@@ -2560,6 +2560,7 @@ function confirmCmd(){
   const m=G.menu;if(!m)return;
   if(m.kind==='fmenu'){
     const it=m.items[m.sel];
+    if(it!=='つよさ')statusWin.style.display='none'; // つよさ画面の閉じ漏れ防止
     if(it==='とじる'){cmdWin.style.display='none';statusWin.style.display='none';G.mode='field';G.menu=null;return;}
     if(it==='つよさ'){renderStatus(true);return;}
     if(it==='どうぐ'){
