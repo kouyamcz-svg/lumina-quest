@@ -1642,7 +1642,10 @@ function showMsg(lines,cb){
 }
 function nextMsg(){
   if(G.msgQ.length===0){msgWin.style.display='none';msgArrow.style.display='none';
-    const cb=G.msgCb;G.msgCb=null;if(cb)cb();return;}
+    const cb=G.msgCb;G.msgCb=null;
+    if(cb)cb();
+    else if(!G.battle&&G.mode==='msg')G.mode='field'; // cbなしメッセージの復帰保険
+    return;}
   const line=G.msgQ.shift();curFull=line;
   msgText.textContent='';msgArrow.style.display='none';G.typing=true;
   let i=0;
@@ -1932,14 +1935,14 @@ function tryMove(dx,dy){
       if(ch3===need){
         G._seq.push(ch3);AU.blip();
         if(G._seq.length===3){
-          G.flags.shrineOpen=true;render();
-          showMsg(['ゴゴゴ……ゆかの いしが うごき、','かくし かいだんが あらわれた！'],null);
+          G.flags.shrineOpen=true;render();G.steps=0;
           G.mode='msg';
+          showMsg(['ゴゴゴ……ゆかの いしが うごき、','かくし かいだんが あらわれた！'],()=>{G.mode='field';});
         }
       }else{
-        G._seq=[];AU.hit();
-        showMsg(['ゆかの もんしょうが つめたく ひかった。','（じゅんばんが ちがう ようだ）'],null);
+        G._seq=[];AU.hit();G.steps=0;
         G.mode='msg';
+        showMsg(['ゆかの もんしょうが つめたく ひかった。','（じゅんばんが ちがう ようだ）'],()=>{G.mode='field';});
       }
       }
     }
@@ -2441,6 +2444,50 @@ function openEquipList(mi,kind){
   G.menu={kind:'elist',sel:0,mi,ekind:kind,cands,hasCur:!!cur,items};
   renderCmd(G.menu,(kind==='w'?'どの ぶきに する？':'どの ぼうぐに する？'));
 }
+// だいじなもの：手記・日記などの読み返し
+function keyItemDefs(){
+  const F=G.flags,ks=[];
+  const pc=(F.page1?1:0)+(F.page2?1:0)+(F.page3?1:0);
+  if(pc>0){
+    const t=[];
+    if(pc===3){
+      t.push('──ロイドの し（かんせい）──','',
+        '「つきは しずみ、ほしは めぐり、たいようは のぼる。',
+        'しんでんの ゆかに その みちすじを しるした。',
+        'たどる ものに、わしの こたえを のこす。──ロイド」');
+      if(!F.shrineOpen)t.push('','（かわの しんでんの ゆかの もんしょうを、',
+        'つき→ほし→たいようの じゅんに ふもう）');
+    }else{
+      t.push('──ちぎれた てき──');
+      if(F.page1)t.push('「…つきは しずみ、ほしは めぐり…」');
+      if(F.page2)t.push('「…たいようは のぼる。しんでんの ゆかに…」');
+      if(F.page3)t.push('「…みちすじを しるした。たどる ものに、','わしの こたえを のこす。──R」');
+      t.push('','（あと '+(3-pc)+'まい、どこかに ありそうだ）');
+    }
+    ks.push({n:pc===3?'ロイドの し':'ちぎれた てき（'+pc+'/3）',t});
+  }
+  if(F.diary)ks.push({n:'ロイドのにっき',t:[
+    '──ロイドのにっき──','',
+    '「めいおうの な、ヴェルナーク。',
+    'やつは──かつて、にんげんだった」','',
+    '「ふかみの 3つの かがりびは',
+    'あか、あお、しろの じゅんに ともせ。',
+    'ふういんの おくへの みちが ひらく」','',
+    '「この さきへ すすむ ものへ。',
+    'どうか、いきて かえってくれ。──ロイド」']});
+  if(F.pendant)ks.push({n:'ロイドのペンダント',t:[
+    'ふるびた ペンダント。','うらに ちいさく「ロイド」と きざまれている。',
+    'ちちの ぬくもりが、まだ のこっている きがする。']});
+  if(F.crystal)ks.push({n:'やみのすいしょう',t:[
+    'けんじゃゼフより たくされた すいしょう。','まおうじょうの けっかいを やぶる ちからを ひめる。']});
+  return ks;
+}
+function openKeyItems(){
+  const ks=keyItemDefs();
+  if(ks.length===0){fieldInfo(['だいじなものは、まだ もっていない。']);return;}
+  G.menu={kind:'keyitem',sel:0,ks,items:ks.map(k=>k.n).concat(['もどる'])};
+  renderCmd(G.menu,'だいじなもの');
+}
 // ワールドマップ
 function openWorldMap(){
   G.mode='map';G.menu=null;
@@ -2485,7 +2532,7 @@ function openDex(){
 function openFieldMenu(){
   if(G.mode!=='field')return;
   G.mode='menu';
-  G.menu={kind:'fmenu',sel:0,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};
+  G.menu={kind:'fmenu',sel:0,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};
   renderCmd(G.menu,'メニュー');renderStatus(true);
 }
 function renderCmd(m,head){
@@ -2519,6 +2566,7 @@ function confirmCmd(){
       G.menu={kind:'fitem',sel:0,items:['やくそう ×'+P.herbs,'まほうのせいすい ×'+P.waters,'もどる']};
       renderCmd(G.menu,'どうぐ');return;}
     if(it==='そうび'){openEquipMember();return;}
+    if(it==='だいじなもの'){openKeyItems();return;}
     if(it==='ちず'){openWorldMap();return;}
     if(it==='ずかん'){openDex();return;}
     if(it==='じゅもん'){
@@ -2536,10 +2584,10 @@ function confirmCmd(){
       if(P.waters<=0){fieldInfo(['まほうのせいすいを もっていない。']);return;}
       const tg=aliveMembers().filter(p=>p.maxmp>0);
       openFieldTarget({type:'water'},tg);return;}
-    G.menu={kind:'fmenu',sel:1,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};renderCmd(G.menu,'メニュー');return;
+    G.menu={kind:'fmenu',sel:1,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;
   }
   if(m.kind==='fspell'){
-    if(m.sel>=m.casts.length){G.menu={kind:'fmenu',sel:2,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};renderCmd(G.menu,'メニュー');return;}
+    if(m.sel>=m.casts.length){G.menu={kind:'fmenu',sel:2,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
     const c=m.casts[m.sel];
     if(c.p.mp<c.sp.mp){fieldInfo(['MPが たりない！']);return;}
     if(c.sp.type==='return'){
@@ -2552,7 +2600,7 @@ function confirmCmd(){
       const lines=[c.p.name+'は '+c.sp.name+'を となえた！'];
       aliveMembers().forEach(t=>{const heal=Math.min(c.sp.min+Math.floor(Math.random()*(c.sp.max-c.sp.min+1)),t.maxhp-t.hp);t.hp+=heal;lines.push(t.name+'の HPが '+heal+' かいふく！');});
       renderStatus(true);
-      G.menu={kind:'fmenu',sel:2,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};
+      G.menu={kind:'fmenu',sel:2,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};
       fieldInfo(lines);return;
     }
     if(c.sp.type==='revive'){
@@ -2585,8 +2633,18 @@ function confirmCmd(){
     }
     return;
   }
+  if(m.kind==='keyitem'){
+    if(m.sel>=m.ks.length){
+      G.menu={kind:'fmenu',sel:6,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};
+      renderCmd(G.menu,'メニュー');return;
+    }
+    const k=m.ks[m.sel];
+    cmdWin.style.display='none';G.menu=null;G.mode='msg';
+    showMsg(k.t,()=>{G.mode='menu';openKeyItems();});
+    return;
+  }
   if(m.kind==='emember'){
-    if(m.sel>=party.length){G.menu={kind:'fmenu',sel:2,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};renderCmd(G.menu,'メニュー');return;}
+    if(m.sel>=party.length){G.menu={kind:'fmenu',sel:2,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
     openEquipSlot(m.sel);return;
   }
   if(m.kind==='eslot'){
@@ -2614,11 +2672,11 @@ function confirmCmd(){
     openEquipSlot(m.mi);return; // もどる
   }
   if(m.kind==='dex'){
-    closeSub();G.menu={kind:'fmenu',sel:5,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};
+    closeSub();G.menu={kind:'fmenu',sel:5,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};
     renderCmd(G.menu,'メニュー');return;
   }
   if(m.kind==='freturn'){
-    if(m.sel>=m.towns.length){G.menu={kind:'fmenu',sel:2,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};renderCmd(G.menu,'メニュー');return;}
+    if(m.sel>=m.towns.length){G.menu={kind:'fmenu',sel:2,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
     const town=m.towns[m.sel];const dst=MAPS[town].warps.D;
     m.caster.mp-=m.sp.mp;AU.spell();
     cmdWin.style.display='none';statusWin.style.display='none';G.menu=null;
@@ -2637,10 +2695,10 @@ function openFieldTarget(pending,targets){
 }
 function confirmFieldTarget(){
   const m=G.menu;
-  if(m.sel>=m.targets.length){closeSub();G.menu={kind:'fmenu',sel:0,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};renderCmd(G.menu,'メニュー');renderStatus(true);return;}
+  if(m.sel>=m.targets.length){closeSub();G.menu={kind:'fmenu',sel:0,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');renderStatus(true);return;}
   const tgt=m.targets[m.sel],pd=m.pending;
   closeSub();
-  G.menu={kind:'fmenu',sel:0,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};
+  G.menu={kind:'fmenu',sel:0,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};
   if(pd.type==='herb'){
     P.herbs--;const heal=Math.min(20,tgt.maxhp-tgt.hp);tgt.hp+=heal;AU.heal();
     renderStatus(true);fieldInfo(['やくそうを つかった！',tgt.name+'の HPが '+heal+' かいふくした。']);
@@ -2661,7 +2719,7 @@ function confirmFieldTarget(){
 function fieldInfo(lines){
   G.mode='msg';showMsg(lines,()=>{
     G.mode='menu';
-    if(!G.menu||G.menu.kind!=='fmenu')G.menu={kind:'fmenu',sel:0,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};
+    if(!G.menu||G.menu.kind!=='fmenu')G.menu={kind:'fmenu',sel:0,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};
     renderCmd(G.menu,'メニュー');renderStatus(true);});
 }
 
@@ -3684,12 +3742,13 @@ function pressB(){
   if(msgWin.style.display==='block')return;
   if(G.mode==='field'){openFieldMenu();return;}
   if(G.mode==='menu'){
-    if(G.menu&&G.menu.kind==='dex'){closeSub();G.menu={kind:'fmenu',sel:5,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};renderCmd(G.menu,'メニュー');return;}
+    if(G.menu&&G.menu.kind==='dex'){closeSub();G.menu={kind:'fmenu',sel:5,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
     if(G.menu&&G.menu.kind==='altar'){cmdWin.style.display='none';G.menu=null;G.mode='field';return;}
-    if(G.menu&&G.menu.kind==='emember'){G.menu={kind:'fmenu',sel:2,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};renderCmd(G.menu,'メニュー');return;}
+    if(G.menu&&G.menu.kind==='keyitem'){G.menu={kind:'fmenu',sel:6,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
+    if(G.menu&&G.menu.kind==='emember'){G.menu={kind:'fmenu',sel:2,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
     if(G.menu&&G.menu.kind==='eslot'){openEquipMember();return;}
     if(G.menu&&G.menu.kind==='elist'){openEquipSlot(G.menu.mi);return;}
-    if(G.menu&&(G.menu.kind==='ftarget'||G.menu.kind==='fspell'||G.menu.kind==='fitem'||G.menu.kind==='freturn')){closeSub();G.menu={kind:'fmenu',sel:0,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','とじる']};renderCmd(G.menu,'メニュー');return;}
+    if(G.menu&&(G.menu.kind==='ftarget'||G.menu.kind==='fspell'||G.menu.kind==='fitem'||G.menu.kind==='freturn')){closeSub();G.menu={kind:'fmenu',sel:0,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
     cmdWin.style.display='none';statusWin.style.display='none';G.mode='field';G.menu=null;return;}
   if(G.mode==='shop'){
     if(G.menu&&G.menu.kind==='equip'){G.menu={kind:'shop',sel:0,items:SHOPS[P.map].concat([{label:'やめる'}])};renderShopList();return;}
@@ -3714,7 +3773,7 @@ function moveSel(d){
   const m=G.menu;if(!m)return;
   m.sel=(m.sel+d+m.items.length)%m.items.length;
   if(m.kind==='shop')renderShopList();
-  else if(['battle','bspell','etarget','bitem','round','tactic','fmenu','fspell','fitem','freturn','emember','eslot','elist','altar'].includes(m.kind))renderCmd(m); // コマンド窓系（ヘッダーはm.headに記憶済み）
+  else if(['battle','bspell','etarget','bitem','round','tactic','fmenu','fspell','fitem','freturn','emember','eslot','elist','altar','keyitem'].includes(m.kind))renderCmd(m); // コマンド窓系（ヘッダーはm.headに記憶済み）
   else renderSub(''); // サブ窓系（shop以外：equip/church/ftarget/btarget）
   AU.blip();
 }
