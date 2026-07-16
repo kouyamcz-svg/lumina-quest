@@ -273,7 +273,7 @@ depths:{name:'じゃあくの ふかみ',enc:true,tiles:[
 "######D######",
 "#############"
 ],
-warps:{'D':{to:'cave',x:12,y:11}}},
+warps:{'D':{to:'cave',x:12,y:10}}},
 castle:{name:'まおうじょう',enc:true,tiles:[
 "#############",
 "#_____U_____#",
@@ -2616,6 +2616,7 @@ function confirmCmd(){
     cmdWin.style.display='none';
     if(m.sel>=party.length){G.mode='field';G.menu=null;return;}
     const p=party[m.sel];G.menu=null;
+    if(!p){G.mode='field';return;} // 不正選択の防御
     if(p.hp<=0){G.mode='field';say(['しんでいる ものの ちは ながれない。']);return;}
     if(p.cls==='hero'||p.cls==='warrior'){
       const dmg=Math.max(1,Math.floor(p.maxhp*0.25));
@@ -2677,7 +2678,7 @@ function confirmCmd(){
     renderCmd(G.menu,'メニュー');return;
   }
   if(m.kind==='freturn'){
-    if(m.sel>=m.towns.length){G.menu={kind:'fmenu',sel:2,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
+    if(m.sel>=m.towns.length){G.menu={kind:'fmenu',sel:3,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
     const town=m.towns[m.sel];const dst=MAPS[town].warps.D;
     m.caster.mp-=m.sp.mp;AU.spell();
     cmdWin.style.display='none';statusWin.style.display='none';G.menu=null;
