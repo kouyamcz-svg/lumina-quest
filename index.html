@@ -420,7 +420,7 @@ let party=[mkMember('hero',1)];
 const P={gold:30,herbs:1,waters:0,equipBag:[],map:'alba',x:6,y:8,dir:0};
 const G={mode:'title',msgQ:[],msgCb:null,typing:false,typeTimer:null,
   battle:null,menu:null,steps:0,cleared:false,gotTreasure:{},joined:{},trail:[],
-  flags:{spiderQuest:false,spider:false,nushi:false,boat:false,zefQuest:false,crystal:false,trueClear:false,castleSwitch:false,castleDragon:false,raid:false,raidCleared:false,kingTruth:false,graveScene:false,sisterGrave:false,zefNote:false,pendant:false,graveFinal:false,page1:false,page2:false,page3:false,shrineOpen:false,diary:false,firesLit:false},
+  flags:{spiderQuest:false,spider:false,nushi:false,boat:false,zefQuest:false,crystal:false,trueClear:false,castleSwitch:false,castleDragon:false,raid:false,raidCleared:false,kingTruth:false,graveScene:false,sisterGrave:false,zefNote:false,pendant:false,graveFinal:false,page1:false,page2:false,page3:false,shrineOpen:false,diary:false,firesLit:false,rematchOn:false,luminaClear:false},
   visited:{alba:true},tactic:'manual',dex:{}};
 
 // ---------------- セーブ／ロード ----------------
@@ -1521,6 +1521,59 @@ const BOSS={key:'boss',name:'まおうゾルデア',hp:320,atk:28,def:12,agi:9,e
   "........143333242222222141......1411433341......",
   ".......1433331111422221141.......1..1433341.....",
   "........14331....11141..1............14331......"]};
+
+const LUMINA={key:'lumina',name:'はじまりの ルミナ',hp:1050,atk:44,def:18,agi:16,exp:0,gold:0,acts:2,
+  aoe:{p:0.30,lo:28,hi:36,name:'そうせいの ひかり'},
+  pal:['#12141c','#8a98b4','#eef2f8','#e8c85a','#fff2a0','#ffffff','#cfe0f0','#ffd23c','#7a88a4'],
+  art:[
+  "....1................1.....141...............111",
+  "...191..............141.....141.............1444",
+  "..19591..............1411....141..........116444",
+  "...16991.............14451...1441........1677641",
+  "...192991.............14451...1441......16776741",
+  "..19992991.............14451...1441....177767771",
+  "..199992991............144541...1441.11776677771",
+  "..1999992991..........15144541..1444167767777777",
+  "..199999929911.........15144541..144477677777777",
+  ".19999999929991.........154444411117746737777777",
+  ".199999999929991........155433366663333333777777",
+  ".1999999999929991........15533333333333333377766",
+  ".19999999999929991...1....1553333336313333333675",
+  "1999999999999929991.1511...153333188113333333377",
+  "16229999999999929991.15511.155333111133331332337",
+  "199922222299999929991.15551635333111133333332222",
+  "199999999922222292991..1155533333333333333333212",
+  ".19999999999999922291....15533333333333333333227",
+  ".1999999999999222999111.161557633333333333333277",
+  ".19999999992229999991551636353336333333333666666",
+  ".19999992229999999991115555233337766377777666777",
+  "..199222999999911111.163555333377777667777767777",
+  "..1629999111111......163225533377777776677767777",
+  ".19999111...........1632333533311777777766777777",
+  ".19111.............1632333333331.111117777667777",
+  "..1...............1632333333331.......1111776677",
+  "..................1633333333331...........116337",
+  ".................16333333333331.............1116",
+  "................163333333332331................1",
+  "................1632222226623361................",
+  "...............16336622222266331................",
+  "...............16332266522223331................",
+  "...............16332225652233331................",
+  "...............16333256665233331................",
+  ".1............163333566666533331................",
+  "151...........163333256665233331................",
+  "1551.........11633332356533333361...............",
+  "15551.......166333333335333333331...............",
+  "1555511...11633333333663333333331...............",
+  "15555561.166333311633336633333331...............",
+  "1555533616333331..16333333333311................",
+  "155533336333311...1633333223331.................",
+  "1551163333331.....1633331623331.................",
+  "151..1161611......1633111621631.................",
+  ".1.....1.1.......16331..16116361................",
+  "................116331.1621163311...............",
+  "...............1444444116214444441..............",
+  "................143341.1621143341..............."]};
 function zoneAt(x,y){ if(y<8)return 2; if(y<15)return 1; return 0; }
 
 // ---------------- ショップ ----------------
@@ -2219,13 +2272,29 @@ function interact(){
     }else say(['なまえも よめぬ、ふるい はかいし。']);
     return;
   }
-  if(ch==='Q'&&!F.firesLit){
+  if(ch==='Q'&&!F.firesLit&&!F.trueClear){
     say(['ふかい やみが ゆくてを とざしている。','ちからずくでは とおれそうにない。','（3つの かがりびを ともす ひつようが ある）']);
     return;
   }
   if(ch==='Q'){
     if(!F.trueClear)say(['くらやみの おくで ふたつの めが ひかった…','「よくぞ ここまで きた、にんげんよ。','ゾルデアを あやつっていたのは この わし──','めいおう ヴェルナーク。','しんの やみを みせてやろう！」'],()=>startBattle('kaos'));
-    else say(['めいおうは ほろびた。','ふかみには しずかな やみだけが のこっている。']);
+    else if(F.rematchOn&&!F.luminaClear){
+      say(['ふかみの さいおくに、しろい ひかりの とびらが ひらいている。',
+        'なかから、あたたかくも おそろしい きはいが あふれている…',
+        'ちかづくと、こえが きこえた。',
+        '「われは ルミナ。この せかいに さいしょに ひかりを ともした もの。',
+        'めいおうすら、われの かげに すぎなかった。',
+        'すべてを こえた ものよ──われを こえて みせよ！」'],()=>{
+        startBattle('lumina');if(G.battle)G.battle.rematch='lumina';
+      });
+    }
+    else if(F.luminaClear){
+      say(['しろい ひかりの とびらは、しずかに とじている。',
+        'はじまりの ルミナは、もう ここには いない。']);
+    }
+    else say(['めいおうは ほろびた。','ふかみには しずかな やみだけが のこっている。',
+      '（かこの てきたちと もう いちど たたかいたければ、',
+      'まおうじょうの ゾルデアの いた ばしょへ）']);
     return;
   }
   if(ch==='Y'){
@@ -2319,7 +2388,12 @@ function interact(){
   if(ch==='B'&&!G.cleared){
     say(['ゾルデア「…よくぞ ここまで きた、にんげんども。','だが ここが きさまらの はかばだ！」'],()=>startBattle('zoldea'));
     return;}
-  if(ch==='B'&&G.cleared){say(['まおうは ほろびた。へやには しずけさだけが のこる。']);return;}
+  if(ch==='B'&&G.cleared){
+    say(['ゾルデアの いた ばしょに、ふしぎな まどうじんが のこっている。',
+      'てを かざすと、かこの てきの すがたが うかびあがった。',
+      '（ここで かつての てきと さいせんできる）'],()=>{G.mode='menu';openArena();});
+    return;
+  }
 }
 
 // ---------------- 教会（回復・蘇生・セーブ） ----------------
@@ -2635,6 +2709,17 @@ function confirmCmd(){
     }
     return;
   }
+  if(m.kind==='arena'){
+    if(m.sel>=m.list.length){cmdWin.style.display='none';G.menu=null;G.mode='field';return;}
+    const r=m.list[m.sel];
+    cmdWin.style.display='none';G.menu=null;
+    party.forEach(mem=>{mem.hp=mem.maxhp;mem.mp=mem.maxmp;}); // 再戦前に全回復
+    G.mode='field';
+    G._rematchKind=r.key;
+    startBattle(r.key);
+    if(G.battle)G.battle.rematch=r.key;
+    return;
+  }
   if(m.kind==='keyitem'){
     if(m.sel>=m.ks.length){
       G.menu={kind:'fmenu',sel:6,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};
@@ -2745,6 +2830,7 @@ function startBattle(kind){
   setTimeout(()=>document.getElementById('battle-flash').classList.remove('bflash'),450);
   let enemies=[];
   if(kind==='zoldea')enemies=[JSON.parse(JSON.stringify(BOSS))];
+  else if(kind==='lumina')enemies=[JSON.parse(JSON.stringify(LUMINA))];
   else if(kind&&MIDBOSS[kind])enemies=[JSON.parse(JSON.stringify(MIDBOSS[kind]))];
   else{
     const proto=pickEnemy();
@@ -2764,7 +2850,7 @@ function startBattle(kind){
   }
   enemies.forEach(e=>{e.maxhp=e.hp;if(!e.dispName)e.dispName=e.name;
     const dx=G.dex[e.key]=G.dex[e.key]||{seen:0,kill:0};dx.seen++;});
-  G.battle={enemies,named:kind||null,isBoss:kind==='zoldea',cur:0,fled:false};
+  G.battle={enemies,named:kind||null,isBoss:(kind==='zoldea'||kind==='lumina'),cur:0,fled:false};
   G.mode='battle';updateBGM();
   setTimeout(()=>{
     renderBattle();
@@ -3317,7 +3403,7 @@ function enemyAct(e){
     }
     showMsg(['スュンさんは かぜのように さっていった…'],()=>{b.cur++;nextActor();});return;
   }
-  if(b.isBoss&&!e.phase2&&e.hp>0&&e.hp<=e.maxhp/2){ // 魔王の変身
+  if(b.isBoss&&e.key==='boss'&&!e.phase2&&e.hp>0&&e.hp<=e.maxhp/2){ // 魔王の変身（ゾルデア限定）
     e.phase2=true;
     e.art=BOSS.art2;e.pal=BOSS.pal2;
     e.atk=Math.round(e.atk*1.3);
@@ -3604,6 +3690,7 @@ function advanceActor(){
 }
 function victoryAll(){
   const b=G.battle;
+  if(b.rematch){rematchVictory();return;} // 再戦は専用処理
   if(b.isBoss){winBoss();return;}
   AU.win();
   if(b.named){midbossVictory(b.named);return;}
@@ -3633,6 +3720,65 @@ function victoryAll(){
   });
   if(leveled)AU.lvup();
   showMsg(lines,()=>endBattle(true));
+}
+// 再戦（闘技場）の撃破処理：報酬は経験値・ゴールドのみ
+const REMATCH_LIST=[
+  {key:'spider',name:'オオグモ',exp:200,gold:150},
+  {key:'nushi',name:'かわのぬし グラード',exp:240,gold:180},
+  {key:'gargoyle',name:'ガーゴイル',exp:260,gold:200},
+  {key:'darga',name:'やみのしょうぐん ダルガ',exp:320,gold:260},
+  {key:'kokuryu',name:'こくりゅう',exp:360,gold:300},
+  {key:'zoldea',name:'まおう ゾルデア',exp:460,gold:400},
+  {key:'kaos',name:'めいおう ヴェルナーク',exp:520,gold:450}
+];
+function rematchVictory(){
+  const b=G.battle;const e=b.enemies[0];
+  const def=REMATCH_LIST.find(r=>r.key===b.rematch)||{exp:e.exp||100,gold:e.gold||100,name:e.name};
+  const exp=def.exp,gold=def.gold;
+  P.gold+=gold;
+  G.flags.beaten=G.flags.beaten||{};G.flags.beaten[b.rematch]=true;
+  const lines=[e.name+'を もう いちど うちやぶった！','けいけんち '+exp+'、'+gold+'ゴールドを かくとく！'];
+  let leveled=false;
+  aliveMembers().forEach(mem=>{
+    mem.exp+=exp;
+    while(mem.exp>=expNext(mem)){
+      mem.exp-=expNext(mem);mem.lv++;leveled=true;
+      const g=CLASSES[mem.cls].g;
+      mem.maxhp+=g.hp;mem.maxmp+=g.mp;mem.batk+=g.atk;mem.bdef+=g.def;if(mem.lv%2===0)mem.agi=(mem.agi||5)+(g.agi||1);
+      mem.hp=mem.maxhp;mem.mp=mem.maxmp;
+      lines.push(mem.name+'は レベル'+mem.lv+'に あがった！');
+      const newSp=CLASSES[mem.cls].learns.find(l=>l.lv===mem.lv);
+      if(newSp)lines.push(mem.name+'は '+SPELL_DEFS[newSp.key].name+'を おぼえた！');
+    }
+  });
+  if(leveled)AU.lvup();
+  // 全ボス撃破チェック→ルミナ解禁
+  if(b.rematch==='lumina'){
+    G.flags.luminaClear=true;
+    lines.push('','はじまりの ルミナは、しろい ひかりに とけていく。',
+      '「よくぞ、われを こえた……。この せかいは、','もう おまえたちの ものだ」',
+      'ルミナは 『ひかりのつるぎ』を のこして きえた。');
+    if(!P.equipBag.some(i=>i.name==='ひかりのつるぎ'))
+      P.equipBag.push({kind:'w',name:'ひかりのつるぎ',v:40});
+    lines.push('（そうびぶくろに 『ひかりのつるぎ』を しまった）');
+  }else{
+    const allBeaten=REMATCH_LIST.every(r=>G.flags.beaten&&G.flags.beaten[r.key]);
+    if(allBeaten&&!G.flags.rematchOn){
+      G.flags.rematchOn=true;
+      lines.push('','──ふかみの さいおくに、しろい ひかりの とびらが あらわれた！',
+        '（すべてを こえた ものだけが、その おくへ すすめる）');
+    }
+  }
+  showMsg(lines,()=>endBattle(true));
+}
+function openArena(){
+  const items=REMATCH_LIST.map(r=>{
+    const done=G.flags.beaten&&G.flags.beaten[r.key];
+    return r.name+(done?' ✓':'');
+  });
+  items.push('やめる');
+  G.menu={kind:'arena',sel:0,items,list:REMATCH_LIST};
+  renderCmd(G.menu,'だれと たたかう？');
 }
 // 中ボス撃破：経験値・ゴールド＋ストーリー進行
 function midbossVictory(kind){
@@ -3787,7 +3933,7 @@ function titleConfirm(){
     party=[mkMember('hero',1)];
     P.gold=30;P.herbs=1;P.waters=0;P.equipBag=[];P.map='alba';P.x=6;P.y=8;P.dir=0;
     G.joined={};G.gotTreasure={};G.cleared=false;G.trail=[];
-    G.flags={spiderQuest:false,spider:false,nushi:false,boat:false,zefQuest:false,crystal:false,trueClear:false,castleSwitch:false,castleDragon:false,raid:false,raidCleared:false,kingTruth:false,graveScene:false,sisterGrave:false,zefNote:false,pendant:false,graveFinal:false,page1:false,page2:false,page3:false,shrineOpen:false,diary:false,firesLit:false}; // 新規開始でフラグ初期化
+    G.flags={spiderQuest:false,spider:false,nushi:false,boat:false,zefQuest:false,crystal:false,trueClear:false,castleSwitch:false,castleDragon:false,raid:false,raidCleared:false,kingTruth:false,graveScene:false,sisterGrave:false,zefNote:false,pendant:false,graveFinal:false,page1:false,page2:false,page3:false,shrineOpen:false,diary:false,firesLit:false,rematchOn:false,luminaClear:false}; // 新規開始でフラグ初期化
     G.visited={alba:true};G.tactic='manual';G.dex={};
     G.mode='msg';
     ctx.fillStyle='#000';ctx.fillRect(0,0,cv.width,cv.height); // 夢の間は暗転
@@ -3830,6 +3976,7 @@ function pressB(){
   if(G.mode==='menu'){
     if(G.menu&&G.menu.kind==='dex'){closeSub();G.menu={kind:'fmenu',sel:5,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
     if(G.menu&&G.menu.kind==='altar'){cmdWin.style.display='none';G.menu=null;G.mode='field';return;}
+    if(G.menu&&G.menu.kind==='arena'){cmdWin.style.display='none';G.menu=null;G.mode='field';return;}
     if(G.menu&&G.menu.kind==='keyitem'){G.menu={kind:'fmenu',sel:6,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
     if(G.menu&&G.menu.kind==='emember'){G.menu={kind:'fmenu',sel:2,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
     if(G.menu&&G.menu.kind==='eslot'){openEquipMember();return;}
@@ -3859,7 +4006,7 @@ function moveSel(d){
   const m=G.menu;if(!m)return;
   m.sel=(m.sel+d+m.items.length)%m.items.length;
   if(m.kind==='shop')renderShopList();
-  else if(['battle','bspell','etarget','bitem','round','tactic','fmenu','fspell','fitem','freturn','emember','eslot','elist','altar','keyitem'].includes(m.kind))renderCmd(m); // コマンド窓系（ヘッダーはm.headに記憶済み）
+  else if(['battle','bspell','etarget','bitem','round','tactic','fmenu','fspell','fitem','freturn','emember','eslot','elist','altar','keyitem','arena'].includes(m.kind))renderCmd(m); // コマンド窓系（ヘッダーはm.headに記憶済み）
   else renderSub(''); // サブ窓系（shop以外：equip/church/ftarget/btarget）
   AU.blip();
 }
