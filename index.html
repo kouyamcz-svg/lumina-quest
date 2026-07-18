@@ -1908,7 +1908,12 @@ function drawTile(ch,px,py,x,y){
         ctx.fillStyle='#c060e0';ctx.fillRect(px+11,py+4,2,3);}
       break;}
     case 'Q':{drawTile('_',px,py,x,y);
-      if(!G.flags.trueClear)drawArt(MIDBOSS.kaos,px,py,24/MIDBOSS.kaos.art.length);break;}
+      if(!G.flags.trueClear)drawArt(MIDBOSS.kaos,px,py,24/MIDBOSS.kaos.art.length);
+      else if(G.flags.rematchOn&&!G.flags.luminaClear){ // 解禁後：白竜と光の扉
+        ctx.fillStyle='#eef2f8';ctx.globalAlpha=0.5;ctx.fillRect(px+1,py+1,TS-2,TS-2);ctx.globalAlpha=1;
+        drawArt(LUMINA,px,py,24/LUMINA.art.length);
+      }
+      break;}
     case 'X':{drawTile('_',px,py,x,y);
       if(!G.flags.spider)drawArt(MIDBOSS.spider,px,py,24/MIDBOSS.spider.art.length);break;}
     case 'Y':{drawTile('_',px,py,x,y);
