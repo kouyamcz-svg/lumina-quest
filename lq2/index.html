@@ -408,6 +408,24 @@ field5:{name:'にしのかいどう',enc:true,tiles:[
 "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"
 ],
 warps:{},warpsXY:{'29,8':{to:'liberion',x:1,y:9},'1,5':{to:'haruna',x:9,y:7}}},
+haruna_h1:{name:'みんか',enc:false,tiles:[
+"###########",
+"#___+_____#",
+"#________n#",
+"#_________#",
+"#_________#",
+"#____D____#",
+"###########"],
+warps:{},warpsXY:{'5,5':{to:'haruna',x:5,y:7}}},
+haruna_h2:{name:'みんか',enc:false,tiles:[
+"###########",
+"#=________#",
+"#_________#",
+"#___n_____#",
+"#_________#",
+"#____D____#",
+"###########"],
+warps:{},warpsXY:{'5,5':{to:'haruna',x:14,y:7}}},
 haruna:{name:'みなとまち ハルナ',enc:false,tiles:[
 "####################",
 "#______I______S____#",
@@ -421,7 +439,7 @@ haruna:{name:'みなとまち ハルナ',enc:false,tiles:[
 "#~~~~~~~~~~~~~~~~~~#",
 "####################"
 ],
-warps:{},warpsXY:{'9,7':{to:'field5',x:2,y:5},'5,6':{to:'lib_house1',x:5,y:4},'14,6':{to:'lib_house2',x:5,y:4}}},
+warps:{},warpsXY:{'9,7':{to:'field5',x:2,y:5},'5,6':{to:'haruna_h1',x:5,y:4},'14,6':{to:'haruna_h2',x:5,y:4}}},
 sanctum2:{name:'さいおくの ま',enc:false,tiles:[
 "#############",
 "#_____5_____#",
@@ -6073,7 +6091,7 @@ const BGM={cur:null,step:0,timer:null,enabled:true,
 function updateBGM(){
   if(G.mode==='title')return;
   if(G.battle){BGM.play((G.battle.named==='vox'||G.battle.named==='vox2')?'finalboss':(G.battle.named?'boss':'battle'));return;}
-  const towns={toros:1,toros_home:1,toros_house1:1,toros_house2:1,liberion:1,lib_house1:1,lib_house2:1,lib_house3:1,alba:1,village:1,river:1,nord:1,haruna:1,iona:1};
+  const towns={toros:1,toros_home:1,toros_house1:1,toros_house2:1,liberion:1,lib_house1:1,lib_house2:1,lib_house3:1,alba:1,village:1,river:1,nord:1,haruna:1,iona:1,haruna_h1:1,haruna_h2:1};
   if(towns[P.map])BGM.play('town');
   else if(P.map==='cave'||P.map==='tower'||P.map==='castle'||P.map==='castle2'||P.map==='castle3'||P.map==='depths'||P.map==='yakata1'||P.map==='yakata2'||P.map==='yakata3'||P.map==='crypt1'||P.map==='crypt2'||P.map==='sanctum1'||P.map==='sanctumB1'||P.map==='sanctum2'||P.map==='sandou1'||P.map==='sandou2'||P.map==='summit'||P.map==='tower2'||P.map==='tower3'||P.map==='tower4'||P.map==='castle'||P.map==='castle2'||P.map==='castle3'||P.map==='shinen')BGM.play('dungeon');
   else if(P.map==='daiseido')BGM.play('sorrow');
@@ -7469,6 +7487,12 @@ function interact(){
         ['「ここは みなとまち ハルナ。ふねに のるなら はまべの',
           'せんちょうに はなしな。……ルミナたいりく いきかい？',
           'ものずきだねえ」'],
+      haruna_h1:['「うちの じいさんは わかいころ、ゆうしゃさまたちを',
+        'ふねで ルミナたいりくへ おくった ことが あるんだと。',
+        '30ねんも まえの はなしさ」'],
+      haruna_h2:['「うみの むこうには もう だれも すんでない って？',
+        'いやいや、ノルドの まちには まだ ひとが いるさ。',
+        'としよりばかりだけど、いい まちだよ」'],
       lib_house1:['「しんでんの ミラさまが きょうだんに','＜まねかれた＞そうだ。……むりやりって うわさだよ」'],
       lib_house2:['「きたの たいせいどうは きょうだんが たてたのさ。','ばんにん からの きふでね。りっぱなもんだろう」'],
       lib_house3:['「さいきん かいどうに まものが でるように なった。','きょうだんの ぎしきが はじまってからだよ……」'],
