@@ -1909,7 +1909,7 @@ function drawTile(ch,px,py,x,y){
       break;}
     case 'Q':{drawTile('_',px,py,x,y);
       if(!G.flags.trueClear)drawArt(MIDBOSS.kaos,px,py,24/MIDBOSS.kaos.art.length);
-      else if(G.flags.rematchOn&&!G.flags.luminaClear){ // 解禁後：白竜と光の扉
+      else if(G.flags.rematchOn){ // 解禁後：白竜と光の扉（討伐後も再戦可）
         ctx.fillStyle='#eef2f8';ctx.globalAlpha=0.5;ctx.fillRect(px+1,py+1,TS-2,TS-2);ctx.globalAlpha=1;
         drawArt(LUMINA,px,py,24/LUMINA.art.length);
       }
@@ -2294,8 +2294,12 @@ function interact(){
       });
     }
     else if(F.luminaClear){
-      say(['しろい ひかりの とびらは、しずかに とじている。',
-        'はじまりの ルミナは、もう ここには いない。']);
+      say(['しろい ひかりの とびらの おくから、こえが ひびく。',
+        '「もどってきたか。よい めを している。',
+        'もういちど、われと まじわるか？」'],()=>{
+        party.forEach(mem=>{mem.hp=mem.maxhp;mem.mp=mem.maxmp;});
+        startBattle('lumina');if(G.battle)G.battle.rematch='lumina';
+      });
     }
     else say(['めいおうは ほろびた。','ふかみには しずかな やみだけが のこっている。',
       '（かこの てきたちと もう いちど たたかいたければ、',
@@ -3759,13 +3763,19 @@ function rematchVictory(){
   if(leveled)AU.lvup();
   // 全ボス撃破チェック→ルミナ解禁
   if(b.rematch==='lumina'){
+    const firstKill=!G.flags.luminaClear;
     G.flags.luminaClear=true;
-    lines.push('','はじまりの ルミナは、しろい ひかりに とけていく。',
-      '「よくぞ、われを こえた……。この せかいは、','もう おまえたちの ものだ」',
-      'ルミナは 『ひかりのつるぎ』を のこして きえた。');
-    if(!P.equipBag.some(i=>i.name==='ひかりのつるぎ'))
-      P.equipBag.push({kind:'w',name:'ひかりのつるぎ',v:40});
-    lines.push('（そうびぶくろに 『ひかりのつるぎ』を しまった）');
+    if(firstKill){
+      lines.push('','はじまりの ルミナは、しろい ひかりに とけていく。',
+        '「よくぞ、われを こえた……。この せかいは、','もう おまえたちの ものだ」',
+        'ルミナは 『ひかりのつるぎ』を のこして きえた。');
+      if(!P.equipBag.some(i=>i.name==='ひかりのつるぎ'))
+        P.equipBag.push({kind:'w',name:'ひかりのつるぎ',v:40});
+      lines.push('（そうびぶくろに 『ひかりのつるぎ』を しまった）');
+    }else{
+      lines.push('','ルミナは たのしげに わらい、ひかりへ とけた。',
+        '「みごとだ。ひかりは いつでも、ここに ある。','また こい、ゆうしゃよ」');
+    }
   }else{
     const allBeaten=REMATCH_LIST.every(r=>G.flags.beaten&&G.flags.beaten[r.key]);
     if(allBeaten&&!G.flags.rematchOn){
