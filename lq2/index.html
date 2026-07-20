@@ -7897,7 +7897,7 @@ function confirmCmd(){
   if(m.kind==='freturn'){
     if(m.sel>=m.towns.length){G.menu={kind:'fmenu',sel:3,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','とじる']};renderCmd(G.menu,'メニュー');return;}
     const town=m.towns[m.sel];
-    const lq2r={toros:{map:'toros',x:12,y:12},liberion:{map:'liberion',x:17,y:16}}; // LQ2のまちは まちなかへ
+    const lq2r={toros:{map:'toros',x:12,y:12},liberion:{map:'liberion',x:17,y:16},haruna:{map:'haruna',x:9,y:4},iona:{map:'iona',x:7,y:5}}; // LQ2のまちは まちなかへ
     m.caster.mp-=m.sp.mp;AU.spell();
     cmdWin.style.display='none';statusWin.style.display='none';G.menu=null;
     if(lq2r[town]){
@@ -8013,7 +8013,8 @@ function startBattle(kind){
   setTimeout(()=>{
     renderBattle();
     const first=enemies[0];
-    const intro=[enemies.length>1?first.name+'が '+enemies.length+'たい あらわれた！':first.name+'が あらわれた！'];
+    const _nm={};enemies.forEach(e2=>{_nm[e2.name]=(_nm[e2.name]||0)+1;});
+    const intro=[Object.keys(_nm).map(n2=>_nm[n2]>1?n2+'が '+_nm[n2]+'たい':n2).join('と ')+'が あらわれた！'];
     const b2=G.battle;
     if(!kind){ // 通常エンカウントのみ：たまに先制／様子見
       const r=Math.random();
@@ -8051,7 +8052,8 @@ function renderBattle(){
     e.art.forEach((row,y)=>{for(let x=0;x<row.length;x++){const c=row[x];
       if(c==='.'||c===' ')continue;ctx.fillStyle=e.pal[+c-1]||'#fff';ctx.fillRect(ox+x*scale,oy+y*scale,scale,scale);}});
     if(list.length>1){ctx.fillStyle='#ccc';ctx.font='10px monospace';
-      ctx.fillText(e.dispName.slice(-1),ox+6*scale-3,oy-4);}
+      const _w=(e.art&&e.art[0]?e.art[0].length:24)*scale;
+      ctx.textAlign='center';ctx.fillText(e.dispName,ox+_w/2,oy-4);ctx.textAlign='left';}
   });
   if(b.named&&list[0]){const e=list[0];
     ctx.fillStyle='#400';ctx.fillRect(CW/2-80,96,160,8);
