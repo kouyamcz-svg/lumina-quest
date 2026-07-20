@@ -330,7 +330,7 @@ field3:{name:'こだいかいどう',enc:true,tiles:[
 "Mrrr...........................M",
 "Mrrrr..........................M",
 "M..rrr.........MM........ff....M",
-"M....rrr.......................M",
+"M....rrr.....a.................M",
 "M......rrr.....f....M..........M",
 "M..f.....rrr...................M",
 "M..........rrrr........M.......M",
@@ -344,7 +344,21 @@ field3:{name:'こだいかいどう',enc:true,tiles:[
 "M..f......ff.........M.....f...M",
 "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"
 ],
-warps:{},warpsXY:{'1,6':{to:'field2',x:37,y:6},'1,7':{to:'field2',x:37,y:7},'29,19':{to:'sanctum1',x:9,y:10}}},
+warps:{},warpsXY:{'1,6':{to:'field2',x:37,y:6},'1,7':{to:'field2',x:37,y:7},'29,19':{to:'sanctum1',x:9,y:10},'13,9':{to:'iona',x:7,y:9}}},
+iona:{name:'じゅんれいのむら イオナ',enc:false,tiles:[
+"################",
+"#____I_____S___#",
+"#______________#",
+"#_n_________n__#",
+"#______________#",
+"#___#__P__#____#",
+"#______________#",
+"#__n___________#",
+"#______________#",
+"#______________#",
+"#######D########"
+],
+warps:{},warpsXY:{'7,10':{to:'field3',x:13,y:10}}},
 sanctum1:{name:'いせき サンクトゥム 1F',enc:true,tiles:[
 "####################",
 "#l____#____3___#__>#",
@@ -4178,7 +4192,7 @@ const MIDBOSS={
   "................................1221222221.1221221221.1221221221................................",
   ".................................11.11111..1221221221.1222222221................................",
   "...........................................1221221221..11111111................................."]},
- vox2:{key:'vox2',dark:true,name:'やみのこえ ヴォクス・かいげん',hp:1150,atk:26,def:16,agi:15,exp:0,gold:0,acts:3,aoe:{p:0.31,lo:18,hi:24,name:'ことわりの さけび'},spell:{kind:'dmg',p:0.36,lo:32,hi:44,name:'やみの いき'},
+ vox2:{key:'vox2',dark:true,name:'やみのこえ ヴォクス・かいげん',hp:1150,atk:26,def:16,agi:15,exp:1500,gold:1200,acts:3,aoe:{p:0.31,lo:18,hi:24,name:'ことわりの さけび'},spell:{kind:'dmg',p:0.36,lo:32,hi:44,name:'やみの いき'},
   pal:["#070510", "#191228", "#332a4e", "#544878", "#8a78b8", "#e02838", "#d9a832", "#efe9e0", "#0e1c36"],art:[
   "......................11111311111...............................11111111111.....................",
   ".....................122223222222111.........................111232222222221....................",
@@ -5571,8 +5585,13 @@ const SHOPS={
   {kind:'a',name:'まもりのよろい',v:12,price:1100},
   {kind:'h',name:'やくそう',v:20,price:12},
   {kind:'wtr',name:'まほうのせいすい',v:30,price:60}],
+ iona:[
+  {kind:'w',name:'てつのつるぎ',v:8,price:400},
+  {kind:'a',name:'くさりかたびら',v:8,price:520},
+  {kind:'h',name:'やくそう',v:20,price:12},
+  {kind:'wtr',name:'まほうのせいすい',v:30,price:60}],
 };
-const INN_PRICE={liberion:8,alba:10,river:20,nord:35,haruna:25};
+const INN_PRICE={liberion:8,alba:10,river:20,nord:35,haruna:25,iona:15};
 
 // ---------------- BGM（チップチューン・オリジナル曲）----------------
 // ======= ラスボスBGM：full_melody.tsx 原曲オーディオコア逐語移植（UI部のみ除去） =======
@@ -6053,8 +6072,8 @@ const BGM={cur:null,step:0,timer:null,enabled:true,
 };
 function updateBGM(){
   if(G.mode==='title')return;
-  if(G.battle){BGM.play((G.battle.named==='vox')?'finalboss':(G.battle.named?'boss':'battle'));return;}
-  const towns={toros:1,toros_home:1,toros_house1:1,toros_house2:1,liberion:1,lib_house1:1,lib_house2:1,lib_house3:1,alba:1,village:1,river:1,nord:1};
+  if(G.battle){BGM.play((G.battle.named==='vox'||G.battle.named==='vox2')?'finalboss':(G.battle.named?'boss':'battle'));return;}
+  const towns={toros:1,toros_home:1,toros_house1:1,toros_house2:1,liberion:1,lib_house1:1,lib_house2:1,lib_house3:1,alba:1,village:1,river:1,nord:1,haruna:1,iona:1};
   if(towns[P.map])BGM.play('town');
   else if(P.map==='cave'||P.map==='tower'||P.map==='castle'||P.map==='castle2'||P.map==='castle3'||P.map==='depths'||P.map==='yakata1'||P.map==='yakata2'||P.map==='yakata3'||P.map==='crypt1'||P.map==='crypt2'||P.map==='sanctum1'||P.map==='sanctumB1'||P.map==='sanctum2'||P.map==='sandou1'||P.map==='sandou2'||P.map==='summit'||P.map==='tower2'||P.map==='tower3'||P.map==='tower4'||P.map==='castle'||P.map==='castle2'||P.map==='castle3'||P.map==='shinen')BGM.play('dungeon');
   else if(P.map==='daiseido')BGM.play('sorrow');
@@ -6639,7 +6658,7 @@ function tryMove(dx,dy){
       showMsg(w.msg||['とびらは かたく とざされている。'],()=>{G.mode='field';});
       return;}
     P.map=w.to;P.x=w.x;P.y=w.y;G.trail=[];
-    if({toros:1,liberion:1}[w.to])G.visited[w.to]=true; // LQ2：リターン先を記録
+    if({toros:1,liberion:1,haruna:1,iona:1}[w.to])G.visited[w.to]=true; // LQ2：リターン先を記録
     AU.blip();updateBGM();render();return;}
   if(ch==='d'||ch==='e'){handleDock(ch);return;}
   if(ch==='t'){openTreasure(nx,ny);render();return;}
@@ -7434,6 +7453,16 @@ function interact(){
     const hints={
       liberion:F.garof?['「どうしさまが まものだった なんて……。','きょうだんは いったい……」']:G.joined.kai?['「ほくとうの もんの おくは きょうだんの やかただ。','ふつうは はいれないはずだが……」']:
         ['「きょうだんの おかげで よるも あかるいのさ。','ありがたい ことだねえ」'],
+      iona:F.gameClear?['「せかいが なんだか あかるく なった きが するよ。',
+          'あんたたちの おかげかねえ。ありがとうね」']:
+        F.vorug?['「ゆきやまの ほうで すごい ひかりが みえたよ。',
+          'あんたたちの しわざかい？ たいした もんだ」']:
+        F.lumia?['「ばんにんさまが めざめて たびだった って ほんとうかい！？',
+          '…しろい かみの おんなのこ？ それが ばんにんさま…！」']:
+        ['「ここは じゅんれいのむら イオナ。むかしから',
+          'サンクトゥムの いせきを まもってきた むらさ。',
+          'いせきの おくには ＜ひかりの ばんにん＞さまが ねむっている…',
+          'ばあちゃんの ばあちゃんの ころからの いいつたえだよ」'],
       haruna:G.flags.haruna?['「たいりくから ぶじに もどったかい。',
           'うみの むこうは 30ねんまえの せんじょう……いや、',
           'いまじゃ しずかな いなかさ」']:
@@ -7971,7 +8000,7 @@ function startBattle(kind){
       e.dispName=e.name+(n>1?String.fromCharCode(65+i):'');
       enemies.push(e);
     }
-    const LQ2_MAPS={toros:1,field2:1,liberion:1,yakata1:1,yakata2:1,yakata3:1,crypt1:1,crypt2:1,daiseido:1,field3:1,sanctum1:1,sanctumB1:1,sanctum2:1,field4:1,sandou1:1,sandou2:1,summit:1,tower:1,tower2:1,tower3:1,tower4:1,field5:1,haruna:1,field:1,nord:1,castle:1,castle2:1,castle3:1,shinen:1};
+    const LQ2_MAPS={toros:1,field2:1,liberion:1,yakata1:1,yakata2:1,yakata3:1,crypt1:1,crypt2:1,daiseido:1,field3:1,sanctum1:1,sanctumB1:1,sanctum2:1,field4:1,sandou1:1,sandou2:1,summit:1,tower:1,tower2:1,tower3:1,tower4:1,field5:1,haruna:1,field:1,nord:1,castle:1,castle2:1,castle3:1,shinen:1,iona:1};
     if(!LQ2_MAPS[P.map]&&Math.random()<0.04){ // レアキャラ乱入（前作エリアのみ）
       const sd=ENEMIES.find(x=>x.key==='syun');
       enemies=[JSON.parse(JSON.stringify(sd))];
@@ -8908,6 +8937,7 @@ function victoryAll(){
   AU.win();
   if(b.named==='rugozaga'){twinVictory();return;}
   if(b.named==='zef'){zefVictory();return;}
+  if(b.named==='vox'&&b.enemies[0]&&!b.enemies[0]._form2){voxRebirth();return;}
   if(b.named){midbossVictory(b.named);return;}
   b.enemies.forEach(e=>{if(e.fled)return;const dx=G.dex[e.key]=G.dex[e.key]||{seen:1,kill:0};dx.kill++;});
   const exp=b.enemies.reduce((a,e)=>a+(e.fled?0:e.exp),0);
@@ -9022,6 +9052,16 @@ function twinVictory(){ // 導師2体撃破→合体演出→ばんけん戦へ
   showMsg(lines,()=>{
     G.battle=null;G.menu=null;cmdWin.style.display='none';subWin.style.display='none';
     startBattle('banken');
+  });
+}
+function voxRebirth(){ // 第1形態のまま撃破→とびらの力で完全顕現
+  showMsg(['ヴォクスを うちたおした……はずだった。',
+    'そのとき──とびらが うちがわから くだけちった！！',
+    'やみが ながれるように あふれ、かたちを むすんでいく。',
+    'むすうの めと て……この よの ものとは おもえぬ きょたい！',
+    'ヴォクスは かんぜんな すがたを あらわした！！'],()=>{
+    G.battle=null;G.menu=null;cmdWin.style.display='none';subWin.style.display='none';
+    startBattle('vox2');
   });
 }
 function zefVictory(){ // ゼフ撃破→とびらが ひらく→ヴォクス戦
@@ -9143,7 +9183,7 @@ function midbossVictory(kind){
       'ゼフ「あの ほうこうは……ミストむらじゃ！」',
       'ガルド「────マリン！！」',
       '（いそいで ミストむらへ！）');
-  }else if(kind==='vox'){
+  }else if(kind==='vox'||kind==='vox2'){
     G.flags.gameClear=true;G.cleared2=true;
     lines.push('',
       'ヴォクスの きょたいが、ひかりの あわと なって ほどけていく。',
@@ -9219,7 +9259,7 @@ function midbossVictory(kind){
     else if(kind==='banken')showChapter('第4章','ルミナの さいだんあと');
     else if(kind==='vorug')showChapter('第5章','30ねんめの しんじつ');
     else if(kind==='zefphantom')showChapter('第6章','ひらかれる とびら');
-    else if(kind==='vox')showChapter('終章','ひかりは つづく',()=>{
+    else if(kind==='vox'||kind==='vox2')showChapter('終章','ひかりは つづく',()=>{
       P.map='toros';P.x=12;P.y=6;G.trail=[];updateBGM();
       G.mode='msg';render();
       showMsg(['──トロスむら。',
