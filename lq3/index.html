@@ -67,16 +67,19 @@ const FIELD=[
 "ffffffffffffff",
 ];
 // ダンジョン（1にんしょう）: #=かべ _=ゆか E=でぐち B=たたかい t=たいまつ
-const DUNGEON=[
-"########",
-"#__t___#",
-"#_##_#_#",
-"#_#B_#_#",
-"#_#__#t#",
-"#_####_#",
-"#t____E#",
-"########",
-];
+const DUNGEON=[ // #=がんぺき w=みず o=いわ C=たから B=まもの t=たいまつ E=でぐち
+"############",
+"#www__t__C_#",
+"#_ww____o__#",
+"#__w_______#",
+"#_o___B__o_#",
+"#______w___#",
+"#__o___ww__#",
+"#t___o__w__#",
+"#__________#",
+"#____E_____#",
+"############",
+]
 // ---------------- ドットえ ----------------
 const PAL={_:'',k:'#10131f',w:'#f2ede4',s:'#e8b98a',h:'#5a3a26',t:'#2f8f83',d:'#1f5f57',g:'#d9a832',r:'#c33',b:'#20325c',p:'#6a4fae',e:'#0c0a18',v:'#8f2fd0',y:'#e8e050'};
 const PAL2={_:'',k:'#141020',H:'#7a5236',h:'#5a3a26',W:'#fff6ea',w:'#e8ddc8',S:'#f0c298',s:'#cf9668',T:'#3aa892',t:'#237a68',d:'#175548',G:'#f0c050',g:'#c09030',B:'#3a4a78',b:'#25335c',R:'#c84040',E:'#2a1f16'};
@@ -334,97 +337,171 @@ function fieldUpdate(dt,time){
     enterDungeon();
   }
 }
-// ---------------- 1にんしょう ダンジョン ----------------
+// ---------------- クォータービュー どうくつ ----------------
 const dunScene=new THREE.Scene();
-dunScene.background=new THREE.Color(0x050409);
-dunScene.fog=new THREE.Fog(0x050409,0.5,7.5);
-const dunCam=new THREE.PerspectiveCamera(68,1,0.05,50);
-let D={x:6,y:6,dir:3,px:6,py:6,ang:Math.PI*1.0,tAng:Math.PI*1.0,lights:[]};
-const DIRS=[[0,-1],[1,0],[0,1],[-1,0]]; // きた ひがし みなみ にし
+dunScene.background=new THREE.Color(0x05070f);
+dunScene.fog=new THREE.Fog(0x05070f,7,17);
+const dunCam=new THREE.PerspectiveCamera(30,1,0.1,100);
+let D={x:5,y:8,tx:5,ty:8,px:5,py:8,heroSpr:null,lights:[],waters:[],chestOpen:false};
+function rockGroundTexture(){
+  return patTex((x,px)=>{
+    x.fillStyle='#6b5f42';x.fillRect(0,0,px,px);
+    for(let i=0;i<120;i++){
+      const t=0.7+Math.random()*0.55;
+      x.fillStyle=`rgb(${107*t|0},${95*t|0},${66*t|0})`;
+      x.fillRect(Math.random()*px|0,Math.random()*px|0,3,2);
+    }
+    x.fillStyle='rgba(30,25,15,0.4)'; // ひびわれ
+    for(let i=0;i<7;i++){
+      let bx=Math.random()*px,by=Math.random()*px;
+      for(let s=0;s<8;s++){x.fillRect(bx|0,by|0,2,1);bx+=Math.random()*5-2;by+=Math.random()*4-1;}
+    }
+  },64);
+}
+function cliffTexture(){
+  return patTex((x,px)=>{
+    x.fillStyle='#232a38';x.fillRect(0,0,px,px);
+    for(let i=0;i<26;i++){ // たてすじの がんばん
+      const bx=Math.random()*px|0,w=2+Math.random()*4|0;
+      const t=0.6+Math.random()*0.8;
+      x.fillStyle=`rgb(${52*t|0},${62*t|0},${84*t|0})`;
+      x.fillRect(bx,0,w,px);
+    }
+    x.fillStyle='rgba(200,220,255,0.16)';
+    for(let i=0;i<12;i++)x.fillRect(Math.random()*px|0,Math.random()*px*0.4|0,2,3);
+  },64);
+}
+function waterTexture(){
+  const t=patTex((x,px)=>{
+    x.fillStyle='#1c4f8a';x.fillRect(0,0,px,px);
+    for(let i=0;i<40;i++){
+      x.fillStyle=i%2?'#2a66aa':'#174276';
+      x.fillRect(Math.random()*px|0,Math.random()*px|0,6,2);
+    }
+    x.fillStyle='rgba(220,240,255,0.5)';
+    for(let i=0;i<10;i++)x.fillRect(Math.random()*px|0,Math.random()*px|0,4,1);
+  },64);
+  t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  return t;
+}
 function buildDungeon(){
-  const wallT=wallTexture('#4a4258','#332c42');
-  const florT=patTex((x,px)=>{
-    x.fillStyle='#241f30';x.fillRect(0,0,px,px);
-    x.fillStyle='#1a1626';
-    const g=px/4;
-    for(let j=0;j<4;j++)for(let i=0;i<4;i++)if((i+j)%2)x.fillRect(i*g,j*g,g,g);
-  },32);
+  const gT=rockGroundTexture(),cT=cliffTexture(),wT=waterTexture();
   const H=DUNGEON.length,W=DUNGEON[0].length;
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     const ch=DUNGEON[y][x];
-    if(ch==='#'){
-      const w=new THREE.Mesh(new THREE.BoxGeometry(1,1.6,1),new THREE.MeshLambertMaterial({map:wallT}));
-      w.position.set(x,0.8,y);dunScene.add(w);
+    if(ch==='#'){ // がんぺき：たかさふぞろい＋ぎざぎざ頂部
+      const h=1.6+((x*7+y*13)%5)*0.35;
+      const w=new THREE.Mesh(new THREE.BoxGeometry(1,h,1),new THREE.MeshLambertMaterial({map:cT}));
+      w.position.set(x,h/2,y);dunScene.add(w);
+      const spike=new THREE.Mesh(new THREE.ConeGeometry(0.42,0.55,5),new THREE.MeshLambertMaterial({color:0x2c3448}));
+      spike.position.set(x+(((x+y)%3)-1)*0.18,h+0.27,y);spike.rotation.y=(x*3+y)*0.7;
+      dunScene.add(spike);
       continue;
     }
-    const f=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshLambertMaterial({map:florT}));
-    f.rotation.x=-Math.PI/2;f.position.set(x,0,y);dunScene.add(f);
-    const c=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshLambertMaterial({color:0x141020}));
-    c.rotation.x=Math.PI/2;c.position.set(x,1.6,y);dunScene.add(c);
+    if(ch==='w'){ // みず：じめんより ひくい あおい めん
+      const bed=new THREE.Mesh(new THREE.BoxGeometry(1,0.06,1),new THREE.MeshLambertMaterial({color:0x0d2c50}));
+      bed.position.set(x,-0.2,y);dunScene.add(bed);
+      const wm=new THREE.Mesh(new THREE.PlaneGeometry(1,1),
+        new THREE.MeshBasicMaterial({map:wT.clone(),transparent:true,opacity:0.82}));
+      wm.material.map.wrapS=wm.material.map.wrapT=THREE.RepeatWrapping;
+      wm.rotation.x=-Math.PI/2;wm.position.set(x,-0.1,y);
+      dunScene.add(wm);D.waters.push(wm);
+      continue;
+    }
+    const g=new THREE.Mesh(new THREE.BoxGeometry(1,0.12,1),new THREE.MeshLambertMaterial({map:gT}));
+    g.position.set(x,-0.06,y);dunScene.add(g);
+    if(ch==='o'){ // おおいわ：たかつどめんたい
+      const r=new THREE.Mesh(new THREE.DodecahedronGeometry(0.42,0),
+        new THREE.MeshLambertMaterial({color:0x8a8f9c,flatShading:true}));
+      r.position.set(x,0.34,y);
+      r.rotation.set(Math.random()*3,Math.random()*3,0);
+      r.scale.set(1,0.8+Math.random()*0.5,1);
+      dunScene.add(r);
+    }
+    if(ch==='C'){ // たからばこ
+      const body=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.34,0.44),new THREE.MeshLambertMaterial({color:0x7a4a20}));
+      body.position.set(x,0.17,y);dunScene.add(body);
+      const lid=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.2,0.46),new THREE.MeshLambertMaterial({color:0x8f5828}));
+      lid.position.set(x,0.42,y);dunScene.add(lid);
+      const band=new THREE.Mesh(new THREE.BoxGeometry(0.64,0.08,0.48),new THREE.MeshBasicMaterial({color:0xd9a832}));
+      band.position.set(x,0.3,y);dunScene.add(band);
+      D.chestLid=lid;
+    }
     if(ch==='t'){
-      const fire=new THREE.Mesh(new THREE.SphereGeometry(0.07,6,6),new THREE.MeshBasicMaterial({color:0xffa040}));
-      fire.position.set(x,1.15,y);dunScene.add(fire);
-      const li=new THREE.PointLight(0xff8a30,1.4,4);
-      li.position.set(x,1.1,y);dunScene.add(li);
+      const pole=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.8,0.08),new THREE.MeshLambertMaterial({color:0x3a2a1a}));
+      pole.position.set(x,0.4,y);dunScene.add(pole);
+      const fire=new THREE.Mesh(new THREE.SphereGeometry(0.09,6,6),new THREE.MeshBasicMaterial({color:0xffb050}));
+      fire.position.set(x,0.86,y);dunScene.add(fire);
+      const li=new THREE.PointLight(0xff9a40,1.4,4.5);
+      li.position.set(x,1.0,y);dunScene.add(li);
       D.lights.push({fire,li,ph:Math.random()*6});
     }
     if(ch==='E'){
-      const p=new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.9),new THREE.MeshBasicMaterial({color:0x88e0ff,transparent:true,opacity:0.5}));
-      p.position.set(x,0.6,y);dunScene.add(p);
-      D.exitPortal=p;
+      const p=new THREE.Mesh(new THREE.CircleGeometry(0.36,16),
+        new THREE.MeshBasicMaterial({color:0x88e0ff,transparent:true,opacity:0.5}));
+      p.rotation.x=-Math.PI/2;p.position.set(x,0.02,y);
+      dunScene.add(p);D.exitPortal=p;
     }
   }
-  dunScene.add(new THREE.AmbientLight(0x334,0.7));
-  const lamp=new THREE.PointLight(0xffd090,0.9,3.2);
+  dunScene.add(new THREE.AmbientLight(0x40507a,0.5));
+  const lamp=new THREE.PointLight(0xffd090,1.0,4.2); // ゆうしゃの ランタン
   dunScene.add(lamp);D.lamp=lamp;
+  D.heroSpr=makeBillboard(HERO,0.85);
+  dunScene.add(D.heroSpr);
 }
 function dunCell(x,y){
   if(y<0||x<0||y>=DUNGEON.length||x>=DUNGEON[0].length)return '#';
   return DUNGEON[y][x];
 }
-function dunForward(sign){
-  if(app.busy||app.msg)return;
-  const d=DIRS[D.dir];
-  const nx=D.x+d[0]*sign,ny=D.y+d[1]*sign;
-  if(dunCell(nx,ny)==='#')return;
-  D.x=nx;D.y=ny;
-  const ch=dunCell(nx,ny);
-  if(ch==='B'&&!app.beaten){setTimeout(()=>{if(app.mode==='dungeon')enterBattle();},260);}
-  if(ch==='E'){setTimeout(()=>{if(app.mode==='dungeon')exitDungeon();},260);}
+function dunWalkable(x,y){
+  const ch=dunCell(x,y);
+  return ch==='_'||ch==='B'||ch==='E'||ch==='t';
 }
-function dunTurn(s){
+function dunStep(dx,dy){
   if(app.busy||app.msg)return;
-  D.dir=(D.dir+s+4)%4;
-  D.tAng=Math.atan2(DIRS[D.dir][0],DIRS[D.dir][1])+Math.PI;
+  const nx=D.tx+dx,ny=D.ty+dy;
+  const ch=dunCell(nx,ny);
+  if(ch==='C'&&!D.chestOpen){ // ぶつかって あける
+    D.chestOpen=true;
+    if(D.chestLid){D.chestLid.rotation.x=-0.9;D.chestLid.position.y=0.5;}
+    showMsg(['たからばこを あけた！','きんかを てにいれた！（しさくのため きぶんだけ）']);
+    return;
+  }
+  if(!dunWalkable(nx,ny))return;
+  D.tx=nx;D.ty=ny;
+  if(ch==='B'&&!app.beaten){setTimeout(()=>{if(app.mode==='dungeon'&&!app.busy)enterBattle();},300);}
+  if(ch==='E'){setTimeout(()=>{if(app.mode==='dungeon'&&!app.busy)exitDungeon();},300);}
 }
 function angLerp(a,b,t){
   let d=b-a;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;
   return a+d*t;
 }
 function dunUpdate(dt,time){
-  D.px+=(D.x-D.px)*Math.min(1,dt*6);
-  D.py+=(D.y-D.py)*Math.min(1,dt*6);
-  D.ang=angLerp(D.ang,D.tAng,Math.min(1,dt*7));
-  const bob=Math.abs(Math.sin(time*8))*0.02*(Math.abs(D.x-D.px)+Math.abs(D.y-D.py)>0.02?1:0.3);
-  dunCam.position.set(D.px,0.82+bob,D.py);
-  dunCam.rotation.set(0,D.ang,0);
-  D.lamp.position.set(D.px,1.0,D.py);
+  D.px+=(D.tx-D.px)*Math.min(1,dt*8);
+  D.py+=(D.ty-D.py)*Math.min(1,dt*8);
+  D.heroSpr.position.set(D.px,0.45+Math.abs(Math.sin(time*7))*0.02,D.py);
+  D.heroSpr.quaternion.copy(dunCam.quaternion);
+  const cx=D.px, cz=D.py+5.6;
+  dunCam.position.lerp(new THREE.Vector3(cx,8.4,cz),Math.min(1,dt*5));
+  dunCam.lookAt(D.px,0,D.py-0.6);
+  D.lamp.position.set(D.px,1.1,D.py);
   D.lights.forEach(b=>{
     b.fire.scale.setScalar(1+Math.sin(time*9+b.ph)*0.2);
     b.li.intensity=1.2+Math.sin(time*10+b.ph)*0.3;
   });
+  D.waters.forEach((w,i)=>{w.material.map.offset.x=time*0.05+i*0.13;w.material.map.offset.y=Math.sin(time*0.7+i)*0.03;});
   if(D.exitPortal)D.exitPortal.material.opacity=0.4+Math.sin(time*3)*0.15;
 }
 function enterDungeon(){
   app.busy=true;
   fade(1,()=>{
     app.mode='dungeon';
-    D.x=6;D.y=6;D.px=6;D.py=6;D.dir=0;
-    D.ang=D.tAng=Math.atan2(DIRS[0][0],DIRS[0][1])+Math.PI;
+    D.tx=5;D.ty=8;D.px=5;D.py=8;
+    dunCam.position.set(5,8.4,13.6);
     setLabel('いにしえの どうくつ B1');
-    setHelp('▲すすむ ▼さがる ◀▶むきをかえる');
+    setHelp('じゅうじキーで いどう');
     fade(0,()=>{app.busy=false;
-      showMsg(['──いちにんしょう 3Dダンジョン。','おくで なにかが うごめいている……。']);});
+      showMsg(['──いわと みずの どうくつ。','おくで なにかが うごめいている……。','（たからばこも さがしてみよう）']);});
   });
 }
 function exitDungeon(){
@@ -556,9 +633,9 @@ function batUpdate(dt,time){
       fade(1,()=>{
         app.mode='dungeon';
         setLabel('いにしえの どうくつ B1');
-        setHelp('▲すすむ ▼さがる ◀▶むきをかえる（Eで だっしゅつ）');
+        setHelp('あおい ひかりが でぐち');
         fade(0,()=>{app.busy=false;
-          showMsg(['（あおい ひかりの もんが でぐちだ）']);});
+          showMsg(['（ゆかの あおい ひかりが でぐちだ）']);});
       });
     }
   }
@@ -631,10 +708,8 @@ function press(k){
       }
     }
   }else if(app.mode==='dungeon'){
-    if(k==='U')dunForward(1);
-    if(k==='D')dunForward(-1);
-    if(k==='L')dunTurn(-1);
-    if(k==='R')dunTurn(1);
+    if(k==='U')dunStep(0,-1);if(k==='D')dunStep(0,1);
+    if(k==='L')dunStep(-1,0);if(k==='R')dunStep(1,0);
   }else if(app.mode==='battle'){
     if(k==='A')battleAttack();
   }
