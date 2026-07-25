@@ -6983,7 +6983,9 @@ function interact(){
     }else{
       say(['とびらは しずかに とじ、ただの いしかべに もどっている。',
         'かべの まえに、いちふりの けんが たてかけられていた。',
-        '＜レイ＞の けんは、しずかに ひかっている。']);
+        'レイの けんを にぎると──とじた とびらに、',
+        'たたかいの きおくが かげろうのように うかびあがった。',
+        '（ここで かつての てきと さいせんできる）'],()=>{G.mode='menu';openArena2();});
     }
     return;
   }
@@ -8958,7 +8960,10 @@ function advanceActor(){
 }
 function victoryAll(){
   const b=G.battle;
-  if(b.rematch){rematchVictory();return;} // 再戦は専用処理
+  if(b.rematch){ // 再戦は専用処理（ヴォクスだけは かいげんを はさむ）
+    if(b.named==='vox'&&b.enemies[0]&&!b.enemies[0]._form2){AU.win();voxRebirth();return;}
+    rematchVictory();return;
+  }
   if(b.isBoss){winBoss();return;}
   AU.win();
   if(b.named==='rugozaga'){twinVictory();return;}
@@ -9004,10 +9009,11 @@ const REMATCH_LIST=[
 ];
 function rematchVictory(){
   const b=G.battle;const e=b.enemies[0];
-  const def=REMATCH_LIST.find(r=>r.key===b.rematch)||{exp:e.exp||100,gold:e.gold||100,name:e.name};
+  const def=REMATCH_LIST.concat(typeof LQ2_REMATCH!=='undefined'?LQ2_REMATCH:[]).find(r=>r.key===b.rematch)||{exp:e.exp||100,gold:e.gold||100,name:e.name};
   const exp=def.exp,gold=def.gold;
   P.gold+=gold;
   G.flags.beaten=G.flags.beaten||{};G.flags.beaten[b.rematch]=true;
+  G.flags.beaten2=G.flags.beaten2||{};G.flags.beaten2[b.rematch]=true;
   const lines=[e.name+'を もう いちど うちやぶった！','けいけんち '+exp+'、'+gold+'ゴールドを かくとく！'];
   let leveled=false;
   aliveMembers().forEach(mem=>{
@@ -9041,6 +9047,22 @@ function rematchVictory(){
     }
   }
   showMsg(lines,()=>endBattle(true));
+}
+const LQ2_REMATCH=[
+  {key:'banken',name:'そうえいのばんけん',exp:700,gold:500},
+  {key:'vorug',name:'だいどうし ヴォルグ',exp:900,gold:700},
+  {key:'zefphantom',name:'けんじゃの まぼろし',exp:1100,gold:850},
+  {key:'zef',name:'けんじゃ ゼフ',exp:1400,gold:1000},
+  {key:'vox',name:'やみのこえ ヴォクス',exp:2000,gold:1500}
+];
+function openArena2(){ // LQ2：とびらの ま での さいせん
+  const items=LQ2_REMATCH.map(r=>{
+    const done=G.flags.beaten2&&G.flags.beaten2[r.key];
+    return r.name+(done?' ✓':'');
+  });
+  items.push('やめる');
+  G.menu={kind:'arena',sel:0,items,list:LQ2_REMATCH};
+  renderCmd(G.menu,'だれと たたかう？');
 }
 function openArena(){
   const items=REMATCH_LIST.map(r=>{
@@ -9086,8 +9108,10 @@ function voxRebirth(){ // 第1形態のまま撃破→とびらの力で完全�
     'やみが ながれるように あふれ、かたちを むすんでいく。',
     'むすうの めと て……この よの ものとは おもえぬ きょたい！',
     'ヴォクスは かんぜんな すがたを あらわした！！'],()=>{
+    const _rm=G.battle&&G.battle.rematch;
     G.battle=null;G.menu=null;cmdWin.style.display='none';subWin.style.display='none';
     startBattle('vox2');
+    if(_rm&&G.battle)G.battle.rematch=_rm; // さいせんの ばあいは ほうしゅうを ひきつぐ
   });
 }
 function zefVictory(){ // ゼフ撃破→とびらが ひらく→ヴォクス戦
