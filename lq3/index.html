@@ -97,7 +97,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T13:41:48", "assets_sha": "a9d7e224", "lines": {"world": 130, "npc": 185, "core": 1432, "view": 1130, "ui": 270}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T13:45:52", "assets_sha": "a9d7e224", "lines": {"world": 130, "npc": 185, "core": 1432, "view": 1130, "ui": 285}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3208,7 +3208,15 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>{ if(KEYMAP[e.code]) endHold(); });
 
 // ---------------- 起動 ----------------
+let bootTimer=setTimeout(()=>{                  // ほけん：まんいち よびわすれても とまらない
+  const b=$('boot');
+  if(b && !b.classList.contains('hide')){
+    console.warn('[boot] bootDone が よばれなかったため、じどうで とじました');
+    bootDone();
+  }
+}, 8000);
 function bootDone(){
+  clearTimeout(bootTimer);
   const b=$('boot'); if(!b) return;
   b.classList.add('hide');
   setTimeout(()=>{ b.style.display='none'; }, 520);
@@ -3246,12 +3254,19 @@ function startGame(loaded){
 C.freshState();
 const hasSave = (()=>{ try{ return !!localStorage.getItem('LQ3_SAVE_1'); }catch(e){ return false; } })();
 if(hasSave){
+  const info=C.saveInfo();
   C.G.mode='menu';
-  menu(['はじめから','つづきから'],'ルミナクエストIII',(sel)=>{
-    if(sel===1 && C.loadGame()) startGame(true);
-    else { C.freshState(); startGame(false); }
+  V.buildMap(C.P.map); V.setActors(true); label('ルミナクエストIII'); hud();
+  bootDone();                                   // ★タイトルでも ローディングを かならず 消す
+  const cont = info && !info.broken
+    ? 'つづきから（'+info.lead+' Lv'+info.lv+'）' : 'つづきから';
+  menu(['はじめから',cont],'ルミナクエストIII',(sel)=>{
+    if(sel===1){
+      if(C.loadGame()) startGame(true);
+      else msg2([C.lastSaveError||'きろくが よめませんでした',
+                 'はじめから あそびます。'],()=>{ C.freshState(); startGame(false); });
+    }else{ C.freshState(); startGame(false); }
   });
-  V.buildMap('toros'); V.setActors(true); label('ルミナクエストIII'); hud();
 }else{
   startGame(false);
 }
