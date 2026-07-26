@@ -1556,6 +1556,28 @@ const MON = {
 };
 
 const SPR = {
+lion:[
+"______kkkk______",
+"_____kMMMMk_____",
+"____kMMMMMMk____",
+"____kMmmmMMk____",
+"____kSSSSSSk____",
+"____kSkSSkSk____",
+"____kSSSSSSk____",
+"_____kSssSk_____",
+"___kkBBBBBBkk___",
+"__kMkBBYYBBkMk__",
+"__kMkBBYYBBkMk__",
+"__kMkBbbbBBkMk__",
+"___kkBBBBBBkk___",
+"____kBBBBBBk____",
+"____kmmmmmmk____",
+"____kmmkkmmk____",
+"____kmmkkmmk____",
+"____kEEkkEEk____",
+"___kEEkkkEEk____",
+"________________",
+],
 sora:[
 "______kkkk______",
 "_____kHHHHk_____",
@@ -1681,6 +1703,10 @@ function monTex(key){
   return monTexCache[key];
 }
 function billboard(key, size){
+  if(!MON[key] && !SPR[key]){
+    console.warn('[view] スプライトが ありません: '+key+' → sora で だいようします');
+    key='sora';
+  }
   const mon=MON[key];
   if(mon){                                       // こうかいぞうどの まもの（PNG）
     const m=new THREE.Mesh(new THREE.PlaneGeometry(size*mon.w/mon.h, size),
@@ -2232,11 +2258,13 @@ function buildMap(name){
   if(sc.aurora && night) buildAurora();
   if(sc.footprints) initFootprints();
 
-  // 隊列アクター
-  const cls=C.party.map(m=>m.cls);
-  actors.hero=billboard(cls[0]||'sora',0.85); scene.add(actors.hero);
-  actors.f1=billboard(cls[1]||'lumia',0.82); scene.add(actors.f1);
-  actors.f2=billboard(cls[2]||'dan',0.8); scene.add(actors.f2);
+  // 隊列アクター（パーティ人数ぶんだけ つくる）
+  actors.list=[];
+  C.party.forEach((m,i)=>{
+    const b=billboard(m.cls, i===0?0.85:0.82);
+    scene.add(b); actors.list.push(b);
+  });
+  actors.hero=actors.list[0]||null;
   if(map.theme==='cave'){
     const lamp=new THREE.PointLight(0xffd090,1.0,4.5); scene.add(lamp); actors.lamp=lamp;
   }else actors.lamp=null;
@@ -2249,8 +2277,13 @@ function setActors(snap){
     if(key!==lastFootTile){ lastFootTile=key; dropFootprint(P.x,P.y,!!C.G.stepFlip); }
   }
   const yy = (C.MAPS[curMap]&&C.MAPS[curMap].theme==='cave')?0.95:0.45;
-  const tgt=[[P.x,P.y], tr[0]||[P.x,P.y], tr[1]||[P.x,P.y]];
-  if(snap) fp=tgt.map(t=>({x:t[0],y:t[1]}));
+  const n=(actors.list?actors.list.length:1);
+  const tgt=[];
+  for(let i=0;i<n;i++){
+    const t=(i===0)?[P.x,P.y]:(tr[i-1]||[P.x,P.y]);
+    tgt.push(t);
+  }
+  if(snap || fp.length!==n) fp=tgt.map(t=>({x:t[0],y:t[1]}));
   fp._tgt=tgt; fp._y=yy;
 }
 function chest(x,y){
@@ -2343,11 +2376,12 @@ function loop(now){
 }
 function updateField(dt,time){
   if(!scene) return;
-  const tgt=fp._tgt||[[C.P.x,C.P.y],[C.P.x,C.P.y],[C.P.x,C.P.y]];
+  const objs=actors.list||[];
+  if(!objs.length) { renderer.render(scene,cam); return; }
+  const tgt=fp._tgt||objs.map(()=>[C.P.x,C.P.y]);
   const yy=fp._y||0.45;
-  const objs=[actors.hero,actors.f1,actors.f2];
-  for(let i=0;i<3;i++){
-    if(!objs[i]) continue;
+  for(let i=0;i<objs.length;i++){
+    if(!objs[i]||!tgt[i]||!fp[i]) continue;
     fp[i].x += (tgt[i][0]-fp[i].x)*Math.min(1,dt*8);
     fp[i].y += (tgt[i][1]-fp[i].y)*Math.min(1,dt*8);
     objs[i].position.set(fp[i].x, yy+(i===0?Math.abs(Math.sin(time*7))*0.02:0), fp[i].y);
