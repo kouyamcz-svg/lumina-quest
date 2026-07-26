@@ -84,7 +84,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
 const LQ3 = (function(){
 
 // ---------------- データ：クラス・呪文 ----------------
-const LV_CAP = 30;
+const LV_CAP = 50;
 const SPELL_DEFS = {
   spark:  {name:'スパーク',   mp:2, type:'dmg',    min:12, max:18},
   heal:   {name:'ヒール',     mp:3, type:'heal',   min:20, max:28},
@@ -93,12 +93,25 @@ const SPELL_DEFS = {
   hiheal: {name:'ハイヒール', mp:6, type:'heal',   min:45, max:60},
   nova:   {name:'ノヴァ',     mp:10,type:'dmgall', min:26, max:36},
   revive: {name:'リヴァイブ', mp:12,type:'revive'},
+  // ---- こうい じゅもん（Lv12いこう） ----
+  bolt:   {name:'ライトニング',   mp:8, type:'dmg',     min:42, max:56},
+  holyray:{name:'ホーリーレイ',   mp:16,type:'dmgall',  min:42, max:56},
+  luminaflare:{name:'ルミナフレア',mp:26,type:'dmgall', min:74, max:98},
+  judgment:{name:'ばんぶつの ひかり',mp:34,type:'dmg',  min:140,max:185},
+  fullheal:{name:'フルヒール',    mp:12,type:'heal',    min:95, max:135},
+  healall:{name:'いやしの うた',  mp:16,type:'healall', min:50, max:70},
+  goddess:{name:'めがみの いのり',mp:26,type:'healall', min:95, max:130},
+  sanctuary:{name:'セイントウォール',mp:14,type:'heal', min:150,max:200},
 };
 const CLASSES = {
   sora:  {name:'ソラ',  hp:16,mp:5,atk:5,def:3,agi:6, g:{hp:5,mp:3,atk:2,def:2,agi:1},
-          learns:[{lv:2,key:'spark'},{lv:3,key:'heal'},{lv:6,key:'blaze'},{lv:9,key:'nova'}]},
+          learns:[{lv:2,key:'spark'},{lv:3,key:'heal'},{lv:6,key:'blaze'},{lv:9,key:'nova'},
+                  {lv:14,key:'bolt'},{lv:21,key:'holyray'},{lv:30,key:'luminaflare'},
+                  {lv:40,key:'judgment'}]},
   lumia: {name:'ルミア',hp:14,mp:8,atk:3,def:3,agi:5, g:{hp:4,mp:4,atk:1,def:2,agi:1},
-          learns:[{lv:1,key:'heal'},{lv:4,key:'cure'},{lv:5,key:'hiheal'},{lv:10,key:'revive'}]},
+          learns:[{lv:1,key:'heal'},{lv:4,key:'cure'},{lv:5,key:'hiheal'},{lv:10,key:'revive'},
+                  {lv:16,key:'fullheal'},{lv:24,key:'healall'},{lv:33,key:'sanctuary'},
+                  {lv:42,key:'goddess'}]},
   dan:   {name:'ダン',  hp:24,mp:0,atk:8,def:4,agi:4, g:{hp:7,mp:0,atk:3,def:2,agi:1}, learns:[]},
 };
 const TACTICS = {manual:'めいれいさせろ', gungan:'ガンガンいこうぜ', inochi:'いのちだいじに'};
@@ -182,15 +195,15 @@ const ENEMIES = [
    skill:{p:0.36, mul:1.60, name:'どくの こぶし'}, inflict:{type:'confuse', p:0.25}},
 ];
 const MIDBOSS = {
-  desgran1:{key:'desgran1', name:'まおう デスグラン', hp:360, atk:35, def:28, agi:14, acts:2,
+  desgran1:{key:'desgran1', name:'まおう デスグラン', hp:500, atk:43, def:28, agi:14, acts:2,
             exp:0, gold:0,
             aoe:{p:0.26, lo:26, hi:36, name:'ダークフレア'},
             skill:{p:0.30, mul:1.35, name:'まじんの つえ'}},
-  desgran2:{key:'desgran2', name:'デスグラン・おんねんのすがた', hp:420, atk:40, def:26, agi:17, acts:2,
+  desgran2:{key:'desgran2', name:'デスグラン・おんねんのすがた', hp:580, atk:48, def:26, agi:17, acts:2,
             exp:0, gold:0,
             aoe:{p:0.34, lo:30, hi:42, name:'おんねんの ほのお'},
             inflict:{type:'confuse', p:0.24}},
-  desgran3:{key:'desgran3', name:'デスグラン・まじんのすがた', hp:540, atk:43, def:30, agi:15, acts:2,
+  desgran3:{key:'desgran3', name:'デスグラン・まじんのすがた', hp:750, atk:51, def:30, agi:15, acts:2,
             exp:4000, gold:3000,
             aoe:{p:0.36, lo:30, hi:44, name:'ぜつぼうの まなざし'},
             skill:{p:0.28, mul:1.40, name:'むすうの しょくしゅ'},
@@ -652,6 +665,12 @@ function autoCommand(m){
     const rv = sp.find(s=>s.type==='revive');
     if(rv) return {actor:m, type:'spell', sp:rv, tgt:dead};
   }
+  // ②-a ぜんたいかいふく（3にん いじょう きずついていたら）
+  const hurtAll = party.filter(p=>p.hp>0 && p.hp<p.maxhp*0.62);
+  if(hurtAll.length>=2){
+    const ha = sp.filter(s=>s.type==='healall').sort((a,c)=>c.max-a.max)[0];
+    if(ha) return {actor:m, type:'spell', sp:ha};
+  }
   // ② かいふく（のこりHPの わりあいで はんだん）
   const wounded = party.filter(p=>p.hp>0 && p.hp<p.maxhp)
                        .sort((a,c)=>a.hp/a.maxhp - c.hp/c.maxhp);
@@ -760,6 +779,19 @@ function memberAct(a, done){
       const h = Math.min(t.maxhp-t.hp, sp.min+Math.floor(Math.random()*(sp.max-sp.min+1)));
       t.hp+=h; A.heal(); U.hud();
       V.fx('heal',{member:t}, ()=>U.msg([m.name+'は '+sp.name+'を となえた！', t.name+'の HPが '+h+' かいふく！'], done));
+      return;
+    }
+    if(sp.type==='healall'){
+      const targets=aliveMembers();
+      const lines=[m.name+'は '+sp.name+'を となえた！'];
+      A.heal();
+      targets.forEach(tg=>{
+        const h=Math.min(tg.maxhp-tg.hp, sp.min+Math.floor(Math.random()*(sp.max-sp.min+1)));
+        if(h>0){ tg.hp+=h; lines.push(tg.name+'の HPが '+h+' かいふく！'); }
+      });
+      if(lines.length===1) lines.push('しかし こうかが なかった。');
+      U.hud();
+      V.fx('heal',{}, ()=>U.msg(lines, done));
       return;
     }
     if(sp.type==='cure'){
