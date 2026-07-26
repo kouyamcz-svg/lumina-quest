@@ -78,6 +78,287 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
 </script>
 <script>'use strict';
 // ============================================================
+// ルミナクエストIII / 世界設定データ
+// 地方・章・マップID・シーン名・街状態を ここに 一元化する。
+// ゲームロジック（core.js）は このデータを 参照するだけに する。
+// ============================================================
+const WORLD = (function(){
+
+// ---------------- 地方 ----------------
+const REGIONS = {
+  versa:  {id:'versa',  name:'ゆきの おうこく ヴェルサ', dir:'北',   chapter:1,
+           climate:'snow',   summary:'雪原と氷窟。王女が眠りから覚めない雪国。'},
+  zaal:   {id:'zaal',   name:'たいしょうのまち ザール', dir:'東',   chapter:2,
+           climate:'desert', summary:'砂の交易路。隊商と荷車と売買の街。'},
+  minamo: {id:'minamo', name:'サンゴぐんとう ミナモ',   dir:'南',   chapter:3,
+           climate:'sea',    summary:'小舟で島づたいに渡る珊瑚の群島。'},
+  elde:   {id:'elde',   name:'れいほう エルデ',         dir:'西',   chapter:4,
+           climate:'peak',   summary:'夢を研究する賢者の隠れ里がある霊峰。'},
+  oldland:{id:'oldland',name:'きゅうたいりく',           dir:'中央', chapter:5,
+           climate:'temperate',
+           summary:'過去の世界が長い年月を経て変わった土地。遺構だけが残る。'},
+  yume:   {id:'yume',   name:'ゆめの たいりく',         dir:'中央海', chapter:6,
+           climate:'dream',  summary:'終章で中央海に浮上する。最深部に夢喰い神殿。'},
+};
+
+// ---------------- 章 ----------------
+// ※ 登場人物名は ここ 1箇所で 管理する（差し替えが きくように）
+const CHAPTERS = [
+  {no:1, id:'ch1_versa',  title:'わかき きし',           region:'versa',
+   heroes:[{id:'lion',   name:'リオン',  role:'しんまい このえへい'}],
+   summary:'王女の眠りの謎を追い、雪原と氷窟へ。単独戦闘の教習章。'},
+  {no:2, id:'ch2_zaal',   title:'あきないの たび',       region:'zaal',
+   heroes:[{id:'bald',   name:'バルド',  role:'ぎょうしょうにん'}],
+   summary:'眠り病で止まった隊商をつなぐ。売買と荷車の章。'},
+  {no:3, id:'ch3_minamo', title:'みなとの しまい',       region:'minamo',
+   heroes:[{id:'manya',  name:'マーニャ', role:'うらないし'},
+           {id:'minea',  name:'ミネア',  role:'おどりこ'}],
+   summary:'小舟で島を渡り、夢を「視る」力で真相に最初に触れる。'},
+  {no:4, id:'ch4_elde',   title:'ろうけんじゃの しょくざい', region:'elde',
+   heroes:[{id:'zef',    name:'ゼフ',    role:'ろうけんじゃ'},
+           {id:'iona',   name:'イオナ',  role:'でし'}],
+   summary:'夢の研究と贖罪。隠れ里で入口の鍵を探す。'},
+  {no:5, id:'ch5_oldland',title:'ひかりの こ',           region:'oldland',
+   heroes:[{id:'sora',   name:'ソラ',    role:'ひかりの こ'}],
+   summary:'母ルミアから光を受け継ぎ、船で北→東→南→西を巡って合流する。'},
+  {no:6, id:'final_yume', title:'とびらの むこう',       region:'yume',
+   heroes:[],
+   summary:'ゆめのたいりくが浮上。最深部の夢喰い神殿へ。'},
+];
+
+// ---------------- マップID体系 ----------------
+// 命名規則： <地方>_<種別><連番>
+//   種別： town / field / cast(城) / dgn(ダンジョン) / in(屋内) / shrine(神殿)
+const MAP_IDS = {
+  // --- ヴェルサ地方（第1章・実装中） ---
+  versa_town:    {region:'versa', kind:'town',  name:'ゆきの じょうかまち ヴェルサ', scene:'SCENE_VERSA_TOWN'},
+  versa_field1:  {region:'versa', kind:'field', name:'ヴェルサの せつげん',         scene:'SCENE_VERSA_FIELD'},
+  versa_cast1:   {planned:true, region:'versa', kind:'cast',  name:'ヴェルサ おうじょう',         scene:'SCENE_VERSA_CASTLE'},
+  versa_dgn1:    {planned:true, region:'versa', kind:'dgn',   name:'こおりの どうくつ',           scene:'SCENE_VERSA_ICECAVE'},
+  versa_in_inn:  {planned:true, region:'versa', kind:'in',    name:'やどや',                      scene:'SCENE_VERSA_INN'},
+  versa_in_ch:   {planned:true, region:'versa', kind:'in',    name:'きょうかい',                  scene:'SCENE_VERSA_CHURCH'},
+  versa_in_wep:  {planned:true, region:'versa', kind:'in',    name:'ぶきや',                      scene:'SCENE_VERSA_WEAPON'},
+  versa_in_mag:  {planned:true, region:'versa', kind:'in',    name:'まほうてん',                  scene:'SCENE_VERSA_MAGIC'},
+  // --- 旧大陸（第5章・M0資産を退避。到達経路は未接続） ---
+  toros:         {region:'oldland', kind:'town', name:'トロスむら',                 scene:'SCENE_OLD_TOROS'},
+  field_toros:   {region:'oldland', kind:'field',name:'トロスの のはら',            scene:'SCENE_OLD_FIELD'},
+  cave1:         {region:'oldland', kind:'dgn',  name:'ゆめみの どうくつ B1',       scene:'SCENE_OLD_CAVE1'},
+  cave2:         {region:'oldland', kind:'dgn',  name:'ゆめみの どうくつ B2',       scene:'SCENE_OLD_CAVE2'},
+  cave3:         {region:'oldland', kind:'dgn',  name:'ゆめみの どうくつ B3',       scene:'SCENE_OLD_CAVE3'},
+  toros_h1:      {region:'oldland', kind:'in',   name:'みんか',                     scene:'SCENE_OLD_HOUSE1'},
+  toros_h2:      {region:'oldland', kind:'in',   name:'みんか',                     scene:'SCENE_OLD_HOUSE2'},
+};
+
+// ---------------- シーン名 ----------------
+// ビューの見た目（背景・霧・ライト・演出）を決める識別子
+const SCENES = {
+  SCENE_VERSA_TOWN:   {theme:'snow',   outdoor:true,  snowfall:true,  aurora:true,  footprints:true},
+  SCENE_VERSA_FIELD:  {theme:'snow',   outdoor:true,  snowfall:true,  aurora:true,  footprints:true},
+  SCENE_VERSA_CASTLE: {theme:'castle', outdoor:false, snowfall:false, aurora:false, footprints:false},
+  SCENE_VERSA_ICECAVE:{theme:'ice',    outdoor:false, snowfall:false, aurora:false, footprints:false},
+  SCENE_VERSA_INN:    {theme:'indoor', outdoor:false},
+  SCENE_VERSA_CHURCH: {theme:'indoor', outdoor:false},
+  SCENE_VERSA_WEAPON: {theme:'indoor', outdoor:false},
+  SCENE_VERSA_MAGIC:  {theme:'indoor', outdoor:false},
+  SCENE_OLD_TOROS:    {theme:'village',outdoor:true},
+  SCENE_OLD_FIELD:    {theme:'field',  outdoor:true},
+  SCENE_OLD_CAVE1:    {theme:'cave',   outdoor:false},
+  SCENE_OLD_CAVE2:    {theme:'cave',   outdoor:false},
+  SCENE_OLD_CAVE3:    {theme:'cave',   outdoor:false},
+  SCENE_OLD_HOUSE1:   {theme:'indoor', outdoor:false},
+  SCENE_OLD_HOUSE2:   {theme:'indoor', outdoor:false},
+};
+
+// ---------------- 街の状態 ----------------
+// 物語の進行で街の見た目・NPCの台詞・BGMが変わる
+const TOWN_STATES = {
+  NORMAL: {
+    id:'NORMAL', label:'へいおん',
+    fog:[0xcfe2f2, 14, 40], sky:0x9ec8e8,
+    snowColor:0xffffff, snowRate:1.0, ambient:[0xdfeaff, 0.95],
+  },
+  SLEEPING_SICKNESS: {
+    id:'SLEEPING_SICKNESS', label:'ねむりびょう',
+    fog:[0xb8a8d8, 11, 30], sky:0x8c7fae,
+    snowColor:0xd6c2f0, snowRate:1.25, ambient:[0xc7b8e8, 0.85],
+  },
+  DREAM_INVASION: {
+    id:'DREAM_INVASION', label:'ゆめの しんしょく',
+    fog:[0x7a4fa8, 7, 22], sky:0x4a2f6e,
+    snowColor:0xc08cf0, snowRate:1.7, ambient:[0xa070d8, 0.75],
+  },
+};
+
+function sceneOf(mapId){
+  const m = MAP_IDS[mapId];
+  return m ? (SCENES[m.scene] || {}) : {};
+}
+function mapName(mapId){
+  const m = MAP_IDS[mapId];
+  return m ? m.name : mapId;
+}
+function regionOf(mapId){
+  const m = MAP_IDS[mapId];
+  return m ? REGIONS[m.region] : null;
+}
+
+return {REGIONS, CHAPTERS, MAP_IDS, SCENES, TOWN_STATES, sceneOf, mapName, regionOf};
+})();
+
+</script>
+<script>'use strict';
+// ============================================================
+// ルミナクエストIII / NPCデータ・クエストデータ
+// NPCは「マップID + 座標」で識別し、街状態とフラグで台詞を切り替える。
+// ============================================================
+const NPCDATA = (function(){
+
+// lines は 上から じゅんに 判定し、さいしょに あてはまった ものを しゃべる。
+//   when: {state:'...', flag:'...', notFlag:'...'} すべて みたす ひつようが ある
+//   when を かかない ものが きほん（さいごに おく）
+const NPCS = {
+  versa_town: [
+    {at:'8,12', name:'もんばん', lines:[
+      {when:{state:'DREAM_INVASION'}, text:[
+        '「みなみもんは とじた！ そとは もう ゆめの なかだ！」',
+        '「きみも はやく おくへ さがれ、リオン！」']},
+      {when:{state:'SLEEPING_SICKNESS'}, text:[
+        '「けさも 3にん たおれた。みんな ねむったままだ」',
+        '「せつげんの ほうから なにか きてる きが する……」']},
+      {text:[
+        '「よう リオン、しんまいの わりに よく はしるな」',
+        '「みなみもんの さきは せつげん。まよったら ひきかえせよ」']},
+    ]},
+    {at:'6,7', name:'こうじょの じじょ', lines:[
+      {when:{state:'DREAM_INVASION'}, text:[
+        '「おうじょさま……ゆめの なかで だれかと はなして おられます」',
+        '「むらさきの きりが、おしろまで のぼってきました」']},
+      {when:{state:'SLEEPING_SICKNESS'}, text:[
+        '「おうじょさまが おめざめに なりません。もう みっかです」',
+        '「おいしゃさまも くびを かしげるばかりで……」']},
+      {text:[
+        '「おうじょさまは おやさしいかたです」',
+        '「けさも まどから ゆきを ながめて おられました」']},
+    ]},
+    {at:'16,7', name:'きしだんちょう', lines:[
+      {when:{flag:'ch1_orderReceived'}, text:[
+        '「せつげんの おくに こおりの どうくつが ある」',
+        '「きを つけて いけ。おまえは まだ しんまいだ」']},
+      {when:{state:'SLEEPING_SICKNESS'}, text:[
+        '「リオン。おまえに めいれいだ」',
+        '「おうじょの ねむりの げんいんを しらべてこい」',
+        '「まずは まちの ものに はなしを きけ」']},
+      {text:[
+        '「きしだんの ひろばは しんけんしょうぶの ばだ」',
+        '「あさの くんれんを おこたるなよ、リオン」']},
+    ]},
+    {at:'11,4', name:'しんかん', lines:[
+      {when:{state:'DREAM_INVASION'}, text:[
+        '「いのりが とどきません。ゆめが かみさまの こえを かき けしている」']},
+      {when:{state:'SLEEPING_SICKNESS'}, text:[
+        '「ねむったまま おきぬ ものが ふえています」',
+        '「きょうかいで あずかって おりますが、ひとが たりません」']},
+      {text:['「ヴェルサの ゆきは しずかで うつくしい」',
+             '「たびの ぶじを おいのりしましょう」']},
+    ]},
+    {at:'4,9', name:'まちのこども', lines:[
+      {when:{state:'DREAM_INVASION'}, text:[
+        '「おそらが むらさきだよ。きれいだけど、こわい」']},
+      {text:['「ゆきの うえに あしあとを つけるの、たのしいよ！」',
+             '「よるに なると そらが ひかるんだ。オーロラって いうんだって」']},
+    ]},
+    {at:'19,10', name:'ぎょうしょうにん', lines:[
+      {text:['「ひがしの ザールから きた。にぐるまが ゆきで うごかん」',
+             '「なんでも みなみの しまでも ひとが ねむって おきんそうだ」',
+             '「せかいじゅうで おきてる はなし かも しれんな」']},
+    ]},
+    {at:'14,13', name:'さかばの きゃく', lines:[
+      {text:['「せかいじゅうを たびして ものまねげいで おおうけしてる けんしが いるらしい」',
+             '「ねずみの おうこくの ものまねが てっぱん だとさ」',
+             '「こだまのいしで うわさは あっというま だな」']},
+    ]},
+  ],
+  toros: [
+    {at:'6,5', name:'むらびとA', lines:[
+      {text:['「ちかごろ ねむったまま おきない ひとが ふえてる…」',
+             '「まえは こんな こと なかったのに ねえ」']}]},
+    {at:'10,5', name:'むらびとB', lines:[
+      {text:['「みなみの どうくつで へんな ゆめを みる らしい。',
+             'きを つけて いきなよ」']}]},
+    {at:'7,12', name:'さかばの きゃく', lines:[
+      {text:['「さかばの うわさでね、せかいじゅうを たびして',
+             '＜ものまねげい＞で おおうけしてる けんしが いるんだと。',
+             'ねずみの おうこくの ものまねが てっぱん らしいよ」']}]},
+  ],
+  toros_h1: [
+    {at:'5,1', name:'いえの ひと', lines:[
+      {text:['「ルミアさまの こどもが もう そんなに おおきく…」',
+             '「じかんが たつのは はやい ねえ」']}]},
+  ],
+  toros_h2: [
+    {at:'2,1', name:'いえの ひと', lines:[
+      {text:['「こだまのいしで うわさは あっというまさ。',
+             'あの ものまね けんし、また ばけたらしいぜ」']}]},
+  ],
+  versa_field1: [
+    {at:'9,8', name:'そうさくたい', lines:[
+      {text:['「せつげんの おくに こおりの どうくつが ある」',
+             '「あそこから つめたい かぜが ふいてくるんだ」']},
+    ]},
+  ],
+};
+
+// ---------------- クエスト ----------------
+// state: 'inactive' → 'active' → 'clear'
+const QUESTS = {
+  ch1_q1_wakeup: {
+    id:'ch1_q1_wakeup', chapter:1, title:'めざめぬ おうじょ',
+    giver:'きしだんちょう',
+    desc:'おうじょが ねむりから さめない。まちの ものに はなしを きき、げんいんを しらべる。',
+    steps:[
+      {id:'talk_maid',  desc:'こうじょの じじょに はなす',   flag:'ch1_talkedMaid'},
+      {id:'talk_guard', desc:'みなみもんの もんばんに はなす', flag:'ch1_talkedGate'},
+      {id:'report',     desc:'きしだんちょうに ほうこくする', flag:'ch1_orderReceived'},
+    ],
+    reward:{gold:100, item:null},
+    next:'ch1_q2_icecave',
+  },
+  ch1_q2_icecave: {
+    id:'ch1_q2_icecave', chapter:1, title:'こおりの どうくつ',
+    giver:'きしだんちょう',
+    desc:'せつげんの おくの こおりの どうくつを しらべる。',
+    steps:[
+      {id:'enter_field', desc:'せつげんへ でる',           flag:'ch1_enteredField'},
+      {id:'enter_cave',  desc:'こおりの どうくつに はいる', flag:'ch1_enteredCave'},
+    ],
+    reward:{gold:300, item:null},
+    next:null,
+  },
+};
+
+// じょうけんに あう だんを えらぶ
+function pickLines(entry, ctx){
+  for(const l of entry.lines){
+    const w = l.when;
+    if(!w) return l.text;
+    if(w.state && ctx.townState !== w.state) continue;
+    if(w.flag && !ctx.flags[w.flag]) continue;
+    if(w.notFlag && ctx.flags[w.notFlag]) continue;
+    return l.text;
+  }
+  return ['「……」'];
+}
+function npcAt(mapId, x, y){
+  const list = NPCS[mapId];
+  if(!list) return null;
+  return list.find(n=>n.at === (x+','+y)) || null;
+}
+return {NPCS, QUESTS, pickLines, npcAt};
+})();
+
+</script>
+<script>'use strict';
+// ============================================================
 // ルミナクエストIII / コア層（DOM・THREE非依存＝ヘッドレス実行可）
 // 描画は V.*（ビュー）、UIは U.*（メッセージ/メニュー）、音は A.* 経由
 // ============================================================
@@ -113,6 +394,8 @@ const CLASSES = {
                   {lv:16,key:'fullheal'},{lv:24,key:'healall'},{lv:33,key:'sanctuary'},
                   {lv:42,key:'goddess'}]},
   dan:   {name:'ダン',  hp:24,mp:0,atk:8,def:4,agi:4, g:{hp:7,mp:0,atk:3,def:2,agi:1}, learns:[]},
+  lion:  {name:'リオン',hp:20,mp:4,atk:7,def:5,agi:6, g:{hp:6,mp:2,atk:3,def:2,agi:1},
+          learns:[{lv:4,key:'heal'},{lv:8,key:'spark'},{lv:15,key:'blaze'},{lv:22,key:'bolt'}]},
 };
 const TACTICS = {manual:'めいれいさせろ', gungan:'ガンガンいこうぜ', inochi:'いのちだいじに'};
 
@@ -224,6 +507,45 @@ const byMap = {
 //   I やどや / P きょうかい / S みせ / D とびら(ワープ) / n むらびと
 //   t たいまつ / C たからばこ / > した階段 / < うえ階段 / B ボス
 const MAPS = {
+  // ============ ヴェルサ地方（第1章） ============
+  // = ゆき / r いしだたみ / # しろい いしかべ / T あおい せんとう
+  // K おうじょうもん / F ふんすい / I やどや / P きょうかい / W ぶきや / M まほうてん
+  // G みなみもん / f ゆきの き / n むらびと
+  versa_town:{name:'ゆきの じょうかまち ヴェルサ',theme:'snow',enc:false,tiles:[
+    "########################",
+    "###TT######KK######TT###",
+    "###TT######==######TT###",
+    "#=========Prr===##T====#",
+    "#=T##=###==nr======I==f#",
+    "#=###=##T==rr=rrrrrrr==#",
+    "#f=======rrrrrrrrrrr##=#",
+    "#=##==n==rrrrrrrnrrr#T=#",
+    "#=##=====rrFFrrrrrrrr==#",
+    "#===nf===rrrrrrrrrrrr==#",
+    "#f=W=====rrrrrr====n##=#",
+    "#==========rr=======##=#",
+    "#=##=##Tn==rr===###====#",
+    "#=##=###===rr=n=##T=M==#",
+    "#==========rr======f==f#",
+    "###########GG###########"
+  ], warps:{}, warpsXY:{'11,15':{to:'versa_field1',x:9,y:1},'12,15':{to:'versa_field1',x:10,y:1}}},
+  versa_field1:{name:'ヴェルサの せつげん',theme:'snow',enc:false,tiles:[
+    "####################",
+    "#========rr========#",
+    "#==ff====rr====ff==#",
+    "#========rr========#",
+    "#==f=====rr=====f==#",
+    "#========rr========#",
+    "#===rrrrrrrrrrr====#",
+    "#===r=========r====#",
+    "#==fr====n====r=f==#",
+    "#===r=========r====#",
+    "#===rrrrrrrrrrr====#",
+    "#=======f==f=======#",
+    "#=====>============#",
+    "####################",
+  ], warps:{}, warpsXY:{'9,1':{to:'versa_town',x:11,y:14},'10,1':{to:'versa_town',x:12,y:14}}},
+
   toros:{name:'トロスむら',theme:'village',enc:false,tiles:[
     "ffffffffffffffff",
     "f____ff____ff__f",
@@ -332,7 +654,18 @@ const MAPS = {
 
 // ---------------- データ：店・宿 ----------------
 const SHOPS = {
-  toros:[
+  'versa_town:W':[
+    {kind:'w',name:'どうのけん',     v:6, price:120},
+    {kind:'a',name:'かわのたて',     v:4, price:90},
+    {kind:'w',name:'はがねのつるぎ', v:12,price:800},
+    {kind:'a',name:'てつのよろい',   v:12,price:950},
+  ],
+  'versa_town:M':[
+    {kind:'h',name:'やくそう',           v:20,price:8},
+    {kind:'wtr',name:'まほうのせいすい', v:30,price:60},
+    {kind:'a',name:'まほうのローブ',     v:8, price:420},
+  ],
+  'toros:S':[
     {kind:'w',name:'ひのきのぼう',   v:2, price:10},
     {kind:'w',name:'どうのつるぎ',   v:5, price:100},
     {kind:'a',name:'たびびとのふく', v:2, price:20},
@@ -345,18 +678,33 @@ const SHOPS = {
     {kind:'wtr',name:'まほうのせいすい',v:30,price:60},
   ],
 };
-const INN_PRICE = {toros:6};
+const INN_PRICE = {toros:6, versa_town:8};
 
 // ---------------- 状態 ----------------
 let G, P, party;
 function freshState(){
   G = {mode:'field', menu:null, battle:null, flags:{}, visited:{}, gotTreasure:{},
-       tactic:'manual', dex:{}, trail:[], stepFlip:false, cleared:false};
-  P = {map:'toros', x:7, y:6, gold:20, herbs:2, waters:0, equipBag:[]};
-  party = [mkMember('sora',1), mkMember('lumia',1), mkMember('dan',1)];
-  party[0].weapon = {kind:'w',name:'ひのきのぼう',v:2};
-  G.visited.toros = true;
+       tactic:'manual', dex:{}, trail:[], stepFlip:false, cleared:false,
+       chapter:1, townState:'NORMAL', night:false, quests:{}, steps:0};
+  P = {map:'versa_town', x:11, y:14, gold:60, herbs:3, waters:0, equipBag:[]};
+  party = [mkMember('lion',1)];
+  party[0].weapon = {kind:'w',name:'みならいの けん',v:3};
+  party[0].armor  = {kind:'a',name:'こまもり',v:2};
+  G.visited.versa_town = true;
 }
+// ---------------- まちの じょうたい ----------------
+function setTownState(id){
+  if(!WORLD.TOWN_STATES[id]) return false;
+  G.townState = id;
+  V.buildMap(P.map); V.setActors(true); U.hud();
+  return true;
+}
+function setNight(v){
+  G.night = !!v;
+  V.buildMap(P.map); V.setActors(true);
+  return G.night;
+}
+function townStateDef(){ return WORLD.TOWN_STATES[G.townState] || WORLD.TOWN_STATES.NORMAL; }
 function mkMember(cls, lv){
   const c = CLASSES[cls];
   const m = {cls, name:c.name, lv:1, exp:0,
@@ -380,14 +728,15 @@ function aliveMembers(){ return party.filter(p=>p.hp>0); }
 function actableMembers(){ return party.filter(p=>p.hp>0 && p.status!=='sleep'); }
 
 // ---------------- マップ ----------------
-const SOLID = new Set(['#','f','w','o']);
+const SOLID = new Set(['#','f','w','o','T','F','K']);
 function tileAt(map,x,y){
   const m = MAPS[map]; if(!m) return '#';
   if(y<0||x<0||y>=m.tiles.length||x>=m.tiles[y].length) return '#';
   return m.tiles[y][x];
 }
 function isBlocked(ch){
-  return SOLID.has(ch) || ch==='I' || ch==='P' || ch==='S' || ch==='n' || ch==='C' || ch==='B';
+  return SOLID.has(ch) || ch==='I' || ch==='P' || ch==='S' || ch==='W' || ch==='M'
+      || ch==='n' || ch==='C' || ch==='B';
 }
 function walkable(map,x,y){ return !isBlocked(tileAt(map,x,y)); }
 function warpAt(map,x,y){
@@ -424,9 +773,27 @@ function stepField(dx,dy){
   if(ch==='n'){ talkNPC(nx,ny); return; }
   if(ch==='I'){ useInn(); return; }
   if(ch==='P'){ useChurch(); return; }
-  if(ch==='S'){ openShop(); return; }
+  if(ch==='S'||ch==='W'||ch==='M'){ openShop(ch); return; }
   if(ch==='C'){ openChest(nx,ny); return; }
   if(ch==='B'){ triggerBoss(nx,ny); return; }
+  if(ch==='K'){
+    G.mode='msg';
+    U.msg(G.townState==='NORMAL'
+      ? ['おうじょうの もん。えいへいが かたく まもっている。',
+         'えいへい「しんまいが かってに はいるな」']
+      : ['おうじょうの もん。えいへいの かおいろが わるい。',
+         'えいへい「おうじょさまは まだ おめざめに ならぬ……」'],
+      ()=>{ G.mode='field'; });
+    return;
+  }
+  if(ch==='F'){
+    G.mode='msg';
+    U.msg(G.townState==='DREAM_INVASION'
+      ? ['ちゅうおうひろばの ふんすい。みずが むらさきに にごっている。']
+      : ['ちゅうおうひろばの ふんすい。こおりついた みずが ひかっている。'],
+      ()=>{ G.mode='field'; });
+    return;
+  }
   if(!walkable(P.map,nx,ny)) return;
   G.trail.unshift([P.x,P.y]); if(G.trail.length>8) G.trail.pop();
   P.x=nx; P.y=ny; G.stepFlip=!G.stepFlip;
@@ -441,6 +808,7 @@ function doWarp(w){
     P.map=w.to; P.x=w.x; P.y=w.y;
     G.trail=[[w.x,w.y],[w.x,w.y]];
     G.visited[w.to]=true;
+    if(w.to==='versa_field1') G.flags.ch1_enteredField=true;
     V.buildMap(w.to); V.setActors(); U.label(MAPS[w.to].name);
     A.bgm(MAPS[w.to].theme);
     V.fade(0, ()=>{ G.busy=false; });
@@ -455,30 +823,40 @@ function maybeEncounter(){
 }
 
 // ---------------- NPC・施設 ----------------
-const NPC_LINES = {
-  toros:[
-    ['「ちかごろ ねむったまま おきない ひとが ふえてる…」',
-     '「まえは こんな こと なかったのに ねえ」'],
-    ['「みなみの どうくつで へんな ゆめを みる らしい。',
-     'きを つけて いきなよ」'],
-    ['「さかばの うわさでね、せかいじゅうを たびして',
-     '＜ものまねげい＞で おおうけしてる けんしが いるんだと。',
-     'ねずみの おうこくの ものまねが てっぱん らしいよ」'],
-  ],
-  toros_h1:[['「ルミアさまの こどもが もう そんなに おおきく…」',
-             '「じかんが たつのは はやい ねえ」']],
-  toros_h2:[['「こだまのいしで うわさは あっというまさ。',
-             'あの ものまね けんし、また ばけたらしいぜ」']],
-};
-let npcIdx = {};
 function talkNPC(x,y){
-  const key = P.map+':'+x+','+y;
-  const list = NPC_LINES[P.map]||[['「……」']];
-  if(npcIdx[key]===undefined){
-    npcIdx[key] = Object.keys(npcIdx).filter(k=>k.startsWith(P.map+':')).length % list.length;
-  }
+  const entry = NPCDATA.npcAt(P.map, x, y);
   G.mode='msg';
-  U.msg(list[npcIdx[key]], ()=>{ G.mode='field'; });
+  if(!entry){ U.msg(['「……」'], ()=>{ G.mode='field'; }); return; }
+  const lines = NPCDATA.pickLines(entry, {townState:G.townState, flags:G.flags});
+  U.msg(lines, ()=>{ questOnTalk(entry.name); G.mode='field'; });
+}
+// ---------------- クエスト ----------------
+function questOnTalk(npcName){
+  const F=G.flags;
+  if(G.townState==='NORMAL') return;
+  if(npcName==='こうじょの じじょ') F.ch1_talkedMaid=true;
+  if(npcName==='もんばん')          F.ch1_talkedGate=true;
+  if(npcName==='きしだんちょう'){
+    if(F.ch1_talkedMaid && F.ch1_talkedGate && !F.ch1_orderReceived){
+      F.ch1_orderReceived=true;
+      P.gold += 100;
+      questAdvance('ch1_q1_wakeup','clear');
+      questAdvance('ch1_q2_icecave','active');
+      U.msg(['きしだんちょう「よく しらべた。せつげんの おくを あたれ」',
+             '（したくきんとして 100ゴールドを うけとった）',
+             '＊ クエスト「めざめぬ おうじょ」を たっせい ＊',
+             '＊ あたらしい クエスト「こおりの どうくつ」＊'], ()=>{ U.hud(); });
+    }else if(!F.ch1_orderReceived){
+      questAdvance('ch1_q1_wakeup','active');
+    }
+  }
+}
+function questAdvance(id, state){
+  if(!NPCDATA.QUESTS[id]) return;
+  G.quests[id]=state;
+}
+function questList(){
+  return Object.keys(G.quests).filter(k=>G.quests[k]==='active').map(k=>NPCDATA.QUESTS[k]);
 }
 function useInn(){
   const price = INN_PRICE[P.map]||10;
@@ -547,8 +925,8 @@ function triggerBoss(x,y){
          'すべてを のみこむ やみを、その めに やきつけよ！」',
          'まおう デスグランが たちふさがった！'], ()=>{ startBattle('desgran1'); });
 }
-function openShop(){
-  const list = SHOPS[P.map]; if(!list) return;
+function openShop(kind){
+  const list = SHOPS[P.map+':'+(kind||'S')]; if(!list) return;
   G.mode='menu';
   const items = list.map(it=>it.name+'　'+it.price+'G').concat(['やめる']);
   U.menu(items, 'なにを かいますか？', (sel)=>{
@@ -1055,6 +1433,7 @@ function saveGame(store){
         weapon:m.weapon,armor:m.armor,status:m.status})),
       flags:G.flags, visited:G.visited, gotTreasure:G.gotTreasure,
       tactic:G.tactic, dex:G.dex, cleared:G.cleared,
+      chapter:G.chapter, townState:G.townState, night:G.night, quests:G.quests,
     }));
     return true;
   }catch(e){ return false; }
@@ -1075,6 +1454,8 @@ function loadGame(store){
     });
     G.flags=d.flags||{}; G.visited=d.visited||{}; G.gotTreasure=d.gotTreasure||{};
     G.tactic=d.tactic||'manual'; G.dex=d.dex||{}; G.cleared=!!d.cleared;
+    G.chapter=d.chapter||1; G.townState=d.townState||'NORMAL';
+    G.night=!!d.night; G.quests=d.quests||{};
     G.trail=[[P.x,P.y],[P.x,P.y]];
     return true;
   }catch(e){ return false; }
@@ -1084,7 +1465,7 @@ function loadGame(store){
 return {
   // データ
   MAPS, ENEMIES, MIDBOSS, CLASSES, SPELL_DEFS, SHOPS, INN_PRICE, byMap, TACTICS, LV_CAP,
-  NPC_LINES,
+  get NPC_LINES(){return NPCDATA.NPCS;}, WORLD, QUESTS:NPCDATA.QUESTS,
   // 状態アクセサ
   get G(){return G;}, get P(){return P;}, get party(){return party;},
   freshState, mkMember, expNext, mAtk, mDef, knownSpells, aliveMembers,
@@ -1093,6 +1474,7 @@ return {
   // 行動
   stepField, doWarp, startBattle, beginRound, saveGame, loadGame,
   useInn, useChurch, openShop, talkNPC,
+  setTownState, setNight, townStateDef, questList, questAdvance,
   // 差し替え
   bind, NullView, NullUI, NullAudio,
 };
@@ -1383,6 +1765,50 @@ function initTex(){
     x.fillStyle='rgba(200,220,255,0.16)';
     for(let i=0;i<12;i++) x.fillRect(Math.random()*px|0,Math.random()*px*0.4|0,2,3);
   },64);
+  TEX.snow = patTex((x,px)=>{
+    x.fillStyle='#eef4fb'; x.fillRect(0,0,px,px);
+    for(let i=0;i<70;i++){ x.fillStyle=i%2?'#e2ecf7':'#f8fbff';
+      x.fillRect(Math.random()*px|0,Math.random()*px|0,3,3); }
+    x.fillStyle='rgba(190,210,235,0.55)';           // ゆきの ふきだまり
+    for(let i=0;i<14;i++) x.fillRect(Math.random()*px|0,Math.random()*px|0,6,2);
+    x.fillStyle='rgba(255,255,255,0.9)';            // きらめき
+    for(let i=0;i<10;i++) x.fillRect(Math.random()*px|0,Math.random()*px|0,1,1);
+  },64);
+  TEX.pave = patTex((x,px)=>{
+    x.fillStyle='#8e93a2'; x.fillRect(0,0,px,px);
+    for(let j=0;j<4;j++){ const off=(j%2)?px/8:0;
+      for(let i=-1;i<4;i++){
+        const sx=i*(px/4)+off+1, sy=j*(px/4)+1, w=px/4-2, h=px/4-2;
+        const t=0.86+Math.random()*0.26;
+        x.fillStyle=`rgb(${162*t|0},${168*t|0},${182*t|0})`; x.fillRect(sx,sy,w,h);
+        x.fillStyle='rgba(255,255,255,0.35)'; x.fillRect(sx,sy,w,2);
+        x.fillStyle='rgba(40,48,64,0.30)'; x.fillRect(sx,sy+h-2,w,2);
+      }}
+    x.fillStyle='rgba(240,248,255,0.5)';            // すみに のこる ゆき
+    for(let i=0;i<10;i++) x.fillRect(Math.random()*px|0,Math.random()*px|0,4,2);
+  },64);
+  TEX.whitestone = patTex((x,px)=>{
+    x.fillStyle='#b8c0cc'; x.fillRect(0,0,px,px);
+    for(let j=0;j<5;j++){ const off=(j%2)?px/6:0;
+      for(let i=-1;i<4;i++){
+        const sx=i*(px/3)+off+1, sy=j*(px/5)+1, w=px/3-2, h=px/5-2;
+        const t=0.9+Math.random()*0.22;
+        x.fillStyle=`rgb(${226*t|0},${232*t|0},${240*t|0})`; x.fillRect(sx,sy,w,h);
+        x.fillStyle='rgba(255,255,255,0.5)'; x.fillRect(sx,sy,w,1);
+        x.fillStyle='rgba(120,130,150,0.4)'; x.fillRect(sx,sy+h-1,w,1);
+      }}
+  },64);
+  TEX.bluetile = patTex((x,px)=>{
+    x.fillStyle='#1e3a6e'; x.fillRect(0,0,px,px);
+    for(let j=0;j<6;j++){ const off=(j%2)?px/8:0;
+      for(let i=-1;i<5;i++){
+        const sx=i*(px/4)+off, sy=j*(px/6);
+        const t=0.85+Math.random()*0.35;
+        x.fillStyle=`rgb(${44*t|0},${92*t|0},${168*t|0})`;
+        x.fillRect(sx+1,sy+1,px/4-2,px/6-1);
+        x.fillStyle='rgba(190,220,255,0.32)'; x.fillRect(sx+1,sy+1,px/4-2,1);
+      }}
+  },64);
   TEX.wood = patTex((x,px)=>{
     x.fillStyle='#7a5a34'; x.fillRect(0,0,px,px);
     for(let i=0;i<8;i++){ const t=0.8+Math.random()*0.4;
@@ -1417,12 +1843,16 @@ let fp = [{x:0,y:0},{x:0,y:0},{x:0,y:0}];
 let animObjs = [];                  // {mesh,light,ph} 揺れるもの
 let waters = [];
 let chestLids = {};
-let curMap = null;
+let curMap = null, curScene = {}, curNight = false, curTS = null;
+let snowfall = null, aurora = null, footprints = [], footIdx = 0, lastFootTile = null;
 let mode = 'field';
 let fxState = null;
 let shake = 0;
 
 const THEME = {
+  snow:   {sky:0x9ec8e8, fog:[0xcfe2f2,14,40], amb:[0xdfeaff,0.95],sun:[0xffffff,0.55]},
+  castle: {sky:0x2a2c44, fog:[0x2a2c44,10,26], amb:[0xc8c0e0,0.85],sun:[0xffe8c0,0.5]},
+  ice:    {sky:0x14283c, fog:[0x14283c,8,22],  amb:[0x9ac8f0,0.8], sun:[0xd8f0ff,0.45]},
   village:{sky:0x79b8e8, fog:[0x9ccbe8,12,30], amb:[0xfff2e0,0.9], sun:[0xfff0d8,0.7]},
   field:  {sky:0x79b8e8, fog:[0x9ccbe8,12,30], amb:[0xfff2e0,0.85],sun:[0xfff0d8,0.7]},
   cave:   {sky:0x0a1020, fog:[0x0a1020,9,22],  amb:[0x9aa8d0,0.8], sun:[0xbfd0ff,0.35]},
@@ -1465,6 +1895,161 @@ function addInstanced(geo, mat, list){
   return im;
 }
 
+// ---------------- ゆきぐにの タイル ----------------
+function buildSnowTile(ch,x,y,topY,ts){
+  if(ch==='T'){
+    const body=new THREE.Mesh(new THREE.CylinderGeometry(0.36,0.42,1.5,8),
+      new THREE.MeshLambertMaterial({map:TEX.whitestone}));
+    body.position.set(x,topY+0.75,y); scene.add(body);
+    const roof=new THREE.Mesh(new THREE.ConeGeometry(0.54,1.2,8),
+      new THREE.MeshLambertMaterial({map:TEX.bluetile}));
+    roof.position.set(x,topY+2.1,y); scene.add(roof);
+    const cap=new THREE.Mesh(new THREE.SphereGeometry(0.1,6,6),
+      new THREE.MeshBasicMaterial({color:0xf2f6ff}));
+    cap.position.set(x,topY+2.72,y); scene.add(cap);
+    return true;
+  }
+  if(ch==='K'){
+    const g1=new THREE.Mesh(new THREE.BoxGeometry(1,2.3,0.9),
+      new THREE.MeshLambertMaterial({map:TEX.whitestone,color:0xdde4f0}));
+    g1.position.set(x,topY+1.15,y); scene.add(g1);
+    const arch=new THREE.Mesh(new THREE.BoxGeometry(1,0.5,0.55),
+      new THREE.MeshLambertMaterial({map:TEX.bluetile}));
+    arch.position.set(x,topY+1.95,y+0.28); scene.add(arch);
+    return true;
+  }
+  if(ch==='F'){
+    const base=new THREE.Mesh(new THREE.CylinderGeometry(0.48,0.52,0.3,12),
+      new THREE.MeshLambertMaterial({map:TEX.whitestone}));
+    base.position.set(x,topY+0.15,y); scene.add(base);
+    const wat=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.4,0.06,12),
+      new THREE.MeshBasicMaterial({color:(ts&&ts.id==='DREAM_INVASION')?0x8a4fc0:0x9fd8f0,
+        transparent:true,opacity:0.9}));
+    wat.position.set(x,topY+0.32,y); scene.add(wat);
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.12,0.7,8),
+      new THREE.MeshLambertMaterial({map:TEX.whitestone}));
+    pole.position.set(x,topY+0.65,y); scene.add(pole);
+    return true;
+  }
+  if(ch==='W'||ch==='M'||ch==='I'||ch==='P'){
+    const col = ch==='I'?0xe8dcc0 : ch==='P'?0xf0f0fa : ch==='W'?0xd8c8b0 : 0xd0c8e8;
+    const b=new THREE.Mesh(new THREE.BoxGeometry(0.96,1.2,0.96),
+      new THREE.MeshLambertMaterial({map:TEX.whitestone,color:col}));
+    b.position.set(x,topY+0.6,y); scene.add(b);
+    const r=new THREE.Mesh(new THREE.ConeGeometry(0.84,1.0,4),
+      new THREE.MeshLambertMaterial({map:TEX.bluetile}));
+    r.position.set(x,topY+1.65,y); r.rotation.y=Math.PI/4; scene.add(r);
+    const cap=new THREE.Mesh(new THREE.ConeGeometry(0.62,0.3,4),
+      new THREE.MeshBasicMaterial({color:0xf6faff}));
+    cap.position.set(x,topY+2.0,y); cap.rotation.y=Math.PI/4; scene.add(cap);
+    const sign=new THREE.Mesh(new THREE.PlaneGeometry(0.5,0.3),
+      new THREE.MeshBasicMaterial({color: ch==='I'?0xf0d060 : ch==='P'?0xeaeaff
+        : ch==='W'?0xc86050 : 0x8a6ad0}));
+    sign.position.set(x,topY+0.74,y+0.5); scene.add(sign);
+    return true;
+  }
+  if(ch==='G'){
+    for(const dx of [-0.45,0.45]){
+      const p=new THREE.Mesh(new THREE.BoxGeometry(0.18,1.9,0.32),
+        new THREE.MeshLambertMaterial({map:TEX.whitestone}));
+      p.position.set(x+dx,topY+0.95,y); scene.add(p);
+      const t=new THREE.Mesh(new THREE.ConeGeometry(0.2,0.36,6),
+        new THREE.MeshLambertMaterial({map:TEX.bluetile}));
+      t.position.set(x+dx,topY+2.05,y); scene.add(t);
+    }
+    return true;
+  }
+  if(ch==='f'){                         // ゆきを かぶった き
+    const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.14,0.6,6),
+      new THREE.MeshLambertMaterial({color:0x5a4632}));
+    trunk.position.set(x,topY+0.3,y); scene.add(trunk);
+    for(let k=0;k<3;k++){
+      const r=0.46-k*0.12;
+      const cone=new THREE.Mesh(new THREE.ConeGeometry(r,0.56,7),
+        new THREE.MeshLambertMaterial({color:0x2c5a44}));
+      cone.position.set(x,topY+0.7+k*0.34,y); scene.add(cone);
+      const cap=new THREE.Mesh(new THREE.ConeGeometry(r*0.9,0.2,7),
+        new THREE.MeshBasicMaterial({color:0xf4f9ff}));
+      cap.position.set(x,topY+0.94+k*0.34,y); scene.add(cap);
+    }
+    return true;
+  }
+  return false;
+}
+// ---------------- せきせつパーティクル ----------------
+function buildSnowfall(ts){
+  const n=420;
+  const geo=new THREE.BufferGeometry();
+  const pos=new Float32Array(n*3);
+  for(let i=0;i<n;i++){
+    pos[i*3]=(Math.random()-0.5)*34;
+    pos[i*3+1]=Math.random()*16;
+    pos[i*3+2]=(Math.random()-0.5)*34;
+  }
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const col=(ts&&ts.id!=='NORMAL')?ts.snowColor:0xffffff;
+  const mat=new THREE.PointsMaterial({color:col,size:0.13,transparent:true,opacity:0.9,
+    depthWrite:false});
+  snowfall=new THREE.Points(geo,mat);
+  snowfall.userData.rate=(ts?ts.snowRate:1.0);
+  scene.add(snowfall);
+}
+// ---------------- オーロラ ----------------
+function auroraTexture(){
+  return patTex((x,px)=>{
+    const g=x.createLinearGradient(0,0,0,px);
+    g.addColorStop(0.00,'rgba(0,0,0,0)');
+    g.addColorStop(0.35,'rgba(90,240,180,0.55)');
+    g.addColorStop(0.60,'rgba(120,200,255,0.45)');
+    g.addColorStop(0.85,'rgba(180,120,255,0.25)');
+    g.addColorStop(1.00,'rgba(0,0,0,0)');
+    x.fillStyle=g; x.fillRect(0,0,px,px);
+    for(let i=0;i<26;i++){        // たてに ゆれる すじ
+      x.fillStyle='rgba(255,255,255,'+(0.05+Math.random()*0.12)+')';
+      x.fillRect(Math.random()*px|0,0,2+Math.random()*3|0,px);
+    }
+  },128);
+}
+function buildAurora(){
+  aurora=new THREE.Group();
+  const tex=auroraTexture();
+  tex.wrapS=THREE.RepeatWrapping; tex.repeat.set(3,1);
+  for(let i=0;i<3;i++){
+    const geo=new THREE.PlaneGeometry(46,10,24,1);
+    const p=geo.attributes.position;
+    for(let k=0;k<p.count;k++){    // ゆるやかに うねらせる
+      const xx=p.getX(k);
+      p.setZ(k, Math.sin(xx*0.22+i)*2.4);
+    }
+    geo.computeVertexNormals();
+    const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({map:tex.clone(),
+      transparent:true, opacity:0.5-i*0.11, blending:THREE.AdditiveBlending,
+      depthWrite:false, side:THREE.DoubleSide}));
+    m.material.map.wrapS=THREE.RepeatWrapping; m.material.map.repeat.set(3,1);
+    m.position.set(0, 13+i*2.2, -16-i*4);
+    m.rotation.x=-0.34;
+    aurora.add(m);
+  }
+  scene.add(aurora);
+}
+// ---------------- ゆきの あしあと ----------------
+function initFootprints(){
+  footprints=[]; footIdx=0; lastFootTile=null;
+  const geo=new THREE.PlaneGeometry(0.34,0.5);
+  for(let i=0;i<48;i++){
+    const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x9fb0c8,
+      transparent:true, opacity:0, depthWrite:false}));
+    m.rotation.x=-Math.PI/2; m.position.set(0,-99,0);
+    scene.add(m); footprints.push({mesh:m, life:0});
+  }
+}
+function dropFootprint(x,z,side){
+  if(!footprints.length) return;
+  const f=footprints[footIdx%footprints.length]; footIdx++;
+  f.mesh.position.set(x+(side?0.16:-0.16), 0.075, z+0.1);
+  f.mesh.rotation.z=(Math.random()-0.5)*0.3;
+  f.life=1.0;
+}
 function disposeScene(s){
   if(!s) return;
   s.traverse(o=>{
@@ -1475,18 +2060,30 @@ function disposeScene(s){
     }
   });
 }
+function darken(hex,k){
+  const r=((hex>>16)&255)*k, g=((hex>>8)&255)*k, b=(hex&255)*k;
+  return ((r|0)<<16)|((g|0)<<8)|(b|0);
+}
 function buildMap(name){
   disposeScene(scene);
   const map=C.MAPS[name];
   const th=THEME[map.theme]||THEME.field;
+  const sc=(C.WORLD&&C.WORLD.sceneOf)?C.WORLD.sceneOf(name):{};
+  const ts=(C.townStateDef?C.townStateDef():null);
+  const night=!!(C.G&&C.G.night)&&!!sc.outdoor;
   scene=new THREE.Scene();
-  scene.background=new THREE.Color(th.sky);
-  scene.fog=new THREE.Fog(th.fog[0],th.fog[1]*1.5,th.fog[2]*1.6); // ひきに あわせて フォグも のばす
+  let sky=th.sky, fog=[th.fog[0], th.fog[1]*1.5, th.fog[2]*1.6];
+  if(map.theme==='snow' && ts){ sky=ts.sky; fog=[ts.fog[0], ts.fog[1]*1.5, ts.fog[2]*1.6]; }
+  if(night){ sky=darken(sky,0.34); fog=[darken(fog[0],0.42), fog[1]*0.85, fog[2]*0.9]; }
+  scene.background=new THREE.Color(sky);
+  scene.fog=new THREE.Fog(fog[0],fog[1],fog[2]);
+  curScene=sc; curNight=night; curTS=ts;
   animObjs=[]; waters=[]; chestLids={};
   curMap=name;
 
   const rows=map.tiles, H=rows.length, W=rows[0].length;
   const cave = map.theme==='cave';
+  const snow = map.theme==='snow';
   const baseY = cave?0.25:-0.06;     // 洞窟は台地
   const topY  = cave?0.5:0;
   const G_={}, put=(k,v)=>{ (G_[k]=G_[k]||[]).push(v); };
@@ -1514,6 +2111,7 @@ function buildMap(name){
     }
     // ゆか
     put(ch==='r'?'road':'ground',[x,baseY,y]);
+    if(snow && buildSnowTile(ch,x,y,topY,ts)) continue;
     if(ch==='f'){                    // もり
       put('leafA',[x,topY+0.5,y,(x*7+y*3)%6]);
       put('leafB',[x-0.28,topY+0.34,y+0.2,0]);
@@ -1595,8 +2193,11 @@ function buildMap(name){
   }
   // インスタンス化（drawCall削減）
   const box=new THREE.BoxGeometry(1,0.12,1);
-  addInstanced(box,new THREE.MeshLambertMaterial({map:TEX.grass}), (G_.ground||[]).map(p=>[p[0],p[1],p[2]]));
-  addInstanced(box,new THREE.MeshLambertMaterial({map:TEX.road}),  (G_.road||[]).map(p=>[p[0],p[1],p[2]]));
+  const gm=new THREE.MeshLambertMaterial({map:snow?TEX.snow:TEX.grass});
+  if(snow && ts && ts.id!=='NORMAL') gm.color.setHex(ts.snowColor);
+  addInstanced(box,gm, (G_.ground||[]).map(p=>[p[0],p[1],p[2]]));
+  addInstanced(box,new THREE.MeshLambertMaterial({map:snow?TEX.pave:TEX.road}),
+    (G_.road||[]).map(p=>[p[0],p[1],p[2]]));
   if(cave){
     addInstanced(new THREE.BoxGeometry(1,0.5,1),new THREE.MeshLambertMaterial({map:TEX.rock}),
       (G_.ground||[]).concat(G_.road||[]).map(p=>[p[0],0.25,p[2]]));
@@ -1605,8 +2206,12 @@ function buildMap(name){
     addInstanced(new THREE.ConeGeometry(0.42,0.55,5),new THREE.MeshLambertMaterial({color:0x2c3448}),
       G_.spike||[]);
   }else{
-    addInstanced(new THREE.BoxGeometry(1,1.6,1),new THREE.MeshLambertMaterial({map:TEX.brick}),
+    addInstanced(new THREE.BoxGeometry(1,1.6,1),
+      new THREE.MeshLambertMaterial({map:snow?TEX.whitestone:TEX.brick}),
       (G_.wall||[]).map(p=>[p[0],p[1],p[2]]));
+    if(snow) addInstanced(new THREE.BoxGeometry(1.04,0.18,1.04),
+      new THREE.MeshBasicMaterial({color:0xf4f9ff}),
+      (G_.wall||[]).map(p=>[p[0],p[1]+0.82,p[2]]));
   }
   addInstanced(new THREE.IcosahedronGeometry(0.44,0),
     new THREE.MeshLambertMaterial({color:0x2c7a34,flatShading:true}), G_.leafA||[]);
@@ -1616,9 +2221,16 @@ function buildMap(name){
     new THREE.MeshLambertMaterial({color:0x8a8f9c,flatShading:true}), G_.rock||[]);
   addInstanced(box,new THREE.MeshLambertMaterial({color:0x0d2c50}), (G_.waterbed||[]).map(p=>[p[0],p[1],p[2]]));
 
-  scene.add(new THREE.AmbientLight(th.amb[0],th.amb[1]));
-  const sun=new THREE.DirectionalLight(th.sun[0],th.sun[1]);
+  let ambCol=th.amb[0], ambPow=th.amb[1];
+  if(snow && ts){ ambCol=ts.ambient[0]; ambPow=ts.ambient[1]; }
+  if(night){ ambCol=darken(ambCol,0.45); ambPow*=0.62; }
+  scene.add(new THREE.AmbientLight(ambCol,ambPow));
+  const sun=new THREE.DirectionalLight(night?0x8fa8d8:th.sun[0], night?0.30:th.sun[1]);
   sun.position.set(5,10,4); scene.add(sun);
+  snowfall=null; aurora=null; footprints=[]; footIdx=0;
+  if(sc.snowfall) buildSnowfall(ts);
+  if(sc.aurora && night) buildAurora();
+  if(sc.footprints) initFootprints();
 
   // 隊列アクター
   const cls=C.party.map(m=>m.cls);
@@ -1632,6 +2244,10 @@ function buildMap(name){
 }
 function setActors(snap){
   const P=C.P, tr=C.G.trail;
+  if(curScene && curScene.footprints){
+    const key=P.x+','+P.y;
+    if(key!==lastFootTile){ lastFootTile=key; dropFootprint(P.x,P.y,!!C.G.stepFlip); }
+  }
   const yy = (C.MAPS[curMap]&&C.MAPS[curMap].theme==='cave')?0.95:0.45;
   const tgt=[[P.x,P.y], tr[0]||[P.x,P.y], tr[1]||[P.x,P.y]];
   if(snap) fp=tgt.map(t=>({x:t[0],y:t[1]}));
@@ -1749,6 +2365,32 @@ function updateField(dt,time){
   });
   waters.forEach((w,i)=>{ w.material.map.offset.x=time*0.04+i*0.11;
     w.material.map.offset.y=Math.sin(time*0.6+i)*0.03; });
+  // せきせつ：カメラの まわりに ふらせ、したまで おちたら うえへ もどす
+  if(snowfall){
+    const p=snowfall.geometry.attributes.position;
+    const rate=snowfall.userData.rate||1;
+    for(let i=0;i<p.count;i++){
+      let yy=p.getY(i)-dt*(1.1+((i%7)*0.16))*rate;
+      let xx=p.getX(i)+Math.sin(time*0.7+i)*dt*0.5;
+      if(yy<0){ yy=15+Math.random()*3; xx=(Math.random()-0.5)*34; p.setZ(i,(Math.random()-0.5)*34); }
+      p.setY(i,yy); p.setX(i,xx);
+    }
+    p.needsUpdate=true;
+    snowfall.position.set(fp[0].x,0,fp[0].y);
+  }
+  // オーロラ：ゆっくり ながれ、あかるさが ゆらぐ
+  if(aurora){
+    aurora.position.set(fp[0].x,0,fp[0].y-4);
+    aurora.children.forEach((m,i)=>{
+      m.material.map.offset.x = time*(0.012+i*0.006);
+      m.material.opacity = (0.5-i*0.11)*(0.72+0.28*Math.sin(time*0.5+i*1.3));
+    });
+  }
+  // あしあと：じかんで うすくなる
+  footprints.forEach(f=>{
+    if(f.life>0){ f.life-=dt*0.055; f.mesh.material.opacity=Math.max(0,f.life)*0.5;
+      if(f.life<=0) f.mesh.position.y=-99; }
+  });
   renderer.render(scene,cam);
 }
 function updateBattle(dt,time){
@@ -1964,7 +2606,7 @@ function press(k){
 }
 function openFieldMenu(){
   C.G.mode='menu';
-  menu(['つよさ','さくせん','セーブ','とじる'],'メニュー',(sel)=>{
+  menu(['つよさ','さくせん','セーブ','クエスト','まちの ようす','とじる'],'メニュー',(sel)=>{
     if(sel===0){
       const lines=C.party.map(m=>
         m.name+' Lv'+m.lv+'　HP'+m.hp+'/'+m.maxhp+(m.maxmp>0?'　MP'+m.mp+'/'+m.maxmp:'')+
@@ -1982,6 +2624,27 @@ function openFieldMenu(){
     }else if(sel===2){
       const ok=C.saveGame();
       msg2([ok?'ぼうけんの きろくを つけた。':'きろくに しっぱいした…'],()=>{ C.G.mode='field'; });
+    }else if(sel===3){
+      const qs=C.questList();
+      msg2(qs.length
+        ? qs.reduce((a,q)=>a.concat(['＊ '+q.title, '　'+q.desc]),[])
+        : ['いまは とくに やることが ない。'], ()=>{ C.G.mode='field'; });
+    }else if(sel===4){
+      // ★プロトタイプ用：まちの じょうたいと ひるよるを きりかえて みため を たしかめる
+      const st=['NORMAL','SLEEPING_SICKNESS','DREAM_INVASION'];
+      const lb=st.map(s=>C.WORLD.TOWN_STATES[s].label)
+                 .concat([C.G.night?'あさに する':'よるに する','もどる']);
+      menu(lb,'まちの ようす（しさく）',(k)=>{
+        if(k<st.length){
+          C.setTownState(st[k]);
+          msg2(['まちの ようすが 「'+C.WORLD.TOWN_STATES[st[k]].label+'」に なった。'],
+               ()=>{ C.G.mode='field'; });
+        }else if(k===st.length){
+          C.setNight(!C.G.night);
+          msg2([C.G.night?'よるに なった。そらに オーロラが みえる。':'あさに なった。'],
+               ()=>{ C.G.mode='field'; });
+        }else C.G.mode='field';
+      });
     }else C.G.mode='field';
   });
 }
@@ -2034,15 +2697,15 @@ C.bind(V, UI, A);
 function startGame(loaded){
   V.buildMap(C.P.map);
   V.setActors(true);
-  label(C.MAPS[C.P.map].name);
+  label(C.WORLD.mapName(C.P.map));
   hud();
   C.G.mode='field';
   if(!loaded){
-    msg2(['──ルミナクエストIII ぎじゅつスライス──',
-      'トロスむら。ソラは ははの ルミア、むらの ダンと くらしている。',
-      'ちかごろ ねむったまま おきない ひとが ふえているらしい。',
-      'むらびとに はなしを きいて、みなみの どうくつを しらべよう。',
-      '（Aボタンで メニュー・セーブ）'],()=>{ C.G.mode='field'; });
+    msg2(['──ルミナクエストIII だいいっしょう「わかき きし」──',
+      'ゆきの おうこく ヴェルサ。しんまいの このえへい リオン。',
+      'おうじょさまが ねむりから さめない——そんな うわさが ながれている。',
+      'まちの ものに はなしを きいてみよう。',
+      '（Aボタン → 「まちの ようす」で ひるよる・まちの じょうたいを きりかえられます）'],()=>{ C.G.mode='field'; });
   }
 }
 C.freshState();
