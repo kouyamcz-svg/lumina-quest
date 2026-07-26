@@ -839,6 +839,14 @@ const PAL = {
   P:'#9a6ad0', p:'#6a4098',           // むらさき
   Y:'#f0e060',                        // きいろ
   D:'#20182c', d:'#100c18',           // やみ
+  // ---- モンスター用の かいちょう ----
+  '1':'#a8834f', '2':'#7d5c36', '3':'#523720',   // ちゃ（ねずみ）
+  '4':'#c9a2ea', '5':'#9463cc', '6':'#663a9a',   // むらさき
+  '7':'#2b2140', '8':'#150f24',                  // やみ・かげ
+  '9':'#efe8f6',                                 // あわい
+  q:'#f2a8b8',                                   // ももいろ
+  x:'#ffd140', z:'#ff5646',                      // ひかる め
+  j:'#6f5b3f', J:'#93794f',                      // どろ
 };
 const SPR = {
 sora:[
@@ -908,94 +916,152 @@ dan:[
 "________________",
 ],
 nrat:[
-"________________",
-"________________",
-"__k__________k__",
-"_kNk________kNk_",
-"_kNNk______kNNk_",
-"__kNNkkkkkkNNk__",
-"___kNNNNNNNNk___",
-"__kNNRNNNNRNNk__",
-"__kNNNNNNNNNNk__",
-"__kNNwwwwwwNNk__",
-"___kNNNNNNNNk___",
-"____kNNNNNNk____",
-"_____kkkkkk_____",
-"____kn____nk____",
-"________________",
-"________________",
+".........k.............k........",
+".......kk3kk.........kk3kk......",
+"......k32223k.......k32223k.....",
+".....k322q223k..k..k322q223k....",
+".....k22qqq22kkk2kkk22qqq22k....",
+"....k32qqqqq232222232qqqqq23k...",
+".....k22qqq22111111122qqq22k....",
+".....k322q2231111111322q223k....",
+"......k3222311111111132223k.....",
+".......kk31zz111111zz113kk......",
+".......k221zz111111zz1122k......",
+"......k2221111111111111222k.....",
+".....k221211111131111112122k....",
+".....k221121333qq2333121122k....",
+".....k221113322qq2223311122k....",
+"....k22111322299992222311122k...",
+".....k221132222222222231122k....",
+".....k221332222222222233122k....",
+".....k221132222222222231122kkk..",
+"......k22132222222222231222222k.",
+".......k2223322222223322222222k.",
+"........k222333222333222kkkkk22k",
+".........k333322323333kk.....kk.",
+".........k3333kk2k3333k.........",
+".........k3333k.kk3333k.........",
+"..........kkkk....kkkk..........",
 ],
 dbug:[
-"________________",
-"____k______k____",
-"_____k____k_____",
-"______kkkk______",
-"____kkPPPPkk____",
-"___kPPPPPPPPk___",
-"__kPPRPPPPRPPk__",
-"__kPPPPPPPPPPk__",
-"__kPpppppppPPk__",
-"___kPPPPPPPPk___",
-"____kPPPPPPk____",
-"___k_kPPPPk_k___",
-"__kp__kkkk__pk__",
-"________________",
-"________________",
-"________________",
+"................................",
+"................................",
+"................k...............",
+"...kk.......kkkk6kkkk.......kk..",
+".kk94k....kkx6655566xkk....k49kk",
+"k4994k...kxxxxx555xxxxxk...k4994",
+"94994k...kx88xx555xx88xk...k4994",
+"94994k..kxx88xxx5xxx88xxk..k4994",
+"94994k...kxxxxx555xxxxxk...k4994",
+"94994k...kxxxxx555xxxxxk...k4994",
+"94994k..k666x5555555x666k..k4994",
+"94994k.k66556666666565566k.k4994",
+"94994k.k66555666666655566k.k4994",
+"k4994k.k65555555655555556k.k4994",
+".kk94k.k65555555555555556k.k49kk",
+"...kk.k6655556666665555566k.kk..",
+".......k65555666666555556k......",
+"......kk65555555555555556kkkk...",
+".....k66665555555555555666666k..",
+".....k66665556666665555666666k..",
+"......kkk665566666655566kkkkk...",
+".....k66666655555555566kk6666k..",
+".....k6666k66655555666k.k6666k..",
+"......kkkk.k666666666k...kkkk...",
+"............kkkk6kkkk...........",
+"................k...............",
 ],
 nbat:[
-"________________",
-"__k__________k__",
-"_kDk________kDk_",
-"_kDDk______kDDk_",
-"_kDDDk____kDDDk_",
-"_kDDDDkkkkDDDDk_",
-"__kDDDDDDDDDDk__",
-"___kDDRDDRDDk___",
-"____kDDDDDDk____",
-"____kDwwwwDk____",
-"_____kDDDDk_____",
-"______kkkk______",
-"________________",
-"________________",
-"________________",
-"________________",
+"................................",
+"................................",
+"...........k.........k..........",
+"..........k7k...k...k7k.........",
+"...........k7kkk8kkk7k..........",
+"k...k...k.kkk7877787kkk.k...k...",
+"6k.k6k.k6k7787777777877k6k.k6k..",
+"6k.k6kk766778zz777zz877667kk6k..",
+"6kkk667767687zz777zz786767766kkk",
+"66776767677887777777887767676776",
+"7k67677667788777777788776677676k",
+"k.k667776778788997887877677766k.",
+"...kk77766887779977778866777kk..",
+".....kk7676877777777786767kk....",
+".......kk778777777777877kk......",
+".........kk87777777778kk........",
+"...........k877777778k..........",
+"...........k887777788k..........",
+"............k8888888k...........",
+".............k88888k............",
+".............k88k88k............",
+".............k88k88k............",
+"..............kk.kk.............",
+"................................",
+"................................",
+"................................",
 ],
 mud:[
-"________________",
-"_____kkkkkk_____",
-"____kNNNNNNk____",
-"___kNNNNNNNNk___",
-"__kNNYNNNNYNNk__",
-"__kNNNNNNNNNNk__",
-"__kNNnnnnnnNNk__",
-"_kNNNNNNNNNNNNk_",
-"_kNNNNNNNNNNNNk_",
-"_kNNnNNNNNNnNNk_",
-"_kNNNNNNNNNNNNk_",
-"__kNNNNNNNNNNk__",
-"__kNNk____kNNk__",
-"__knnk____knnk__",
-"__kkkk____kkkk__",
-"________________",
+"................k...............",
+".............kkk3kkk............",
+"...........kk3333333kk..........",
+"..........k33jjjjjjj33k.........",
+".........k33jjjjjjjjj33k........",
+".........k3jjjjjjjjjjj3k........",
+".........k3xxxjjjjxxxj3k........",
+"........k33xxxjjjjxxxj33k.......",
+".........k3xxxjjjjxxxj3k........",
+"........kk3jjjjjjjjjjj3kk.......",
+".......k3333jjjjjjjjj3333k......",
+"..kkkkk333j33jjjjjjj33j333kkkk..",
+".k33jjjj3jj3j33333333jj3jjjj33k.",
+".k33jjjjjjJjjjJj3jJjjjJjjjjj33k.",
+".k33jjjjjjjJjjjJjjjJjjjJjjjj33k.",
+".k33jjjjjjJjjjJjjjJjjjJjjjjj33k.",
+".k33jjjjjjjJjjjJjjjJjjjJjjjj33k.",
+".k33jjjj3jJ3jjJjj3Jj3jJ3jjjj33k.",
+".k33jjjjjjjJjjjJjjjJjjjJjjjj33k.",
+".k33jjjjjjJjjjJjjjJjjjJjjjjj33k.",
+".k33jjjj3jjjjjjjjjjjjjjjjjjj33k.",
+".k33jjjj33j3jj3jj3jj3jj3jjjj33k.",
+".k33jjjj333jjjjjjjjjjj33jjjj33k.",
+"..kkkkkkkk333jjjjjjj333kkkkkkk..",
+"........k33333333333333k........",
+"........k333333k3333333k........",
 ],
 hagure:[
-"____k______k____",
-"___kPk____kPk___",
-"__kPPPk__kPPPk__",
-"_kPPDDPkkPDDPPk_",
-"_kPDDDDDDDDDDPk_",
-"kPDDRDDDDDDRDDPk",
-"kPDDDDDDDDDDDDPk",
-"kPDDDDDwwDDDDDPk",
-"kPDDDDwwwwDDDDPk",
-"kPDDDDDwwDDDDDPk",
-"kPDDDDDDDDDDDDPk",
-"_kPDDDDDDDDDDPk_",
-"_kPPDDDDDDDDPPk_",
-"__kPPDDDDDDPPk__",
-"___kPPPkkPPPk___",
-"____kkk__kkk____",
+"........................................",
+"........................................",
+"......kk.........................k......",
+".....k66k.......................k6k.....",
+"......k66k..........k..........k6k......",
+".......k66k....kkkkk8kkkkk....k6k.......",
+"........kk...kk88888888888kk...k........",
+"..........k.k888866686668888kk..........",
+".........k7k88866688z886668887k.........",
+"..........k8866668zzzzz8666688k.........",
+"........kk88666668zz8zz86666688kk.......",
+".......k888666668zzz8zzz866666888k......",
+"....kkk88888666668zz8zz86666688888kk....",
+"...k7688888z886668zzzzz866688z888887k...",
+"....k88888z8z8666688z8866668z8z88888k...",
+"....k8888zz8zz8666668666668zz8zz8888k...",
+"...k888778z8z866666666666668z8z877888k..",
+"...k8887788z88666666666666688z8877888k..",
+"...k888777886666666666666666688777888k..",
+"..kk888777788666666666666666887777888kk.",
+".k7888777777888666666666668887777778887k",
+"..kk8887777788z88666666688z8877777888kk.",
+"...k888777778z8z888888888z8z877777888k..",
+"...k88877778zz8zz8778778zz8zz87777888k..",
+"...k888777778z8z877787778z8z877777888k..",
+"....k888777788z88788z88788z887777888k...",
+"...k788887777787778z8z87778777778888k...",
+"....kk888877777778zz8zz877777778888k....",
+"......k888877777778z8z877777778888k.....",
+".......k888887777788z887777788888k......",
+"........kk888887777787777788888kk.......",
+"..........k8888888888888888888k.........",
+"...........kkk8888888888888kkk..........",
+"..............kkkkkk8kkkkkk.............",
 ],
 npc:[
 "______kkkk______",
@@ -1045,9 +1111,12 @@ function patTex(draw, px){
 }
 const sprCache={};
 function billboard(key, size){
-  if(!sprCache[key]) sprCache[key]=texFromCanvas(artCanvas(SPR[key],8));
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(size,size),
+  const art=SPR[key];
+  if(!sprCache[key]) sprCache[key]=texFromCanvas(artCanvas(art,8));
+  const w=art[0].length, h=art.length;          // size は「たかさ」。よこは アスペクトで きめる
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(size*w/h, size),
     new THREE.MeshBasicMaterial({map:sprCache[key],transparent:true,alphaTest:0.4}));
+  m.userData.aspect=w/h;
   return m;
 }
 
@@ -1171,7 +1240,7 @@ function init(){
   renderer=new THREE.WebGLRenderer({canvas,antialias:false});
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   initTex();
-  cam=new THREE.PerspectiveCamera(30,1,0.1,120);
+  cam=new THREE.PerspectiveCamera(32,1,0.1,140);
   batCam=new THREE.PerspectiveCamera(48,1,0.1,120);
   buildBattleScene();
   fit();
@@ -1217,7 +1286,7 @@ function buildMap(name){
   const th=THEME[map.theme]||THEME.field;
   scene=new THREE.Scene();
   scene.background=new THREE.Color(th.sky);
-  scene.fog=new THREE.Fog(th.fog[0],th.fog[1],th.fog[2]);
+  scene.fog=new THREE.Fog(th.fog[0],th.fog[1]*1.5,th.fog[2]*1.6); // ひきに あわせて フォグも のばす
   animObjs=[]; waters=[]; chestLids={};
   curMap=name;
 
@@ -1409,10 +1478,10 @@ function battleEnter(enemies, done){
   foes.forEach(f=>batScene.remove(f.mesh)); foes=[];
   const n=enemies.length;
   enemies.forEach((e,i)=>{
-    const size = e.key==='hagure'?3.0:1.9;
+    const size = e.key==='hagure'?3.4:2.0;
     const m=billboard(SPR[e.key]?e.key:'dbug', size);
-    const spread = n===1?0:(i-(n-1)/2)*2.3;
-    m.position.set(spread, size*0.42, -3 - (i%2)*0.5);
+    const spread = n===1?0:(i-(n-1)/2)*2.6;
+    m.position.set(spread, size*0.5, -3.2 - (i%2)*0.6);
     batScene.add(m);
     foes.push({mesh:m, enemy:e, base:m.position.clone(), size});
   });
@@ -1466,9 +1535,9 @@ function updateField(dt,time){
     objs[i].scale.x = (C.G.stepFlip ? (i%2?-1:1) : (i%2?1:-1));
   }
   if(actors.lamp) actors.lamp.position.set(fp[0].x,yy+0.6,fp[0].y);
-  const cx=fp[0].x, cz=fp[0].y+4.3;
-  cam.position.lerp(new THREE.Vector3(cx,6.6,cz),Math.min(1,dt*6));
-  cam.lookAt(fp[0].x,0.2,fp[0].y-0.5);
+  const cx=fp[0].x, cz=fp[0].y+7.2;
+  cam.position.lerp(new THREE.Vector3(cx,11.0,cz),Math.min(1,dt*6));
+  cam.lookAt(fp[0].x,0.2,fp[0].y-0.9);
   animObjs.forEach(o=>{
     if(o.bill){ o.mesh.quaternion.copy(cam.quaternion); return; }
     o.mesh.scale.setScalar(1+Math.sin(time*9+o.ph)*0.2);
