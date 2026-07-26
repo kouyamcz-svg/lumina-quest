@@ -97,7 +97,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T12:52:39", "assets_sha": "5df06c01", "lines": {"world": 130, "npc": 185, "core": 1394, "view": 1130, "ui": 270}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T13:14:41", "assets_sha": "5df06c01", "lines": {"world": 130, "npc": 185, "core": 1406, "view": 1130, "ui": 270}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -545,11 +545,11 @@ const ENEMIES = [
 ];
 const MIDBOSS = {
   // ---- 第1章ボス ----
-  yumebanken:{key:'yumebanken', name:'ゆめの ばんけん', hp:135, atk:13, def:7, agi:10, acts:1,
+  yumebanken:{key:'yumebanken', name:'ゆめの ばんけん', hp:160, atk:15, def:8, agi:10, acts:1,
               exp:200, gold:180,
-              skill:{p:0.30, mul:1.30, name:'ゆめを かみくだく'},
-              aoe:{p:0.17, lo:6, hi:11, name:'とおぼえ'},
-              inflict:{type:'sleep', p:0.22}},
+              skill:{p:0.32, mul:1.34, name:'ゆめを かみくだく'},
+              aoe:{p:0.20, lo:8, hi:13, name:'とおぼえ'},
+              inflict:{type:'sleep', p:0.28}},
   desgran1:{key:'desgran1', name:'まおう デスグラン', hp:500, atk:43, def:28, agi:14, acts:2,
             exp:0, gold:0,
             aoe:{p:0.26, lo:26, hi:36, name:'ダークフレア'},
@@ -566,9 +566,9 @@ const MIDBOSS = {
 };
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
-  versa_field1:['greenslime','drakybat','madrock','hoimislime'],
-  versa_dgn1:  ['drakybat','mandragora','wisp','madrock'],
-  versa_dgn2:  ['thornwolf','wisp','hornet','skeleton'],
+  versa_field1:['greenslime','drakybat','hoimislime'],                      // Lv1〜3
+  versa_dgn1:  ['drakybat','madrock','flameslime','mandragora'],            // Lv3〜5
+  versa_dgn2:  ['madrock','mandragora','hornet','thornwolf','metalslime'],  // Lv5〜7
   field_toros:['greenslime','flameslime','hoimislime','drakybat','madrock','mandragora',
                'thornwolf','hornet','metalslime'],
   cave1:['wisp','skeleton','ghostlamp','skullbat','mushmage','armycrab','merman','mimic','golem'],
@@ -1160,6 +1160,11 @@ function openShop(kind){
 }
 
 // ---------------- 戦闘 ----------------
+// ひとり たびの あいだは じょうたい いじょうを うけにくくする
+function inflictP(e){
+  if(!e.inflict) return 0;
+  return party.length===1 ? e.inflict.p*0.6 : e.inflict.p;
+}
 function makeEnemy(def){
   const e = JSON.parse(JSON.stringify(def));
   e.maxhp = e.hp; e.dispName = e.name; e.status = null;
@@ -1171,8 +1176,11 @@ function startBattle(kind){
     enemies = [makeEnemy(MIDBOSS[kind])];
   }else{
     const pool = byMap[P.map] || ['slimefire'];
-    const lv = party[0].lv;                       // レベルが ひくいうちは たいぐんに ならない
-    const maxN = lv<4 ? 1 : (lv<9 ? 2 : 3);
+    const lv = party[0].lv;
+    const byLv    = lv<4 ? 1 : (lv<9 ? 2 : 3);          // レベルが ひくいうちは たいぐんに ならない
+    const byParty = party.length===1 ? (lv<5 ? 1 : 2)   // ひとりの ときは とくに おさえる
+                                     : party.length+1;
+    const maxN = Math.min(byLv, byParty);
     const n = Math.min(maxN, 1 + (Math.random()<0.45?1:0) + (Math.random()<0.18?1:0));
     enemies = [];
     for(let i=0;i<n;i++){
@@ -1196,9 +1204,13 @@ function beginRound(){
   if(b.round>200){ endBattle(false); return; }  // 安全弁
   b.queue=[];
   // じょうたい いじょうの かいふく はんてい
+  // ひとりの ときは、ねむり・こんらんで なにも できない じかんが ながすぎるため さめやすくする
+  const solo = party.length===1;
+  const wakeSleep   = solo ? 0.60 : 0.34;
+  const wakeConfuse = solo ? 0.62 : 0.38;
   party.forEach(m=>{
-    if(m.status==='sleep'&&Math.random()<0.34) m.status=null;
-    else if(m.status==='confuse'&&Math.random()<0.38) m.status=null;
+    if(m.status==='sleep'&&Math.random()<wakeSleep) m.status=null;
+    else if(m.status==='confuse'&&Math.random()<wakeConfuse) m.status=null;
   });
   collectCommands(0);
 }
@@ -1469,7 +1481,7 @@ function enemyAct(e, done){
         if(h>0){ e.hp+=h; lines.push(e.dispName+'は HPを '+h+' すいとった！'); }
       }
       if(ts.hp<=0){ ts.hp=0; ts.status=null; lines.push(ts.name+'は たおれた…'); }
-      else if(e.inflict && Math.random()<e.inflict.p && !ts.status){
+      else if(e.inflict && Math.random()<inflictP(e) && !ts.status){
         ts.status=e.inflict.type;
         lines.push(ts.name+'は '+(e.inflict.type==='sleep'?'ねむってしまった！':'こんらんした！'));
       }
@@ -1500,7 +1512,7 @@ function enemyAct(e, done){
       lines.push(e.dispName+'は '+sp.name+'を となえた！',
                  tp.name+'は '+dp+'の ダメージを うけた！');
       if(tp.hp<=0){ tp.hp=0; tp.status=null; lines.push(tp.name+'は たおれた…'); }
-      else if(e.inflict && Math.random()<e.inflict.p && !tp.status){
+      else if(e.inflict && Math.random()<inflictP(e) && !tp.status){
         tp.status=e.inflict.type;
         lines.push(tp.name+'は '+(e.inflict.type==='sleep'?'ねむってしまった！':'こんらんした！'));
       }
@@ -1536,7 +1548,7 @@ function enemyAct(e, done){
       if(h>0){ e.hp+=h; lines.push(e.dispName+'は HPを '+h+' すいとった！'); }
     }
     if(t.hp<=0){ t.hp=0; t.status=null; lines.push(t.name+'は たおれた…'); }
-    else if(e.inflict && Math.random()<e.inflict.p && !t.status){
+    else if(e.inflict && Math.random()<inflictP(e) && !t.status){
       t.status=e.inflict.type;
       lines.push(t.name+'は '+(e.inflict.type==='sleep'?'ねむってしまった！':'こんらんした！'));
     }
