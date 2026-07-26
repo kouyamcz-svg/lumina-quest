@@ -28,6 +28,16 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
 .bar{height:3px;background:#231d38;border-radius:2px;margin-top:2px;overflow:hidden}
 .bar i{display:block;height:100%;background:#4fd07a}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#chapter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;background:rgba(4,4,12,.82);opacity:0;pointer-events:none;
+  transition:opacity .7s}
+#chapter.show{opacity:1}
+#chapter .ct{font-size:15px;letter-spacing:.5em;color:#cfc4a0;margin-bottom:14px}
+#chapter .cs{font-size:23px;letter-spacing:.22em;color:#fff6e0;
+  text-shadow:0 0 18px rgba(220,190,120,.5)}
+#chapter::before,#chapter::after{content:'';width:150px;height:1px;
+  background:linear-gradient(90deg,transparent,#c8b078,transparent)}
+#chapter::before{margin-bottom:22px} #chapter::after{margin-top:22px}
 #boot{position:fixed;inset:0;background:#0b0a16;display:flex;flex-direction:column;
   align-items:center;justify-content:center;z-index:99;transition:opacity .5s}
 #boot.hide{opacity:0;pointer-events:none}
@@ -78,6 +88,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div id="hud"></div>
   <div id="cmd-win"></div>
   <div id="msg-win"><div id="msg-text"></div></div>
+  <div id="chapter"></div>
   <div id="flash"></div>
   <div id="fade"></div>
 </div>
@@ -86,7 +97,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T12:29:04", "assets_sha": "5df06c01", "lines": {"world": 129, "npc": 150, "core": 1239, "view": 1060, "ui": 266}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T12:52:39", "assets_sha": "5df06c01", "lines": {"world": 130, "npc": 185, "core": 1394, "view": 1130, "ui": 270}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -152,8 +163,9 @@ const MAP_IDS = {
   // --- ヴェルサ地方（第1章・実装中） ---
   versa_town:    {region:'versa', kind:'town',  name:'おうと ヴェルサリア',         scene:'SCENE_VERSA_TOWN'},
   versa_field1:  {region:'versa', kind:'field', name:'ヴェルサの せつげん',         scene:'SCENE_VERSA_FIELD'},
-  versa_cast1:   {planned:true, region:'versa', kind:'cast',  name:'ヴェルサ おうじょう',         scene:'SCENE_VERSA_CASTLE'},
-  versa_dgn1:    {planned:true, region:'versa', kind:'dgn',   name:'こおりの どうくつ',           scene:'SCENE_VERSA_ICECAVE'},
+  versa_cast1:   {region:'versa', kind:'cast',  name:'ヴェルサ おうじょう',         scene:'SCENE_VERSA_CASTLE'},
+  versa_dgn1:    {region:'versa', kind:'dgn',   name:'こおりの どうくつ',           scene:'SCENE_VERSA_ICECAVE'},
+  versa_dgn2:    {region:'versa', kind:'dgn',   name:'こおりの どうくつ さいしんぶ', scene:'SCENE_VERSA_ICECAVE'},
   versa_in_inn:  {planned:true, region:'versa', kind:'in',    name:'やどや',                      scene:'SCENE_VERSA_INN'},
   versa_in_ch:   {planned:true, region:'versa', kind:'in',    name:'きょうかい',                  scene:'SCENE_VERSA_CHURCH'},
   versa_in_wep:  {planned:true, region:'versa', kind:'in',    name:'ぶきや',                      scene:'SCENE_VERSA_WEAPON'},
@@ -320,9 +332,42 @@ const NPCS = {
              'あの ものまね けんし、また ばけたらしいぜ」']}]},
   ],
   versa_field1: [
-    {at:'9,8', name:'そうさくたい', lines:[
-      {text:['「せつげんの おくに こおりの どうくつが ある」',
+    {at:'19,8', name:'そうさくたい', lines:[
+      {when:{flag:'ch1_cleared'}, text:[
+        '「どうくつの こおりが とけはじめた！ なにを したんだ、あんた」']},
+      {when:{flag:'ch1_enteredCave'}, text:[
+        '「みなみの どうくつは やめとけ。なかから うなりごえが する」']},
+      {text:['「みなみの おくに こおりの どうくつが ある」',
              '「あそこから つめたい かぜが ふいてくるんだ」']},
+    ]},
+    {at:'5,12', name:'ゆきかき', lines:[
+      {when:{state:'DREAM_INVASION'}, text:[
+        '「ゆきが むらさきだ……こんなの みたことない」']},
+      {text:['「かいどうの ゆきは わしが かいてる。まっすぐ いけば まちだ」']},
+    ]},
+  ],
+  versa_cast1: [
+    {at:'10,4', name:'おう', lines:[
+      {when:{flag:'ch1_cleared'}, text:[
+        'おう「よくぞ むすめを すくってくれた、リオン」',
+        '「だが きこう。この ねむりは ヴェルサだけの ことか？」',
+        '「……せかいじゅうで おきているなら、ことは おおきい」']},
+      {text:['おう「むすめが めを さまさぬ。いしゃも てだてが ないという」',
+             '「たのむ、リオン。おまえだけが たよりだ」']},
+    ]},
+    {at:'8,7', name:'じい', lines:[
+      {when:{flag:'ch1_sawPrincess'}, text:[
+        'じい「きたの せつげんの おくじゃ。こおりの どうくつを しらべてくれ」']},
+      {text:['じい「おうじょさまは おくの ねまに おられる」',
+             '「みて さしあげなさい。なにか わかるかもしれん」']},
+    ]},
+    {at:'13,7', name:'えいへい', lines:[
+      {text:['「おれも きしだんだ。おまえの ぶんまで まちを まもる」']},
+    ]},
+    {at:'6,12', name:'しじょ', lines:[
+      {when:{flag:'ch1_cleared'}, text:['「おうじょさまが おきられました！ ゆめのようです」']},
+      {text:['「おうじょさまは、ねむる まえに こう おっしゃいました」',
+             '「＜つめたい ところで、だれかが わたしを よんでいる＞と」']},
     ]},
   ],
 };
@@ -347,8 +392,10 @@ const QUESTS = {
     giver:'きしだんちょう',
     desc:'せつげんの おくの こおりの どうくつを しらべる。',
     steps:[
-      {id:'enter_field', desc:'せつげんへ でる',           flag:'ch1_enteredField'},
-      {id:'enter_cave',  desc:'こおりの どうくつに はいる', flag:'ch1_enteredCave'},
+      {id:'see_princess', desc:'おうじょさまを みる',       flag:'ch1_sawPrincess'},
+      {id:'enter_field',  desc:'せつげんへ でる',           flag:'ch1_enteredField'},
+      {id:'enter_cave',   desc:'こおりの どうくつに はいる', flag:'ch1_enteredCave'},
+      {id:'beat_boss',    desc:'さいしんぶの ぬしを たおす', flag:'ch1_cleared'},
     ],
     reward:{gold:300, item:null},
     next:null,
@@ -497,6 +544,12 @@ const ENEMIES = [
    skill:{p:0.36, mul:1.60, name:'どくの こぶし'}, inflict:{type:'confuse', p:0.25}},
 ];
 const MIDBOSS = {
+  // ---- 第1章ボス ----
+  yumebanken:{key:'yumebanken', name:'ゆめの ばんけん', hp:135, atk:13, def:7, agi:10, acts:1,
+              exp:200, gold:180,
+              skill:{p:0.30, mul:1.30, name:'ゆめを かみくだく'},
+              aoe:{p:0.17, lo:6, hi:11, name:'とおぼえ'},
+              inflict:{type:'sleep', p:0.22}},
   desgran1:{key:'desgran1', name:'まおう デスグラン', hp:500, atk:43, def:28, agi:14, acts:2,
             exp:0, gold:0,
             aoe:{p:0.26, lo:26, hi:36, name:'ダークフレア'},
@@ -512,6 +565,10 @@ const MIDBOSS = {
             inflict:{type:'sleep', p:0.20}},
 };
 const byMap = {
+  // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
+  versa_field1:['greenslime','drakybat','madrock','hoimislime'],
+  versa_dgn1:  ['drakybat','mandragora','wisp','madrock'],
+  versa_dgn2:  ['thornwolf','wisp','hornet','skeleton'],
   field_toros:['greenslime','flameslime','hoimislime','drakybat','madrock','mandragora',
                'thornwolf','hornet','metalslime'],
   cave1:['wisp','skeleton','ghostlamp','skullbat','mushmage','armycrab','merman','mimic','golem'],
@@ -547,23 +604,88 @@ const MAPS = {
     "#=##=###===rr=n=##T=M==#",
     "#==========rr======f==f#",
     "###########GG###########"
-  ], warps:{}, warpsXY:{'11,15':{to:'versa_field1',x:9,y:1},'12,15':{to:'versa_field1',x:10,y:1}}},
-  versa_field1:{name:'ヴェルサの せつげん',theme:'snow',enc:false,tiles:[
+  ], warps:{}, warpsXY:{'11,15':{to:'versa_field1',x:15,y:1},'12,15':{to:'versa_field1',x:16,y:1},
+                     '11,1':{to:'versa_cast1',x:10,y:14},'12,1':{to:'versa_cast1',x:11,y:14}}},
+  versa_field1:{name:'ヴェルサの せつげん',theme:'snow',enc:true,tiles:[
+    "###############GG###############",
+    "#==============rr==============#",
+    "#=fffff========rr=======ffffff=#",
+    "#=fffff========rr===wwwwff=Cff=#",
+    "#=fffff=o======rr===wwwwff=fff=#",
+    "#=fffff=======trrt==wwwwff=fff=#",
+    "#==============rr=======ff=fff=#",
+    "#====rrrrrrrrrrrrrrrrrrrrrr====#",
+    "#====rrrrtrrrrrrrrrnrrtrrrro===#",
+    "#==o======rr===========o=======#",
+    "#=========rr=o=================#",
+    "#=ffff====rr=============fffff=#",
+    "#=fffn====rr======fffff==fffff=#",
+    "#=ffff=o==rr======fffff==fffff=#",
+    "#=ffff===trr======fffff==fffff=#",
+    "#=ffff====rr======fffff==fffff=#",
+    "#=====wwwwrr=============fffff=#",
+    "#=====wwwwrrt==========C=======#",
+    "#===fffff=rr=====o=============#",
+    "#===fffff=rr========fffffff====#",
+    "#==Cfffff=====o=====fffffff====#",
+    "#===fffff===========fffffff====#",
+    "#===================fffffff====#",
+    "##########GG####################"
+  ], warps:{}, warpsXY:{'15,0':{to:'versa_town',x:11,y:14},'16,0':{to:'versa_town',x:12,y:14},
+                        '10,23':{to:'versa_dgn1',x:9,y:14},'11,23':{to:'versa_dgn1',x:10,y:14}}},
+  versa_cast1:{name:'ヴェルサ おうじょう',theme:'castle',enc:false,tiles:[
+    "######################",
+    "########rrKKrr########",
+    "########rrrrrr########",
+    "########rrrrrr########",
+    "#rrrrrrrrrnrrrrrrrrrr#",
+    "######rTrrrrrrTr######",
+    "##rZr#rrrrrrrrrr#rCr##",
+    "##rrr#rrnrrrrnrr#rrr##",
+    "##rrr#rrrrrrrrrr#rrr##",
+    "##rrr#rTrrrrrrTr#rrr##",
+    "###D##rrrrrrrrrr##D###",
+    "#rrrrrrrrrrrrrrrrrrrr#",
+    "#rrrrrnrrrrrrrrrrrrrr#",
+    "#rrrrrrrrrrrrrrrrrrrr#",
+    "#rrrrrrrrrrrrrrrrrrrr#",
+    "##########GG##########"
+  ], warps:{}, warpsXY:{'10,15':{to:'versa_town',x:11,y:2},'11,15':{to:'versa_town',x:12,y:2}}},
+  versa_dgn1:{name:'こおりの どうくつ',theme:'ice',enc:true,tiles:[
     "####################",
-    "#========rr========#",
-    "#==ff====rr====ff==#",
-    "#========rr========#",
-    "#==f=====rr=====f==#",
-    "#========rr========#",
-    "#===rrrrrrrrrrr====#",
-    "#===r=========r====#",
-    "#==fr====n====r=f==#",
-    "#===r=========r====#",
-    "#===rrrrrrrrrrr====#",
-    "#=======f==f=======#",
-    "#=====>============#",
-    "####################",
-  ], warps:{}, warpsXY:{'9,1':{to:'versa_town',x:11,y:14},'10,1':{to:'versa_town',x:12,y:14}}},
+    "#========>>========#",
+    "#==#C##======###C==#",
+    "#==####=o====##o#==#",
+    "#==####======####==#",
+    "#=t=====####=====t=#",
+    "#=====o=####=o=====#",
+    "#==###========###==#",
+    "#==###=====o==###==#",
+    "#==###========###==#",
+    "#========t=========#",
+    "#=www==######==www=#",
+    "#=www==######==www=#",
+    "#====o=######======#",
+    "#=t==C===========t=#",
+    "#########GG#########"
+  ], warps:{}, warpsXY:{'9,15':{to:'versa_field1',x:10,y:22},'10,15':{to:'versa_field1',x:11,y:22},
+                        '9,1':{to:'versa_dgn2',x:8,y:12},'10,1':{to:'versa_dgn2',x:9,y:12}}},
+  versa_dgn2:{name:'こおりの どうくつ さいしんぶ',theme:'ice',enc:true,tiles:[
+    "##################",
+    "#================#",
+    "#=t===o====o===t=#",
+    "#==###==BB==###==#",
+    "#==###======###==#",
+    "#==###======###==#",
+    "#=o====wwww====o=#",
+    "#======wwww======#",
+    "#==###======###==#",
+    "#==###======###==#",
+    "#=C###======###C=#",
+    "#=t===o====o===t=#",
+    "#================#",
+    "########<<########"
+  ], warps:{}, warpsXY:{'8,13':{to:'versa_dgn1',x:9,y:2},'9,13':{to:'versa_dgn1',x:10,y:2}}},
 
   toros:{name:'トロスむら',theme:'village',enc:false,tiles:[
     "ffffffffffffffff",
@@ -701,6 +823,11 @@ const INN_PRICE = {toros:6, versa_town:8};
 
 // ---------------- 状態 ----------------
 let G, P, party;
+function startChapter(no){
+  const ch=(WORLD.CHAPTERS||[]).find(x=>x.no===no);
+  if(!ch) return;
+  V.chapterCard('第'+no+'章', ch.title);
+}
 function freshState(){
   G = {mode:'field', menu:null, battle:null, flags:{}, visited:{}, gotTreasure:{},
        tactic:'manual', dex:{}, trail:[], stepFlip:false, cleared:false,
@@ -722,6 +849,15 @@ function setNight(v){
   G.night = !!v;
   V.buildMap(P.map); V.setActors(true);
   return G.night;
+}
+// 章ごとの ふっきてん（ぜんめつしたとき もどる まち）
+const HOME = {
+  1:{map:'versa_town', x:11, y:6, name:'ヴェルサリアの きょうかい'},
+  5:{map:'toros',      x:7,  y:6, name:'トロスむらの きょうかい'},
+};
+function homePoint(){
+  const h = HOME[G.chapter] || HOME[1];
+  return MAPS[h.map] ? h : HOME[1];
 }
 function townStateDef(){ return WORLD.TOWN_STATES[G.townState] || WORLD.TOWN_STATES.NORMAL; }
 function mkMember(cls, lv){
@@ -771,7 +907,7 @@ function warpAt(map,x,y){
 const NullView = {
   buildMap(){}, setActors(){}, fx(kind,data,done){ done&&done(); },
   battleEnter(_,done){ done&&done(); }, battleLeave(done){ done&&done(); },
-  refresh(){}, chest(){}, fade(_,done){ done&&done(); },
+  refresh(){}, chest(){}, fade(_,done){ done&&done(); }, chapterCard(_,__,done){ done&&done(); },
 };
 const NullUI = {
   msgLog: [],
@@ -797,12 +933,38 @@ function stepField(dx,dy){
   if(ch==='B'){ triggerBoss(nx,ny); return; }
   if(ch==='K'){
     G.mode='msg';
-    U.msg(G.townState==='NORMAL'
-      ? ['おうじょうの もん。えいへいが かたく まもっている。',
-         'えいへい「しんまいが かってに はいるな」']
-      : ['おうじょうの もん。えいへいの かおいろが わるい。',
-         'えいへい「おうじょさまは まだ おめざめに ならぬ……」'],
-      ()=>{ G.mode='field'; });
+    if(G.flags.ch1_orderReceived){
+      U.msg(['えいへい「おうめいを うけた もの だな。とおれ」'], ()=>{
+        doWarp({to:'versa_cast1', x:10, y:14});
+      });
+    }else if(G.townState==='NORMAL'){
+      U.msg(['おうじょうの もん。えいへいが かたく まもっている。',
+             'えいへい「しんまいが かってに はいるな」'], ()=>{ G.mode='field'; });
+    }else{
+      U.msg(['おうじょうの もん。えいへいの かおいろが わるい。',
+             'えいへい「おうめいの ない ものは とおせぬ」'], ()=>{ G.mode='field'; });
+    }
+    return;
+  }
+  if(ch==='Z'){                       // ねむる おうじょ
+    G.mode='msg';
+    if(G.flags.ch1_cleared){
+      U.msg(['おうじょ「……ながい ゆめを みていました」',
+             '「くろい けものが、わたしの ゆめの もんばんを していたの」',
+             '「たすけて くれて ありがとう、リオン」'], ()=>{ G.mode='field'; });
+    }else{
+      const first=!G.flags.ch1_sawPrincess;
+      G.flags.ch1_sawPrincess=true;
+      U.msg(first
+        ? ['ベッドに おうじょさまが ねむっている。',
+           'いくら よびかけても、まぶたは ひらかない。',
+           'じい「おうじょさまの ゆめに、なにかが すみついておる……」',
+           'じい「きたの せつげんの おくに こおりの どうくつが ある。',
+           'あそこから つめたい ゆめの けはいが ながれてくるのじゃ」',
+           '＊ クエスト「こおりの どうくつ」＊']
+        : ['おうじょさまは しずかに ねむっている。'],
+        ()=>{ if(first){ questAdvance('ch1_q2_icecave','active'); } G.mode='field'; });
+    }
     return;
   }
   if(ch==='F'){
@@ -829,9 +991,13 @@ function doWarp(w){
     G.trail=[[w.x,w.y],[w.x,w.y]];
     G.visited[w.to]=true;
     if(w.to==='versa_field1') G.flags.ch1_enteredField=true;
-    V.buildMap(w.to); V.setActors(); U.label(MAPS[w.to].name);
+    if(w.to==='versa_dgn1' && !G.flags.ch1_enteredCave){
+      G.flags.ch1_enteredCave=true;
+      G.townState='DREAM_INVASION';        // まちが ゆめに しんしょくされる
+    }
+    V.buildMap(w.to); V.setActors(); U.label(WORLD.mapName(w.to));
     A.bgm(MAPS[w.to].theme);
-    V.fade(0, ()=>{ G.busy=false; });
+    V.fade(0, ()=>{ G.busy=false; G.mode='field'; });   // メッセージ中から呼ばれても操作可へ戻す
   });
 }
 let encSteps = 0;
@@ -853,6 +1019,17 @@ function talkNPC(x,y){
 // ---------------- クエスト ----------------
 function questOnTalk(npcName){
   const F=G.flags;
+  // へいおん中に きしだんちょうへ はなしかけると、じけんが うごきだす
+  if(G.townState==='NORMAL' && npcName==='きしだんちょう' && !F.ch1_started){
+    F.ch1_started=true;
+    setTownState('SLEEPING_SICKNESS');
+    questAdvance('ch1_q1_wakeup','active');
+    U.msg(['きしだんちょう「たいへんだ リオン！ おうじょさまが おめざめに ならぬ！」',
+           '「まちでも ねむったまま おきぬ ものが ふえておる」',
+           '「まちの ものに はなしを きいて、げんいんを しらべてこい」',
+           '＊ クエスト「めざめぬ おうじょ」＊'], ()=>{ U.hud(); });
+    return;
+  }
   if(G.townState==='NORMAL') return;
   if(npcName==='こうじょの じじょ') F.ch1_talkedMaid=true;
   if(npcName==='もんばん')          F.ch1_talkedGate=true;
@@ -934,6 +1111,17 @@ function openChest(x,y){
   }
 }
 function triggerBoss(x,y){
+  if(P.map==='versa_dgn2'){                 // 第1章ボス
+    G.mode='msg';
+    if(G.flags.ch1_cleared){
+      U.msg(['こおりの ゆかに、けものの あしあとだけが のこっている。'], ()=>{ G.mode='field'; });
+      return;
+    }
+    U.msg(['どうくつの さいしんぶ。こおりの おくに、くろい けものが うずくまっている。',
+           '＜……ここは わたしの もの。ゆめは わたしが みはる＞',
+           'ゆめの ばんけんが たちふさがった！'], ()=>{ startBattle('yumebanken'); });
+    return;
+  }
   if(G.flags.desgran){
     G.mode='msg';
     U.msg(['まおうの きえた あとに、こげた いわだけが のこっている。'], ()=>{ G.mode='field'; });
@@ -1402,6 +1590,19 @@ function victory(){
     }
   });
   if(leveled) A.lvup();
+  if(b.named==='yumebanken'){
+    G.flags.ch1_cleared=true;
+    questAdvance('ch1_q2_icecave','clear');
+    G.townState='NORMAL';                   // ゆめの しんしょくが はれる
+    lines.push('',
+      'ゆめの ばんけんは、しろい いきを はいて ほどけていった。',
+      '＜……もう、みはらなくて いいのか＞',
+      'どうくつの こおりが、ゆっくりと とけはじめる。',
+      'とおく、まちの ほうから かねの おとが きこえた。',
+      '',
+      '＊ おうじょさまが めを さました！ ＊');
+    V.chapterCard('第1章','わかき きし  かんけつ');
+  }
   if(b.named==='desgran3'){
     G.flags.desgran=true; G.cleared=true;
     lines.push('',
@@ -1422,11 +1623,12 @@ function defeat(){
     G.battle=null;
     G.busy=true;
     V.battleLeave(()=>{
-      P.map='toros'; P.x=7; P.y=6; G.trail=[[7,6],[7,6]];
-      V.buildMap('toros'); V.setActors(); U.label(MAPS.toros.name); U.hud();
-      A.bgm('village');
+      const h=homePoint();
+      P.map=h.map; P.x=h.x; P.y=h.y; G.trail=[[h.x,h.y],[h.x,h.y]];
+      V.buildMap(h.map); V.setActors(); U.label(WORLD.mapName(h.map)); U.hud();
+      A.bgm(MAPS[h.map].theme);
       G.mode='field'; G.busy=false;
-      U.msg(['きがつくと トロスむらの きょうかいに いた。','（ゴールドを はんぶん おとした…）'], ()=>{});
+      U.msg(['きがつくと '+h.name+'に いた。','（ゴールドを はんぶん おとした…）'], ()=>{});
     });
   });
 }
@@ -1609,7 +1811,7 @@ return {
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
-  setTownState, setNight, townStateDef, questList, questAdvance,
+  setTownState, setNight, townStateDef, questList, questAdvance, startChapter,
   // 差し替え
   bind, NullView, NullUI, NullAudio,
 };
@@ -1966,6 +2168,30 @@ function initTex(){
         x.fillStyle='rgba(190,220,255,0.32)'; x.fillRect(sx+1,sy+1,px/4-2,1);
       }}
   },64);
+  TEX.ice = patTex((x,px)=>{
+    x.fillStyle='#8fc4e4'; x.fillRect(0,0,px,px);
+    for(let i=0;i<60;i++){ const t=0.82+Math.random()*0.34;
+      x.fillStyle=`rgb(${150*t|0},${200*t|0},${232*t|0})`;
+      x.fillRect(Math.random()*px|0,Math.random()*px|0,5,3); }
+    x.fillStyle='rgba(255,255,255,0.55)';
+    for(let i=0;i<12;i++){ const bx=Math.random()*px|0,by=Math.random()*px|0;
+      x.fillRect(bx,by,6,1); x.fillRect(bx,by,1,5); }
+  },64);
+  TEX.icewall = patTex((x,px)=>{
+    x.fillStyle='#3f6d94'; x.fillRect(0,0,px,px);
+    for(let i=0;i<22;i++){ const bx=Math.random()*px|0,w=3+Math.random()*6|0;
+      const t=0.7+Math.random()*0.6;
+      x.fillStyle=`rgb(${88*t|0},${150*t|0},${196*t|0})`; x.fillRect(bx,0,w,px); }
+    x.fillStyle='rgba(230,248,255,0.32)';
+    for(let i=0;i<14;i++) x.fillRect(Math.random()*px|0,Math.random()*px*0.5|0,2,4);
+  },64);
+  TEX.carpet = patTex((x,px)=>{
+    x.fillStyle='#7a2530'; x.fillRect(0,0,px,px);
+    for(let i=0;i<40;i++){ x.fillStyle=i%2?'#8c2c38':'#661d26';
+      x.fillRect(Math.random()*px|0,Math.random()*px|0,4,4); }
+    x.fillStyle='#c8a martial'.replace(' martial','850');
+    for(let i=0;i<6;i++) x.fillRect(2,i*10+3,px-4,1);
+  },64);
   TEX.wood = patTex((x,px)=>{
     x.fillStyle='#7a5a34'; x.fillRect(0,0,px,px);
     for(let i=0;i<8;i++){ const t=0.8+Math.random()*0.4;
@@ -2251,8 +2477,10 @@ function buildMap(name){
   curMap=name;
 
   const rows=map.tiles, H=rows.length, W=rows[0].length;
-  const cave = map.theme==='cave';
+  const cave = map.theme==='cave' || map.theme==='ice';
   const snow = map.theme==='snow';
+  const ice  = map.theme==='ice';
+  const cast = map.theme==='castle';
   const baseY = cave?0.25:-0.06;     // 洞窟は台地
   const topY  = cave?0.5:0;
   const G_={}, put=(k,v)=>{ (G_[k]=G_[k]||[]).push(v); };
@@ -2281,6 +2509,16 @@ function buildMap(name){
     // ゆか
     put(ch==='r'?'road':'ground',[x,baseY,y]);
     if(snow && buildSnowTile(ch,x,y,topY,ts,put)) continue;
+    if(ice){
+      if(ch==='o'){ put('icePillar',[x,topY+0.6,y]); continue; }
+      if(ch==='C'||ch==='B'||ch==='t'||ch==='G'||ch==='<'||ch==='>'){ /* 既存処理へ */ }
+    }
+    if(cast){
+      if(ch==='T'){ put('castPillar',[x,topY+1.0,y]); continue; }
+      if(ch==='K'){ put('throne',[x,topY+0.5,y]); continue; }
+      if(ch==='Z'){ put('bed',[x,topY+0.28,y]); put('sleeper',[x,topY+0.55,y]); continue; }
+      if(ch==='D'){ put('castDoor',[x,topY+0.5,y]); continue; }
+    }
     if(ch==='f'){                    // もり
       put('leafA',[x,topY+0.5,y,(x*7+y*3)%6]);
       put('leafB',[x-0.28,topY+0.34,y+0.2,0]);
@@ -2362,15 +2600,18 @@ function buildMap(name){
   }
   // インスタンス化（drawCall削減）
   const box=new THREE.BoxGeometry(1,0.12,1);
-  const gm=new THREE.MeshLambertMaterial({map:snow?TEX.snow:TEX.grass});
+  const gm=new THREE.MeshLambertMaterial({
+    map: snow?TEX.snow : ice?TEX.ice : cast?TEX.pave : TEX.grass});
   if(snow && ts && ts.id!=='NORMAL') gm.color.setHex(ts.snowColor);
   addInstanced(box,gm, (G_.ground||[]).map(p=>[p[0],p[1],p[2]]));
-  addInstanced(box,new THREE.MeshLambertMaterial({map:snow?TEX.pave:TEX.road}),
+  addInstanced(box,new THREE.MeshLambertMaterial({
+      map: snow?TEX.pave : ice?TEX.ice : cast?TEX.carpet : TEX.road}),
     (G_.road||[]).map(p=>[p[0],p[1],p[2]]));
   if(cave){
     addInstanced(new THREE.BoxGeometry(1,0.5,1),new THREE.MeshLambertMaterial({map:TEX.rock}),
       (G_.ground||[]).concat(G_.road||[]).map(p=>[p[0],0.25,p[2]]));
-    addInstanced(new THREE.BoxGeometry(1,1,1),new THREE.MeshLambertMaterial({map:TEX.cliff}),
+    addInstanced(new THREE.BoxGeometry(1,1,1),
+      new THREE.MeshLambertMaterial({map: ice?TEX.icewall:TEX.cliff}),
       (G_.cliff||[]).map(p=>[p[0],p[1],p[2],0,1,p[5]]));
     addInstanced(new THREE.ConeGeometry(0.42,0.55,5),new THREE.MeshLambertMaterial({color:0x2c3448}),
       G_.spike||[]);
@@ -2390,6 +2631,26 @@ function buildMap(name){
     new THREE.MeshLambertMaterial({color:0x8a8f9c,flatShading:true}), G_.rock||[]);
   addInstanced(box,new THREE.MeshLambertMaterial({color:0x0d2c50}), (G_.waterbed||[]).map(p=>[p[0],p[1],p[2]]));
   // ゆきぐにの たてもの・せんとう・きを かたちごとに まとめて 1ドローコールへ
+  if(ice||cast){
+    const wh=()=>new THREE.MeshLambertMaterial({map:TEX.whitestone});
+    const S2={
+      icePillar:[new THREE.ConeGeometry(0.34,1.2,6),
+        new THREE.MeshLambertMaterial({map:TEX.ice,transparent:true,opacity:0.9})],
+      castPillar:[new THREE.CylinderGeometry(0.3,0.36,2.0,8), wh()],
+      throne:[new THREE.BoxGeometry(0.8,1.0,0.7),
+        new THREE.MeshLambertMaterial({color:0xb8942c})],
+      bed:[new THREE.BoxGeometry(0.86,0.36,0.96),
+        new THREE.MeshLambertMaterial({color:0xe8e2d2})],
+      sleeper:[new THREE.BoxGeometry(0.42,0.2,0.7),
+        new THREE.MeshLambertMaterial({color:0xdcd0f0})],
+      castDoor:[new THREE.BoxGeometry(0.8,1.0,0.2),
+        new THREE.MeshLambertMaterial({map:TEX.wood})],
+    };
+    Object.keys(S2).forEach(k=>{
+      const list=G_[k]; if(!list||!list.length) return;
+      addInstanced(S2[k][0], S2[k][1], list);
+    });
+  }
   if(snow){
     const S=snowShapes();
     Object.keys(S).forEach(k=>{
@@ -2512,6 +2773,17 @@ function flash(v){
   const f=document.getElementById('flash');
   f.style.transition='none'; f.style.opacity=v;
   requestAnimationFrame(()=>{ f.style.transition='opacity 0.25s'; f.style.opacity=0; });
+}
+// ---------------- しょうタイトルカード ----------------
+function chapterCard(title, sub, done){
+  const el=document.getElementById('chapter');
+  if(!el){ if(done) done(); return; }
+  el.innerHTML='<div class="ct">'+title+'</div><div class="cs">'+(sub||'')+'</div>';
+  el.classList.add('show');
+  setTimeout(()=>{
+    el.classList.remove('show');
+    setTimeout(()=>{ if(done) done(); }, 700);
+  }, 2400);
 }
 function fade(to, done){
   const f=document.getElementById('fade');
@@ -2672,7 +2944,7 @@ function spawnBurst(target){
 }
 
 window.LQ3View = {
-  init, loop, buildMap, setActors, fx, battleEnter, battleLeave, refresh, chest, fade,
+  init, loop, buildMap, setActors, fx, battleEnter, battleLeave, refresh, chest, fade, chapterCard,
   get mode(){return mode;}, get drawCalls(){return drawCalls;},
 };
 })();
@@ -2922,11 +3194,15 @@ function startGame(loaded){
   hud();
   C.G.mode='field';
   if(!loaded){
-    msg2(['──ルミナクエストIII だいいっしょう「わかき きし」──',
+    V.chapterCard('第1章','わかき きし', ()=>{
+    msg2(['──ゆきの おうこく ヴェルサ──',
       'ゆきの おうこく ヴェルサ、おうと ヴェルサリア。しんまいの このえへい リオン。',
-      'おうじょさまが ねむりから さめない——そんな うわさが ながれている。',
+      'おうと ヴェルサリア。しんまいの このえへい リオン。',
+      'けさから しろが さわがしい。きしだんの ひろばへ いってみよう。',
       'まちの ものに はなしを きいてみよう。',
-      '（Aボタン → 「まちの ようす」で ひるよる・まちの じょうたいを きりかえられます）'],()=>{ C.G.mode='field'; });
+      '（Aボタン → 「まちの ようす」で ひるよる・まちの じょうたいを きりかえられます）'],
+      ()=>{ C.G.mode='field'; });
+    });
   }
 }
 C.freshState();
