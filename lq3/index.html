@@ -100,7 +100,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T23:24:01", "assets_sha": "76aac0bb", "lines": {"world": 135, "npc": 185, "core": 1509, "view2d": 469, "view": 1194, "ui": 360}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T23:36:41", "assets_sha": "76aac0bb", "lines": {"world": 139, "npc": 255, "core": 1625, "view2d": 469, "view": 1194, "ui": 372}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -166,6 +166,8 @@ const MAP_IDS = {
   // --- ヴェルサ地方（第1章・実装中） ---
   versa_town:    {region:'versa', kind:'town',  name:'おうと ヴェルサリア',         scene:'SCENE_VERSA_TOWN'},
   versa_field1:  {region:'versa', kind:'field', name:'ヴェルサの せつげん',         scene:'SCENE_VERSA_FIELD'},
+  versa_town2:   {region:'versa', kind:'town',  name:'くすしの むら ミルカ',         scene:'SCENE_VERSA_TOWN2'},
+  versa_hut:     {region:'versa', kind:'in',    name:'くすしの いえ',               scene:'SCENE_VERSA_HUT'},
   versa_cast1:   {region:'versa', kind:'cast',  name:'ヴェルサ おうじょう',         scene:'SCENE_VERSA_CASTLE'},
   versa_dgn1:    {region:'versa', kind:'dgn',   name:'こおりの どうくつ',           scene:'SCENE_VERSA_ICECAVE'},
   versa_dgn2:    {region:'versa', kind:'dgn',   name:'こおりの どうくつ さいしんぶ', scene:'SCENE_VERSA_ICECAVE'},
@@ -189,6 +191,8 @@ const MAP_IDS = {
 const SCENES = {
   SCENE_VERSA_TOWN:   {render:'2d', theme:'snow',   outdoor:true,  snowfall:true,  aurora:true,  footprints:true},
   SCENE_VERSA_FIELD:  {render:'2d', theme:'snow',   outdoor:true,  snowfall:true,  aurora:true,  footprints:true},
+  SCENE_VERSA_TOWN2:  {render:'2d', theme:'snow',   outdoor:true,  snowfall:true,  aurora:true,  footprints:true},
+  SCENE_VERSA_HUT:    {render:'2d', theme:'indoor', outdoor:false},
   SCENE_VERSA_CASTLE: {render:'3d', theme:'castle', outdoor:false, snowfall:false, aurora:false, footprints:false},
   SCENE_VERSA_ICECAVE:{render:'2d', theme:'ice',    outdoor:false, snowfall:false, aurora:false, footprints:false},
   SCENE_VERSA_INN:    {render:'2d', theme:'indoor', outdoor:false},
@@ -261,6 +265,8 @@ const NPCS = {
       {when:{state:'DREAM_INVASION'}, text:[
         '「みなみもんは とじた！ そとは もう ゆめの なかだ！」',
         '「きみも はやく おくへ さがれ、リオン！」']},
+      {when:{flag:'ch1_heardTheft'}, text:[
+        '「ミルカまで いったのか。にしの もんは いつでも あけとくぜ」']},
       {when:{state:'SLEEPING_SICKNESS'}, text:[
         '「けさも 3にん たおれた。みんな ねむったままだ」',
         '「せつげんの ほうから なにか きてる きが する……」']},
@@ -354,18 +360,60 @@ const NPCS = {
       {text:['「かいどうの ゆきは わしが かいてる。まっすぐ いけば まちだ」']},
     ]},
   ],
+  versa_town2: [
+    {at:'8,8', name:'むらびと', lines:[
+      {when:{flag:'ch1_gotHerb'}, text:['「まものから とりかえしたって？ たいした しんまいだ」']},
+      {when:{flag:'ch1_heardTheft'}, text:[
+        '「くすしの ばあさんは この むらの ほこりでね」',
+        '「ゆきぐさを ぬすまれてから、ずっと ためいきばかりさ」']},
+      {text:['「ようこそ ミルカへ。ちいさいが くすりの むらだよ」',
+             '「なんでも なおす ばあさんが いるんだ」']}]},
+    {at:'13,5', name:'こども', lines:[
+      {when:{flag:'ch1_heardTheft'}, text:['「みなみの どうくつには いっちゃだめだって」']},
+      {text:['「ゆきぐさは あおく ひかるんだよ。みたこと ある？」']}]},
+    {at:'6,9', name:'りょうし', lines:[
+      {when:{flag:'ch1_heardTheft'}, text:[
+        '「くろい けものを みたよ。まるで かげが かたちを もったみたいだった」',
+        '「あれは ふつうの まものじゃない」']},
+      {text:['「みなみに こおりの どうくつが ある。ちかごろ ようすが へんでね」']}]},
+    {at:'16,8', name:'たびのしょうにん', lines:[
+      {text:['「ひがしの ザールでも ねむったまま おきん ものが でたそうだ」',
+             '「ヴェルサだけの はなしじゃ なさそうだよ」']}]},
+    {at:'11,11', name:'むらのおんな', lines:[
+      {when:{state:'DREAM_INVASION'}, text:['「そらが むらさきだよ……なにが おきてるの」']},
+      {text:['「やどは きたの ほうさ。ゆっくり やすんでいきな」']}]},
+  ],
+  versa_hut: [
+    {at:'5,2', name:'くすし', lines:[
+      {when:{flag:'ch1_usedMedicine'}, text:[
+        'くすし「きかなかったのかい……。それは もう くすりの はなしじゃ ないね」']},
+      {when:{flag:'ch1_madeMedicine'}, text:[
+        'くすし「はやく おうじょさまの ところへ おいき」']},
+      {when:{flag:'ch1_gotHerb'}, text:[
+        'くすし「おや、その ひかり……ゆきぐさ だね」']},
+      {when:{flag:'ch1_heardTheft'}, text:[
+        'くすし「みなみの こおりの どうくつ。くろい けものだよ」']},
+      {text:['くすし「よく きたね、わかい きし。なにを さがしに?」']}]},
+  ],
   versa_cast1: [
     {at:'10,4', name:'おう', lines:[
       {when:{flag:'ch1_cleared'}, text:[
-        'おう「よくぞ むすめを すくってくれた、リオン」',
-        '「だが きこう。この ねむりは ヴェルサだけの ことか？」',
-        '「……せかいじゅうで おきているなら、ことは おおきい」']},
+        'おう「ゆきぐさでも だめだった。……たびの したくは できておるか」',
+        '「せかいを みてこい、リオン。おなじ ねむりの もとを つきとめるのだ」']},
+      {when:{flag:'ch1_gotHerb'}, text:[
+        'おう「くすりが できたら、すぐに むすめの もとへ」']},
       {text:['おう「むすめが めを さまさぬ。いしゃも てだてが ないという」',
              '「たのむ、リオン。おまえだけが たよりだ」']},
     ]},
     {at:'8,7', name:'じい', lines:[
+      {when:{flag:'ch1_cleared'}, text:[
+        'じい「ゆきぐさが きかぬとは……。わしの しる くすりでは もう むりじゃ」']},
+      {when:{flag:'ch1_gotHerb'}, text:[
+        'じい「ゆきぐさを ミルカの くすしに わたすのじゃ。くすりに して もらえる」']},
+      {when:{flag:'ch1_heardTheft'}, text:[
+        'じい「まものに うばわれた とな。……とりかえすしか あるまい」']},
       {when:{flag:'ch1_sawPrincess'}, text:[
-        'じい「きたの せつげんの おくじゃ。こおりの どうくつを しらべてくれ」']},
+        'じい「にしの ミルカへ いくのじゃ。ゆきぐささえ あれば……」']},
       {text:['じい「おうじょさまは おくの ねまに おられる」',
              '「みて さしあげなさい。なにか わかるかもしれん」']},
     ]},
@@ -392,21 +440,47 @@ const QUESTS = {
       {id:'talk_guard', desc:'みなみもんの もんばんに はなす', flag:'ch1_talkedGate'},
       {id:'report',     desc:'きしだんちょうに ほうこくする', flag:'ch1_orderReceived'},
     ],
-    reward:{gold:100, item:null},
-    next:'ch1_q2_icecave',
+    reward:{gold:100}, next:'ch1_q2_herb',
   },
-  ch1_q2_icecave: {
-    id:'ch1_q2_icecave', chapter:1, title:'こおりの どうくつ',
-    giver:'きしだんちょう',
-    desc:'せつげんの おくの こおりの どうくつを しらべる。',
+  ch1_q2_herb: {
+    id:'ch1_q2_herb', chapter:1, title:'ゆきぐさを もとめて',
+    giver:'じい',
+    desc:'となりまち ミルカに ある くすりぐさ ＜ゆきぐさ＞ を もらいに いく。せつげんを にしへ。',
     steps:[
-      {id:'see_princess', desc:'おうじょさまを みる',       flag:'ch1_sawPrincess'},
-      {id:'enter_field',  desc:'せつげんへ でる',           flag:'ch1_enteredField'},
-      {id:'enter_cave',   desc:'こおりの どうくつに はいる', flag:'ch1_enteredCave'},
-      {id:'beat_boss',    desc:'さいしんぶの ぬしを たおす', flag:'ch1_cleared'},
+      {id:'see_princess', desc:'おうじょさまを みる',   flag:'ch1_sawPrincess'},
+      {id:'reach_mirka',  desc:'ミルカへ たどりつく',   flag:'ch1_reachedMirka'},
+      {id:'ask_kusushi',  desc:'くすしに はなしを きく', flag:'ch1_heardTheft'},
     ],
-    reward:{gold:300, item:null},
-    next:null,
+    reward:{}, next:'ch1_q3_retrieve',
+  },
+  ch1_q3_retrieve: {
+    id:'ch1_q3_retrieve', chapter:1, title:'うばわれた ゆきぐさ',
+    giver:'くすし',
+    desc:'ゆきぐさは まものに うばわれた。みなみの こおりの どうくつで とりかえす。',
+    steps:[
+      {id:'enter_cave', desc:'こおりの どうくつに はいる',   flag:'ch1_enteredCave'},
+      {id:'beat_boss',  desc:'さいしんぶの ぬしを たおす',   flag:'ch1_gotHerb'},
+    ],
+    reward:{}, next:'ch1_q4_medicine',
+  },
+  ch1_q4_medicine: {
+    id:'ch1_q4_medicine', chapter:1, title:'めざめの くすり',
+    giver:'くすし',
+    desc:'ゆきぐさを くすしに わたして くすりに して もらい、おうじょさまに つかう。',
+    steps:[
+      {id:'make',  desc:'くすしに ゆきぐさを わたす', flag:'ch1_madeMedicine'},
+      {id:'use',   desc:'おうじょさまに くすりを つかう', flag:'ch1_usedMedicine'},
+    ],
+    reward:{}, next:'ch1_q5_cause',
+  },
+  ch1_q5_cause: {
+    id:'ch1_q5_cause', chapter:1, title:'ねむりの もとを たずねて',
+    giver:'おう',
+    desc:'くすりが きかなかった。この ねむりの もとを つきとめるため、せかいへ たびだつ。',
+    steps:[
+      {id:'depart', desc:'たびに でる', flag:'ch1_departed'},
+    ],
+    reward:{}, next:null,
   },
 };
 
@@ -1110,8 +1184,8 @@ const MAPS = {
     "#====rrrrtrrrrrrrrrnrrtrrrro===#",
     "#==o======rr===========o=======#",
     "#=========rr=o=================#",
-    "#=ffff====rr=============fffff=#",
-    "#=fffn====rr======fffff==fffff=#",
+    "G==fff====rr=============fffff=#",
+    "G==ffn====rr======fffff==fffff=#",
     "#=ffff=o==rr======fffff==fffff=#",
     "#=ffff===trr======fffff==fffff=#",
     "#=ffff====rr======fffff==fffff=#",
@@ -1124,7 +1198,36 @@ const MAPS = {
     "#===================fffffff====#",
     "##########GG####################"
   ], warps:{}, warpsXY:{'15,0':{to:'versa_town',x:11,y:14},'16,0':{to:'versa_town',x:12,y:14},
-                        '10,23':{to:'versa_dgn1',x:9,y:14},'11,23':{to:'versa_dgn1',x:10,y:14}}},
+                        '10,23':{to:'versa_dgn1',x:9,y:14},'11,23':{to:'versa_dgn1',x:10,y:14},
+                        '0,11':{to:'versa_town2',x:10,y:13},'0,12':{to:'versa_town2',x:11,y:13}}},
+  versa_town2:{name:'くすしの むら ミルカ',theme:'snow',enc:false,tiles:[
+    "######################",
+    "#====================#",
+    "#=#T#==###rr=#T#=====#",
+    "#=###==###rr=###=D===#",
+    "#=###=I===rr=#S#=###=#",
+    "#f=======trr=n===###=#",
+    "#===rrrrrrrrrrrrr###=#",
+    "#===rrrrrrrrrrrrrr===#",
+    "#=======n=rr====n====#",
+    "#=#T#=n===rrt#T#====f#",
+    "#=###=P===rr=###=====#",
+    "#=###=====rn=###=====#",
+    "#f====f===rr====f=C==#",
+    "#====================#",
+    "##########GG##########"
+  ], warps:{}, warpsXY:{'10,14':{to:'versa_field1',x:1,y:11},'11,14':{to:'versa_field1',x:1,y:12},
+                        '17,3':{to:'versa_hut',x:5,y:6}}},
+  versa_hut:{name:'くすしの いえ',theme:'indoor',enc:false,tiles:[
+    "############",
+    "####rrrrrC##",
+    "####rnrrr###",
+    "#rrrrrrrrrr#",
+    "#rrrrrrrrrr#",
+    "#rrrrrrrrrr#",
+    "#rrrrrrrrrr#",
+    "#####DD#####"
+  ], warps:{}, warpsXY:{'5,7':{to:'versa_town2',x:18,y:3},'6,7':{to:'versa_town2',x:18,y:3}}},
   versa_cast1:{name:'ヴェルサ おうじょう',theme:'castle',enc:false,tiles:[
     "######################",
     "########rrKKrr########",
@@ -1324,7 +1427,8 @@ function freshState(){
   G = {mode:'field', menu:null, battle:null, flags:{}, visited:{}, gotTreasure:{},
        tactic:'manual', dex:{}, trail:[], stepFlip:false, cleared:false,
        chapter:1, chapters:{}, townState:'NORMAL', night:false, quests:{}, steps:0};
-  P = {map:'versa_town', x:11, y:14, dir:'front', gold:60, herbs:5, waters:0, equipBag:[]};
+  P = {map:'versa_town', x:11, y:14, dir:'front', gold:60, herbs:5, waters:0,
+       equipBag:[], keyItems:{}};
   party = [mkMember('lion',1)];
   party[0].weapon = {kind:'w',name:'みならいの けん',v:3};
   party[0].armor  = {kind:'a',name:'こまもり',v:2};
@@ -1440,23 +1544,43 @@ function stepField(dx,dy){
   }
   if(ch==='Z'){                       // ねむる おうじょ
     G.mode='msg';
-    if(G.flags.ch1_cleared){
-      U.msg(['おうじょ「……ながい ゆめを みていました」',
-             '「くろい けものが、わたしの ゆめの もんばんを していたの」',
-             '「たすけて くれて ありがとう、リオン」'], ()=>{ G.mode='field'; });
-    }else{
-      const first=!G.flags.ch1_sawPrincess;
-      G.flags.ch1_sawPrincess=true;
-      U.msg(first
-        ? ['ベッドに おうじょさまが ねむっている。',
-           'いくら よびかけても、まぶたは ひらかない。',
-           'じい「おうじょさまの ゆめに、なにかが すみついておる……」',
-           'じい「きたの せつげんの おくに こおりの どうくつが ある。',
-           'あそこから つめたい ゆめの けはいが ながれてくるのじゃ」',
-           '＊ クエスト「こおりの どうくつ」＊']
-        : ['おうじょさまは しずかに ねむっている。'],
-        ()=>{ if(first){ questAdvance('ch1_q2_icecave','active'); } G.mode='field'; });
+    const F=G.flags;
+    if(F.ch1_cleared){
+      U.msg(['おうじょさまは まだ ねむっている。',
+             'まくらもとの くすりの うつわは、からに なっている。'], ()=>{ G.mode='field'; });
+      return;
     }
+    if(hasKey('medicine') && !F.ch1_usedMedicine){        // ★くすりを つかう ばめん
+      F.ch1_usedMedicine=true; takeKey('medicine');
+      questAdvance('ch1_q4_medicine','clear');
+      U.msg([
+        'リオンは めざめの くすりを おうじょさまの くちもとへ はこんだ。',
+        'じい「……のみこまれた。あとは まつだけ じゃ」',
+        '……',
+        'しかし、まぶたは ひらかない。',
+        'じい「そんな ばかな。ゆきぐさが きかぬ ねむりなど……」',
+        'おう「では これは、ただの びょうでは ないと いうことか」'
+      ], ()=>{ triggerEnding(); });
+      return;
+    }
+    if(F.ch1_gotHerb && !hasKey('medicine')){
+      U.msg(['おうじょさまは ねむったまま。',
+             'じい「ゆきぐさを もってきたのじゃな。ミルカの くすしに くすりに して もらうのじゃ」'],
+        ()=>{ G.mode='field'; });
+      return;
+    }
+    const first=!F.ch1_sawPrincess;
+    F.ch1_sawPrincess=true;
+    U.msg(first
+      ? ['ベッドに おうじょさまが ねむっている。',
+         'いくら よびかけても、まぶたは ひらかない。',
+         'じい「わしの てには おえぬ。……ただ ひとつ、こころあたりが ある」',
+         'じい「となりまち ミルカに ＜ゆきぐさ＞ という くすりぐさが ある。',
+         'あれなら どんな ねむりも さますと いわれておる」',
+         'じい「せつげんを にしへ ぬければ ミルカじゃ。たのむぞ、リオン」',
+         '＊ クエスト「ゆきぐさを もとめて」＊']
+      : ['おうじょさまは しずかに ねむっている。'],
+      ()=>{ if(first) questAdvance('ch1_q2_herb','active'); G.mode='field'; });
     return;
   }
   if(ch==='F'){
@@ -1483,6 +1607,7 @@ function doWarp(w){
     G.trail=[[w.x,w.y],[w.x,w.y]];
     G.visited[w.to]=true;
     if(w.to==='versa_field1') G.flags.ch1_enteredField=true;
+    if(w.to==='versa_town2') G.flags.ch1_reachedMirka=true;
     if(w.to==='versa_dgn1' && !G.flags.ch1_enteredCave){
       G.flags.ch1_enteredCave=true;
       G.townState='DREAM_INVASION';        // まちが ゆめに しんしょくされる
@@ -1513,6 +1638,33 @@ function talkNPC(x,y){
 // ---------------- クエスト ----------------
 function questOnTalk(npcName){
   const F=G.flags;
+  // ---- ミルカの くすし ----
+  if(npcName==='くすし'){
+    if(F.ch1_gotHerb && !hasKey('medicine') && hasKey('yukigusa')){
+      takeKey('yukigusa'); giveKey('medicine');
+      F.ch1_madeMedicine=true;
+      questAdvance('ch1_q3_retrieve','clear');
+      questAdvance('ch1_q4_medicine','active');
+      U.msg(['くすし「まあ……ほんとうに とりかえして きたのかい」',
+             '（くすしは ゆきぐさを すりつぶし、ゆげの たつ くすりを つくった）',
+             '＊ めざめの くすりを てにいれた！ ＊',
+             'くすし「はやく おうじょさまの ところへ。さめる ことを いのってる」'], ()=>{});
+      return;
+    }
+    if(!F.ch1_heardTheft){
+      F.ch1_heardTheft=true;
+      questAdvance('ch1_q2_herb','clear');
+      questAdvance('ch1_q3_retrieve','active');
+      U.msg(['くすし「ゆきぐさを わけて ほしい？ ……それが ないんだよ」',
+             '「せんじつ、まものが かかえて いってしまってねえ」',
+             '「みなみの こおりの どうくつだよ。くろい けものだった」',
+             '「とりかえして きてくれるなら、くすりに して あげる」',
+             '＊ クエスト「うばわれた ゆきぐさ」＊'], ()=>{});
+      return;
+    }
+    return;
+  }
+  // ---- ヴェルサリア ----
   // へいおん中に きしだんちょうへ はなしかけると、じけんが うごきだす
   if(G.townState==='NORMAL' && npcName==='きしだんちょう' && !F.ch1_started){
     F.ch1_started=true;
@@ -1532,11 +1684,10 @@ function questOnTalk(npcName){
       F.ch1_orderReceived=true;
       P.gold += 100;
       questAdvance('ch1_q1_wakeup','clear');
-      questAdvance('ch1_q2_icecave','active');
-      U.msg(['きしだんちょう「よく しらべた。せつげんの おくを あたれ」',
+      U.msg(['きしだんちょう「よく しらべた。おうめいを だす、しろへ はいれ」',
+             '「じいが まっておる。おうじょさまを みてくるのだ」',
              '（したくきんとして 100ゴールドを うけとった）',
-             '＊ クエスト「めざめぬ おうじょ」を たっせい ＊',
-             '＊ あたらしい クエスト「こおりの どうくつ」＊'], ()=>{ U.hud(); });
+             '＊ クエスト「めざめぬ おうじょ」を たっせい ＊'], ()=>{ U.hud(); });
     }else if(!F.ch1_orderReceived){
       questAdvance('ch1_q1_wakeup','active');
     }
@@ -1604,15 +1755,38 @@ function openChest(x,y){
     U.msg(['たからばこを あけた！','まほうのせいすいを てにいれた！'], ()=>{ G.mode='field'; });
   }
 }
+// ---------------- 第1章の しめくくり ----------------
+function triggerEnding(){
+  G.flags.ch1_cleared=true;
+  G.cleared=true;
+  questAdvance('ch1_q5_cause','active');
+  U.msg([
+    'おう「リオン。おまえは よく やった。ゆきぐさまで とりもどした」',
+    '「だが むすめは めざめぬ。……これは ヴェルサだけの ことでは あるまい」',
+    'きしだんちょう「だんちょうとして いう。おまえを たびに だす」',
+    'おう「せかいを みてこい。おなじ ねむりが どこかで おきているなら、',
+    'その もとを つきとめるのだ」',
+    '',
+    'リオンは かるく うなずき、こしの けんに てを かけた。',
+    'まどの そとでは、むらさきの ゆきが しずかに ふりつづけている。'
+  ], ()=>{
+    V.chapterCard('第1章 完', 'わかき きし', ()=>{
+      G.mode='msg';
+      U.msg(['＊＊ だいいっしょう「わかき きし」 かんけつ ＊＊',
+             '（つづきの しょうは これから つくります）'], ()=>{ G.mode='field'; });
+    });
+  });
+}
 function triggerBoss(x,y){
   if(P.map==='versa_dgn2'){                 // 第1章ボス
     G.mode='msg';
-    if(G.flags.ch1_cleared){
+    if(G.flags.ch1_gotHerb){
       U.msg(['こおりの ゆかに、けものの あしあとだけが のこっている。'], ()=>{ G.mode='field'; });
       return;
     }
     U.msg(['どうくつの さいしんぶ。こおりの おくに、くろい けものが うずくまっている。',
-           '＜……ここは わたしの もの。ゆめは わたしが みはる＞',
+           'その あしもとに、あおく ひかる くさが かかえこまれている。',
+           '＜これは わたしの もの。だれにも わたさない＞',
            'ゆめの ばんけんが たちふさがった！'], ()=>{ startBattle('yumebanken'); });
     return;
   }
@@ -2124,17 +2298,18 @@ function victory(){
   });
   if(leveled) A.lvup();
   if(b.named==='yumebanken'){
-    G.flags.ch1_cleared=true;
-    questAdvance('ch1_q2_icecave','clear');
-    G.townState='NORMAL';                   // ゆめの しんしょくが はれる
+    G.flags.ch1_gotHerb=true;
+    giveKey('yukigusa');
+    questAdvance('ch1_q3_retrieve','clear');
+    questAdvance('ch1_q4_medicine','active');
+    G.townState='SLEEPING_SICKNESS';        // しんしょくは しりぞいたが びょうは のこる
     lines.push('',
       'ゆめの ばんけんは、しろい いきを はいて ほどけていった。',
       '＜……もう、みはらなくて いいのか＞',
-      'どうくつの こおりが、ゆっくりと とけはじめる。',
-      'とおく、まちの ほうから かねの おとが きこえた。',
+      'けものの いた あとに、あおく ひかる くさが のこされていた。',
       '',
-      '＊ おうじょさまが めを さました！ ＊');
-    V.chapterCard('第1章','わかき きし  かんけつ');
+      '＊ ゆきぐさを てにいれた！ ＊',
+      'これを もって ヴェルサリアへ もどろう。');
   }
   if(b.named==='desgran3'){
     G.flags.desgran=true; G.cleared=true;
@@ -2174,6 +2349,19 @@ function endBattle(won){
   });
 }
 
+// ---------------- だいじなもの（キーアイテム）----------------
+const KEY_ITEMS = {
+  yukigusa:{id:'yukigusa', name:'ゆきぐさ',
+            desc:'ミルカの くすしが つくる くすりの もと。まものに うばわれていた。'},
+  medicine:{id:'medicine', name:'めざめの くすり',
+            desc:'ゆきぐさから つくった くすり。ねむりを さます はず だった。'},
+};
+function hasKey(id){ return !!(P.keyItems && P.keyItems[id]); }
+function giveKey(id){ P.keyItems = P.keyItems || {}; P.keyItems[id] = true; }
+function takeKey(id){ if(P.keyItems) delete P.keyItems[id]; }
+function keyItemList(){
+  return Object.keys(P.keyItems||{}).map(k=>KEY_ITEMS[k]).filter(Boolean);
+}
 // ---------------- どうぐ（せんとうの そとで つかう）----------------
 function itemList(){
   const out=[];
@@ -2305,7 +2493,7 @@ function saveGame(s, slot){
     st.setItem(SAVE_SLOTS[slot||0], JSON.stringify({
       v:SAVE_VERSION, at:Date.now(),
       map:P.map, x:P.x, y:P.y, dir:P.dir,
-      gold:P.gold, herbs:P.herbs, waters:P.waters, equipBag:P.equipBag,
+      gold:P.gold, herbs:P.herbs, waters:P.waters, equipBag:P.equipBag, keyItems:P.keyItems,
       party: party.map(serializeMember),
       chapter:G.chapter, chapters:G.chapters,
       flags:G.flags, quests:G.quests,
@@ -2330,6 +2518,7 @@ function loadGame(s, slot){
     P.herbs = Math.max(0, d.herbs|0);
     P.waters = Math.max(0, d.waters|0);
     P.equipBag = Array.isArray(d.equipBag) ? d.equipBag : [];
+    P.keyItems = (d.keyItems && typeof d.keyItems==='object') ? d.keyItems : {};
     P.dir = d.dir || 'front';
     const land = safeLanding(d.map, d.x|0, d.y|0);
     P.map = land.map; P.x = land.x; P.y = land.y;
@@ -2404,6 +2593,7 @@ return {
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
   itemList, useItemField, equipCandidates, equipFromBag, unequip, equipSummary, slotOf,
+  KEY_ITEMS, hasKey, giveKey, takeKey, keyItemList,
   setTownState, setNight, townStateDef, questList, questAdvance, startChapter,
   // 差し替え
   bind, NullView, NullUI, NullAudio,
@@ -3799,9 +3989,21 @@ function openFieldMenu(){
 // ---------------- どうぐ ----------------
 function openItems(){
   const items=C.itemList();
-  if(!items.length){ msg2(['どうぐを なにも もっていない。'],()=>{C.G.mode='field';}); return; }
-  menu(items.map(it=>it.name+'　'+it.num).concat(['もどる']),'どうぐ',(k)=>{
-    if(k>=items.length){ C.G.mode='field'; return; }
+  const keys=C.keyItemList();
+  const opts=items.map(it=>it.name+'　'+it.num)
+    .concat(keys.map(k=>'◆'+k.name))
+    .concat(['もどる']);
+  if(!opts.length===0){ }
+  if(!items.length && !keys.length){
+    msg2(['どうぐを なにも もっていない。'],()=>{C.G.mode='field';}); return;
+  }
+  menu(opts,'どうぐ',(k)=>{
+    if(k>=items.length+keys.length){ C.G.mode='field'; return; }
+    if(k>=items.length){                    // だいじなもの は せつめいを みるだけ
+      const ki=keys[k-items.length];
+      msg2(['◆'+ki.name, '　'+ki.desc], ()=>{ C.G.mode='menu'; openItems(); });
+      return;
+    }
     const it=items[k];
     if(C.party.length===1){ applyItem(it.kind,0); return; }
     menu(C.party.map(m=>m.name+'　HP'+m.hp+'/'+m.maxhp).concat(['もどる']),
