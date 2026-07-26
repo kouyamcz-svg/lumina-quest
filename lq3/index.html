@@ -14,6 +14,8 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans',sans-serif;overflow:hidden}
 #stage{position:relative;width:100%;height:60%;background:#000;overflow:hidden}
 #gl{width:100%;height:100%;display:block;image-rendering:pixelated}
+#gl2d{position:absolute;inset:0;width:100%;height:100%;display:none;
+  image-rendering:pixelated}
 #label{position:absolute;top:calc(env(safe-area-inset-top,0px) + 6px);left:8px;
   background:rgba(8,6,20,.75);padding:3px 10px;font-size:13px;
   border:1px solid #4a4270;border-radius:4px;letter-spacing:.05em}
@@ -84,6 +86,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
 </div>
 <div id="stage">
   <canvas id="gl"></canvas>
+  <canvas id="gl2d"></canvas>
   <div id="label"></div>
   <div id="hud"></div>
   <div id="cmd-win"></div>
@@ -97,7 +100,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T15:06:50", "assets_sha": "76aac0bb", "lines": {"world": 130, "npc": 185, "core": 1509, "view": 1148, "ui": 360}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T23:24:01", "assets_sha": "76aac0bb", "lines": {"world": 135, "npc": 185, "core": 1509, "view2d": 469, "view": 1194, "ui": 360}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -182,23 +185,28 @@ const MAP_IDS = {
 
 // ---------------- シーン名 ----------------
 // ビューの見た目（背景・霧・ライト・演出）を決める識別子
+// render: '2d' ＝ ドットえ（まち・フィールド・ダンジョン）／ '3d' ＝ しろの なか だけ
 const SCENES = {
-  SCENE_VERSA_TOWN:   {theme:'snow',   outdoor:true,  snowfall:true,  aurora:true,  footprints:true},
-  SCENE_VERSA_FIELD:  {theme:'snow',   outdoor:true,  snowfall:true,  aurora:true,  footprints:true},
-  SCENE_VERSA_CASTLE: {theme:'castle', outdoor:false, snowfall:false, aurora:false, footprints:false},
-  SCENE_VERSA_ICECAVE:{theme:'ice',    outdoor:false, snowfall:false, aurora:false, footprints:false},
-  SCENE_VERSA_INN:    {theme:'indoor', outdoor:false},
-  SCENE_VERSA_CHURCH: {theme:'indoor', outdoor:false},
-  SCENE_VERSA_WEAPON: {theme:'indoor', outdoor:false},
-  SCENE_VERSA_MAGIC:  {theme:'indoor', outdoor:false},
-  SCENE_OLD_TOROS:    {theme:'village',outdoor:true},
-  SCENE_OLD_FIELD:    {theme:'field',  outdoor:true},
-  SCENE_OLD_CAVE1:    {theme:'cave',   outdoor:false},
-  SCENE_OLD_CAVE2:    {theme:'cave',   outdoor:false},
-  SCENE_OLD_CAVE3:    {theme:'cave',   outdoor:false},
-  SCENE_OLD_HOUSE1:   {theme:'indoor', outdoor:false},
-  SCENE_OLD_HOUSE2:   {theme:'indoor', outdoor:false},
+  SCENE_VERSA_TOWN:   {render:'2d', theme:'snow',   outdoor:true,  snowfall:true,  aurora:true,  footprints:true},
+  SCENE_VERSA_FIELD:  {render:'2d', theme:'snow',   outdoor:true,  snowfall:true,  aurora:true,  footprints:true},
+  SCENE_VERSA_CASTLE: {render:'3d', theme:'castle', outdoor:false, snowfall:false, aurora:false, footprints:false},
+  SCENE_VERSA_ICECAVE:{render:'2d', theme:'ice',    outdoor:false, snowfall:false, aurora:false, footprints:false},
+  SCENE_VERSA_INN:    {render:'2d', theme:'indoor', outdoor:false},
+  SCENE_VERSA_CHURCH: {render:'2d', theme:'indoor', outdoor:false},
+  SCENE_VERSA_WEAPON: {render:'2d', theme:'indoor', outdoor:false},
+  SCENE_VERSA_MAGIC:  {render:'2d', theme:'indoor', outdoor:false},
+  SCENE_OLD_TOROS:    {render:'2d', theme:'village',outdoor:true},
+  SCENE_OLD_FIELD:    {render:'2d', theme:'field',  outdoor:true},
+  SCENE_OLD_CAVE1:    {render:'2d', theme:'cave',   outdoor:false},
+  SCENE_OLD_CAVE2:    {render:'2d', theme:'cave',   outdoor:false},
+  SCENE_OLD_CAVE3:    {render:'2d', theme:'cave',   outdoor:false},
+  SCENE_OLD_HOUSE1:   {render:'2d', theme:'indoor', outdoor:false},
+  SCENE_OLD_HOUSE2:   {render:'2d', theme:'indoor', outdoor:false},
 };
+function renderModeOf(mapId){
+  const s = SCENES[(MAP_IDS[mapId]||{}).scene] || {};
+  return s.render || '2d';
+}
 
 // ---------------- 街の状態 ----------------
 // 物語の進行で街の見た目・NPCの台詞・BGMが変わる
@@ -233,7 +241,7 @@ function regionOf(mapId){
   return m ? REGIONS[m.region] : null;
 }
 
-return {REGIONS, CHAPTERS, MAP_IDS, SCENES, TOWN_STATES, sceneOf, mapName, regionOf};
+return {REGIONS, CHAPTERS, MAP_IDS, SCENES, TOWN_STATES, sceneOf, mapName, regionOf, renderModeOf};
 })();
 
 </script>
@@ -420,6 +428,476 @@ function npcAt(mapId, x, y){
   return list.find(n=>n.at === (x+','+y)) || null;
 }
 return {NPCS, QUESTS, pickLines, npcAt};
+})();
+
+</script>
+<script>'use strict';
+// ============================================================
+// ルミナクエストIII / 2Dドットえ レンダラ
+// まち・フィールド・ダンジョンは こちらで えがく（3Dは しろの なかだけ）。
+// みおろしがた。タイルは きどうじに てつづきで えがいて アトラスに ためる。
+// ============================================================
+const View2D = (function(){
+
+const TS = 32;                 // タイル1まいの ドットすう
+let cv, cx, W = 0, H = 0;      // キャンバスと ろんりサイズ
+let atlas = {};                // ch → キャンバス
+let curMap = null, curScene = {}, curNight = false, curTS = null;
+let camX = 0, camY = 0;        // カメラの ちゅうしん（タイルたんい）
+let snow = [], foot = [], flakes = 0;
+let fadeV = 0;
+let C = null;                  // LQ3 への さんしょう
+let CHRREF = null;             // キャラのスプライト
+let imgCache = {};
+
+// ---------------- しょきか ----------------
+function init(canvas, core, chr){
+  cv = canvas; cx = cv.getContext('2d');
+  cx.imageSmoothingEnabled = false;
+  C = core; CHRREF = chr;
+  buildAtlas();
+}
+function px(n){ return Math.round(n); }
+function mk(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
+
+// ---------------- タイルの え ----------------
+function noise(g, n, colors, w, h){
+  for(let i=0;i<n;i++){
+    g.fillStyle = colors[(Math.random()*colors.length)|0];
+    g.fillRect((Math.random()*w)|0, (Math.random()*h)|0, 2, 2);
+  }
+}
+function tile(draw){
+  const c = mk(TS,TS); const g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  draw(g, TS);
+  return c;
+}
+function buildAtlas(){
+  atlas = {};
+  // --- ゆき ---
+  atlas.snow = tile((g,s)=>{
+    g.fillStyle='#eef4fb'; g.fillRect(0,0,s,s);
+    noise(g, 26, ['#e2ecf7','#f8fbff','#dbe6f4'], s, s);
+    g.fillStyle='rgba(255,255,255,0.95)';
+    for(let i=0;i<4;i++) g.fillRect((Math.random()*s)|0,(Math.random()*s)|0,1,1);
+  });
+  // --- くさち（きゅうたいりく）---
+  atlas.grass = tile((g,s)=>{
+    g.fillStyle='#4f9a3e'; g.fillRect(0,0,s,s);
+    noise(g, 30, ['#428a34','#5cab4a','#68b855'], s, s);
+    g.fillStyle='#78c45e';
+    for(let i=0;i<8;i++){ const x=(Math.random()*s)|0,y=(Math.random()*s)|0;
+      g.fillRect(x,y,1,3); g.fillRect(x+1,y+1,1,2); }
+  });
+  // --- いしだたみ ---
+  atlas.pave = tile((g,s)=>{
+    g.fillStyle='#8e93a2'; g.fillRect(0,0,s,s);
+    for(let j=0;j<2;j++){ const off=j%2?s/4:0;
+      for(let i=-1;i<3;i++){
+        const bx=i*(s/2)+off+1, by=j*(s/2)+1, bw=s/2-2, bh=s/2-2;
+        const t=0.88+Math.random()*0.22;
+        g.fillStyle=`rgb(${162*t|0},${168*t|0},${182*t|0})`; g.fillRect(bx,by,bw,bh);
+        g.fillStyle='rgba(255,255,255,0.35)'; g.fillRect(bx,by,bw,1);
+        g.fillStyle='rgba(40,48,64,0.35)'; g.fillRect(bx,by+bh-1,bw,1);
+      }}
+  });
+  // --- みち（つち）---
+  atlas.road = tile((g,s)=>{
+    g.fillStyle='#8a7a58'; g.fillRect(0,0,s,s);
+    noise(g, 24, ['#7a6a4a','#9a8a66','#a89670'], s, s);
+  });
+  // --- こおりの ゆか ---
+  atlas.ice = tile((g,s)=>{
+    g.fillStyle='#9fd0ea'; g.fillRect(0,0,s,s);
+    noise(g, 18, ['#8cc2e2','#b4dcf2'], s, s);
+    g.strokeStyle='rgba(255,255,255,0.6)'; g.lineWidth=1;
+    g.beginPath(); g.moveTo(3,s-6); g.lineTo(10,s-14); g.lineTo(8,4); g.stroke();
+    g.beginPath(); g.moveTo(s-4,6); g.lineTo(s-12,14); g.stroke();
+  });
+  // --- しろい いしかべ（うえから みた かべ）---
+  atlas.wall = tile((g,s)=>{
+    g.fillStyle='#aab2c0'; g.fillRect(0,0,s,s);
+    for(let j=0;j<4;j++){ const off=j%2?s/6:0;
+      for(let i=-1;i<4;i++){
+        const bx=i*(s/3)+off+1, by=j*(s/4)+1, bw=s/3-2, bh=s/4-2;
+        const t=0.92+Math.random()*0.18;
+        g.fillStyle=`rgb(${226*t|0},${232*t|0},${240*t|0})`; g.fillRect(bx,by,bw,bh);
+        g.fillStyle='rgba(120,130,150,0.5)'; g.fillRect(bx,by+bh-1,bw,1);
+      }}
+    g.fillStyle='rgba(255,255,255,0.85)'; g.fillRect(0,0,s,3);   // てっぺんの ゆき
+    g.fillStyle='rgba(30,36,52,0.35)'; g.fillRect(0,s-3,s,3);
+  });
+  // --- こおりの かべ ---
+  atlas.icewall = tile((g,s)=>{
+    g.fillStyle='#33587c'; g.fillRect(0,0,s,s);
+    for(let i=0;i<10;i++){ const bx=(Math.random()*s)|0, w=2+((Math.random()*4)|0);
+      const t=0.7+Math.random()*0.6;
+      g.fillStyle=`rgb(${88*t|0},${150*t|0},${196*t|0})`; g.fillRect(bx,0,w,s); }
+    g.fillStyle='rgba(220,244,255,0.5)'; g.fillRect(0,0,s,2);
+    g.fillStyle='rgba(10,20,36,0.45)'; g.fillRect(0,s-3,s,3);
+  });
+  // --- いわかべ（きゅうたいりくの どうくつ）---
+  atlas.rockwall = tile((g,s)=>{
+    g.fillStyle='#4a4436'; g.fillRect(0,0,s,s);
+    noise(g, 40, ['#5c5442','#6a6250','#3e392c'], s, s);
+    g.fillStyle='rgba(200,196,180,0.25)'; g.fillRect(0,0,s,2);
+    g.fillStyle='rgba(0,0,0,0.4)'; g.fillRect(0,s-3,s,3);
+  });
+  // --- みず ---
+  atlas.water = tile((g,s)=>{
+    g.fillStyle='#1c4f8a'; g.fillRect(0,0,s,s);
+    noise(g, 14, ['#2a66aa','#174276'], s, s);
+    g.strokeStyle='rgba(220,240,255,0.55)'; g.lineWidth=1;
+    for(let i=0;i<2;i++){
+      const y=6+i*12;
+      g.beginPath(); g.moveTo(2,y); g.quadraticCurveTo(s/2,y-3,s-2,y); g.stroke();
+    }
+  });
+  // --- ゆきの き ---
+  atlas.tree = tile((g,s)=>{
+    g.drawImage(atlas.snow,0,0);
+    g.fillStyle='#5a4632'; g.fillRect(s/2-2,s-9,4,8);
+    for(let k=0;k<3;k++){
+      const w=(s-6)-k*6, y=s-12-k*7;
+      g.fillStyle='#2c5a44';
+      g.beginPath(); g.moveTo(s/2,y-8); g.lineTo(s/2-w/2,y+2); g.lineTo(s/2+w/2,y+2); g.closePath(); g.fill();
+      g.fillStyle='#f4f9ff';
+      g.beginPath(); g.moveTo(s/2,y-8); g.lineTo(s/2-w/3,y-2); g.lineTo(s/2+w/3,y-2); g.closePath(); g.fill();
+    }
+  });
+  // --- ひろばの き（くさち）---
+  atlas.tree_g = tile((g,s)=>{
+    g.drawImage(atlas.grass,0,0);
+    g.fillStyle='#5a4632'; g.fillRect(s/2-2,s-9,4,8);
+    g.fillStyle='#2c7a34';
+    g.beginPath(); g.arc(s/2,s/2-2,10,0,Math.PI*2); g.fill();
+    g.fillStyle='#3f9a44';
+    g.beginPath(); g.arc(s/2-3,s/2-5,7,0,Math.PI*2); g.fill();
+  });
+  // --- いわ／つらら ---
+  atlas.rock = tile((g,s)=>{
+    g.fillStyle='#8a8f9c';
+    g.beginPath(); g.moveTo(4,s-4); g.lineTo(8,10); g.lineTo(s/2,4);
+    g.lineTo(s-8,12); g.lineTo(s-4,s-4); g.closePath(); g.fill();
+    g.fillStyle='rgba(255,255,255,0.3)';
+    g.beginPath(); g.moveTo(8,10); g.lineTo(s/2,4); g.lineTo(s/2-2,14); g.closePath(); g.fill();
+  });
+  atlas.icicle = tile((g,s)=>{
+    g.fillStyle='rgba(160,215,240,0.95)';
+    g.beginPath(); g.moveTo(s/2,3); g.lineTo(s-7,s-5); g.lineTo(7,s-5); g.closePath(); g.fill();
+    g.fillStyle='rgba(255,255,255,0.7)';
+    g.beginPath(); g.moveTo(s/2,3); g.lineTo(s/2+3,s-6); g.lineTo(s/2-3,s-6); g.closePath(); g.fill();
+  });
+  // --- たいまつ ---
+  atlas.torch = tile((g,s)=>{
+    g.fillStyle='#3a2a1a'; g.fillRect(s/2-2,s/2,4,s/2-3);
+    g.fillStyle='#ff9a30';
+    g.beginPath(); g.ellipse(s/2,s/2-3,5,8,0,0,Math.PI*2); g.fill();
+    g.fillStyle='#ffe070';
+    g.beginPath(); g.ellipse(s/2,s/2-2,2.5,5,0,0,Math.PI*2); g.fill();
+  });
+  // --- たからばこ ---
+  atlas.chest = tile((g,s)=>{
+    g.fillStyle='#7a5a34'; g.fillRect(5,10,s-10,s-15);
+    g.fillStyle='#a07a48'; g.fillRect(5,10,s-10,7);
+    g.fillStyle='#d9a832'; g.fillRect(5,16,s-10,3);
+    g.fillStyle='#d9a832'; g.fillRect(s/2-2,17,4,5);
+    g.strokeStyle='#20180c'; g.lineWidth=1; g.strokeRect(5.5,10.5,s-11,s-16);
+  });
+  atlas.chest_open = tile((g,s)=>{
+    g.fillStyle='#5c4426'; g.fillRect(5,14,s-10,s-19);
+    g.fillStyle='#2a1e10'; g.fillRect(7,16,s-14,6);
+    g.fillStyle='#a07a48'; g.fillRect(4,7,s-8,5);
+    g.strokeStyle='#20180c'; g.lineWidth=1; g.strokeRect(5.5,14.5,s-11,s-20);
+  });
+  // --- かいだん ---
+  atlas.stairs = tile((g,s)=>{
+    g.fillStyle='#6e6a60'; g.fillRect(0,0,s,s);
+    for(let i=0;i<4;i++){
+      g.fillStyle=i%2?'#8e8a80':'#7a766c';
+      g.fillRect(3+i*2, 4+i*7, s-6-i*4, 6);
+      g.fillStyle='rgba(0,0,0,0.3)'; g.fillRect(3+i*2, 9+i*7, s-6-i*4, 1);
+    }
+  });
+  // --- もん（みなみもん）---
+  atlas.gate = tile((g,s)=>{
+    g.drawImage(atlas.pave,0,0);
+    g.fillStyle='#dde4f0'; g.fillRect(1,2,6,s-4); g.fillRect(s-7,2,6,s-4);
+    g.fillStyle='#2f5a9e';
+    g.beginPath(); g.moveTo(4,2); g.lineTo(1,-4); g.lineTo(7,-4); g.closePath(); g.fill();
+    g.fillStyle='rgba(30,40,60,0.35)'; g.fillRect(1,s-4,6,3); g.fillRect(s-7,s-4,6,3);
+  });
+  // --- たてもの（やど・きょうかい・ぶきや・まほうてん）---
+  function building(bodyCol, roofCol, signCol){
+    return tile((g,s)=>{
+      g.fillStyle='rgba(20,26,40,0.25)'; g.fillRect(2,s-5,s-4,4);
+      g.fillStyle=bodyCol; g.fillRect(3,s/2-2,s-6,s/2);
+      g.strokeStyle='#5a6070'; g.lineWidth=1; g.strokeRect(3.5,s/2-1.5,s-7,s/2-1);
+      g.fillStyle=roofCol;
+      g.beginPath(); g.moveTo(s/2,2); g.lineTo(s-1,s/2-1); g.lineTo(1,s/2-1); g.closePath(); g.fill();
+      g.fillStyle='rgba(246,250,255,0.85)';
+      g.beginPath(); g.moveTo(s/2,2); g.lineTo(s/2+7,s/2-6); g.lineTo(s/2-7,s/2-6); g.closePath(); g.fill();
+      g.fillStyle=signCol; g.fillRect(s/2-5,s/2+3,10,6);
+      g.fillStyle='rgba(0,0,0,0.45)'; g.fillRect(s/2-3,s-9,6,8);
+    });
+  }
+  atlas.inn    = building('#e8dcc0','#2f5a9e','#f0d060');
+  atlas.church = building('#f0f0fa','#2f5a9e','#eaeaff');
+  atlas.weapon = building('#d8c8b0','#2f5a9e','#c86050');
+  atlas.magic  = building('#d0c8e8','#2f5a9e','#8a6ad0');
+  atlas.shop   = building('#d8c8b0','#8a5a2a','#f0a050');
+  // --- おうじょうの もん ---
+  atlas.castgate = tile((g,s)=>{
+    g.fillStyle='#c8d0e0'; g.fillRect(0,0,s,s);
+    g.fillStyle='#8f98ac'; g.fillRect(2,2,s-4,s-4);
+    g.fillStyle='#2b2038'; g.fillRect(s/2-6,s/2-4,12,s/2+2);
+    g.beginPath(); g.arc(s/2,s/2-4,6,Math.PI,0); g.fill();
+    g.fillStyle='#d9a832'; g.fillRect(s/2-7,s/2+8,14,2);
+  });
+  // --- ふんすい ---
+  atlas.fountain = tile((g,s)=>{
+    g.drawImage(atlas.pave,0,0);
+    g.fillStyle='#c8d0e0'; g.beginPath(); g.arc(s/2,s/2,13,0,Math.PI*2); g.fill();
+    g.fillStyle='#9fd8f0'; g.beginPath(); g.arc(s/2,s/2,10,0,Math.PI*2); g.fill();
+    g.fillStyle='#e8f6ff'; g.beginPath(); g.arc(s/2,s/2-2,3,0,Math.PI*2); g.fill();
+    g.fillStyle='#c8d0e0'; g.fillRect(s/2-2,s/2-8,4,7);
+  });
+  // --- とびら（みんか）---
+  atlas.door = tile((g,s)=>{
+    g.drawImage(atlas.wall,0,0);
+    g.fillStyle='#7a5a34'; g.fillRect(s/2-7,s/2-2,14,s/2);
+    g.fillStyle='#d9a832'; g.fillRect(s/2+3,s/2+6,2,2);
+  });
+  // --- せんとう（ゆきぐにの とうろう）---
+  atlas.tower = tile((g,s)=>{
+    g.fillStyle='rgba(20,26,40,0.25)'; g.fillRect(4,s-5,s-8,4);
+    g.fillStyle='#dde4f0'; g.fillRect(s/2-7,s/2-2,14,s/2);
+    g.fillStyle='#2f5a9e';
+    g.beginPath(); g.moveTo(s/2,0); g.lineTo(s/2+10,s/2-1); g.lineTo(s/2-10,s/2-1); g.closePath(); g.fill();
+    g.fillStyle='#f2f6ff'; g.beginPath(); g.arc(s/2,1,2.5,0,Math.PI*2); g.fill();
+  });
+}
+
+// ---------------- タイル → え の わりあて ----------------
+function tileArt(ch, theme){
+  const ice = theme==='ice', snowT = theme==='snow', cave = theme==='cave';
+  switch(ch){
+    case '#': return ice?atlas.icewall : (cave?atlas.rockwall : atlas.wall);
+    case 'w': return atlas.water;
+    case 'f': return snowT?atlas.tree : atlas.tree_g;
+    case 'o': return ice?atlas.icicle : atlas.rock;
+    case 't': return atlas.torch;
+    case 'C': return atlas.chest;
+    case 'I': return atlas.inn;
+    case 'P': return atlas.church;
+    case 'W': return atlas.weapon;
+    case 'M': return atlas.magic;
+    case 'S': return atlas.shop;
+    case 'K': return atlas.castgate;
+    case 'F': return atlas.fountain;
+    case 'G': return atlas.gate;
+    case 'T': return atlas.tower;
+    case 'D': return atlas.door;
+    case '<': case '>': return atlas.stairs;
+    default:  return null;    // ゆか は したで えがく
+  }
+}
+function floorArt(theme){
+  return theme==='snow' ? atlas.snow
+       : theme==='ice'  ? atlas.ice
+       : theme==='cave' ? atlas.road
+       : theme==='village' || theme==='field' ? atlas.grass
+       : atlas.pave;
+}
+function roadArt(theme){
+  return theme==='snow' ? atlas.pave
+       : theme==='ice'  ? atlas.ice
+       : theme==='cave' ? atlas.road
+       : atlas.road;
+}
+
+// ---------------- マップの じゅんび ----------------
+function buildMap(name){
+  curMap = name;
+  curScene = (C.WORLD && C.WORLD.sceneOf) ? C.WORLD.sceneOf(name) : {};
+  curTS = C.townStateDef ? C.townStateDef() : null;
+  curNight = !!(C.G && C.G.night) && !!curScene.outdoor;
+  snow = []; foot = [];
+  const m = C.MAPS[name];
+  flakes = curScene.snowfall ? 90 : 0;
+  for(let i=0;i<flakes;i++)
+    snow.push({x:Math.random(), y:Math.random(), v:0.25+Math.random()*0.5, s:1+Math.random()*2});
+}
+function resize(){
+  if(!cv) return;
+  const r = cv.getBoundingClientRect();
+  const dpr = Math.min(devicePixelRatio||1, 2);
+  cv.width  = Math.max(1, Math.round(r.width*dpr));
+  cv.height = Math.max(1, Math.round(r.height*dpr));
+  cx = cv.getContext('2d'); cx.imageSmoothingEnabled = false;
+  W = cv.width; H = cv.height;
+}
+
+// ---------------- あしあと ----------------
+let lastTile = null;
+function noteStep(x,y,side){
+  if(!curScene.footprints) return;
+  const k = x+','+y;
+  if(k===lastTile) return;
+  lastTile = k;
+  foot.push({x, y, side:!!side, life:1});
+  if(foot.length>40) foot.shift();
+}
+
+// ---------------- びょうが ----------------
+function draw(dt, time, actors){
+  if(!cv || !curMap) return;
+  const m = C.MAPS[curMap];
+  if(!m) return;
+  const rows = m.tiles, MW = rows[0].length, MH = rows.length;
+  const theme = m.theme;
+  const dpr = Math.min(devicePixelRatio||1, 2);
+  const scale = Math.max(2, Math.round((H/dpr) / (9*TS) * dpr));   // たてに 9タイルくらい
+  const ts = TS*scale;
+
+  // カメラ（プレイヤーちゅうしん・はしで とめる）
+  const p = actors && actors[0] ? actors[0] : {x:C.P.x, y:C.P.y};
+  const viewW = W/ts, viewH = H/ts;
+  camX = Math.min(Math.max(p.x+0.5, viewW/2), Math.max(viewW/2, MW-viewW/2));
+  camY = Math.min(Math.max(p.y+0.5, viewH/2), Math.max(viewH/2, MH-viewH/2));
+  const ox = W/2 - camX*ts, oy = H/2 - camY*ts;
+
+  // はいけい
+  cx.fillStyle = theme==='ice' ? '#0d2036' : theme==='cave' ? '#0a1020'
+               : curNight ? '#141a30' : '#1a2436';
+  cx.fillRect(0,0,W,H);
+
+  const x0 = Math.max(0, Math.floor(-ox/ts)-1), x1 = Math.min(MW-1, Math.ceil((W-ox)/ts)+1);
+  const y0 = Math.max(0, Math.floor(-oy/ts)-1), y1 = Math.min(MH-1, Math.ceil((H-oy)/ts)+1);
+  const floor = floorArt(theme), road = roadArt(theme);
+
+  // ① ゆか
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+    const ch = rows[y][x];
+    const base = (ch==='r') ? road : floor;
+    cx.drawImage(base, px(ox+x*ts), px(oy+y*ts), ts, ts);
+  }
+  // ② あしあと（ゆきの うえ）
+  if(curScene.footprints){
+    foot.forEach(f=>{
+      cx.globalAlpha = Math.max(0, f.life)*0.45;
+      cx.fillStyle = '#8fa2bd';
+      const fx = ox+f.x*ts + ts*(f.side?0.58:0.30), fy = oy+f.y*ts + ts*0.55;
+      cx.fillRect(px(fx), px(fy), Math.max(2,scale*3), Math.max(3,scale*4));
+      cx.globalAlpha = 1;
+    });
+  }
+  // ③ ちけい・たてもの（うしろから じゅんに）
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+    const ch = rows[y][x];
+    if(ch==='C' && C.G.gotTreasure[curMap+':'+x+','+y]){
+      cx.drawImage(atlas.chest_open, px(ox+x*ts), px(oy+y*ts), ts, ts); continue;
+    }
+    const art = tileArt(ch, theme);
+    if(art) cx.drawImage(art, px(ox+x*ts), px(oy+y*ts), ts, ts);
+    if(ch==='n') drawNPC(ox+x*ts, oy+y*ts, ts, x, y);
+    if(ch==='B' && !(C.G.flags.ch1_cleared && curMap.startsWith('versa'))) drawBoss(ox+x*ts, oy+y*ts, ts);
+  }
+  // ④ キャラ（Yじゅんに かさねる）
+  const list = (actors||[]).slice().sort((a,b)=>a.y-b.y);
+  list.forEach(a=>drawChar(a, ox, oy, ts, time));
+
+  // ⑤ てんこう・じかん
+  if(flakes) drawSnow(dt, ts);
+  if(curNight && curScene.aurora) drawAurora(time);
+  drawTint();
+  if(fadeV>0){ cx.fillStyle='rgba(0,0,0,'+fadeV+')'; cx.fillRect(0,0,W,H); }
+}
+function drawNPC(dx,dy,ts,x,y){
+  const s=ts;
+  cx.fillStyle='rgba(20,26,40,0.3)';
+  cx.fillRect(px(dx+s*0.28), px(dy+s*0.78), s*0.44, s*0.12);
+  cx.fillStyle='#3f5a9e'; cx.fillRect(px(dx+s*0.30), px(dy+s*0.38), s*0.40, s*0.42);
+  cx.fillStyle='#f2c79c'; cx.fillRect(px(dx+s*0.33), px(dy+s*0.18), s*0.34, s*0.24);
+  cx.fillStyle='#5c4a3a'; cx.fillRect(px(dx+s*0.31), px(dy+s*0.14), s*0.38, s*0.12);
+  cx.fillStyle='#181420';
+  cx.fillRect(px(dx+s*0.38), px(dy+s*0.26), Math.max(1,s*0.05), Math.max(1,s*0.06));
+  cx.fillRect(px(dx+s*0.57), px(dy+s*0.26), Math.max(1,s*0.05), Math.max(1,s*0.06));
+}
+function drawBoss(dx,dy,ts){
+  const s=ts;
+  cx.fillStyle='rgba(60,20,80,0.5)';
+  cx.beginPath(); cx.ellipse(dx+s/2, dy+s*0.6, s*0.42, s*0.34, 0, 0, Math.PI*2); cx.fill();
+  cx.fillStyle='#c8324a';
+  cx.fillRect(px(dx+s*0.32), px(dy+s*0.45), Math.max(2,s*0.09), Math.max(2,s*0.07));
+  cx.fillRect(px(dx+s*0.59), px(dy+s*0.45), Math.max(2,s*0.09), Math.max(2,s*0.07));
+}
+function getImg(src){
+  if(!imgCache[src]){ const i=new Image(); i.src=src; imgCache[src]=i; }
+  return imgCache[src];
+}
+function drawChar(a, ox, oy, ts, time){
+  const d = CHRREF && CHRREF[a.cls];
+  const dx = ox + a.x*ts, dy = oy + a.y*ts;
+  cx.fillStyle='rgba(16,20,34,0.30)';
+  cx.beginPath(); cx.ellipse(dx+ts/2, dy+ts*0.86, ts*0.26, ts*0.10, 0, 0, Math.PI*2); cx.fill();
+  if(!d){ cx.fillStyle='#c8d0e0'; cx.fillRect(px(dx+ts*0.3),px(dy+ts*0.2),ts*0.4,ts*0.6); return; }
+  let pose = a.pose in d ? a.pose : 'front';
+  const img = getImg(d[pose]);
+  if(!img.complete || !img.naturalWidth) return;
+  const hh = ts*1.35, ww = hh*(d.w/d.h);
+  const bx = dx + ts/2 - ww/2, by = dy + ts*0.92 - hh + (a.bob||0)*ts;
+  cx.save();
+  if(a.flip){ cx.translate(bx+ww, by); cx.scale(-1,1); cx.drawImage(img, 0, 0, ww, hh); }
+  else cx.drawImage(img, px(bx), px(by), ww, hh);
+  cx.restore();
+}
+function drawSnow(dt, ts){
+  const col = (curTS && curTS.id!=='NORMAL') ? '#d8bff5' : '#ffffff';
+  cx.fillStyle = col;
+  const rate = curTS ? curTS.snowRate : 1;
+  snow.forEach(f=>{
+    f.y += dt*f.v*rate*0.35;
+    f.x += Math.sin((f.y+f.v)*6)*0.0012;
+    if(f.y>1){ f.y=-0.02; f.x=Math.random(); }
+    cx.globalAlpha = 0.75;
+    cx.fillRect(px(f.x*W), px(f.y*H), f.s*2, f.s*2);
+  });
+  cx.globalAlpha = 1;
+}
+function drawAurora(time){
+  const g = cx.createLinearGradient(0,0,0,H*0.42);
+  const a1 = 0.16+0.06*Math.sin(time*0.5), a2 = 0.12+0.05*Math.sin(time*0.37+1.4);
+  g.addColorStop(0,   'rgba(90,240,180,0)');
+  g.addColorStop(0.35,'rgba(90,240,180,'+a1+')');
+  g.addColorStop(0.62,'rgba(120,200,255,'+a2+')');
+  g.addColorStop(1,   'rgba(180,120,255,0)');
+  cx.fillStyle=g; cx.fillRect(0,0,W,H*0.42);
+  cx.globalAlpha=0.10;
+  cx.fillStyle='#ffffff';
+  for(let i=0;i<10;i++){
+    const x=((i*97+time*22)%(W+120))-60;
+    cx.fillRect(px(x), 0, 3, H*0.34);
+  }
+  cx.globalAlpha=1;
+}
+function drawTint(){
+  if(curTS && curTS.id!=='NORMAL'){
+    cx.fillStyle = curTS.id==='DREAM_INVASION'
+      ? 'rgba(110,60,170,0.30)' : 'rgba(150,120,200,0.16)';
+    cx.fillRect(0,0,W,H);
+  }
+  if(curNight){ cx.fillStyle='rgba(20,26,60,0.34)'; cx.fillRect(0,0,W,H); }
+  // まわりを くらくして おくゆきを だす
+  const g = cx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.30, W/2,H/2,Math.max(W,H)*0.72);
+  g.addColorStop(0,'rgba(0,0,0,0)');
+  g.addColorStop(1, curTS && curTS.id==='DREAM_INVASION' ? 'rgba(30,8,50,0.55)' : 'rgba(0,0,0,0.42)');
+  cx.fillStyle=g; cx.fillRect(0,0,W,H);
+}
+function setFade(v){ fadeV = v; }
+
+return {init, resize, buildMap, draw, noteStep, setFade, get TS(){return TS;}};
 })();
 
 </script>
@@ -1941,6 +2419,8 @@ return {
 (function(){
 const C = LQ3;
 // そざいは assets.js が さきに よみこまれ、__ASSETS に のっている ぜんてい
+const V2 = (typeof globalThis!=='undefined' && globalThis.View2D) ? globalThis.View2D
+         : (typeof View2D!=='undefined' ? View2D : null);
 const _A = (typeof globalThis!=='undefined' && globalThis.__ASSETS) ? globalThis.__ASSETS : null;
 if(!_A) console.error('[view] assets.js が よみこまれていません');
 const MON = _A ? _A.MON : {};
@@ -2367,8 +2847,10 @@ const THEME = {
   indoor: {sky:0x1a1420, fog:[0x1a1420,10,24], amb:[0xffe6c0,0.95],sun:[0xffd8a0,0.4]},
 };
 
+let canvas2d=null, is2D=false, lastPoses2D=[];
 function init(){
   canvas=document.getElementById('gl');
+  canvas2d=document.getElementById('gl2d');
   stage=document.getElementById('stage');
   renderer=new THREE.WebGLRenderer({canvas,antialias:false});
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
@@ -2376,6 +2858,7 @@ function init(){
   cam=new THREE.PerspectiveCamera(32,1,0.1,140);
   batCam=new THREE.PerspectiveCamera(48,1,0.1,120);
   buildBattleScene();
+  if(V2 && canvas2d) V2.init(canvas2d, C, CHR);
   fit();
   addEventListener('resize',fit);
 }
@@ -2384,6 +2867,7 @@ function fit(){
   renderer.setSize(w,h,false);
   cam.aspect=w/h; cam.updateProjectionMatrix();
   batCam.aspect=w/h; batCam.updateProjectionMatrix();
+  if(V2) V2.resize();
 }
 
 // ---- インスタンス描画ヘルパ（drawCallを地形種ごと1つに） ----
@@ -2583,6 +3067,17 @@ function darken(hex,k){
   return ((r|0)<<16)|((g|0)<<8)|(b|0);
 }
 function buildMap(name){
+  // しろの なか だけ 3D。それ いがいは ドットえ（2D）で えがく
+  const mode = (C.WORLD && C.WORLD.renderModeOf) ? C.WORLD.renderModeOf(name) : '2d';
+  is2D = (mode==='2d');
+  if(canvas2d) canvas2d.style.display = is2D ? 'block' : 'none';
+  if(canvas) canvas.style.visibility = is2D ? 'hidden' : 'visible';
+  if(is2D){
+    curMap = name;
+    if(V2){ V2.resize(); V2.buildMap(name); }
+    setActors(true);
+    return;
+  }
   disposeScene(scene);
   const map=C.MAPS[name];
   const th=THEME[map.theme]||THEME.field;
@@ -2811,7 +3306,9 @@ function buildMap(name){
 }
 function setActors(snap){
   const P=C.P, tr=C.G.trail;
-  if(curScene && curScene.footprints && !isElevated(curMap)){
+  if(is2D){
+    if(V2) V2.noteStep(P.x, P.y, !!C.G.stepFlip);
+  }else if(curScene && curScene.footprints && !isElevated(curMap)){
     const key=P.x+','+P.y;
     if(key!==lastFootTile){ lastFootTile=key; dropFootprint(P.x,P.y,!!C.G.stepFlip); }
   }
@@ -2912,6 +3409,7 @@ function chapterCard(title, sub, done){
 function fade(to, done){
   const f=document.getElementById('fade');
   f.style.transition='opacity 0.3s'; f.style.opacity=to;
+  if(V2) V2.setFade(0);          // DOMがわの おおいで じゅうぶん
   setTimeout(()=>done&&done(), 330);
 }
 
@@ -2921,8 +3419,33 @@ function loop(now){
   const dt=Math.min(0.05,(now-last)/1000); last=now;
   const time=now/1000;
   if(mode==='battle') updateBattle(dt,time);
+  else if(is2D) update2D(dt,time);
   else updateField(dt,time);
   requestAnimationFrame(loop);
+}
+// ---------------- 2D（ドットえ）の こうしん ----------------
+function update2D(dt,time){
+  if(!V2) return;
+  const tgt=fp._tgt||[[C.P.x,C.P.y]];
+  const objs=[];
+  C.party.forEach((m,i)=>{
+    if(!fp[i]||!tgt[i]) return;
+    fp[i].x += (tgt[i][0]-fp[i].x)*Math.min(1,dt*8);
+    fp[i].y += (tgt[i][1]-fp[i].y)*Math.min(1,dt*8);
+    let dir=C.P.dir||'front';
+    if(i>0 && tgt[i-1]){
+      const dx=tgt[i-1][0]-tgt[i][0], dy=tgt[i-1][1]-tgt[i][1];
+      if(dx||dy) dir = dy<0?'back' : dy>0?'front' : (dx<0?'left':'right');
+    }
+    const dist=Math.abs(tgt[i][0]-fp[i].x)+Math.abs(tgt[i][1]-fp[i].y);
+    const moving=dist>0.06;
+    const pf=poseOf(m.cls, dir, moving && C.G.stepFlip);
+    const t=1-Math.min(1,dist);
+    objs.push({x:fp[i].x, y:fp[i].y, cls:m.cls, pose:pf.pose, flip:pf.flip,
+               bob: moving ? -Math.abs(Math.sin(t*Math.PI))*0.06 : 0});
+  });
+  lastPoses2D = objs.map(o=>o.pose);
+  V2.draw(dt, time, objs);
 }
 function updateField(dt,time){
   if(!scene) return;
@@ -3077,8 +3600,9 @@ function spawnBurst(target){
 
 window.LQ3View = {
   init, loop, buildMap, setActors, fx, battleEnter, battleLeave, refresh, chest, fade, chapterCard,
-  get mode(){return mode;}, get drawCalls(){return drawCalls;},
-  debugPoses(){ return (actors.list||[]).map(o=>o.userData.pose).filter(Boolean); },
+  get mode(){return mode;}, get drawCalls(){return drawCalls;}, get is2D(){return is2D;},
+  debugPoses(){ return is2D ? lastPoses2D.slice()
+                           : (actors.list||[]).map(o=>o.userData.pose).filter(Boolean); },
 };
 })();
 </script>
