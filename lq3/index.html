@@ -96,9 +96,9 @@ const REGIONS = {
            climate:'peak',   summary:'夢を研究する賢者の隠れ里がある霊峰。'},
   oldland:{id:'oldland',name:'きゅうたいりく',           dir:'中央', chapter:5,
            climate:'temperate',
-           summary:'過去の世界が長い年月を経て変わった土地。遺構だけが残る。'},
+           summary:'LQ2の世界。トロス・リベリオン・ハルナ等を高精細タイルでリメイク再登場させる。'},
   yume:   {id:'yume',   name:'ゆめの たいりく',         dir:'中央海', chapter:6,
-           climate:'dream',  summary:'終章で中央海に浮上する。最深部に夢喰い神殿。'},
+           climate:'dream',  summary:'終章で中央海に浮上する。浮遊島と逆さの城。'},
 };
 
 // ---------------- 章 ----------------
@@ -111,13 +111,13 @@ const CHAPTERS = [
    heroes:[{id:'bald',   name:'バルド',  role:'ぎょうしょうにん'}],
    summary:'眠り病で止まった隊商をつなぐ。売買と荷車の章。'},
   {no:3, id:'ch3_minamo', title:'みなとの しまい',       region:'minamo',
-   heroes:[{id:'manya',  name:'マーニャ', role:'うらないし'},
-           {id:'minea',  name:'ミネア',  role:'おどりこ'}],
+   heroes:[{id:'sena',   name:'セナ',    role:'うらないし'},
+           {id:'ruka',   name:'ルカ',    role:'おどりこ'}],
    summary:'小舟で島を渡り、夢を「視る」力で真相に最初に触れる。'},
   {no:4, id:'ch4_elde',   title:'ろうけんじゃの しょくざい', region:'elde',
    heroes:[{id:'zef',    name:'ゼフ',    role:'ろうけんじゃ'},
-           {id:'iona',   name:'イオナ',  role:'でし'}],
-   summary:'夢の研究と贖罪。隠れ里で入口の鍵を探す。'},
+           {id:'mio',    name:'ミオ',    role:'でし'}],
+   summary:'夢の研究と贖罪。ミオを守りとして送り出す。'},
   {no:5, id:'ch5_oldland',title:'ひかりの こ',           region:'oldland',
    heroes:[{id:'sora',   name:'ソラ',    role:'ひかりの こ'}],
    summary:'母ルミアから光を受け継ぎ、船で北→東→南→西を巡って合流する。'},
@@ -131,7 +131,7 @@ const CHAPTERS = [
 //   種別： town / field / cast(城) / dgn(ダンジョン) / in(屋内) / shrine(神殿)
 const MAP_IDS = {
   // --- ヴェルサ地方（第1章・実装中） ---
-  versa_town:    {region:'versa', kind:'town',  name:'ゆきの じょうかまち ヴェルサ', scene:'SCENE_VERSA_TOWN'},
+  versa_town:    {region:'versa', kind:'town',  name:'おうと ヴェルサリア',         scene:'SCENE_VERSA_TOWN'},
   versa_field1:  {region:'versa', kind:'field', name:'ヴェルサの せつげん',         scene:'SCENE_VERSA_FIELD'},
   versa_cast1:   {planned:true, region:'versa', kind:'cast',  name:'ヴェルサ おうじょう',         scene:'SCENE_VERSA_CASTLE'},
   versa_dgn1:    {planned:true, region:'versa', kind:'dgn',   name:'こおりの どうくつ',           scene:'SCENE_VERSA_ICECAVE'},
@@ -511,7 +511,7 @@ const MAPS = {
   // = ゆき / r いしだたみ / # しろい いしかべ / T あおい せんとう
   // K おうじょうもん / F ふんすい / I やどや / P きょうかい / W ぶきや / M まほうてん
   // G みなみもん / f ゆきの き / n むらびと
-  versa_town:{name:'ゆきの じょうかまち ヴェルサ',theme:'snow',enc:false,tiles:[
+  versa_town:{name:'おうと ヴェルサリア',theme:'snow',enc:false,tiles:[
     "########################",
     "###TT######KK######TT###",
     "###TT######==######TT###",
@@ -2702,7 +2702,7 @@ function startGame(loaded){
   C.G.mode='field';
   if(!loaded){
     msg2(['──ルミナクエストIII だいいっしょう「わかき きし」──',
-      'ゆきの おうこく ヴェルサ。しんまいの このえへい リオン。',
+      'ゆきの おうこく ヴェルサ、おうと ヴェルサリア。しんまいの このえへい リオン。',
       'おうじょさまが ねむりから さめない——そんな うわさが ながれている。',
       'まちの ものに はなしを きいてみよう。',
       '（Aボタン → 「まちの ようす」で ひるよる・まちの じょうたいを きりかえられます）'],()=>{ C.G.mode='field'; });
