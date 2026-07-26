@@ -97,7 +97,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T14:05:08", "assets_sha": "a9d7e224", "lines": {"world": 130, "npc": 185, "core": 1494, "view": 1136, "ui": 360}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T14:45:52", "assets_sha": "38958804", "lines": {"world": 130, "npc": 185, "core": 1509, "view": 1136, "ui": 360}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -476,6 +476,13 @@ const ENEMIES = [
    skill:{p:0.28, mul:1.15, name:'こおりの つばさ'}, inflict:{type:'freeze', p:0.18}},
   {key:'yukingon', minLv:3,    name:'ゆきんこゴン',     hp:36, atk:10, def:7,  agi:5,  exp:12,  gold:11,
    skill:{p:0.34, mul:1.35, name:'ゆきだま'}},
+  {key:'blizzardhawk', minLv:4, name:'ブリザードホーク', hp:34, atk:10, def:6,  agi:15, exp:14,  gold:12,
+   aoe:{p:0.30, lo:7, hi:12, name:'つめたい つばさ'}},
+  {key:'frostmermaid', minLv:6, name:'フロストマーメイド', hp:44, atk:12, def:8, agi:11, exp:24, gold:22,
+   spell:{kind:'dmg', p:0.30, lo:11, hi:17, name:'こおりの うた'},
+   spellInflict:{type:'sleep', p:0.32},
+   skill:{p:0.26, mul:1.15, name:'こごえる まなざし'},
+   inflict:{type:'slow', p:0.38}},
   {key:'flameslime', minLv:2,  name:'フレイムスライム', hp:30, atk:8,  def:5,  agi:6,  exp:7,   gold:7,
    spell:{kind:'dmg', p:0.26, lo:6, hi:10, name:'ひのたま'}},
   {key:'hoimislime', minLv:1,  name:'ホイミスライム',   hp:20, atk:6,  def:5,  agi:7,  exp:9,   gold:8,
@@ -574,8 +581,8 @@ const MIDBOSS = {
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
   versa_field1:['icicleslime','hoimislime','yukingon','frostbat'],          // Lv1〜（レベルで しゅるいが ふえる）
-  versa_dgn1:  ['icicleslime','frostbat','yukingon','madrock'],             // Lv3〜5
-  versa_dgn2:  ['yukingon','madrock','mandragora','thornwolf','metalslime'],// Lv5〜7
+  versa_dgn1:  ['icicleslime','frostbat','yukingon','blizzardhawk'],        // Lv3〜5
+  versa_dgn2:  ['yukingon','blizzardhawk','frostmermaid','thornwolf','metalslime'],// Lv5〜7
   field_toros:['greenslime','flameslime','hoimislime','drakybat','madrock','mandragora',
                'thornwolf','hornet','metalslime'],
   cave1:['wisp','skeleton','ghostlamp','skullbat','mushmage','armycrab','merman','mimic','golem'],
@@ -1174,8 +1181,11 @@ function statusText(type){
   return type==='sleep'   ? 'ねむってしまった！'
        : type==='confuse' ? 'こんらんした！'
        : type==='freeze'  ? 'こおりついた！'
+       : type==='slow'    ? 'うごきが にぶった！'
        : 'じょうたいが おかしい！';
 }
+// にぶっていると すばやさが はんぶんに なる（こうどうは できる）
+function effAgi(m){ return m.status==='slow' ? m.agi*0.5 : m.agi; }
 function inflictP(e){
   if(!e.inflict) return 0;
   return party.length===1 ? e.inflict.p*0.6 : e.inflict.p;
@@ -1233,10 +1243,12 @@ function beginRound(){
   const wakeSleep   = solo ? 0.60 : 0.34;
   const wakeConfuse = solo ? 0.62 : 0.38;
   const wakeFreeze  = solo ? 0.62 : 0.40;   // こおりは とけやすい
+  const wakeSlow    = 0.30;                 // にぶりは こうどうできるので きゅうさいは しない
   party.forEach(m=>{
     if(m.status==='sleep'&&Math.random()<wakeSleep) m.status=null;
     else if(m.status==='confuse'&&Math.random()<wakeConfuse) m.status=null;
     else if(m.status==='freeze'&&Math.random()<wakeFreeze) m.status=null;
+    else if(m.status==='slow'&&Math.random()<wakeSlow) m.status=null;
   });
   collectCommands(0);
 }
@@ -1331,8 +1343,8 @@ function resolveRound(){
     for(let i=0;i<n;i++) acts.push({enemy:e, type:'enemy'});
   });
   acts.sort((a,c)=>{
-    const av = a.actor?a.actor.agi:(a.enemy.agi);
-    const cv = c.actor?c.actor.agi:(c.enemy.agi);
+    const av = a.actor?effAgi(a.actor):(a.enemy.agi);
+    const cv = c.actor?effAgi(c.actor):(c.enemy.agi);
     return (cv+Math.random()*4)-(av+Math.random()*4);
   });
   party.forEach(p=>p.guard=false);
@@ -1540,9 +1552,12 @@ function enemyAct(e, done){
       lines.push(e.dispName+'は '+sp.name+'を となえた！',
                  tp.name+'は '+dp+'の ダメージを うけた！');
       if(tp.hp<=0){ tp.hp=0; tp.status=null; lines.push(tp.name+'は たおれた…'); }
-      else if(e.inflict && Math.random()<inflictP(e) && !tp.status){
-        tp.status=e.inflict.type;
-        lines.push(tp.name+'は '+statusText(e.inflict.type));
+      else{
+        const inf = e.spellInflict || e.inflict;     // うたは ねむらせ、まなざしは にぶらせる
+        if(inf && Math.random()<inflictP({inflict:inf}) && !tp.status){
+          tp.status=inf.type;
+          lines.push(tp.name+'は '+statusText(inf.type));
+        }
       }
       U.hud(); U.msg(lines, done);
     });
@@ -1790,7 +1805,7 @@ function reviveMember(o){
   m.exp = Math.max(0, o.exp|0);
   m.weapon = o.weapon || null;
   m.armor  = o.armor  || null;
-  m.status = ['sleep','confuse','freeze'].includes(o.status) ? o.status : null;
+  m.status = ['sleep','confuse','freeze','slow'].includes(o.status) ? o.status : null;
   m.hp = Math.max(0, Math.min(m.maxhp, (o.hp===undefined? m.maxhp : o.hp|0)));
   m.mp = Math.max(0, Math.min(m.maxmp, (o.mp===undefined? m.maxmp : o.mp|0)));
   return m;
@@ -2094,7 +2109,7 @@ function patTex(draw, px){
 }
 const sprCache={};
 // せかいでの たかさ（1タイル＝1）
-const MON_SIZE={flameslime:2.27,thornwolf:2.48,armycrab:2.69,ghostlamp:2.48,stonecyclops:2.91,hornet:2.38,tornado:2.8,merman:2.59,skullbat:2.38,metalslime:1.9,golem:2.75,shadowmimic:2.64,darkpriest:2.69,icephoenix:2.69,mushmage:2.59,blazedragon:2.85,devilknight:2.8,orcking:2.91,demonlord:3.12,bloodwolf:2.69,firedragon:3.06,madcyclops:3.06,darkguard:2.91,icephoenixlord:2.91,shadowassassin:2.75,killerpanther:2.69,deathbishop:2.91,bluecyclops:3.06,desgran1:4.18,desgran2:4.18,desgran3:4.6,greenslime:2.01,skeleton:2.54,drakybat:2.16,mimic:2.48,wisp:2.22,hoimislime:2.01,mandragora:2.38,madrock:2.16,icicleslime:2.0,frostbat:2.3,yukingon:2.5};
+const MON_SIZE={flameslime:2.27,thornwolf:2.48,armycrab:2.69,ghostlamp:2.48,stonecyclops:2.91,hornet:2.38,tornado:2.8,merman:2.59,skullbat:2.38,metalslime:1.9,golem:2.75,shadowmimic:2.64,darkpriest:2.69,icephoenix:2.69,mushmage:2.59,blazedragon:2.85,devilknight:2.8,orcking:2.91,demonlord:3.12,bloodwolf:2.69,firedragon:3.06,madcyclops:3.06,darkguard:2.91,icephoenixlord:2.91,shadowassassin:2.75,killerpanther:2.69,deathbishop:2.91,bluecyclops:3.06,desgran1:4.18,desgran2:4.18,desgran3:4.6,greenslime:2.01,skeleton:2.54,drakybat:2.16,mimic:2.48,wisp:2.22,hoimislime:2.01,mandragora:2.38,madrock:2.16,icicleslime:2.0,frostbat:2.3,yukingon:2.5,blizzardhawk:2.6,frostmermaid:2.7};
 // ---------------- キャラクター（ポーズべつ）----------------
 const chrTexCache={};
 function chrTex(key,pose){
