@@ -97,7 +97,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T13:45:52", "assets_sha": "a9d7e224", "lines": {"world": 130, "npc": 185, "core": 1432, "view": 1130, "ui": 285}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T13:56:40", "assets_sha": "a9d7e224", "lines": {"world": 130, "npc": 185, "core": 1434, "view": 1130, "ui": 285}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -461,7 +461,7 @@ const CLASSES = {
                   {lv:42,key:'goddess'}]},
   dan:   {name:'ダン',  hp:24,mp:0,atk:8,def:4,agi:4, g:{hp:7,mp:0,atk:3,def:2,agi:1}, learns:[]},
   lion:  {name:'リオン',hp:20,mp:4,atk:7,def:5,agi:6, g:{hp:6,mp:2,atk:3,def:2,agi:1},
-          learns:[{lv:4,key:'heal'},{lv:8,key:'spark'},{lv:15,key:'blaze'},{lv:22,key:'bolt'}]},
+          learns:[{lv:3,key:'heal'},{lv:8,key:'spark'},{lv:15,key:'blaze'},{lv:22,key:'bolt'}]},
 };
 const TACTICS = {manual:'めいれいさせろ', gungan:'ガンガンいこうぜ', inochi:'いのちだいじに'};
 
@@ -472,14 +472,14 @@ const ENEMIES = [
   // ---- ヴェルサ地方（こおりの まもの）----
   {key:'icicleslime', minLv:1, name:'つららスライム',   hp:24, atk:6,  def:5,  agi:6,  exp:6,   gold:6,
    spell:{kind:'dmg', p:0.26, lo:5, hi:9, name:'つめたい しずく'}},
-  {key:'frostbat', minLv:3,    name:'フロストバット',   hp:28, atk:8,  def:5,  agi:13, exp:9,   gold:8,
-   skill:{p:0.30, mul:1.20, name:'こおりの つばさ'}, inflict:{type:'freeze', p:0.26}},
-  {key:'yukingon', minLv:4,    name:'ゆきんこゴン',     hp:36, atk:10, def:7,  agi:5,  exp:12,  gold:11,
+  {key:'frostbat', minLv:4,    name:'フロストバット',   hp:28, atk:7,  def:5,  agi:13, exp:9,   gold:8,
+   skill:{p:0.28, mul:1.15, name:'こおりの つばさ'}, inflict:{type:'freeze', p:0.18}},
+  {key:'yukingon', minLv:3,    name:'ゆきんこゴン',     hp:36, atk:10, def:7,  agi:5,  exp:12,  gold:11,
    skill:{p:0.34, mul:1.35, name:'ゆきだま'}},
   {key:'flameslime', minLv:2,  name:'フレイムスライム', hp:30, atk:8,  def:5,  agi:6,  exp:7,   gold:7,
    spell:{kind:'dmg', p:0.26, lo:6, hi:10, name:'ひのたま'}},
-  {key:'hoimislime', minLv:1,  name:'ホイミスライム',   hp:26, atk:6,  def:6,  agi:7,  exp:9,   gold:8,
-   spell:{kind:'heal', p:0.40, lo:14, hi:20, name:'いやしの ひかり'}},
+  {key:'hoimislime', minLv:1,  name:'ホイミスライム',   hp:20, atk:6,  def:5,  agi:7,  exp:9,   gold:8,
+   spell:{kind:'heal', p:0.22, lo:7, hi:11, name:'いやしの ひかり'}},
   {key:'drakybat', minLv:1,    name:'ドラキーバット',   hp:24, atk:7,  def:4,  agi:12, exp:7,   gold:6},
   {key:'madrock', minLv:3,     name:'マドロック',       hp:34, atk:9,  def:8,  agi:3,  exp:10,  gold:9},
   {key:'mandragora', minLv:4,  name:'マンドラゴラ',     hp:32, atk:9,  def:6,  agi:5,  exp:11,  gold:10,
@@ -573,8 +573,8 @@ const MIDBOSS = {
 };
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
-  versa_field1:['icicleslime','frostbat','hoimislime'],                     // Lv1〜3
-  versa_dgn1:  ['frostbat','icicleslime','yukingon','madrock'],             // Lv3〜5
+  versa_field1:['icicleslime','hoimislime','yukingon','frostbat'],          // Lv1〜（レベルで しゅるいが ふえる）
+  versa_dgn1:  ['icicleslime','frostbat','yukingon','madrock'],             // Lv3〜5
   versa_dgn2:  ['yukingon','madrock','mandragora','thornwolf','metalslime'],// Lv5〜7
   field_toros:['greenslime','flameslime','hoimislime','drakybat','madrock','mandragora',
                'thornwolf','hornet','metalslime'],
@@ -613,7 +613,7 @@ const MAPS = {
     "###########GG###########"
   ], warps:{}, warpsXY:{'11,15':{to:'versa_field1',x:15,y:1},'12,15':{to:'versa_field1',x:16,y:1},
                      '11,1':{to:'versa_cast1',x:10,y:14},'12,1':{to:'versa_cast1',x:11,y:14}}},
-  versa_field1:{name:'ヴェルサの せつげん',theme:'snow',enc:true,tiles:[
+  versa_field1:{name:'ヴェルサの せつげん',theme:'snow',enc:true,encRate:0.055,encGrace:5,tiles:[
     "###############GG###############",
     "#==============rr==============#",
     "#=fffff========rr=======ffffff=#",
@@ -658,7 +658,7 @@ const MAPS = {
     "#rrrrrrrrrrrrrrrrrrrr#",
     "##########GG##########"
   ], warps:{}, warpsXY:{'10,15':{to:'versa_town',x:11,y:2},'11,15':{to:'versa_town',x:12,y:2}}},
-  versa_dgn1:{name:'こおりの どうくつ',theme:'ice',enc:true,tiles:[
+  versa_dgn1:{name:'こおりの どうくつ',theme:'ice',enc:true,encRate:0.075,encGrace:4,tiles:[
     "####################",
     "#========>>========#",
     "#==#C##======###C==#",
@@ -677,7 +677,7 @@ const MAPS = {
     "#########GG#########"
   ], warps:{}, warpsXY:{'9,15':{to:'versa_field1',x:10,y:22},'10,15':{to:'versa_field1',x:11,y:22},
                         '9,1':{to:'versa_dgn2',x:8,y:12},'10,1':{to:'versa_dgn2',x:9,y:12}}},
-  versa_dgn2:{name:'こおりの どうくつ さいしんぶ',theme:'ice',enc:true,tiles:[
+  versa_dgn2:{name:'こおりの どうくつ さいしんぶ',theme:'ice',enc:true,encRate:0.085,encGrace:4,tiles:[
     "##################",
     "#================#",
     "#=t===o====o===t=#",
@@ -839,7 +839,7 @@ function freshState(){
   G = {mode:'field', menu:null, battle:null, flags:{}, visited:{}, gotTreasure:{},
        tactic:'manual', dex:{}, trail:[], stepFlip:false, cleared:false,
        chapter:1, chapters:{}, townState:'NORMAL', night:false, quests:{}, steps:0};
-  P = {map:'versa_town', x:11, y:14, dir:'front', gold:60, herbs:3, waters:0, equipBag:[]};
+  P = {map:'versa_town', x:11, y:14, dir:'front', gold:60, herbs:5, waters:0, equipBag:[]};
   party = [mkMember('lion',1)];
   party[0].weapon = {kind:'w',name:'みならいの けん',v:3};
   party[0].armor  = {kind:'a',name:'こまもり',v:2};
@@ -1010,8 +1010,10 @@ function doWarp(w){
 let encSteps = 0;
 function maybeEncounter(){
   encSteps++;
-  const rate = 0.085;          // 広域マップ向けに低め（構想書§8）
-  if(encSteps<3) return;        // 直後の連戦を防ぐ
+  const m = MAPS[P.map];
+  const rate = (m && m.encRate!==undefined) ? m.encRate : 0.085;
+  const grace = (m && m.encGrace!==undefined) ? m.encGrace : 3;
+  if(encSteps<grace) return;                 // たたかいの ちょくごに また、を ふせぐ
   if(Math.random()<rate){ encSteps=0; startBattle(null); }
 }
 
