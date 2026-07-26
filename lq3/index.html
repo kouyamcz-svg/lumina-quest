@@ -97,7 +97,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T13:56:40", "assets_sha": "a9d7e224", "lines": {"world": 130, "npc": 185, "core": 1434, "view": 1130, "ui": 285}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T14:05:08", "assets_sha": "a9d7e224", "lines": {"world": 130, "npc": 185, "core": 1494, "view": 1136, "ui": 360}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1681,6 +1681,65 @@ function endBattle(won){
   });
 }
 
+// ---------------- どうぐ（せんとうの そとで つかう）----------------
+function itemList(){
+  const out=[];
+  if(P.herbs>0)  out.push({kind:'h',   name:'やくそう',         num:P.herbs});
+  if(P.waters>0) out.push({kind:'wtr', name:'まほうのせいすい', num:P.waters});
+  return out;
+}
+function useItemField(kind, mi){
+  const m = party[mi];
+  if(!m) return {ok:false, lines:['だれに つかう？']};
+  if(kind==='h'){
+    if(P.herbs<=0) return {ok:false, lines:['やくそうを もっていない。']};
+    if(m.hp<=0)    return {ok:false, lines:[m.name+'は たおれている。きょうかいへ いこう。']};
+    if(m.hp>=m.maxhp) return {ok:false, lines:[m.name+'の HPは まんたんだ。']};
+    P.herbs--;
+    const h=Math.min(m.maxhp-m.hp, 20+Math.floor(Math.random()*9));
+    m.hp+=h;
+    return {ok:true, lines:[m.name+'は やくそうを つかった！', m.name+'の HPが '+h+' かいふく！']};
+  }
+  if(kind==='wtr'){
+    if(P.waters<=0) return {ok:false, lines:['まほうのせいすいを もっていない。']};
+    if(m.maxmp<=0)  return {ok:false, lines:[m.name+'は じゅもんを つかえない。']};
+    if(m.mp>=m.maxmp) return {ok:false, lines:[m.name+'の MPは まんたんだ。']};
+    P.waters--;
+    const h=Math.min(m.maxmp-m.mp, 30);
+    m.mp+=h;
+    return {ok:true, lines:[m.name+'は まほうのせいすいを つかった！', m.name+'の MPが '+h+' かいふく！']};
+  }
+  return {ok:false, lines:['つかえない。']};
+}
+// ---------------- そうび ----------------
+function slotOf(it){ return it && it.kind==='w' ? 'weapon' : 'armor'; }
+function equipCandidates(slot){
+  return (P.equipBag||[]).map((it,i)=>({it,i})).filter(x=>slotOf(x.it)===slot);
+}
+function equipFromBag(mi, bagIndex){
+  const m=party[mi], it=P.equipBag[bagIndex];
+  if(!m||!it) return {ok:false, lines:['そうびできない。']};
+  const slot=slotOf(it);
+  const cur=m[slot];
+  m[slot]=it;
+  P.equipBag.splice(bagIndex,1);
+  if(cur) P.equipBag.push(cur);
+  return {ok:true, lines:[m.name+'は '+it.name+'を そうびした！'
+    + (cur ? '（'+cur.name+'は ふくろへ）' : '')]};
+}
+function unequip(mi, slot){
+  const m=party[mi];
+  if(!m||!m[slot]) return {ok:false, lines:['はずす ものが ない。']};
+  const cur=m[slot];
+  m[slot]=null; P.equipBag.push(cur);
+  return {ok:true, lines:[m.name+'は '+cur.name+'を はずした。']};
+}
+function equipSummary(mi){
+  const m=party[mi];
+  return [m.name+'　こうげき '+mAtk(m)+'　しゅび '+mDef(m),
+          '　みぎて：'+(m.weapon?m.weapon.name+'（+'+m.weapon.v+'）':'なし'),
+          '　からだ：'+(m.armor ?m.armor.name +'（+'+m.armor.v +'）':'なし')];
+}
 // ---------------- セーブ ----------------
 const SAVE_VERSION = 2;
 const SAVE_SLOTS = ['LQ3_SAVE_1','LQ3_SAVE_2','LQ3_SAVE_3'];
@@ -1851,6 +1910,7 @@ return {
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
+  itemList, useItemField, equipCandidates, equipFromBag, unequip, equipSummary, slotOf,
   setTownState, setNight, townStateDef, questList, questAdvance, startChapter,
   // 差し替え
   bind, NullView, NullUI, NullAudio,
@@ -2495,6 +2555,11 @@ function disposeScene(s){
     }
   });
 }
+// だんさの ある ちけい（どうくつ・こおりの どうくつ）かどうか
+function isElevated(mapName){
+  const m=C.MAPS[mapName];
+  return !!m && (m.theme==='cave' || m.theme==='ice');
+}
 function darken(hex,k){
   const r=((hex>>16)&255)*k, g=((hex>>8)&255)*k, b=(hex&255)*k;
   return ((r|0)<<16)|((g|0)<<8)|(b|0);
@@ -2648,7 +2713,8 @@ function buildMap(name){
       map: snow?TEX.pave : ice?TEX.ice : cast?TEX.carpet : TEX.road}),
     (G_.road||[]).map(p=>[p[0],p[1],p[2]]));
   if(cave){
-    addInstanced(new THREE.BoxGeometry(1,0.5,1),new THREE.MeshLambertMaterial({map:TEX.rock}),
+    addInstanced(new THREE.BoxGeometry(1,0.5,1),
+      new THREE.MeshLambertMaterial({map: ice?TEX.ice:TEX.rock}),
       (G_.ground||[]).concat(G_.road||[]).map(p=>[p[0],0.25,p[2]]));
     addInstanced(new THREE.BoxGeometry(1,1,1),
       new THREE.MeshLambertMaterial({map: ice?TEX.icewall:TEX.cliff}),
@@ -2720,18 +2786,18 @@ function buildMap(name){
     scene.add(b); actors.list.push(b);
   });
   actors.hero=actors.list[0]||null;
-  if(map.theme==='cave'){
-    const lamp=new THREE.PointLight(0xffd090,1.0,4.5); scene.add(lamp); actors.lamp=lamp;
+  if(cave){
+    const lamp=new THREE.PointLight(ice?0xbfe4ff:0xffd090,1.0,4.5); scene.add(lamp); actors.lamp=lamp;
   }else actors.lamp=null;
   setActors(true);
 }
 function setActors(snap){
   const P=C.P, tr=C.G.trail;
-  if(curScene && curScene.footprints){
+  if(curScene && curScene.footprints && !isElevated(curMap)){
     const key=P.x+','+P.y;
     if(key!==lastFootTile){ lastFootTile=key; dropFootprint(P.x,P.y,!!C.G.stepFlip); }
   }
-  const yy = (C.MAPS[curMap]&&C.MAPS[curMap].theme==='cave')?0.95:0.45;
+  const yy = isElevated(curMap) ? 0.95 : 0.45;   // だんさの うえに たつ
   const n=(actors.list?actors.list.length:1);
   const tgt=[];
   for(let i=0;i<n;i++){
@@ -3124,31 +3190,42 @@ function press(k){
 }
 function openFieldMenu(){
   C.G.mode='menu';
-  menu(['つよさ','さくせん','セーブ','クエスト','まちの ようす','とじる'],'メニュー',(sel)=>{
-    if(sel===0){
-      const lines=C.party.map(m=>
-        m.name+' Lv'+m.lv+'　HP'+m.hp+'/'+m.maxhp+(m.maxmp>0?'　MP'+m.mp+'/'+m.maxmp:'')+
-        '　つぎのLvまで '+(C.expNext(m)===Infinity?'---':(C.expNext(m)-m.exp)));
-      lines.push('こうげき '+C.party.map(m=>C.mAtk(m)).join('/')+
-                 '　しゅび '+C.party.map(m=>C.mDef(m)).join('/'));
+  menu(['つよさ','どうぐ','そうび','さくせん','クエスト','セーブ','まちの ようす','とじる'],
+       'メニュー',(sel)=>{
+    if(sel===0){            // つよさ
+      const lines=C.party.reduce((a,m)=>a.concat([
+        m.name+' Lv'+m.lv+'　HP'+m.hp+'/'+m.maxhp+(m.maxmp>0?'　MP'+m.mp+'/'+m.maxmp:''),
+        '　こうげき '+C.mAtk(m)+'　しゅび '+C.mDef(m)+'　すばやさ '+m.agi,
+        '　つぎのLvまで '+(C.expNext(m)===Infinity?'---':(C.expNext(m)-m.exp))
+      ]),[]);
       msg2(lines, ()=>{ C.G.mode='field'; });
-    }else if(sel===1){
+
+    }else if(sel===1){      // どうぐ
+      openItems();
+
+    }else if(sel===2){      // そうび
+      openEquip();
+
+    }else if(sel===3){      // さくせん
       const keys=Object.keys(C.TACTICS);
       menu(keys.map(k=>C.TACTICS[k]).concat(['もどる']),'さくせん',(k)=>{
         if(k<keys.length){ C.G.tactic=keys[k];
           msg2(['さくせんを 「'+C.TACTICS[keys[k]]+'」に した。'],()=>{C.G.mode='field';}); }
         else C.G.mode='field';
       });
-    }else if(sel===2){
-      const ok=C.saveGame();
-      msg2([ok?'ぼうけんの きろくを つけた。':'きろくに しっぱいした…'],()=>{ C.G.mode='field'; });
-    }else if(sel===3){
+
+    }else if(sel===4){      // クエスト
       const qs=C.questList();
       msg2(qs.length
         ? qs.reduce((a,q)=>a.concat(['＊ '+q.title, '　'+q.desc]),[])
         : ['いまは とくに やることが ない。'], ()=>{ C.G.mode='field'; });
-    }else if(sel===4){
-      // ★プロトタイプ用：まちの じょうたいと ひるよるを きりかえて みため を たしかめる
+
+    }else if(sel===5){      // セーブ
+      const ok=C.saveGame();
+      msg2([ok?'ぼうけんの きろくを つけた。':(C.lastSaveError||'きろくに しっぱいした…')],
+           ()=>{ C.G.mode='field'; });
+
+    }else if(sel===6){      // まちの ようす（しさく）
       const st=['NORMAL','SLEEPING_SICKNESS','DREAM_INVASION'];
       const lb=st.map(s=>C.WORLD.TOWN_STATES[s].label)
                  .concat([C.G.night?'あさに する':'よるに する','もどる']);
@@ -3163,9 +3240,73 @@ function openFieldMenu(){
                ()=>{ C.G.mode='field'; });
         }else C.G.mode='field';
       });
+
     }else C.G.mode='field';
   });
 }
+
+// ---------------- どうぐ ----------------
+function openItems(){
+  const items=C.itemList();
+  if(!items.length){ msg2(['どうぐを なにも もっていない。'],()=>{C.G.mode='field';}); return; }
+  menu(items.map(it=>it.name+'　'+it.num).concat(['もどる']),'どうぐ',(k)=>{
+    if(k>=items.length){ C.G.mode='field'; return; }
+    const it=items[k];
+    if(C.party.length===1){ applyItem(it.kind,0); return; }
+    menu(C.party.map(m=>m.name+'　HP'+m.hp+'/'+m.maxhp).concat(['もどる']),
+         it.name+'を だれに？',(mi)=>{
+      if(mi>=C.party.length){ openItems(); return; }
+      applyItem(it.kind,mi);
+    });
+  });
+}
+function applyItem(kind,mi){
+  const r=C.useItemField(kind,mi);
+  hud();
+  msg2(r.lines, ()=>{ C.G.mode='menu'; openItems(); });
+}
+
+// ---------------- そうび ----------------
+function openEquip(){
+  if(C.party.length===1){ equipMember(0); return; }
+  menu(C.party.map(m=>m.name).concat(['もどる']),'そうび',(mi)=>{
+    if(mi>=C.party.length){ C.G.mode='field'; return; }
+    equipMember(mi);
+  });
+}
+function equipMember(mi){
+  const m=C.party[mi];
+  const w=m.weapon?m.weapon.name:'なし';
+  const a=m.armor ?m.armor.name :'なし';
+  menu(['みぎて：'+w, 'からだ：'+a, 'つよさを みる', 'もどる'], m.name+'の そうび',(k)=>{
+    if(k===0) chooseEquip(mi,'weapon');
+    else if(k===1) chooseEquip(mi,'armor');
+    else if(k===2) msg2(C.equipSummary(mi), ()=>{ C.G.mode='menu'; equipMember(mi); });
+    else C.G.mode='field';
+  });
+}
+function chooseEquip(mi, slot){
+  const m=C.party[mi];
+  const cands=C.equipCandidates(slot);
+  const label=slot==='weapon'?'みぎて':'からだ';
+  const opts=cands.map(x=>x.it.name+'（+'+x.it.v+'）');
+  if(m[slot]) opts.push('はずす');
+  opts.push('もどる');
+  if(!cands.length && !m[slot]){
+    msg2(['ふくろに つけられる ものが ない。'], ()=>{ C.G.mode='menu'; equipMember(mi); });
+    return;
+  }
+  menu(opts, label+'に なにを？',(k)=>{
+    if(k<cands.length){
+      const r=C.equipFromBag(mi, cands[k].i);
+      hud(); msg2(r.lines, ()=>{ C.G.mode='menu'; equipMember(mi); });
+    }else if(m[slot] && k===cands.length){
+      const r=C.unequip(mi, slot);
+      hud(); msg2(r.lines, ()=>{ C.G.mode='menu'; equipMember(mi); });
+    }else{ C.G.mode='menu'; equipMember(mi); }
+  });
+}
+
 // ---- ながおし たいおう（じゅうじキーは おしっぱなしで れんぞく いどう）----
 const REPEATABLE='UDLR';
 let held=null, holdDelay=null, holdTimer=null;
