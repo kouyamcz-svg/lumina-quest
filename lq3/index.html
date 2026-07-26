@@ -100,7 +100,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T23:48:03", "assets_sha": "76aac0bb", "lines": {"world": 139, "npc": 255, "core": 1660, "view2d": 469, "view": 1201, "ui": 372}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T23:53:42", "assets_sha": "a0f0d79e", "lines": {"world": 139, "npc": 255, "core": 1660, "view2d": 484, "view": 1211, "ui": 372}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -876,7 +876,7 @@ function draw(dt, time, actors){
     const art = tileArt(ch, theme);
     if(art) cx.drawImage(art, px(ox+x*ts), px(oy+y*ts), ts, ts);
     if(ch==='n') drawNPC(ox+x*ts, oy+y*ts, ts, x, y);
-    if(ch==='B' && !(C.G.flags.ch1_cleared && curMap.startsWith('versa'))) drawBoss(ox+x*ts, oy+y*ts, ts);
+    if(ch==='B' && !(C.G.flags.ch1_gotHerb && curMap.startsWith('versa'))) drawBoss(ox+x*ts, oy+y*ts, ts);
   }
   // ④ キャラ（Yじゅんに かさねる）
   const list = (actors||[]).slice().sort((a,b)=>a.y-b.y);
@@ -899,8 +899,23 @@ function drawNPC(dx,dy,ts,x,y){
   cx.fillRect(px(dx+s*0.38), px(dy+s*0.26), Math.max(1,s*0.05), Math.max(1,s*0.06));
   cx.fillRect(px(dx+s*0.57), px(dy+s*0.26), Math.max(1,s*0.05), Math.max(1,s*0.06));
 }
+let MONREF = null;
+function setMon(m){ MONREF = m; }
 function drawBoss(dx,dy,ts){
   const s=ts;
+  cx.fillStyle='rgba(40,10,60,0.35)';
+  cx.beginPath(); cx.ellipse(dx+s/2, dy+s*0.86, s*0.36, s*0.12, 0, 0, Math.PI*2); cx.fill();
+  // まものの えが あれば それを えがく（なければ かげと あかい めだけ）
+  const key = (C.P.map==='versa_dgn2') ? 'yumebanken_f' : null;
+  const d = key && MONREF && MONREF[key];
+  if(d){
+    const img=getImg(d.src);
+    if(img.complete && img.naturalWidth){
+      const hh=ts*1.7, ww=hh*(d.w/d.h);
+      cx.drawImage(img, px(dx+s/2-ww/2), px(dy+s*0.92-hh), ww, hh);
+      return;
+    }
+  }
   cx.fillStyle='rgba(60,20,80,0.5)';
   cx.beginPath(); cx.ellipse(dx+s/2, dy+s*0.6, s*0.42, s*0.34, 0, 0, Math.PI*2); cx.fill();
   cx.fillStyle='#c8324a';
@@ -971,7 +986,7 @@ function drawTint(){
 }
 function setFade(v){ fadeV = v; }
 
-return {init, resize, buildMap, draw, noteStep, setFade, get TS(){return TS;}};
+return {init, resize, buildMap, draw, noteStep, setFade, setMon, get TS(){return TS;}};
 })();
 
 </script>
@@ -2814,7 +2829,7 @@ function patTex(draw, px){
 }
 const sprCache={};
 // せかいでの たかさ（1タイル＝1）
-const MON_SIZE={flameslime:2.27,thornwolf:2.48,armycrab:2.69,ghostlamp:2.48,stonecyclops:2.91,hornet:2.38,tornado:2.8,merman:2.59,skullbat:2.38,metalslime:1.9,golem:2.75,shadowmimic:2.64,darkpriest:2.69,icephoenix:2.69,mushmage:2.59,blazedragon:2.85,devilknight:2.8,orcking:2.91,demonlord:3.12,bloodwolf:2.69,firedragon:3.06,madcyclops:3.06,darkguard:2.91,icephoenixlord:2.91,shadowassassin:2.75,killerpanther:2.69,deathbishop:2.91,bluecyclops:3.06,desgran1:4.18,desgran2:4.18,desgran3:4.6,greenslime:2.01,skeleton:2.54,drakybat:2.16,mimic:2.48,wisp:2.22,hoimislime:2.01,mandragora:2.38,madrock:2.16,icicleslime:2.0,frostbat:2.3,yukingon:2.5,blizzardhawk:2.6,frostmermaid:2.7};
+const MON_SIZE={flameslime:2.27,thornwolf:2.48,armycrab:2.69,ghostlamp:2.48,stonecyclops:2.91,hornet:2.38,tornado:2.8,merman:2.59,skullbat:2.38,metalslime:1.9,golem:2.75,shadowmimic:2.64,darkpriest:2.69,icephoenix:2.69,mushmage:2.59,blazedragon:2.85,devilknight:2.8,orcking:2.91,demonlord:3.12,bloodwolf:2.69,firedragon:3.06,madcyclops:3.06,darkguard:2.91,icephoenixlord:2.91,shadowassassin:2.75,killerpanther:2.69,deathbishop:2.91,bluecyclops:3.06,desgran1:4.18,desgran2:4.18,desgran3:4.6,greenslime:2.01,skeleton:2.54,drakybat:2.16,mimic:2.48,wisp:2.22,hoimislime:2.01,mandragora:2.38,madrock:2.16,icicleslime:2.0,frostbat:2.3,yukingon:2.5,blizzardhawk:2.6,frostmermaid:2.7,yumebanken:3.2,yumebanken_f:2.4};
 // ---------------- キャラクター（ポーズべつ）----------------
 const chrTexCache={};
 function chrTex(key,pose){
@@ -3083,7 +3098,7 @@ function init(){
   cam=new THREE.PerspectiveCamera(32,1,0.1,140);
   batCam=new THREE.PerspectiveCamera(48,1,0.1,120);
   buildBattleScene();
-  if(V2 && canvas2d) V2.init(canvas2d, C, CHR);
+  if(V2 && canvas2d){ V2.init(canvas2d, C, CHR); if(V2.setMon) V2.setMon(MON); }
   fit();
   addEventListener('resize',fit);
 }
@@ -3579,13 +3594,23 @@ function buildBattleScene(){
   batScene.add(new THREE.AmbientLight(0x8899bb,0.9));
   const key=new THREE.PointLight(0xb0c8ff,1.0,26); key.position.set(3,6,5); batScene.add(key);
 }
+function showBattleCanvas(on){
+  // せんとうは つねに 3Dで えがくので、2Dマップに いても キャンバスを いれかえる
+  if(canvas2d) canvas2d.style.display = on ? 'none' : (is2D ? 'block' : 'none');
+  if(canvas)   canvas.style.visibility = on ? 'visible' : (is2D ? 'hidden' : 'visible');
+}
 function battleEnter(enemies, done){
+  showBattleCanvas(true);
   foes.forEach(f=>{ batScene.remove(f.mesh); if(f.shadow) batScene.remove(f.shadow); });
   foes=[];
   const n=enemies.length;
   enemies.forEach((e,i)=>{
     const size = MON_SIZE[e.key] || 2.3;
-    const key = (MON[e.key]||SPR[e.key])?e.key:'dbug';
+    let key = e.key;
+    if(!MON[key] && !SPR[key]){
+      console.warn('[view] まものの えが ありません: '+key);
+      key = MON.icicleslime ? 'icicleslime' : 'sora';
+    }
     const m=billboard(key, size);
     const spread = n===1?0:(i-(n-1)/2)*2.6;
     m.position.set(spread, size*0.5, -3.2 - (i%2)*0.6);
@@ -3603,7 +3628,7 @@ function battleEnter(enemies, done){
   fxState={kind:'enter', t:0, done};
 }
 function battleLeave(done){
-  fxState={kind:'leave', t:0, done};
+  fxState={kind:'leave', t:0, done:()=>{ showBattleCanvas(false); if(done) done(); }};
 }
 function fx(kind, data, done){
   // 演出は短く。完了時に done() を呼ぶ
