@@ -97,7 +97,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T14:45:52", "assets_sha": "38958804", "lines": {"world": 130, "npc": 185, "core": 1509, "view": 1136, "ui": 360}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T15:06:50", "assets_sha": "76aac0bb", "lines": {"world": 130, "npc": 185, "core": 1509, "view": 1148, "ui": 360}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -2126,12 +2126,15 @@ function chrTex(key,pose){
 }
 // むき → つかう ポーズ
 // ※ げんがの よこむきは 「ひだりむき」。したがって みぎへ すすむ ときに はんてんする。
-function poseOf(key,dir){
+// walk=true の ときは 「いっぽ ふみだした」フレーム（…W）を つかう。
+function poseOf(key,dir,walk){
   const d=CHR[key]; if(!d) return {pose:'front',flip:false};
-  if(dir==='back'  && d.back) return {pose:'back',  flip:false};
-  if(dir==='left'  && d.side) return {pose:'side',  flip:false};
-  if(dir==='right' && d.side) return {pose:'side',  flip:true};
-  return {pose:'front', flip:false};
+  let base='front', flip=false;
+  if(dir==='back'  && d.back){ base='back'; }
+  else if(dir==='left'  && d.side){ base='side'; flip=false; }
+  else if(dir==='right' && d.side){ base='side'; flip=true; }
+  if(walk && d[base+'W']) base=base+'W';
+  return {pose:base, flip};
 }
 function chrBillboard(key,size){
   const d=CHR[key];
@@ -2941,7 +2944,10 @@ function updateField(dt,time){
         const dx=tgt[i-1][0]-tgt[i][0], dy=tgt[i-1][1]-tgt[i][1];
         if(dx||dy) dir = dy<0?'back' : dy>0?'front' : (dx<0?'left':'right');
       }
-      const pf=poseOf(key,dir);
+      // まだ めもりに ついていない ＝ あるいている とちゅう
+      const dist=Math.abs(tgt[i][0]-fp[i].x)+Math.abs(tgt[i][1]-fp[i].y);
+      const moving = dist>0.06;
+      const pf=poseOf(key, dir, moving && C.G.stepFlip);   // ますごとに あしが かわる
       if(objs[i].userData.pose!==pf.pose){
         objs[i].material.map=chrTex(key,pf.pose);
         objs[i].material.needsUpdate=true;
@@ -2949,6 +2955,11 @@ function updateField(dt,time){
       }
       objs[i].scale.x = pf.flip?-1:1;
       objs[i].scale.y = 1;
+      // あるく はずみ：ふみだす たびに すこし しずんで もどる
+      if(moving){
+        const t=1-Math.min(1,dist);                       // 0→1 で 1ますぶん
+        objs[i].position.y += Math.abs(Math.sin(t*Math.PI))*0.045;
+      }
     }else{
       objs[i].scale.x = (C.G.stepFlip ? (i%2?-1:1) : (i%2?1:-1));
     }
@@ -3067,6 +3078,7 @@ function spawnBurst(target){
 window.LQ3View = {
   init, loop, buildMap, setActors, fx, battleEnter, battleLeave, refresh, chest, fade, chapterCard,
   get mode(){return mode;}, get drawCalls(){return drawCalls;},
+  debugPoses(){ return (actors.list||[]).map(o=>o.userData.pose).filter(Boolean); },
 };
 })();
 </script>
