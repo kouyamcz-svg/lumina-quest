@@ -97,7 +97,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T13:14:41", "assets_sha": "5df06c01", "lines": {"world": 130, "npc": 185, "core": 1406, "view": 1130, "ui": 270}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T13:41:48", "assets_sha": "a9d7e224", "lines": {"world": 130, "npc": 185, "core": 1432, "view": 1130, "ui": 270}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -468,20 +468,27 @@ const TACTICS = {manual:'めいれいさせろ', gungan:'ガンガンいこう�
 // ---------------- データ：敵（36しゅ＋ボス3けいたい） ----------------
 const ENEMIES = [
   // === ティア1：のはら（Lv1-6） ===
-  {key:'greenslime',  name:'グリーンスライム', hp:22, atk:6,  def:4,  agi:6,  exp:5,   gold:5},
-  {key:'flameslime',  name:'フレイムスライム', hp:30, atk:8,  def:5,  agi:6,  exp:7,   gold:7,
+  {key:'greenslime', minLv:1,  name:'グリーンスライム', hp:22, atk:6,  def:4,  agi:6,  exp:5,   gold:5},
+  // ---- ヴェルサ地方（こおりの まもの）----
+  {key:'icicleslime', minLv:1, name:'つららスライム',   hp:24, atk:6,  def:5,  agi:6,  exp:6,   gold:6,
+   spell:{kind:'dmg', p:0.26, lo:5, hi:9, name:'つめたい しずく'}},
+  {key:'frostbat', minLv:3,    name:'フロストバット',   hp:28, atk:8,  def:5,  agi:13, exp:9,   gold:8,
+   skill:{p:0.30, mul:1.20, name:'こおりの つばさ'}, inflict:{type:'freeze', p:0.26}},
+  {key:'yukingon', minLv:4,    name:'ゆきんこゴン',     hp:36, atk:10, def:7,  agi:5,  exp:12,  gold:11,
+   skill:{p:0.34, mul:1.35, name:'ゆきだま'}},
+  {key:'flameslime', minLv:2,  name:'フレイムスライム', hp:30, atk:8,  def:5,  agi:6,  exp:7,   gold:7,
    spell:{kind:'dmg', p:0.26, lo:6, hi:10, name:'ひのたま'}},
-  {key:'hoimislime',  name:'ホイミスライム',   hp:26, atk:6,  def:6,  agi:7,  exp:9,   gold:8,
+  {key:'hoimislime', minLv:1,  name:'ホイミスライム',   hp:26, atk:6,  def:6,  agi:7,  exp:9,   gold:8,
    spell:{kind:'heal', p:0.40, lo:14, hi:20, name:'いやしの ひかり'}},
-  {key:'drakybat',    name:'ドラキーバット',   hp:24, atk:7,  def:4,  agi:12, exp:7,   gold:6},
-  {key:'madrock',     name:'マドロック',       hp:34, atk:9,  def:8,  agi:3,  exp:10,  gold:9},
-  {key:'mandragora',  name:'マンドラゴラ',     hp:32, atk:9,  def:6,  agi:5,  exp:11,  gold:10,
+  {key:'drakybat', minLv:1,    name:'ドラキーバット',   hp:24, atk:7,  def:4,  agi:12, exp:7,   gold:6},
+  {key:'madrock', minLv:3,     name:'マドロック',       hp:34, atk:9,  def:8,  agi:3,  exp:10,  gold:9},
+  {key:'mandragora', minLv:4,  name:'マンドラゴラ',     hp:32, atk:9,  def:6,  agi:5,  exp:11,  gold:10,
    skill:{p:0.30, mul:1.05, name:'きょうきの さけび'}, inflict:{type:'sleep', p:0.35}},
-  {key:'thornwolf',   name:'いばらウルフ',     hp:45, atk:12, def:8,  agi:11, exp:14,  gold:12,
+  {key:'thornwolf', minLv:6,   name:'いばらウルフ',     hp:45, atk:12, def:8,  agi:11, exp:14,  gold:12,
    skill:{p:0.32, mul:1.45, name:'とげとげアタック'}},
-  {key:'hornet',      name:'エレキホーネット', hp:35, atk:10, def:6,  agi:14, exp:12,  gold:10,
+  {key:'hornet', minLv:3,      name:'エレキホーネット', hp:35, atk:10, def:6,  agi:14, exp:12,  gold:10,
    spell:{kind:'dmg', p:0.32, lo:9, hi:14, name:'でんげき'}},
-  {key:'metalslime',  name:'メタルスライム',   hp:20, atk:8,  def:14, agi:18, exp:120, gold:80,
+  {key:'metalslime', minLv:5,  name:'メタルスライム',   hp:20, atk:8,  def:14, agi:18, exp:120, gold:80,
    fleeP:0.58, tough:true},
   // === ティア2：どうくつB1（Lv6-12） ===
   {key:'wisp',        name:'ウィスプ',         hp:45, atk:14, def:8,  agi:16, exp:28,  gold:31,
@@ -566,9 +573,9 @@ const MIDBOSS = {
 };
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
-  versa_field1:['greenslime','drakybat','hoimislime'],                      // Lv1〜3
-  versa_dgn1:  ['drakybat','madrock','flameslime','mandragora'],            // Lv3〜5
-  versa_dgn2:  ['madrock','mandragora','hornet','thornwolf','metalslime'],  // Lv5〜7
+  versa_field1:['icicleslime','frostbat','hoimislime'],                     // Lv1〜3
+  versa_dgn1:  ['frostbat','icicleslime','yukingon','madrock'],             // Lv3〜5
+  versa_dgn2:  ['yukingon','madrock','mandragora','thornwolf','metalslime'],// Lv5〜7
   field_toros:['greenslime','flameslime','hoimislime','drakybat','madrock','mandragora',
                'thornwolf','hornet','metalslime'],
   cave1:['wisp','skeleton','ghostlamp','skullbat','mushmage','armycrab','merman','mimic','golem'],
@@ -1161,6 +1168,12 @@ function openShop(kind){
 
 // ---------------- 戦闘 ----------------
 // ひとり たびの あいだは じょうたい いじょうを うけにくくする
+function statusText(type){
+  return type==='sleep'   ? 'ねむってしまった！'
+       : type==='confuse' ? 'こんらんした！'
+       : type==='freeze'  ? 'こおりついた！'
+       : 'じょうたいが おかしい！';
+}
 function inflictP(e){
   if(!e.inflict) return 0;
   return party.length===1 ? e.inflict.p*0.6 : e.inflict.p;
@@ -1175,7 +1188,16 @@ function startBattle(kind){
   if(kind){
     enemies = [makeEnemy(MIDBOSS[kind])];
   }else{
-    const pool = byMap[P.map] || ['slimefire'];
+    // レベルが たりない まものは まだ でてこない（はじまりの ちいきを あんぜんに たもつ）
+    const all = byMap[P.map] || ['icicleslime'];
+    const plv = party[0].lv;
+    let pool = all.filter(k=>{
+      const e = ENEMIES.find(x=>x.key===k);
+      return !e || !e.minLv || e.minLv<=plv;
+    });
+    // どれも でられない ＝ レベルが たりないのに おくへ きた ばあい。
+    // ここは まもらない（ふかいりの きけんは のこす）
+    if(!pool.length) pool = all;
     const lv = party[0].lv;
     const byLv    = lv<4 ? 1 : (lv<9 ? 2 : 3);          // レベルが ひくいうちは たいぐんに ならない
     const byParty = party.length===1 ? (lv<5 ? 1 : 2)   // ひとりの ときは とくに おさえる
@@ -1208,9 +1230,11 @@ function beginRound(){
   const solo = party.length===1;
   const wakeSleep   = solo ? 0.60 : 0.34;
   const wakeConfuse = solo ? 0.62 : 0.38;
+  const wakeFreeze  = solo ? 0.62 : 0.40;   // こおりは とけやすい
   party.forEach(m=>{
     if(m.status==='sleep'&&Math.random()<wakeSleep) m.status=null;
     else if(m.status==='confuse'&&Math.random()<wakeConfuse) m.status=null;
+    else if(m.status==='freeze'&&Math.random()<wakeFreeze) m.status=null;
   });
   collectCommands(0);
 }
@@ -1221,6 +1245,7 @@ function collectCommands(i){
   const m = list[i];
   if(m.status==='sleep'){ b.queue.push({actor:m, type:'sleep'}); collectCommands(i+1); return; }
   if(m.status==='confuse'){ b.queue.push({actor:m, type:'confused'}); collectCommands(i+1); return; }
+  if(m.status==='freeze'){ b.queue.push({actor:m, type:'frozen'}); collectCommands(i+1); return; }
   if(G.tactic!=='manual'){ b.queue.push(autoCommand(m)); collectCommands(i+1); return; }
   G.menu={kind:'battle'};
   const items=['こうげき','じゅもん','どうぐ','ぼうぎょ','にげる'];
@@ -1329,6 +1354,7 @@ function memberAct(a, done){
   const b=G.battle, m=a.actor;
   const alive = b.enemies.filter(e=>e.hp>0);
   if(a.type==='sleep'){ U.msg([m.name+'は ねむっている…'], done); return; }
+  if(a.type==='frozen'){ U.msg([m.name+'は こおりついて うごけない！'], done); return; }
   if(a.type==='confused'){ // こんらん：てきか みかたか わからなくなる
     const allies=aliveMembers().filter(p=>p!==m);
     if(Math.random()<0.45 && allies.length){
@@ -1483,7 +1509,7 @@ function enemyAct(e, done){
       if(ts.hp<=0){ ts.hp=0; ts.status=null; lines.push(ts.name+'は たおれた…'); }
       else if(e.inflict && Math.random()<inflictP(e) && !ts.status){
         ts.status=e.inflict.type;
-        lines.push(ts.name+'は '+(e.inflict.type==='sleep'?'ねむってしまった！':'こんらんした！'));
+        lines.push(ts.name+'は '+statusText(e.inflict.type));
       }
       U.hud(); U.msg(lines, done);
     });
@@ -1514,7 +1540,7 @@ function enemyAct(e, done){
       if(tp.hp<=0){ tp.hp=0; tp.status=null; lines.push(tp.name+'は たおれた…'); }
       else if(e.inflict && Math.random()<inflictP(e) && !tp.status){
         tp.status=e.inflict.type;
-        lines.push(tp.name+'は '+(e.inflict.type==='sleep'?'ねむってしまった！':'こんらんした！'));
+        lines.push(tp.name+'は '+statusText(e.inflict.type));
       }
       U.hud(); U.msg(lines, done);
     });
@@ -1550,7 +1576,7 @@ function enemyAct(e, done){
     if(t.hp<=0){ t.hp=0; t.status=null; lines.push(t.name+'は たおれた…'); }
     else if(e.inflict && Math.random()<inflictP(e) && !t.status){
       t.status=e.inflict.type;
-      lines.push(t.name+'は '+(e.inflict.type==='sleep'?'ねむってしまった！':'こんらんした！'));
+      lines.push(t.name+'は '+statusText(e.inflict.type));
     }
     U.hud(); U.msg(lines, done);
   });
@@ -1703,7 +1729,7 @@ function reviveMember(o){
   m.exp = Math.max(0, o.exp|0);
   m.weapon = o.weapon || null;
   m.armor  = o.armor  || null;
-  m.status = (o.status==='sleep'||o.status==='confuse') ? o.status : null;
+  m.status = ['sleep','confuse','freeze'].includes(o.status) ? o.status : null;
   m.hp = Math.max(0, Math.min(m.maxhp, (o.hp===undefined? m.maxhp : o.hp|0)));
   m.mp = Math.max(0, Math.min(m.maxmp, (o.mp===undefined? m.maxmp : o.mp|0)));
   return m;
@@ -2006,7 +2032,7 @@ function patTex(draw, px){
 }
 const sprCache={};
 // せかいでの たかさ（1タイル＝1）
-const MON_SIZE={flameslime:2.27,thornwolf:2.48,armycrab:2.69,ghostlamp:2.48,stonecyclops:2.91,hornet:2.38,tornado:2.8,merman:2.59,skullbat:2.38,metalslime:1.9,golem:2.75,shadowmimic:2.64,darkpriest:2.69,icephoenix:2.69,mushmage:2.59,blazedragon:2.85,devilknight:2.8,orcking:2.91,demonlord:3.12,bloodwolf:2.69,firedragon:3.06,madcyclops:3.06,darkguard:2.91,icephoenixlord:2.91,shadowassassin:2.75,killerpanther:2.69,deathbishop:2.91,bluecyclops:3.06,desgran1:4.18,desgran2:4.18,desgran3:4.6,greenslime:2.01,skeleton:2.54,drakybat:2.16,mimic:2.48,wisp:2.22,hoimislime:2.01,mandragora:2.38,madrock:2.16};
+const MON_SIZE={flameslime:2.27,thornwolf:2.48,armycrab:2.69,ghostlamp:2.48,stonecyclops:2.91,hornet:2.38,tornado:2.8,merman:2.59,skullbat:2.38,metalslime:1.9,golem:2.75,shadowmimic:2.64,darkpriest:2.69,icephoenix:2.69,mushmage:2.59,blazedragon:2.85,devilknight:2.8,orcking:2.91,demonlord:3.12,bloodwolf:2.69,firedragon:3.06,madcyclops:3.06,darkguard:2.91,icephoenixlord:2.91,shadowassassin:2.75,killerpanther:2.69,deathbishop:2.91,bluecyclops:3.06,desgran1:4.18,desgran2:4.18,desgran3:4.6,greenslime:2.01,skeleton:2.54,drakybat:2.16,mimic:2.48,wisp:2.22,hoimislime:2.01,mandragora:2.38,madrock:2.16,icicleslime:2.0,frostbat:2.3,yukingon:2.5};
 // ---------------- キャラクター（ポーズべつ）----------------
 const chrTexCache={};
 function chrTex(key,pose){
