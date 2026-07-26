@@ -1724,12 +1724,13 @@ function chrTex(key,pose){
   }
   return chrTexCache[k];
 }
-// むき → つかう ポーズ（ひだりは みぎを はんてん）
+// むき → つかう ポーズ
+// ※ げんがの よこむきは 「ひだりむき」。したがって みぎへ すすむ ときに はんてんする。
 function poseOf(key,dir){
   const d=CHR[key]; if(!d) return {pose:'front',flip:false};
   if(dir==='back'  && d.back) return {pose:'back',  flip:false};
-  if(dir==='left'  && d.side) return {pose:'side',  flip:true};
-  if(dir==='right' && d.side) return {pose:'side',  flip:false};
+  if(dir==='left'  && d.side) return {pose:'side',  flip:false};
+  if(dir==='right' && d.side) return {pose:'side',  flip:true};
   return {pose:'front', flip:false};
 }
 function chrBillboard(key,size){
