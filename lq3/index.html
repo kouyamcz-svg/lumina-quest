@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T07:40:31", "assets_sha": "95652c8f", "lines": {"world": 139, "npc": 254, "core": 1740, "view2d": 767, "view": 1217, "ui": 372}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T07:47:06", "assets_sha": "95652c8f", "lines": {"world": 139, "npc": 254, "core": 1740, "view2d": 953, "view": 1225, "ui": 372}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1063,6 +1063,190 @@ function noteStep(x,y,side){
   if(foot.length>40) foot.shift();
 }
 
+// ============================================================
+// せんとう（2Dドットえ）
+// SFCの ように、はいけいは よこいちれつの じめん＋とおくの シルエット。
+// ============================================================
+let bFoes = [], bFx = null, bShake = 0, bFlash = 0, bParts = [], bTheme = 'plain';
+let bBack = null, bEnter = 0;
+
+function battleBackdrop(theme){
+  const key = theme;
+  if(bBack && bBack.key===key) return bBack;
+  const BW = 256, BH = 144;                       // 16bitらしい ひくい かいぞうど
+  const c = mk(BW,BH), g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  const set = {
+    snow:  {sky:'#1c2740', far:'#2e3d5c', mid:'#48597c', gnd:atlas.snowfield, line:'#8fa2bd'},
+    ice:   {sky:'#101c30', far:'#22374f', mid:'#31536f', gnd:atlas.ice,       line:'#7fa8c4'},
+    cave:  {sky:'#0c0f18', far:'#1a1f2c', mid:'#2a3040', gnd:atlas.rockwall,  line:'#5a5040'},
+    world: {sky:'#141c30', far:'#22314a', mid:'#2f4a3a', gnd:atlas.plain,     line:'#4a7a3a'},
+    plain: {sky:'#141c30', far:'#22314a', mid:'#2f4a3a', gnd:atlas.plain,     line:'#4a7a3a'},
+    village:{sky:'#141c30',far:'#22314a', mid:'#2f4a3a', gnd:atlas.plain,     line:'#4a7a3a'},
+    indoor:{sky:'#12101a', far:'#221d2c', mid:'#332b40', gnd:atlas.pave,      line:'#8f97a8'},
+    castle:{sky:'#12101a', far:'#221d2c', mid:'#332b40', gnd:atlas.pave,      line:'#8f97a8'},
+  }[theme] || {sky:'#141c30', far:'#22314a', mid:'#2f4a3a', gnd:atlas.plain, line:'#4a7a3a'};
+
+  const horizon = 84;
+  R(g,0,0,BW,horizon,set.sky);
+  // とおくの ほし（どうくつ いがい）
+  if(theme!=='cave' && theme!=='indoor' && theme!=='castle'){
+    for(let i=0;i<26;i++){
+      const x=Math.floor(nz(i,1,3)*BW), y=Math.floor(nz(i,2,5)*(horizon-24));
+      P(g,x,y, i%4? '#3a4a6e' : '#7d8fb4');
+    }
+  }
+  // とおくの やまなみ（2そう・シルエット）
+  for(const [col, base, amp, step] of [[set.far, horizon-6, 22, 23],[set.mid, horizon, 14, 17]]){
+    let y = base - amp*0.5;
+    for(let x=0;x<BW;x++){
+      if(x%step===0) y = base - Math.floor(nz(x,7,2)*amp) - 4;
+      R(g,x,y,1,horizon-y+2,col);
+    }
+  }
+  R(g,0,horizon,BW,1,set.line);
+  // じめん：ちけいの タイルを しきつめる
+  const gnd = Array.isArray(set.gnd) ? set.gnd[0] : set.gnd;
+  for(let y=horizon+1;y<BH;y+=TS)for(let x=0;x<BW;x+=TS) g.drawImage(gnd,x,y);
+  // てまえほど くらくして おくゆきを だす（だんかいてきに・グラデーションは つかわない）
+  for(let i=0;i<4;i++){
+    const y = horizon+1 + Math.floor((BH-horizon-1)*(i+1)/5);
+    g.fillStyle = 'rgba(0,0,0,'+(0.06+i*0.05)+')';
+    g.fillRect(0,y,BW,BH-y);
+  }
+  bBack = {key, canvas:c, w:BW, h:BH, horizon};
+  return bBack;
+}
+
+function battleEnter2D(enemies, mon, done){
+  const m = C.MAPS[C.P.map];
+  bTheme = (m && m.theme) || 'plain';
+  battleBackdrop(bTheme);
+  bFoes = enemies.map((e,i)=>{
+    const d = mon && mon[e.key];
+    return {enemy:e, art:d, idx:i, n:enemies.length, ph:nz(i,3,9)*6, fade:1, z:0};
+  });
+  bParts = []; bShake = 0; bFlash = 0; bEnter = 0;
+  bFx = {kind:'enter', t:0, done};
+}
+function battleFx2D(kind, data, done){
+  if(kind==='attack'||kind==='spell'||kind==='spellall'){
+    bFx = {kind:'pattack', t:0, done, target:data && data.target};
+  }else if(kind==='enemyattack'||kind==='enemyaoe'){
+    const actor = data && data.from ? bFoes.find(f=>f.enemy===data.from) : null;
+    bFx = {kind:'eattack', t:0, done, actor, wide:(kind==='enemyaoe')};
+  }else if(kind==='heal'){
+    bFx = {kind:'heal', t:0, done};
+  }else if(done) done();
+}
+function battleLeave2D(done){ bFx = {kind:'leave', t:0, done}; }
+
+function burst2D(target){
+  const f = target ? bFoes.find(x=>x.enemy===target) : bFoes[0];
+  const cx0 = f ? f._cx : W/2, cy0 = f ? f._cy : H/2;
+  for(let i=0;i<12;i++){
+    bParts.push({x:cx0, y:cy0,
+      vx:(nz(i,1,11)-0.5)*260, vy:-(60+nz(i,2,12)*220),
+      life:0.5, col: i%2 ? '#f0c058' : '#e06038'});
+  }
+}
+
+function drawBattle(dt, time){
+  if(!cv) return;
+  const back = battleBackdrop(bTheme);
+  // ---- えんしゅつの しんこう ----
+  let zoom = 1, ox2 = 0;
+  if(bFx){
+    bFx.t += dt;
+    const s = bFx;
+    if(s.kind==='enter'){
+      bEnter = Math.min(1, s.t/0.5);
+      if(s.t>0.55){ const d=s.done; bFx=null; d&&d(); }
+    }else if(s.kind==='pattack'){
+      if(s.t<0.16) zoom = 1 + s.t*0.5;
+      else if(s.t<0.24){ if(!s.hit){ s.hit=true; bShake=0.26; bFlash=0.5; burst2D(s.target); } zoom=1.08; }
+      else if(s.t<0.5) zoom = 1.08 - (s.t-0.24)*0.32;
+      else { const d=s.done; bFx=null; d&&d(); }
+    }else if(s.kind==='eattack'){
+      const reach = s.wide ? 8 : 14;
+      if(s.actor){
+        if(s.t<0.2) s.actor.z = s.t*(reach/0.2);
+        else if(s.t<0.5) s.actor.z = reach-(s.t-0.28)*(reach/0.3);
+        else s.actor.z = 0;
+      }
+      if(s.t>=0.2 && s.t<0.28 && !s.hit){ s.hit=true; bShake=s.wide?0.34:0.26; bFlash=s.wide?0.45:0.3; }
+      if(s.t>0.55){ if(s.actor) s.actor.z=0; const d=s.done; bFx=null; d&&d(); }
+    }else if(s.kind==='heal'){
+      if(s.t>0.3){ const d=s.done; bFx=null; d&&d(); }
+    }else if(s.kind==='leave'){
+      if(s.t>0.2){ const d=s.done; bFx=null; d&&d(); return; }
+    }
+  }
+  if(bShake>0){ bShake-=dt; ox2 = (nz(time*60|0,1,13)-0.5)*bShake*26; }
+
+  // ---- はいけい（せいすうばいで ひきのばす）----
+  const sc = Math.max(1, Math.floor(W/back.w));
+  const bw = back.w*sc, bh = back.h*sc;
+  cx.fillStyle = '#0a0c14'; cx.fillRect(0,0,W,H);
+  const bx = Math.round((W-bw)/2 + ox2), by = Math.round(H-bh);
+  cx.drawImage(back.canvas, bx, by, bw, bh);
+  if(bh < H){ cx.fillStyle='#0a0c14'; cx.fillRect(0,0,W,by); }
+
+  // ---- てき ----
+  const groundY = by + back.horizon*sc + Math.round(bh*0.22);
+  bFoes.forEach((f,i)=>{
+    if(f.enemy.hp<=0){ f.fade = Math.max(0, f.fade - dt*2.2); }
+    if(f.fade<=0) return;
+    const n = f.n;
+    const spread = (n===1) ? 0 : (i-(n-1)/2) * (bw*0.26);
+    const breathe = 1 + Math.sin(time*2.1+f.ph)*0.03;
+    const sway = Math.sin(time*0.85+f.ph)*(sc*1.5);
+    let hh = Math.round(bh*0.42*zoom);
+    let ww = hh;
+    if(f.art){ ww = Math.round(hh*(f.art.w/f.art.h)); }
+    const cx0 = bx+bw/2 + spread + sway + ox2;
+    const cy0 = groundY - f.z*sc - Math.sin(time*1.7+f.ph)*sc;
+    f._cx = cx0; f._cy = cy0 - hh*0.5;
+    cx.globalAlpha = f.fade;
+    // かげ
+    cx.fillStyle='rgba(0,0,0,0.35)';
+    cx.beginPath(); cx.ellipse(cx0, cy0, ww*0.30, sc*3, 0, 0, Math.PI*2); cx.fill();
+    if(f.art){
+      const img = getImg(f.art.src);
+      if(img.complete && img.naturalWidth){
+        const dh = Math.round(hh*breathe), dw = Math.round(ww/breathe);
+        cx.drawImage(img, Math.round(cx0-dw/2), Math.round(cy0-dh), dw, dh);
+      }
+    }else{
+      cx.fillStyle='#8f4fa0';
+      cx.fillRect(Math.round(cx0-ww/2), Math.round(cy0-hh), ww, hh);
+    }
+    cx.globalAlpha = 1;
+  });
+
+  // ---- つぶ ----
+  bParts = bParts.filter(p=>{
+    p.life -= dt;
+    if(p.life<=0) return false;
+    p.vy += dt*900; p.x += p.vx*dt; p.y += p.vy*dt;
+    cx.fillStyle = p.col;
+    cx.fillRect(Math.round(p.x), Math.round(p.y), sc*2, sc*2);
+    return true;
+  });
+
+  // ---- とうじょうの スライドイン ----
+  if(bEnter<1){
+    cx.fillStyle='rgba(0,0,0,'+(1-bEnter)+')';
+    cx.fillRect(0,0,W,H);
+  }
+  if(bFlash>0){
+    cx.fillStyle='rgba(255,255,255,'+bFlash+')';
+    cx.fillRect(0,0,W,H);
+    bFlash = Math.max(0, bFlash - dt*2.6);
+  }
+  if(fadeV>0){ cx.fillStyle='rgba(0,0,0,'+fadeV+')'; cx.fillRect(0,0,W,H); }
+}
+
 // ---------------- びょうが ----------------
 function draw(dt, time, actors){
   if(!cv || !curMap) return;
@@ -1269,7 +1453,9 @@ function drawTint(){
 }
 function setFade(v){ fadeV = v; }
 
-return {init, resize, buildMap, draw, noteStep, setFade, setMon, setNpcData, get TS(){return TS;}};
+return {init, resize, buildMap, draw, noteStep, setFade, setMon, setNpcData,
+        battleEnter:battleEnter2D, battleFx:battleFx2D, battleLeave:battleLeave2D, drawBattle,
+        get TS(){return TS;}};
 })();
 
 </script>
@@ -3964,12 +4150,14 @@ function buildBattleScene(){
   const key=new THREE.PointLight(0xb0c8ff,1.0,26); key.position.set(3,6,5); batScene.add(key);
 }
 function showBattleCanvas(on){
-  // せんとうは つねに 3Dで えがくので、2Dマップに いても キャンバスを いれかえる
-  if(canvas2d) canvas2d.style.display = on ? 'none' : (is2D ? 'block' : 'none');
-  if(canvas)   canvas.style.visibility = on ? 'visible' : (is2D ? 'hidden' : 'visible');
+  // せんとうも ドットえ（2D）で えがく。3Dは しろの なかの フィールドだけ。
+  if(canvas2d) canvas2d.style.display = on ? 'block' : (is2D ? 'block' : 'none');
+  if(canvas)   canvas.style.visibility = on ? 'hidden' : (is2D ? 'hidden' : 'visible');
 }
 function battleEnter(enemies, done){
   showBattleCanvas(true);
+  mode='battle';
+  if(V2 && V2.battleEnter){ V2.resize(); V2.battleEnter(enemies, MON, done); return; }
   foes.forEach(f=>{ batScene.remove(f.mesh); if(f.shadow) batScene.remove(f.shadow); });
   foes=[];
   const n=enemies.length;
@@ -3997,9 +4185,12 @@ function battleEnter(enemies, done){
   fxState={kind:'enter', t:0, done};
 }
 function battleLeave(done){
-  fxState={kind:'leave', t:0, done:()=>{ showBattleCanvas(false); if(done) done(); }};
+  const fin = ()=>{ mode='field'; showBattleCanvas(false); if(done) done(); };
+  if(V2 && V2.battleLeave){ V2.battleLeave(fin); return; }
+  fxState={kind:'leave', t:0, done:fin};
 }
 function fx(kind, data, done){
+  if(mode==='battle' && V2 && V2.battleFx){ V2.battleFx(kind, data, done); return; }
   // 演出は短く。完了時に done() を呼ぶ
   if(kind==='attack'||kind==='spell'||kind==='spellall'){
     fxState={kind:'pattack', t:0, done, target:data.target};
@@ -4037,9 +4228,12 @@ function fade(to, done){
 // ---------------- ループ ----------------
 let last=performance.now();
 function loop(now){
-  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  const dt=Math.max(0, Math.min(0.05,(now-last)/1000)); last=now;   // まきもどりでも とまらない
   const time=now/1000;
-  if(mode==='battle') updateBattle(dt,time);
+  if(mode==='battle'){
+    if(V2 && V2.drawBattle) V2.drawBattle(dt,time);
+    else updateBattle(dt,time);
+  }
   else if(is2D) update2D(dt,time);
   else updateField(dt,time);
   requestAnimationFrame(loop);
