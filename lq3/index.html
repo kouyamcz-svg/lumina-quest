@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T08:50:21", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1740, "view2d": 1002, "view": 1225, "ui": 372}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T09:17:01", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1762, "view2d": 1076, "view": 1227, "ui": 387}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1289,6 +1289,78 @@ function drawBattle(dt, time){
   if(fadeV>0){ cx.fillStyle='rgba(0,0,0,'+fadeV+')'; cx.fillRect(0,0,W,H); }
 }
 
+// ============================================================
+// ちず（メニューの「ちず」）
+// タイルを 1〜4ドットに ちぢめて えがく。いった ことの ある ちてんだけ しるしを つける。
+// ============================================================
+let mapOn = false, mapId = null, mapBlink = 0;
+const MAPCOL = {
+  '~':'#20386e','w':'#3c48a0','_':'#c8a86c','.':'#48a854',',':'#22401a',
+  '=':'#c2d0de',':':'#dfc47f','^':'#6a4f36','r':'#a88a52',
+  '#':'#6a7182','f':'#22401a','o':'#8a6a48','t':'#c85a20',
+  'I':'#d8b040','P':'#dcdce8','S':'#c87830','W':'#b04038','M':'#7048a8',
+  'K':'#b4bcc9','F':'#3d68ac','G':'#c8a86c','D':'#7d5a36','Z':'#dcd0f0',
+  'C':'#d9a832','n':'#e8e8f0','B':'#8a2a3a','<':'#b4bcc9','>':'#b4bcc9',
+  'A':'#e8e0d0','V':'#e0a040','X':'#3a3a44','Q':'#8a8f9a',
+};
+function showMap(id){ mapOn = true; mapId = id; }
+function hideMap(){ mapOn = false; }
+function drawMapOverlay(time){
+  const m = C.MAPS[mapId]; if(!m) return;
+  const rows = m.tiles, MW = rows[0].length, MH = rows.length;
+  // がめんに おさまる せいすうばい
+  const pad = Math.round(Math.min(W,H)*0.06);
+  const sc = Math.max(1, Math.min(Math.floor((W-pad*2)/MW), Math.floor((H-pad*2.6)/MH)));
+  const mw = MW*sc, mh = MH*sc;
+  const ox = Math.round((W-mw)/2), oy = Math.round((H-mh)/2 + pad*0.2);
+
+  cx.fillStyle='rgba(0,0,0,0.82)'; cx.fillRect(0,0,W,H);
+  // わく
+  cx.fillStyle='#fff'; cx.fillRect(ox-sc*2, oy-sc*2, mw+sc*4, mh+sc*4);
+  cx.fillStyle='#000'; cx.fillRect(ox-sc,   oy-sc,   mw+sc*2, mh+sc*2);
+  // ちけい
+  for(let y=0;y<MH;y++){
+    const r = rows[y];
+    for(let x=0;x<MW;x++){
+      const col = MAPCOL[r[x]];
+      if(!col) continue;
+      cx.fillStyle = col;
+      cx.fillRect(ox+x*sc, oy+y*sc, sc, sc);
+    }
+  }
+  // いった ことの ある ちてんだけ しるし（しろい わく）
+  const known = C.G.visited || {};
+  Object.keys(m.warpsXY||{}).forEach(pos=>{
+    const [x,y] = pos.split(',').map(Number);
+    const to = m.warpsXY[pos].to;
+    if(!known[to]) return;
+    cx.fillStyle='#fff';
+    cx.fillRect(ox+x*sc-sc, oy+y*sc-sc, sc*3, 1);
+    cx.fillRect(ox+x*sc-sc, oy+y*sc+sc*2, sc*3, 1);
+    cx.fillRect(ox+x*sc-sc, oy+y*sc-sc, 1, sc*3);
+    cx.fillRect(ox+x*sc+sc*2, oy+y*sc-sc, 1, sc*3);
+  });
+  // じぶんの いち（てんめつ）
+  mapBlink = (mapBlink + 1) % 60;
+  if(mapBlink < 38){
+    const s2 = Math.max(2, sc+1);
+    cx.fillStyle='#ff4a4a';
+    cx.fillRect(ox+C.P.x*sc - (s2-sc)/2, oy+C.P.y*sc - (s2-sc)/2, s2, s2);
+    cx.fillStyle='#fff';
+    cx.fillRect(ox+C.P.x*sc, oy+C.P.y*sc, Math.max(1,sc-1), Math.max(1,sc-1));
+  }
+  // みだし
+  const label = (C.areaName ? C.areaName(mapId, C.P.x, C.P.y) : C.WORLD.mapName(mapId));
+  cx.fillStyle='#fff';
+  cx.font = Math.round(H*0.030)+'px sans-serif';
+  cx.textAlign='center';
+  cx.fillText(label, W/2, oy-sc*4);
+  cx.font = Math.round(H*0.022)+'px sans-serif';
+  cx.fillStyle='#bfc6d8';
+  cx.fillText('ボタンを おすと とじます', W/2, oy+mh+sc*5);
+  cx.textAlign='left';
+}
+
 // ---------------- びょうが ----------------
 function draw(dt, time, actors){
   if(!cv || !curMap) return;
@@ -1385,6 +1457,7 @@ function draw(dt, time, actors){
   if(curNight && curScene.aurora) drawAurora(time);
   drawTint();
   if(fadeV>0){ cx.fillStyle='rgba(0,0,0,'+fadeV+')'; cx.fillRect(0,0,W,H); }
+  if(mapOn) drawMapOverlay(time);
 }
 let NPCREF = null;
 function setNpcData(n){ NPCREF = n; }
@@ -1503,6 +1576,7 @@ function drawTint(){
 function setFade(v){ fadeV = v; }
 
 return {init, resize, buildMap, draw, noteStep, setFade, setMon, setNpcData,
+        showMap, hideMap, drawMapOverlay, get mapOn(){return mapOn;},
         battleEnter:battleEnter2D, battleFx:battleFx2D, battleLeave:battleLeave2D, drawBattle,
         get TS(){return TS;}};
 })();
@@ -2077,7 +2151,7 @@ function tileAt(map,x,y){
 function isBlocked(ch){
   return SOLID.has(ch) || ch==='I' || ch==='P' || ch==='S' || ch==='W' || ch==='M'
       || ch==='n' || ch==='C' || ch==='B'
-      || ch==='A' || ch==='V' || ch==='X' || ch==='Q';   // ちてんは ぶつかって はいる
+      || ch==='Q';                                   // Q は しらべる たいしょう
 }
 function walkable(map,x,y){ return !isBlocked(tileAt(map,x,y)); }
 function warpAt(map,x,y){
@@ -2106,9 +2180,18 @@ let V = NullView, U = NullUI, A = NullAudio;
 function bind(view, ui, audio){ V=view||NullView; U=ui||NullUI; A=audio||NullAudio; }
 
 // ---------------- フィールド行動 ----------------
-function stepField(dx,dy){
-  if(G.mode!=='field' || G.busy) return;
-  const nx=P.x+dx, ny=P.y+dy;
+// ---------------- しらべる（Aボタン）----------------
+// むいている ほうこうの 1ますを しらべる。DQと おなじ そうさ。
+function facing(){
+  const d = P.dir||'front';
+  const dx = d==='left' ? -1 : d==='right' ? 1 : 0;
+  const dy = d==='back' ? -1 : d==='front' ? 1 : 0;
+  return {x:P.x+dx, y:P.y+dy, dx, dy};
+}
+function interact(){
+  if(G.mode!=='field' || G.busy) return false;
+  const f = facing();
+  const nx = f.x, ny = f.y, dx = f.dx, dy = f.dy;
   const ch = tileAt(P.map,nx,ny);
   // 施設・人物は「ぶつかって」作用
   if(ch==='n'){ talkNPC(nx,ny); return; }
@@ -2118,7 +2201,7 @@ function stepField(dx,dy){
   if(ch==='C'){ openChest(nx,ny); return; }
   if(ch==='A'||ch==='V'||ch==='X'){          // ワールドの ちてん
     const w=warpAt(P.map,nx,ny);
-    if(w){ P.dir = dy<0?'back':dy>0?'front':(dx<0?'left':'right'); doWarp(w); return; }
+    if(w){ doWarp(w); return; }
   }
   if(ch==='Q'){                               // まだ いけない ちほう
     G.mode='msg';
@@ -2192,6 +2275,19 @@ function stepField(dx,dy){
       ()=>{ G.mode='field'; });
     return;
   }
+  // なにも なければ
+  G.mode='msg';
+  U.msg(['そこには なにも ない。'], ()=>{ G.mode='field'; });
+  return true;
+}
+
+function stepField(dx,dy){
+  if(G.mode!=='field' || G.busy) return;
+  const nx=P.x+dx, ny=P.y+dy;
+  const ch = tileAt(P.map,nx,ny);
+  // ★ぶつかっただけでは なにも おきない。しらべるのは Aボタン（interact）。
+  //   ワープの ます（もん・かいだん・ちてん）は ふんだら すすむ。
+  P.dir = dy<0?'back' : dy>0?'front' : (dx<0?'left':'right');
   if(!walkable(P.map,nx,ny)) return;
   G.trail.unshift([P.x,P.y]); if(G.trail.length>8) G.trail.pop();
   P.dir = dy<0?'back' : dy>0?'front' : (dx<0?'left':'right');   // むきを おぼえる
@@ -3236,7 +3332,7 @@ return {
   // マップ
   tileAt, isBlocked, walkable, warpAt,
   // 行動
-  stepField, doWarp, startBattle, beginRound, saveGame, loadGame,
+  stepField, interact, facing, doWarp, startBattle, beginRound, saveGame, loadGame,
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
@@ -4469,6 +4565,8 @@ function spawnBurst(target){
 
 window.LQ3View = {
   init, loop, buildMap, setActors, fx, battleEnter, battleLeave, refresh, chest, fade, chapterCard,
+  showMap(id){ if(V2&&V2.showMap) V2.showMap(id); },
+  hideMap(){ if(V2&&V2.hideMap) V2.hideMap(); },
   get mode(){return mode;}, get drawCalls(){return drawCalls;}, get is2D(){return is2D;},
   debugPoses(){ return is2D ? lastPoses2D.slice()
                            : (actors.list||[]).map(o=>o.userData.pose).filter(Boolean); },
@@ -4600,17 +4698,29 @@ function press(k){
     else if(k==='B') menuCancel();
     return;
   }
+  if(C.G.mode==='map'){ closeMap(); return; }        // ちずは どの ボタンでも とじる
   if(C.G.mode!=='field'||C.G.busy) return;
   if(k==='U') C.stepField(0,-1);
   else if(k==='D') C.stepField(0,1);
   else if(k==='L') C.stepField(-1,0);
   else if(k==='R') C.stepField(1,0);
-  else if(k==='A') openFieldMenu();
-  else if(k==='B') openFieldMenu();
+  else if(k==='A') C.interact();                     // ★A＝しらべる・はなす
+  else if(k==='B') openFieldMenu();                  // ★B＝メニュー
+}
+// ---------------- ちず ----------------
+function openMap(){
+  C.G.mode='map';
+  $('cmd-win').style.display='none';
+
+  if(V.showMap) V.showMap(C.P.map);
+}
+function closeMap(){
+  if(V.hideMap) V.hideMap();
+  C.G.mode='field';
 }
 function openFieldMenu(){
   C.G.mode='menu';
-  menu(['つよさ','どうぐ','そうび','さくせん','クエスト','セーブ','まちの ようす','とじる'],
+  menu(['つよさ','どうぐ','そうび','ちず','さくせん','クエスト','セーブ','まちの ようす','とじる'],
        'メニュー',(sel)=>{
     if(sel===0){            // つよさ
       const lines=C.party.reduce((a,m)=>a.concat([
@@ -4626,7 +4736,10 @@ function openFieldMenu(){
     }else if(sel===2){      // そうび
       openEquip();
 
-    }else if(sel===3){      // さくせん
+    }else if(sel===3){      // ちず
+      openMap();
+
+    }else if(sel===4){      // さくせん
       const keys=Object.keys(C.TACTICS);
       menu(keys.map(k=>C.TACTICS[k]).concat(['もどる']),'さくせん',(k)=>{
         if(k<keys.length){ C.G.tactic=keys[k];
@@ -4634,18 +4747,18 @@ function openFieldMenu(){
         else C.G.mode='field';
       });
 
-    }else if(sel===4){      // クエスト
+    }else if(sel===5){      // クエスト
       const qs=C.questList();
       msg2(qs.length
         ? qs.reduce((a,q)=>a.concat(['＊ '+q.title, '　'+q.desc]),[])
         : ['いまは とくに やることが ない。'], ()=>{ C.G.mode='field'; });
 
-    }else if(sel===5){      // セーブ
+    }else if(sel===6){      // セーブ
       const ok=C.saveGame();
       msg2([ok?'ぼうけんの きろくを つけた。':(C.lastSaveError||'きろくに しっぱいした…')],
            ()=>{ C.G.mode='field'; });
 
-    }else if(sel===6){      // まちの ようす（しさく）
+    }else if(sel===7){      // まちの ようす（しさく）
       const st=['NORMAL','SLEEPING_SICKNESS','DREAM_INVASION'];
       const lb=st.map(s=>C.WORLD.TOWN_STATES[s].label)
                  .concat([C.G.night?'あさに する':'よるに する','もどる']);
