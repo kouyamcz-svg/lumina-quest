@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T15:04:23", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1766, "bgm": 640, "view2d": 1076, "view": 1227, "ui": 407}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T18:08:01", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1766, "bgm": 657, "view2d": 1076, "view": 1227, "ui": 407}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1049,7 +1049,11 @@ function ctx(){
 }
 function ensure(){
   if(!ctx()) return false;
-  if(!G){ G = buildGraph(AC); if(G && G.out) G.out.gain.value = vol; }
+  if(!G){
+    try{ G = buildGraph(AC); }
+    catch(e){ console.warn('[bgm] おとの グラフを つくれません', e); G = null; }
+    if(G && G.out) G.out.gain.value = vol;
+  }
   if(!EVENTS){
     EVENTS = buildEvents().slice().sort((a,b)=>a.t-b.t);
   }
@@ -1095,8 +1099,8 @@ function begin(name){
   playing = name;
   idx = 0; loopN = 0;
   t0 = AC.currentTime + 0.10;
-  lastNow = AC.currentTime;
-  if(G && G.out){ try{ G.out.gain.setValueAtTime(vol, AC.currentTime); }catch(e){} }
+  lastNow = -1;                  // さいしょの pump を みはりで はじかない
+  gainNow(vol);                  // ★のこっている フェードを とりけして おんりょうを もどす
   pump();
   if(timer) clearInterval(timer);
   timer = setInterval(pump, TICK);
@@ -1118,22 +1122,35 @@ function play(name){
   pending = null;
   begin(name);
 }
+// おんりょうの よやくを かならず とりけしてから きめる。
+// ※ よやくを のこしたまま かけなおすと、はじめた とたんに 0へ さがって
+//    「ぜんぜん きこえない」に なる（じっさいに でた ふぐあい）。
+function gainNow(v){
+  if(!G || !G.out || !AC) return;
+  try{
+    const g = G.out.gain, t = AC.currentTime;
+    g.cancelScheduledValues(t);
+    g.setValueAtTime(v, t);
+  }catch(e){ try{ G.out.gain.value = v; }catch(e2){} }
+}
+function fadeOut(){
+  if(!G || !G.out || !AC) return;
+  try{
+    const g = G.out.gain, t = AC.currentTime;
+    g.cancelScheduledValues(t);
+    g.setValueAtTime(Math.max(0.0001, g.value), t);
+    g.linearRampToValueAtTime(0.0001, t+0.18);
+  }catch(e){}
+}
 function stop(){
+  const wasPlaying = !!playing;
   if(timer){ clearInterval(timer); timer=null; }
   playing = null; pending = null; stall = 0; lastNow = -1;
-  if(G && G.out){                                  // すぐ とめず、みじかく フェード
-    try{
-      const g=G.out.gain, t=AC.currentTime;
-      g.cancelScheduledValues(t);
-      g.setValueAtTime(g.value, t);
-      g.linearRampToValueAtTime(0.0001, t+0.18);
-      setTimeout(()=>{ try{ G.out.gain.setValueAtTime(vol, AC.currentTime); }catch(e){} }, 260);
-    }catch(e){}
-  }
+  if(wasPlaying) fadeOut();      // ★なっていた ときだけ フェード。かけはじめでは さわらない
 }
 function setVolume(v){
   vol = Math.max(0, Math.min(1, v));
-  if(G && G.out) G.out.gain.value = vol;
+  gainNow(vol);
 }
 function resume(){ const a=ctx(); if(a && a.state==='suspended') a.resume(); }
 
