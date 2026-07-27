@@ -100,7 +100,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-26T23:53:42", "assets_sha": "a0f0d79e", "lines": {"world": 139, "npc": 255, "core": 1660, "view2d": 484, "view": 1211, "ui": 372}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T03:02:55", "assets_sha": "95652c8f", "lines": {"world": 139, "npc": 255, "core": 1660, "view2d": 497, "view": 1217, "ui": 372}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -261,7 +261,7 @@ const NPCDATA = (function(){
 //   when を かかない ものが きほん（さいごに おく）
 const NPCS = {
   versa_town: [
-    {at:'8,12', name:'もんばん', lines:[
+    {at:'8,12', spr:'soldier', name:'もんばん', lines:[
       {when:{state:'DREAM_INVASION'}, text:[
         '「みなみもんは とじた！ そとは もう ゆめの なかだ！」',
         '「きみも はやく おくへ さがれ、リオン！」']},
@@ -274,7 +274,7 @@ const NPCS = {
         '「よう リオン、しんまいの わりに よく はしるな」',
         '「みなみもんの さきは せつげん。まよったら ひきかえせよ」']},
     ]},
-    {at:'6,7', name:'こうじょの じじょ', lines:[
+    {at:'6,7', spr:'villagerA', name:'こうじょの じじょ', lines:[
       {when:{state:'DREAM_INVASION'}, text:[
         '「おうじょさま……ゆめの なかで だれかと はなして おられます」',
         '「むらさきの きりが、おしろまで のぼってきました」']},
@@ -285,7 +285,7 @@ const NPCS = {
         '「おうじょさまは おやさしいかたです」',
         '「けさも まどから ゆきを ながめて おられました」']},
     ]},
-    {at:'16,7', name:'きしだんちょう', lines:[
+    {at:'16,7', spr:'soldier', name:'きしだんちょう', lines:[
       {when:{flag:'ch1_orderReceived'}, text:[
         '「せつげんの おくに こおりの どうくつが ある」',
         '「きを つけて いけ。おまえは まだ しんまいだ」']},
@@ -297,7 +297,7 @@ const NPCS = {
         '「きしだんの ひろばは しんけんしょうぶの ばだ」',
         '「あさの くんれんを おこたるなよ、リオン」']},
     ]},
-    {at:'11,4', name:'しんかん', lines:[
+    {at:'11,4', spr:'villagerA', name:'しんかん', lines:[
       {when:{state:'DREAM_INVASION'}, text:[
         '「いのりが とどきません。ゆめが かみさまの こえを かき けしている」']},
       {when:{state:'SLEEPING_SICKNESS'}, text:[
@@ -306,47 +306,47 @@ const NPCS = {
       {text:['「ヴェルサの ゆきは しずかで うつくしい」',
              '「たびの ぶじを おいのりしましょう」']},
     ]},
-    {at:'4,9', name:'まちのこども', lines:[
+    {at:'4,9', spr:'villagerB', name:'まちのこども', lines:[
       {when:{state:'DREAM_INVASION'}, text:[
         '「おそらが むらさきだよ。きれいだけど、こわい」']},
       {text:['「ゆきの うえに あしあとを つけるの、たのしいよ！」',
              '「よるに なると そらが ひかるんだ。オーロラって いうんだって」']},
     ]},
-    {at:'19,10', name:'ぎょうしょうにん', lines:[
+    {at:'19,10', spr:'villagerB', name:'ぎょうしょうにん', lines:[
       {text:['「ひがしの ザールから きた。にぐるまが ゆきで うごかん」',
              '「なんでも みなみの しまでも ひとが ねむって おきんそうだ」',
              '「せかいじゅうで おきてる はなし かも しれんな」']},
     ]},
-    {at:'14,13', name:'さかばの きゃく', lines:[
+    {at:'14,13', spr:'villagerB', name:'さかばの きゃく', lines:[
       {text:['「せかいじゅうを たびして ものまねげいで おおうけしてる けんしが いるらしい」',
              '「ねずみの おうこくの ものまねが てっぱん だとさ」',
              '「こだまのいしで うわさは あっというま だな」']},
     ]},
   ],
   toros: [
-    {at:'6,5', name:'むらびとA', lines:[
+    {at:'6,5', spr:'villagerB', name:'むらびとA', lines:[
       {text:['「ちかごろ ねむったまま おきない ひとが ふえてる…」',
              '「まえは こんな こと なかったのに ねえ」']}]},
-    {at:'10,5', name:'むらびとB', lines:[
+    {at:'10,5', spr:'villagerB', name:'むらびとB', lines:[
       {text:['「みなみの どうくつで へんな ゆめを みる らしい。',
              'きを つけて いきなよ」']}]},
-    {at:'7,12', name:'さかばの きゃく', lines:[
+    {at:'7,12', spr:'villagerB', name:'さかばの きゃく', lines:[
       {text:['「さかばの うわさでね、せかいじゅうを たびして',
              '＜ものまねげい＞で おおうけしてる けんしが いるんだと。',
              'ねずみの おうこくの ものまねが てっぱん らしいよ」']}]},
   ],
   toros_h1: [
-    {at:'5,1', name:'いえの ひと', lines:[
+    {at:'5,1', spr:'villagerA', name:'いえの ひと', lines:[
       {text:['「ルミアさまの こどもが もう そんなに おおきく…」',
              '「じかんが たつのは はやい ねえ」']}]},
   ],
   toros_h2: [
-    {at:'2,1', name:'いえの ひと', lines:[
+    {at:'2,1', spr:'villagerA', name:'いえの ひと', lines:[
       {text:['「こだまのいしで うわさは あっというまさ。',
              'あの ものまね けんし、また ばけたらしいぜ」']}]},
   ],
   versa_field1: [
-    {at:'19,8', name:'そうさくたい', lines:[
+    {at:'19,8', spr:'soldier', name:'そうさくたい', lines:[
       {when:{flag:'ch1_cleared'}, text:[
         '「どうくつの こおりが とけはじめた！ なにを したんだ、あんた」']},
       {when:{flag:'ch1_enteredCave'}, text:[
@@ -354,37 +354,37 @@ const NPCS = {
       {text:['「みなみの おくに こおりの どうくつが ある」',
              '「あそこから つめたい かぜが ふいてくるんだ」']},
     ]},
-    {at:'5,12', name:'ゆきかき', lines:[
+    {at:'5,12', spr:'villagerB', name:'ゆきかき', lines:[
       {when:{state:'DREAM_INVASION'}, text:[
         '「ゆきが むらさきだ……こんなの みたことない」']},
       {text:['「かいどうの ゆきは わしが かいてる。まっすぐ いけば まちだ」']},
     ]},
   ],
   versa_town2: [
-    {at:'8,8', name:'むらびと', lines:[
+    {at:'8,8', spr:'villagerB', name:'むらびと', lines:[
       {when:{flag:'ch1_gotHerb'}, text:['「まものから とりかえしたって？ たいした しんまいだ」']},
       {when:{flag:'ch1_heardTheft'}, text:[
         '「くすしの ばあさんは この むらの ほこりでね」',
         '「ゆきぐさを ぬすまれてから、ずっと ためいきばかりさ」']},
       {text:['「ようこそ ミルカへ。ちいさいが くすりの むらだよ」',
              '「なんでも なおす ばあさんが いるんだ」']}]},
-    {at:'13,5', name:'こども', lines:[
+    {at:'13,5', spr:'villagerB', name:'こども', lines:[
       {when:{flag:'ch1_heardTheft'}, text:['「みなみの どうくつには いっちゃだめだって」']},
       {text:['「ゆきぐさは あおく ひかるんだよ。みたこと ある？」']}]},
-    {at:'6,9', name:'りょうし', lines:[
+    {at:'6,9', spr:'villagerB', name:'りょうし', lines:[
       {when:{flag:'ch1_heardTheft'}, text:[
         '「くろい けものを みたよ。まるで かげが かたちを もったみたいだった」',
         '「あれは ふつうの まものじゃない」']},
       {text:['「みなみに こおりの どうくつが ある。ちかごろ ようすが へんでね」']}]},
-    {at:'16,8', name:'たびのしょうにん', lines:[
+    {at:'16,8', spr:'villagerB', name:'たびのしょうにん', lines:[
       {text:['「ひがしの ザールでも ねむったまま おきん ものが でたそうだ」',
              '「ヴェルサだけの はなしじゃ なさそうだよ」']}]},
-    {at:'11,11', name:'むらのおんな', lines:[
+    {at:'11,11', spr:'villagerA', name:'むらのおんな', lines:[
       {when:{state:'DREAM_INVASION'}, text:['「そらが むらさきだよ……なにが おきてるの」']},
       {text:['「やどは きたの ほうさ。ゆっくり やすんでいきな」']}]},
   ],
   versa_hut: [
-    {at:'5,2', name:'くすし', lines:[
+    {at:'5,2', spr:'villagerA', name:'くすし', lines:[
       {when:{flag:'ch1_usedMedicine'}, text:[
         'くすし「きかなかったのかい……。それは もう くすりの はなしじゃ ないね」']},
       {when:{flag:'ch1_madeMedicine'}, text:[
@@ -396,7 +396,7 @@ const NPCS = {
       {text:['くすし「よく きたね、わかい きし。なにを さがしに?」']}]},
   ],
   versa_cast1: [
-    {at:'10,4', name:'おう', lines:[
+    {at:'10,4', spr:'soldier', name:'おう', lines:[
       {when:{flag:'ch1_cleared'}, text:[
         'おう「ゆきぐさでも だめだった。……たびの したくは できておるか」',
         '「せかいを みてこい、リオン。おなじ ねむりの もとを つきとめるのだ」']},
@@ -405,7 +405,7 @@ const NPCS = {
       {text:['おう「むすめが めを さまさぬ。いしゃも てだてが ないという」',
              '「たのむ、リオン。おまえだけが たよりだ」']},
     ]},
-    {at:'8,7', name:'じい', lines:[
+    {at:'8,7', spr:'villagerB', name:'じい', lines:[
       {when:{flag:'ch1_cleared'}, text:[
         'じい「ゆきぐさが きかぬとは……。わしの しる くすりでは もう むりじゃ」']},
       {when:{flag:'ch1_gotHerb'}, text:[
@@ -417,10 +417,10 @@ const NPCS = {
       {text:['じい「おうじょさまは おくの ねまに おられる」',
              '「みて さしあげなさい。なにか わかるかもしれん」']},
     ]},
-    {at:'13,7', name:'えいへい', lines:[
+    {at:'13,7', spr:'soldier', name:'えいへい', lines:[
       {text:['「おれも きしだんだ。おまえの ぶんまで まちを まもる」']},
     ]},
-    {at:'6,12', name:'しじょ', lines:[
+    {at:'6,12', spr:'villagerA', name:'しじょ', lines:[
       {when:{flag:'ch1_cleared'}, text:['「おうじょさまが おきられました！ ゆめのようです」']},
       {text:['「おうじょさまは、ねむる まえに こう おっしゃいました」',
              '「＜つめたい ところで、だれかが わたしを よんでいる＞と」']},
@@ -888,16 +888,29 @@ function draw(dt, time, actors){
   drawTint();
   if(fadeV>0){ cx.fillStyle='rgba(0,0,0,'+fadeV+')'; cx.fillRect(0,0,W,H); }
 }
+let NPCREF = null;
+function setNpcData(n){ NPCREF = n; }
 function drawNPC(dx,dy,ts,x,y){
   const s=ts;
-  cx.fillStyle='rgba(20,26,40,0.3)';
-  cx.fillRect(px(dx+s*0.28), px(dy+s*0.78), s*0.44, s*0.12);
+  cx.fillStyle='rgba(16,20,34,0.30)';
+  cx.beginPath(); cx.ellipse(dx+s/2, dy+s*0.86, s*0.24, s*0.09, 0, 0, Math.PI*2); cx.fill();
+  // NPCデータから みためを ひく（なければ むらびとb）
+  let key='villagerB';
+  if(NPCREF && NPCREF.npcAt){
+    const e=NPCREF.npcAt(curMap, x, y);
+    if(e && e.spr) key=e.spr;
+  }
+  const d = CHRREF && CHRREF[key];
+  if(d){
+    const img=getImg(d.front||d.src);
+    if(img.complete && img.naturalWidth){
+      const hh=ts*1.30, ww=hh*(d.w/d.h);
+      cx.drawImage(img, px(dx+s/2-ww/2), px(dy+s*0.90-hh), ww, hh);
+      return;
+    }
+  }
   cx.fillStyle='#3f5a9e'; cx.fillRect(px(dx+s*0.30), px(dy+s*0.38), s*0.40, s*0.42);
   cx.fillStyle='#f2c79c'; cx.fillRect(px(dx+s*0.33), px(dy+s*0.18), s*0.34, s*0.24);
-  cx.fillStyle='#5c4a3a'; cx.fillRect(px(dx+s*0.31), px(dy+s*0.14), s*0.38, s*0.12);
-  cx.fillStyle='#181420';
-  cx.fillRect(px(dx+s*0.38), px(dy+s*0.26), Math.max(1,s*0.05), Math.max(1,s*0.06));
-  cx.fillRect(px(dx+s*0.57), px(dy+s*0.26), Math.max(1,s*0.05), Math.max(1,s*0.06));
 }
 let MONREF = null;
 function setMon(m){ MONREF = m; }
@@ -986,7 +999,7 @@ function drawTint(){
 }
 function setFade(v){ fadeV = v; }
 
-return {init, resize, buildMap, draw, noteStep, setFade, setMon, get TS(){return TS;}};
+return {init, resize, buildMap, draw, noteStep, setFade, setMon, setNpcData, get TS(){return TS;}};
 })();
 
 </script>
@@ -3098,7 +3111,8 @@ function init(){
   cam=new THREE.PerspectiveCamera(32,1,0.1,140);
   batCam=new THREE.PerspectiveCamera(48,1,0.1,120);
   buildBattleScene();
-  if(V2 && canvas2d){ V2.init(canvas2d, C, CHR); if(V2.setMon) V2.setMon(MON); }
+  if(V2 && canvas2d){ V2.init(canvas2d, C, CHR); if(V2.setMon) V2.setMon(MON);
+    if(V2.setNpcData && typeof NPCDATA!=='undefined') V2.setNpcData(NPCDATA); }
   fit();
   addEventListener('resize',fit);
 }
@@ -3404,9 +3418,14 @@ function buildMap(name){
         new THREE.MeshBasicMaterial({map:TEX.wood}));
       dr.position.set(x,topY+0.33,y+0.46); scene.add(dr);
     }
-    if(ch==='n'){                    // むらびと
-      const s=billboard('npc',0.8);
-      s.position.set(x,topY+0.42,y); s.userData.bill=true;
+    if(ch==='n'){                    // むらびと・へいし
+      let key='villagerB';
+      if(typeof NPCDATA!=='undefined' && NPCDATA.npcAt){
+        const e=NPCDATA.npcAt(name,x,y);
+        if(e && e.spr) key=e.spr;
+      }
+      const s = CHR[key] ? chrBillboard(key,0.95) : billboard('npc',0.8);
+      s.position.set(x, topY+0.48, y); s.userData.bill=true;
       scene.add(s); animObjs.push({mesh:s,bill:true,ph:0});
     }
     if(ch==='t'){                    // たいまつ（かべぎわに よせる）
