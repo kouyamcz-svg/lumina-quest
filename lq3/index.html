@@ -100,7 +100,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T03:20:22", "assets_sha": "95652c8f", "lines": {"world": 139, "npc": 254, "core": 1740, "view2d": 616, "view": 1217, "ui": 372}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T04:36:13", "assets_sha": "95652c8f", "lines": {"world": 139, "npc": 254, "core": 1740, "view2d": 782, "view": 1217, "ui": 372}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -546,6 +546,59 @@ function tile(draw){
   draw(g, TS);
   return c;
 }
+// おなじ ちけいでも 4しゅるい つくって いちで つかいわける
+// （まったく おなじ タイルが ならぶと ブロックを つみあげたように みえるため）
+function tileSet(draw, n){
+  const arr=[];
+  for(let i=0;i<(n||4);i++) arr.push(tile((g,s)=>draw(g,s,i)));
+  return arr;
+}
+function hashPick(x,y,arr){
+  if(!arr || !arr.length) return null;
+  if(!Array.isArray(arr)) return arr;
+  const h = Math.abs(Math.sin(x*127.1 + y*311.7) * 43758.5453);
+  return arr[Math.floor((h - Math.floor(h)) * arr.length) % arr.length];
+}
+
+// ---- ちけいの ふち：となりの ちけいが しみだして なじむ ----
+// ranks が おおきい ほど うえに かぶさる
+const TERRAIN_RANK = {sea:0, lake:0, beach:1, desert:2, plain:3, snowfield:4, highway:5};
+const edgeMaskCache = {};
+function edgeMask(dir){
+  if(edgeMaskCache[dir]) return edgeMaskCache[dir];
+  const c = mk(TS,TS), g = c.getContext('2d');
+  g.fillStyle='#fff';
+  const wob = (t)=> Math.sin(t*Math.PI*3)*2.2 + Math.sin(t*Math.PI*7)*1.1;
+  if(dir==='N'||dir==='S'){
+    for(let x=0;x<TS;x++){
+      const d = 7 + wob(x/TS);
+      if(dir==='N') g.fillRect(x,0,1,d); else g.fillRect(x,TS-d,1,d);
+    }
+  }else if(dir==='W'||dir==='E'){
+    for(let y=0;y<TS;y++){
+      const d = 7 + wob(y/TS);
+      if(dir==='W') g.fillRect(0,y,d,1); else g.fillRect(TS-d,y,d,1);
+    }
+  }else{                                  // かど（NE / NW / SE / SW）
+    const cx = dir.includes('W') ? 0 : TS, cy = dir.includes('N') ? 0 : TS;
+    g.beginPath(); g.arc(cx,cy,9,0,Math.PI*2); g.fill();
+  }
+  edgeMaskCache[dir] = c;
+  return c;
+}
+// ちけい × むき の ふちタイルを つくって ためる
+const edgeTileCache = {};
+function edgeTile(terrainCanvas, key, dir){
+  const k = key+':'+dir;
+  if(edgeTileCache[k]) return edgeTileCache[k];
+  const c = mk(TS,TS), g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  g.drawImage(edgeMask(dir),0,0);
+  g.globalCompositeOperation = 'source-in';
+  g.drawImage(terrainCanvas,0,0);
+  edgeTileCache[k] = c;
+  return c;
+}
 function buildAtlas(){
   atlas = {};
   // --- ゆき ---
@@ -742,69 +795,142 @@ function buildAtlas(){
     g.fillStyle='#7a5a34'; g.fillRect(s/2-7,s/2-2,14,s/2);
     g.fillStyle='#d9a832'; g.fillRect(s/2+3,s/2+6,2,2);
   });
-  // ====== ワールドマップ の ちけい ======
-  atlas.sea = tile((g,s)=>{
-    g.fillStyle='#1b4a86'; g.fillRect(0,0,s,s);
-    noise(g,16,['#17417a','#2159a0'],s,s);
-    g.strokeStyle='rgba(190,225,255,0.45)'; g.lineWidth=1;
-    for(let i=0;i<2;i++){ const y=8+i*14;
-      g.beginPath(); g.moveTo(2,y); g.quadraticCurveTo(s/2,y-4,s-2,y); g.stroke(); }
-  });
-  atlas.beach = tile((g,s)=>{
-    g.fillStyle='#ddc98e'; g.fillRect(0,0,s,s);
-    noise(g,26,['#cfb97c','#eadaa4','#c4ad6e'],s,s);
-  });
-  atlas.plain = tile((g,s)=>{
-    g.fillStyle='#4f9a3e'; g.fillRect(0,0,s,s);
-    noise(g,28,['#428a34','#5cab4a','#67b552'],s,s);
-    g.fillStyle='#78c45e';
-    for(let i=0;i<6;i++){ const x=(Math.random()*s)|0,y=(Math.random()*s)|0;
-      g.fillRect(x,y,1,3); g.fillRect(x+1,y+1,1,2); }
-  });
-  atlas.woods = tile((g,s)=>{
-    g.drawImage(atlas.plain,0,0);
-    for(const [ox,oy,r] of [[9,12,7],[22,10,6],[16,22,7]]){
-      g.fillStyle='#1f6b30'; g.beginPath(); g.arc(ox,oy+2,r,0,Math.PI*2); g.fill();
-      g.fillStyle='#2f8b40'; g.beginPath(); g.arc(ox-1,oy,r-1,0,Math.PI*2); g.fill();
-      g.fillStyle='#4aa855'; g.beginPath(); g.arc(ox-2,oy-2,r-3,0,Math.PI*2); g.fill();
+  // ====== ワールドマップ の ちけい（4しゅるいずつ つくって ならびを くずす）======
+  atlas.sea = tileSet((g,s,v)=>{
+    g.fillStyle='#1d4f8c'; g.fillRect(0,0,s,s);
+    for(let i=0;i<26;i++){
+      const t=0.85+Math.random()*0.3;
+      g.fillStyle=`rgb(${29*t|0},${79*t|0},${140*t|0})`;
+      g.fillRect((Math.random()*s)|0,(Math.random()*s)|0,3,2);
+    }
+    g.strokeStyle='rgba(190,225,255,0.40)'; g.lineWidth=1;
+    for(let i=0;i<2;i++){
+      const y=5+i*13+v*3;
+      g.beginPath(); g.moveTo(1,y);
+      g.quadraticCurveTo(s*0.3,y-3,s*0.55,y);
+      g.quadraticCurveTo(s*0.8,y+3,s-1,y-1); g.stroke();
     }
   });
-  atlas.desert = tile((g,s)=>{
-    g.fillStyle='#dcc079'; g.fillRect(0,0,s,s);
-    noise(g,22,['#cfb069','#e8d091'],s,s);
-    g.strokeStyle='rgba(180,150,90,0.6)'; g.lineWidth=1;
-    for(let i=0;i<2;i++){ const y=9+i*13;
-      g.beginPath(); g.moveTo(1,y); g.quadraticCurveTo(s/2,y+3,s-1,y); g.stroke(); }
+  atlas.lake = tileSet((g,s,v)=>{
+    g.fillStyle='#2d74b4'; g.fillRect(0,0,s,s);
+    for(let i=0;i<18;i++){
+      const t=0.88+Math.random()*0.26;
+      g.fillStyle=`rgb(${45*t|0},${116*t|0},${180*t|0})`;
+      g.fillRect((Math.random()*s)|0,(Math.random()*s)|0,3,2);
+    }
+    g.strokeStyle='rgba(225,245,255,0.5)'; g.lineWidth=1;
+    const y=8+v*5;
+    g.beginPath(); g.moveTo(2,y); g.quadraticCurveTo(s/2,y-4,s-2,y); g.stroke();
   });
-  atlas.mount = tile((g,s)=>{
-    g.fillStyle='#6c6a62'; g.fillRect(0,0,s,s);
-    for(const [cx,base,h,col] of [[8,s-4,16,'#8b887c'],[20,s-2,22,'#9a978a'],[26,s-6,12,'#7d7a70']]){
-      g.fillStyle=col;
-      g.beginPath(); g.moveTo(cx,base-h); g.lineTo(cx+h*0.6,base); g.lineTo(cx-h*0.6,base);
+  atlas.beach = tileSet((g,s,v)=>{
+    g.fillStyle='#e0cd94'; g.fillRect(0,0,s,s);
+    for(let i=0;i<34;i++){
+      const t=0.9+Math.random()*0.2;
+      g.fillStyle=`rgb(${224*t|0},${205*t|0},${148*t|0})`;
+      g.fillRect((Math.random()*s)|0,(Math.random()*s)|0,2,2);
+    }
+    g.fillStyle='rgba(160,140,95,0.35)';
+    for(let i=0;i<4;i++) g.fillRect((Math.random()*s)|0,(Math.random()*s)|0,3,1);
+  });
+  atlas.plain = tileSet((g,s,v)=>{
+    g.fillStyle='#57a244'; g.fillRect(0,0,s,s);
+    for(let i=0;i<40;i++){
+      const t=0.86+Math.random()*0.3;
+      g.fillStyle=`rgb(${87*t|0},${162*t|0},${68*t|0})`;
+      g.fillRect((Math.random()*s)|0,(Math.random()*s)|0,3,2);
+    }
+    g.fillStyle='#7ac560';
+    for(let i=0;i<5+v;i++){
+      const x=(Math.random()*s)|0, y=(Math.random()*s)|0;
+      g.fillRect(x,y,1,3); g.fillRect(x+1,y+1,1,2); g.fillRect(x-1,y+1,1,2);
+    }
+  });
+  atlas.snowfield = tileSet((g,s,v)=>{
+    g.fillStyle='#eaf1fa'; g.fillRect(0,0,s,s);
+    for(let i=0;i<30;i++){
+      const t=0.95+Math.random()*0.08;
+      g.fillStyle=`rgb(${226*t|0},${236*t|0},${247*t|0})`;
+      g.fillRect((Math.random()*s)|0,(Math.random()*s)|0,3,2);
+    }
+    g.fillStyle='rgba(196,214,236,0.55)';                 // ゆきの うねり
+    for(let i=0;i<2+v;i++){
+      const y=(Math.random()*s)|0;
+      g.beginPath(); g.moveTo(0,y);
+      g.quadraticCurveTo(s/2,y-3,s,y); g.lineTo(s,y+2);
+      g.quadraticCurveTo(s/2,y-1,0,y+2); g.closePath(); g.fill();
+    }
+    g.fillStyle='rgba(255,255,255,0.95)';
+    for(let i=0;i<3;i++) g.fillRect((Math.random()*s)|0,(Math.random()*s)|0,1,1);
+  });
+  atlas.desert = tileSet((g,s,v)=>{
+    g.fillStyle='#dfc47f'; g.fillRect(0,0,s,s);
+    for(let i=0;i<30;i++){
+      const t=0.9+Math.random()*0.2;
+      g.fillStyle=`rgb(${223*t|0},${196*t|0},${127*t|0})`;
+      g.fillRect((Math.random()*s)|0,(Math.random()*s)|0,3,2);
+    }
+    g.strokeStyle='rgba(186,158,96,0.55)'; g.lineWidth=1;
+    for(let i=0;i<2;i++){
+      const y=7+i*12+v*2;
+      g.beginPath(); g.moveTo(0,y); g.quadraticCurveTo(s/2,y+4,s,y); g.stroke();
+    }
+  });
+  atlas.highway = tileSet((g,s,v)=>{
+    g.fillStyle='#b8a479'; g.fillRect(0,0,s,s);
+    for(let i=0;i<26;i++){
+      const t=0.9+Math.random()*0.2;
+      g.fillStyle=`rgb(${184*t|0},${164*t|0},${121*t|0})`;
+      g.fillRect((Math.random()*s)|0,(Math.random()*s)|0,3,2);
+    }
+    g.fillStyle='rgba(150,132,92,0.5)';
+    for(let i=0;i<5;i++) g.fillRect((Math.random()*s)|0,(Math.random()*s)|0,2,2);
+  });
+  // やま：タイルを またいで つらなるように、いちで かたちを かえる
+  atlas.mount = tileSet((g,s,v)=>{
+    g.fillStyle='#5f7a52'; g.fillRect(0,0,s,s);
+    for(let i=0;i<20;i++){
+      const t=0.9+Math.random()*0.2;
+      g.fillStyle=`rgb(${95*t|0},${122*t|0},${82*t|0})`;
+      g.fillRect((Math.random()*s)|0,(Math.random()*s)|0,3,2);
+    }
+    const peaks=[[[6,30,20],[20,32,26],[29,29,15]],
+                 [[4,31,16],[16,30,24],[27,32,20]],
+                 [[9,32,24],[23,30,18]],
+                 [[3,30,14],[13,32,22],[24,31,17],[31,29,12]]][v%4];
+    peaks.forEach(([cx,base,h])=>{
+      g.fillStyle='#6b6357';
+      g.beginPath(); g.moveTo(cx,base-h); g.lineTo(cx+h*0.72,base); g.lineTo(cx-h*0.72,base);
       g.closePath(); g.fill();
-      g.fillStyle='#eef2f6';
-      g.beginPath(); g.moveTo(cx,base-h); g.lineTo(cx+h*0.22,base-h*0.68);
-      g.lineTo(cx-h*0.22,base-h*0.68); g.closePath(); g.fill();
-    }
+      g.fillStyle='#8d8478';                              // ひかりの あたる めん
+      g.beginPath(); g.moveTo(cx,base-h); g.lineTo(cx-h*0.72,base); g.lineTo(cx-h*0.1,base);
+      g.closePath(); g.fill();
+      g.fillStyle='#f0f4f8';                              // ゆきの かぶり
+      g.beginPath(); g.moveTo(cx,base-h); g.lineTo(cx+h*0.26,base-h*0.64);
+      g.lineTo(cx+h*0.07,base-h*0.70); g.lineTo(cx-h*0.12,base-h*0.60);
+      g.lineTo(cx-h*0.26,base-h*0.64); g.closePath(); g.fill();
+    });
   });
-  atlas.lake = tile((g,s)=>{
-    g.fillStyle='#2a6fae'; g.fillRect(0,0,s,s);
-    noise(g,14,['#245f97','#3782c4'],s,s);
-    g.strokeStyle='rgba(220,240,255,0.5)'; g.lineWidth=1;
-    g.beginPath(); g.moveTo(3,12); g.quadraticCurveTo(s/2,8,s-3,12); g.stroke();
-  });
-  atlas.snowfield = tile((g,s)=>{
-    g.fillStyle='#eef4fb'; g.fillRect(0,0,s,s);
-    noise(g,22,['#e2ecf7','#f8fbff','#d8e4f2'],s,s);
-  });
-  atlas.highway = tile((g,s)=>{
-    g.fillStyle='#a8956a'; g.fillRect(0,0,s,s);
-    noise(g,20,['#98865c','#b8a678'],s,s);
-    g.fillStyle='rgba(255,255,255,0.35)'; g.fillRect(0,2,s,1); g.fillRect(0,s-3,s,1);
+  // もり：まるい こずえの あつまり
+  atlas.woods = tileSet((g,s,v)=>{
+    // はいけいは えがかない ＝ ゆきの うえなら ゆきの もりに みえる
+    const sets=[[[8,11,7],[21,9,6],[15,22,8],[27,20,5]],
+                [[11,9,6],[23,14,7],[9,23,7]],
+                [[7,14,7],[19,10,6],[24,23,6],[12,25,5]],
+                [[13,12,8],[25,17,6],[7,24,6]]][v%4];
+    sets.forEach(([ox,oy,r])=>{
+      g.fillStyle='rgba(24,52,26,0.45)';
+      g.beginPath(); g.ellipse(ox+1,oy+r*0.8,r*0.95,r*0.5,0,0,Math.PI*2); g.fill();
+      g.fillStyle='#1e6b30';
+      g.beginPath(); g.arc(ox,oy+1,r,0,Math.PI*2); g.fill();
+      g.fillStyle='#2f8b40';
+      g.beginPath(); g.arc(ox-1,oy-1,r-1.5,0,Math.PI*2); g.fill();
+      g.fillStyle='#4aa855';
+      g.beginPath(); g.arc(ox-2,oy-3,r-3.5,0,Math.PI*2); g.fill();
+    });
   });
   // --- ちてんの めじるし ---
   function marker(draw){
-    return tile((g,s)=>{ g.drawImage(atlas.plain,0,0); draw(g,s); });
+    return tile((g,s)=>{ g.drawImage(atlas.plain[0],0,0); draw(g,s); });
   }
   atlas.mCastle = marker((g,s)=>{
     g.fillStyle='rgba(20,26,40,0.28)'; g.fillRect(3,s-5,s-6,4);
@@ -884,7 +1010,7 @@ function tileArt(ch, theme){
   }
 }
 function floorArt(theme){
-  if(theme==='world') return atlas.plain;
+  if(theme==='world') return atlas.plain;   // ※ ワールドは タイルごとに きめる
   return theme==='snow' ? atlas.snow
        : theme==='ice'  ? atlas.ice
        : theme==='cave' ? atlas.road
@@ -899,13 +1025,37 @@ function roadArt(theme){
        : atlas.road;
 }
 
+// ---- ゆか＋ふち を 1まいに やきこんで ためる ----
+// まいフレーム 9かい かさねると おもいので、はじめて みた ときだけ つくる
+const DIRS8=[['N',0,-1],['S',0,1],['W',-1,0],['E',1,0],
+             ['NW',-1,-1],['NE',1,-1],['SW',-1,1],['SE',1,1]];
+let groundCache = {};
+function groundTile(x,y,terrainOf){
+  const k = curMap+':'+x+','+y;
+  const hit = groundCache[k];
+  if(hit) return hit;
+  const t = terrainOf(x,y);
+  const c = mk(TS,TS), g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  g.drawImage(hashPick(x,y,atlas[t]),0,0);
+  const rank = TERRAIN_RANK[t]||0;
+  DIRS8.forEach(([dir,dx,dy])=>{
+    const nt = terrainOf(x+dx,y+dy);
+    if(!nt || nt===t) return;
+    if((TERRAIN_RANK[nt]||0) <= rank) return;
+    const src = hashPick(x+dx,y+dy,atlas[nt]);
+    g.drawImage(edgeTile(src, nt+':'+atlas[nt].indexOf(src), dir),0,0);
+  });
+  groundCache[k] = c;
+  return c;
+}
 // ---------------- マップの じゅんび ----------------
 function buildMap(name){
   curMap = name;
   curScene = (C.WORLD && C.WORLD.sceneOf) ? C.WORLD.sceneOf(name) : {};
   curTS = C.townStateDef ? C.townStateDef() : null;
   curNight = !!(C.G && C.G.night) && !!curScene.outdoor;
-  snow = []; foot = [];
+  snow = []; foot = []; groundCache = {};
   const m = C.MAPS[name];
   flakes = curScene.snowfall ? 90 : 0;
   for(let i=0;i<flakes;i++)
@@ -940,7 +1090,9 @@ function draw(dt, time, actors){
   const rows = m.tiles, MW = rows[0].length, MH = rows.length;
   const theme = m.theme;
   const dpr = Math.min(devicePixelRatio||1, 2);
-  const scale = Math.max(2, Math.round((H/dpr) / (9*TS) * dpr));   // たてに 9タイルくらい
+  // みおろす ひろさ：せかいちずは ひろく、まちの なかは すこし よせる
+  const tilesTall = (theme==='world') ? 14 : 11;
+  const scale = Math.max(1, (H/dpr) / (tilesTall*TS) * dpr);
   const ts = TS*scale;
 
   // カメラ（プレイヤーちゅうしん・はしで とめる）
@@ -960,20 +1112,29 @@ function draw(dt, time, actors){
   const floor = floorArt(theme), road = roadArt(theme);
 
   // ① ゆか
-  const worldFloor = {'.':atlas.plain, '=':atlas.snowfield, ':':atlas.desert,
-                      '_':atlas.beach, '~':atlas.sea, 'w':atlas.lake,
-                      ',':atlas.plain, '^':atlas.plain, 'r':atlas.highway};
+  // タイルもじ → ちけいめい（ワールド）
+  const W2T = {'.':'plain','=':'snowfield',':':'desert','_':'beach','~':'sea','w':'lake',
+               ',':'plain','^':'plain','r':'highway'};
+  const terrainOf = (tx,ty)=>{
+    if(tx<0||ty<0||ty>=MH||tx>=MW) return null;
+    const c = rows[ty][tx];
+    if(W2T[c]) return W2T[c];
+    // ちてん・たからばこ などは まわりの ちけいを ひきつぐ
+    for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]]){
+      const n=rows[ty+dy] && rows[ty+dy][tx+dx];
+      if(n && W2T[n]) return W2T[n];
+    }
+    return 'plain';
+  };
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
     const ch = rows[y][x];
-    let base;
+    const dx0 = px(ox+x*ts), dy0 = px(oy+y*ts);
     if(theme==='world'){
-      base = worldFloor[ch];
-      if(!base){                                   // ちてん・たからばこ などは まわりの ちけいに あわせる
-        const near = rows[y][x-1]||rows[y][x+1]||'.';
-        base = worldFloor[near] || atlas.plain;
-      }
-    }else base = (ch==='r') ? road : floor;
-    cx.drawImage(base, px(ox+x*ts), px(oy+y*ts), ts, ts);
+      cx.drawImage(groundTile(x,y,terrainOf), dx0, dy0, ts, ts);   // やきこみずみ 1まい
+    }else{
+      const base = (ch==='r') ? road : floor;
+      cx.drawImage(Array.isArray(base)?hashPick(x,y,base):base, dx0, dy0, ts, ts);
+    }
   }
   // ② あしあと（ゆきの うえ）
   if(curScene.footprints){
@@ -991,8 +1152,13 @@ function draw(dt, time, actors){
     if(ch==='C' && C.G.gotTreasure[curMap+':'+x+','+y]){
       cx.drawImage(atlas.chest_open, px(ox+x*ts), px(oy+y*ts), ts, ts); continue;
     }
-    const art = tileArt(ch, theme);
-    if(art) cx.drawImage(art, px(ox+x*ts), px(oy+y*ts), ts, ts);
+    // ワールドの きほん ちけいは ゆかの パスで えがきおえている（うわがきしない）
+    if(theme==='world' && '.=:_~wr'.includes(ch)) { /* ゆかのみ */ }
+    else {
+      let art = tileArt(ch, theme);
+      if(Array.isArray(art)) art = hashPick(x,y,art);
+      if(art) cx.drawImage(art, px(ox+x*ts), px(oy+y*ts), ts, ts);
+    }
     if(ch==='n') drawNPC(ox+x*ts, oy+y*ts, ts, x, y);
     if(ch==='B' && !(C.G.flags.ch1_gotHerb && curMap.startsWith('versa'))) drawBoss(ox+x*ts, oy+y*ts, ts);
   }
