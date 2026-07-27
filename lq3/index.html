@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T14:42:51", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1766, "bgm": 598, "view2d": 1076, "view": 1227, "ui": 394}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T15:04:23", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1766, "bgm": 640, "view2d": 1076, "view": 1227, "ui": 407}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -785,7 +785,7 @@ function buildGraph(ctx){
   const pre=ctx.createDelay(0.1); pre.delayTime.value=0.026;
   verbIn.connect(pre); pre.connect(damp); damp.connect(conv); conv.connect(verbOut); verbOut.connect(glue);
 
-  return {ctx,dry,verb:verbIn,noise:makeNoise(ctx),shape:makeCurve(2.6)};
+  return {ctx,out,dry,verb:verbIn,noise:makeNoise(ctx),shape:makeCurve(2.6)};
 }
 
 /* ══ 楽器 ══ */
@@ -1033,11 +1033,18 @@ impact(G,t,p){
 
 /* ══ さいせい（ライブ・さきよみスケジューリング）══ */
 let AC=null, G=null, EVENTS=null, timer=null, playing=null;
-let t0=0, idx=0, loopN=0, vol=0.62;
+let t0=0, idx=0, loopN=0, vol=0.62, lastNow=-1, stall=0, pending=null;
 const LOOKAHEAD=0.35, TICK=60;
 
+// ★こうかおんと おなじ AudioContext を つかう。
+//   べつべつに つくると、かたほうだけ「ていし」の ままに なり、
+//   さいしょの すうびょうだけ なって とまる（じっさいに でた ふぐあい）。
+let SHARED = null;
+function attach(ac){ if(ac && !AC){ AC = ac; } SHARED = ac || SHARED; }
 function ctx(){
-  try{ AC = AC || new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+  try{
+    AC = AC || SHARED || new (window.AudioContext||window.webkitAudioContext)();
+  }catch(e){}
   return AC;
 }
 function ensure(){
@@ -1055,30 +1062,65 @@ function fire(ev, when){
 function pump(){
   if(!playing || !G) return;
   const now = AC.currentTime;
+  // ★みはり①：とけいが すすんでいない ＝ オーディオが とまっている
+  if(now <= lastNow){
+    stall++;
+    if(stall > 8){                       // やく0.5びょう すすまなければ たてなおす
+      stall = 0;
+      try{ AC.resume(); }catch(e){}
+      t0 = now + 0.10; idx = 0; loopN = 0;
+    }
+    return;
+  }
+  stall = 0; lastNow = now;
+  // ★みはり②：じかんが おおきく とんだ（タブふっき など）→ いまの いちへ とばす
+  const songPos = now - t0;
+  if(songPos > (loopN+1)*LOOP + 1){
+    loopN = Math.floor(songPos / LOOP);
+    idx = 0;
+    while(idx < EVENTS.length && t0 + loopN*LOOP + EVENTS[idx].t < now) idx++;
+  }
+  let guard = 0;
   while(idx < EVENTS.length){
+    if(++guard > 4000) return;           // ばんいち むげんループを ふせぐ
     const ev = EVENTS[idx];
     const when = t0 + loopN*LOOP + ev.t;
     if(when > now + LOOKAHEAD) return;
     if(when >= now - 0.05) fire(ev, when);
     idx++;
   }
-  // 1しゅうしたら さいしょへ（きょくは LOOP びょうで ひとまわり）
   idx = 0; loopN++;
+}
+function begin(name){
+  playing = name;
+  idx = 0; loopN = 0;
+  t0 = AC.currentTime + 0.10;
+  lastNow = AC.currentTime;
+  if(G && G.out){ try{ G.out.gain.setValueAtTime(vol, AC.currentTime); }catch(e){} }
+  pump();
+  if(timer) clearInterval(timer);
+  timer = setInterval(pump, TICK);
 }
 function play(name){
   if(name !== 'battle' && name !== 'boss'){ stop(); return; }
   if(playing === name) return;
   if(!ensure()){ return; }
   stop();
-  playing = name;
-  idx = 0; loopN = 0;
-  t0 = AC.currentTime + 0.08;
-  pump();
-  timer = setInterval(pump, TICK);
+  // ★とまっている あいだは とけいが すすまないので、うごきだしてから はじめる
+  if(AC.state === 'suspended'){
+    const go = ()=>{ if(pending===name) begin(name); };
+    pending = name;
+    try{ AC.resume().then(go, go); }catch(e){ go(); }
+    // resume が かえってこない ばあいの ほけん
+    setTimeout(()=>{ if(pending===name && playing!==name && AC.state==='running') begin(name); }, 350);
+    return;
+  }
+  pending = null;
+  begin(name);
 }
 function stop(){
   if(timer){ clearInterval(timer); timer=null; }
-  playing = null;
+  playing = null; pending = null; stall = 0; lastNow = -1;
   if(G && G.out){                                  // すぐ とめず、みじかく フェード
     try{
       const g=G.out.gain, t=AC.currentTime;
@@ -1095,7 +1137,7 @@ function setVolume(v){
 }
 function resume(){ const a=ctx(); if(a && a.state==='suspended') a.resume(); }
 
-return {play, stop, setVolume, resume,
+return {play, stop, setVolume, resume, attach,
         get current(){return playing;},
         get bars(){return BARS;}, get bpm(){return BPM;},
         get sections(){return SECTIONS;},
@@ -5185,7 +5227,15 @@ const C = LQ3, V = window.LQ3View;
 
 // ---------------- 音 ----------------
 let AC=null;
-function ctx(){ try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} return AC; }
+function ctx(){
+  try{
+    if(!AC){
+      AC = new (window.AudioContext||window.webkitAudioContext)();
+      if(typeof BGM!=='undefined' && BGM.attach) BGM.attach(AC);   // BGMと きょうゆう
+    }
+  }catch(e){}
+  return AC;
+}
 function tone(f,d,type,v,w){
   const ac=ctx(); if(!ac) return;
   const t0=ac.currentTime+(w||0);
@@ -5209,7 +5259,12 @@ const A = {
     if(typeof BGM!=='undefined') BGM.stop();
   },
   battleBgm(kind){                 // せんとうきょく「双嶺の誓約」
-    if(typeof BGM!=='undefined'){ BGM.resume(); BGM.play(kind==='boss'?'boss':'battle'); }
+    const ac = ctx();
+    if(typeof BGM!=='undefined'){
+      if(BGM.attach) BGM.attach(ac);
+      BGM.resume();
+      BGM.play(kind==='boss'?'boss':'battle');
+    }
   },
   bgmStop(){ if(typeof BGM!=='undefined') BGM.stop(); },
 };
