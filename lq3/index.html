@@ -100,7 +100,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T03:02:55", "assets_sha": "95652c8f", "lines": {"world": 139, "npc": 255, "core": 1660, "view2d": 497, "view": 1217, "ui": 372}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T03:20:22", "assets_sha": "95652c8f", "lines": {"world": 139, "npc": 254, "core": 1740, "view2d": 616, "view": 1217, "ui": 372}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -164,8 +164,8 @@ const CHAPTERS = [
 //   種別： town / field / cast(城) / dgn(ダンジョン) / in(屋内) / shrine(神殿)
 const MAP_IDS = {
   // --- ヴェルサ地方（第1章・実装中） ---
+  world:         {region:'versa', kind:'field', name:'ワールドマップ',              scene:'SCENE_WORLD'},
   versa_town:    {region:'versa', kind:'town',  name:'おうと ヴェルサリア',         scene:'SCENE_VERSA_TOWN'},
-  versa_field1:  {region:'versa', kind:'field', name:'ヴェルサの せつげん',         scene:'SCENE_VERSA_FIELD'},
   versa_town2:   {region:'versa', kind:'town',  name:'くすしの むら ミルカ',         scene:'SCENE_VERSA_TOWN2'},
   versa_hut:     {region:'versa', kind:'in',    name:'くすしの いえ',               scene:'SCENE_VERSA_HUT'},
   versa_cast1:   {region:'versa', kind:'cast',  name:'ヴェルサ おうじょう',         scene:'SCENE_VERSA_CASTLE'},
@@ -189,8 +189,8 @@ const MAP_IDS = {
 // ビューの見た目（背景・霧・ライト・演出）を決める識別子
 // render: '2d' ＝ ドットえ（まち・フィールド・ダンジョン）／ '3d' ＝ しろの なか だけ
 const SCENES = {
+  SCENE_WORLD:        {render:'2d', theme:'world',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
   SCENE_VERSA_TOWN:   {render:'2d', theme:'snow',   outdoor:true,  snowfall:true,  aurora:true,  footprints:true},
-  SCENE_VERSA_FIELD:  {render:'2d', theme:'snow',   outdoor:true,  snowfall:true,  aurora:true,  footprints:true},
   SCENE_VERSA_TOWN2:  {render:'2d', theme:'snow',   outdoor:true,  snowfall:true,  aurora:true,  footprints:true},
   SCENE_VERSA_HUT:    {render:'2d', theme:'indoor', outdoor:false},
   SCENE_VERSA_CASTLE: {render:'3d', theme:'castle', outdoor:false, snowfall:false, aurora:false, footprints:false},
@@ -345,20 +345,19 @@ const NPCS = {
       {text:['「こだまのいしで うわさは あっというまさ。',
              'あの ものまね けんし、また ばけたらしいぜ」']}]},
   ],
-  versa_field1: [
-    {at:'19,8', spr:'soldier', name:'そうさくたい', lines:[
-      {when:{flag:'ch1_cleared'}, text:[
+  world: [
+    {at:'46,16', spr:'soldier', name:'そうさくたい', lines:[
+      {when:{flag:'ch1_gotHerb'}, text:[
         '「どうくつの こおりが とけはじめた！ なにを したんだ、あんた」']},
       {when:{flag:'ch1_enteredCave'}, text:[
-        '「みなみの どうくつは やめとけ。なかから うなりごえが する」']},
-      {text:['「みなみの おくに こおりの どうくつが ある」',
-             '「あそこから つめたい かぜが ふいてくるんだ」']},
-    ]},
-    {at:'5,12', spr:'villagerB', name:'ゆきかき', lines:[
+        '「ひがしの どうくつは やめとけ。なかから うなりごえが する」']},
+      {text:['「ひがしの おくに こおりの どうくつが ある」',
+             '「あそこから つめたい かぜが ふいてくるんだ」']}]},
+    {at:'53,10', spr:'villagerB', name:'たびびと', lines:[
       {when:{state:'DREAM_INVASION'}, text:[
-        '「ゆきが むらさきだ……こんなの みたことない」']},
-      {text:['「かいどうの ゆきは わしが かいてる。まっすぐ いけば まちだ」']},
-    ]},
+        '「そらが むらさきだ……こんなの みたことない」']},
+      {text:['「みなみの やまなみは こえられん。ヴェルサは しまのような ものさ」',
+             '「にしへ いけば ミルカ、ひがしの おくは こおりの どうくつだ」']}]},
   ],
   versa_town2: [
     {at:'8,8', spr:'villagerB', name:'むらびと', lines:[
@@ -743,6 +742,104 @@ function buildAtlas(){
     g.fillStyle='#7a5a34'; g.fillRect(s/2-7,s/2-2,14,s/2);
     g.fillStyle='#d9a832'; g.fillRect(s/2+3,s/2+6,2,2);
   });
+  // ====== ワールドマップ の ちけい ======
+  atlas.sea = tile((g,s)=>{
+    g.fillStyle='#1b4a86'; g.fillRect(0,0,s,s);
+    noise(g,16,['#17417a','#2159a0'],s,s);
+    g.strokeStyle='rgba(190,225,255,0.45)'; g.lineWidth=1;
+    for(let i=0;i<2;i++){ const y=8+i*14;
+      g.beginPath(); g.moveTo(2,y); g.quadraticCurveTo(s/2,y-4,s-2,y); g.stroke(); }
+  });
+  atlas.beach = tile((g,s)=>{
+    g.fillStyle='#ddc98e'; g.fillRect(0,0,s,s);
+    noise(g,26,['#cfb97c','#eadaa4','#c4ad6e'],s,s);
+  });
+  atlas.plain = tile((g,s)=>{
+    g.fillStyle='#4f9a3e'; g.fillRect(0,0,s,s);
+    noise(g,28,['#428a34','#5cab4a','#67b552'],s,s);
+    g.fillStyle='#78c45e';
+    for(let i=0;i<6;i++){ const x=(Math.random()*s)|0,y=(Math.random()*s)|0;
+      g.fillRect(x,y,1,3); g.fillRect(x+1,y+1,1,2); }
+  });
+  atlas.woods = tile((g,s)=>{
+    g.drawImage(atlas.plain,0,0);
+    for(const [ox,oy,r] of [[9,12,7],[22,10,6],[16,22,7]]){
+      g.fillStyle='#1f6b30'; g.beginPath(); g.arc(ox,oy+2,r,0,Math.PI*2); g.fill();
+      g.fillStyle='#2f8b40'; g.beginPath(); g.arc(ox-1,oy,r-1,0,Math.PI*2); g.fill();
+      g.fillStyle='#4aa855'; g.beginPath(); g.arc(ox-2,oy-2,r-3,0,Math.PI*2); g.fill();
+    }
+  });
+  atlas.desert = tile((g,s)=>{
+    g.fillStyle='#dcc079'; g.fillRect(0,0,s,s);
+    noise(g,22,['#cfb069','#e8d091'],s,s);
+    g.strokeStyle='rgba(180,150,90,0.6)'; g.lineWidth=1;
+    for(let i=0;i<2;i++){ const y=9+i*13;
+      g.beginPath(); g.moveTo(1,y); g.quadraticCurveTo(s/2,y+3,s-1,y); g.stroke(); }
+  });
+  atlas.mount = tile((g,s)=>{
+    g.fillStyle='#6c6a62'; g.fillRect(0,0,s,s);
+    for(const [cx,base,h,col] of [[8,s-4,16,'#8b887c'],[20,s-2,22,'#9a978a'],[26,s-6,12,'#7d7a70']]){
+      g.fillStyle=col;
+      g.beginPath(); g.moveTo(cx,base-h); g.lineTo(cx+h*0.6,base); g.lineTo(cx-h*0.6,base);
+      g.closePath(); g.fill();
+      g.fillStyle='#eef2f6';
+      g.beginPath(); g.moveTo(cx,base-h); g.lineTo(cx+h*0.22,base-h*0.68);
+      g.lineTo(cx-h*0.22,base-h*0.68); g.closePath(); g.fill();
+    }
+  });
+  atlas.lake = tile((g,s)=>{
+    g.fillStyle='#2a6fae'; g.fillRect(0,0,s,s);
+    noise(g,14,['#245f97','#3782c4'],s,s);
+    g.strokeStyle='rgba(220,240,255,0.5)'; g.lineWidth=1;
+    g.beginPath(); g.moveTo(3,12); g.quadraticCurveTo(s/2,8,s-3,12); g.stroke();
+  });
+  atlas.snowfield = tile((g,s)=>{
+    g.fillStyle='#eef4fb'; g.fillRect(0,0,s,s);
+    noise(g,22,['#e2ecf7','#f8fbff','#d8e4f2'],s,s);
+  });
+  atlas.highway = tile((g,s)=>{
+    g.fillStyle='#a8956a'; g.fillRect(0,0,s,s);
+    noise(g,20,['#98865c','#b8a678'],s,s);
+    g.fillStyle='rgba(255,255,255,0.35)'; g.fillRect(0,2,s,1); g.fillRect(0,s-3,s,1);
+  });
+  // --- ちてんの めじるし ---
+  function marker(draw){
+    return tile((g,s)=>{ g.drawImage(atlas.plain,0,0); draw(g,s); });
+  }
+  atlas.mCastle = marker((g,s)=>{
+    g.fillStyle='rgba(20,26,40,0.28)'; g.fillRect(3,s-5,s-6,4);
+    g.fillStyle='#dde4f0'; g.fillRect(5,12,s-10,s-16);
+    g.fillStyle='#c8d0e0'; g.fillRect(3,8,6,s-12); g.fillRect(s-9,8,6,s-12);
+    g.fillStyle='#2f5a9e';
+    for(const bx of [3,s-9,s/2-4]){
+      g.beginPath(); g.moveTo(bx+3,2); g.lineTo(bx+7,9); g.lineTo(bx-1,9); g.closePath(); g.fill();
+    }
+    g.fillStyle='#2b2038'; g.fillRect(s/2-3,s-9,6,8);
+  });
+  atlas.mVillage = marker((g,s)=>{
+    g.fillStyle='rgba(20,26,40,0.28)'; g.fillRect(4,s-5,s-8,4);
+    g.fillStyle='#e8dcc0'; g.fillRect(6,15,s-12,s-19);
+    g.fillStyle='#a8443c';
+    g.beginPath(); g.moveTo(s/2,5); g.lineTo(s-3,15); g.lineTo(3,15); g.closePath(); g.fill();
+    g.fillStyle='rgba(246,250,255,0.8)';
+    g.beginPath(); g.moveTo(s/2,5); g.lineTo(s/2+6,10); g.lineTo(s/2-6,10); g.closePath(); g.fill();
+    g.fillStyle='#2b2038'; g.fillRect(s/2-2,s-8,5,7);
+  });
+  atlas.mCave = marker((g,s)=>{
+    g.fillStyle='#6c6a62';
+    g.beginPath(); g.moveTo(2,s-2); g.lineTo(s/2,4); g.lineTo(s-2,s-2); g.closePath(); g.fill();
+    g.fillStyle='#8b887c';
+    g.beginPath(); g.moveTo(6,s-2); g.lineTo(s/2,8); g.lineTo(s-6,s-2); g.closePath(); g.fill();
+    g.fillStyle='#141020';
+    g.beginPath(); g.moveTo(s/2-6,s-2); g.lineTo(s/2,s-14); g.lineTo(s/2+6,s-2); g.closePath(); g.fill();
+  });
+  atlas.mFuture = marker((g,s)=>{
+    g.fillStyle='rgba(20,26,40,0.25)'; g.fillRect(5,s-5,s-10,4);
+    g.fillStyle='#9aa0ae'; g.fillRect(7,14,s-14,s-18);
+    g.fillStyle='#6a7080';
+    g.beginPath(); g.moveTo(s/2,6); g.lineTo(s-5,14); g.lineTo(5,14); g.closePath(); g.fill();
+    g.fillStyle='rgba(255,255,255,0.35)'; g.fillRect(9,17,s-18,3);
+  });
   // --- せんとう（ゆきぐにの とうろう）---
   atlas.tower = tile((g,s)=>{
     g.fillStyle='rgba(20,26,40,0.25)'; g.fillRect(4,s-5,s-8,4);
@@ -757,6 +854,15 @@ function buildAtlas(){
 function tileArt(ch, theme){
   const ice = theme==='ice', snowT = theme==='snow', cave = theme==='cave';
   switch(ch){
+    // ---- ワールドマップ ----
+    case '~': return atlas.sea;
+    case '_': return atlas.beach;
+    case ',': return atlas.woods;
+    case '^': return atlas.mount;
+    case 'A': return atlas.mCastle;
+    case 'V': return atlas.mVillage;
+    case 'X': return atlas.mCave;
+    case 'Q': return atlas.mFuture;
     case '#': return ice?atlas.icewall : (cave?atlas.rockwall : atlas.wall);
     case 'w': return atlas.water;
     case 'f': return snowT?atlas.tree : atlas.tree_g;
@@ -778,6 +884,7 @@ function tileArt(ch, theme){
   }
 }
 function floorArt(theme){
+  if(theme==='world') return atlas.plain;
   return theme==='snow' ? atlas.snow
        : theme==='ice'  ? atlas.ice
        : theme==='cave' ? atlas.road
@@ -785,6 +892,7 @@ function floorArt(theme){
        : atlas.pave;
 }
 function roadArt(theme){
+  if(theme==='world') return atlas.highway;
   return theme==='snow' ? atlas.pave
        : theme==='ice'  ? atlas.ice
        : theme==='cave' ? atlas.road
@@ -852,9 +960,19 @@ function draw(dt, time, actors){
   const floor = floorArt(theme), road = roadArt(theme);
 
   // ① ゆか
+  const worldFloor = {'.':atlas.plain, '=':atlas.snowfield, ':':atlas.desert,
+                      '_':atlas.beach, '~':atlas.sea, 'w':atlas.lake,
+                      ',':atlas.plain, '^':atlas.plain, 'r':atlas.highway};
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
     const ch = rows[y][x];
-    const base = (ch==='r') ? road : floor;
+    let base;
+    if(theme==='world'){
+      base = worldFloor[ch];
+      if(!base){                                   // ちてん・たからばこ などは まわりの ちけいに あわせる
+        const near = rows[y][x-1]||rows[y][x+1]||'.';
+        base = worldFloor[near] || atlas.plain;
+      }
+    }else base = (ch==='r') ? road : floor;
     cx.drawImage(base, px(ox+x*ts), px(oy+y*ts), ts, ts);
   }
   // ② あしあと（ゆきの うえ）
@@ -1160,7 +1278,6 @@ const MIDBOSS = {
 };
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
-  versa_field1:['icicleslime','hoimislime','yukingon','frostbat'],          // Lv1〜（レベルで しゅるいが ふえる）
   versa_dgn1:  ['icicleslime','frostbat','yukingon','blizzardhawk'],        // Lv3〜5
   versa_dgn2:  ['yukingon','blizzardhawk','frostmermaid','thornwolf','metalslime'],// Lv5〜7
   field_toros:['greenslime','flameslime','hoimislime','drakybat','madrock','mandragora',
@@ -1177,6 +1294,92 @@ const byMap = {
 //   I やどや / P きょうかい / S みせ / D とびら(ワープ) / n むらびと
 //   t たいまつ / C たからばこ / > した階段 / < うえ階段 / B ボス
 const MAPS = {
+  // ============ ワールドマップ（5ちほう＋ちゅうおうかい）============
+  // ~ うみ / _ すなはま / . くさち / , しげみ / = ゆきげん / : さばく / ^ やま / w みずうみ
+  // r かいどう / A おうと / V むら / X どうくつ / Q まだ いけない まち
+  world:{name:'ヴェルサちほう',theme:'world',enc:true,encRate:0.05,encGrace:6,tiles:[
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~______~~~~~~~~~~_____~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~__======__~~~~~~__=====_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_=========______========_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_=========================_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_===============C=========_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_========,======,=========,=_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_==,=====,======,============_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_======w,======A==========,====_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_==C==wwwww==,==r=======,========_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~________=====,wwwwww====r====n=========,,=_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~_====,======,=,wwwww=====t=========,=C,,====__~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~_=========,======www==,===r==,=================______~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~_=========,===============r===========,=====,=======_~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~_===============.Vrrrrtrrrrrrrtrrrr=================_~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~_=================,===,===========rwww=,============_~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~_==========,============n=========wwwww====,========_~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~__======,=========================.wwww=======______~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~________=,=================,===.X.ww=,==,=__~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~__=,,======C======,==,====w=====__~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~__==,====,=====,=====,=====,=_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~__=============__========__~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_=====__...._~~____==__~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^===^~~^^^^^~~~~~~^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^~^^^^^~~~~~~~~~~~~~~~~~~~~~~~~______~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~________~~~~~~~~~~~~~~~^^^^^^^^^^^^^~^^^^^^^^^~~~~~~~~~~~~__::::::___~~~~~~~~~~~~",
+    "~~~~~~_________........__~~~~~~~~~~~__............._........._~~~~~~~~~~_:::::::::::___~~~~~~~~~",
+    "~~~~__^....^^^^^^^^.^...._~~~~~~~~__..........................__~~~~~~~_:::::::::::::::______~~~",
+    "~~~_....^^^^^^^^^^^^^^...._~~~~~~_,.,..,.....,.,.,...........,.,_~~~~__:::::^::::::::::::::::__~",
+    "~~~_..^^^^^^^^^^^^^^^^^..._~~~~__..,...,.........,...,.,........._~~^::^:::::::::::::::::^:::::_",
+    "~~_...^^^^^^^^^^^^^^^^^....^~~_,,...............,.....,...,.,.....^~^:::::::::::::^::::::::^::::",
+    "~~_..^^^^^^^^^^^^^^^^^^^...^^^...................,............,,..^^::::::::^:::::::::::::::::::",
+    "~~_..^^^^^^^^^^^^^^^^^^^...^~^..,.................................^~^:::::::::^:::::^:::::::::::",
+    "~~_...^^^^^^.^^^^^^^^^^....^^^.....,................,...,....,....^^^..::::::::::::^::::^:^:::::",
+    "~~~_..^^^^^.Q.^^^^^^^^^.^..^^^._......,................,..........^^^..::::::^::::::Q::::::::::_",
+    "~~~_..^^^^^^.^^^^^^^^^^....^^^_~_,..,.,....,.,..Q.......,,...,..._^^^..:^::::::::::::::::::^::_~",
+    "~~~_...^^^^^^^^^^^^^^^.....^^^_~~_............,..............,.._~^^^..:::::^:::::::::::::::::_~",
+    "~~~~_..^^^^^^^^^^^^^^^...._^^^_~~_,..,....wwwww................._~^^^_.::::::::^::::::::^:^::_~~",
+    "~~~~_...^^^^^^^^^^^^^...._~~~~~~~~_.,....wwwwww........,,....,._~~~~~~_:::::::::::::^::::::::_~~",
+    "~~~~_....^^^^^^^^^^^^...._~~~~~~~~_,......wwwww...,.......,..,._~~~~~~_::::::www::::::::::::^_~~",
+    "~~~~_.^...^^^^^^^^^^....._~~~~~~~~_.,.........,,....,...,......_~~~~~~_:::::wwww::::::::::^::_~~",
+    "~~~~_...^....^^^^^..^..^._~~~~~~~~_.....................,......._~~~~~_::::::www:::::::::::::_~~",
+    "~~~~_........^..^......^._~~~~~~~~_....................,........_~~~~~_::::::ww::::::::::::::_~~",
+    "~~~~_..^.............^..._~~~~~~~~_..,.......,..,........,....,_~~~~~~_::::::::^::::^::::::::_~~",
+    "~~~~_..............^....._~~~~~~~~_..........,...........,....._~~~~~~_:::::::::::::::::::::_~~~",
+    "~~~~~__................._~~~~~~~~~~_.........................._~~~~~~~~_::::::::::::::______~~~~",
+    "~~~~~~~__________.^...._~~~~~~~~~~~~__.............__.......__~~~~~~~~~~__::::::^::___~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~______~~~~~~~~~~~~~~~________...._~~_______~~~~~~~~~~~~~~__::::___~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_..._~~~~~~~~~~~~~~~~~~~~~~~~~____~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_..._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_..._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_..._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_____~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_~~~~~~~~~~~~~~~~~~~_____~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~___.___~~~~~~~~~~~~~~~_....._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_.......__~~~~~~~~~~~~_......_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_.........._~~~~~~~___~_......_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_..........._~~~~___..._......_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_...........Q_~~_..........___~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_............_~_.........._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_~_..........._~_..........._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~___._...........__~~_.........._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_......._......_~~~~~_........._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_......_~____._~_~~~~~____..___~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~__...._~~~~~~_._.___~~~~~~__~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~____~~~~~~~_......_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_......._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_.....__~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_____~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  ], warps:{}, warpsXY:{
+    '48,8': {to:'versa_town',  x:11, y:14},
+    '39,14':{to:'versa_town2', x:10, y:13},
+    '56,18':{to:'versa_dgn1',  x:9,  y:14},
+  },
+  // ちほうごとに でる まものを かえる
+  encZones:[
+    {x0:26,y0:0, x1:70,y1:23, pool:['icicleslime','hoimislime','yukingon','frostbat'], name:'ヴェルサの せつげん'},
+  ]},
+
   // ============ ヴェルサ地方（第1章） ============
   // = ゆき / r いしだたみ / # しろい いしかべ / T あおい せんとう
   // K おうじょうもん / F ふんすい / I やどや / P きょうかい / W ぶきや / M まほうてん
@@ -1198,36 +1401,8 @@ const MAPS = {
     "#=##=###===rr=n=##T=M==#",
     "#==========rr======f==f#",
     "###########GG###########"
-  ], warps:{}, warpsXY:{'11,15':{to:'versa_field1',x:15,y:1},'12,15':{to:'versa_field1',x:16,y:1},
+  ], warps:{}, warpsXY:{'11,15':{to:'world',x:48,y:9},'12,15':{to:'world',x:48,y:9},
                      '11,1':{to:'versa_cast1',x:10,y:14},'12,1':{to:'versa_cast1',x:11,y:14}}},
-  versa_field1:{name:'ヴェルサの せつげん',theme:'snow',enc:true,encRate:0.055,encGrace:5,tiles:[
-    "###############GG###############",
-    "#==============rr==============#",
-    "#=fffff========rr=======ffffff=#",
-    "#=fffff========rr===wwwwff=Cff=#",
-    "#=fffff=o======rr===wwwwff=fff=#",
-    "#=fffff=======trrt==wwwwff=fff=#",
-    "#==============rr=======ff=fff=#",
-    "#====rrrrrrrrrrrrrrrrrrrrrr====#",
-    "#====rrrrtrrrrrrrrrnrrtrrrro===#",
-    "#==o======rr===========o=======#",
-    "#=========rr=o=================#",
-    "G==fff====rr=============fffff=#",
-    "G==ffn====rr======fffff==fffff=#",
-    "#=ffff=o==rr======fffff==fffff=#",
-    "#=ffff===trr======fffff==fffff=#",
-    "#=ffff====rr======fffff==fffff=#",
-    "#=====wwwwrr=============fffff=#",
-    "#=====wwwwrrt==========C=======#",
-    "#===fffff=rr=====o=============#",
-    "#===fffff=rr========fffffff====#",
-    "#==Cfffff=====o=====fffffff====#",
-    "#===fffff===========fffffff====#",
-    "#===================fffffff====#",
-    "##########GG####################"
-  ], warps:{}, warpsXY:{'15,0':{to:'versa_town',x:11,y:14},'16,0':{to:'versa_town',x:12,y:14},
-                        '10,23':{to:'versa_dgn1',x:9,y:14},'11,23':{to:'versa_dgn1',x:10,y:14},
-                        '0,11':{to:'versa_town2',x:10,y:13},'0,12':{to:'versa_town2',x:11,y:13}}},
   versa_town2:{name:'くすしの むら ミルカ',theme:'snow',enc:false,tiles:[
     "######################",
     "#====================#",
@@ -1244,7 +1419,7 @@ const MAPS = {
     "#f====f===rr====f=C==#",
     "#====================#",
     "##########GG##########"
-  ], warps:{}, warpsXY:{'10,14':{to:'versa_field1',x:1,y:11},'11,14':{to:'versa_field1',x:1,y:12},
+  ], warps:{}, warpsXY:{'10,14':{to:'world',x:39,y:15},'11,14':{to:'world',x:39,y:15},
                         '17,3':{to:'versa_hut',x:5,y:6}}},
   versa_hut:{name:'くすしの いえ',theme:'indoor',enc:false,tiles:[
     "############",
@@ -1291,7 +1466,7 @@ const MAPS = {
     "#====o=######======#",
     "#=t==C===========t=#",
     "#########GG#########"
-  ], warps:{}, warpsXY:{'9,15':{to:'versa_field1',x:10,y:22},'10,15':{to:'versa_field1',x:11,y:22},
+  ], warps:{}, warpsXY:{'9,15':{to:'world',x:56,y:19},'10,15':{to:'world',x:56,y:19},
                         '9,1':{to:'versa_dgn2',x:8,y:12},'10,1':{to:'versa_dgn2',x:9,y:12}}},
   versa_dgn2:{name:'こおりの どうくつ さいしんぶ',theme:'ice',enc:true,encRate:0.085,encGrace:4,tiles:[
     "##################",
@@ -1309,7 +1484,6 @@ const MAPS = {
     "#================#",
     "########<<########"
   ], warps:{}, warpsXY:{'8,13':{to:'versa_dgn1',x:9,y:2},'9,13':{to:'versa_dgn1',x:10,y:2}}},
-
   toros:{name:'トロスむら',theme:'village',enc:false,tiles:[
     "ffffffffffffffff",
     "f____ff____ff__f",
@@ -1507,7 +1681,7 @@ function aliveMembers(){ return party.filter(p=>p.hp>0); }
 function actableMembers(){ return party.filter(p=>p.hp>0 && p.status!=='sleep'); }
 
 // ---------------- マップ ----------------
-const SOLID = new Set(['#','f','w','o','T','F','K']);
+const SOLID = new Set(['#','f','w','o','T','F','K','~','^',',']);
 function tileAt(map,x,y){
   const m = MAPS[map]; if(!m) return '#';
   if(y<0||x<0||y>=m.tiles.length||x>=m.tiles[y].length) return '#';
@@ -1515,7 +1689,8 @@ function tileAt(map,x,y){
 }
 function isBlocked(ch){
   return SOLID.has(ch) || ch==='I' || ch==='P' || ch==='S' || ch==='W' || ch==='M'
-      || ch==='n' || ch==='C' || ch==='B';
+      || ch==='n' || ch==='C' || ch==='B'
+      || ch==='A' || ch==='V' || ch==='X' || ch==='Q';   // ちてんは ぶつかって はいる
 }
 function walkable(map,x,y){ return !isBlocked(tileAt(map,x,y)); }
 function warpAt(map,x,y){
@@ -1554,6 +1729,17 @@ function stepField(dx,dy){
   if(ch==='P'){ useChurch(); return; }
   if(ch==='S'||ch==='W'||ch==='M'){ openShop(ch); return; }
   if(ch==='C'){ openChest(nx,ny); return; }
+  if(ch==='A'||ch==='V'||ch==='X'){          // ワールドの ちてん
+    const w=warpAt(P.map,nx,ny);
+    if(w){ P.dir = dy<0?'back':dy>0?'front':(dx<0?'left':'right'); doWarp(w); return; }
+  }
+  if(ch==='Q'){                               // まだ いけない ちほう
+    G.mode='msg';
+    U.msg(['とおくに まちの かげが みえる。',
+           'だが いまの リオンには、ここから さきへ すすむ すべが ない。',
+           '（この ちほうは これから つくられます）'], ()=>{ G.mode='field'; });
+    return;
+  }
   if(ch==='B'){ triggerBoss(nx,ny); return; }
   if(ch==='K'){
     G.mode='msg';
@@ -1628,19 +1814,26 @@ function stepField(dx,dy){
   if(w){ doWarp(w); return; }
   if(MAPS[P.map].enc) maybeEncounter();
 }
+// ワールドマップは ばしょによって なまえが かわる
+function areaName(map,x,y){
+  const m=MAPS[map];
+  if(!m || !m.encZones) return WORLD.mapName(map);
+  const z=(m.encZones||[]).find(z=>x>=z.x0&&x<=z.x1&&y>=z.y0&&y<=z.y1);
+  return z ? z.name : WORLD.mapName(map);
+}
 function doWarp(w){
   G.busy=true;
   V.fade(1, ()=>{
     P.map=w.to; P.x=w.x; P.y=w.y; P.dir='front';
     G.trail=[[w.x,w.y],[w.x,w.y]];
     G.visited[w.to]=true;
-    if(w.to==='versa_field1') G.flags.ch1_enteredField=true;
+    if(w.to==='world') G.flags.ch1_enteredField=true;
     if(w.to==='versa_town2') G.flags.ch1_reachedMirka=true;
     if(w.to==='versa_dgn1' && !G.flags.ch1_enteredCave){
       G.flags.ch1_enteredCave=true;
       G.townState='DREAM_INVASION';        // まちが ゆめに しんしょくされる
     }
-    V.buildMap(w.to); V.setActors(); U.label(WORLD.mapName(w.to));
+    V.buildMap(w.to); V.setActors(); U.label(areaName(w.to, w.x, w.y));
     A.bgm(MAPS[w.to].theme);
     V.fade(0, ()=>{ G.busy=false; G.mode='field'; });   // メッセージ中から呼ばれても操作可へ戻す
   });
@@ -1881,7 +2074,12 @@ function startBattle(kind){
     enemies = [makeEnemy(MIDBOSS[kind])];
   }else{
     // レベルが たりない まものは まだ でてこない（はじまりの ちいきを あんぜんに たもつ）
-    const all = byMap[P.map] || ['icicleslime'];
+    let all = byMap[P.map];
+    if(!all){
+      const m=MAPS[P.map];
+      const z=(m&&m.encZones||[]).find(z=>P.x>=z.x0&&P.x<=z.x1&&P.y>=z.y0&&P.y<=z.y1);
+      all = z ? z.pool : ['icicleslime'];
+    }
     const plv = party[0].lv;
     let pool = all.filter(k=>{
       const e = ENEMIES.find(x=>x.key===k);
