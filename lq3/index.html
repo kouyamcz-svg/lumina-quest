@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T07:52:42", "assets_sha": "95652c8f", "lines": {"world": 139, "npc": 254, "core": 1740, "view2d": 993, "view": 1225, "ui": 372}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T08:00:40", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1740, "view2d": 1000, "view": 1225, "ui": 372}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1241,9 +1241,11 @@ function drawBattle(dt, time){
     const spread = (n===1) ? 0 : (i-(n-1)/2) * (Math.min(bw,W)*0.28);
     const breathe = 1 + Math.sin(time*2.1+f.ph)*0.03;
     const sway = Math.sin(time*0.85+f.ph)*(sc*1.5);
-    let hh = Math.round(bh*0.30*zoom);
-    let ww = hh;
-    if(f.art){ ww = Math.round(hh*(f.art.w/f.art.h)); }
+    // はいけいと おなじ せいすうばい ＝ ドットの あらさが そろう
+    const esc = Math.max(1, Math.round(sc*0.62*zoom));
+    let hh, ww;
+    if(f.art){ hh = f.art.h*esc; ww = f.art.w*esc; }
+    else { hh = 48*esc; ww = 48*esc; }
     const cx0 = bx+bw/2 + spread + sway + ox2;
     const cy0 = groundY - f.z*sc - Math.sin(time*1.7+f.ph)*sc;
     f._cx = cx0; f._cy = cy0 - hh*0.5;
@@ -1398,8 +1400,9 @@ function drawNPC(dx,dy,ts,x,y){
   if(d){
     const img=getImg(d.front||d.src);
     if(img.complete && img.naturalWidth){
-      const hh=ts*1.30, ww=hh*(d.w/d.h);
-      cx.drawImage(img, px(dx+s/2-ww/2), px(dy+s*0.90-hh), ww, hh);
+      const sc=ts/TS;
+      const ww=Math.round(d.w*sc), hh=Math.round(d.h*sc);
+      cx.drawImage(img, Math.round(dx+s/2-ww/2), Math.round(dy+s*0.95-hh), ww, hh);
       return;
     }
   }
@@ -1418,8 +1421,9 @@ function drawBoss(dx,dy,ts){
   if(d){
     const img=getImg(d.src);
     if(img.complete && img.naturalWidth){
-      const hh=ts*1.7, ww=hh*(d.w/d.h);
-      cx.drawImage(img, px(dx+s/2-ww/2), px(dy+s*0.92-hh), ww, hh);
+      const sc=Math.max(1,Math.round(ts/TS*0.6));
+      const ww=d.w*sc, hh=d.h*sc;
+      cx.drawImage(img, Math.round(dx+s/2-ww/2), Math.round(dy+s*0.95-hh), ww, hh);
       return;
     }
   }
@@ -1436,17 +1440,20 @@ function getImg(src){
 function drawChar(a, ox, oy, ts, time){
   const d = CHRREF && CHRREF[a.cls];
   const dx = ox + a.x*ts, dy = oy + a.y*ts;
+  const sc = ts/TS;                       // タイルの ばいりつ（かならず せいすう）
   cx.fillStyle='rgba(16,20,34,0.30)';
   cx.beginPath(); cx.ellipse(dx+ts/2, dy+ts*0.86, ts*0.26, ts*0.10, 0, 0, Math.PI*2); cx.fill();
   if(!d){ cx.fillStyle='#c8d0e0'; cx.fillRect(px(dx+ts*0.3),px(dy+ts*0.2),ts*0.4,ts*0.6); return; }
   let pose = a.pose in d ? a.pose : 'front';
   const img = getImg(d[pose]);
   if(!img.complete || !img.naturalWidth) return;
-  const hh = ts*1.35, ww = hh*(d.w/d.h);
-  const bx = dx + ts/2 - ww/2, by = dy + ts*0.92 - hh + (a.bob||0)*ts;
+  // ★タイルと おなじ ばいりつで えがく ＝ ドットの あらさが そろう
+  const ww = Math.round(d.w*sc), hh = Math.round(d.h*sc);
+  const bx = Math.round(dx + ts/2 - ww/2);
+  const by = Math.round(dy + ts*0.95 - hh + (a.bob||0)*ts);
   cx.save();
   if(a.flip){ cx.translate(bx+ww, by); cx.scale(-1,1); cx.drawImage(img, 0, 0, ww, hh); }
-  else cx.drawImage(img, px(bx), px(by), ww, hh);
+  else cx.drawImage(img, bx, by, ww, hh);
   cx.restore();
 }
 function drawSnow(dt, ts){
