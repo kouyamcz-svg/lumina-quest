@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T07:47:06", "assets_sha": "95652c8f", "lines": {"world": 139, "npc": 254, "core": 1740, "view2d": 953, "view": 1225, "ui": 372}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T07:52:42", "assets_sha": "95652c8f", "lines": {"world": 139, "npc": 254, "core": 1740, "view2d": 993, "view": 1225, "ui": 372}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1073,45 +1073,86 @@ let bBack = null, bEnter = 0;
 function battleBackdrop(theme){
   const key = theme;
   if(bBack && bBack.key===key) return bBack;
-  const BW = 256, BH = 144;                       // 16bitらしい ひくい かいぞうど
+  const BW = 256, BH = 176;                       // たてを ふやして がめんを うめる
   const c = mk(BW,BH), g = c.getContext('2d');
   g.imageSmoothingEnabled = false;
   const set = {
-    snow:  {sky:'#1c2740', far:'#2e3d5c', mid:'#48597c', gnd:atlas.snowfield, line:'#8fa2bd'},
-    ice:   {sky:'#101c30', far:'#22374f', mid:'#31536f', gnd:atlas.ice,       line:'#7fa8c4'},
-    cave:  {sky:'#0c0f18', far:'#1a1f2c', mid:'#2a3040', gnd:atlas.rockwall,  line:'#5a5040'},
-    world: {sky:'#141c30', far:'#22314a', mid:'#2f4a3a', gnd:atlas.plain,     line:'#4a7a3a'},
-    plain: {sky:'#141c30', far:'#22314a', mid:'#2f4a3a', gnd:atlas.plain,     line:'#4a7a3a'},
-    village:{sky:'#141c30',far:'#22314a', mid:'#2f4a3a', gnd:atlas.plain,     line:'#4a7a3a'},
-    indoor:{sky:'#12101a', far:'#221d2c', mid:'#332b40', gnd:atlas.pave,      line:'#8f97a8'},
-    castle:{sky:'#12101a', far:'#221d2c', mid:'#332b40', gnd:atlas.pave,      line:'#8f97a8'},
-  }[theme] || {sky:'#141c30', far:'#22314a', mid:'#2f4a3a', gnd:atlas.plain, line:'#4a7a3a'};
+    snow:  {sky:'#161f36', sky2:'#1e2a45', far:'#2a3f5c', mid:'#44567a',
+            gnd:atlas.snowfield, haze:'#39496b'},
+    ice:   {sky:'#0d1728', sky2:'#152438', far:'#20344a', mid:'#2e4f6a',
+            gnd:atlas.ice,       haze:'#2a4560'},
+    cave:  {sky:'#090c14', sky2:'#101520', far:'#181d2a', mid:'#262c3c',
+            gnd:atlas.rockwall,  haze:'#202634'},
+    world: {sky:'#111a2e', sky2:'#1a2540', far:'#20304a', mid:'#2c4438',
+            gnd:atlas.plain,     haze:'#26374e'},
+    indoor:{sky:'#100e18', sky2:'#191527', far:'#221d2c', mid:'#332b40',
+            gnd:atlas.pave,      haze:'#2a2438'},
+  };
+  const S = set[theme] || (theme==='village'||theme==='field'||theme==='plain' ? set.world
+          : theme==='castle' ? set.indoor : set.world);
+  const horizon = 106;
 
-  const horizon = 84;
-  R(g,0,0,BW,horizon,set.sky);
-  // とおくの ほし（どうくつ いがい）
-  if(theme!=='cave' && theme!=='indoor' && theme!=='castle'){
-    for(let i=0;i<26;i++){
-      const x=Math.floor(nz(i,1,3)*BW), y=Math.floor(nz(i,2,5)*(horizon-24));
-      P(g,x,y, i%4? '#3a4a6e' : '#7d8fb4');
-    }
-  }
-  // とおくの やまなみ（2そう・シルエット）
-  for(const [col, base, amp, step] of [[set.far, horizon-6, 22, 23],[set.mid, horizon, 14, 17]]){
-    let y = base - amp*0.5;
+  // ---- そら：2だんの ベタ ＋ ディザで つなぐ（グラデーションは つかわない）----
+  R(g,0,0,BW,horizon*0.55,S.sky);
+  R(g,0,horizon*0.55,BW,horizon-horizon*0.55,S.sky2);
+  for(let y=Math.floor(horizon*0.42);y<Math.floor(horizon*0.62);y++){
+    const d = (y-horizon*0.42)/(horizon*0.20);
     for(let x=0;x<BW;x++){
-      if(x%step===0) y = base - Math.floor(nz(x,7,2)*amp) - 4;
-      R(g,x,y,1,horizon-y+2,col);
+      if(((x+y)%2===0) && nz(x,y,2)<d) P(g,x,y,S.sky2);
+      if(((x+y)%2===1) && nz(x,y,3)>d) P(g,x,y,S.sky);
     }
   }
-  R(g,0,horizon,BW,1,set.line);
-  // じめん：ちけいの タイルを しきつめる
-  const gnd = Array.isArray(set.gnd) ? set.gnd[0] : set.gnd;
-  for(let y=horizon+1;y<BH;y+=TS)for(let x=0;x<BW;x+=TS) g.drawImage(gnd,x,y);
-  // てまえほど くらくして おくゆきを だす（だんかいてきに・グラデーションは つかわない）
+  // ほし
+  if(theme!=='cave' && theme!=='indoor' && theme!=='castle'){
+    for(let i=0;i<40;i++){
+      const x=Math.floor(nz(i,1,3)*BW), y=Math.floor(nz(i,2,5)*(horizon-40));
+      P(g,x,y, i%5? '#39496b' : '#8ea2c8');
+    }
+  }
+  // ---- とおくの やまなみ：なめらかな りょうせん（サインの かさねあわせ）----
+  function ridge(baseY, amp, freq, phase, col, colLit){
+    const h=[];
+    for(let x=0;x<BW;x++){
+      const t=x/BW*Math.PI*2;
+      const v = Math.sin(t*freq+phase)*0.55
+              + Math.sin(t*freq*2.3+phase*1.7)*0.28
+              + Math.sin(t*freq*4.1+phase*2.9)*0.17;
+      h.push(Math.round(baseY - (v*0.5+0.5)*amp));
+    }
+    for(let x=0;x<BW;x++){
+      const y0=h[x];
+      R(g,x,y0,1,horizon-y0+2,col);
+      // みぎうえの ひかり：りょうせんが みぎさがりの ところを あかるく
+      if(x>0 && h[x] >= h[x-1]) P(g,x,y0,colLit);
+      // りんかくの ディザ（1ドットの ぎざつきで なじませる）
+      if((x%2===0) && x>0 && h[x]!==h[x-1]) P(g,x,y0-1,col);
+    }
+  }
+  ridge(horizon-8, 30, 1.6, 0.7, S.far, S.haze);
+  ridge(horizon-1, 18, 2.4, 2.1, S.mid, S.haze);
+  // ちへいせんの もや（ディザ2れつ）
+  for(let x=0;x<BW;x++){
+    if((x+0)%2===0) P(g,x,horizon-1,S.haze);
+    if((x+1)%3===0) P(g,x,horizon-2,S.haze);
+  }
+
+  // ---- じめん：ちけいの タイルを しきつめる ----
+  const gnd = Array.isArray(S.gnd) ? S.gnd[0] : S.gnd;
+  const gnd2 = Array.isArray(S.gnd) ? (S.gnd[1]||S.gnd[0]) : S.gnd;
+  for(let y=horizon;y<BH;y+=TS)for(let x=0;x<BW;x+=TS){
+    g.drawImage(((x/TS + y/TS)%2) ? gnd2 : gnd, x, y);
+  }
+  // ちへいせん ちかくを ディザで くらくして おくゆきを だす
+  for(let y=horizon;y<horizon+10;y++){
+    const d=1-(y-horizon)/10;
+    for(let x=0;x<BW;x++){
+      if(((x+y)%2===0) && nz(x,y,9)<d*0.85) P(g,x,y,S.mid);
+    }
+  }
+  // てまえを だんかいてきに くらく（4だん・ベタ）
   for(let i=0;i<4;i++){
-    const y = horizon+1 + Math.floor((BH-horizon-1)*(i+1)/5);
-    g.fillStyle = 'rgba(0,0,0,'+(0.06+i*0.05)+')';
+    const y = horizon + Math.floor((BH-horizon)*(i+1)/5);
+    g.fillStyle = 'rgba(0,0,0,'+(0.05+i*0.045)+')';
     g.fillRect(0,y,BW,BH-y);
   }
   bBack = {key, canvas:c, w:BW, h:BH, horizon};
@@ -1184,24 +1225,23 @@ function drawBattle(dt, time){
   }
   if(bShake>0){ bShake-=dt; ox2 = (nz(time*60|0,1,13)-0.5)*bShake*26; }
 
-  // ---- はいけい（せいすうばいで ひきのばす）----
-  const sc = Math.max(1, Math.floor(W/back.w));
+  // ---- はいけい：たてを うめる せいすうばい。よこは あふれても よい（ちゅうおうよせ）----
+  const sc = Math.max(1, Math.ceil(H/back.h));
   const bw = back.w*sc, bh = back.h*sc;
   cx.fillStyle = '#0a0c14'; cx.fillRect(0,0,W,H);
   const bx = Math.round((W-bw)/2 + ox2), by = Math.round(H-bh);
   cx.drawImage(back.canvas, bx, by, bw, bh);
-  if(bh < H){ cx.fillStyle='#0a0c14'; cx.fillRect(0,0,W,by); }
 
   // ---- てき ----
-  const groundY = by + back.horizon*sc + Math.round(bh*0.22);
+  const groundY = by + back.horizon*sc + Math.round((bh-back.horizon*sc)*0.46);
   bFoes.forEach((f,i)=>{
     if(f.enemy.hp<=0){ f.fade = Math.max(0, f.fade - dt*2.2); }
     if(f.fade<=0) return;
     const n = f.n;
-    const spread = (n===1) ? 0 : (i-(n-1)/2) * (bw*0.26);
+    const spread = (n===1) ? 0 : (i-(n-1)/2) * (Math.min(bw,W)*0.28);
     const breathe = 1 + Math.sin(time*2.1+f.ph)*0.03;
     const sway = Math.sin(time*0.85+f.ph)*(sc*1.5);
-    let hh = Math.round(bh*0.42*zoom);
+    let hh = Math.round(bh*0.30*zoom);
     let ww = hh;
     if(f.art){ ww = Math.round(hh*(f.art.w/f.art.h)); }
     const cx0 = bx+bw/2 + spread + sway + ox2;
