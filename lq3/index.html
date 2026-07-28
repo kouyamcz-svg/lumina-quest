@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T03:46:27", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1767, "bgm": 700, "view2d": 1076, "view": 1227, "ui": 458}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T05:23:06", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1767, "bgm": 806, "view2d": 1076, "view": 1227, "ui": 475}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1070,8 +1070,29 @@ function ctx(){
   }catch(e){}
   return AC;
 }
+// おわった はっしんきを じどうで きりはなす。
+// これを しないと たまりつづけ、iOSでは あたらしい おとが つくれなく なる。
+let cleaned = null;
+function autoClean(ac){
+  if(!ac || cleaned===ac) return;
+  cleaned = ac;
+  ['createOscillator','createBufferSource'].forEach(m=>{
+    if(typeof ac[m] !== 'function') return;
+    const orig = ac[m].bind(ac);
+    ac[m] = function(){
+      const n = orig();
+      try{
+        n.addEventListener('ended', ()=>{ try{ n.disconnect(); }catch(e){} }, {once:true});
+      }catch(e){
+        try{ n.onended = ()=>{ try{ n.disconnect(); }catch(e2){} }; }catch(e3){}
+      }
+      return n;
+    };
+  });
+}
 function ensure(){
   if(!ctx()) return false;
+  autoClean(AC);
   if(!G){
     try{ G = buildGraph(AC); }
     catch(e){ console.warn('[bgm] おとの グラフを つくれません', e); G = null; }
@@ -1142,6 +1163,7 @@ function begin(name){
 }
 function play(name){
   if(name !== 'battle' && name !== 'boss'){ stop(); return; }
+  pauseField();                       // せんとうちゅうは いちじ ていし（いしは のこす）
   if(playing === name) return;
   if(!ensure()){ return; }
   stop();
@@ -1173,6 +1195,7 @@ function fadeOut(){
 }
 function stop(){
   const wasPlaying = !!playing;
+  if(wasPlaying) setTimeout(()=>{ if(!playing && fieldWant) playField(); }, 220);
   if(timer){ clearInterval(timer); timer=null; }
   playing = null; pending = null; stall = 0; lastNow = -1;
   if(wasPlaying) fadeOut();      // ★なっていた ときだけ フェード。かけはじめでは さわらない
@@ -1183,6 +1206,80 @@ function setVolume(v){
 }
 function resume(){ const a=ctx(); if(a && a.state==='suspended') a.resume(); }
 
+/* ══ フィールドきょく（おんげんファイルを ながす）══ */
+// せんとうきょくは はっしんきで つくるが、フィールドきょくは
+// レンダリングずみの ファイルを ながす。<audio> なら メモリを くわない。
+let fieldEl = null, fieldWant = false, fieldUrl = 'field.mp3', fieldVol = 0.55;
+let fieldSrc = null, fieldGain = null, fieldErr = '';
+function fieldAudio(){
+  if(fieldEl) return fieldEl;
+  try{
+    fieldEl = new Audio(fieldUrl);
+    fieldEl.loop = true;
+    fieldEl.preload = 'auto';          // さきに よみこんでおく
+    fieldEl.crossOrigin = 'anonymous';
+    fieldEl.volume = 1;                // おんりょうは グラフがわで きめる
+    fieldEl.addEventListener('error', ()=>{
+      const e = fieldEl.error;
+      fieldErr = 'よみこみ しっぱい' + (e ? '(code '+e.code+')' : '');
+    });
+    try{ fieldEl.load(); }catch(e){}
+  }catch(e){ fieldEl = null; fieldErr = 'つくれない'; }
+  return fieldEl;
+}
+// ★<audio> を きょうゆうコンテキストへ つなぐ。
+//   iOSは <audio> たんたいだと ならない ことが あるが、
+//   ユーザー そうさで あけた コンテキストを とおせば ならせる。
+function routeField(){
+  const el = fieldAudio(); if(!el) return false;
+  if(fieldSrc) return true;
+  if(!ctx()) return false;
+  if(typeof AC.createMediaElementSource !== 'function') return false;
+  try{
+    autoClean(AC);
+    fieldSrc = AC.createMediaElementSource(el);
+    fieldGain = AC.createGain();
+    fieldGain.gain.value = fieldVol;
+    fieldSrc.connect(fieldGain);
+    fieldGain.connect(AC.destination);
+    return true;
+  }catch(e){ fieldErr = 'つなげない: '+e.message; return false; }
+}
+function playField(){
+  fieldWant = true;                   // 「フィールドきょくを ならしたい」いし
+  if(playing) return;                 // せんとうちゅうは あとで もどす
+  const el = fieldAudio(); if(!el) return;
+  routeField();
+  try{ AC && AC.resume && AC.resume(); }catch(e){}
+  if(fieldGain){ try{ fieldGain.gain.value = fieldVol; }catch(e){} }
+  try{
+    const p = el.play();
+    if(p && p.catch) p.catch(err=>{ fieldErr = 'さいせい きょかまち'; });
+  }catch(e){ fieldErr = 'さいせい しっぱい'; }
+}
+function pauseField(){                // せんとうの あいだの いちじ ていし（いしは のこす）
+  if(!fieldEl) return;
+  try{ fieldEl.pause(); }catch(e){}
+}
+function stopField(){                 // プレイヤーが とめた（いしも けす）
+  fieldWant = false;
+  pauseField();
+}
+function unlockField(){
+  // さいしょの そうさで <audio> を あけておく（iOSたいさく）
+  const el = fieldAudio(); if(!el) return;
+  routeField();
+  try{
+    const p = el.play();
+    if(p && p.then) p.then(()=>{ if(!fieldWant) el.pause(); }, ()=>{});
+    else if(!fieldWant) el.pause();
+  }catch(e){}
+}
+function setFieldVolume(v){
+  fieldVol = Math.max(0, Math.min(1, v));
+  if(fieldGain){ try{ fieldGain.gain.value = fieldVol; }catch(e){} }
+  else if(fieldEl){ try{ fieldEl.volume = fieldVol; }catch(e){} }
+}
 function status(){
   const a = AC;
   return {
@@ -1194,9 +1291,18 @@ function status(){
     playing: playing || 'なし',
     scheduled: fired,
     vol: vol,
+    field: fieldEl ? (fieldEl.paused ? 'とまっている' : 'ながれている') : 'みよみこみ',
+    fieldVol: fieldVol,
+    fieldReady: fieldEl ? fieldEl.readyState : -1,
+    fieldNet: fieldEl ? fieldEl.networkState : -1,
+    fieldTime: fieldEl ? Math.round((fieldEl.currentTime||0)*10)/10 : -1,
+    fieldRoute: fieldSrc ? 'グラフ経由' : '<audio>のみ',
+    fieldErr: fieldErr || 'なし',
   };
 }
 return {play, stop, setVolume, resume, attach, status,
+        playField, stopField, pauseField, unlockField, setFieldVolume,
+        get fieldOn(){return fieldWant;},
         get current(){return playing;},
         get bars(){return BARS;}, get bpm(){return BPM;},
         get startAt(){return START_AT;}, get sectionAt(){return SECTION_AT;},
@@ -5316,8 +5422,10 @@ const A = {
   lvup(){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,0.16,'square',0.05,i*0.09)); },
   win(){ [392,523,659,784].forEach((f,i)=>tone(f,0.2,'square',0.055,i*0.11)); },
   lose(){ [330,294,247,196].forEach((f,i)=>tone(f,0.3,'triangle',0.06,i*0.18)); },
-  bgm(theme){                      // フィールドの きょくは これから。いまは とめる。
-    if(typeof BGM!=='undefined') BGM.stop();
+  bgm(theme){                      // フィールド・まち・ダンジョンの きょく
+    if(typeof BGM==='undefined') return;
+    BGM.stop();                    // せんとうきょくは とめる
+    BGM.playField();               // フィールドきょくへ
   },
   battleBgm(kind){                 // せんとうきょく「双嶺の誓約」
     const ac = ctx();
@@ -5517,29 +5625,39 @@ function openMusic(){
     '　きょくデータ：'+s.events+'こ',
     '　さいせいちゅう：'+s.playing,
     '　よやくした おと：'+s.scheduled+'こ',
-    '　おんりょう：'+Math.round(s.vol*100)+'％',
+    '　せんとうきょくの おんりょう：'+Math.round(s.vol*100)+'％',
+    '　フィールドきょく：'+s.field+'（'+s.fieldRoute+'）',
+    '　よみこみ：readyState='+s.fieldReady+' network='+s.fieldNet,
+    '　さいせい いち：'+s.fieldTime+'びょう',
+    '　エラー：'+s.fieldErr,
+    '　フィールドの おんりょう：'+Math.round(s.fieldVol*100)+'％',
   ] : ['BGMエンジンが みつかりません'];
-  menu(['きょくを ならす','とめる','おんりょう＋','おんりょう−','じょうたいを みる','もどる'],
-       'おんがく',(k)=>{
+  menu(['フィールドきょく','せんとうきょく','とめる','おんりょう＋','おんりょう−',
+        'じょうたいを みる','もどる'],'おんがく',(k)=>{
     if(k===0){
+      if(typeof BGM!=='undefined'){ BGM.stop(); BGM.playField(); }
+      msg2(['フィールドきょくを ならしました。'], ()=>{ C.G.mode='menu'; openMusic(); });
+    }else if(k===1){
       const ac=ctx();
       if(typeof BGM!=='undefined'){
         if(BGM.attach) BGM.attach(ac);
         BGM.resume(); BGM.play('battle');
       }
-      msg2(['きょくを ならしました。','きこえない ときは 「じょうたいを みる」を えらんでください。'],
+      msg2(['せんとうきょくを ならしました。','きこえない ときは 「じょうたいを みる」を えらんでください。'],
            ()=>{ C.G.mode='menu'; openMusic(); });
-    }else if(k===1){
-      if(typeof BGM!=='undefined') BGM.stop();
+    }else if(k===2){
+      if(typeof BGM!=='undefined'){ BGM.stop(); BGM.stopField(); }
       msg2(['きょくを とめました。'], ()=>{ C.G.mode='menu'; openMusic(); });
-    }else if(k===2 || k===3){
+    }else if(k===3 || k===4){
       if(typeof BGM!=='undefined' && BGM.status){
-        const v = Math.max(0, Math.min(1, BGM.status().vol + (k===2?0.15:-0.15)));
+        const d = (k===3?0.15:-0.15);
+        const v = Math.max(0, Math.min(1, BGM.status().vol + d));
         BGM.setVolume(v);
+        if(BGM.setFieldVolume) BGM.setFieldVolume(Math.max(0, Math.min(1, BGM.status().fieldVol + d)));
         msg2(['おんりょうを '+Math.round(v*100)+'％に しました。'],
              ()=>{ C.G.mode='menu'; openMusic(); });
       }
-    }else if(k===4){
+    }else if(k===5){
       msg2(lines, ()=>{ C.G.mode='menu'; openMusic(); });
     }else C.G.mode='field';
   });
@@ -5690,7 +5808,11 @@ addEventListener('error', ev=>{
 function unlockAudio(){
   const ac = ctx();
   try{ if(ac && ac.state!=='running') ac.resume(); }catch(e){}
-  if(typeof BGM!=='undefined'){ if(BGM.attach) BGM.attach(ac); BGM.resume(); }
+  if(typeof BGM!=='undefined'){
+    if(BGM.attach) BGM.attach(ac);
+    BGM.resume();
+    if(BGM.unlockField) BGM.unlockField();   // <audio> も あけておく
+  }
 }
 ['touchstart','touchend','pointerdown','mousedown','click','keydown'].forEach(ev=>{
   addEventListener(ev, unlockAudio, {passive:true});
@@ -5700,6 +5822,7 @@ C.bind(V, UI, A);
 function startGame(loaded){
   V.buildMap(C.P.map);
   bootDone();
+  if(typeof BGM!=='undefined') BGM.playField();   // フィールドきょく
   V.setActors(true);
   label(C.WORLD.mapName(C.P.map));
   hud();
