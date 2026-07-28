@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T02:17:37", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1766, "bgm": 658, "view2d": 1076, "view": 1227, "ui": 416}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T03:46:27", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1767, "bgm": 700, "view2d": 1076, "view": 1227, "ui": 458}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1032,15 +1032,38 @@ impact(G,t,p){
 
 
 /* ══ さいせい（ライブ・さきよみスケジューリング）══ */
+// セクションの かいし じこく（びょう）
+const SECTION_AT = (()=>{
+  const at={}; let bar=0;
+  SECTIONS.forEach(s=>{ at[s.n]=bar*BAR; bar+=s.l; });
+  return at;
+})();
+// ★せんとうは みじかい。13びょうの イントロを ながしていると
+//   ほんぺんに はいる まえに たたかいが おわり、ほぼ むおんに きこえる。
+//   そこで もりあがる ところから はじめ、そこへ ループさせる。
+const START_AT = {
+  battle: SECTION_AT.A      || 0,   // ふつうの せんとう ＝ Aメロから
+  boss:   SECTION_AT.CHORUS || 0,   // ボス ＝ サビから
+};
 let AC=null, G=null, EVENTS=null, timer=null, playing=null;
 let t0=0, idx=0, loopN=0, vol=0.62, lastNow=-1, stall=0, pending=null;
+let songStart=0, loopSpan=1, idxStart=0;
 const LOOKAHEAD=0.35, TICK=60;
 
 // ★こうかおんと おなじ AudioContext を つかう。
 //   べつべつに つくると、かたほうだけ「ていし」の ままに なり、
 //   さいしょの すうびょうだけ なって とまる（じっさいに でた ふぐあい）。
 let SHARED = null;
-function attach(ac){ if(ac && !AC){ AC = ac; } SHARED = ac || SHARED; }
+// ★こうかおんと べつの コンテキストに なると、こちらだけ「ていし」の まま に なり
+//   おとが でない。わたされた ものを かならず つかう。
+function attach(ac){
+  if(!ac) return;
+  SHARED = ac;
+  if(AC !== ac){
+    AC = ac;
+    G = null;                    // ふるい コンテキストの グラフは すてて つくりなおす
+  }
+}
 function ctx(){
   try{
     AC = AC || SHARED || new (window.AudioContext||window.webkitAudioContext)();
@@ -1059,7 +1082,8 @@ function ensure(){
   }
   return !!G;
 }
-function fire(ev, when){
+let fired = 0;
+function fire(ev, when){ fired++;
   const f = INST[ev.i];
   if(f) try{ f(G, when, ev.p); }catch(e){}
 }
@@ -1069,7 +1093,7 @@ function pump(){
   //   きょくの あたまから はじめなおせるように しておく。
   if(AC.state !== 'running'){
     try{ AC.resume(); }catch(e){}
-    t0 = AC.currentTime + 0.10; idx = 0; loopN = 0; lastNow = -1;
+    t0 = AC.currentTime + 0.10 - songStart; idx = idxStart; loopN = 0; lastNow = -1;
     return;
   }
   const now = AC.currentTime;
@@ -1079,33 +1103,37 @@ function pump(){
     if(stall > 8){                       // やく0.5びょう すすまなければ たてなおす
       stall = 0;
       try{ AC.resume(); }catch(e){}
-      t0 = now + 0.10; idx = 0; loopN = 0;
+      t0 = now + 0.10 - songStart; idx = idxStart; loopN = 0;
     }
     return;
   }
   stall = 0; lastNow = now;
   // ★みはり②：じかんが おおきく とんだ（タブふっき など）→ いまの いちへ とばす
-  const songPos = now - t0;
-  if(songPos > (loopN+1)*LOOP + 1){
-    loopN = Math.floor(songPos / LOOP);
-    idx = 0;
-    while(idx < EVENTS.length && t0 + loopN*LOOP + EVENTS[idx].t < now) idx++;
+  const songPos = now - t0 - songStart;
+  if(songPos > (loopN+1)*loopSpan + 1){
+    loopN = Math.floor(songPos / loopSpan);
+    idx = idxStart;
+    while(idx < EVENTS.length && t0 + loopN*loopSpan + EVENTS[idx].t < now) idx++;
   }
   let guard = 0;
   while(idx < EVENTS.length){
     if(++guard > 4000) return;           // ばんいち むげんループを ふせぐ
     const ev = EVENTS[idx];
-    const when = t0 + loopN*LOOP + ev.t;
+    const when = t0 + loopN*loopSpan + ev.t;
     if(when > now + LOOKAHEAD) return;
     if(when >= now - 0.05) fire(ev, when);
     idx++;
   }
-  idx = 0; loopN++;
+  idx = idxStart; loopN++;        // イントロには もどらない
 }
 function begin(name){
   playing = name;
-  idx = 0; loopN = 0;
-  t0 = AC.currentTime + 0.10;
+  songStart = START_AT[name] || 0;
+  loopSpan = Math.max(1, LOOP - songStart);
+  idxStart = 0;
+  while(idxStart < EVENTS.length && EVENTS[idxStart].t < songStart) idxStart++;
+  idx = idxStart; loopN = 0;
+  t0 = AC.currentTime + 0.10 - songStart;   // ここから ならすと じこくを あわせる
   lastNow = -1;                  // さいしょの pump を みはりで はじかない
   gainNow(vol);                  // ★のこっている フェードを とりけして おんりょうを もどす
   pump();                        // だせない じょうたいなら pump が たてなおしを つづける
@@ -1155,9 +1183,23 @@ function setVolume(v){
 }
 function resume(){ const a=ctx(); if(a && a.state==='suspended') a.resume(); }
 
-return {play, stop, setVolume, resume, attach,
+function status(){
+  const a = AC;
+  return {
+    ctx: a ? 'あり' : 'なし',
+    state: a ? a.state : '-',
+    time: a ? Math.round(a.currentTime*10)/10 : -1,
+    graph: G ? 'あり' : 'なし',
+    events: EVENTS ? EVENTS.length : 0,
+    playing: playing || 'なし',
+    scheduled: fired,
+    vol: vol,
+  };
+}
+return {play, stop, setVolume, resume, attach, status,
         get current(){return playing;},
         get bars(){return BARS;}, get bpm(){return BPM;},
+        get startAt(){return START_AT;}, get sectionAt(){return SECTION_AT;},
         get sections(){return SECTIONS;},
         get eventCount(){ ensure(); return EVENTS?EVENTS.length:0; },
         debugEvents(){ return buildEvents(); }};
@@ -3257,7 +3299,8 @@ function startBattle(kind){
   enemies.forEach(e=>{ const d=G.dex[e.key]=G.dex[e.key]||{seen:0,kill:0}; d.seen++; });
   G.battle = {enemies, named:kind||null, round:0, order:[], queue:[], fled:false};
   G.mode='battle';
-  A.bgm(kind?'boss':'battle');
+  // ★ここで A.bgm() を よぶと きょくが とまる（bgm は フィールドようで、
+  //   いまは とめる しょりに なっている）。せんとうきょくは startBattle で たのむ。
   V.battleEnter(enemies, ()=>{
     const cnt={}; enemies.forEach(e=>{ cnt[e.name]=(cnt[e.name]||0)+1; });
     const intro = Object.keys(cnt).map(n=>cnt[n]>1?n+' '+cnt[n]+'たい':n).join('と ')+'が あらわれた！';
@@ -5402,7 +5445,7 @@ function closeMap(){
 }
 function openFieldMenu(){
   C.G.mode='menu';
-  menu(['つよさ','どうぐ','そうび','ちず','さくせん','クエスト','セーブ','まちの ようす','とじる'],
+  menu(['つよさ','どうぐ','そうび','ちず','さくせん','クエスト','セーブ','おんがく','まちの ようす','とじる'],
        'メニュー',(sel)=>{
     if(sel===0){            // つよさ
       const lines=C.party.reduce((a,m)=>a.concat([
@@ -5440,7 +5483,10 @@ function openFieldMenu(){
       msg2([ok?'ぼうけんの きろくを つけた。':(C.lastSaveError||'きろくに しっぱいした…')],
            ()=>{ C.G.mode='field'; });
 
-    }else if(sel===7){      // まちの ようす（しさく）
+    }else if(sel===7){      // おんがく（ならないときの きりわけよう）
+      openMusic();
+
+    }else if(sel===8){      // まちの ようす（しさく）
       const st=['NORMAL','SLEEPING_SICKNESS','DREAM_INVASION'];
       const lb=st.map(s=>C.WORLD.TOWN_STATES[s].label)
                  .concat([C.G.night?'あさに する':'よるに する','もどる']);
@@ -5456,6 +5502,45 @@ function openFieldMenu(){
         }else C.G.mode='field';
       });
 
+    }else C.G.mode='field';
+  });
+}
+
+// ---------------- おんがく ----------------
+function openMusic(){
+  const s = (typeof BGM!=='undefined' && BGM.status) ? BGM.status() : null;
+  const lines = s ? [
+    'おと の じょうたい',
+    '　コンテキスト：'+s.ctx+'（'+s.state+'）',
+    '　とけい：'+s.time+'びょう',
+    '　おとの グラフ：'+s.graph,
+    '　きょくデータ：'+s.events+'こ',
+    '　さいせいちゅう：'+s.playing,
+    '　よやくした おと：'+s.scheduled+'こ',
+    '　おんりょう：'+Math.round(s.vol*100)+'％',
+  ] : ['BGMエンジンが みつかりません'];
+  menu(['きょくを ならす','とめる','おんりょう＋','おんりょう−','じょうたいを みる','もどる'],
+       'おんがく',(k)=>{
+    if(k===0){
+      const ac=ctx();
+      if(typeof BGM!=='undefined'){
+        if(BGM.attach) BGM.attach(ac);
+        BGM.resume(); BGM.play('battle');
+      }
+      msg2(['きょくを ならしました。','きこえない ときは 「じょうたいを みる」を えらんでください。'],
+           ()=>{ C.G.mode='menu'; openMusic(); });
+    }else if(k===1){
+      if(typeof BGM!=='undefined') BGM.stop();
+      msg2(['きょくを とめました。'], ()=>{ C.G.mode='menu'; openMusic(); });
+    }else if(k===2 || k===3){
+      if(typeof BGM!=='undefined' && BGM.status){
+        const v = Math.max(0, Math.min(1, BGM.status().vol + (k===2?0.15:-0.15)));
+        BGM.setVolume(v);
+        msg2(['おんりょうを '+Math.round(v*100)+'％に しました。'],
+             ()=>{ C.G.mode='menu'; openMusic(); });
+      }
+    }else if(k===4){
+      msg2(lines, ()=>{ C.G.mode='menu'; openMusic(); });
     }else C.G.mode='field';
   });
 }
