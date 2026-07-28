@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T14:01:28", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 343, "core": 1997, "chapters": 266, "bgm": 827, "view2d": 1234, "view": 1273, "ui": 495}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T14:23:39", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 343, "core": 2078, "chapters": 266, "bgm": 827, "view2d": 1234, "view": 1273, "ui": 495}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3073,10 +3073,11 @@ const ENEMIES = [
 ];
 const MIDBOSS = {
   // ---- 第1章ボス ----
-  sandsleeper:{key:'sandsleeper', name:'すなの ねむりぬし', hp:230, atk:24, def:14, agi:14, acts:1,
+  sandsleeper:{key:'sandsleeper', name:'すなの ねむりぬし', hp:240, atk:25, def:15, agi:14, acts:1,
     exp:600, gold:400, art:'golem',
-    skills:[{name:'ねむりの すな', type:'sleepall', rate:0.30},
-            {name:'すなの うず',   type:'dmgall', min:16, max:24, rate:0.25}]},
+    skill:{p:0.30, mul:1.35, name:'すなの きば'},
+    aoe:{p:0.22, lo:14, hi:21, name:'すなの うず'},
+    inflict:{type:'sleep', p:0.30}},
   yumebanken:{key:'yumebanken', name:'ゆめの ばんけん', hp:160, atk:15, def:8, agi:10, acts:1,
               exp:200, gold:180,
               skill:{p:0.32, mul:1.34, name:'ゆめを かみくだく'},
@@ -3779,6 +3780,15 @@ function doWarp(w){
     G.trail=[[w.x,w.y],[w.x,w.y]];
     G.visited[w.to]=true;
     if(w.to==='world') G.flags.ch1_enteredField=true;
+    // ★章データの onEnter / onEnterState
+    {
+      const cd = chData();
+      if(cd){
+        if(cd.onEnter && cd.onEnter[w.to]) G.flags[cd.onEnter[w.to]] = true;
+        if(cd.onEnterState && cd.onEnterState[w.to] && WORLD.TOWN_STATES[cd.onEnterState[w.to]])
+          G.townState = cd.onEnterState[w.to];
+      }
+    }
     if(w.to==='versa_town2') G.flags.ch1_reachedMirka=true;
     if(w.to==='versa_dgn1' && !G.flags.ch1_enteredCave){
       G.flags.ch1_enteredCave=true;
@@ -3810,8 +3820,65 @@ function talkNPC(x,y){
   U.msg(lines, ()=>{ questOnTalk(entry.name); G.mode='field'; });
 }
 // ---------------- クエスト ----------------
+// ---------------- 章データの ものがたりを うごかす ----------------
+// chapters.js の talkEvents を じょうから みて、さいしょに あてはまった ものを おこなう。
+// これに よって、章を ふやす ときに ここを さわらなくて すむ。
+function matchEvent(e){
+  const F = G.flags;
+  if(e.unless && F[e.unless]) return false;                 // もう おきている
+  if(e.cond && !e.cond.every(f=>F[f])) return false;         // まえの じょうけんが そろって いない
+  if(e.when && e.when.state && G.townState !== e.when.state) return false;
+  if(e.needKey && !hasKey(e.needKey)) return false;
+  return true;
+}
+function runTalkEvent(npcName){
+  const cd = chData();
+  if(!cd || !cd.talkEvents) return false;
+  const e = cd.talkEvents.find(ev => ev.npc === npcName && matchEvent(ev));
+  if(!e) return false;
+
+  (e.set || []).forEach(f => { G.flags[f] = true; });
+  if(e.setState && WORLD.TOWN_STATES[e.setState]) G.townState = e.setState;
+  if(e.takeKey) takeKey(e.takeKey);
+  if(e.giveKey) giveKey(e.giveKey);
+  if(e.gold) P.gold += e.gold;
+  Object.keys(e.quest || {}).forEach(q => questAdvance(q, e.quest[q]));
+
+  const lines = (e.msg || []).slice();
+  U.msg(lines, () => {
+    U.hud();
+    // 章の おわりに たっしたか
+    if(cd.ending && cd.ending.trigger && G.flags[cd.ending.trigger] && !G.flags[(cd.ending.set||[])[0]]){
+      triggerChapterEnd();
+      return;
+    }
+    G.mode = 'field';
+  });
+  return true;
+}
+// ---------------- 章の しめくくり（データから）----------------
+function triggerChapterEnd(){
+  const cd = chData();
+  if(!cd || !cd.ending){ G.mode='field'; return; }
+  const en = cd.ending;
+  (en.set || []).forEach(f => { G.flags[f] = true; });
+  G.cleared = true;
+  Object.keys(en.quest || {}).forEach(q => questAdvance(q, en.quest[q]));
+  G.mode = 'msg';
+  U.msg(en.msg || ['……'], () => {
+    const card = en.card || {title:'', sub:''};
+    V.chapterCard(card.title, card.sub, () => {
+      G.mode = 'msg';
+      U.msg(['＊＊ ' + (cd.title||'') + ' かんけつ ＊＊',
+             en.next ? '（つづきの しょうは これから つくります）' : ''].filter(Boolean),
+        () => { G.mode = 'field'; });
+    });
+  });
+}
 function questOnTalk(npcName){
   const F=G.flags;
+  // ★まず 章データの ものがたりを ためす（第2章いこうは これだけで うごく）
+  if((G.chapter||1) !== 1 && runTalkEvent(npcName)) return;
   // ---- ミルカの くすし ----
   if(npcName==='くすし'){
     if(F.ch1_gotHerb && !hasKey('medicine') && hasKey('yukigusa')){
@@ -4517,6 +4584,19 @@ function victory(){
     }
   });
   if(leveled) A.lvup();
+  // ★章データの ボスごほうび（第2章いこうは これだけで うごく）
+  {
+    const cd = chData();
+    const rw = cd && cd.bossReward && cd.bossReward[b.named];
+    if(rw && (G.chapter||1)!==1){
+      (rw.set||[]).forEach(f=>{ G.flags[f]=true; });
+      if(rw.giveKey) giveKey(rw.giveKey);
+      if(rw.takeKey) takeKey(rw.takeKey);
+      if(rw.setState && WORLD.TOWN_STATES[rw.setState]) G.townState = rw.setState;
+      Object.keys(rw.quest||{}).forEach(q=>questAdvance(q, rw.quest[q]));
+      lines.push(...(rw.msg||[]));
+    }
+  }
   if(b.named==='yumebanken'){
     G.flags.ch1_gotHerb=true;
     giveKey('yukigusa');
@@ -4914,6 +4994,7 @@ return {
   tileAt, isBlocked, walkable, warpAt,
   // 行動
   stepField, interact, facing, doWarp, startBattle, beginRound, saveGame, loadGame,
+  runTalkEvent, triggerChapterEnd,
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
