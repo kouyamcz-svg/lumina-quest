@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T06:45:33", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1767, "bgm": 813, "view2d": 1076, "view": 1227, "ui": 489}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T07:25:57", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1820, "bgm": 813, "view2d": 1076, "view": 1227, "ui": 465}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3912,6 +3912,58 @@ function endBattle(won){
   });
 }
 
+// ---------------- じゅもん（せんとうの そとで つかう）----------------
+// そとで つかえるのは かいふく・じょうたい かいふく・そせい だけ。
+// こうげき じゅもんは 「ここでは つかえない」。
+const FIELD_SPELL = {heal:true, cure:true, revive:true, healall:true};
+function fieldSpells(m){
+  return knownSpells(m).filter(s=>FIELD_SPELL[s.type]);
+}
+function spellNeedsTarget(sp){ return sp.type==='heal' || sp.type==='cure' || sp.type==='revive'; }
+function castField(ci, key, ti){
+  const m = party[ci];
+  const sp = SPELL_DEFS[key];
+  if(!m || !sp) return {ok:false, lines:['その じゅもんは つかえない。']};
+  if(m.hp<=0)   return {ok:false, lines:[m.name+'は たおれている。']};
+  if(!FIELD_SPELL[sp.type]) return {ok:false, lines:['ここでは つかっても しかたが ない。']};
+  if(m.mp < sp.mp) return {ok:false, lines:['MPが たりない！']};
+
+  const t = (ti===undefined||ti===null) ? null : party[ti];
+  const lines = [m.name+'は '+sp.name+'を となえた！'];
+
+  if(sp.type==='heal'){
+    if(!t) return {ok:false, lines:['だれに つかう？']};
+    if(t.hp<=0) return {ok:false, lines:[t.name+'は たおれている。リヴァイブが ひつよう だ。']};
+    if(t.hp>=t.maxhp) return {ok:false, lines:[t.name+'の HPは まんたんだ。']};
+    m.mp -= sp.mp;
+    const v = Math.min(t.maxhp-t.hp, sp.min+Math.floor(Math.random()*(sp.max-sp.min+1)));
+    t.hp += v;
+    lines.push(t.name+'の HPが '+v+' かいふくした！');
+  }else if(sp.type==='healall'){
+    const alive = party.filter(x=>x.hp>0 && x.hp<x.maxhp);
+    if(!alive.length) return {ok:false, lines:['みんな げんきだ。']};
+    m.mp -= sp.mp;
+    alive.forEach(x=>{
+      const v = Math.min(x.maxhp-x.hp, sp.min+Math.floor(Math.random()*(sp.max-sp.min+1)));
+      x.hp += v;
+      lines.push(x.name+'の HPが '+v+' かいふくした！');
+    });
+  }else if(sp.type==='cure'){
+    if(!t) return {ok:false, lines:['だれに つかう？']};
+    if(!t.status) return {ok:false, lines:[t.name+'は なんとも ない。']};
+    m.mp -= sp.mp;
+    t.status = null;
+    lines.push(t.name+'の からだが らくに なった！');
+  }else if(sp.type==='revive'){
+    if(!t) return {ok:false, lines:['だれに つかう？']};
+    if(t.hp>0) return {ok:false, lines:[t.name+'は たおれていない。']};
+    m.mp -= sp.mp;
+    t.hp = Math.max(1, Math.floor(t.maxhp*0.5));
+    t.status = null;
+    lines.push(t.name+'は いきを ふきかえした！');
+  }
+  return {ok:true, lines};
+}
 // ---------------- だいじなもの（キーアイテム）----------------
 const KEY_ITEMS = {
   yukigusa:{id:'yukigusa', name:'ゆきぐさ',
@@ -4156,6 +4208,7 @@ return {
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
   itemList, useItemField, equipCandidates, equipFromBag, unequip, equipSummary, slotOf,
+  fieldSpells, castField, spellNeedsTarget,
   KEY_ITEMS, hasKey, giveKey, takeKey, keyItemList,
   setTownState, setNight, townStateDef, questList, questAdvance, startChapter,
   // 差し替え
@@ -5569,7 +5622,7 @@ function closeMap(){
 }
 function openFieldMenu(){
   C.G.mode='menu';
-  menu(['つよさ','どうぐ','そうび','ちず','さくせん','クエスト','セーブ','おんがく','まちの ようす','とじる'],
+  menu(['つよさ','じゅもん','どうぐ','そうび','ちず','さくせん','クエスト','セーブ','とじる'],
        'メニュー',(sel)=>{
     if(sel===0){            // つよさ
       const lines=C.party.reduce((a,m)=>a.concat([
@@ -5579,16 +5632,19 @@ function openFieldMenu(){
       ]),[]);
       msg2(lines, ()=>{ C.G.mode='field'; });
 
-    }else if(sel===1){      // どうぐ
+    }else if(sel===1){      // じゅもん
+      openSpells();
+
+    }else if(sel===2){      // どうぐ
       openItems();
 
-    }else if(sel===2){      // そうび
+    }else if(sel===3){      // そうび
       openEquip();
 
-    }else if(sel===3){      // ちず
+    }else if(sel===4){      // ちず
       openMap();
 
-    }else if(sel===4){      // さくせん
+    }else if(sel===5){      // さくせん
       const keys=Object.keys(C.TACTICS);
       menu(keys.map(k=>C.TACTICS[k]).concat(['もどる']),'さくせん',(k)=>{
         if(k<keys.length){ C.G.tactic=keys[k];
@@ -5596,87 +5652,60 @@ function openFieldMenu(){
         else C.G.mode='field';
       });
 
-    }else if(sel===5){      // クエスト
+    }else if(sel===6){      // クエスト
       const qs=C.questList();
       msg2(qs.length
         ? qs.reduce((a,q)=>a.concat(['＊ '+q.title, '　'+q.desc]),[])
         : ['いまは とくに やることが ない。'], ()=>{ C.G.mode='field'; });
 
-    }else if(sel===6){      // セーブ
+    }else if(sel===7){      // セーブ
       const ok=C.saveGame();
       msg2([ok?'ぼうけんの きろくを つけた。':(C.lastSaveError||'きろくに しっぱいした…')],
            ()=>{ C.G.mode='field'; });
-
-    }else if(sel===7){      // おんがく（ならないときの きりわけよう）
-      openMusic();
-
-    }else if(sel===8){      // まちの ようす（しさく）
-      const st=['NORMAL','SLEEPING_SICKNESS','DREAM_INVASION'];
-      const lb=st.map(s=>C.WORLD.TOWN_STATES[s].label)
-                 .concat([C.G.night?'あさに する':'よるに する','もどる']);
-      menu(lb,'まちの ようす（しさく）',(k)=>{
-        if(k<st.length){
-          C.setTownState(st[k]);
-          msg2(['まちの ようすが 「'+C.WORLD.TOWN_STATES[st[k]].label+'」に なった。'],
-               ()=>{ C.G.mode='field'; });
-        }else if(k===st.length){
-          C.setNight(!C.G.night);
-          msg2([C.G.night?'よるに なった。そらに オーロラが みえる。':'あさに なった。'],
-               ()=>{ C.G.mode='field'; });
-        }else C.G.mode='field';
-      });
 
     }else C.G.mode='field';
   });
 }
 
-// ---------------- おんがく ----------------
-function openMusic(){
-  const s = (typeof BGM!=='undefined' && BGM.status) ? BGM.status() : null;
-  const lines = s ? [
-    'おと の じょうたい',
-    '　コンテキスト：'+s.ctx+'（'+s.state+'）',
-    '　とけい：'+s.time+'びょう',
-    '　おとの グラフ：'+s.graph,
-    '　きょくデータ：'+s.events+'こ',
-    '　さいせいちゅう：'+s.playing,
-    '　よやくした おと：'+s.scheduled+'こ',
-    '　せんとうきょくの おんりょう：'+Math.round(s.vol*100)+'％',
-    '　フィールドきょく：'+s.field+'（'+s.fieldRoute+'）',
-    '　よみこみ：readyState='+s.fieldReady+' network='+s.fieldNet,
-    '　さいせい いち：'+s.fieldTime+'びょう',
-    '　エラー：'+s.fieldErr,
-    '　フィールドの おんりょう：'+Math.round(s.fieldVol*100)+'％',
-  ] : ['BGMエンジンが みつかりません'];
-  menu(['フィールドきょく','せんとうきょく','とめる','おんりょう＋','おんりょう−',
-        'じょうたいを みる','もどる'],'おんがく',(k)=>{
-    if(k===0){
-      if(typeof BGM!=='undefined'){ BGM.stop(); BGM.playField(); }
-      msg2(['フィールドきょくを ならしました。'], ()=>{ C.G.mode='menu'; openMusic(); });
-    }else if(k===1){
-      const ac=ctx();
-      if(typeof BGM!=='undefined'){
-        if(BGM.attach) BGM.attach(ac);
-        BGM.resume(); BGM.play('battle');
-      }
-      msg2(['せんとうきょくを ならしました。','きこえない ときは 「じょうたいを みる」を えらんでください。'],
-           ()=>{ C.G.mode='menu'; openMusic(); });
-    }else if(k===2){
-      if(typeof BGM!=='undefined'){ BGM.stop(); BGM.stopField(); }
-      msg2(['きょくを とめました。'], ()=>{ C.G.mode='menu'; openMusic(); });
-    }else if(k===3 || k===4){
-      if(typeof BGM!=='undefined' && BGM.status){
-        const d = (k===3?0.15:-0.15);
-        const v = Math.max(0, Math.min(1, BGM.status().vol + d));
-        BGM.setVolume(v);
-        if(BGM.setFieldVolume) BGM.setFieldVolume(Math.max(0, Math.min(1, BGM.status().fieldVol + d)));
-        msg2(['おんりょうを '+Math.round(v*100)+'％に しました。'],
-             ()=>{ C.G.mode='menu'; openMusic(); });
-      }
-    }else if(k===5){
-      msg2(lines, ()=>{ C.G.mode='menu'; openMusic(); });
-    }else C.G.mode='field';
+// ---------------- じゅもん ----------------
+function openSpells(){
+  const casters = C.party.filter(m=>m.hp>0 && C.fieldSpells(m).length>0);
+  if(!casters.length){
+    msg2(['ここで つかえる じゅもんは ない。'], ()=>{ C.G.mode='field'; });
+    return;
+  }
+  if(C.party.length===1){ spellsOf(0); return; }
+  const idx = C.party.map((m,i)=>i).filter(i=>C.party[i].hp>0);
+  menu(idx.map(i=>C.party[i].name+(C.party[i].maxmp>0?'　MP'+C.party[i].mp+'/'+C.party[i].maxmp:''))
+       .concat(['もどる']),'だれの じゅもん？',(k)=>{
+    if(k>=idx.length){ C.G.mode='field'; return; }
+    spellsOf(idx[k]);
   });
+}
+function spellsOf(ci){
+  const m = C.party[ci];
+  const sp = C.fieldSpells(m);
+  if(!sp.length){
+    msg2([m.name+'は ここで つかえる じゅもんを おぼえていない。'],
+         ()=>{ C.G.mode='menu'; openSpells(); });
+    return;
+  }
+  menu(sp.map(s=>s.name+'　'+s.mp).concat(['もどる']), m.name+'　じゅもん',(k)=>{
+    if(k>=sp.length){ C.G.mode='field'; return; }
+    const s = sp[k];
+    if(!C.spellNeedsTarget(s)){ applySpell(ci, s.key, null); return; }
+    if(C.party.length===1){ applySpell(ci, s.key, 0); return; }
+    menu(C.party.map(t=>t.name+'　HP'+t.hp+'/'+t.maxhp+(t.hp<=0?'（たおれている）':''))
+         .concat(['もどる']), s.name+'を だれに？',(ti)=>{
+      if(ti>=C.party.length){ C.G.mode='menu'; spellsOf(ci); return; }
+      applySpell(ci, s.key, ti);
+    });
+  });
+}
+function applySpell(ci, key, ti){
+  const r = C.castField(ci, key, ti);
+  hud();
+  msg2(r.lines, ()=>{ C.G.mode='menu'; spellsOf(ci); });
 }
 
 // ---------------- どうぐ ----------------
@@ -5855,7 +5884,7 @@ function startGame(loaded){
       'おうと ヴェルサリア。しんまいの このえへい リオン。',
       'けさから しろが さわがしい。きしだんの ひろばへ いってみよう。',
       'まちの ものに はなしを きいてみよう。',
-      '（Aボタン → 「まちの ようす」で ひるよる・まちの じょうたいを きりかえられます）'],
+      '（Aボタン：しらべる・はなす　Bボタン：メニュー）'],
       ()=>{ C.G.mode='field'; });
     });
   }
