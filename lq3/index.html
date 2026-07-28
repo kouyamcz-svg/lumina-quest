@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T07:52:23", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1860, "bgm": 813, "view2d": 1076, "view": 1227, "ui": 486}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T08:06:32", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1860, "bgm": 813, "view2d": 1076, "view": 1278, "ui": 486}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -4979,10 +4979,42 @@ function buildMap(name){
       if(ch==='C'||ch==='B'||ch==='t'||ch==='G'||ch==='<'||ch==='>'){ /* 既存処理へ */ }
     }
     if(cast){
-      if(ch==='T'){ put('castPillar',[x,topY+1.0,y]); continue; }
-      if(ch==='K'){ put('throne',[x,topY+0.5,y]); continue; }
-      if(ch==='Z'){ put('bed',[x,topY+0.28,y]); put('sleeper',[x,topY+0.55,y]); continue; }
+      if(ch==='T'){                                  // はしら（だいざ・みぞ・かしらつき）
+        put('pillarBase',[x,topY+0.10,y]);
+        put('castPillar',[x,topY+1.05,y]);
+        put('pillarCap', [x,topY+2.05,y]);
+        continue;
+      }
+      if(ch==='K'){                                  // ぎょくざ
+        put('throneSeat',[x,topY+0.42,y]);
+        put('throneBack',[x,topY+1.15,y-0.34]);
+        put('throneGold',[x,topY+1.72,y-0.34]);
+        continue;
+      }
+      if(ch==='Z'){                                  // ねむる おうじょ
+        put('bedFrame',[x,topY+0.16,y]);
+        put('bedSheet',[x,topY+0.34,y]);
+        put('bedPillow',[x,topY+0.42,y-0.30]);
+        const pr = CHR.princess;
+        if(pr){
+          const t=chrTex('princess','front');
+          if(t){
+            const m2=new THREE.Mesh(new THREE.PlaneGeometry(0.52, 0.52*pr.h/pr.w),
+              new THREE.MeshBasicMaterial({map:t,transparent:true,alphaTest:0.35}));
+            m2.rotation.x=-Math.PI/2; m2.rotation.z=Math.PI;   // よこに ねかせる
+            m2.position.set(x, topY+0.46, y+0.02);
+            scene.add(m2);
+          }
+        }
+        continue;
+      }
       if(ch==='D'){ put('castDoor',[x,topY+0.5,y]); continue; }
+      if(ch==='#'){                                  // かべ：まどと たれまくを かざる
+        const key = (x*7+y*13)%5;
+        if(key===0) put('castWindow',[x,topY+1.05,y+0.50]);
+        else if(key===2) put('banner',[x,topY+1.05,y+0.50]);
+        else if(key===4) put('wallTorch',[x,topY+0.95,y+0.48]);
+      }
     }
     if(ch==='f'){                    // もり
       put('leafA',[x,topY+0.5,y,(x*7+y*3)%6]);
@@ -5017,9 +5049,13 @@ function buildMap(name){
         const e=NPCDATA.npcAt(name,x,y);
         if(e && e.spr) key=e.spr;
       }
-      const s = CHR[key] ? chrBillboard(key,0.95) : billboard('npc',0.8);
-      s.position.set(x, topY+0.48, y); s.userData.bill=true;
+      const s = CHR[key] ? chrBillboard(key,1.45) : billboard('npc',1.2);
+      s.position.set(x, topY+0.74, y); s.userData.bill=true;
       scene.add(s); animObjs.push({mesh:s,bill:true,ph:0});
+      const sh=new THREE.Mesh(new THREE.CircleGeometry(0.30,12),
+        new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.28,depthWrite:false}));
+      sh.rotation.x=-Math.PI/2; sh.position.set(x, topY+0.045, y);
+      scene.add(sh);                                  // あしもとの かげ
     }
     if(ch==='t'){                    // たいまつ（かべぎわに よせる）
       let ox=0,oz=0;
@@ -5071,7 +5107,7 @@ function buildMap(name){
   // インスタンス化（drawCall削減）
   const box=new THREE.BoxGeometry(1,0.12,1);
   const gm=new THREE.MeshLambertMaterial({
-    map: snow?TEX.snow : ice?TEX.ice : cast?TEX.pave : TEX.grass});
+    map: snow?TEX.snow : ice?TEX.ice : cast?TEX.carpet : TEX.grass});
   if(snow && ts && ts.id!=='NORMAL') gm.color.setHex(ts.snowColor);
   addInstanced(box,gm, (G_.ground||[]).map(p=>[p[0],p[1],p[2]]));
   addInstanced(box,new THREE.MeshLambertMaterial({
@@ -5107,13 +5143,28 @@ function buildMap(name){
     const S2={
       icePillar:[new THREE.ConeGeometry(0.34,1.2,6),
         new THREE.MeshLambertMaterial({map:TEX.ice,transparent:true,opacity:0.9})],
-      castPillar:[new THREE.CylinderGeometry(0.3,0.36,2.0,8), wh()],
-      throne:[new THREE.BoxGeometry(0.8,1.0,0.7),
-        new THREE.MeshLambertMaterial({color:0xb8942c})],
-      bed:[new THREE.BoxGeometry(0.86,0.36,0.96),
-        new THREE.MeshLambertMaterial({color:0xe8e2d2})],
-      sleeper:[new THREE.BoxGeometry(0.42,0.2,0.7),
+      castPillar:[new THREE.CylinderGeometry(0.26,0.30,1.9,10), wh()],
+      pillarBase:[new THREE.CylinderGeometry(0.38,0.42,0.2,10), wh()],
+      pillarCap:[new THREE.CylinderGeometry(0.40,0.34,0.16,10),
+        new THREE.MeshLambertMaterial({color:0xd8c48a})],
+      throneSeat:[new THREE.BoxGeometry(0.74,0.24,0.66),
+        new THREE.MeshLambertMaterial({color:0x8a2a30})],
+      throneBack:[new THREE.BoxGeometry(0.74,1.30,0.16),
+        new THREE.MeshLambertMaterial({color:0x6e2028})],
+      throneGold:[new THREE.BoxGeometry(0.82,0.14,0.22),
+        new THREE.MeshLambertMaterial({color:0xd8b040})],
+      bedFrame:[new THREE.BoxGeometry(0.90,0.24,1.02),
+        new THREE.MeshLambertMaterial({map:TEX.wood})],
+      bedSheet:[new THREE.BoxGeometry(0.84,0.14,0.96),
+        new THREE.MeshLambertMaterial({color:0xeef0fa})],
+      bedPillow:[new THREE.BoxGeometry(0.52,0.12,0.28),
         new THREE.MeshLambertMaterial({color:0xdcd0f0})],
+      castWindow:[new THREE.PlaneGeometry(0.52,0.86),
+        new THREE.MeshBasicMaterial({color:0x2f5f96})],
+      banner:[new THREE.PlaneGeometry(0.42,1.05),
+        new THREE.MeshBasicMaterial({color:0x8a2a30})],
+      wallTorch:[new THREE.SphereGeometry(0.11,7,7),
+        new THREE.MeshBasicMaterial({color:0xffa838})],
       castDoor:[new THREE.BoxGeometry(0.8,1.0,0.2),
         new THREE.MeshLambertMaterial({map:TEX.wood})],
     };
@@ -5146,8 +5197,8 @@ function buildMap(name){
   // 隊列アクター（パーティ人数ぶんだけ つくる）
   actors.list=[];
   C.party.forEach((m,i)=>{
-    const b = CHR[m.cls] ? chrBillboard(m.cls, i===0?1.02:0.98)
-                         : billboard(m.cls, i===0?0.85:0.82);
+    const b = CHR[m.cls] ? chrBillboard(m.cls, i===0?1.50:1.44)
+                         : billboard(m.cls, i===0?1.25:1.20);
     scene.add(b); actors.list.push(b);
   });
   actors.hero=actors.list[0]||null;
@@ -5164,7 +5215,7 @@ function setActors(snap){
     const key=P.x+','+P.y;
     if(key!==lastFootTile){ lastFootTile=key; dropFootprint(P.x,P.y,!!C.G.stepFlip); }
   }
-  const yy = isElevated(curMap) ? 0.95 : 0.45;   // だんさの うえに たつ
+  const yy = isElevated(curMap) ? 1.22 : 0.72;   // だんさの うえに たつ
   const n=(actors.list?actors.list.length:1);
   const tgt=[];
   for(let i=0;i<n;i++){
