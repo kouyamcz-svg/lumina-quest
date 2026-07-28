@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T09:26:19", "assets_sha": "ad66dbbc", "lines": {"world": 139, "npc": 254, "core": 1872, "bgm": 813, "view2d": 1204, "view": 1273, "ui": 486}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T10:36:27", "assets_sha": "ad66dbbc", "lines": {"world": 139, "npc": 254, "core": 1872, "bgm": 813, "view2d": 1233, "view": 1273, "ui": 486}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1817,25 +1817,54 @@ function buildAtlas(){
 
   // ---------- ワールドの ちてん ----------
   function marker(draw){ return tile((g,s)=>{ g.drawImage(atlas.plain[0],0,0); draw(g,s); }); }
+  // しろ：とう2つ＋てんしゅ、ぎざぎざの きょうへき、くろい もん。ひかりは みぎうえ。
   atlas.mCastle = marker((g,s)=>{
-    R(g,2,7,12,8,P16.st2); R(g,2,7,12,1,P16.st3); R(g,2,14,12,1,P16.st0);
-    R(g,1,4,3,4,P16.st2); R(g,12,4,3,4,P16.st2);
-    for(const bx of [1,12,6]){ R(g,bx,2,3,2,P16.roof1); R(g,bx+1,1,2,1,P16.roof2); }
-    R(g,6,4,4,4,P16.st2);
-    R(g,7,11,3,4,P16.blk);
-    R(g,4,9,2,2,P16.win); R(g,11,9,2,2,P16.win);
-  });
-  atlas.mVillage = marker((g,s)=>{
-    R(g,3,9,10,6,P16.wall1); R(g,3,9,10,1,P16.wall2); R(g,3,14,10,1,P16.wall0);
-    for(let y=1;y<=5;y++){
-      const half=Math.min(6,y+1);
-      R(g,8-half,8-y,half*2,1,P16.roof1);
-      R(g,8,8-y,half,1,P16.roof2);
+    const wallL=P16.st0, wallM=P16.st2, wallH=P16.st3, roofD=P16.roof0, roofM=P16.roof1, roofH=P16.roof2;
+    // てんしゅの やね
+    for(let i=0;i<4;i++) R(g,8-(i+2),i,(i+2)*2,1, i<2?roofD:roofM);
+    // りょうとうの やね
+    for(let i=0;i<3;i++){
+      R(g,2-((i/2)|0),2+i,2+i,1, i===0?roofD:roofM);
+      R(g,12+((i/2)|0)-i,2+i,2+i,1, i===0?roofD:roofM);
     }
-    R(g,5,11,2,2,P16.win); R(g,10,11,2,2,P16.win);
-    R(g,7,12,3,3,P16.wood0);
+    R(g,9,3,3,1,roofH); R(g,13,4,2,1,roofH);        // みぎうえの ひかり
+    // かべ
+    R(g,1,5,4,11,wallM); R(g,11,5,4,11,wallM); R(g,5,4,6,12,wallM);
+    R(g,1,5,1,11,wallL); R(g,5,4,1,12,wallL);       // ひだり＝かげ
+    R(g,14,5,1,11,wallH); R(g,10,4,1,12,wallH);     // みぎ＝ひかり
+    // きょうへき（ぎざぎざ）
+    for(let x=1;x<15;x+=2) R(g,x,5,1,1,'rgba(0,0,0,0)');
+    R(g,1,6,14,1,wallH);
+    // まど
+    [[2,8],[12,8],[7,7]].forEach(([x,y])=>{ R(g,x,y,2,2,P16.win); R(g,x,y,2,1,P16.winL); });
+    // もん
+    R(g,7,10,2,1,P16.blk); R(g,6,11,4,5,P16.blk);
+    R(g,6,11,4,1,'#241c26');
+    R(g,1,15,14,1,P16.st0);
   });
-  // どうくつの いりぐち：すそひろがりの いわやまに くろい アーチ。ひかりは みぎうえ。
+  // むら：あかい やねの いえ2けん＋き の さく。まんなかが もん。
+  atlas.mVillage = marker((g,s)=>{
+    const roofD=P16.roof0, roofM=P16.roof1, roofH=P16.roof2;
+    // ひだりの いえ
+    for(let i=0;i<4;i++) R(g,4-i,2+i,1+i*2,1, i===0?roofD:roofM);
+    R(g,5,4,2,1,roofH); R(g,6,5,2,1,roofH);
+    R(g,2,6,5,5,P16.wall1);
+    R(g,2,6,1,5,P16.wall0); R(g,6,6,1,5,P16.wall2);
+    R(g,4,9,1,2,P16.wood0);
+    R(g,3,7,1,1,P16.win);
+    // みぎの いえ
+    for(let i=0;i<3;i++) R(g,12-i,5+i,1+i*2,1, i===0?roofD:roofM);
+    R(g,13,6,2,1,roofH);
+    R(g,10,8,5,4,P16.wall1);
+    R(g,10,8,1,4,P16.wall0); R(g,14,8,1,4,P16.wall2);
+    R(g,12,10,1,2,P16.wood0);
+    R(g,11,9,1,1,P16.win);
+    // きの さく（まんなかは もんの あきま）
+    R(g,1,13,6,1,P16.wood1); R(g,9,13,6,1,P16.wood1);
+    R(g,1,14,1,2,P16.wood0); R(g,14,14,1,2,P16.wood0);
+    for(let x=2;x<7;x+=2) P(g,x,14,P16.wood0);
+    for(let x=10;x<15;x+=2) P(g,x,14,P16.wood0);
+  });
   atlas.mCave = marker((g,s)=>{
     const half=[0,0,2,3,4,5,5,6,6,7,7,7,7,7,7,7];
     const jag =[0,0,0,1,0,1,0,0,1,0,0,0,0,0,0,0];
