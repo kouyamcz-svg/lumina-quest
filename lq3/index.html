@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T07:33:31", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1850, "bgm": 813, "view2d": 1076, "view": 1227, "ui": 486}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T07:52:23", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1860, "bgm": 813, "view2d": 1076, "view": 1227, "ui": 486}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3030,8 +3030,17 @@ function interact(){
   if(ch==='B'){ triggerBoss(nx,ny); return; }
   if(ch==='K'){
     G.mode='msg';
-    if(G.flags.ch1_orderReceived){
-      U.msg(['えいへい「おうめいを うけた もの だな。とおれ」'], ()=>{
+    const F = G.flags;
+    // ★おうめいを うけていなくても、はなしが すすんでいれば とおす。
+    //   （しろに はいらず ミルカへ さきに いくと、くすりを もっているのに
+    //     もんで とめられて つみに なる ふぐあいが あった）
+    const mayEnter = F.ch1_orderReceived || F.ch1_heardTheft || F.ch1_gotHerb
+                  || F.ch1_cleared || hasKey('yukigusa') || hasKey('medicine');
+    if(mayEnter){
+      if(!F.ch1_orderReceived) F.ch1_orderReceived = true;   // つじつまを あわせる
+      U.msg([F.ch1_cleared
+              ? 'えいへい「おかえりなさいませ」'
+              : 'えいへい「おうじょさまの ことだな。とおれ」'], ()=>{
         doWarp({to:'versa_cast1', x:10, y:14});
       });
     }else if(G.townState==='NORMAL'){
@@ -3039,7 +3048,8 @@ function interact(){
              'えいへい「しんまいが かってに はいるな」'], ()=>{ G.mode='field'; });
     }else{
       U.msg(['おうじょうの もん。えいへいの かおいろが わるい。',
-             'えいへい「おうめいの ない ものは とおせぬ」'], ()=>{ G.mode='field'; });
+             'えいへい「おうめいの ない ものは とおせぬ」',
+             'えいへい「きしだんちょうの ゆるしを もらってこい」'], ()=>{ G.mode='field'; });
     }
     return;
   }
