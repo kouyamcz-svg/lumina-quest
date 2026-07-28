@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T10:36:27", "assets_sha": "ad66dbbc", "lines": {"world": 139, "npc": 254, "core": 1872, "bgm": 813, "view2d": 1233, "view": 1273, "ui": 486}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T11:09:44", "assets_sha": "ad66dbbc", "lines": {"world": 139, "npc": 254, "core": 1874, "bgm": 813, "view2d": 1233, "view": 1273, "ui": 486}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3118,7 +3118,7 @@ function aliveMembers(){ return party.filter(p=>p.hp>0); }
 function actableMembers(){ return party.filter(p=>p.hp>0 && p.status!=='sleep'); }
 
 // ---------------- マップ ----------------
-const SOLID = new Set(['#','f','w','o','T','F','K','~','^',',','H','e','y']);
+const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y']);
 function tileAt(map,x,y){
   const m = MAPS[map]; if(!m) return '#';
   if(y<0||x<0||y>=m.tiles.length||x>=m.tiles[y].length) return '#';
@@ -3321,8 +3321,10 @@ let encSteps = 0;
 function maybeEncounter(){
   encSteps++;
   const m = MAPS[P.map];
-  const rate = (m && m.encRate!==undefined) ? m.encRate : 0.085;
+  let rate = (m && m.encRate!==undefined) ? m.encRate : 0.085;
   const grace = (m && m.encGrace!==undefined) ? m.encGrace : 3;
+  // ★もりの なかは みとおしが わるく、まものに あいやすい
+  if(tileAt(P.map,P.x,P.y)===',') rate *= 1.8;
   if(encSteps<grace) return;                 // たたかいの ちょくごに また、を ふせぐ
   if(Math.random()<rate){ encSteps=0; startBattle(null); }
 }
