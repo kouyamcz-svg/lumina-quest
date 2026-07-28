@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T11:39:07", "assets_sha": "ad66dbbc", "lines": {"world": 139, "npc": 254, "core": 1874, "bgm": 827, "view2d": 1233, "view": 1273, "ui": 489}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T13:16:41", "assets_sha": "ad66dbbc", "lines": {"world": 139, "npc": 254, "core": 1874, "bgm": 827, "view2d": 1233, "view": 1273, "ui": 495}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1211,7 +1211,7 @@ function resume(){ const a=ctx(); if(a && a.state==='suspended') a.resume(); }
 // せんとうきょくは はっしんきで つくるが、フィールドきょくは
 // レンダリングずみの ファイルを ながす。<audio> なら メモリを くわない。
 // ばしょごとの きょく。<audio> は 1つを つかいまわし、src を さしかえる。
-const TRACKS = {field:'field.mp3', castle:'castle.mp3'};
+const TRACKS = {field:'field.mp3', town:'town.mp3', castle:'castle.mp3'};
 let fieldEl = null, fieldWant = false, fieldVol = 0.55;
 let fieldTrack = 'field';                        // いま かかっている きょく
 let fieldSrc = null, fieldGain = null, fieldErr = '';
@@ -3327,7 +3327,7 @@ function doWarp(w){
       G.townState='DREAM_INVASION';        // まちが ゆめに しんしょくされる
     }
     V.buildMap(w.to); V.setActors(); U.label(areaName(w.to, w.x, w.y));
-    A.bgm(MAPS[w.to].theme);
+    A.bgm(w.to);
     V.fade(0, ()=>{ G.busy=false; G.mode='field'; });   // メッセージ中から呼ばれても操作可へ戻す
   });
 }
@@ -4094,7 +4094,7 @@ function defeat(){
       const h=homePoint();
       P.map=h.map; P.x=h.x; P.y=h.y; G.trail=[[h.x,h.y],[h.x,h.y]];
       V.buildMap(h.map); V.setActors(); U.label(WORLD.mapName(h.map)); U.hud();
-      A.bgm(MAPS[h.map].theme);
+      A.bgm(h.map);
       G.mode='field'; G.busy=false;
       U.msg(['きがつくと '+h.name+'に いた。','（ゴールドを はんぶん おとした…）'], ()=>{});
     });
@@ -4104,7 +4104,7 @@ function endBattle(won){
   G.battle=null; G.menu=null;
   G.busy=true;
   V.battleLeave(()=>{
-    A.bgm(MAPS[P.map].theme);
+    A.bgm(P.map);
     G.mode='field'; G.busy=false; V.setActors(); U.hud();
   });
 }
@@ -5724,6 +5724,15 @@ window.LQ3View = {
 const C = LQ3, V = window.LQ3View;
 
 // ---------------- 音 ----------------
+// マップの しゅべつ（town/in/cast/field/dgn）で きょくを えらぶ。
+// テーマでは 「まち」と 「のはら」を みわけられない ため。
+function trackFor(mapId){
+  const info = (typeof WORLD!=='undefined' && WORLD.MAP_IDS) ? WORLD.MAP_IDS[mapId] : null;
+  const kind = info ? info.kind : '';
+  if(kind==='cast') return 'castle';
+  if(kind==='town' || kind==='in') return 'town';
+  return 'field';
+}
 let AC=null;
 function ctx(){
   try{
@@ -5762,10 +5771,10 @@ const A = {
   lvup(){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,0.16,'square',0.05,i*0.09)); },
   win(){ [392,523,659,784].forEach((f,i)=>tone(f,0.2,'square',0.055,i*0.11)); },
   lose(){ [330,294,247,196].forEach((f,i)=>tone(f,0.3,'triangle',0.06,i*0.18)); },
-  bgm(theme){                      // ばしょに あわせた きょく
+  bgm(mapId){                      // ★ばしょの しゅべつで きょくを えらぶ
     if(typeof BGM==='undefined') return;
     BGM.stop();                    // せんとうきょくは とめる
-    BGM.playField(theme==='castle' ? 'castle' : 'field');
+    BGM.playField(trackFor(mapId));
   },
   battleBgm(kind){                 // せんとうきょく「双嶺の誓約」
     const ac = ctx();
@@ -6164,10 +6173,7 @@ C.bind(V, UI, A);
 function startGame(loaded){
   V.buildMap(C.P.map);
   bootDone();
-  if(typeof BGM!=='undefined'){                    // ばしょに あわせた きょく
-    const th=(C.MAPS[C.P.map]||{}).theme;
-    BGM.playField(th==='castle' ? 'castle' : 'field');
-  }
+  if(typeof BGM!=='undefined') BGM.playField(trackFor(C.P.map));   // ばしょの きょく
   V.setActors(true);
   label(C.WORLD.mapName(C.P.map));
   hud();
