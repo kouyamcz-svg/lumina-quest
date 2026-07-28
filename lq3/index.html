@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T08:16:57", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1860, "bgm": 813, "view2d": 1076, "view": 1274, "ui": 486}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T08:29:12", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1869, "bgm": 813, "view2d": 1076, "view": 1274, "ui": 486}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -396,7 +396,7 @@ const NPCS = {
       {text:['くすし「よく きたね、わかい きし。なにを さがしに?」']}]},
   ],
   versa_cast1: [
-    {at:'10,4', spr:'soldier', name:'おう', lines:[
+    {at:'10,2', spr:'soldier', name:'おう', lines:[
       {when:{flag:'ch1_cleared'}, text:[
         'おう「ゆきぐさでも だめだった。……たびの したくは できておるか」',
         '「せかいを みてこい、リオン。おなじ ねむりの もとを つきとめるのだ」']},
@@ -405,7 +405,7 @@ const NPCS = {
       {text:['おう「むすめが めを さまさぬ。いしゃも てだてが ないという」',
              '「たのむ、リオン。おまえだけが たよりだ」']},
     ]},
-    {at:'8,7', spr:'villagerB', name:'じい', lines:[
+    {at:'8,7', spr:'zef', name:'じい', lines:[
       {when:{flag:'ch1_cleared'}, text:[
         'じい「ゆきぐさが きかぬとは……。わしの しる くすりでは もう むりじゃ」']},
       {when:{flag:'ch1_gotHerb'}, text:[
@@ -2711,9 +2711,9 @@ const MAPS = {
   versa_cast1:{name:'ヴェルサ おうじょう',theme:'castle',enc:false,tiles:[
     "######################",
     "########rrKKrr########",
+    "########rrnrrr########",
     "########rrrrrr########",
-    "########rrrrrr########",
-    "#rrrrrrrrrnrrrrrrrrrr#",
+    "#rrrrrrrrrrrrrrrrrrrr#",
     "######rTrrrrrrTr######",
     "##rZr#rrrrrrrrrr#rCr##",
     "##rrr#rrnrrrrnrr#rrr##",
@@ -3028,7 +3028,16 @@ function interact(){
     return;
   }
   if(ch==='B'){ triggerBoss(nx,ny); return; }
-  if(ch==='K'){
+  if(ch==='K' && P.map==='versa_cast1'){        // ★しろの なかの K は ぎょくざ
+    G.mode='msg';
+    U.msg(G.flags.ch1_cleared
+      ? ['ヴェルサの ぎょくざ。','おうは しずかに こしかけている。']
+      : ['ヴェルサの ぎょくざ。きんの かざりが にぶく ひかっている。',
+         'おうは むすめの ことばかり かんがえて いるようだ。'],
+      ()=>{ G.mode='field'; });
+    return;
+  }
+  if(ch==='K'){                                 // まちの おうじょうもん
     G.mode='msg';
     const F = G.flags;
     // ★おうめいを うけていなくても、はなしが すすんでいれば とおす。
