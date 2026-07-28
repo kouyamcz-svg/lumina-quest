@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T14:23:39", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 343, "core": 2078, "chapters": 266, "bgm": 827, "view2d": 1234, "view": 1273, "ui": 495}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T14:41:03", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 343, "core": 2094, "chapters": 266, "bgm": 827, "view2d": 1234, "view": 1273, "ui": 513}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3857,6 +3857,31 @@ function runTalkEvent(npcName){
   return true;
 }
 // ---------------- 章の しめくくり（データから）----------------
+// 章の おわりに 「つぎへ すすむ」か「この しょうを つづける」を えらばせる
+function offerNextChapter(next, title){
+  const ready = next && CHD && CHD.has(next);
+  G.mode = 'msg';
+  if(!ready){
+    U.msg(['＊＊ ' + (title||'') + ' かんけつ ＊＊',
+           '（つづきの しょうは これから つくります）'], () => { G.mode='field'; });
+    return;
+  }
+  const nc = CHD.get(next);
+  U.msg(['＊＊ ' + (title||'') + ' かんけつ ＊＊',
+         'つぎは 第' + next + 'しょう「' + nc.title + '」。'], () => {
+    G.mode = 'menu';
+    U.menu(['第' + next + 'しょうへ すすむ', 'この しょうを つづける'], 'これから', (k) => {
+      if(k === 0){
+        switchChapter(next);
+        G.mode = 'msg';
+        V.buildMap(P.map); V.setActors(true);
+        U.label(WORLD.mapName(P.map)); U.hud();
+        A.bgm(P.map);
+        V.chapterCard('第' + next + 'しょう', nc.title, () => { G.mode = 'field'; });
+      }else G.mode = 'field';
+    });
+  });
+}
 function triggerChapterEnd(){
   const cd = chData();
   if(!cd || !cd.ending){ G.mode='field'; return; }
@@ -3867,12 +3892,7 @@ function triggerChapterEnd(){
   G.mode = 'msg';
   U.msg(en.msg || ['……'], () => {
     const card = en.card || {title:'', sub:''};
-    V.chapterCard(card.title, card.sub, () => {
-      G.mode = 'msg';
-      U.msg(['＊＊ ' + (cd.title||'') + ' かんけつ ＊＊',
-             en.next ? '（つづきの しょうは これから つくります）' : ''].filter(Boolean),
-        () => { G.mode = 'field'; });
-    });
+    V.chapterCard(card.title, card.sub, () => { offerNextChapter(en.next, cd.title); });
   });
 }
 function questOnTalk(npcName){
@@ -4011,11 +4031,7 @@ function triggerEnding(){
     'リオンは かるく うなずき、こしの けんに てを かけた。',
     'まどの そとでは、むらさきの ゆきが しずかに ふりつづけている。'
   ], ()=>{
-    V.chapterCard('第1章 完', 'わかき きし', ()=>{
-      G.mode='msg';
-      U.msg(['＊＊ だいいっしょう「わかき きし」 かんけつ ＊＊',
-             '（つづきの しょうは これから つくります）'], ()=>{ G.mode='field'; });
-    });
+    V.chapterCard('第1章 完', 'わかき きし', ()=>{ offerNextChapter(2, 'わかき きし'); });
   });
 }
 // ボスの ばしょ・とうじょうの ことば・たおした あとは 章データから ひく
@@ -4994,7 +5010,7 @@ return {
   tileAt, isBlocked, walkable, warpAt,
   // 行動
   stepField, interact, facing, doWarp, startBattle, beginRound, saveGame, loadGame,
-  runTalkEvent, triggerChapterEnd,
+  runTalkEvent, triggerChapterEnd, offerNextChapter,
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
@@ -6737,6 +6753,40 @@ function unlockAudio(){
 UNLOCK_EVENTS.forEach(ev=>{ addEventListener(ev, unlockAudio, {passive:true}); });
 V.init();
 C.bind(V, UI, A);
+// ---------------- タイトル ----------------
+function titleScreen(){
+  const info=C.saveInfo();
+  C.G.mode='menu';
+  V.buildMap(C.P.map); V.setActors(true); label('ルミナクエストIII'); hud();
+  bootDone();                                   // ★タイトルでも ローディングを かならず 消す
+  const cont = info && !info.broken
+    ? 'つづきから（'+info.lead+' Lv'+info.lv+'）' : 'つづきから';
+  menu(['はじめから',cont,'しょうを えらぶ'],'ルミナクエストIII',(sel)=>{
+    if(sel===1){
+      if(C.loadGame()) startGame(true);
+      else msg2([C.lastSaveError||'きろくが よめませんでした',
+                 'はじめから あそびます。'],()=>{ C.freshState(); startGame(false); });
+    }else if(sel===2){ chapterSelect(); }
+    else{ C.freshState(); startGame(false); }
+  });
+}
+// ---------------- しょうを えらぶ ----------------
+// つくりおえた しょうを えらんで はじめる（ためしに あそぶ ため）。
+function chapterSelect(){
+  const nos = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA.list() : [1];
+  const items = nos.map(no=>{
+    const c = CHAPTERS_DATA.get(no);
+    const who = (c.party||[]).map(k=>(C.CLASSES[k]||{}).name||k).join('・');
+    return '第'+no+'しょう　'+c.title+'（'+who+'）';
+  }).concat(['もどる']);
+  menu(items, 'しょうを えらぶ', (k)=>{
+    if(k>=nos.length){ titleScreen(); return; }
+    const no = nos[k];
+    C.freshState();
+    if(no!==1) C.switchChapter(no);
+    startGame(false);
+  });
+}
 function startGame(loaded){
   V.buildMap(C.P.map);
   bootDone();
@@ -6758,24 +6808,8 @@ function startGame(loaded){
   }
 }
 C.freshState();
-const hasSave = (()=>{ try{ return !!localStorage.getItem('LQ3_SAVE_1'); }catch(e){ return false; } })();
-if(hasSave){
-  const info=C.saveInfo();
-  C.G.mode='menu';
-  V.buildMap(C.P.map); V.setActors(true); label('ルミナクエストIII'); hud();
-  bootDone();                                   // ★タイトルでも ローディングを かならず 消す
-  const cont = info && !info.broken
-    ? 'つづきから（'+info.lead+' Lv'+info.lv+'）' : 'つづきから';
-  menu(['はじめから',cont],'ルミナクエストIII',(sel)=>{
-    if(sel===1){
-      if(C.loadGame()) startGame(true);
-      else msg2([C.lastSaveError||'きろくが よめませんでした',
-                 'はじめから あそびます。'],()=>{ C.freshState(); startGame(false); });
-    }else{ C.freshState(); startGame(false); }
-  });
-}else{
-  startGame(false);
-}
+// ★セーブの ありなしに かかわらず タイトルを だす（しょうを えらべる ように）
+titleScreen();
 requestAnimationFrame(V.loop);
 })();
 </script>
