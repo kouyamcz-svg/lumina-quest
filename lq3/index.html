@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T08:06:32", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1860, "bgm": 813, "view2d": 1076, "view": 1278, "ui": 486}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T08:16:57", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1860, "bgm": 813, "view2d": 1076, "view": 1274, "ui": 486}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -4995,16 +4995,12 @@ function buildMap(name){
         put('bedFrame',[x,topY+0.16,y]);
         put('bedSheet',[x,topY+0.34,y]);
         put('bedPillow',[x,topY+0.42,y-0.30]);
-        const pr = CHR.princess;
-        if(pr){
-          const t=chrTex('princess','front');
-          if(t){
-            const m2=new THREE.Mesh(new THREE.PlaneGeometry(0.52, 0.52*pr.h/pr.w),
-              new THREE.MeshBasicMaterial({map:t,transparent:true,alphaTest:0.35}));
-            m2.rotation.x=-Math.PI/2; m2.rotation.z=Math.PI;   // よこに ねかせる
-            m2.position.set(x, topY+0.46, y+0.02);
-            scene.add(m2);
-          }
+        if(CHR.princess){
+          const pm = chrBillboard('princess', 1.40);
+          pm.position.set(x, topY+1.12, y);            // ベッドの うえに
+          pm.userData.bill = true;
+          scene.add(pm);
+          animObjs.push({mesh:pm, bill:true, ph:0});
         }
         continue;
       }
@@ -5412,7 +5408,7 @@ function updateField(dt,time){
   }
   if(actors.lamp) actors.lamp.position.set(fp[0].x,yy+0.6,fp[0].y);
   const cx=fp[0].x, cz=fp[0].y+7.2;
-  cam.position.lerp(new THREE.Vector3(cx,11.0,cz),Math.min(1,dt*6));
+  cam.position.lerp(new THREE.Vector3(cx,14.2,cz),Math.min(1,dt*6));   // ひいた しかく
   cam.lookAt(fp[0].x,0.2,fp[0].y-0.9);
   animObjs.forEach(o=>{
     if(o.bill){ o.mesh.quaternion.copy(cam.quaternion); return; }
