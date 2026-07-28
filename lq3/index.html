@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T09:11:00", "assets_sha": "ad66dbbc", "lines": {"world": 139, "npc": 254, "core": 1872, "bgm": 813, "view2d": 1186, "view": 1273, "ui": 486}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T09:26:19", "assets_sha": "ad66dbbc", "lines": {"world": 139, "npc": 254, "core": 1872, "bgm": 813, "view2d": 1204, "view": 1273, "ui": 486}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1835,15 +1835,33 @@ function buildAtlas(){
     R(g,5,11,2,2,P16.win); R(g,10,11,2,2,P16.win);
     R(g,7,12,3,3,P16.wood0);
   });
+  // どうくつの いりぐち：すそひろがりの いわやまに くろい アーチ。ひかりは みぎうえ。
   atlas.mCave = marker((g,s)=>{
-    for(let y=0;y<11;y++){
-      const half=Math.floor((y+1)*0.72);
-      R(g,8-half,15-y,half*2+1,1,P16.mt1);
-      R(g,8-half,15-y,Math.max(1,half),1,P16.mt0);
-      R(g,8+Math.floor(half*0.3),15-y,Math.max(1,half),1,P16.mt2);
+    const half=[0,0,2,3,4,5,5,6,6,7,7,7,7,7,7,7];
+    const jag =[0,0,0,1,0,1,0,0,1,0,0,0,0,0,0,0];
+    for(let y=2;y<16;y++){
+      const hw=half[y]-jag[y];
+      if(hw<=0) continue;
+      const x0=8-hw, wdt=hw*2;
+      R(g,x0,y,wdt,1,P16.mt1);
+      const sh=Math.max(1,Math.round(wdt*0.32));
+      R(g,x0,y,sh,1,P16.mt0);                       // ひだり＝かげ
+      R(g,x0+wdt-sh,y,sh,1,P16.mt2);                // みぎ＝ひかり
+      P(g,x0,y,P16.mtS);                            // ひだりの りんかく
+      P(g,x0+wdt-1,y,P16.mt3);                      // みぎうえの ハイライト
     }
-    R(g,6,10,5,5,P16.blk);
-    for(let i=0;i<3;i++) R(g,6+i,9-Math.min(1,i),1,1,P16.blk);
+    // いわはだの まだら
+    [[5,7],[10,6],[4,11],[12,10],[11,14],[3,13],[6,4]].forEach(([x,y])=>{
+      P(g,x,y,P16.mt0); P(g,x+1,y,P16.mt2);
+    });
+    // ★くろい アーチの いりぐち（うえが まるい）
+    R(g,7,9,2,1,P16.blk);
+    R(g,6,10,4,6,P16.blk);
+    P(g,6,9,'#2a2028'); P(g,9,9,'#2a2028');
+    R(g,6,10,4,1,'#241c26');                        // おくの かげ
+    P(g,5,10,P16.mt3); P(g,10,10,P16.mt0);          // いりぐちの ふち
+    // したの かげ
+    R(g,1,15,14,1,P16.mtS);
   });
   atlas.mFuture = marker((g,s)=>{
     R(g,4,10,8,5,'#8a8f9a'); R(g,4,10,8,1,'#a8adb8');
