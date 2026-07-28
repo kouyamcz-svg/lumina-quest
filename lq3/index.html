@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T08:56:25", "assets_sha": "ad66dbbc", "lines": {"world": 139, "npc": 254, "core": 1869, "bgm": 813, "view2d": 1076, "view": 1273, "ui": 486}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T09:11:00", "assets_sha": "ad66dbbc", "lines": {"world": 139, "npc": 254, "core": 1872, "bgm": 813, "view2d": 1186, "view": 1273, "ui": 486}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -262,7 +262,7 @@ const NPCDATA = (function(){
 //   when を かかない ものが きほん（さいごに おく）
 const NPCS = {
   versa_town: [
-    {at:'8,12', spr:'guardA', name:'もんばん', lines:[
+    {at:'13,6', spr:'guardA', name:'もんばん', lines:[
       {when:{state:'DREAM_INVASION'}, text:[
         '「みなみもんは とじた！ そとは もう ゆめの なかだ！」',
         '「きみも はやく おくへ さがれ、リオン！」']},
@@ -275,7 +275,7 @@ const NPCS = {
         '「よう リオン、しんまいの わりに よく はしるな」',
         '「みなみもんの さきは せつげん。まよったら ひきかえせよ」']},
     ]},
-    {at:'6,7', spr:'maid', name:'こうじょの じじょ', lines:[
+    {at:'19,9', spr:'maid', name:'こうじょの じじょ', lines:[
       {when:{state:'DREAM_INVASION'}, text:[
         '「おうじょさま……ゆめの なかで だれかと はなして おられます」',
         '「むらさきの きりが、おしろまで のぼってきました」']},
@@ -286,7 +286,7 @@ const NPCS = {
         '「おうじょさまは おやさしいかたです」',
         '「けさも まどから ゆきを ながめて おられました」']},
     ]},
-    {at:'16,7', spr:'captain', name:'きしだんちょう', lines:[
+    {at:'8,9', spr:'captain', name:'きしだんちょう', lines:[
       {when:{flag:'ch1_orderReceived'}, text:[
         '「せつげんの おくに こおりの どうくつが ある」',
         '「きを つけて いけ。おまえは まだ しんまいだ」']},
@@ -298,7 +298,7 @@ const NPCS = {
         '「きしだんの ひろばは しんけんしょうぶの ばだ」',
         '「あさの くんれんを おこたるなよ、リオン」']},
     ]},
-    {at:'11,4', spr:'priest', name:'しんかん', lines:[
+    {at:'24,9', spr:'priest', name:'しんかん', lines:[
       {when:{state:'DREAM_INVASION'}, text:[
         '「いのりが とどきません。ゆめが かみさまの こえを かき けしている」']},
       {when:{state:'SLEEPING_SICKNESS'}, text:[
@@ -307,18 +307,18 @@ const NPCS = {
       {text:['「ヴェルサの ゆきは しずかで うつくしい」',
              '「たびの ぶじを おいのりしましょう」']},
     ]},
-    {at:'4,9', spr:'villagerB', name:'まちのこども', lines:[
+    {at:'5,11', spr:'villagerB', name:'まちのこども', lines:[
       {when:{state:'DREAM_INVASION'}, text:[
         '「おそらが むらさきだよ。きれいだけど、こわい」']},
       {text:['「ゆきの うえに あしあとを つけるの、たのしいよ！」',
              '「よるに なると そらが ひかるんだ。オーロラって いうんだって」']},
     ]},
-    {at:'19,10', spr:'villagerB', name:'ぎょうしょうにん', lines:[
+    {at:'11,13', spr:'villagerB', name:'ぎょうしょうにん', lines:[
       {text:['「ひがしの ザールから きた。にぐるまが ゆきで うごかん」',
              '「なんでも みなみの しまでも ひとが ねむって おきんそうだ」',
              '「せかいじゅうで おきてる はなし かも しれんな」']},
     ]},
-    {at:'14,13', spr:'villagerB', name:'さかばの きゃく', lines:[
+    {at:'21,16', spr:'villagerB', name:'さかばの きゃく', lines:[
       {text:['「せかいじゅうを たびして ものまねげいで おおうけしてる けんしが いるらしい」',
              '「ねずみの おうこくの ものまねが てっぱん だとさ」',
              '「こだまのいしで うわさは あっというま だな」']},
@@ -1675,6 +1675,87 @@ function buildAtlas(){
     }
   });
 
+  // ---------- たてもの（ふくすうマスで 1けん・やねが つながる）----------
+  // DQ4/5の まちは 1マス アイコンでは なく、3x3くらいの たてものが ならぶ。
+  // まわりの マスを みて「やねの てっぺん／なかほど／かべ」を えらぶ。
+  function roofPiece(kind, side){
+    return tile((g,s)=>{
+      const R0=P16.roof0, R1=P16.roof1, R2=P16.roof2;
+      if(kind==='peak'){
+        R(g,0,0,s,4,'rgba(0,0,0,0)');
+        for(let y=4;y<s;y++){                       // むねから したへ ひろがる
+          const t=(y-4)/(s-4);
+          R(g,0,y,s,1, y<6?R0 : (t<0.5?R2:R1));
+        }
+        R(g,0,4,s,2,R0);                            // むねの ライン
+        for(let x=1;x<s;x+=4) R(g,x,7,2,1,R0);      // かわらの すじ
+        for(let x=3;x<s;x+=4) R(g,x,11,2,1,R0);
+      }else if(kind==='mid'){
+        R(g,0,0,s,s,R1);
+        for(let x=1;x<s;x+=4){ R(g,x,1,2,1,R0); R(g,x+2,5,2,1,R0);
+          R(g,x,9,2,1,R0); R(g,x+2,13,2,1,R0); }
+        R(g,0,0,s,1,R2);
+      }else{                                        // かべ
+        R(g,0,0,s,3,R0);                            // のきした
+        R(g,0,3,s,s-3,P16.wall1);
+        for(let y=4;y<s;y+=3) R(g,0,y,s,1,P16.wall0);
+        R(g,0,s-1,s,1,P16.wall0);
+      }
+      if(side==='L'){ R(g,0,0,1,s,P16.blk); }
+      if(side==='R'){ R(g,s-1,0,1,s,P16.blk); }
+    });
+  }
+  ['peak','mid','wall'].forEach(k=>{
+    ['L','M','R'].forEach(sd=>{ atlas['bd_'+k+'_'+sd]=roofPiece(k,sd); });
+  });
+  // まどと とびら（かべの うえに かさねる）
+  atlas.bdWindow = tile((g,s)=>{
+    R(g,4,6,8,7,P16.win); R(g,4,6,8,2,P16.winL);
+    R(g,3,5,10,1,P16.wall2); R(g,3,13,10,1,P16.wall0);
+    R(g,7,6,2,7,P16.wall2);
+  });
+  function doorTile(signCol){
+    return tile((g,s)=>{
+      R(g,0,0,s,3,P16.roof0);
+      R(g,0,3,s,s-3,P16.wall1);
+      R(g,4,5,8,11,P16.wood0);
+      R(g,5,6,6,9,P16.wood1);
+      R(g,9,11,1,2,P16.gold);
+      if(signCol){ R(g,2,3,12,2,signCol); }
+    });
+  }
+  atlas.bdDoor      = doorTile(null);
+  atlas.bdDoorInn   = doorTile('#d8b040');
+  atlas.bdDoorChurch= doorTile('#dcdce8');
+  atlas.bdDoorWeapon= doorTile('#b04038');
+  atlas.bdDoorMagic = doorTile('#7048a8');
+  atlas.bdDoorShop  = doorTile('#c87830');
+  // ---------- まちの かざり ----------
+  atlas.well = tile((g,s)=>{
+    R(g,2,7,12,8,P16.st1);
+    R(g,2,7,12,1,P16.st3); R(g,2,14,12,1,P16.st0);
+    R(g,4,9,8,5,'#20386e');
+    R(g,3,3,1,5,P16.wood0); R(g,12,3,1,5,P16.wood0);
+    R(g,2,2,12,2,P16.roof1); R(g,2,2,12,1,P16.roof2);
+  });
+  atlas.fence = tile((g,s)=>{
+    R(g,0,7,s,2,P16.wood1);
+    R(g,0,11,s,2,P16.wood1);
+    for(let x=1;x<s;x+=6) R(g,x,5,2,10,P16.wood0);
+  });
+  atlas.flower = tile((g,s)=>{
+    g.drawImage(hashPick(0,0,atlas.snowfield),0,0);
+    [[4,6,'#c85a7a'],[10,5,'#d8b040'],[7,11,'#7048a8'],[12,10,'#c85a7a']].forEach(([x,y,c])=>{
+      R(g,x,y,2,2,c); P(g,x-1,y+1,c); P(g,x+2,y+1,c);
+      P(g,x,y+2,'#2f8c44');
+    });
+  });
+  atlas.signpost = tile((g,s)=>{
+    R(g,7,6,2,9,P16.wood0);
+    R(g,2,3,12,5,P16.wood1);
+    R(g,2,3,12,1,'#9a7548');
+    R(g,4,5,8,1,P16.wood0); R(g,4,7,6,1,P16.wood0);
+  });
   // ---------- たてもの：あかい やね・しろい かべ・あおい まど ----------
   function building(signCol){
     return tile((g,s)=>{
@@ -1771,6 +1852,30 @@ function buildAtlas(){
   });
 }
 
+// ---------------- たてもの（まわりを みて やねを くみたてる）----------------
+const BUILD_CHARS = 'HIPWMS';        // H＝かべ／ I P W M S ＝ とびら
+function isBuild(rows,x,y){
+  if(y<0||y>=rows.length||x<0||x>=rows[0].length) return false;
+  return BUILD_CHARS.includes(rows[y][x]);
+}
+const DOOR_ART = {I:'bdDoorInn', P:'bdDoorChurch', W:'bdDoorWeapon',
+                  M:'bdDoorMagic', S:'bdDoorShop'};
+function drawBuilding(rows,x,y,dx,dy,ts){
+  const ch = rows[y][x];
+  const up = isBuild(rows,x,y-1), dn = isBuild(rows,x,y+1);
+  const lf = isBuild(rows,x-1,y), rt = isBuild(rows,x+1,y);
+  const side = !lf ? 'L' : (!rt ? 'R' : 'M');
+  if(ch!=='H'){                                  // とびら
+    cx.drawImage(atlas[DOOR_ART[ch]] || atlas.bdDoor, dx, dy, ts, ts);
+    return;
+  }
+  const kind = !up ? 'peak' : (dn ? 'mid' : 'wall');
+  cx.drawImage(atlas['bd_'+kind+'_'+side], dx, dy, ts, ts);
+  // かべの れつには まどを つける（とびらの まうえは のぞく）
+  if(kind==='wall' && side==='M' && ((x+y)%2===0) && !isBuild(rows,x,y+1)){
+    cx.drawImage(atlas.bdWindow, dx, dy, ts, ts);
+  }
+}
 // ---------------- タイル → え の わりあて ----------------
 function tileArt(ch, theme){
   const ice = theme==='ice', snowT = theme==='snow', cave = theme==='cave';
@@ -1792,9 +1897,10 @@ function tileArt(ch, theme){
     case 'C': return atlas.chest;
     case 'I': return atlas.inn;
     case 'P': return atlas.church;
-    case 'W': return atlas.weapon;
-    case 'M': return atlas.magic;
-    case 'S': return atlas.shop;
+    case 'w': return atlas.well;      // ※ ワールドの みずうみは floorで しょり
+    case 'e': return atlas.fence;
+    case '*': return atlas.flower;
+    case 'y': return atlas.signpost;
     case 'K': return atlas.castgate;
     case 'F': return atlas.fountain;
     case 'G': return atlas.gate;
@@ -2252,8 +2358,12 @@ function draw(dt, time, actors){
     if(ch==='C' && C.G.gotTreasure[curMap+':'+x+','+y]){
       cx.drawImage(atlas.chest_open, ox+x*ts, oy+y*ts, ts, ts); continue;
     }
+    // ★たてものは まわりを みて やねを くみたてる
+    if(theme!=='world' && BUILD_CHARS.includes(ch)){
+      drawBuilding(rows, x, y, ox+x*ts, oy+y*ts, ts);
+    }
     // ワールドの きほん ちけいは ゆかの パスで えがきおえている（うわがきしない）
-    if(theme==='world' && '.=:_~wr'.includes(ch)) { /* ゆかのみ */ }
+    else if(theme==='world' && '.=:_~wr'.includes(ch)) { /* ゆかのみ */ }
     else {
       let art = tileArt(ch, theme);
       if(Array.isArray(art)) art = hashPick(x,y,art);
@@ -2648,7 +2758,7 @@ const MAPS = {
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   ], warps:{}, warpsXY:{
-    '48,8': {to:'versa_town',  x:11, y:14},
+    '48,8': {to:'versa_town',  x:13, y:18},
     '39,14':{to:'versa_town2', x:10, y:13},
     '56,18':{to:'versa_dgn1',  x:9,  y:14},
   },
@@ -2662,24 +2772,27 @@ const MAPS = {
   // K おうじょうもん / F ふんすい / I やどや / P きょうかい / W ぶきや / M まほうてん
   // G みなみもん / f ゆきの き / n むらびと
   versa_town:{name:'おうと ヴェルサリア',theme:'snow',enc:false,tiles:[
-    "########################",
-    "###TT######KK######TT###",
-    "###TT######==######TT###",
-    "#=========Prr===##T====#",
-    "#=T##=###==nr======I==f#",
-    "#=###=##T==rr=rrrrrrr==#",
-    "#f=======rrrrrrrrrrr##=#",
-    "#=##==n==rrrrrrrnrrr#T=#",
-    "#=##=====rrFFrrrrrrrr==#",
-    "#===nf===rrrrrrrrrrrr==#",
-    "#f=W=====rrrrrr====n##=#",
-    "#==========rr=======##=#",
-    "#=##=##Tn==rr===###====#",
-    "#=##=###===rr=n=##T=M==#",
-    "#==========rr======f==f#",
-    "###########GG###########"
-  ], warps:{}, warpsXY:{'11,15':{to:'world',x:48,y:9},'12,15':{to:'world',x:48,y:9},
-                     '11,1':{to:'versa_cast1',x:10,y:14},'12,1':{to:'versa_cast1',x:11,y:14}}},
+    "############################",
+    "#############KK#############",
+    "#############==#############",
+    "#############==#############",
+    "#============rry===========#",
+    "#==HHHH=HHH==rr==HHH=HHHH==#",
+    "#==HHHH=HHH==nr==HHH=HHHH==#",
+    "#=fHHIH=HWHrFFrrrHMH=HHPH=f#",
+    "#==========rrrrrr==========#",
+    "#==rrrrrnrrtrrrrtrrnrrrrn==#",
+    "#==rrrfrrrrrrrrrrrrrrrfrr==#",
+    "#====n======yrr============#",
+    "#==HHHw==HHH=rr=*=HHHH=HHH=#",
+    "#==HHHH==HHn=rr==*HHHH=HHH=#",
+    "#==HHSH==HHH=rr===HHHH=HHH=#",
+    "#============rr============#",
+    "#=f====*=====tt=====*n===Cf#",
+    "#====eeeee===rr====eeeee===#",
+    "#============rr============#",
+    "#############GG#############"
+  ], warps:{}, warpsXY:{'13,19':{to:'world',x:48,y:9},'14,19':{to:'world',x:48,y:9}}},
   versa_town2:{name:'くすしの むら ミルカ',theme:'snow',enc:false,tiles:[
     "######################",
     "#====================#",
@@ -2725,7 +2838,7 @@ const MAPS = {
     "#rrrrrrrrrrrrrrrrrrrr#",
     "#rrrrrrrrrrrrrrrrrrrr#",
     "##########GG##########"
-  ], warps:{}, warpsXY:{'10,15':{to:'versa_town',x:11,y:2},'11,15':{to:'versa_town',x:12,y:2}}},
+  ], warps:{}, warpsXY:{'10,15':{to:'versa_town',x:13,y:4},'11,15':{to:'versa_town',x:14,y:4}}},
   versa_dgn1:{name:'こおりの どうくつ',theme:'ice',enc:true,encRate:0.075,encGrace:4,tiles:[
     "####################",
     "#========>>========#",
@@ -2906,7 +3019,7 @@ function freshState(){
   G = {mode:'field', menu:null, battle:null, flags:{}, visited:{}, gotTreasure:{},
        tactic:'manual', dex:{}, trail:[], stepFlip:false, cleared:false,
        chapter:1, chapters:{}, townState:'NORMAL', night:false, quests:{}, steps:0};
-  P = {map:'versa_town', x:11, y:14, dir:'front', gold:60, herbs:5, waters:0,
+  P = {map:'versa_town', x:13, y:18, dir:'front', gold:60, herbs:5, waters:0,
        equipBag:[], keyItems:{}};
   party = [mkMember('lion',1)];
   party[0].weapon = {kind:'w',name:'みならいの けん',v:3};
@@ -2927,7 +3040,7 @@ function setNight(v){
 }
 // 章ごとの ふっきてん（ぜんめつしたとき もどる まち）
 const HOME = {
-  1:{map:'versa_town', x:11, y:6, name:'ヴェルサリアの きょうかい'},
+  1:{map:'versa_town', x:13, y:9, name:'ヴェルサリアの きょうかい'},
   5:{map:'toros',      x:7,  y:6, name:'トロスむらの きょうかい'},
 };
 function homePoint(){
@@ -2958,7 +3071,7 @@ function aliveMembers(){ return party.filter(p=>p.hp>0); }
 function actableMembers(){ return party.filter(p=>p.hp>0 && p.status!=='sleep'); }
 
 // ---------------- マップ ----------------
-const SOLID = new Set(['#','f','w','o','T','F','K','~','^',',']);
+const SOLID = new Set(['#','f','w','o','T','F','K','~','^',',','H','e','y']);
 function tileAt(map,x,y){
   const m = MAPS[map]; if(!m) return '#';
   if(y<0||x<0||y>=m.tiles.length||x>=m.tiles[y].length) return '#';
@@ -3939,7 +4052,7 @@ function endBattle(won){
 const FIELD_SPELL = {heal:true, cure:true, revive:true, healall:true, 'return':true};
 // リターンで いける ばしょ（いちど おとずれた ところ だけ）
 const RETURN_SPOTS = [
-  {map:'versa_town',  x:11, y:14},
+  {map:'versa_town',  x:13, y:18},
   {map:'versa_town2', x:10, y:13},
   {map:'toros',       x:7,  y:6 },
 ];
@@ -4140,14 +4253,14 @@ function reviveMember(o){
   return m;
 }
 function safeLanding(map, x, y){
-  if(!MAPS[map]) return {map:'versa_town', x:11, y:14};   // マップが きえていたら はじまりへ
+  if(!MAPS[map]) return {map:'versa_town', x:13, y:18};   // マップが きえていたら はじまりへ
   if(walkable(map,x,y)) return {map,x,y};
   for(let r=1;r<=6;r++){                                   // かべの なかなら ちかくへ おしだす
     for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){
       if(walkable(map,x+dx,y+dy)) return {map, x:x+dx, y:y+dy};
     }
   }
-  return {map:'versa_town', x:11, y:14};
+  return {map:'versa_town', x:13, y:18};
 }
 function saveGame(s, slot){
   const st = store(s); if(!st) return false;
