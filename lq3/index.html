@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T05:23:06", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1767, "bgm": 806, "view2d": 1076, "view": 1227, "ui": 475}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T06:45:33", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1767, "bgm": 813, "view2d": 1076, "view": 1227, "ui": 489}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1046,7 +1046,7 @@ const START_AT = {
   boss:   SECTION_AT.CHORUS || 0,   // ボス ＝ サビから
 };
 let AC=null, G=null, EVENTS=null, timer=null, playing=null;
-let t0=0, idx=0, loopN=0, vol=0.62, lastNow=-1, stall=0, pending=null;
+let t0=0, idx=0, loopN=0, vol=0.42, lastNow=-1, stall=0, pending=null;
 let songStart=0, loopSpan=1, idxStart=0;
 const LOOKAHEAD=0.35, TICK=60;
 
@@ -1164,6 +1164,7 @@ function begin(name){
 function play(name){
   if(name !== 'battle' && name !== 'boss'){ stop(); return; }
   pauseField();                       // せんとうちゅうは いちじ ていし（いしは のこす）
+  fieldUnlocked = true;               // せんとうちゅうに あけなおさない
   if(playing === name) return;
   if(!ensure()){ return; }
   stop();
@@ -1265,13 +1266,19 @@ function stopField(){                 // プレイヤーが とめた（いし�
   fieldWant = false;
   pauseField();
 }
+let fieldUnlocked = false;
 function unlockField(){
   // さいしょの そうさで <audio> を あけておく（iOSたいさく）
+  // ★1かいだけ。まいかい よぶと、せんとうちゅうに ボタンを おすたび
+  //   フィールドきょくが ならり なおしてしまう（じっさいに でた ふぐあい）。
+  if(fieldUnlocked) return;
+  if(playing) return;                 // せんとうちゅうは さわらない
   const el = fieldAudio(); if(!el) return;
   routeField();
   try{
     const p = el.play();
-    if(p && p.then) p.then(()=>{ if(!fieldWant) el.pause(); }, ()=>{});
+    fieldUnlocked = true;
+    if(p && p.then) p.then(()=>{ if(!fieldWant) el.pause(); }, ()=>{ fieldUnlocked=false; });
     else if(!fieldWant) el.pause();
   }catch(e){}
 }
@@ -5403,6 +5410,15 @@ function ctx(){
   }catch(e){}
   return AC;
 }
+let SFXBUS=null;
+function sfxBus(){                 // こうかおんは まとめて すこし おおきく
+  const ac=ctx(); if(!ac) return null;
+  if(!SFXBUS){
+    try{ SFXBUS=ac.createGain(); SFXBUS.gain.value=1.6; SFXBUS.connect(ac.destination); }
+    catch(e){ SFXBUS=null; }
+  }
+  return SFXBUS;
+}
 function tone(f,d,type,v,w){
   const ac=ctx(); if(!ac) return;
   const t0=ac.currentTime+(w||0);
@@ -5410,7 +5426,7 @@ function tone(f,d,type,v,w){
   o.type=type; o.frequency.value=f;
   g.gain.setValueAtTime(v,t0);
   g.gain.exponentialRampToValueAtTime(0.0008,t0+d);
-  o.connect(g); g.connect(ac.destination);
+  o.connect(g); g.connect(sfxBus()||ac.destination);
   o.start(t0); o.stop(t0+d+0.02);
 }
 const A = {
@@ -5805,18 +5821,23 @@ addEventListener('error', ev=>{
   bootFail((ev.message||'エラー')+'\n（ページを さいよみこみ してください）');
 });
 // ★さいしょの そうさで オーディオを あける（iOSは タップが ないと おとが でない）
+// ★かいじょは 1かいだけ。まいかい やると きょくを ならしなおして しまう。
+let audioUnlocked = false;
+const UNLOCK_EVENTS = ['touchstart','touchend','pointerdown','mousedown','click','keydown'];
 function unlockAudio(){
   const ac = ctx();
   try{ if(ac && ac.state!=='running') ac.resume(); }catch(e){}
   if(typeof BGM!=='undefined'){
     if(BGM.attach) BGM.attach(ac);
     BGM.resume();
-    if(BGM.unlockField) BGM.unlockField();   // <audio> も あけておく
+    if(BGM.unlockField) BGM.unlockField();
+  }
+  if(ac && ac.state==='running' && !audioUnlocked){
+    audioUnlocked = true;
+    UNLOCK_EVENTS.forEach(ev=>{ try{ removeEventListener(ev, unlockAudio); }catch(e){} });
   }
 }
-['touchstart','touchend','pointerdown','mousedown','click','keydown'].forEach(ev=>{
-  addEventListener(ev, unlockAudio, {passive:true});
-});
+UNLOCK_EVENTS.forEach(ev=>{ addEventListener(ev, unlockAudio, {passive:true}); });
 V.init();
 C.bind(V, UI, A);
 function startGame(loaded){
