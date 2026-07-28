@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-27T18:08:01", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1766, "bgm": 657, "view2d": 1076, "view": 1227, "ui": 407}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T02:17:37", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1766, "bgm": 658, "view2d": 1076, "view": 1227, "ui": 416}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1065,8 +1065,15 @@ function fire(ev, when){
 }
 function pump(){
   if(!playing || !G) return;
+  // ★おとが まだ だせない あいだは よやくしない。まいかい さいかいを こころみ、
+  //   きょくの あたまから はじめなおせるように しておく。
+  if(AC.state !== 'running'){
+    try{ AC.resume(); }catch(e){}
+    t0 = AC.currentTime + 0.10; idx = 0; loopN = 0; lastNow = -1;
+    return;
+  }
   const now = AC.currentTime;
-  // ★みはり①：とけいが すすんでいない ＝ オーディオが とまっている
+  // ★みはり：とけいが すすんでいない（state は running でも とまることが ある）
   if(now <= lastNow){
     stall++;
     if(stall > 8){                       // やく0.5びょう すすまなければ たてなおす
@@ -1101,7 +1108,7 @@ function begin(name){
   t0 = AC.currentTime + 0.10;
   lastNow = -1;                  // さいしょの pump を みはりで はじかない
   gainNow(vol);                  // ★のこっている フェードを とりけして おんりょうを もどす
-  pump();
+  pump();                        // だせない じょうたいなら pump が たてなおしを つづける
   if(timer) clearInterval(timer);
   timer = setInterval(pump, TICK);
 }
@@ -1110,16 +1117,10 @@ function play(name){
   if(playing === name) return;
   if(!ensure()){ return; }
   stop();
-  // ★とまっている あいだは とけいが すすまないので、うごきだしてから はじめる
-  if(AC.state === 'suspended'){
-    const go = ()=>{ if(pending===name) begin(name); };
-    pending = name;
-    try{ AC.resume().then(go, go); }catch(e){ go(); }
-    // resume が かえってこない ばあいの ほけん
-    setTimeout(()=>{ if(pending===name && playing!==name && AC.state==='running') begin(name); }, 350);
-    return;
-  }
   pending = null;
+  // ★resume の やくそくは iOSでは かえってこない ことが ある。
+  //   またずに はじめ、おとが だせるように なったら みはりが たてなおす。
+  try{ AC.resume(); }catch(e){}
   begin(name);
 }
 // おんりょうの よやくを かならず とりけしてから きめる。
@@ -5599,6 +5600,15 @@ function bootFail(msg){
 }
 addEventListener('error', ev=>{
   bootFail((ev.message||'エラー')+'\n（ページを さいよみこみ してください）');
+});
+// ★さいしょの そうさで オーディオを あける（iOSは タップが ないと おとが でない）
+function unlockAudio(){
+  const ac = ctx();
+  try{ if(ac && ac.state!=='running') ac.resume(); }catch(e){}
+  if(typeof BGM!=='undefined'){ if(BGM.attach) BGM.attach(ac); BGM.resume(); }
+}
+['touchstart','touchend','pointerdown','mousedown','click','keydown'].forEach(ev=>{
+  addEventListener(ev, unlockAudio, {passive:true});
 });
 V.init();
 C.bind(V, UI, A);
