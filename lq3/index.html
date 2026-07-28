@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T16:14:44", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 393, "core": 2142, "chapters": 274, "bgm": 827, "view2d": 1243, "view": 1273, "ui": 601}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T23:21:39", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 393, "core": 2148, "chapters": 274, "bgm": 827, "view2d": 1243, "view": 1273, "ui": 601}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3664,6 +3664,12 @@ const HOME = {
   5:{map:'toros',      x:7,  y:6, name:'トロスむらの きょうかい'},
 };
 function homePoint(){
+  // ★章データの home を さいゆうせん（章を ふやしても ここを さわらない）。
+  //   これを わすれると、第2章で ぜんめつしても 第1章の まちへ もどされる。
+  const cd = chData();
+  if(cd && cd.home && MAPS[cd.home.map] && walkable(cd.home.map, cd.home.x, cd.home.y)){
+    return cd.home;
+  }
   const h = HOME[G.chapter] || HOME[1];
   return MAPS[h.map] ? h : HOME[1];
 }
@@ -5125,7 +5131,7 @@ return {
   tileAt, isBlocked, walkable, warpAt,
   // 行動
   stepField, interact, facing, doWarp, startBattle, beginRound, saveGame, loadGame,
-  runTalkEvent, triggerChapterEnd, offerNextChapter,
+  runTalkEvent, triggerChapterEnd, offerNextChapter, homePoint,
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
