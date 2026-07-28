@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T13:16:41", "assets_sha": "ad66dbbc", "lines": {"world": 139, "npc": 254, "core": 1874, "bgm": 827, "view2d": 1233, "view": 1273, "ui": 495}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T13:41:53", "assets_sha": "ad66dbbc", "lines": {"world": 139, "npc": 254, "core": 1890, "chapters": 171, "bgm": 827, "view2d": 1233, "view": 1273, "ui": 495}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -502,6 +502,178 @@ function npcAt(mapId, x, y){
   return list.find(n=>n.at === (x+','+y)) || null;
 }
 return {NPCS, QUESTS, pickLines, npcAt};
+})();
+
+</script>
+<script>'use strict';
+// ============================================================
+// ルミナクエストIII / 章データ
+//
+// 「その章だけの きまりごと」を ここに あつめる。
+// コア（core.js）は この データを よむだけ に して、
+// 章を ふやす ときに コアを さわらなくて すむ ように する。
+//
+// 章を ふやす てじゅん は docs/章の作り方.md を みること。
+// ============================================================
+const CHAPTERS_DATA = (function(){
+
+const CH = {
+
+  // ============================================================
+  // 第1章 わかき きし（ヴェルサ地方）
+  // ============================================================
+  1: {
+    id: 'ch1_versa',
+    title: 'わかき きし',
+    region: 'versa',
+
+    // --- はじまり ---
+    start: {map:'versa_town', x:13, y:18, dir:'front'},
+    party: ['lion'],
+    gold: 60, herbs: 5, waters: 0,
+    equip: {weapon:{kind:'w',name:'みならいの けん',v:3},
+            armor: {kind:'a',name:'こまもり',v:2}},
+
+    // --- ぜんめつしたとき もどる ばしょ ---
+    home: {map:'versa_town', x:13, y:9, name:'ヴェルサリアの きょうかい'},
+
+    // --- リターンで いける まち（おとずれた ものだけ ひょうじ）---
+    returnSpots: [
+      {map:'versa_town',  x:13, y:18},
+      {map:'versa_town2', x:10, y:13},
+    ],
+
+    // --- ボスが いる ばしょ（マップ → ボスのキー）---
+    bosses: {
+      versa_dgn2: {
+        key: 'yumebanken',
+        // たおしたか どうか の めじるし
+        clearedFlag: 'ch1_gotHerb',
+        intro: ['どうくつの さいしんぶ。こおりの おくに、くろい けものが うずくまっている。',
+                'その あしもとに、あおく ひかる くさが かかえこまれている。',
+                '＜これは わたしの もの。だれにも わたさない＞',
+                'ゆめの ばんけんが たちふさがった！'],
+        after: ['こおりの ゆかに、けものの あしあとだけが のこっている。'],
+      },
+    },
+
+    // --- とくべつな ます（そのマップだけの しらべる たいしょう）---
+    // tile: タイルもじ / map: どの マップか / handler: core が よぶ なまえ
+    specialTiles: [
+      {map:'versa_town',  tile:'K', handler:'castleGate'},
+      {map:'versa_cast1', tile:'K', handler:'throne'},
+      {map:'versa_cast1', tile:'Z', handler:'sleepingPrincess'},
+    ],
+
+    // --- マップに はいった ときに たつ めじるし ---
+    onEnter: {
+      world:       'ch1_enteredField',
+      versa_town2: 'ch1_reachedMirka',
+      versa_dgn1:  'ch1_enteredCave',
+    },
+    // どうくつに はいると まちが しんしょくされる
+    onEnterState: {versa_dgn1: 'DREAM_INVASION'},
+
+    // --- ものがたりの すじ（NPCの なまえ → なにが おきるか）---
+    // cond: この めじるしが そろって いれば おきる
+    // set : たつ めじるし / quest: クエストの すすみ / gold: もらえる おかね
+    talkEvents: [
+      { npc:'きしだんちょう', when:{state:'NORMAL'}, unless:'ch1_started',
+        set:['ch1_started'], setState:'SLEEPING_SICKNESS',
+        quest:{ch1_q1_wakeup:'active'},
+        msg:['きしだんちょう「たいへんだ リオン！ おうじょさまが おめざめに ならぬ！」',
+             '「まちでも ねむったまま おきぬ ものが ふえておる」',
+             '「まちの ものに はなしを きいて、げんいんを しらべてこい」',
+             '＊ クエスト「めざめぬ おうじょ」＊'] },
+      { npc:'こうじょの じじょ', set:['ch1_talkedMaid'] },
+      { npc:'もんばん',          set:['ch1_talkedGate'] },
+      { npc:'きしだんちょう', cond:['ch1_talkedMaid','ch1_talkedGate'], unless:'ch1_orderReceived',
+        set:['ch1_orderReceived'], gold:100,
+        quest:{ch1_q1_wakeup:'clear'},
+        msg:['きしだんちょう「よく しらべた。おうめいを だす、しろへ はいれ」',
+             '「じいが まっておる。おうじょさまを みてくるのだ」',
+             '（したくきんとして 100ゴールドを うけとった）',
+             '＊ クエスト「めざめぬ おうじょ」を たっせい ＊'] },
+      { npc:'くすし', cond:['ch1_gotHerb'], unless:'ch1_madeMedicine',
+        needKey:'yukigusa', takeKey:'yukigusa', giveKey:'medicine',
+        set:['ch1_madeMedicine'],
+        quest:{ch1_q3_retrieve:'clear', ch1_q4_medicine:'active'},
+        msg:['くすし「まあ……ほんとうに とりかえして きたのかい」',
+             '（くすしは ゆきぐさを すりつぶし、ゆげの たつ くすりを つくった）',
+             '＊ めざめの くすりを てにいれた！ ＊',
+             'くすし「はやく おうじょさまの ところへ。さめる ことを いのってる」'] },
+      { npc:'くすし', unless:'ch1_heardTheft',
+        set:['ch1_heardTheft'],
+        quest:{ch1_q2_herb:'clear', ch1_q3_retrieve:'active'},
+        msg:['くすし「ゆきぐさを わけて ほしい？ ……それが ないんだよ」',
+             '「せんじつ、まものが かかえて いってしまってねえ」',
+             '「みなみの こおりの どうくつだよ。くろい けものだった」',
+             '「とりかえして きてくれるなら、くすりに して あげる」',
+             '＊ クエスト「うばわれた ゆきぐさ」＊'] },
+    ],
+
+    // --- ボスを たおした ときの ごほうび ---
+    bossReward: {
+      yumebanken: {
+        set:['ch1_gotHerb'], giveKey:'yukigusa',
+        setState:'SLEEPING_SICKNESS',
+        quest:{ch1_q3_retrieve:'clear', ch1_q4_medicine:'active'},
+        msg:['', 'ゆめの ばんけんは、しろい いきを はいて ほどけていった。',
+             '＜……もう、みはらなくて いいのか＞',
+             'けものの いた あとに、あおく ひかる くさが のこされていた。',
+             '', '＊ ゆきぐさを てにいれた！ ＊',
+             'これを もって ヴェルサリアへ もどろう。'],
+      },
+    },
+
+    // --- 章の おわり ---
+    ending: {
+      trigger: 'ch1_usedMedicine',
+      set:['ch1_cleared'],
+      quest:{ch1_q5_cause:'active'},
+      msg:['おう「リオン。おまえは よく やった。ゆきぐさまで とりもどした」',
+           '「だが むすめは めざめぬ。……これは ヴェルサだけの ことでは あるまい」',
+           'きしだんちょう「だんちょうとして いう。おまえを たびに だす」',
+           'おう「せかいを みてこい。おなじ ねむりが どこかで おきているなら、',
+           'その もとを つきとめるのだ」',
+           '',
+           'リオンは かるく うなずき、こしの けんに てを かけた。',
+           'まどの そとでは、むらさきの ゆきが しずかに ふりつづけている。'],
+      card: {title:'第1章 完', sub:'わかき きし'},
+      next: 2,
+    },
+  },
+
+  // ============================================================
+  // 第2章 あきないの たび（ザール地方）※これから
+  // ============================================================
+  // 2: {
+  //   id:'ch2_zaal', title:'あきないの たび', region:'zaal',
+  //   start:{map:'zaal_town', x:.., y:.., dir:'front'},
+  //   party:['bald'], gold:.., herbs:.., waters:..,
+  //   home:{...}, returnSpots:[...], bosses:{...},
+  //   specialTiles:[...], onEnter:{...}, talkEvents:[...],
+  //   bossReward:{...}, ending:{...},
+  // },
+};
+
+function get(no){ return CH[no] || CH[1]; }
+function has(no){ return !!CH[no]; }
+function list(){ return Object.keys(CH).map(Number).sort((a,b)=>a-b); }
+// ボスが いる マップ → ボスの じょうほう（ぜんしょう ぶんを まとめて さがす）
+function bossAt(chapter, map){
+  const c = CH[chapter];
+  return (c && c.bosses && c.bosses[map]) || null;
+}
+// とくべつな ますの あつかいを ひく
+function specialTile(chapter, map, tile){
+  const c = CH[chapter];
+  if(!c || !c.specialTiles) return null;
+  const hit = c.specialTiles.find(s=>s.map===map && s.tile===tile);
+  return hit ? hit.handler : null;
+}
+
+return {CH, get, has, list, bossAt, specialTile};
 })();
 
 </script>
@@ -3100,6 +3272,7 @@ function setNight(v){
   return G.night;
 }
 // 章ごとの ふっきてん（ぜんめつしたとき もどる まち）
+// ※ 章データ（chapters.js）に うつした。ここは よびだしの ための のこり。
 const HOME = {
   1:{map:'versa_town', x:13, y:9, name:'ヴェルサリアの きょうかい'},
   5:{map:'toros',      x:7,  y:6, name:'トロスむらの きょうかい'},
@@ -3132,6 +3305,11 @@ function aliveMembers(){ return party.filter(p=>p.hp>0); }
 function actableMembers(){ return party.filter(p=>p.hp>0 && p.status!=='sleep'); }
 
 // ---------------- マップ ----------------
+// 章ごとの きまりごとは src/chapters.js に まとめてある。
+const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
+          : (typeof require!=='undefined' ? require('./chapters.js') : null);
+function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
+
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y']);
 function tileAt(map,x,y){
   const m = MAPS[map]; if(!m) return '#';
@@ -3493,17 +3671,20 @@ function triggerEnding(){
     });
   });
 }
+// ボスの ばしょ・とうじょうの ことば・たおした あとは 章データから ひく
+function bossInfoAt(map){
+  return CHD ? CHD.bossAt(G.chapter||1, map) : null;
+}
 function triggerBoss(x,y){
-  if(P.map==='versa_dgn2'){                 // 第1章ボス
+  // ★章データに かかれた ボスを ひく（章を ふやしても ここは さわらない）
+  const bi = bossInfoAt(P.map);
+  if(bi){
     G.mode='msg';
-    if(G.flags.ch1_gotHerb){
-      U.msg(['こおりの ゆかに、けものの あしあとだけが のこっている。'], ()=>{ G.mode='field'; });
+    if(bi.clearedFlag && G.flags[bi.clearedFlag]){
+      U.msg(bi.after || ['もう だれも いない。'], ()=>{ G.mode='field'; });
       return;
     }
-    U.msg(['どうくつの さいしんぶ。こおりの おくに、くろい けものが うずくまっている。',
-           'その あしもとに、あおく ひかる くさが かかえこまれている。',
-           '＜これは わたしの もの。だれにも わたさない＞',
-           'ゆめの ばんけんが たちふさがった！'], ()=>{ startBattle('yumebanken'); });
+    U.msg(bi.intro || ['まものが たちふさがった！'], ()=>{ startBattle(bi.key); });
     return;
   }
   if(G.flags.desgran){
@@ -4114,13 +4295,20 @@ function endBattle(won){
 // こうげき じゅもんは 「ここでは つかえない」。
 const FIELD_SPELL = {heal:true, cure:true, revive:true, healall:true, 'return':true};
 // リターンで いける ばしょ（いちど おとずれた ところ だけ）
-const RETURN_SPOTS = [
-  {map:'versa_town',  x:13, y:18},
-  {map:'versa_town2', x:10, y:13},
-  {map:'toros',       x:7,  y:6 },
-];
+// リターンさきは 章データから。むかしの 章の まちにも もどれるよう ぜんしょう ぶんを あつめる。
+function allReturnSpots(){
+  if(!CHD) return [];
+  const out=[];
+  CHD.list().forEach(no=>{
+    const c=CHD.get(no);
+    (c.returnSpots||[]).forEach(s=>{ if(!out.some(o=>o.map===s.map)) out.push(s); });
+  });
+  // きゅうたいりく（第5章そざい）も おとずれていれば いける
+  if(!out.some(o=>o.map==='toros')) out.push({map:'toros', x:7, y:6});
+  return out;
+}
 function returnDestinations(){
-  return RETURN_SPOTS
+  return allReturnSpots()
     .filter(s=>MAPS[s.map] && G.visited[s.map])
     .map(s=>({...s, name:WORLD.mapName(s.map)}));
 }
@@ -4433,7 +4621,7 @@ return {
   useInn, useChurch, openShop, talkNPC,
   itemList, useItemField, equipCandidates, equipFromBag, unequip, equipSummary, slotOf,
   fieldSpells, castField, spellNeedsTarget,
-  returnDestinations, canReturnHere, castReturn, RETURN_SPOTS,
+  returnDestinations, canReturnHere, castReturn, allReturnSpots, bossInfoAt, chData,
   KEY_ITEMS, hasKey, giveKey, takeKey, keyItemList,
   setTownState, setNight, townStateDef, questList, questAdvance, startChapter,
   // 差し替え
