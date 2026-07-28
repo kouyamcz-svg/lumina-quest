@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T07:25:57", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1820, "bgm": 813, "view2d": 1076, "view": 1227, "ui": 465}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T07:33:31", "assets_sha": "0551e801", "lines": {"world": 139, "npc": 254, "core": 1850, "bgm": 813, "view2d": 1076, "view": 1227, "ui": 486}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -2422,6 +2422,7 @@ const SPELL_DEFS = {
   healall:{name:'いやしの うた',  mp:16,type:'healall', min:50, max:70},
   goddess:{name:'めがみの いのり',mp:26,type:'healall', min:95, max:130},
   sanctuary:{name:'セイントウォール',mp:14,type:'heal', min:150,max:200},
+  ret:{name:'リターン',           mp:8, type:'return'},
 };
 const CLASSES = {
   sora:  {name:'ソラ',  hp:16,mp:5,atk:5,def:3,agi:6, g:{hp:5,mp:3,atk:2,def:2,agi:1},
@@ -2434,7 +2435,8 @@ const CLASSES = {
                   {lv:42,key:'goddess'}]},
   dan:   {name:'ダン',  hp:24,mp:0,atk:8,def:4,agi:4, g:{hp:7,mp:0,atk:3,def:2,agi:1}, learns:[]},
   lion:  {name:'リオン',hp:20,mp:4,atk:7,def:5,agi:6, g:{hp:6,mp:2,atk:3,def:2,agi:1},
-          learns:[{lv:3,key:'heal'},{lv:8,key:'spark'},{lv:15,key:'blaze'},{lv:22,key:'bolt'}]},
+          learns:[{lv:3,key:'heal'},{lv:6,key:'ret'},{lv:8,key:'spark'},
+                  {lv:15,key:'blaze'},{lv:22,key:'bolt'}]},
 };
 const TACTICS = {manual:'めいれいさせろ', gungan:'ガンガンいこうぜ', inochi:'いのちだいじに'};
 
@@ -3915,7 +3917,34 @@ function endBattle(won){
 // ---------------- じゅもん（せんとうの そとで つかう）----------------
 // そとで つかえるのは かいふく・じょうたい かいふく・そせい だけ。
 // こうげき じゅもんは 「ここでは つかえない」。
-const FIELD_SPELL = {heal:true, cure:true, revive:true, healall:true};
+const FIELD_SPELL = {heal:true, cure:true, revive:true, healall:true, 'return':true};
+// リターンで いける ばしょ（いちど おとずれた ところ だけ）
+const RETURN_SPOTS = [
+  {map:'versa_town',  x:11, y:14},
+  {map:'versa_town2', x:10, y:13},
+  {map:'toros',       x:7,  y:6 },
+];
+function returnDestinations(){
+  return RETURN_SPOTS
+    .filter(s=>MAPS[s.map] && G.visited[s.map])
+    .map(s=>({...s, name:WORLD.mapName(s.map)}));
+}
+// どうくつの なかでは つかえない（DQと おなじ）
+function canReturnHere(){
+  const th = (MAPS[P.map]||{}).theme;
+  return th!=='ice' && th!=='cave';
+}
+function castReturn(ci, di){
+  const m = party[ci], sp = SPELL_DEFS.ret;
+  const list = returnDestinations();
+  const d = list[di];
+  if(!m || !d) return {ok:false, lines:['どこへ いく？']};
+  if(!canReturnHere()) return {ok:false, lines:['ここでは つかえない。','そとへ でなければ ならない。']};
+  if(m.mp < sp.mp) return {ok:false, lines:['MPが たりない！']};
+  m.mp -= sp.mp;
+  return {ok:true, warp:{to:d.map, x:d.x, y:d.y},
+          lines:[m.name+'は リターンを となえた！','ひかりに つつまれ、そらへ まいあがった——']};
+}
 function fieldSpells(m){
   return knownSpells(m).filter(s=>FIELD_SPELL[s.type]);
 }
@@ -4209,6 +4238,7 @@ return {
   useInn, useChurch, openShop, talkNPC,
   itemList, useItemField, equipCandidates, equipFromBag, unequip, equipSummary, slotOf,
   fieldSpells, castField, spellNeedsTarget,
+  returnDestinations, canReturnHere, castReturn, RETURN_SPOTS,
   KEY_ITEMS, hasKey, giveKey, takeKey, keyItemList,
   setTownState, setNight, townStateDef, questList, questAdvance, startChapter,
   // 差し替え
@@ -5693,6 +5723,7 @@ function spellsOf(ci){
   menu(sp.map(s=>s.name+'　'+s.mp).concat(['もどる']), m.name+'　じゅもん',(k)=>{
     if(k>=sp.length){ C.G.mode='field'; return; }
     const s = sp[k];
+    if(s.type==='return'){ chooseReturn(ci); return; }
     if(!C.spellNeedsTarget(s)){ applySpell(ci, s.key, null); return; }
     if(C.party.length===1){ applySpell(ci, s.key, 0); return; }
     menu(C.party.map(t=>t.name+'　HP'+t.hp+'/'+t.maxhp+(t.hp<=0?'（たおれている）':''))
@@ -5700,6 +5731,26 @@ function spellsOf(ci){
       if(ti>=C.party.length){ C.G.mode='menu'; spellsOf(ci); return; }
       applySpell(ci, s.key, ti);
     });
+  });
+}
+// ---------------- リターン ----------------
+function chooseReturn(ci){
+  if(!C.canReturnHere()){
+    msg2(['ここでは つかえない。','そとへ でなければ ならない。'],
+         ()=>{ C.G.mode='menu'; spellsOf(ci); });
+    return;
+  }
+  const list = C.returnDestinations();
+  if(!list.length){
+    msg2(['まだ いける ばしょが ない。'], ()=>{ C.G.mode='menu'; spellsOf(ci); });
+    return;
+  }
+  menu(list.map(d=>d.name).concat(['もどる']), 'どこへ いく？',(k)=>{
+    if(k>=list.length){ C.G.mode='menu'; spellsOf(ci); return; }
+    const r = C.castReturn(ci, k);
+    hud();
+    if(!r.ok){ msg2(r.lines, ()=>{ C.G.mode='menu'; spellsOf(ci); }); return; }
+    msg2(r.lines, ()=>{ C.G.mode='field'; C.doWarp(r.warp); });
   });
 }
 function applySpell(ci, key, ti){
