@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T15:23:44", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 343, "core": 2101, "chapters": 266, "bgm": 827, "view2d": 1234, "view": 1273, "ui": 601}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T15:31:14", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 343, "core": 2104, "chapters": 266, "bgm": 827, "view2d": 1234, "view": 1273, "ui": 601}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3820,6 +3820,9 @@ function talkNPC(x,y){
   G.mode='msg';
   if(!entry){ U.msg(['「……」'], ()=>{ G.mode='field'; }); return; }
   const lines = NPCDATA.pickLines(entry, {townState:G.townState, flags:G.flags});
+  // ★ものがたりの できごとが ある ときは、そちらを だす（ふだんの せりふは ださない）。
+  //   りょうほう だすと おなじ ことを 2かい いう ことに なる（じっさいに でた ふぐあい）。
+  if((G.chapter||1)!==1 && runTalkEvent(entry.name)) return;
   U.msg(lines, ()=>{ questOnTalk(entry.name); G.mode='field'; });
 }
 // ---------------- クエスト ----------------
