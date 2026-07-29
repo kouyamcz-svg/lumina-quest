@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T12:54:02", "assets_sha": "ad66dbbc", "lines": {"world": 151, "npc": 531, "core": 2404, "chapters": 390, "bgm": 827, "view2d": 1290, "view": 1274, "ui": 672}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T13:07:05", "assets_sha": "ad66dbbc", "lines": {"world": 151, "npc": 531, "core": 2404, "chapters": 390, "bgm": 901, "view2d": 1290, "view": 1274, "ui": 677}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1874,9 +1874,13 @@ function fadeOut(){
     g.linearRampToValueAtTime(0.0001, t+0.18);
   }catch(e){}
 }
+function stopBattleAll(){        // ごうせい・ファイル どちらでも とめる
+  stop();
+  stopBattleFile();
+}
 function stop(){
   const wasPlaying = !!playing;
-  if(wasPlaying) setTimeout(()=>{ if(!playing && fieldWant) playField(fieldTrack); }, 220);
+  if(wasPlaying) setTimeout(()=>{ if(!playing && !batWant && fieldWant) playField(fieldTrack); }, 220);
   if(timer){ clearInterval(timer); timer=null; }
   playing = null; pending = null; stall = 0; lastNow = -1;
   if(wasPlaying) fadeOut();      // ★なっていた ときだけ フェード。かけはじめでは さわらない
@@ -1980,6 +1984,72 @@ function setFieldVolume(v){
   if(fieldGain){ try{ fieldGain.gain.value = fieldVol; }catch(e){} }
   else if(fieldEl){ try{ fieldEl.volume = fieldVol; }catch(e){} }
 }
+/* ══ せんとうきょく（ファイル）══ */
+// 第3章いこうの せんとうは レンダリングずみの ファイルを ながす。
+// フィールドきょくとは べつの <audio> を つかい、いきさきを とりちがえない。
+let batEl = null, batWant = false, batVol = 0.55, batSrc = null, batGain = null, batErr = '';
+const BATTLE_TRACKS = {battle3:'battle3.mp3'};
+let batTrack = null;
+function battleAudio(url){
+  if(!batEl){
+    try{
+      batEl = new Audio(url);
+      batEl.loop = true;
+      batEl.preload = 'auto';
+      batEl.volume = 1;
+      batEl.addEventListener('error', ()=>{
+        const e = batEl.error;
+        batErr = 'よみこみ しっぱい' + (e ? '(code '+e.code+')' : '');
+      });
+      try{ batEl.load(); }catch(e){}
+    }catch(e){ batEl = null; batErr = 'つくれない'; }
+  }
+  return batEl;
+}
+function routeBattle(){
+  const el = battleAudio(BATTLE_TRACKS.battle3); if(!el) return false;
+  if(batSrc) return true;
+  if(!ctx()) return false;
+  if(typeof AC.createMediaElementSource !== 'function') return false;
+  try{
+    autoClean(AC);
+    batSrc = AC.createMediaElementSource(el);
+    batGain = AC.createGain();
+    batGain.gain.value = batVol;
+    batSrc.connect(batGain);
+    batGain.connect(AC.destination);
+    return true;
+  }catch(e){ batErr = 'つなげない: '+e.message; return false; }
+}
+function playBattleFile(track){
+  const url = BATTLE_TRACKS[track] || BATTLE_TRACKS.battle3;
+  stop();                              // ごうせいの せんとうきょくは とめる
+  pauseField();                        // フィールドきょくも とめる
+  batWant = true;
+  const el = battleAudio(url); if(!el) return;
+  if(batTrack !== track){
+    batTrack = track;
+    try{ el.pause(); el.src = url; el.load(); batErr=''; }catch(e){}
+  }
+  routeBattle();
+  try{ AC && AC.resume && AC.resume(); }catch(e){}
+  if(batGain){ try{ batGain.gain.value = batVol; }catch(e){} }
+  try{
+    const p = el.play();
+    if(p && p.catch) p.catch(()=>{ batErr='さいせい きょかまち'; });
+  }catch(e){ batErr='さいせい しっぱい'; }
+}
+function stopBattleFile(){
+  const was = batWant;
+  batWant = false;
+  if(batEl){ try{ batEl.pause(); }catch(e){} }
+  // ★せんとうが おわったら もといた ばしょの きょくへ もどす
+  if(was) setTimeout(()=>{ if(!playing && !batWant && fieldWant) playField(fieldTrack); }, 220);
+}
+function setBattleVolume(v){
+  batVol = Math.max(0, Math.min(1, v));
+  if(batGain){ try{ batGain.gain.value = batVol; }catch(e){} }
+}
 function status(){
   const a = AC;
   return {
@@ -1993,6 +2063,8 @@ function status(){
     vol: vol,
     field: fieldEl ? (fieldEl.paused ? 'とまっている' : 'ながれている') : 'みよみこみ',
     track: fieldTrack,
+    battleFile: batEl ? (batEl.paused ? 'とまっている' : 'ながれている') : 'みよみこみ',
+    battleErr: batErr || 'なし',
     fieldVol: fieldVol,
     fieldReady: fieldEl ? fieldEl.readyState : -1,
     fieldNet: fieldEl ? fieldEl.networkState : -1,
@@ -2002,6 +2074,8 @@ function status(){
   };
 }
 return {play, stop, setVolume, resume, attach, status,
+        playBattleFile, stopBattleFile, setBattleVolume, stopBattleAll,
+        get battleTrack(){return batTrack;}, BATTLE_TRACKS,
         playField, stopField, pauseField, unlockField, setFieldVolume,
         get fieldOn(){return fieldWant;}, get track(){return fieldTrack;}, TRACKS,
         get current(){return playing;},
@@ -7128,15 +7202,20 @@ const A = {
     BGM.stop();                    // せんとうきょくは とめる
     BGM.playField(trackFor(mapId));
   },
-  battleBgm(kind){                 // せんとうきょく「双嶺の誓約」
+  battleBgm(kind){                 // ★しょうで せんとうきょくを かえる
     const ac = ctx();
-    if(typeof BGM!=='undefined'){
-      if(BGM.attach) BGM.attach(ac);
-      BGM.resume();
-      BGM.play(kind==='boss'?'boss':'battle');
+    if(typeof BGM==='undefined') return;
+    if(BGM.attach) BGM.attach(ac);
+    BGM.resume();
+    const no = C.G.chapter || 1;
+    if(no >= 3 && BGM.playBattleFile){
+      BGM.playBattleFile('battle3');            // 第3章いこう：ファイル
+    }else{
+      BGM.stopBattleFile && BGM.stopBattleFile();
+      BGM.play(kind==='boss'?'boss':'battle');  // 第1・2章：ごうせいの 双嶺の誓約
     }
   },
-  bgmStop(){ if(typeof BGM!=='undefined') BGM.stop(); },
+  bgmStop(){ if(typeof BGM!=='undefined'){ BGM.stopBattleAll ? BGM.stopBattleAll() : BGM.stop(); } },
 };
 
 // ---------------- DOM ----------------
