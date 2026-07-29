@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T13:28:54", "assets_sha": "ad66dbbc", "lines": {"world": 151, "npc": 531, "core": 2404, "chapters": 390, "bgm": 901, "view2d": 1290, "view": 1277, "ui": 677}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T14:57:45", "assets_sha": "18e7cc31", "lines": {"world": 151, "npc": 531, "core": 2404, "chapters": 390, "bgm": 901, "view2d": 1292, "view": 1277, "ui": 677}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3307,7 +3307,9 @@ function drawChar(a, ox, oy, ts, time){
   const img = getImg(d[pose]);
   if(!img.complete || !img.naturalWidth) return;
   // ★タイルと おなじ ばいりつで えがく ＝ ドットの あらさが そろう
-  const ww = Math.round(d.w*sc), hh = Math.round(d.h*sc);
+  //   よこむきは はばが ちがう ので、その えの はばを つかう
+  const baseW = (pose.indexOf('side')===0 && d.sideW_) ? d.sideW_ : d.w;
+  const ww = Math.round(baseW*sc), hh = Math.round(d.h*sc);
   const bx = Math.round(dx + ts/2 - ww/2);
   const by = Math.round(dy + ts*0.95 - hh + (a.bob||0)*ts);
   cx.save();
