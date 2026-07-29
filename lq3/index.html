@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-28T23:21:39", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 393, "core": 2148, "chapters": 274, "bgm": 827, "view2d": 1243, "view": 1273, "ui": 601}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T03:32:31", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 393, "core": 2148, "chapters": 274, "bgm": 827, "view2d": 1244, "view": 1273, "ui": 601}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -2391,21 +2391,22 @@ function tileArt(ch, theme){
     default:  return null;    // ゆか は したで えがく
   }
 }
-function floorArt(theme){
-  if(theme==='world') return atlas.plain;   // ※ ワールドは タイルごとに きめる
-  return theme==='snow' ? atlas.snow
-       : theme==='ice'  ? atlas.ice
-       : theme==='cave' ? atlas.road
-       : theme==='village' || theme==='field' ? atlas.grass
-       : atlas.pave;
-}
-function roadArt(theme){
-  if(theme==='world') return atlas.highway;
-  return theme==='snow' ? atlas.pave
-       : theme==='ice'  ? atlas.ice
-       : theme==='cave' ? atlas.road
-       : atlas.road;
-}
+// ★テーマごとの「じめん」と「みち」。ひょうに して かきわすれを ふせぐ。
+//   （desert が ぬけていて、むらの じめんが いしだたみに なる ふぐあいが あった）
+const THEME_FLOOR = {
+  snow:    {floor:'snow',      road:'pave'},      // ゆきの まち：いしの とおり
+  desert:  {floor:'desert',    road:'highway'},   // さばくの まち：すなの じめんに ふみかためた みち
+  ice:     {floor:'ice',       road:'ice'},
+  cave:    {floor:'road',      road:'road'},
+  village: {floor:'grass',     road:'road'},
+  field:   {floor:'grass',     road:'road'},
+  indoor:  {floor:'pave',      road:'road'},
+  castle:  {floor:'pave',      road:'pave'},      // ※ しろは 3Dで えがく
+  world:   {floor:'plain',     road:'highway'},   // ※ ワールドは タイルごとに きめる
+};
+function themeArt(theme){ return THEME_FLOOR[theme] || THEME_FLOOR.village; }
+function floorArt(theme){ return atlas[themeArt(theme).floor]; }
+function roadArt(theme){  return atlas[themeArt(theme).road]; }
 
 // ---- ゆか＋ふち を 1まいに やきこんで ためる ----
 // まいフレーム 9かい かさねると おもいので、はじめて みた ときだけ つくる
