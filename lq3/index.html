@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T13:07:05", "assets_sha": "ad66dbbc", "lines": {"world": 151, "npc": 531, "core": 2404, "chapters": 390, "bgm": 901, "view2d": 1290, "view": 1274, "ui": 677}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T13:28:54", "assets_sha": "ad66dbbc", "lines": {"world": 151, "npc": 531, "core": 2404, "chapters": 390, "bgm": 901, "view2d": 1290, "view": 1277, "ui": 677}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -6737,7 +6737,10 @@ function setActors(snap){
     if(key!==lastFootTile){ lastFootTile=key; dropFootprint(P.x,P.y,!!C.G.stepFlip); }
   }
   const yy = isElevated(curMap) ? 1.22 : 0.72;   // だんさの うえに たつ
-  const n=(actors.list?actors.list.length:1);
+  // ★2Dでは 3Dの アクターを つくらない ので、actors.list が からに なる。
+  //   にんずうを パーティから とる（そうしないと たいれつが つねに 1にんぶん になる）。
+  const n = is2D ? C.party.length
+                 : (actors.list ? actors.list.length : 1);
   const tgt=[];
   for(let i=0;i<n;i++){
     const t=(i===0)?[P.x,P.y]:(tr[i-1]||[P.x,P.y]);
