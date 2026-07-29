@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T15:19:19", "assets_sha": "2fde0a6c", "lines": {"world": 151, "npc": 531, "core": 2443, "chapters": 391, "bgm": 905, "view2d": 1292, "view": 1277, "ui": 677}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T21:45:04", "assets_sha": "cbbaafbf", "lines": {"world": 152, "npc": 544, "core": 2498, "chapters": 418, "bgm": 905, "view2d": 1292, "view": 1277, "ui": 677}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -168,6 +168,7 @@ const MAP_IDS = {
   world:         {region:'versa', kind:'field', name:'ワールドマップ',              scene:'SCENE_WORLD'},
   minamo_port:   {region:'minamo',kind:'town', name:'サンゴの みなと',              scene:'SCENE_MINAMO_TOWN'},
   minamo_isle:   {region:'minamo',kind:'town', name:'しまの むら',                 scene:'SCENE_MINAMO_TOWN'},
+  minamo_dgn0:   {region:'minamo',kind:'dgn',  name:'あさせの ほら',               scene:'SCENE_MINAMO_CAVE'},
   minamo_dgn1:   {region:'minamo',kind:'dgn',  name:'かいしょくどう',                scene:'SCENE_MINAMO_CAVE'},
   minamo_dgn2:   {region:'minamo',kind:'dgn',  name:'かいしょくどう さいしんぶ',        scene:'SCENE_MINAMO_CAVE'},
   zaal_town:     {region:'zaal',  kind:'town',  name:'たいしょうのまち ザール',       scene:'SCENE_ZAAL_TOWN'},
@@ -641,6 +642,13 @@ const NPCS = {
 // state: 'inactive' → 'active' → 'clear'
 const QUESTS = {
   // ============ 第3章 みなとの しまい ============
+  ch3_q0_fare: {
+    id:'ch3_q0_fare', chapter:3, title:'ふなちんを かせぐ',
+    giver:'ふなのり',
+    desc:'しまへ わたる こぶねを だして もらうには 80ゴールドが いる。いそべで かせごう。',
+    steps:[{id:'pay', desc:'ふなちんを はらう', flag:'ch3_paidFare'}],
+    reward:{}, next:'ch3_q1_isle',
+  },
   ch3_q1_isle: {
     id:'ch3_q1_isle', chapter:3, title:'しまの ねむり',
     giver:'うらないの ししょう',
@@ -652,31 +660,37 @@ const QUESTS = {
     reward:{}, next:'ch3_q2_dream',
   },
   ch3_q2_dream: {
-    id:'ch3_q2_dream', chapter:3, title:'ゆめを みる',
+    id:'ch3_q2_dream', chapter:3, title:'ゆめの かけら',
     giver:'むらの おさ',
     desc:'みなみの かいしょくどうへ。おくで セナの ゆめみの ちからが なにかを うつす。',
     steps:[
       {id:'enter_cave', desc:'かいしょくどうに はいる', flag:'ch3_enteredCave'},
       {id:'see_dream',  desc:'ゆめを みる',           flag:'ch3_sawDream'},
     ],
-    reward:{}, next:'ch3_q3_twins',
+    reward:{}, next:'ch3_q3_shell',
   },
-  ch3_q3_twins: {
-    id:'ch3_q3_twins', chapter:3, title:'しまいの かげ',
-    giver:'ゆめ',
-    desc:'ゆめの おくに、ふたつの かげが いる。さいしんぶで たたかう。',
+  ch3_q3_shell: {
+    id:'ch3_q3_shell', chapter:3, title:'よびがいを さがす',
+    giver:'うらないの ししょう',
+    desc:'ゆめの おくへ はいるには ＜よびがい＞が いる。あさせの ほらに しずんでいる。',
     steps:[
-      {id:'beat_boss', desc:'しまいの かげを たおす', flag:'ch3_gotShell'},
+      {id:'enter_shoal', desc:'あさせの ほらへ いく', flag:'ch3_enteredShoal'},
+      {id:'get_shell',   desc:'よびがいを てにいれる', flag:'ch3_gotCallShell'},
     ],
-    reward:{}, next:'ch3_q4_cause',
+    reward:{}, next:'ch3_q4_twins',
   },
-  ch3_q4_cause: {
-    id:'ch3_q4_cause', chapter:3, title:'ひかりの こを まつ',
+  ch3_q4_twins: {
+    id:'ch3_q4_twins', chapter:3, title:'しまいの かげ',
+    giver:'ゆめ',
+    desc:'よびがいを もって かいしょくどうの さいしんぶへ。ふたつの かげと たたかう。',
+    steps:[{id:'beat_boss', desc:'しまいの かげを たおす', flag:'ch3_gotShell'}],
+    reward:{}, next:'ch3_q5_cause',
+  },
+  ch3_q5_cause: {
+    id:'ch3_q5_cause', chapter:3, title:'ひかりの こを まつ',
     giver:'うらないの ししょう',
     desc:'かげを たおしても みなは めざめない。セナの ゆめが「むかえが くる」と つげる。',
-    steps:[
-      {id:'depart', desc:'たびに でる', flag:'ch3_departed'},
-    ],
+    steps:[{id:'depart', desc:'たびに でる', flag:'ch3_departed'}],
     reward:{}, next:null,
   },
 
@@ -1061,7 +1075,6 @@ const CH = {
 
     start: {map:'minamo_port', x:13, y:18, dir:'front'},
     party: ['sena', 'ruka'],
-    startLv: 8,                       // ★構想書の レベルたい（10〜14）に あわせた はじまり
     gold: 180, herbs: 8, waters: 2,
     equip: {weapon:{kind:'w',name:'うらないの つえ',v:5},
             armor: {kind:'a',name:'まいの ころも',v:4}},
@@ -1084,6 +1097,10 @@ const CH = {
         key: 'shadowsis_a',
         pair: 'shadowsis_b',                 // ★そうしボス：2たいで あらわれる
         clearedFlag: 'ch3_gotShell',
+        needKey: 'callshell',                 // ★よびがいが ないと ゆめの おくへ とどかない
+        lockMsg: ['しおだまりの おくに、ふたつの かげが ゆらいでいる。',
+                  'だが こえが とどかない。ゆめが ふかすぎる。',
+                  'セナ「……＜よびがい＞が いる」'],
         intro: ['さいしんぶ。しおだまりに、ふたつの かげが うつっている。',
                 'かおも せも おなじ、ふたりの おんなのこ。',
                 '＜おきて＞　＜おきないで＞',
@@ -1097,18 +1114,31 @@ const CH = {
     onEnter: {
       minamo_isle: 'ch3_reachedIsle',
       minamo_dgn1: 'ch3_enteredCave',
+      minamo_dgn0: 'ch3_enteredShoal',
     },
 
     talkEvents: [
+      // ① ししょう：たびの はじまり
       { npc:'うらないの ししょう', unless:'ch3_started',
         set:['ch3_started'],
-        quest:{ch3_q1_isle:'active'},
+        quest:{ch3_q0_fare:'active'},
         msg:['ししょう「セナ。おまえの ゆめみの ちからは、まだ あさい」',
              '「じゃが いまは その あさい ちからが いる」',
              '「しまじゅうの ものが、ねむったまま おきんのじゃ」',
-             'ししょう「ルカ、セナを たのんだよ」',
-             'ルカ「まかせて。ねえさんは わたしが まもる」',
-             '＊ クエスト「しまの ねむり」＊'] },
+             'セナ「……でも わたし、まだ うらないも あたらないのに」',
+             'ルカ「あたるまで やればいいよ。わたしが おどって かせぐから」',
+             'ししょう「しまへ わたる こぶねを たのみなさい。ふなちんが いる」',
+             '＊ クエスト「ふなちんを かせぐ」＊'] },
+      // ② ふなのり：ふなちん 80G
+      { npc:'ふなのり', cond:['ch3_started'], unless:'ch3_paidFare',
+        needGold:80, takeGold:80,
+        set:['ch3_paidFare'],
+        quest:{ch3_q0_fare:'clear', ch3_q1_isle:'active'},
+        msg:['ふなのり「しまへ？ ……いいぜ、80ゴールドだ」',
+             '（ふなちんを はらった）',
+             'ふなのり「しおが はやい。しっかり つかまってな」',
+             '＊ こぶねに のれるように なった ＊'] },
+      // ③ おさ：しまの ねむり
       { npc:'むらの おさ', cond:['ch3_reachedIsle'], unless:'ch3_heardIsle',
         set:['ch3_heardIsle'],
         quest:{ch3_q1_isle:'clear', ch3_q2_dream:'active'},
@@ -1116,10 +1146,21 @@ const CH = {
              '「むらの はんぶんが、ねむったまま おきん」',
              '「みなみの かいしょくどうじゃ。しおが ひいた ときだけ はいれる」',
              '「そこに ＜ゆめの ぬし＞が おると いわれておる」',
-             '＊ クエスト「ゆめを みる」＊'] },
+             '＊ クエスト「ゆめの かけら」＊'] },
+      // ④ ゆめみの あと：ししょうに もどると よびがいの はなし
+      { npc:'うらないの ししょう', cond:['ch3_sawDream'], unless:'ch3_heardShell',
+        set:['ch3_heardShell'],
+        quest:{ch3_q2_dream:'clear', ch3_q3_shell:'active'},
+        msg:['ししょう「ゆめを みたか。……よく たえたな」',
+             'セナ「ふたりの こえが、おなじ くちから きこえたんです」',
+             'ししょう「ふたつで ひとつの ゆめじゃ。あさい ゆめでは とどかん」',
+             '「＜よびがい＞が いる。ふけば、ゆめの おくへ こえが とどく」',
+             '「にしの ＜あさせの ほら＞に しずんでおる。しおが ひいた いまなら はいれる」',
+             '＊ クエスト「よびがいを さがす」＊'] },
+      // ⑤ ボスを たおした あと：ししょうに ほうこく
       { npc:'うらないの ししょう', cond:['ch3_gotShell'], unless:'ch3_reported',
         set:['ch3_reported'],
-        quest:{ch3_q4_cause:'active'},
+        quest:{ch3_q4_twins:'clear', ch3_q5_cause:'active'},
         msg:['ししょう「かげは きえたか。……だが みなは めざめぬな」',
              'セナ「ししょう。……わたし、また ゆめを みました」',
              '「うみの むこうから、ひかりを つれた こが くるんです」',
@@ -1131,7 +1172,7 @@ const CH = {
     bossReward: {
       shadowsis_a: {
         set:['ch3_gotShell'],
-        quest:{ch3_q3_twins:'clear'},
+        quest:{ch3_q4_twins:'clear'},
         msg:['', 'ふたつの かげは かさなり、ひとつに なって きえた。',
              'あとには、ちいさな しろい かいがらが のこされていた。',
              'セナ「……ふたりとも、おきたかったんだ」',
@@ -1142,7 +1183,7 @@ const CH = {
     ending: {
       trigger: 'ch3_reported',
       set:['ch3_cleared'],
-      quest:{ch3_q4_cause:'active'},
+      quest:{ch3_q5_cause:'active'},
       msg:['セナは かいがらを にぎりしめ、うみを みた。',
            'ルカ「ねえさん、なきそうな かお してる」',
            'セナ「……ちがうよ。まっているのが、うれしいの」',
@@ -3444,6 +3485,17 @@ const TACTICS = {manual:'めいれいさせろ', gungan:'ガンガンいこう�
 
 // ---------------- データ：敵（36しゅ＋ボス3けいたい） ----------------
 const ENEMIES = [
+  // ============ 第3章 ミナモ地方 じょばん（Lv1〜6）============
+  // みなとの まわりに でる、ちいさな いそべの まもの。
+  {key:'coralslime', name:'サンゴスライム', hp:23, atk:6,  def:4,  agi:6,  exp:6,  gold:6,  minLv:1},
+  {key:'babycrab',   name:'こがにガニ',     hp:26, atk:7,  def:8,  agi:5,  exp:8,  gold:7,  minLv:1},
+  {key:'seagull',    name:'いそウミネコ',   hp:21, atk:8,  def:3,  agi:14, exp:9,  gold:8,  minLv:2,
+   skill:{p:0.24, mul:1.20, name:'きゅうこうか'}},
+  // ============ 第3章 ミナモ地方 ちゅうばん（Lv6〜10）============
+  {key:'seaslug',    name:'うみうしポン',   hp:38, atk:11, def:9,  agi:7,  exp:18, gold:15, minLv:5,
+   inflict:{type:'slow', p:0.20}},
+  {key:'reefeel',    name:'いわばウナギ',   hp:44, atk:14, def:8,  agi:16, exp:24, gold:20, minLv:6,
+   skill:{p:0.26, mul:1.25, name:'まきつき'}},
   // ============ 第3章 ミナモ地方 せんよう（Lv10〜14）============
   // ヤドガニ：しゅびが たかく、からに こもる（ぼうぎょ）
   {key:'hermitcrab', name:'ヤドガニ',      hp:78, atk:19, def:24, agi:8,  exp:60, gold:58,
@@ -3607,6 +3659,7 @@ const MIDBOSS = {
 };
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
+  minamo_dgn0: ['seaslug','reefeel','babycrab','seagull','poisonjelly'],              // Lv6〜10
   minamo_dgn1: ['hermitcrab','poisonjelly','stingray','bloodflower','junglemen','armycrab'],  // Lv10〜13
   minamo_dgn2: ['redgator','spikelizard','maskshaman','bloodflower','merman','metalslime'],   // Lv12〜15
   zaal_dgn1:   ['skeleton','ghostlamp','skullbat','wisp','hornet','mushmage'],        // Lv8〜12
@@ -3694,8 +3747,8 @@ const MAPS = {
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~____.......r,..........V.....,._~~_....__~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~_.,.........r....,.........,...._~~_......_~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~_..............._._............._~_......._~~~~~~~~~~~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~_....,..,_____._~_~_..........._~~_......._~~~~~~~~~~~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~__....._~~~~~_._._....._..,..,.__.._...._~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~_....,..,_____._._~_..........._~~_......._~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~__....._~~~~~_.X._....._..,..,.__.._...._~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~__...._~~~~_........_~_........._~____~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_....__~_..........__........._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_..,.._~_....X....,_~_...,..__~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
@@ -3713,14 +3766,16 @@ const MAPS = {
     '40,57':{to:'minamo_port', x:13, y:18},
     '52,60':{to:'minamo_isle', x:9,  y:12},
     '46,67':{to:'minamo_dgn1', x:8,  y:13},
+    '44,64':{to:'minamo_dgn0', x:8,  y:10},
   },
   // ちほうごとに でる まものを かえる
   encZones:[
     {x0:26,y0:0, x1:70,y1:23, pool:['icicleslime','hoimislime','yukingon','frostbat'], name:'ヴェルサの せつげん'},
-    // ★まちの まわりは やさしく、みなみ・にしへ いくほど つよく する
-    // ★ミナモ：まちの まわりは やさしく、おきあいは つよく
-    {x0:34,y0:52,x1:60,y1:62, pool:['hermitcrab','poisonjelly','stingray','junglemen'],
-     name:'ミナモの しまなみ'},
+    // ★ミナモ：みなとの まわり → しまなみ → おきあい と だんだん つよく
+    {x0:34,y0:53,x1:48,y1:60, pool:['coralslime','babycrab','seagull','seaslug'],
+     name:'みなとの いそべ'},
+    {x0:34,y0:52,x1:60,y1:64, pool:['seagull','seaslug','reefeel','hermitcrab',
+       'poisonjelly','stingray'], name:'ミナモの しまなみ'},
     {x0:26,y0:50,x1:72,y1:71, pool:['stingray','bloodflower','junglemen','redgator',
        'spikelizard','maskshaman'], name:'サンゴの おきあい'},
     {x0:74,y0:26,x1:95,y1:36, pool:['drakybat','madrock','mandragora','hornet'],
@@ -3734,6 +3789,23 @@ const MAPS = {
   // K おうじょうもん / F ふんすい / I やどや / P きょうかい / W ぶきや / M まほうてん
   // G みなみもん / f ゆきの き / n むらびと
   // ============ 第3章 ミナモ地方（サンゴぐんとう）============
+  // ★あさせの ほら（第3章：よびがいを とりに いく）
+  minamo_dgn0:{name:'あさせの ほら',theme:'sea',enc:true,encRate:0.070,encGrace:4,tiles:[
+    "####################",
+    "####################",
+    "##======##========##",
+    "##=ww===##t=======##",
+    "##=ww===##===o==t=##",
+    "##======##========##",
+    "##=C=o============##",
+    "##================##",
+    "##=t===========ww=##",
+    "##=============wC=##",
+    "##====o===t===o===##",
+    "##======<<========##",
+    "####################",
+    "####################"
+  ], warps:{}, warpsXY:{'8,11':{to:'world',x:44,y:63},'9,11':{to:'world',x:44,y:63}}},
   minamo_port:{name:'サンゴの みなと',theme:'coral',enc:false,tiles:[
     "############################",
     "#wwwwwwwwwwwwwwwwwwwwwwwwww#",
@@ -4329,6 +4401,21 @@ function interact(){
     return;
   }
   if(ch==='B'){ triggerBoss(nx,ny); return; }
+  // ★よびがい：あさせの ほらで いわを しらべると てにはいる
+  if(ch==='o' && P.map==='minamo_dgn0' && (G.chapter||1)===3
+     && G.flags.ch3_heardShell && !G.flags.ch3_gotCallShell){
+    G.flags.ch3_gotCallShell = true;
+    giveKey('callshell');
+    questAdvance('ch3_q3_shell','clear');
+    questAdvance('ch3_q4_twins','active');
+    G.mode='msg';
+    U.msg(['いわの あいだに、しろい かいが はさまっている。',
+           'セナが そっと ひきぬくと、しおの おとが やんだ。',
+           '', '＊ よびがいを てにいれた！ ＊',
+           'ルカ「……いま、うみが しずかに なった？」',
+           'セナ「ううん。この かいが、おとを すいこんだの」'], ()=>{ U.hud(); G.mode='field'; });
+    return;
+  }
   // ★ゆめみ：ちほうと しょうの じょうけんが そろえば おきる
   if(ch==='o' && P.map==='minamo_dgn1' && (G.chapter||1)===3
      && G.flags.ch3_enteredCave && !G.flags.ch3_sawDream){
@@ -4517,6 +4604,7 @@ function matchEvent(e){
   if(e.cond && !e.cond.every(f=>F[f])) return false;         // まえの じょうけんが そろって いない
   if(e.when && e.when.state && G.townState !== e.when.state) return false;
   if(e.needKey && !hasKey(e.needKey)) return false;
+  if(e.needGold && P.gold < e.needGold) return false;   // ★ふなちんが たりない
   return true;
 }
 function runTalkEvent(npcName){
@@ -4529,6 +4617,7 @@ function runTalkEvent(npcName){
   if(e.setState && WORLD.TOWN_STATES[e.setState]) G.townState = e.setState;
   if(e.takeKey) takeKey(e.takeKey);
   if(e.giveKey) giveKey(e.giveKey);
+  if(e.takeGold) P.gold = Math.max(0, P.gold - e.takeGold);   // ★はらう
   if(e.gold) P.gold += e.gold;
   Object.keys(e.quest || {}).forEach(q => questAdvance(q, e.quest[q]));
 
@@ -4766,6 +4855,11 @@ function triggerBoss(x,y){
     G.mode='msg';
     if(bi.clearedFlag && G.flags[bi.clearedFlag]){
       U.msg(bi.after || ['もう だれも いない。'], ()=>{ G.mode='field'; });
+      return;
+    }
+    // ★だいじなものが ないと たたかいに ならない
+    if(bi.needKey && !hasKey(bi.needKey)){
+      U.msg(bi.lockMsg || ['まだ ここには はいれない。'], ()=>{ G.mode='field'; });
       return;
     }
     U.msg(bi.intro || ['まものが たちふさがった！'], ()=>{ startBattle(bi.key); });
@@ -5548,6 +5642,8 @@ function castField(ci, key, ti){
 }
 // ---------------- だいじなもの（キーアイテム）----------------
 const KEY_ITEMS = {
+  callshell:{key:'callshell', name:'よびがい',
+    desc:'しろい かい。ふくと、ゆめの おくへ こえが とどくという。'},
   yukigusa:{id:'yukigusa', name:'ゆきぐさ',
             desc:'ミルカの くすしが つくる くすりの もと。まものに うばわれていた。'},
   medicine:{id:'medicine', name:'めざめの くすり',
