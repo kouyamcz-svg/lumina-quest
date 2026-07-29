@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T04:00:33", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 393, "core": 2155, "chapters": 274, "bgm": 827, "view2d": 1244, "view": 1273, "ui": 601}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T04:32:38", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 405, "core": 2236, "chapters": 274, "bgm": 827, "view2d": 1244, "view": 1273, "ui": 670}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -264,6 +264,9 @@ const NPCDATA = (function(){
 //   when を かかない ものが きほん（さいごに おく）
 const NPCS = {
   zaal_town: [
+    {at:'22,10', spr:'butler', name:'こうえきしょう', lines:[
+      {text:['こうえきしょう「しなものの そうばは まちごとに ちがう」',
+             '「やすい ところで しいれ、たかい ところで うる。それだけさ」']}]},
     {at:'18,10', spr:'villagerB', name:'うわさずきの しょうにん', lines:[
       {when:{flag:'ch2_cleared'}, text:[
         '「きたの ヴェルサにも ＜アルト＞の うわさが あるらしい」',
@@ -311,6 +314,9 @@ const NPCS = {
       {text:['「うちの ひとも たいしょうに いたんです……」']}]},
   ],
   zaal_oasis: [
+    {at:'7,10', spr:'villagerB', name:'こうえきしょう', lines:[
+      {text:['こうえきしょう「この むらは こうしんりょうと なつめが やすい」',
+             '「ぬのと がらすだまは たかく つく。すなを こえて くるからな」']}]},
     {at:'11,6', spr:'elder', name:'すなの かたりべ', lines:[
       {when:{flag:'ch2_gotSand'}, text:[
         'かたりべ「＜アルト＞は すなの まえに きて、すなの あとに きえた」',
@@ -342,6 +348,9 @@ const NPCS = {
       {text:['「すなの したに、ふるい たてものが うまってるんだって」']}]},
   ],
   versa_town: [
+    {at:'9,11', spr:'villagerB', name:'こうえきしょう', lines:[
+      {text:['こうえきしょう「ゆきぐにでは なつめが たかい」',
+             '「みなみから はこべば、それだけで もうけに なるよ」']}]},
     {at:'20,11', spr:'villagerB', name:'うわさずきの おとこ', lines:[
       {when:{flag:'ch1_cleared'}, text:[
         '「なあ、あの＜アルト＞って ひとの こと きいたか」',
@@ -454,6 +463,9 @@ const NPCS = {
              '「にしへ いけば ミルカ、ひがしの おくは こおりの どうくつだ」']}]},
   ],
   versa_town2: [
+    {at:'8,6', spr:'villagerA', name:'こうえきしょう', lines:[
+      {text:['こうえきしょう「ちいさな むらだけど、しなものは あつまる」',
+             '「ぬのが やすいのは、ここで おっているからさ」']}]},
     {at:'12,6', spr:'elderWoman', name:'ものしりの おんな', lines:[
       {when:{flag:'ch1_gotHerb'}, text:[
         '「＜アルト＞ね。まおうを たおした ひとりなんですって」',
@@ -3295,7 +3307,7 @@ const MAPS = {
     "#===========rrrrrr===========#",
     "#==rrrrnrrrrtrrrrtrrrnrrrrr==#",
     "#==rrrrrrrrrrrrrrrrrrrrrrrr==#",
-    "#==========n=yrr==n==========#",
+    "#==========n=yrr==n===n======#",
     "#====n========rr=============#",
     "#==HHHHw=HHHH=rr==HHHH==HHHH=#",
     "#==HHHH==HHHH=rr==HHHH==HHHH=#",
@@ -3317,7 +3329,7 @@ const MAPS = {
     "#==rrrrrrrrrrnrrr==#",
     "#========rr========#",
     "#==HHHH==rr==HHHH==#",
-    "#==HHHH==rt==HHHH==#",
+    "#==HHHHn=rt==HHHH==#",
     "#==HHSHfnrr==HHHHC=#",
     "#========rr========#",
     "#########GG#########"
@@ -3369,7 +3381,7 @@ const MAPS = {
     "#==========rrrrrr==========#",
     "#==rrrrrnrrtrrrrtrrnrrrrn==#",
     "#==rrrfrrrrrrrrrrrrrrrfrr==#",
-    "#====n======yrr=====n======#",
+    "#====n===n==yrr=====n======#",
     "#==HHHw==HHH=rr=*=HHHH=HHH=#",
     "#==HHHH==HHn=rr==*HHHH=HHH=#",
     "#==HHSH==HHH=rr===HHHH=HHH=#",
@@ -3386,7 +3398,7 @@ const MAPS = {
     "#=###==###rr=###=D===#",
     "#=###=I===rr=#S#=###=#",
     "#f=======trr=n===###=#",
-    "#===rrrrrrrrnrrrr###=#",
+    "#===rrrrnrrrnrrrr###=#",
     "#===rrrrrrrrrrrrrr===#",
     "#=======n=rr====n====#",
     "#=#T#=n===rrt#T#====f#",
@@ -3644,7 +3656,7 @@ function freshState(){
        tactic:'manual', dex:{}, trail:[], stepFlip:false, cleared:false,
        chapter:1, chapters:{}, townState:'NORMAL', night:false, quests:{}, steps:0};
   P = {map:'versa_town', x:13, y:18, dir:'front', gold:60, herbs:5, waters:0,
-       equipBag:[], keyItems:{}};
+       equipBag:[], keyItems:{}, goods:{}};
   party = [mkMember('lion',1)];
   party[0].weapon = {kind:'w',name:'みならいの けん',v:3};
   party[0].armor  = {kind:'a',name:'こまもり',v:2};
@@ -3737,6 +3749,7 @@ const NullView = {
 const NullUI = {
   msgLog: [],
   msg(lines, done){ lines.forEach(l=>NullUI.msgLog.push(l)); done&&done(); },
+  openTrade(){},
   menu(items, title, onPick){ onPick(0); },
   hud(){}, label(){},
 };
@@ -3908,6 +3921,7 @@ function doWarp(w){
           G.townState = cd.onEnterState[w.to];
       }
     }
+    if(TRADE_MARKET[w.to]) G.marketTick = (G.marketTick|0) + 1;   // そうばが うごく
     if(w.to==='versa_town2') G.flags.ch1_reachedMirka=true;
     if(w.to==='versa_dgn1' && !G.flags.ch1_enteredCave){
       G.flags.ch1_enteredCave=true;
@@ -3936,6 +3950,16 @@ function talkNPC(x,y){
   G.mode='msg';
   if(!entry){ U.msg(['「……」'], ()=>{ G.mode='field'; }); return; }
   const lines = NPCDATA.pickLines(entry, {townState:G.townState, flags:G.flags});
+  // ★こうえきしょう は はなすと あきないが できる（バルドの ミニイベント）
+  if(entry.name === 'こうえきしょう'){
+    if(party[0] && party[0].cls !== 'bald'){
+      U.msg(['こうえきしょう「あきないは しょうにんの しごとさ」',
+             '「あんたには むいて いないよ」'], ()=>{ G.mode='field'; });
+      return;
+    }
+    U.msg(lines, ()=>{ G.mode='menu'; U.openTrade && U.openTrade(); });
+    return;
+  }
   // ★ものがたりの できごとが ある ときは、そちらを だす（ふだんの せりふは ださない）。
   //   りょうほう だすと おなじ ことを 2かい いう ことに なる（じっさいに でた ふぐあい）。
   if((G.chapter||1)!==1 && runTalkEvent(entry.name)) return;
@@ -4795,6 +4819,70 @@ function endBattle(won){
   });
 }
 
+// ---------------- ぎょうしょう（あきない）----------------
+// バルドは しょうにん。まちごとに そうばが ちがう ものを はこんで もうける。
+// おなじ まちで かって うっても そんを する ように、うりねは かいねの 85%。
+const TRADE_GOODS = {
+  nuno:   {key:'nuno',   name:'ぬの',          base:20},
+  spice:  {key:'spice',  name:'こうしんりょう',  base:60},
+  glass:  {key:'glass',  name:'がらすだま',     base:40},
+  dates:  {key:'dates',  name:'ほしたなつめ',   base:15},
+  silver: {key:'silver', name:'ぎんの かざり',  base:120},
+};
+// まちごとの そうば（1.0が きじゅん）
+const TRADE_MARKET = {
+  zaal_town:  {nuno:0.70, spice:1.45, glass:0.75, dates:1.35, silver:1.15},
+  zaal_oasis: {nuno:1.50, spice:0.60, glass:1.40, dates:0.65, silver:0.85},
+  versa_town: {nuno:1.20, spice:1.30, glass:0.90, dates:1.50, silver:0.80},
+  versa_town2:{nuno:0.85, spice:1.20, glass:1.30, dates:1.20, silver:1.10},
+};
+function tradeTowns(){ return Object.keys(TRADE_MARKET); }
+// そうばは まちに はいる たびに すこし ゆれる
+function marketSeed(map){
+  const t = (G.marketTick|0);
+  let h = 0, s = map + ':' + t;
+  for(let i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+function tradePrice(map, key){
+  const g = TRADE_GOODS[key], mk = TRADE_MARKET[map];
+  if(!g || !mk) return null;
+  const wave = ((marketSeed(map + key) % 41) - 20) / 100;   // ±20%
+  return Math.max(1, Math.round(g.base * mk[key] * (1 + wave)));
+}
+function sellPrice(map, key){
+  const p = tradePrice(map, key);
+  return p === null ? null : Math.max(1, Math.round(p * 0.85));
+}
+function goodsCount(key){ return (P.goods && P.goods[key]) | 0; }
+function goodsTotal(){ return Object.values(P.goods || {}).reduce((a,b)=>a+(b|0), 0); }
+const GOODS_LIMIT = 30;                       // かつげる かず
+function buyGood(map, key, n){
+  const p = tradePrice(map, key);
+  if(p === null) return {ok:false, msg:'ここでは あつかって いない。'};
+  n = Math.max(1, n|0);
+  if(goodsTotal() + n > GOODS_LIMIT) return {ok:false, msg:'これいじょうは かつげない。'};
+  const cost = p * n;
+  if(P.gold < cost) return {ok:false, msg:'ゴールドが たりない。'};
+  P.gold -= cost;
+  P.goods = P.goods || {};
+  P.goods[key] = goodsCount(key) + n;
+  return {ok:true, msg:TRADE_GOODS[key].name + 'を ' + n + 'こ しいれた！（' + cost + 'G）', cost};
+}
+function sellGood(map, key, n){
+  const p = sellPrice(map, key);
+  if(p === null) return {ok:false, msg:'ここでは ひきとって もらえない。'};
+  const have = goodsCount(key);
+  if(have <= 0) return {ok:false, msg:'もって いない。'};
+  n = Math.min(have, Math.max(1, n|0));
+  const gain = p * n;
+  P.gold += gain;
+  P.goods[key] = have - n;
+  if(P.goods[key] <= 0) delete P.goods[key];
+  // ★はじめて もうけたら しょうかいちょうが ほめる（ものがたりの めじるし）
+  G.tradeProfit = (G.tradeProfit | 0) + gain;
+  return {ok:true, msg:TRADE_GOODS[key].name + 'を ' + n + 'こ うった！（' + gain + 'G）', gain};
+}
 // ---------------- じゅもん（せんとうの そとで つかう）----------------
 // そとで つかえるのは かいふく・じょうたい かいふく・そせい だけ。
 // こうげき じゅもんは 「ここでは つかえない」。
@@ -5023,6 +5111,7 @@ function saveGame(s, slot){
       v:SAVE_VERSION, at:Date.now(),
       map:P.map, x:P.x, y:P.y, dir:P.dir,
       gold:P.gold, herbs:P.herbs, waters:P.waters, equipBag:P.equipBag, keyItems:P.keyItems,
+      goods:P.goods, marketTick:G.marketTick, tradeProfit:G.tradeProfit,
       party: party.map(serializeMember),
       chapter:G.chapter, chapters:G.chapters,
       flags:G.flags, quests:G.quests,
@@ -5048,6 +5137,8 @@ function loadGame(s, slot){
     P.waters = Math.max(0, d.waters|0);
     P.equipBag = Array.isArray(d.equipBag) ? d.equipBag : [];
     P.keyItems = (d.keyItems && typeof d.keyItems==='object') ? d.keyItems : {};
+    P.goods = (d.goods && typeof d.goods==='object') ? d.goods : {};
+    G.marketTick = d.marketTick|0; G.tradeProfit = d.tradeProfit|0;
     P.dir = d.dir || 'front';
     const land = safeLanding(d.map, d.x|0, d.y|0);
     P.map = land.map; P.x = land.x; P.y = land.y;
@@ -5147,6 +5238,8 @@ return {
   fieldSpells, castField, spellNeedsTarget,
   returnDestinations, canReturnHere, castReturn, allReturnSpots, bossInfoAt, chData,
   KEY_ITEMS, hasKey, giveKey, takeKey, keyItemList,
+  TRADE_GOODS, TRADE_MARKET, tradeTowns, tradePrice, sellPrice,
+  goodsCount, goodsTotal, buyGood, sellGood, GOODS_LIMIT,
   setTownState, setNight, townStateDef, questList, questAdvance, startChapter,
   // 差し替え
   bind, NullView, NullUI, NullAudio,
@@ -6668,7 +6761,7 @@ function hud(){
 }
 function label(t){ labelEl.textContent=t; }
 
-const UI = {msg:msg2, menu, hud, label};
+const UI = {msg:msg2, menu, hud, label, openTrade};
 
 // ---------------- 入力 ----------------
 function press(k){
@@ -6807,6 +6900,75 @@ function applySpell(ci, key, ti){
   const r = C.castField(ci, key, ti);
   hud();
   msg2(r.lines, ()=>{ C.G.mode='menu'; spellsOf(ci); });
+}
+
+// ---------------- ぎょうしょう（あきない）----------------
+// しょうにん バルドの ミニイベント。まちごとの そうばの さで もうける。
+function openTrade(){
+  const map = C.P.map;
+  const keys = Object.keys(C.TRADE_GOODS);
+  const items = ['しいれる', 'うる', 'そうばを みる', 'もどる'];
+  menu(items, 'あきない（' + C.goodsTotal() + '/' + C.GOODS_LIMIT + '）', (k) => {
+    if(k === 0) tradeBuy(map, keys);
+    else if(k === 1) tradeSell(map, keys);
+    else if(k === 2) tradeInfo(map, keys);
+    else C.G.mode = 'field';
+  });
+}
+function tradeBuy(map, keys){
+  const list = keys.filter(k => C.tradePrice(map, k) !== null);
+  const items = list.map(k => {
+    const g = C.TRADE_GOODS[k];
+    return g.name + '　' + C.tradePrice(map, k) + 'G'
+         + (C.goodsCount(k) ? '（' + C.goodsCount(k) + '）' : '');
+  }).concat(['もどる']);
+  menu(items, 'しいれる　' + C.P.gold + 'G', (k) => {
+    if(k >= list.length){ C.G.mode = 'menu'; openTrade(); return; }
+    tradeAmount('しいれる', list[k], (n) => {
+      const r = C.buyGood(map, list[k], n);
+      hud();
+      msg2([r.msg], () => { C.G.mode = 'menu'; tradeBuy(map, keys); });
+    });
+  });
+}
+function tradeSell(map, keys){
+  const list = keys.filter(k => C.goodsCount(k) > 0 && C.sellPrice(map, k) !== null);
+  if(!list.length){
+    msg2(['うれる しなものを もって いない。'], () => { C.G.mode = 'menu'; openTrade(); });
+    return;
+  }
+  const items = list.map(k => {
+    const g = C.TRADE_GOODS[k];
+    return g.name + '×' + C.goodsCount(k) + '　' + C.sellPrice(map, k) + 'G';
+  }).concat(['もどる']);
+  menu(items, 'うる　' + C.P.gold + 'G', (k) => {
+    if(k >= list.length){ C.G.mode = 'menu'; openTrade(); return; }
+    tradeAmount('うる', list[k], (n) => {
+      const r = C.sellGood(map, list[k], n);
+      hud();
+      msg2([r.msg], () => { C.G.mode = 'menu'; openTrade(); });
+    });
+  });
+}
+function tradeAmount(verb, key, done){
+  const g = C.TRADE_GOODS[key];
+  menu(['1こ', '5こ', '10こ', 'もどる'], g.name + 'を ' + verb, (k) => {
+    if(k >= 3){ C.G.mode = 'menu'; openTrade(); return; }
+    done([1, 5, 10][k]);
+  });
+}
+function tradeInfo(map, keys){
+  const here = C.WORLD.mapName(map);
+  const lines = ['＜' + here + 'の そうば＞'];
+  keys.forEach(k => {
+    const g = C.TRADE_GOODS[k];
+    const b = C.tradePrice(map, k), s = C.sellPrice(map, k);
+    if(b === null) return;
+    const rel = b > g.base * 1.15 ? '　たかい' : b < g.base * 0.85 ? '　やすい' : '';
+    lines.push('　' + g.name + '　かい ' + b + 'G ／ うり ' + s + 'G' + rel);
+  });
+  lines.push('（やすい まちで しいれ、たかい まちで うる）');
+  msg2(lines, () => { C.G.mode = 'menu'; openTrade(); });
 }
 
 // ---------------- どうぐ ----------------
