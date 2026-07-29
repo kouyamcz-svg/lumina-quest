@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T03:32:31", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 393, "core": 2148, "chapters": 274, "bgm": 827, "view2d": 1244, "view": 1273, "ui": 601}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T04:00:33", "assets_sha": "ad66dbbc", "lines": {"world": 145, "npc": 393, "core": 2155, "chapters": 274, "bgm": 827, "view2d": 1244, "view": 1273, "ui": 601}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3069,33 +3069,33 @@ const ENEMIES = [
    spell:{kind:'dmg', p:0.26, lo:6, hi:10, name:'ひのたま'}},
   {key:'hoimislime', minLv:1,  name:'ホイミスライム',   hp:20, atk:6,  def:5,  agi:7,  exp:9,   gold:8,
    spell:{kind:'heal', p:0.22, lo:7, hi:11, name:'いやしの ひかり'}},
-  {key:'drakybat', minLv:1,    name:'ドラキーバット',   hp:24, atk:7,  def:4,  agi:12, exp:7,   gold:6},
-  {key:'madrock', minLv:3,     name:'マドロック',       hp:34, atk:9,  def:8,  agi:3,  exp:10,  gold:9},
-  {key:'mandragora', minLv:4,  name:'マンドラゴラ',     hp:32, atk:9,  def:6,  agi:5,  exp:11,  gold:10,
+  {key:'drakybat', minLv:1,    name:'ドラキーバット',   hp:24, atk:7,  def:4,  agi:12, exp:17,   gold:12},
+  {key:'madrock', minLv:3,     name:'マドロック',       hp:34, atk:9,  def:8,  agi:3,  exp:24,  gold:17},
+  {key:'mandragora', minLv:4,  name:'マンドラゴラ',     hp:32, atk:9,  def:6,  agi:5,  exp:26,  gold:19,
    skill:{p:0.30, mul:1.05, name:'きょうきの さけび'}, inflict:{type:'sleep', p:0.35}},
-  {key:'thornwolf', minLv:6,   name:'いばらウルフ',     hp:45, atk:12, def:8,  agi:11, exp:14,  gold:12,
+  {key:'thornwolf', minLv:6,   name:'いばらウルフ',     hp:45, atk:12, def:8,  agi:11, exp:31,  gold:21,
    skill:{p:0.32, mul:1.45, name:'とげとげアタック'}},
-  {key:'hornet', minLv:3,      name:'エレキホーネット', hp:35, atk:10, def:6,  agi:14, exp:12,  gold:10,
+  {key:'hornet', minLv:3,      name:'エレキホーネット', hp:35, atk:10, def:6,  agi:14, exp:29,  gold:19,
    spell:{kind:'dmg', p:0.32, lo:9, hi:14, name:'でんげき'}},
   {key:'metalslime', minLv:5,  name:'メタルスライム',   hp:20, atk:8,  def:14, agi:18, exp:120, gold:80,
    fleeP:0.58, tough:true},
   // === ティア2：どうくつB1（Lv6-12） ===
-  {key:'wisp',        name:'ウィスプ',         hp:45, atk:14, def:8,  agi:16, exp:28,  gold:31,
-   spell:{kind:'dmg', p:0.38, lo:14, hi:20, name:'ひとだま'}},
-  {key:'skeleton',    name:'スケルトン',       hp:58, atk:16, def:11, agi:9,  exp:22,  gold:25,
-   skill:{p:0.30, mul:1.35, name:'ほねの いちげき'}},
-  {key:'ghostlamp',   name:'ゴーストランプ',   hp:50, atk:15, def:9,  agi:8,  exp:24,  gold:34,
-   skill:{p:0.34, mul:1.10, name:'まどろみの ほのお'}, inflict:{type:'sleep', p:0.40}},
-  {key:'skullbat',    name:'どくろバット',     hp:55, atk:18, def:9,  agi:15, exp:26,  gold:28,
-   skill:{p:0.36, mul:1.25, name:'かみつき'}, drain:0.55},
-  {key:'mushmage',    name:'マッシュメイジ',   hp:62, atk:15, def:10, agi:8,  exp:34,  gold:42,
-   spell:{kind:'dmg', p:0.34, lo:16, hi:23, name:'ほうしの まい'}, inflict:{type:'confuse', p:0.28}},
-  {key:'armycrab',    name:'ぐんたいガニ',     hp:70, atk:20, def:15, agi:7,  exp:32,  gold:39,
-   skill:{p:0.38, mul:1.40, name:'かにばさみ'}},
-  {key:'merman',      name:'バブルマーマン',   hp:75, atk:21, def:12, agi:10, exp:36,  gold:45,
-   spell:{kind:'dmg', p:0.32, lo:18, hi:26, name:'バブルショット'}, inflict:{type:'confuse', p:0.30}},
-  {key:'mimic',       name:'ミミック',         hp:85, atk:24, def:14, agi:6,  exp:42,  gold:126,
-   skill:{p:0.40, mul:1.50, name:'まるのみ'}, drain:0.35},
+  {key:'wisp',        name:'ウィスプ',         hp:45, atk:14, def:8,  agi:16, exp:56,  gold:50,
+   spell:{kind:'dmg', p:0.38, lo:14, hi:20, name:'ひとだま', minLv:8}},
+  {key:'skeleton',    name:'スケルトン',       hp:58, atk:16, def:11, agi:9,  exp:44,  gold:40,
+   skill:{p:0.30, mul:1.35, name:'ほねの いちげき', minLv:7}},
+  {key:'ghostlamp',   name:'ゴーストランプ',   hp:50, atk:15, def:9,  agi:8,  exp:48,  gold:54,
+   skill:{p:0.34, mul:1.10, name:'まどろみの ほのお', minLv:7}, inflict:{type:'sleep', p:0.40}},
+  {key:'skullbat',    name:'どくろバット',     hp:55, atk:18, def:9,  agi:15, exp:52,  gold:45,
+   skill:{p:0.36, mul:1.25, name:'かみつき', minLv:9}, drain:0.55},
+  {key:'mushmage',    name:'マッシュメイジ',   hp:62, atk:15, def:10, agi:8,  exp:61,  gold:60,
+   spell:{kind:'dmg', p:0.34, lo:16, hi:23, name:'ほうしの まい', minLv:9}, inflict:{type:'confuse', p:0.28}},
+  {key:'armycrab',    name:'ぐんたいガニ',     hp:70, atk:20, def:15, agi:7,  exp:58,  gold:56,
+   skill:{p:0.38, mul:1.40, name:'かにばさみ', minLv:10}},
+  {key:'merman',      name:'バブルマーマン',   hp:75, atk:21, def:12, agi:10, exp:65,  gold:65,
+   spell:{kind:'dmg', p:0.32, lo:18, hi:26, name:'バブルショット', minLv:11}, inflict:{type:'confuse', p:0.30}},
+  {key:'mimic',       name:'ミミック',         hp:85, atk:24, def:14, agi:6,  exp:67,  gold:161,
+   skill:{p:0.40, mul:1.50, name:'まるのみ', minLv:12}, drain:0.35},
   {key:'golem',       name:'ストーンゴーレム', hp:110,atk:22, def:18, agi:4,  exp:48,  gold:56,
    skill:{p:0.34, mul:1.45, name:'ぶんまわし'}},
   // === ティア3：どうくつB2（Lv12-18） ===
@@ -3167,8 +3167,8 @@ const MIDBOSS = {
 };
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
-  zaal_dgn1:   ['drakybat','madrock','mandragora','hornet','skeleton','ghostlamp'],   // Lv8〜12
-  zaal_dgn2:   ['skeleton','skullbat','mushmage','armycrab','wisp','metalslime'],     // Lv11〜15
+  zaal_dgn1:   ['skeleton','ghostlamp','skullbat','wisp','hornet','mushmage'],        // Lv8〜12
+  zaal_dgn2:   ['mushmage','armycrab','merman','skullbat','mimic','metalslime'],      // Lv11〜15
   versa_dgn1:  ['icicleslime','frostbat','yukingon','blizzardhawk'],        // Lv3〜5
   versa_dgn2:  ['yukingon','blizzardhawk','frostmermaid','thornwolf','metalslime'],// Lv5〜7
   field_toros:['greenslime','flameslime','hoimislime','drakybat','madrock','mandragora',
@@ -3272,7 +3272,11 @@ const MAPS = {
   // ちほうごとに でる まものを かえる
   encZones:[
     {x0:26,y0:0, x1:70,y1:23, pool:['icicleslime','hoimislime','yukingon','frostbat'], name:'ヴェルサの せつげん'},
-    {x0:66,y0:24,x1:95,y1:50, pool:['drakybat','madrock','mandragora','hornet','thornwolf'], name:'ザールの こうえきろ'},
+    // ★まちの まわりは やさしく、みなみ・にしへ いくほど つよく する
+    {x0:74,y0:26,x1:95,y1:36, pool:['drakybat','madrock','mandragora','hornet'],
+     name:'ザールの こうえきろ'},
+    {x0:66,y0:24,x1:95,y1:50, pool:['madrock','mandragora','hornet','thornwolf',
+       'skeleton','ghostlamp','wisp'], name:'すなの かいどう'},
   ]},
 
   // ============ ヴェルサ地方（第1章） ============
@@ -4249,7 +4253,10 @@ function startBattle(kind){
     if(!pool.length) pool = all;
     const lv = party[0].lv;
     const byLv    = lv<4 ? 1 : (lv<9 ? 2 : 3);          // レベルが ひくいうちは たいぐんに ならない
-    const byParty = party.length===1 ? (lv<5 ? 1 : 2)   // ひとりの ときは とくに おさえる
+    // ★ひとりの ときも、そだつに つれて かずを ふやす。
+    //   2たい どまりだと けいけんちが たまらず、レベルあげが ながすぎる
+    //   （第2章で Lv12まで 188せん かかっていた）。
+    const byParty = party.length===1 ? (lv<5 ? 1 : lv<9 ? 2 : 3)
                                      : party.length+1;
     const maxN = Math.min(byLv, byParty);
     const n = Math.min(maxN, 1 + (Math.random()<0.45?1:0) + (Math.random()<0.18?1:0));
