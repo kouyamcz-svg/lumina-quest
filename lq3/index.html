@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T14:57:45", "assets_sha": "18e7cc31", "lines": {"world": 151, "npc": 531, "core": 2404, "chapters": 390, "bgm": 901, "view2d": 1292, "view": 1277, "ui": 677}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T15:19:19", "assets_sha": "2fde0a6c", "lines": {"world": 151, "npc": 531, "core": 2443, "chapters": 391, "bgm": 905, "view2d": 1292, "view": 1277, "ui": 677}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1061,6 +1061,7 @@ const CH = {
 
     start: {map:'minamo_port', x:13, y:18, dir:'front'},
     party: ['sena', 'ruka'],
+    startLv: 8,                       // ★構想書の レベルたい（10〜14）に あわせた はじまり
     gold: 180, herbs: 8, waters: 2,
     equip: {weapon:{kind:'w',name:'うらないの つえ',v:5},
             armor: {kind:'a',name:'まいの ころも',v:4}},
@@ -1845,7 +1846,8 @@ function play(name){
   if(name !== 'battle' && name !== 'boss'){ stop(); return; }
   pauseField();                       // せんとうちゅうは いちじ ていし（いしは のこす）
   fieldUnlocked = true;               // せんとうちゅうに あけなおさない
-  if(playing === name) return;
+  // ★おなじ きょくでも まいかい あたまから ならしなおす
+  if(playing === name){ if(ensure()){ begin(name); } return; }
   if(!ensure()){ return; }
   stop();
   pending = null;
@@ -2034,6 +2036,9 @@ function playBattleFile(track){
   routeBattle();
   try{ AC && AC.resume && AC.resume(); }catch(e){}
   if(batGain){ try{ batGain.gain.value = batVol; }catch(e){} }
+  // ★せんとうきょくは まいかい あたまから。
+  //   とちゅうから はじまると、みじかい せんとうでは サビに とどかない。
+  try{ el.currentTime = 0; }catch(e){}
   try{
     const p = el.play();
     if(p && p.catch) p.catch(()=>{ batErr='さいせい きょかまち'; });
@@ -3439,6 +3444,39 @@ const TACTICS = {manual:'めいれいさせろ', gungan:'ガンガンいこう�
 
 // ---------------- データ：敵（36しゅ＋ボス3けいたい） ----------------
 const ENEMIES = [
+  // ============ 第3章 ミナモ地方 せんよう（Lv10〜14）============
+  // ヤドガニ：しゅびが たかく、からに こもる（ぼうぎょ）
+  {key:'hermitcrab', name:'ヤドガニ',      hp:78, atk:19, def:24, agi:8,  exp:60, gold:58,
+   minLv:9,  skill:{p:0.30, mul:0.6, name:'からに こもる'}},
+  // ジャングルメン：やりで つき、なかまを よぶ
+  {key:'junglemen',  name:'ジャングルメン', hp:68, atk:23, def:13, agi:14, exp:66, gold:62,
+   minLv:10, skill:{p:0.32, mul:1.38, name:'やりの ひとつき'},
+   call:{p:0.22, key:'junglemen', name:'なかまを よんだ！'}},
+  // スティングレイ：かっくうして たいあたり、どくばりの しっぽ
+  {key:'stingray',   name:'スティングレイ', hp:62, atk:22, def:11, agi:22, exp:63, gold:55,
+   minLv:9,  skill:{p:0.30, mul:1.30, name:'たいあたり'},
+   inflict:{type:'slow', p:0.26}},
+  // レッドゲイター：かみつき・しっぽ。ちゅうきゅうの あばれもの
+  {key:'redgator',   name:'レッドゲイター', hp:95, atk:27, def:16, agi:12, exp:78, gold:70,
+   minLv:11, skill:{p:0.34, mul:1.42, name:'かみつき'},
+   aoe:{p:0.16, lo:10, hi:15, name:'しっぽ なぎばらい'}},
+  // ブラッドフラワー：あまいかおり（ねむり）・どくのこな・ツタ
+  {key:'bloodflower',name:'ブラッドフラワー',hp:72, atk:20, def:14, agi:9,  exp:70, gold:64,
+   minLv:10, skill:{p:0.28, mul:1.25, name:'ツタの むちうち'},
+   aoe:{p:0.20, lo:9, hi:14, name:'どくのこな'},
+   inflict:{type:'sleep', p:0.30}},
+  // どくめんシャーマン：じゅじゅつと こんらん
+  {key:'maskshaman', name:'どくめんシャーマン',hp:66,atk:18, def:12, agi:16, exp:74, gold:72,
+   minLv:11, aoe:{p:0.26, lo:12, hi:18, name:'のろいの じゅもん'},
+   inflict:{type:'confuse', p:0.30}},
+  // トゲトカゲン：すばやく とびかかる
+  {key:'spikelizard',name:'トゲトカゲン',   hp:80, atk:25, def:15, agi:24, exp:76, gold:68,
+   minLv:11, skill:{p:0.34, mul:1.35, name:'とびかかり'},
+   inflict:{type:'slow', p:0.24}},
+  // どくクラゲル：しびれと どく
+  {key:'poisonjelly',name:'どくクラゲル',   hp:58, atk:17, def:10, agi:13, exp:58, gold:52,
+   minLv:9,  aoe:{p:0.22, lo:8, hi:13, name:'しびれの しょくしゅ'},
+   inflict:{type:'slow', p:0.34}},
   // === ティア1：のはら（Lv1-6） ===
   {key:'greenslime', minLv:1,  name:'グリーンスライム', hp:22, atk:6,  def:4,  agi:6,  exp:5,   gold:5},
   // ---- ヴェルサ地方（こおりの まもの）----
@@ -3569,8 +3607,8 @@ const MIDBOSS = {
 };
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
-  minamo_dgn1: ['armycrab','merman','mushmage','wisp','skullbat','ghostlamp'],        // Lv10〜13
-  minamo_dgn2: ['merman','armycrab','mimic','mushmage','metalslime'],                // Lv12〜15
+  minamo_dgn1: ['hermitcrab','poisonjelly','stingray','bloodflower','junglemen','armycrab'],  // Lv10〜13
+  minamo_dgn2: ['redgator','spikelizard','maskshaman','bloodflower','merman','metalslime'],   // Lv12〜15
   zaal_dgn1:   ['skeleton','ghostlamp','skullbat','wisp','hornet','mushmage'],        // Lv8〜12
   zaal_dgn2:   ['mushmage','armycrab','merman','skullbat','mimic','metalslime'],      // Lv11〜15
   versa_dgn1:  ['icicleslime','frostbat','yukingon','blizzardhawk'],        // Lv3〜5
@@ -3680,6 +3718,11 @@ const MAPS = {
   encZones:[
     {x0:26,y0:0, x1:70,y1:23, pool:['icicleslime','hoimislime','yukingon','frostbat'], name:'ヴェルサの せつげん'},
     // ★まちの まわりは やさしく、みなみ・にしへ いくほど つよく する
+    // ★ミナモ：まちの まわりは やさしく、おきあいは つよく
+    {x0:34,y0:52,x1:60,y1:62, pool:['hermitcrab','poisonjelly','stingray','junglemen'],
+     name:'ミナモの しまなみ'},
+    {x0:26,y0:50,x1:72,y1:71, pool:['stingray','bloodflower','junglemen','redgator',
+       'spikelizard','maskshaman'], name:'サンゴの おきあい'},
     {x0:74,y0:26,x1:95,y1:36, pool:['drakybat','madrock','mandragora','hornet'],
      name:'ザールの こうえきろ'},
     {x0:66,y0:24,x1:95,y1:50, pool:['madrock','mandragora','hornet','thornwolf',
@@ -5735,7 +5778,8 @@ function switchChapter(no, newParty){
     const cd = CHD ? CHD.get(no) : null;
     const cls = (newParty && newParty.length) ? newParty
               : (cd && cd.party) ? cd.party : ['sora'];
-    cls.forEach(k=>party.push(mkMember(k,1)));
+    const lv0 = (cd && cd.startLv) ? cd.startLv : 1;   // ★章ごとの はじまりの レベル
+    cls.forEach(k=>party.push(mkMember(k,lv0)));
     if(cd){
       if(cd.start){
         const land = safeLanding(cd.start.map, cd.start.x|0, cd.start.y|0);
