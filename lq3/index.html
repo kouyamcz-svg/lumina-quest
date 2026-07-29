@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T12:45:03", "assets_sha": "ad66dbbc", "lines": {"world": 151, "npc": 531, "core": 2404, "chapters": 371, "bgm": 827, "view2d": 1290, "view": 1274, "ui": 670}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T12:54:02", "assets_sha": "ad66dbbc", "lines": {"world": 151, "npc": 531, "core": 2404, "chapters": 390, "bgm": 827, "view2d": 1290, "view": 1274, "ui": 672}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -832,6 +832,13 @@ const CH = {
             armor: {kind:'a',name:'こまもり',v:2}},
 
     // --- ぜんめつしたとき もどる ばしょ ---
+    // はじまりの ことば（しょうを えらんだ ときに でる）
+    opening: ['──ゆきの おうこく ヴェルサ──',
+      'おうと ヴェルサリア。しんまいの このえへい リオン。',
+      'けさから しろが さわがしい。きしだんの ひろばへ いってみよう。',
+      'まちの ものに はなしを きいてみよう。',
+      '（Aボタン：しらべる・はなす　Bボタン：メニュー）'],
+
     home: {map:'versa_town', x:13, y:9, name:'ヴェルサリアの きょうかい'},
 
     // --- リターンで いける まち（おとずれた ものだけ ひょうじ）---
@@ -957,6 +964,12 @@ const CH = {
     equip: {weapon:{kind:'w',name:'こうえきの ナイフ',v:4},
             armor: {kind:'a',name:'たびの がいとう',v:3}},
 
+    opening: ['──たいしょうのまち ザール──',
+      'ひがしの こうえきとし ザール。しょうにんの バルド。',
+      'みなみへ でた たいしょうが、まるごと きえたという。',
+      'しょうかいちょうに はなしを きこう。',
+      '（こうえきしょうと はなすと あきないが できる）'],
+
     home: {map:'zaal_town', x:26, y:8, name:'ザールの きょうかい'},
 
     returnSpots: [
@@ -1051,6 +1064,12 @@ const CH = {
     gold: 180, herbs: 8, waters: 2,
     equip: {weapon:{kind:'w',name:'うらないの つえ',v:5},
             armor: {kind:'a',name:'まいの ころも',v:4}},
+
+    opening: ['──サンゴぐんとう ミナモ──',
+      'みなみの しまじま。うらないしの セナと、いもうとで おどりこの ルカ。',
+      'しまじゅうの ものが、ねむったまま おきないという。',
+      'うらないの ししょうに はなしを きこう。',
+      '（セナは ゆめを みる ちからを もつ）'],
 
     home: {map:'minamo_port', x:24, y:8, name:'サンゴの みなとの きょうかい'},
 
@@ -4186,7 +4205,7 @@ function interact(){
   if(ch==='Q'){                               // まだ いけない ちほう
     G.mode='msg';
     U.msg(['とおくに まちの かげが みえる。',
-           'だが いまの リオンには、ここから さきへ すすむ すべが ない。',
+           'だが いまの ' + (party[0] ? party[0].name : 'かれら') + 'には、ここから さきへ すすむ すべが ない。',
            '（この ちほうは これから つくられます）'], ()=>{ G.mode='field'; });
     return;
   }
@@ -7619,14 +7638,16 @@ function startGame(loaded){
   hud();
   C.G.mode='field';
   if(!loaded){
-    V.chapterCard('第1章','わかき きし', ()=>{
-    msg2(['──ゆきの おうこく ヴェルサ──',
-      'ゆきの おうこく ヴェルサ、おうと ヴェルサリア。しんまいの このえへい リオン。',
-      'おうと ヴェルサリア。しんまいの このえへい リオン。',
-      'けさから しろが さわがしい。きしだんの ひろばへ いってみよう。',
-      'まちの ものに はなしを きいてみよう。',
-      '（Aボタン：しらべる・はなす　Bボタン：メニュー）'],
-      ()=>{ C.G.mode='field'; });
+    // ★しょうごとの はじまり（章データから）。
+    //   ここを かためがきに していた ため、第3章でも「ヴェルサ」と でていた。
+    const no = C.G.chapter || 1;
+    const cd = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA.get(no) : null;
+    const title = '第' + no + '章';
+    const sub = cd ? cd.title : '';
+    const open = (cd && cd.opening) ? cd.opening
+               : ['（Aボタン：しらべる・はなす　Bボタン：メニュー）'];
+    V.chapterCard(title, sub, ()=>{
+      msg2(open, ()=>{ C.G.mode='field'; });
     });
   }
 }
