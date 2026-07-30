@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T02:04:26", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2586, "chapters": 456, "bgm": 905, "view2d": 1292, "view": 1277, "ui": 677}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T02:17:19", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2594, "chapters": 456, "bgm": 905, "view2d": 1305, "view": 1277, "ui": 677}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3314,7 +3314,12 @@ function draw(dt, time, actors){
       if(art) cx.drawImage(art, ox+x*ts, oy+y*ts, ts, ts);
     }
     if(ch==='n') drawNPC(ox+x*ts, oy+y*ts, ts, x, y);
-    if(ch==='B' && !(C.G.flags.ch1_gotHerb && curMap.startsWith('versa'))) drawBoss(ox+x*ts, oy+y*ts, ts);
+    // ★たおした ボスは でなくなる（章データの clearedFlag を みる）
+    if(ch==='B'){
+      const bi = C.bossInfoAt ? C.bossInfoAt(curMap) : null;
+      const done = bi && bi.clearedFlag && C.G.flags[bi.clearedFlag];
+      if(!done) drawBoss(ox+x*ts, oy+y*ts, ts);
+    }
   }
   // ④ キャラ（Yじゅんに かさねる）
   const list = (actors||[]).slice().sort((a,b)=>a.y-b.y);
@@ -3359,11 +3364,19 @@ function drawBoss(dx,dy,ts){
   const s=ts;
   cx.fillStyle='rgba(40,10,60,0.35)';
   cx.beginPath(); cx.ellipse(dx+s/2, dy+s*0.86, s*0.36, s*0.12, 0, 0, Math.PI*2); cx.fill();
-  // まものの えが あれば それを えがく（なければ かげと あかい めだけ）
-  const key = (C.P.map==='versa_dgn2') ? 'yumebanken_f' : null;
-  const d = key && MONREF && MONREF[key];
+  // ★そのマップの ボスの えを つかう（せんとうちゅうと おなじ すがた）。
+  //   マップめいを かためがきして いた ため、あたらしい ボスが かげのままだった。
+  let d = null;
+  const bi = C.bossInfoAt ? C.bossInfoAt(C.P.map) : null;
+  if(bi){
+    const b = C.MIDBOSS && C.MIDBOSS[bi.key];
+    const art = (b && b.art) || bi.key;
+    d = (MONREF && (MONREF[art] || MONREF[bi.key]))
+     || (CHRREF && (CHRREF[art] || CHRREF[bi.key])) || null;
+  }
+  if(!d && C.P.map==='versa_dgn2') d = MONREF && MONREF['yumebanken_f'];
   if(d){
-    const img=getImg(d.src);
+    const img=getImg(d.src || d.front);
     if(img.complete && img.naturalWidth){
       const sc=Math.max(1,Math.round(ts/TS*0.6));
       const ww=d.w*sc, hh=d.h*sc;
@@ -4941,7 +4954,15 @@ function triggerEnding(){
 }
 // ボスの ばしょ・とうじょうの ことば・たおした あとは 章データから ひく
 function bossInfoAt(map){
-  return CHD ? CHD.bossAt(G.chapter||1, map) : null;
+  if(!CHD) return null;
+  // まず いまの 章、なければ ぜんしょうから さがす（えがきは どの マップでも ひく）
+  const here = CHD.bossAt(G.chapter||1, map);
+  if(here) return here;
+  for(const no of CHD.list()){
+    const b = CHD.bossAt(no, map);
+    if(b) return b;
+  }
+  return null;
 }
 function triggerBoss(x,y){
   // ★章データに かかれた ボスを ひく（章を ふやしても ここは さわらない）
