@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-29T21:45:04", "assets_sha": "cbbaafbf", "lines": {"world": 152, "npc": 544, "core": 2498, "chapters": 418, "bgm": 905, "view2d": 1292, "view": 1277, "ui": 677}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T00:48:45", "assets_sha": "cbbaafbf", "lines": {"world": 152, "npc": 544, "core": 2509, "chapters": 435, "bgm": 905, "view2d": 1292, "view": 1277, "ui": 677}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1127,16 +1127,33 @@ const CH = {
              '「しまじゅうの ものが、ねむったまま おきんのじゃ」',
              'セナ「……でも わたし、まだ うらないも あたらないのに」',
              'ルカ「あたるまで やればいいよ。わたしが おどって かせぐから」',
-             'ししょう「しまへ わたる こぶねを たのみなさい。ふなちんが いる」',
-             '＊ クエスト「ふなちんを かせぐ」＊'] },
-      // ② ふなのり：ふなちん 80G
-      { npc:'ふなのり', cond:['ch3_started'], unless:'ch3_paidFare',
-        needGold:80, takeGold:80,
-        set:['ch3_paidFare'],
+             'ししょう「しまへ わたる こぶねを たのみなさい」',
+             '「ただ、あの ふなのりは うでを みる おとこじゃ」',
+             '＊ クエスト「ふなのりの いらい」＊'] },
+      // ② ふなのり：いらいを うける（いそべの まものを 12たい）
+      { npc:'ふなのり', cond:['ch3_started'], unless:'ch3_tookJob',
+        set:['ch3_tookJob'],
+        startQuota:{need:12, flag:'ch3_jobDone'},
+        msg:['ふなのり「しまへ？ ……わるいが かねの もんだいじゃ ない」',
+             '「しおが あれてる。おれは うでの ない きゃくは のせない」',
+             'ルカ「うで？ おどりなら まかせて」',
+             'ふなのり「そういう うでじゃ ねえよ」',
+             '「いそべに まものが ふえた。12たい かたづけてこい」',
+             '「それが できたら、しまへ わたしてやる」',
+             '＊ いそべの まものを 12たい たおそう ＊'] },
+      // ②-b とちゅうけいか（まだ おわって いない）
+      { npc:'ふなのり', cond:['ch3_tookJob'], unless:'ch3_jobDone',
+        msg:['ふなのり「まだ たりねえよ」',
+             '「いそべは みなとの すぐ そとだ。にげずに やれ」'] },
+      // ②-c たっせい → こぶね
+      { npc:'ふなのり', cond:['ch3_jobDone'], unless:'ch3_paidFare',
+        set:['ch3_paidFare'], clearQuota:true,
         quest:{ch3_q0_fare:'clear', ch3_q1_isle:'active'},
-        msg:['ふなのり「しまへ？ ……いいぜ、80ゴールドだ」',
-             '（ふなちんを はらった）',
-             'ふなのり「しおが はやい。しっかり つかまってな」',
+        msg:['ふなのり「……ほう。ほんとうに かたづけたか」',
+             'ふなのり「みなおしたぜ。うでの ない きゃくは のせないが」',
+             '「うでの ある きゃくは、ただで のせる」',
+             'セナ「ただ、で いいんですか」',
+             'ふなのり「いそべが しずかに なった。それが ふなちんだ」',
              '＊ こぶねに のれるように なった ＊'] },
       // ③ おさ：しまの ねむり
       { npc:'むらの おさ', cond:['ch3_reachedIsle'], unless:'ch3_heardIsle',
@@ -4604,7 +4621,8 @@ function matchEvent(e){
   if(e.cond && !e.cond.every(f=>F[f])) return false;         // まえの じょうけんが そろって いない
   if(e.when && e.when.state && G.townState !== e.when.state) return false;
   if(e.needKey && !hasKey(e.needKey)) return false;
-  if(e.needGold && P.gold < e.needGold) return false;   // ★ふなちんが たりない
+  if(e.needGold && P.gold < e.needGold) return false;
+  if(e.needQuota && !(G.quota && G.quota.n >= G.quota.need)) return false;  // ★いらいが おわって いない
   return true;
 }
 function runTalkEvent(npcName){
@@ -4617,7 +4635,11 @@ function runTalkEvent(npcName){
   if(e.setState && WORLD.TOWN_STATES[e.setState]) G.townState = e.setState;
   if(e.takeKey) takeKey(e.takeKey);
   if(e.giveKey) giveKey(e.giveKey);
-  if(e.takeGold) P.gold = Math.max(0, P.gold - e.takeGold);   // ★はらう
+  if(e.startQuota){                              // ★いらいを うける
+    G.quota = {n:0, need:e.startQuota.need|0, flag:e.startQuota.flag};
+  }
+  if(e.clearQuota) G.quota = null;
+  if(e.takeGold) P.gold = Math.max(0, P.gold - e.takeGold);
   if(e.gold) P.gold += e.gold;
   Object.keys(e.quest || {}).forEach(q => questAdvance(q, e.quest[q]));
 
@@ -5269,6 +5291,11 @@ function memberAct(a, done){
   });
 }
 function killed(e){ const d=G.dex[e.key]=G.dex[e.key]||{seen:1,kill:0}; d.kill++;
+  // ★いらい（たおした かずを かぞえる）
+  if(G.quota && G.quota.n < G.quota.need){
+    G.quota.n++;
+    if(G.quota.n >= G.quota.need) G.flags[G.quota.flag] = true;
+  }
   if(A.defeat) A.defeat(); V.refresh(); }
 function enemyAct(e, done){
   const alive = aliveMembers();
@@ -5788,7 +5815,7 @@ function saveGame(s, slot){
       v:SAVE_VERSION, at:Date.now(),
       map:P.map, x:P.x, y:P.y, dir:P.dir,
       gold:P.gold, herbs:P.herbs, waters:P.waters, equipBag:P.equipBag, keyItems:P.keyItems,
-      goods:P.goods, marketTick:G.marketTick, tradeProfit:G.tradeProfit,
+      goods:P.goods, marketTick:G.marketTick, tradeProfit:G.tradeProfit, quota:G.quota,
       party: party.map(serializeMember),
       chapter:G.chapter, chapters:G.chapters,
       flags:G.flags, quests:G.quests,
@@ -5816,6 +5843,7 @@ function loadGame(s, slot){
     P.keyItems = (d.keyItems && typeof d.keyItems==='object') ? d.keyItems : {};
     P.goods = (d.goods && typeof d.goods==='object') ? d.goods : {};
     G.marketTick = d.marketTick|0; G.tradeProfit = d.tradeProfit|0;
+    G.quota = d.quota || null;
     P.dir = d.dir || 'front';
     const land = safeLanding(d.map, d.x|0, d.y|0);
     P.map = land.map; P.x = land.x; P.y = land.y;
