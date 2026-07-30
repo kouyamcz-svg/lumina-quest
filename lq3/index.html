@@ -52,6 +52,23 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
 @keyframes bootbar{0%{margin-left:-24%}100%{margin-left:100%}}
 #boot .err{color:#e08080;font-size:12px;margin-top:16px;text-align:center;line-height:1.7;display:none}
 #fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+/* ★つよさ：がめん ぜんたいに おおきく だす */
+#status{display:none;position:absolute;left:2%;right:2%;top:2%;bottom:2%;
+  background:rgba(8,6,18,.94);border:2px solid #fff;
+  box-shadow:inset 0 0 0 1px #000;
+  color:#fff;text-shadow:1px 1px 0 #000;letter-spacing:.03em;
+  padding:14px 16px;overflow:hidden;box-sizing:border-box;
+  display:none;flex-direction:column}
+#status .st-name{font-size:19px;color:#fff6e0;margin-bottom:2px}
+#status .st-sub{font-size:12px;color:#cfc4a0;margin-bottom:10px}
+#status .st-grid{display:grid;grid-template-columns:auto 1fr;
+  gap:4px 12px;font-size:15px;line-height:1.5}
+#status .st-k{color:#b8b0d0}
+#status .st-v{color:#fff}
+#status .st-sec{margin-top:12px;font-size:12px;color:#cfc4a0;
+  border-top:1px solid rgba(255,255,255,.22);padding-top:8px}
+#status .st-sp{font-size:13px;line-height:1.5;columns:2;column-gap:14px}
+#status .st-foot{margin-top:auto;font-size:11px;color:#8f8aa8;text-align:center;padding-top:8px}
 #msg-win{display:none;position:absolute;left:3%;right:3%;bottom:3%;
   background:rgba(0,0,0,.72);border:2px solid #fff;border-radius:0;
   box-shadow:inset 0 0 0 1px #000;
@@ -90,6 +107,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <canvas id="gl2d"></canvas>
   <div id="label"></div>
   <div id="hud"></div>
+  <div id="status"></div>
   <div id="cmd-win"></div>
   <div id="msg-win"><div id="msg-text"></div></div>
   <div id="chapter"></div>
@@ -101,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T09:02:39", "assets_sha": "33cd95de", "lines": {"world": 153, "npc": 544, "core": 2647, "chapters": 456, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 718}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T09:25:17", "assets_sha": "33cd95de", "lines": {"world": 153, "npc": 544, "core": 2647, "chapters": 456, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 761}};</script>
 <script src="assets.js?v=c5eeef4b"></script>
 <script>/**
  * @license
@@ -7715,6 +7733,13 @@ function press(k){
     else if(k==='B') menuCancel();
     return;
   }
+  // ★つよさ：A＝つぎの ページ／さいごで とじる、B＝ほかの なかま
+  if(C.G.mode==='status'){
+    if(k==='A') statusNext();
+    else if(k==='B') statusOther();
+    else if(k==='U'||k==='D') statusOther();
+    return;
+  }
   if(C.G.mode==='map'){ closeMap(); return; }        // ちずは どの ボタンでも とじる
   if(C.G.mode!=='field'||C.G.busy) return;
   if(k==='U') C.stepField(0,-1);
@@ -7736,6 +7761,7 @@ function closeMap(){
   C.G.mode='field';
 }
 function openFieldMenu(){
+  if(statusEl) statusEl.style.display='none';
   C.G.mode='menu';
   menu(['つよさ','じゅもん','どうぐ','そうび','ちず','さくせん','クエスト','セーブ','とじる'],
        'メニュー',(sel)=>{
@@ -7778,48 +7804,83 @@ function openFieldMenu(){
 }
 
 // ---------------- つよさ ----------------
-// ひとりずつ すべての ちからを ならべる。
-// ひとに よって もつ ものが ちがう ので、あるものだけ だす。
+// ★がめん ぜんたいに おおきく だす。
+//   ちいさな メッセージまどに ながく ならべると よみにくい ため。
 const STATUS_NAME = {sleep:'ねむり', confuse:'こんらん', freeze:'こおり', slow:'にぶり'};
-function statusLines(m){
-  const L = [];
-  L.push('＊ ' + m.name + '　Lv' + m.lv + '　' + (C.CLASSES[m.cls] ? className(m.cls) : ''));
-  L.push('　HP　' + m.hp + ' / ' + m.maxhp);
-  if(m.maxmp > 0) L.push('　MP　' + m.mp + ' / ' + m.maxmp);
-  L.push('　じょうたい　' + (m.status ? (STATUS_NAME[m.status] || m.status) : 'そうかい'));
-  L.push('');
-  L.push('　こうげきりょく　' + C.mAtk(m));
-  L.push('　しゅびりょく　　' + C.mDef(m));
-  L.push('　すばやさ　　　　' + m.agi);
-  L.push('');
-  L.push('　みぎて　' + (m.weapon ? m.weapon.name + '（+' + m.weapon.v + '）' : 'なにも もって いない'));
-  L.push('　からだ　' + (m.armor  ? m.armor.name  + '（+' + m.armor.v  + '）' : 'なにも つけて いない'));
-  L.push('');
-  const next = C.expNext(m);
-  L.push('　けいけんち　' + m.exp);
-  L.push('　つぎのLvまで　' + (next === Infinity ? '---' : (next - m.exp)));
-  const sp = C.knownSpells(m);
-  if(sp.length){
-    L.push('');
-    L.push('　おぼえた じゅもん');
-    sp.forEach(s=>L.push('　　' + C.spellLabel(s)));
-  }
-  return L;
+const CLASS_NAME  = {lion:'このえへい', bald:'しょうにん', sena:'うらないし', ruka:'おどりこ',
+                     sora:'ゆうしゃ', lumia:'そうりょ', dan:'せんし'};
+function className(cls){ return CLASS_NAME[cls] || ''; }
+const statusEl = $('status');
+let statusPage = 0, statusWho = 0;
+
+function esc(s){ return String(s).replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])); }
+function row(k, v){
+  return '<div class="st-k">'+esc(k)+'</div><div class="st-v">'+esc(v)+'</div>';
 }
-function className(cls){
-  const N = {lion:'このえへい', bald:'しょうにん', sena:'うらないし', ruka:'おどりこ',
-             sora:'ゆうしゃ', lumia:'そうりょ', dan:'せんし'};
-  return N[cls] || '';
+function statusHTML(m, page, pages){
+  const next = C.expNext(m);
+  let h = '<div class="st-name">'+esc(m.name)+'</div>'
+        + '<div class="st-sub">Lv'+m.lv+'　'+esc(className(m.cls))+'</div>';
+  if(page === 0){
+    h += '<div class="st-grid">'
+       + row('HP', m.hp + ' / ' + m.maxhp)
+       + (m.maxmp>0 ? row('MP', m.mp + ' / ' + m.maxmp) : '')
+       + row('じょうたい', m.status ? (STATUS_NAME[m.status]||m.status) : 'そうかい')
+       + row('こうげきりょく', C.mAtk(m))
+       + row('しゅびりょく', C.mDef(m))
+       + row('すばやさ', m.agi)
+       + '</div>'
+       + '<div class="st-sec">そうび</div>'
+       + '<div class="st-grid">'
+       + row('みぎて', m.weapon ? m.weapon.name+'（+'+m.weapon.v+'）' : 'なし')
+       + row('からだ', m.armor  ? m.armor.name +'（+'+m.armor.v +'）' : 'なし')
+       + '</div>'
+       + '<div class="st-sec">けいけん</div>'
+       + '<div class="st-grid">'
+       + row('けいけんち', m.exp)
+       + row('つぎのLvまで', next===Infinity ? '---' : (next - m.exp))
+       + '</div>';
+  }else{
+    const sp = C.knownSpells(m);
+    h += '<div class="st-sec">おぼえた じゅもん</div>';
+    h += sp.length
+      ? '<div class="st-sp">' + sp.map(s=>esc(C.spellLabel(s))).join('<br>') + '</div>'
+      : '<div class="st-sp">まだ おぼえて いない</div>';
+  }
+  const nav = (C.party.length>1 ? 'B：ほかの なかま　' : '') +
+              (pages>1 ? 'A：つぎの ページ' : 'A：とじる');
+  h += '<div class="st-foot">'+esc(nav)+'　（'+(page+1)+'/'+pages+'）</div>';
+  return h;
+}
+function showStatus(){
+  const m = C.party[statusWho];
+  if(!m){ hideStatus(); return; }
+  const pages = C.knownSpells(m).length ? 2 : 1;
+  if(statusPage >= pages) statusPage = 0;
+  statusEl.innerHTML = statusHTML(m, statusPage, pages);
+  statusEl.style.display = 'flex';
+  C.G.mode = 'status';
+}
+function hideStatus(){
+  statusEl.style.display = 'none';
+  C.G.mode = 'field';
+}
+function statusNext(){          // A：つぎの ページ／さいごなら とじる
+  const m = C.party[statusWho];
+  const pages = m && C.knownSpells(m).length ? 2 : 1;
+  if(statusPage + 1 < pages){ statusPage++; A.cursor && A.cursor(); showStatus(); }
+  else { A.cancel && A.cancel(); hideStatus(); }
+}
+function statusOther(){         // B：ほかの なかま
+  if(C.party.length <= 1){ A.cancel && A.cancel(); hideStatus(); return; }
+  statusWho = (statusWho + 1) % C.party.length;
+  statusPage = 0;
+  A.cursor && A.cursor();
+  showStatus();
 }
 function openStatus(){
-  if(C.party.length === 1){
-    msg2(statusLines(C.party[0]), ()=>{ C.G.mode='field'; });
-    return;
-  }
-  menu(C.party.map(m=>m.name + '　Lv' + m.lv).concat(['もどる']), 'つよさを みる', (k)=>{
-    if(k >= C.party.length){ C.G.mode='field'; return; }
-    msg2(statusLines(C.party[k]), ()=>{ C.G.mode='menu'; openStatus(); });
-  });
+  statusWho = 0; statusPage = 0;
+  showStatus();
 }
 
 // ---------------- じゅもん ----------------
