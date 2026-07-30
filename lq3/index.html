@@ -119,8 +119,8 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T10:03:11", "assets_sha": "b836eb79", "lines": {"world": 153, "npc": 544, "core": 2654, "chapters": 495, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 761}};</script>
-<script src="assets.js?v=3e949e09"></script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T11:09:20", "assets_sha": "b66330cc", "lines": {"world": 153, "npc": 544, "core": 2678, "chapters": 495, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 761}};</script>
+<script src="assets.js?v=c1567d3a"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -3794,12 +3794,12 @@ const MIDBOSS = {
   // 第3章 そうしボス「しまいの かげ」：ねえと いもうとの 2たい。
   // かたほうを たおしても、もういっぽうが いきていれば よみがえる。
   shadowsis_a:{key:'shadowsis_a', name:'あねの かげ', hp:275, atk:33, def:16, agi:16, acts:1,
-    exp:520, gold:300, art:'sisters',
+    exp:520, gold:300, art:'sisA',
     skill:{p:0.28, mul:1.32, name:'ゆめの つめ'},
     aoe:{p:0.20, lo:13, hi:19, name:'ふたりの うたごえ'},
     inflict:{type:'sleep', p:0.26}},
   shadowsis_b:{key:'shadowsis_b', name:'いもうとの かげ', hp:240, atk:29, def:14, agi:20, acts:1,
-    exp:480, gold:280, art:'sisters',
+    exp:480, gold:280, art:'sisB',
     skill:{p:0.26, mul:1.25, name:'ゆめの まなざし'},
     aoe:{p:0.18, lo:11, hi:16, name:'ふたりの うたごえ'},
     inflict:{type:'slow', p:0.30}},
@@ -5287,11 +5287,19 @@ function collectCommands(i){
     else if(sel===1){
       const sp = knownSpells(m).filter(s=>s.mp<=m.mp);
       if(!sp.length){ G.mode='msg'; U.msg(['つかえる じゅもんが ない！'], ()=>{ G.mode='battle'; collectCommands(i); }); return; }
-      U.menu(sp.map(s=>s.name+' '+s.mp).concat(['もどる']), m.name+'　じゅもん', (k)=>{
+      U.menu(sp.map(spellLabel).concat(['もどる']), m.name+'　じゅもん', (k)=>{
         if(k>=sp.length){ collectCommands(i); return; }
         const chosen=sp[k];
         if(chosen.type==='dmg'){                             // たんたい こうげき じゅもんは あいてを えらぶ
           chooseTarget(m, (tgt)=>{
+            if(tgt===null){ collectCommands(i); return; }
+            b.queue.push({actor:m, type:'spell', sp:chosen, tgt}); collectCommands(i+1);
+          });
+          return;
+        }
+        // ★かいふく・じょうたいかいふく・そせいは 「だれに つかうか」を えらぶ
+        if(spellNeedsTarget(chosen)){
+          chooseMember(m, chosen, (tgt)=>{
             if(tgt===null){ collectCommands(i); return; }
             b.queue.push({actor:m, type:'spell', sp:chosen, tgt}); collectCommands(i+1);
           });
@@ -5321,6 +5329,22 @@ function bestHeal(m, need){
   return enough[0] || sp[0];      // まかなえる いちばん やすい じゅもん／なければ さいだい
 }
 // あいてが 2たい いじょう なら えらばせる。1たいなら そのまま。
+// ★せんとうちゅうに 「だれに つかうか」を えらぶ。
+//   ひとりしか いない ときは きかない。
+const STATUS_JP = {sleep:'ねむり', confuse:'こんらん', freeze:'こおり', slow:'にぶり'};
+function chooseMember(m, sp, done){
+  const alive = (sp.type==='revive') ? party.filter(p=>p.hp<=0) : aliveMembers();
+  if(!alive.length){ done(null); return; }
+  if(alive.length===1){ done(alive[0]); return; }
+  const label = alive.map(p=>{
+    if(sp.type==='heal')  return p.name + '　HP' + p.hp + '/' + p.maxhp;
+    if(sp.type==='cure')  return p.name + '　' + (p.status ? (STATUS_JP[p.status]||p.status) : 'そうかい');
+    return p.name;
+  });
+  U.menu(label.concat(['もどる']), sp.name + '　だれに？', (k)=>{
+    done(k >= alive.length ? null : alive[k]);
+  });
+}
 function chooseTarget(m, cb){
   const alive = G.battle.enemies.filter(e=>e.hp>0);
   if(alive.length<=1){ cb(alive[0]||null); return; }
