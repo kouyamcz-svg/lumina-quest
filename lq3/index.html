@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T03:42:41", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2628, "chapters": 456, "bgm": 905, "view2d": 1305, "view": 1277, "ui": 678}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T04:23:17", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2630, "chapters": 456, "bgm": 905, "view2d": 1319, "view": 1277, "ui": 678}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -2611,6 +2611,18 @@ function buildAtlas(){
   atlas.bdDoorWeapon= doorTile('#b04038');
   atlas.bdDoorMagic = doorTile('#7048a8');
   atlas.bdDoorShop  = doorTile('#c87830');
+  // ---------- こぶね（ふなつきば）----------
+  atlas.boat = tile((g,s)=>{
+    g.drawImage(hashPick(0,0,atlas.coralsand),0,0);
+    R(g,2,7,12,5,P16.wood1);                    // ふなばら
+    R(g,2,7,12,1,P16.wood0);
+    R(g,1,9,1,2,P16.wood0); R(g,14,9,1,2,P16.wood0);
+    R(g,3,11,10,1,P16.wood0);                   // そこ
+    R(g,7,3,2,5,P16.wood0);                     // ほばしら
+    R(g,9,3,5,4,'#efe6d2');                     // ほ
+    R(g,9,3,5,1,'#d8cdb4');
+    R(g,4,8,8,1,'#8a7048');                     // ざせき
+  });
   // ---------- まちの かざり ----------
   atlas.well = tile((g,s)=>{
     R(g,2,7,12,8,P16.st1);
@@ -2829,6 +2841,7 @@ function tileArt(ch, theme){
     case 'e': return atlas.fence;
     case '*': return atlas.flower;
     case 'y': return atlas.signpost;
+    case 'j': return atlas.boat;      // ふなつきば
     case 'K': return atlas.castgate;
     case 'F': return atlas.fountain;
     case 'G': return atlas.gate;
@@ -3307,6 +3320,7 @@ function draw(dt, time, actors){
       drawBuilding(rows, x, y, ox+x*ts, oy+y*ts, ts);
     }
     // ワールドの きほん ちけいは ゆかの パスで えがきおえている（うわがきしない）
+    else if(theme==='world' && ch==='j'){ cx.drawImage(atlas.boat, dx0, dy0, ts, ts); }
     else if(theme==='world' && '.=:_~wr'.includes(ch)) { /* ゆかのみ */ }
     else {
       let art = tileArt(ch, theme);
@@ -3820,7 +3834,7 @@ const MAPS = {
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_......r..~~~~..............__,.,._~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~____.~~~~~~~~~~~~~.....V.....,._~~_....__~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~_.,...~~~~~~~~~~~~~........,...._~~_......_~~~~~~~~~~~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~_.....~~~~~~~~~~~~~............._~_......._~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~_.....~~~~~~~~~~~~~.....j......._~_......._~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~_....,~~~~~~~~~~~~~_..........._~~_......._~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~__...~~~~~~~~~~~~~....._..,..,.__.._...._~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~__.~~~~~~~~~~~~~...._~_........._~____~~~~~~~~~~~~~~~~~~~~~~~~~~~",
@@ -3847,7 +3861,9 @@ const MAPS = {
   encZones:[
     {x0:26,y0:0, x1:70,y1:23, pool:['icicleslime','hoimislime','yukingon','frostbat'], name:'ヴェルサの せつげん'},
     // ★ミナモ：みなとの まわり → しまなみ → おきあい と だんだん つよく
-    {x0:34,y0:53,x1:48,y1:60, pool:['coralslime','babycrab','seagull','seaslug'],
+    // ★みなとの しま ぜんたい（y53〜69）を じょばんたいに する。
+    //   みなみはんぶんが おきあいゾーンに はいり、Lv1で かちりつ 0%だった。
+    {x0:26,y0:52,x1:43,y1:70, pool:['coralslime','babycrab','seagull','seaslug'],
      name:'みなとの いそべ'},
     {x0:34,y0:52,x1:60,y1:64, pool:['seagull','seaslug','reefeel','hermitcrab',
        'poisonjelly','stingray'], name:'ミナモの しまなみ'},
@@ -3903,7 +3919,7 @@ const MAPS = {
   minamo_port:{name:'サンゴの みなと',theme:'coral',enc:false,tiles:[
     "############################",
     "#wwwwwwwwwwwwwwwwwwwwwwwwww#",
-    "#wwwwwwwwwwwn===wwwwwwwwwww#",
+    "#wwwwwwwwwwwn==jwwwwwwwwwww#",
     "#wwwwwwwwwww====wwwwwwwwwww#",
     "#wwwwwwwwwww=rrywwwwwwwwwww#",
     "#==HHHH==HHH=rr==HHHH=HHHH=#",
@@ -4430,7 +4446,7 @@ const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
           : (typeof require!=='undefined' ? require('./chapters.js') : null);
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
-const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y']);
+const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j']);
 function tileAt(map,x,y){
   const m = MAPS[map]; if(!m) return '#';
   if(y<0||x<0||y>=m.tiles.length||x>=m.tiles[y].length) return '#';
