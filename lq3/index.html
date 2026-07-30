@@ -119,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T11:29:41", "assets_sha": "0f2ebea7", "lines": {"world": 153, "npc": 544, "core": 2678, "chapters": 495, "bgm": 925, "view2d": 1338, "view": 1297, "ui": 761}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T11:48:10", "assets_sha": "0f2ebea7", "lines": {"world": 153, "npc": 543, "core": 2700, "chapters": 490, "bgm": 925, "view2d": 1338, "view": 1297, "ui": 761}};</script>
 <script src="assets.js?v=d52450c3"></script>
 <script>/**
  * @license
@@ -681,20 +681,19 @@ const QUESTS = {
   ch3_q2_dream: {
     id:'ch3_q2_dream', chapter:3, title:'ゆめの かけら',
     giver:'むらの おさ',
-    desc:'みなみの かいしょくどうへ。おくで セナの ゆめみの ちからが なにかを うつす。',
+    desc:'かいしょくどうは けっかいで はいれない。にしの あさせの ほらに、まもり手が いる。',
     steps:[
-      {id:'enter_cave', desc:'かいしょくどうに はいる', flag:'ch3_enteredCave'},
-      {id:'see_dream',  desc:'ゆめを みる',           flag:'ch3_sawDream'},
+      {id:'enter_shoal', desc:'あさせの ほらへ いく',        flag:'ch3_enteredShoal'},
+      {id:'beat_warlock',desc:'まどろみの しもべを たおす', flag:'ch3_sawDream'},
     ],
     reward:{}, next:'ch3_q3_shell',
   },
   ch3_q3_shell: {
     id:'ch3_q3_shell', chapter:3, title:'よびがいを さがす',
     giver:'うらないの ししょう',
-    desc:'ゆめの おくへ はいるには ＜よびがい＞が いる。あさせの ほらに しずんでいる。',
+    desc:'まどろみの しもべを たおし、よびがいを えた。けっかいも きえた。',
     steps:[
-      {id:'enter_shoal', desc:'あさせの ほらへ いく', flag:'ch3_enteredShoal'},
-      {id:'get_shell',   desc:'よびがいを てにいれる', flag:'ch3_gotCallShell'},
+      {id:'get_shell', desc:'よびがいを てにいれる', flag:'ch3_gotCallShell'},
     ],
     reward:{}, next:'ch3_q4_twins',
   },
@@ -1127,7 +1126,7 @@ const CH = {
       },
       // ★ナギサに ついた ころに たたかう ちゅうボス（Lv9そうてい）。
       //   これを たおすと セナが ゆめを みる。
-      minamo_dgn1: {
+      minamo_dgn0: {
         key: 'dreamwarlock',
         clearedFlag: 'ch3_sawDream',
         needFlag: 'ch3_heardIsle',
@@ -1214,16 +1213,6 @@ const CH = {
              '「みなみの かいしょくどうじゃ。しおが ひいた ときだけ はいれる」',
              '「そこに ＜ゆめの ぬし＞が おると いわれておる」',
              '＊ クエスト「ゆめの かけら」＊'] },
-      // ④ ゆめみの あと：ししょうに もどると よびがいの はなし
-      { npc:'うらないの ししょう', cond:['ch3_sawDream'], unless:'ch3_heardShell',
-        set:['ch3_heardShell'],
-        quest:{ch3_q2_dream:'clear', ch3_q3_shell:'active'},
-        msg:['ししょう「ゆめを みたか。……よく たえたな」',
-             'セナ「ふたりの こえが、おなじ くちから きこえたんです」',
-             'ししょう「ふたつで ひとつの ゆめじゃ。あさい ゆめでは とどかん」',
-             '「＜よびがい＞が いる。ふけば、ゆめの おくへ こえが とどく」',
-             '「にしの ＜あさせの ほら＞に しずんでおる。しおが ひいた いまなら はいれる」',
-             '＊ クエスト「よびがいを さがす」＊'] },
       // ⑤ ボスを たおした あと：ししょうに ほうこく
       { npc:'うらないの ししょう', cond:['ch3_gotShell'], unless:'ch3_reported',
         set:['ch3_reported'],
@@ -1238,8 +1227,9 @@ const CH = {
 
     bossReward: {
       dreamwarlock: {
-        set:['ch3_sawDream'],
-        quest:{ch3_q2_dream:'clear', ch3_q3_shell:'active'},
+        set:['ch3_sawDream','ch3_gotCallShell'],
+        giveKey:'callshell',
+        quest:{ch3_q2_dream:'clear', ch3_q3_shell:'clear', ch3_q4_twins:'active'},
         msg:['', 'しもべは ずきんの したで わらった。',
              'しもべ「……おそい。もう、しまじゅうが ねむって いる」',
              'そして ローブだけを のこして きえた。',
@@ -1257,7 +1247,11 @@ const CH = {
              'ふたつの こえが、おなじ くちから きこえた。',
              '',
              'ルカ「セナ！ しっかりして！」',
-             'セナ「……おくに いる。ふたりで ひとりの、かなしい ゆめが」'],
+             'セナ「……おくに いる。ふたりで ひとりの、かなしい ゆめが」',
+             '',
+             'ローブの したに、しろい かいが ひとつ おちていた。',
+             '＊ よびがいを てにいれた！ ＊',
+             'セナ「これで……ゆめの おくへ こえが とどく」'],
       },
       nushicrab: {
         set:['ch3_jobDone'],
@@ -4008,7 +4002,7 @@ const MAPS = {
     "####################",
     "####################",
     "##======##========##",
-    "##=ww===##t=======##",
+    "##=wwB==##t=======##",
     "##=ww===##===o==t=##",
     "##======##========##",
     "##=C=o============##",
@@ -4062,7 +4056,7 @@ const MAPS = {
     "######################",
     "######################",
     "##====##==>>==##====##",
-    "##=o=B##==t===##==o=##",
+    "##=o==##==t===##==o=##",
     "##=ww=##======##==C=##",
     "##=ww=##======##====##",
     "##============##=t==##",
@@ -4614,7 +4608,16 @@ function interact(){
   if(ch==='C'){ openChest(nx,ny); return; }
   if(ch==='A'||ch==='V'||ch==='X'){          // ワールドの ちてん
     const w=warpAt(P.map,nx,ny);
-    if(w){ doWarp(w); return; }
+    if(w){
+      // ★けっかい：じょうけんが そろうまで はいれない
+      const wd = WARDS[w.to];
+      if(wd && (G.chapter||1)===wd.chapter && !G.flags[wd.flag]){
+        G.mode='msg';
+        U.msg(wd.msg, ()=>{ G.mode='field'; });
+        return;
+      }
+      doWarp(w); return;
+    }
   }
   if(ch==='Q'){                               // まだ いけない ちほう
     G.mode='msg';
@@ -4624,6 +4627,16 @@ function interact(){
     return;
   }
   if(ch==='B'){ triggerBoss(nx,ny); return; }
+  // ★けっかい：じょうけんが そろうまで はいれない。
+  //   （まどろみの しもべを たおすまで かいしょくどうへ はいれない）
+  {
+    const w0 = warpAt(P.map, nx, ny);
+    if(w0 && WARDS[w0.to] && !G.flags[WARDS[w0.to].flag] && (G.chapter||1)===WARDS[w0.to].chapter){
+      G.mode='msg';
+      U.msg(WARDS[w0.to].msg, ()=>{ G.mode='field'; });
+      return;
+    }
+  }
   // ★こぶね：さんばしの さきで A を おすと うみを わたる。
   //   ふなのりの いらいを こなすまで のれない（イベントの いみを もたせる）。
   // ★かえりの こぶね（ワールドの はまべ）
@@ -4646,21 +4659,6 @@ function interact(){
       U.msg(f.msg, ()=>{ doWarp({to:f.to, x:f.tx, y:f.ty}); });
       return;
     }
-  }
-  // ★よびがい：あさせの ほらで いわを しらべると てにはいる
-  if(ch==='o' && P.map==='minamo_dgn0' && (G.chapter||1)===3
-     && G.flags.ch3_heardShell && !G.flags.ch3_gotCallShell){
-    G.flags.ch3_gotCallShell = true;
-    giveKey('callshell');
-    questAdvance('ch3_q3_shell','clear');
-    questAdvance('ch3_q4_twins','active');
-    G.mode='msg';
-    U.msg(['いわの あいだに、しろい かいが はさまっている。',
-           'セナが そっと ひきぬくと、しおの おとが やんだ。',
-           '', '＊ よびがいを てにいれた！ ＊',
-           'ルカ「……いま、うみが しずかに なった？」',
-           'セナ「ううん。この かいが、おとを すいこんだの」'], ()=>{ U.hud(); G.mode='field'; });
-    return;
   }
   // ★ゆめみ：ちほうと しょうの じょうけんが そろえば おきる
   if(ch==='o' && P.map==='minamo_dgn1' && (G.chapter||1)===3
@@ -4769,6 +4767,15 @@ function stepField(dx,dy){
   P.x=nx; P.y=ny; G.stepFlip=!G.stepFlip;
   V.setActors();
   const w = warpAt(P.map,nx,ny);
+  // ★けっかい：じょうけんが そろうまで はいれない
+  if(w){
+    const wd = WARDS[w.to];
+    if(wd && (G.chapter||1)===wd.chapter && !G.flags[wd.flag]){
+      G.mode='msg';
+      U.msg(wd.msg, ()=>{ G.mode='field'; });
+      return;
+    }
+  }
   if(w){ doWarp(w); return; }
   if(MAPS[P.map].enc) maybeEncounter();
 }
@@ -5891,6 +5898,15 @@ function sellGood(map, key, n){
 // ---------------- じゅもん（せんとうの そとで つかう）----------------
 // そとで つかえるのは かいふく・じょうたい かいふく・そせい だけ。
 // こうげき じゅもんは 「ここでは つかえない」。
+// ★けっかい：ここを とおるには じょうけんが いる
+const WARDS = {
+  minamo_dgn1: {chapter:3, flag:'ch3_sawDream',
+    msg:['ほらの いりぐちに、うすい ひかりの まくが はっている。',
+         'てを のばすと、しおの ような つめたさに はじかれた。',
+         'セナ「……けっかい。だれかが、なかを まもってる」',
+         'ルカ「あの ずきんの やつ？」',
+         'セナ「たぶん。あれを どうにか しないと、はいれない」']},
+};
 // ★こぶねの わたし（第3章）：さんばしの さきと、むこうの しまの はまべ
 const FERRY = {
   // みなとの さんばし → むこうの しま
