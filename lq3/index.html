@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T07:23:57", "assets_sha": "33cd95de", "lines": {"world": 153, "npc": 544, "core": 2631, "chapters": 456, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 678}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T07:46:09", "assets_sha": "33cd95de", "lines": {"world": 153, "npc": 544, "core": 2647, "chapters": 456, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 678}};</script>
 <script src="assets.js?v=c5eeef4b"></script>
 <script>/**
  * @license
@@ -5178,12 +5178,28 @@ function beginRound(){
   const wakeConfuse = solo ? 0.62 : 0.38;
   const wakeFreeze  = solo ? 0.62 : 0.40;   // こおりは とけやすい
   const wakeSlow    = 0.30;                 // にぶりは こうどうできるので きゅうさいは しない
+  // ★なおった ことを かならず しらせる。
+  //   しらせが ないと 「じねんに なおらない」と おもわれて しまう。
+  const RECOVER_MSG = {
+    sleep:  'は めを さました！',
+    confuse:'は しょうきに もどった！',
+    freeze: 'の こおりが とけた！',
+    slow:   'の うごきが もどった！',
+  };
+  const healed = [];
   party.forEach(m=>{
-    if(m.status==='sleep'&&Math.random()<wakeSleep) m.status=null;
-    else if(m.status==='confuse'&&Math.random()<wakeConfuse) m.status=null;
-    else if(m.status==='freeze'&&Math.random()<wakeFreeze) m.status=null;
-    else if(m.status==='slow'&&Math.random()<wakeSlow) m.status=null;
+    const st = m.status;
+    let ok = false;
+    if(st==='sleep'   && Math.random()<wakeSleep)   ok = true;
+    else if(st==='confuse' && Math.random()<wakeConfuse) ok = true;
+    else if(st==='freeze'  && Math.random()<wakeFreeze)  ok = true;
+    else if(st==='slow'    && Math.random()<wakeSlow)    ok = true;
+    if(ok){ m.status = null; healed.push(m.name + (RECOVER_MSG[st] || 'は もとに もどった！')); }
   });
+  if(healed.length){
+    U.msg(healed, ()=>{ U.hud(); collectCommands(0); });
+    return;
+  }
   collectCommands(0);
 }
 function collectCommands(i){
