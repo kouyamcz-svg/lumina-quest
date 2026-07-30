@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T01:22:14", "assets_sha": "7aefa0e6", "lines": {"world": 152, "npc": 544, "core": 2565, "chapters": 455, "bgm": 905, "view2d": 1292, "view": 1277, "ui": 677}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T01:35:24", "assets_sha": "7aefa0e6", "lines": {"world": 152, "npc": 544, "core": 2565, "chapters": 455, "bgm": 905, "view2d": 1292, "view": 1277, "ui": 677}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3480,26 +3480,26 @@ const SPELL_DEFS = {
   ember:  {name:'ファイア',        mp:2, type:'dmg',    min:12, max:18},
   firedance:{name:'ほのおの うず', mp:6, type:'dmgall', min:16, max:24},
   // ★たんたいに つよい ほのお（おどりから くりだす いちげき）
-  flamestep:{name:'ファイアII',mp:7, type:'dmg',   min:38, max:50},
+  flamestep:{name:'ファイガ',mp:7, type:'dmg',   min:38, max:50},
   // ★しゅびりょくを さげる（ほのおで よろいを あぶる）
-  scorch: {name:'よろいくだき',  mp:4, type:'defdown', cut:8},
-  meltdance:{name:'よろいくだきII', mp:9, type:'defdown', cut:16},
-  scarletfan:{name:'ファイアIII',mp:16,type:'dmg',  min:82, max:106},
-  blazering:{name:'ほのおの うずII', mp:14,type:'dmgall', min:34, max:46},
-  inferno:{name:'ほのおの うずIII',  mp:24,type:'dmgall', min:62, max:82},
-  blaze:  {name:'ブレイズ',   mp:5, type:'dmg',    min:26, max:34},
-  hiheal: {name:'ハイヒール', mp:6, type:'heal',   min:45, max:60},
-  nova:   {name:'ひかりの あらし',     mp:10,type:'dmgall', min:26, max:36},
+  scorch: {name:'よろいわり',  mp:4, type:'defdown', cut:8},
+  meltdance:{name:'よろいくだき', mp:9, type:'defdown', cut:16},
+  scarletfan:{name:'ファイジャ',mp:16,type:'dmg',  min:82, max:106},
+  blazering:{name:'ほのおの あらし', mp:14,type:'dmgall', min:34, max:46},
+  inferno:{name:'ほのおの たいか',  mp:24,type:'dmgall', min:62, max:82},
+  blaze:  {name:'スパーガ',   mp:5, type:'dmg',    min:26, max:34},
+  hiheal: {name:'ヒーラ', mp:6, type:'heal',   min:45, max:60},
+  nova:   {name:'ひかりの うず',     mp:10,type:'dmgall', min:26, max:36},
   revive: {name:'リヴァイブ', mp:12,type:'revive'},
   // ---- こうい じゅもん（Lv12いこう） ----
-  bolt:   {name:'ライトニング',   mp:8, type:'dmg',     min:42, max:56},
-  holyray:{name:'せいなる あらし',   mp:16,type:'dmgall',  min:42, max:56},
-  luminaflare:{name:'ルミナの あらし',mp:26,type:'dmgall', min:74, max:98},
+  bolt:   {name:'スパージャ',   mp:8, type:'dmg',     min:42, max:56},
+  holyray:{name:'ひかりの あらし',   mp:16,type:'dmgall',  min:42, max:56},
+  luminaflare:{name:'ひかりの たいか',mp:26,type:'dmgall', min:74, max:98},
   judgment:{name:'ばんぶつの ひかり',mp:34,type:'dmg',  min:140,max:185},
-  fullheal:{name:'フルヒール',    mp:12,type:'heal',    min:95, max:135},
+  fullheal:{name:'ヒーガ',    mp:12,type:'heal',    min:95, max:135},
   healall:{name:'ヒールオール',  mp:16,type:'healall', min:50, max:70},
-  goddess:{name:'ヒールオールII',mp:26,type:'healall', min:95, max:130},
-  sanctuary:{name:'フルヒールII',mp:14,type:'heal', min:150,max:200},
+  goddess:{name:'ヒーラオール',mp:26,type:'healall', min:95, max:130},
+  sanctuary:{name:'ヒージャ',mp:14,type:'heal', min:150,max:200},
   ret:{name:'リターン',           mp:8, type:'return'},
 };
 const CLASSES = {
