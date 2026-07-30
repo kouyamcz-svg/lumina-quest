@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T01:55:26", "assets_sha": "66de03cd", "lines": {"world": 152, "npc": 544, "core": 2565, "chapters": 455, "bgm": 905, "view2d": 1292, "view": 1277, "ui": 677}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T02:04:26", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2586, "chapters": 456, "bgm": 905, "view2d": 1292, "view": 1277, "ui": 677}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -168,6 +168,7 @@ const MAP_IDS = {
   world:         {region:'versa', kind:'field', name:'ワールドマップ',              scene:'SCENE_WORLD'},
   minamo_port:   {region:'minamo',kind:'town', name:'サンゴの みなと',              scene:'SCENE_MINAMO_TOWN'},
   minamo_isle:   {region:'minamo',kind:'town', name:'しまの むら',                 scene:'SCENE_MINAMO_TOWN'},
+  minamo_rock:   {region:'minamo',kind:'dgn',  name:'にしの いわば',               scene:'SCENE_MINAMO_CAVE'},
   minamo_dgn0:   {region:'minamo',kind:'dgn',  name:'あさせの ほら',               scene:'SCENE_MINAMO_CAVE'},
   minamo_dgn1:   {region:'minamo',kind:'dgn',  name:'かいしょくどう',                scene:'SCENE_MINAMO_CAVE'},
   minamo_dgn2:   {region:'minamo',kind:'dgn',  name:'かいしょくどう さいしんぶ',        scene:'SCENE_MINAMO_CAVE'},
@@ -1093,8 +1094,8 @@ const CH = {
     ],
 
     bosses: {
-      // ★いそべの ちゅうボス（ふなのりの いらい）
-      world: {
+      // ★いそべの ちゅうボス（ふなのりの いらい）：にしの いわばの おく
+      minamo_rock: {
         key: 'nushicrab',
         clearedFlag: 'ch3_jobDone',
         needFlag: 'ch3_tookJob',
@@ -1128,6 +1129,7 @@ const CH = {
       minamo_isle: 'ch3_reachedIsle',
       minamo_dgn1: 'ch3_enteredCave',
       minamo_dgn0: 'ch3_enteredShoal',
+      minamo_rock: 'ch3_enteredRock',
     },
 
     talkEvents: [
@@ -3717,6 +3719,7 @@ const MIDBOSS = {
 };
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
+  minamo_rock: ['coralslime','babycrab','seagull','seaslug'],                        // Lv1〜6
   minamo_dgn0: ['seaslug','reefeel','babycrab','seagull','poisonjelly'],              // Lv6〜10
   minamo_dgn1: ['hermitcrab','poisonjelly','stingray','bloodflower','junglemen','armycrab'],  // Lv10〜13
   minamo_dgn2: ['redgator','spikelizard','maskshaman','bloodflower','merman','metalslime'],   // Lv12〜15
@@ -3797,7 +3800,7 @@ const MAPS = {
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_____~~~~~~~~~~~_._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_____~~~~~~~~~~~~~~~~~~~__...__~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_.....___~~~~~~~~~~~~~~~_......_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_..B......__~~~~~~~~~~~~_......._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_..X......__~~~~~~~~~~~~_......._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_.......,..._~~~~~~~___~_...,...._~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_......A....,_~~_____..._........_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_,.rrrrrrrrr..__................._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
@@ -3825,6 +3828,7 @@ const MAPS = {
     '52,60':{to:'minamo_isle', x:9,  y:12},
     '46,67':{to:'minamo_dgn1', x:8,  y:13},
     '44,64':{to:'minamo_dgn0', x:8,  y:10},
+    '37,55':{to:'minamo_rock', x:10, y:14},
   },
   // ちほうごとに でる まものを かえる
   encZones:[
@@ -3847,6 +3851,25 @@ const MAPS = {
   // K おうじょうもん / F ふんすい / I やどや / P きょうかい / W ぶきや / M まほうてん
   // G みなみもん / f ゆきの き / n むらびと
   // ============ 第3章 ミナモ地方（サンゴぐんとう）============
+  // ★にしの いわば（第3章：ふなのりの いらい）
+  minamo_rock:{name:'にしの いわば',theme:'sea',enc:true,encRate:0.065,encGrace:4,tiles:[
+    "######################",
+    "######################",
+    "######################",
+    "#######===BB===#######",
+    "#######========#######",
+    "#######=o====o=#######",
+    "###=C##========#=C####",
+    "###=ww#========#=ww###",
+    "###=ww####==####=ww###",
+    "###===###t==t###===###",
+    "###================###",
+    "####==============####",
+    "#########====#########",
+    "#########====#########",
+    "#########====#########",
+    "##########<<##########"
+  ], warps:{}, warpsXY:{'10,15':{to:'world',x:37,y:56},'11,15':{to:'world',x:37,y:56}}},
   // ★あさせの ほら（第3章：よびがいを とりに いく）
   minamo_dgn0:{name:'あさせの ほら',theme:'sea',enc:true,encRate:0.070,encGrace:4,tiles:[
     "####################",
