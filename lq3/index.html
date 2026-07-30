@@ -119,8 +119,8 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T09:44:04", "assets_sha": "13ee82da", "lines": {"world": 153, "npc": 544, "core": 2654, "chapters": 489, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 761}};</script>
-<script src="assets.js?v=2525ad4f"></script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T10:03:11", "assets_sha": "b836eb79", "lines": {"world": 153, "npc": 544, "core": 2654, "chapters": 495, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 761}};</script>
+<script src="assets.js?v=3e949e09"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -1128,17 +1128,19 @@ const CH = {
       // ★ナギサに ついた ころに たたかう ちゅうボス（Lv9そうてい）。
       //   これを たおすと セナが ゆめを みる。
       minamo_dgn1: {
-        key: 'shardshadow',
+        key: 'dreamwarlock',
         clearedFlag: 'ch3_sawDream',
         needFlag: 'ch3_heardIsle',
-        lockMsg: ['おくで なにかが ゆらいでいる。',
+        lockMsg: ['おくに ひとの けはいが する。',
                   'まだ ちかづく りゆうが ない。'],
-        intro: ['ほらの おくで、みずが ふるえている。',
-                'かげが ひとつ、しおだまりから せりあがった。',
-                'かたちが さだまらない。ひとの ようで、ひとで ない。',
-                'セナ「……これ、だれかの ゆめの きれはし」',
-                'かげの きれはしが おそいかかってきた！'],
-        after: ['しおだまりが しずかに なみうっている。'],
+        intro: ['ほらの おくに、ずきんの おとこが たっていた。',
+                'つえの さきで、むらさきの たまが しずかに ゆれている。',
+                'しもべ「……よく ここまで きた」',
+                'しもべ「あの おかたがたの ねむりを、じゃまして くれるな」',
+                'ルカ「あの おかた……？ ふたりって こと？」',
+                'しもべ「しれば、おまえも ねむる ことに なる」',
+                'まどろみの しもべが つえを かかげた！'],
+        after: ['ずきんの おとこが たっていた ところに、しずくが おちている。'],
       },
       minamo_dgn2: {
         key: 'shadowsis_a',
@@ -1235,10 +1237,14 @@ const CH = {
     ],
 
     bossReward: {
-      shardshadow: {
+      dreamwarlock: {
         set:['ch3_sawDream'],
         quest:{ch3_q2_dream:'clear', ch3_q3_shell:'active'},
-        msg:['', 'かげは ほどけて、しおだまりに とけた。',
+        msg:['', 'しもべは ずきんの したで わらった。',
+             'しもべ「……おそい。もう、しまじゅうが ねむって いる」',
+             'そして ローブだけを のこして きえた。',
+             '',
+             'セナが その ローブに ふれた しゅんかん——',
              '',
              'セナの あしが とまった。',
              'セナ「……みえる」',
@@ -3778,13 +3784,13 @@ const MIDBOSS = {
     exp:150, gold:180, art:'nushicrab',
     skill:{p:0.28, mul:1.30, name:'はさみうち'},
     aoe:{p:0.16, lo:6, hi:10, name:'すなけむり'}},
-  // 第3章 ちゅうボス「かげの きれはし」：しまいの ゆめから ちぎれた かけら。
-  // ナギサに ついた ばかりの ころに たたかう（Lv9そうてい）。
-  shardshadow:{key:'shardshadow', name:'かげの きれはし', hp:280, atk:30, def:12, agi:18, acts:1,
-    exp:260, gold:210, art:'shardshadow',
-    skill:{p:0.30, mul:1.30, name:'ゆめの ひっかき'},
-    aoe:{p:0.18, lo:8, hi:13, name:'とぎれた こもりうた'},
-    inflict:{type:'sleep', p:0.24}},
+  // 第3章 ちゅうボス「まどろみの しもべ」：しまいの かげに つかえる じゅじゅつし。
+  //   ナギサに ついた ころに たたかう（Lv9そうてい）。
+  dreamwarlock:{key:'dreamwarlock', name:'まどろみの しもべ', hp:280, atk:30, def:12, agi:18, acts:1,
+    exp:260, gold:210, art:'dreamwarlock',
+    skill:{p:0.30, mul:1.30, name:'つえの いちげき'},
+    aoe:{p:0.20, lo:9, hi:14, name:'ねむりの まじない'},
+    inflict:{type:'sleep', p:0.28}},
   // 第3章 そうしボス「しまいの かげ」：ねえと いもうとの 2たい。
   // かたほうを たおしても、もういっぽうが いきていれば よみがえる。
   shadowsis_a:{key:'shadowsis_a', name:'あねの かげ', hp:275, atk:33, def:16, agi:16, acts:1,
