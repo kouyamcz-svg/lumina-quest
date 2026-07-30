@@ -119,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T14:10:37", "assets_sha": "df81a720", "lines": {"world": 161, "npc": 602, "core": 2816, "chapters": 591, "bgm": 925, "view2d": 1357, "view": 1297, "ui": 764}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T14:23:44", "assets_sha": "df81a720", "lines": {"world": 161, "npc": 602, "core": 2822, "chapters": 612, "bgm": 925, "view2d": 1357, "view": 1297, "ui": 764}};</script>
 <script src="assets.js?v=78592f6e"></script>
 <script>/**
  * @license
@@ -1413,13 +1413,14 @@ const CH = {
       { npc:'ゼフの でし', cond:['ch4_gotKey'], unless:'ch4_reported',
         set:['ch4_reported'],
         quest:{ch4_q2_regret:'clear', ch4_q3_send:'active'},
-        msg:['でし「ししょう……その かおは」',
-             'ゼフ「ながい こと、みぬふりを して おった」',
-             'ゼフ「わしの けんきゅうが、ゆめの とびらを ゆるめた」',
-             'ゼフ「ねむりびょうは、わしの しわざじゃ」',
-             'ミオ「……ししょう」',
-             'ゼフ「じゃが、とじる かぎも わしが つくった」',
-             'ゼフ「ミオ。おまえが はこべ。わしは ここで まつ」'] },
+        msg:['でし「ミオさん。……ししょうは？」',
+             'ミオ「ししょうの けんきゅうが、ゆめの とびらを ゆるめて いました」',
+             'ミオ「ねむりびょうは、ししょうの しわざだった」',
+             'でし「そんな……」',
+             'ミオ「だから ししょうは、とじる かぎも つくって いた」',
+             'ミオ「そして さいごに、じぶんごと かげを しずめました」',
+             'でし「…………」',
+             'ミオ「わたしが はこびます。それが ししょうの のぞみだから」'] },
     ],
 
     bossReward: {
@@ -1427,12 +1428,29 @@ const CH = {
         set:['ch4_gotKey'],
         giveKey:'dreamkey',
         quest:{ch4_q2_regret:'clear'},
-        msg:['', 'かげは ゼフに かさなり、そして きえた。',
-             'ゼフ「……ようやく、みとめられた」',
+        removeMember:'zef',
+        msg:['', 'かげは ひざを ついた。だが、きえない。',
+             'かげ「……まだ じゃ。まだ、つぐなって おらん」',
              '',
-             'つくえの うえに、ちいさな かぎが ひかっている。',
+             'かげが さいごの ちからで ミオに とびかかった。',
+             'ミオ「——っ！」',
+             '',
+             'まえに でたのは、ゼフだった。',
+             'ゼフ「ミオ。めを つぶって おれ」',
+             '',
+             'ゼフは かげを だきかかえ、じぶんごと しずめた。',
+             'しろい ひかりが とうを つらぬく。',
+             'ミオ「ししょう！ ししょう——！」',
+             '',
+             'ひかりが やんだ とき、ゆかに ちいさな かぎが おちていた。',
+             'まだ、ぬくもりが のこっている。',
              '＊ ゆめのかぎを てにいれた！ ＊',
-             'ゼフ「これが、ゆめの たいりくへの とびらを ひらく」'],
+             '',
+             'ゼフの こえだけが、まだ そこに あった。',
+             'ゼフ「……30ねん、まちがえ つづけた」',
+             'ゼフ「さいごの ひとつだけ、まちがえずに すんだ」',
+             'ゼフ「ミオ。あとは たのむ」',
+             'ミオ「……はい。はい、ししょう」'],
       },
     },
 
@@ -1440,13 +1458,16 @@ const CH = {
       trigger: 'ch4_reported',
       set:['ch4_cleared'],
       quest:{ch4_q3_send:'active'},
-      msg:['ゼフは まどの そとを みた。',
-           'ゼフ「わしは もう、やまを おりられん」',
-           'ゼフ「じゃが おまえは いける。ミオ」',
-           'ミオ「……かならず、もどって きます」',
-           'ゼフ「もどらんでも よい。とびらを あければ、それで じゅうぶんじゃ」',
+      msg:['ミオは かぎを にぎりしめた。',
            '',
-           'ミオは かぎを にぎり、ひとりで やまを おりて いった。'],
+           'でし「ししょうは……もう、おられないのですね」',
+           'ミオ「はい。……でも、まちがえずに すんだ、と」',
+           'でし「では、それが ししょうの こたえです」',
+           '',
+           'ミオは さとの みなを ふりかえり、ふかく あたまを さげた。',
+           'そして ひとり、やまを おりて いった。',
+           '',
+           'てのひらの かぎは、まだ すこし あたたかい。'],
       card: {title:'第4章 完', sub:'ろうけんじゃの しょくざい'},
       next: 5,
     },
@@ -6070,6 +6091,12 @@ function victory(){
     if(rw && (G.chapter||1)!==1){
       (rw.set||[]).forEach(f=>{ G.flags[f]=true; });
       if(rw.giveKey) giveKey(rw.giveKey);
+      // ★なかまが たびだつ／たおれる（ゼフの ぎせい）
+      if(rw.removeMember){
+        const i2 = party.findIndex(p=>p.cls===rw.removeMember);
+        if(i2>=0) party.splice(i2,1);
+        V.setActors(true); U.hud();
+      }
       if(rw.takeKey) takeKey(rw.takeKey);
       if(rw.setState && WORLD.TOWN_STATES[rw.setState]) G.townState = rw.setState;
       Object.keys(rw.quest||{}).forEach(q=>questAdvance(q, rw.quest[q]));
