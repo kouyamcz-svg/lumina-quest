@@ -119,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T11:48:10", "assets_sha": "0f2ebea7", "lines": {"world": 153, "npc": 543, "core": 2700, "chapters": 490, "bgm": 925, "view2d": 1338, "view": 1297, "ui": 761}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T11:59:55", "assets_sha": "0f2ebea7", "lines": {"world": 153, "npc": 543, "core": 2700, "chapters": 490, "bgm": 925, "view2d": 1357, "view": 1297, "ui": 761}};</script>
 <script src="assets.js?v=d52450c3"></script>
 <script>/**
  * @license
@@ -3470,21 +3470,40 @@ function drawBoss(dx,dy,ts){
   cx.beginPath(); cx.ellipse(dx+s/2, dy+s*0.86, s*0.36, s*0.12, 0, 0, Math.PI*2); cx.fill();
   // ★そのマップの ボスの えを つかう（せんとうちゅうと おなじ すがた）。
   //   マップめいを かためがきして いた ため、あたらしい ボスが かげのままだった。
-  let d = null;
+  // ★そのマップの ボスの えを つかう（せんとうちゅうと おなじ すがた）。
+  //   そうしボス（pair）は 2たいで 1くみ なので、ならべて えがく。
+  const arts = [];
   const bi = C.bossInfoAt ? C.bossInfoAt(C.P.map) : null;
   if(bi){
-    const b = C.MIDBOSS && C.MIDBOSS[bi.key];
-    const art = (b && b.art) || bi.key;
-    d = (MONREF && (MONREF[art] || MONREF[bi.key]))
-     || (CHRREF && (CHRREF[art] || CHRREF[bi.key])) || null;
+    const pick = (key)=>{
+      const b = C.MIDBOSS && C.MIDBOSS[key];
+      const art = (b && b.art) || key;
+      return (MONREF && (MONREF[art] || MONREF[key]))
+          || (CHRREF && (CHRREF[art] || CHRREF[key])) || null;
+    };
+    const a1 = pick(bi.key);
+    if(a1) arts.push(a1);
+    if(bi.pair){ const a2 = pick(bi.pair); if(a2) arts.push(a2); }
   }
-  if(!d && C.P.map==='versa_dgn2') d = MONREF && MONREF['yumebanken_f'];
-  if(d){
-    const img=getImg(d.src || d.front);
-    if(img.complete && img.naturalWidth){
-      const sc=Math.max(1,Math.round(ts/TS*0.6));
-      const ww=d.w*sc, hh=d.h*sc;
-      cx.drawImage(img, Math.round(dx+s/2-ww/2), Math.round(dy+s*0.95-hh), ww, hh);
+  if(!arts.length && C.P.map==='versa_dgn2'){
+    const yb = MONREF && MONREF['yumebanken_f'];
+    if(yb) arts.push(yb);
+  }
+  if(arts.length){
+    const sc = Math.max(1, Math.round(ts/TS*0.6));
+    // 2たいの ときは よこに ならべる（すこし かさねて 1くみに みせる）
+    const gap = arts.length>1 ? Math.round(ts*0.30) : 0;
+    let ok = true;
+    const imgs = arts.map(a=>getImg(a.src || a.front));
+    imgs.forEach(im=>{ if(!(im.complete && im.naturalWidth)) ok = false; });
+    if(ok){
+      arts.forEach((a, i)=>{
+        const ww = a.w*sc, hh = a.h*sc;
+        const off = (arts.length>1) ? ((i===0 ? -1 : 1) * gap) : 0;
+        cx.drawImage(imgs[i],
+          Math.round(dx + s/2 - ww/2 + off),
+          Math.round(dy + s*0.95 - hh), ww, hh);
+      });
       return;
     }
   }
