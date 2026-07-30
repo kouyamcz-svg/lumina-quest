@@ -1,6 +1,7 @@
 // ルミナクエストIII サービスワーカー
-// assets.js は ないようが かわらない かぎり キャッシュから かえす（ロジックだけの こうしんを かるくする）
-const CACHE='lq3-v2';
+// assets.js は ?v=… つきで よみこむ。ないようが かわると URLも かわるので、
+// ふるい キャッシュは つかわれない（え を さしかえても ふるい ままに なる ふぐあいの たいさく）。
+const CACHE='lq3-v3';
 const ASSETS=['./','./index.html','./assets.js'];   // field.mp3 は はじめて つかう ときに キャッシュ
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
