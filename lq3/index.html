@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T04:55:32", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2631, "chapters": 456, "bgm": 905, "view2d": 1319, "view": 1277, "ui": 678}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T05:20:18", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2631, "chapters": 456, "bgm": 905, "view2d": 1319, "view": 1297, "ui": 678}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3320,7 +3320,7 @@ function draw(dt, time, actors){
       drawBuilding(rows, x, y, ox+x*ts, oy+y*ts, ts);
     }
     // ワールドの きほん ちけいは ゆかの パスで えがきおえている（うわがきしない）
-    else if(theme==='world' && ch==='j'){ cx.drawImage(atlas.boat, dx0, dy0, ts, ts); }
+    else if(theme==='world' && ch==='j'){ cx.drawImage(atlas.boat, ox+x*ts, oy+y*ts, ts, ts); }
     else if(theme==='world' && '.=:_~wr'.includes(ch)) { /* ゆかのみ */ }
     else {
       let art = tileArt(ch, theme);
@@ -7069,8 +7069,13 @@ function buildMap(name){
   }else actors.lamp=null;
   setActors(true);
 }
+let fpMap = null;                     // fp が どの マップの ざひょうか
 function setActors(snap){
   const P=C.P, tr=C.G.trail;
+  // ★マップが かわったら かならず いちを あわせる。
+  //   のこったままだと まえの マップの ざひょうで えがかれ、
+  //   がめんの そとに いって すがたが きえる。
+  if(fpMap !== P.map){ fpMap = P.map; snap = true; }
   if(is2D){
     if(V2) V2.noteStep(P.x, P.y, !!C.G.stepFlip);
   }else if(curScene && curScene.footprints && !isElevated(curMap)){
@@ -7214,6 +7219,21 @@ function loop(now){
 // ---------------- 2D（ドットえ）の こうしん ----------------
 function update2D(dt,time){
   if(!V2) return;
+  // ★えがく まえに かならず そろえる。
+  //   fp（ひょうじいち）が たりないと だれも えがかれず、
+  //   マップだけ みえて しゅじんこうが きえる（じっさいに おきた）。
+  const need = C.party.length;
+  if(fp.length !== need || !fp._tgt || fp._tgt.length !== need){
+    const tr = C.G.trail || [];
+    const rebuilt = [];
+    for(let i=0;i<need;i++){
+      const t = (i===0) ? [C.P.x, C.P.y] : (tr[i-1] || [C.P.x, C.P.y]);
+      rebuilt.push(t);
+    }
+    fp = rebuilt.map(t=>({x:t[0], y:t[1]}));
+    fp._tgt = rebuilt;
+    fp._y = isElevated(curMap) ? 1.22 : 0.72;
+  }
   const tgt=fp._tgt||[[C.P.x,C.P.y]];
   const objs=[];
   C.party.forEach((m,i)=>{
