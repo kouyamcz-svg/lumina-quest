@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T07:46:09", "assets_sha": "33cd95de", "lines": {"world": 153, "npc": 544, "core": 2647, "chapters": 456, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 678}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T07:54:07", "assets_sha": "33cd95de", "lines": {"world": 153, "npc": 544, "core": 2647, "chapters": 456, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 678}};</script>
 <script src="assets.js?v=c5eeef4b"></script>
 <script>/**
  * @license
@@ -167,13 +167,13 @@ const MAP_IDS = {
   // --- ヴェルサ地方（第1章・実装中） ---
   world:         {region:'versa', kind:'field', name:'ワールドマップ',              scene:'SCENE_WORLD'},
   minamo_port:   {region:'minamo',kind:'town', name:'サンゴの みなと',              scene:'SCENE_MINAMO_TOWN'},
-  minamo_isle:   {region:'minamo',kind:'town', name:'しまの むら',                 scene:'SCENE_MINAMO_TOWN'},
+  minamo_isle:   {region:'minamo',kind:'town', name:'しおかぜの むら ナギサ',                 scene:'SCENE_MINAMO_TOWN'},
   minamo_rock:   {region:'minamo',kind:'dgn',  name:'にしの いわば',               scene:'SCENE_MINAMO_CAVE'},
   minamo_dgn0:   {region:'minamo',kind:'dgn',  name:'あさせの ほら',               scene:'SCENE_MINAMO_CAVE'},
   minamo_dgn1:   {region:'minamo',kind:'dgn',  name:'かいしょくどう',                scene:'SCENE_MINAMO_CAVE'},
   minamo_dgn2:   {region:'minamo',kind:'dgn',  name:'かいしょくどう さいしんぶ',        scene:'SCENE_MINAMO_CAVE'},
   zaal_town:     {region:'zaal',  kind:'town',  name:'たいしょうのまち ザール',       scene:'SCENE_ZAAL_TOWN'},
-  zaal_oasis:    {region:'zaal',  kind:'town',  name:'オアシスの むら',             scene:'SCENE_ZAAL_TOWN'},
+  zaal_oasis:    {region:'zaal',  kind:'town',  name:'オアシスの むら サーラ',             scene:'SCENE_ZAAL_TOWN'},
   zaal_dgn1:     {region:'zaal',  kind:'dgn',   name:'すなの いせき',               scene:'SCENE_ZAAL_RUIN'},
   zaal_dgn2:     {region:'zaal',  kind:'dgn',   name:'すなの いせき さいしんぶ',       scene:'SCENE_ZAAL_RUIN'},
   versa_town:    {region:'versa', kind:'town',  name:'おうと ヴェルサリア',         scene:'SCENE_VERSA_TOWN'},
@@ -295,7 +295,7 @@ const NPCS = {
     {at:'13,6', spr:'guardA', name:'みなとの みはり', lines:[
       {when:{flag:'ch3_started'}, text:[
         '「ねむったまま おきん ものが ふえてる」',
-        '「しまの むらの ほうが ひどいと きくぞ」']},
+        '「ナギサの ほうが ひどいと きくぞ」']},
       {text:['「ようこそ サンゴの みなとへ。ふねの でいりは ここからだ」']}]},
     {at:'7,9', spr:'elderWoman', name:'うらないの ししょう', lines:[
       {when:{flag:'ch3_gotShell'}, text:[
@@ -305,7 +305,7 @@ const NPCS = {
         'ししょう「ゆめを みたか、セナ。……それが おまえの ちからじゃ」',
         '「かいしょくどうの おくに、ゆめの ぬしが おる」']},
       {when:{flag:'ch3_started'}, text:[
-        'ししょう「しまの むらへ いって、なにが おきたか みてくるのじゃ」',
+        'ししょう「ナギサへ いって、なにが おきたか みてくるのじゃ」',
         '「ルカ、セナを たのんだよ」']},
       {text:['ししょう「セナ。おまえの ゆめみの ちからは、まだ あさい」',
              '「じゃが いまは その あさい ちからが いる」',
@@ -322,7 +322,7 @@ const NPCS = {
       {text:['「おねえちゃん、うらないできるの？ ぼくの あした みてよ」']}]},
     {at:'12,2', spr:'sailor', name:'ふなのり', lines:[
       {when:{flag:'ch3_heardIsle'}, text:[
-        '「しまの むらか。こぶねを だしてやる。……きを つけろよ」']},
+        '「ナギサか。こぶねを だしてやる。……きを つけろよ」']},
       {text:['「こぶねで しまづたいに いくのが この あたりの たびだ」']}]},
   ],
   minamo_isle: [
@@ -644,18 +644,18 @@ const NPCS = {
 const QUESTS = {
   // ============ 第3章 みなとの しまい ============
   ch3_q0_fare: {
-    id:'ch3_q0_fare', chapter:3, title:'ふなちんを かせぐ',
+    id:'ch3_q0_fare', chapter:3, title:'ふなのりの いらい',
     giver:'ふなのり',
-    desc:'しまへ わたる こぶねを だして もらうには 80ゴールドが いる。いそべで かせごう。',
+    desc:'ナギサへ わたる こぶねを だして もらうには うでを みせる ひつようが ある。いそべの ぬしを たおそう。',
     steps:[{id:'pay', desc:'ふなちんを はらう', flag:'ch3_paidFare'}],
     reward:{}, next:'ch3_q1_isle',
   },
   ch3_q1_isle: {
     id:'ch3_q1_isle', chapter:3, title:'しまの ねむり',
     giver:'うらないの ししょう',
-    desc:'しまの むらで ねむりが ひろがっている。こぶねで わたり、なにが おきたか みる。',
+    desc:'ナギサで ねむりが ひろがっている。こぶねで わたり、なにが おきたか みる。',
     steps:[
-      {id:'reach_isle', desc:'しまの むらへ わたる', flag:'ch3_reachedIsle'},
+      {id:'reach_isle', desc:'ナギサへ わたる', flag:'ch3_reachedIsle'},
       {id:'ask_elder',  desc:'むらの おさに はなす', flag:'ch3_heardIsle'},
     ],
     reward:{}, next:'ch3_q2_dream',
@@ -3958,7 +3958,7 @@ const MAPS = {
     "#============rr============#",
     "#############GG#############"
   ], warps:{}, warpsXY:{'13,19':{to:'world',x:36,y:59},'14,19':{to:'world',x:36,y:59}}},
-  minamo_isle:{name:'しまの むら',theme:'coral',enc:false,tiles:[
+  minamo_isle:{name:'しおかぜの むら ナギサ',theme:'coral',enc:false,tiles:[
     "####################",
     "#wwwwwwwwwwwwwwwwww#",
     "#wwwwwwwwwwwwwwwwww#",
@@ -4032,7 +4032,7 @@ const MAPS = {
     "#=============rr=============#",
     "##############GG##############"
   ], warps:{}, warpsXY:{'14,19':{to:'world',x:80,y:33},'15,19':{to:'world',x:80,y:33}}},
-  zaal_oasis:{name:'オアシスの むら',theme:'desert',enc:false,tiles:[
+  zaal_oasis:{name:'オアシスの むら サーラ',theme:'desert',enc:false,tiles:[
     "####################",
     "#==================#",
     "#==wwww==rr========#",
