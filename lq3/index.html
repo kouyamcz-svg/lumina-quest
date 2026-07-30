@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T02:27:36", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2594, "chapters": 456, "bgm": 905, "view2d": 1305, "view": 1277, "ui": 677}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T02:36:25", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2594, "chapters": 456, "bgm": 905, "view2d": 1305, "view": 1277, "ui": 678}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1977,7 +1977,7 @@ function resume(){ const a=ctx(); if(a && a.state==='suspended') a.resume(); }
 // せんとうきょくは はっしんきで つくるが、フィールドきょくは
 // レンダリングずみの ファイルを ながす。<audio> なら メモリを くわない。
 // ばしょごとの きょく。<audio> は 1つを つかいまわし、src を さしかえる。
-const TRACKS = {field:'field.mp3', town:'town.mp3', castle:'castle.mp3'};
+const TRACKS = {field:'field.mp3', town:'town.mp3', castle:'castle.mp3', dungeon:'dungeon.mp3'};
 let fieldEl = null, fieldWant = false, fieldVol = 0.55;
 let fieldTrack = 'field';                        // いま かかっている きょく
 let fieldSrc = null, fieldGain = null, fieldErr = '';
@@ -7366,6 +7366,7 @@ function trackFor(mapId){
   const kind = info ? info.kind : '';
   if(kind==='cast') return 'castle';
   if(kind==='town' || kind==='in') return 'town';
+  if(kind==='dgn') return 'dungeon';        // ★どうくつ・いせき・いわば
   return 'field';
 }
 let AC=null;
