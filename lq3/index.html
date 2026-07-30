@@ -119,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T11:59:55", "assets_sha": "0f2ebea7", "lines": {"world": 153, "npc": 543, "core": 2700, "chapters": 490, "bgm": 925, "view2d": 1357, "view": 1297, "ui": 761}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T12:12:53", "assets_sha": "0f2ebea7", "lines": {"world": 153, "npc": 543, "core": 2700, "chapters": 490, "bgm": 925, "view2d": 1357, "view": 1297, "ui": 764}};</script>
 <script src="assets.js?v=d52450c3"></script>
 <script>/**
  * @license
@@ -2141,7 +2141,7 @@ function setFieldVolume(v){
 // 第3章いこうの せんとうは レンダリングずみの ファイルを ながす。
 // フィールドきょくとは べつの <audio> を つかい、いきさきを とりちがえない。
 let batEl = null, batWant = false, batVol = 0.55, batSrc = null, batGain = null, batErr = '';
-const BATTLE_TRACKS = {battle3:'battle3.mp3'};
+const BATTLE_TRACKS = {battle3:'battle3.mp3', boss:'boss.mp3'};
 let batTrack = null;
 function battleAudio(url){
   if(!batEl){
@@ -7751,11 +7751,14 @@ const A = {
     if(BGM.attach) BGM.attach(ac);
     BGM.resume();
     const no = C.G.chapter || 1;
-    if(no >= 3 && BGM.playBattleFile){
-      BGM.playBattleFile('battle3');            // 第3章いこう：ファイル
+    // ★ボスせんは どの しょうでも せんようの きょく
+    if(kind === 'boss' && BGM.playBattleFile){
+      BGM.playBattleFile('boss');
+    }else if(no >= 3 && BGM.playBattleFile){
+      BGM.playBattleFile('battle3');            // 第3章いこう：ふつうの せんとう
     }else{
       BGM.stopBattleFile && BGM.stopBattleFile();
-      BGM.play(kind==='boss'?'boss':'battle');  // 第1・2章：ごうせいの 双嶺の誓約
+      BGM.play('battle');                       // 第1・2章：ごうせいの 双嶺の誓約
     }
   },
   bgmStop(){ if(typeof BGM!=='undefined'){ BGM.stopBattleAll ? BGM.stopBattleAll() : BGM.stop(); } },
