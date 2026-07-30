@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T05:33:30", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2631, "chapters": 456, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 678}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T05:42:42", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2631, "chapters": 456, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 678}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -3765,10 +3765,10 @@ const MIDBOSS = {
 };
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
-  minamo_rock: ['coralslime','babycrab','seagull','seaslug'],                        // Lv1〜6
-  minamo_dgn0: ['seaslug','reefeel','babycrab','seagull','poisonjelly'],              // Lv6〜10
-  minamo_dgn1: ['hermitcrab','poisonjelly','stingray','bloodflower','junglemen','armycrab'],  // Lv10〜13
-  minamo_dgn2: ['redgator','spikelizard','maskshaman','bloodflower','merman','metalslime'],   // Lv12〜15
+  minamo_rock: ['seaslug','reefeel','babycrab','seagull','coralslime'],            // いそべ+                        // Lv1〜6
+  minamo_dgn0: ['poisonjelly','stingray','hermitcrab','junglemen','armycrab','reefeel'], // しまなみ+
+  minamo_dgn1: ['bloodflower','junglemen','redgator','spikelizard','merman','armycrab'],  // おきあい+
+  minamo_dgn2: ['redgator','spikelizard','mimic','merman','bloodflower','armycrab'],     // さいきょう
   zaal_dgn1:   ['skeleton','ghostlamp','skullbat','wisp','hornet','mushmage'],        // Lv8〜12
   zaal_dgn2:   ['mushmage','armycrab','merman','skullbat','mimic','metalslime'],      // Lv11〜15
   versa_dgn1:  ['icicleslime','frostbat','yukingon','blizzardhawk'],        // Lv3〜5
