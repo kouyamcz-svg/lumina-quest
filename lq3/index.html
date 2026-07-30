@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T05:20:18", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2631, "chapters": 456, "bgm": 905, "view2d": 1319, "view": 1297, "ui": 678}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T05:33:30", "assets_sha": "66de03cd", "lines": {"world": 153, "npc": 544, "core": 2631, "chapters": 456, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 678}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -2612,16 +2612,25 @@ function buildAtlas(){
   atlas.bdDoorMagic = doorTile('#7048a8');
   atlas.bdDoorShop  = doorTile('#c87830');
   // ---------- こぶね（ふなつきば）----------
+  // ★こぶね：したじを もたず、まわりの ちけいの うえに かさねる。
+  //   したじを かためがきに して いた ため、しばの うえに すなが うかんで いた。
   atlas.boat = tile((g,s)=>{
-    g.drawImage(hashPick(0,0,atlas.coralsand),0,0);
-    R(g,2,7,12,5,P16.wood1);                    // ふなばら
-    R(g,2,7,12,1,P16.wood0);
-    R(g,1,9,1,2,P16.wood0); R(g,14,9,1,2,P16.wood0);
-    R(g,3,11,10,1,P16.wood0);                   // そこ
-    R(g,7,3,2,5,P16.wood0);                     // ほばしら
-    R(g,9,3,5,4,'#efe6d2');                     // ほ
-    R(g,9,3,5,1,'#d8cdb4');
-    R(g,4,8,8,1,'#8a7048');                     // ざせき
+    R(g,0,0,s,s,'rgba(0,0,0,0)');
+    // みずぎわの かげ
+    R(g,2,12,12,2,'rgba(30,50,70,0.28)');
+    // ふなばら（よこむき・きの いた）
+    R(g,2,8,12,4,P16.wood1);
+    R(g,2,8,12,1,'#a98858');
+    R(g,1,9,1,3,P16.wood0); R(g,14,9,1,3,P16.wood0);
+    R(g,3,12,10,1,P16.wood0);                   // そこ
+    for(let x=3;x<13;x+=3) P(g,x,10,P16.wood0); // いたの つぎめ
+    // ほばしら と ほ
+    R(g,7,2,1,7,P16.wood0);
+    R(g,8,3,4,4,'#f2ebdc');                     // ほ
+    R(g,8,3,4,1,'#dcd2bc');
+    P(g,11,4,'#dcd2bc'); P(g,11,5,'#dcd2bc');
+    // ざせき
+    R(g,4,9,8,1,'#8a7048');
   });
   // ---------- まちの かざり ----------
   atlas.well = tile((g,s)=>{
@@ -2841,7 +2850,7 @@ function tileArt(ch, theme){
     case 'e': return atlas.fence;
     case '*': return atlas.flower;
     case 'y': return atlas.signpost;
-    case 'j': return atlas.boat;      // ふなつきば
+
     case 'K': return atlas.castgate;
     case 'F': return atlas.fountain;
     case 'G': return atlas.gate;
@@ -3315,12 +3324,22 @@ function draw(dt, time, actors){
     if(ch==='C' && C.G.gotTreasure[curMap+':'+x+','+y]){
       cx.drawImage(atlas.chest_open, ox+x*ts, oy+y*ts, ts, ts); continue;
     }
+    // ★ふなつきば（まちの なか）：ゆかを えがいてから ふねを かさねる
+    if(theme!=='world' && ch==='j'){
+      const fa = floorArt(theme);
+      cx.drawImage(Array.isArray(fa)?hashPick(x,y,fa):fa, ox+x*ts, oy+y*ts, ts, ts);
+      cx.drawImage(atlas.boat, ox+x*ts, oy+y*ts, ts, ts);
+    }
     // ★たてものは まわりを みて やねを くみたてる
-    if(theme!=='world' && BUILD_CHARS.includes(ch)){
+    else if(theme!=='world' && BUILD_CHARS.includes(ch)){
       drawBuilding(rows, x, y, ox+x*ts, oy+y*ts, ts);
     }
     // ワールドの きほん ちけいは ゆかの パスで えがきおえている（うわがきしない）
-    else if(theme==='world' && ch==='j'){ cx.drawImage(atlas.boat, ox+x*ts, oy+y*ts, ts, ts); }
+    else if(theme==='world' && ch==='j'){
+      // ★まわりの ちけいを したじに してから ふねを かさねる
+      cx.drawImage(groundTile(x,y,terrainOf), ox+x*ts, oy+y*ts, ts, ts);
+      cx.drawImage(atlas.boat, ox+x*ts, oy+y*ts, ts, ts);
+    }
     else if(theme==='world' && '.=:_~wr'.includes(ch)) { /* ゆかのみ */ }
     else {
       let art = tileArt(ch, theme);
