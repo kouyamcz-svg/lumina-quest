@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T07:54:07", "assets_sha": "33cd95de", "lines": {"world": 153, "npc": 544, "core": 2647, "chapters": 456, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 678}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T09:02:39", "assets_sha": "33cd95de", "lines": {"world": 153, "npc": 544, "core": 2647, "chapters": 456, "bgm": 905, "view2d": 1338, "view": 1297, "ui": 718}};</script>
 <script src="assets.js?v=c5eeef4b"></script>
 <script>/**
  * @license
@@ -7740,12 +7740,7 @@ function openFieldMenu(){
   menu(['つよさ','じゅもん','どうぐ','そうび','ちず','さくせん','クエスト','セーブ','とじる'],
        'メニュー',(sel)=>{
     if(sel===0){            // つよさ
-      const lines=C.party.reduce((a,m)=>a.concat([
-        m.name+' Lv'+m.lv+'　HP'+m.hp+'/'+m.maxhp+(m.maxmp>0?'　MP'+m.mp+'/'+m.maxmp:''),
-        '　こうげき '+C.mAtk(m)+'　しゅび '+C.mDef(m)+'　すばやさ '+m.agi,
-        '　つぎのLvまで '+(C.expNext(m)===Infinity?'---':(C.expNext(m)-m.exp))
-      ]),[]);
-      msg2(lines, ()=>{ C.G.mode='field'; });
+      openStatus();
 
     }else if(sel===1){      // じゅもん
       openSpells();
@@ -7779,6 +7774,51 @@ function openFieldMenu(){
            ()=>{ C.G.mode='field'; });
 
     }else C.G.mode='field';
+  });
+}
+
+// ---------------- つよさ ----------------
+// ひとりずつ すべての ちからを ならべる。
+// ひとに よって もつ ものが ちがう ので、あるものだけ だす。
+const STATUS_NAME = {sleep:'ねむり', confuse:'こんらん', freeze:'こおり', slow:'にぶり'};
+function statusLines(m){
+  const L = [];
+  L.push('＊ ' + m.name + '　Lv' + m.lv + '　' + (C.CLASSES[m.cls] ? className(m.cls) : ''));
+  L.push('　HP　' + m.hp + ' / ' + m.maxhp);
+  if(m.maxmp > 0) L.push('　MP　' + m.mp + ' / ' + m.maxmp);
+  L.push('　じょうたい　' + (m.status ? (STATUS_NAME[m.status] || m.status) : 'そうかい'));
+  L.push('');
+  L.push('　こうげきりょく　' + C.mAtk(m));
+  L.push('　しゅびりょく　　' + C.mDef(m));
+  L.push('　すばやさ　　　　' + m.agi);
+  L.push('');
+  L.push('　みぎて　' + (m.weapon ? m.weapon.name + '（+' + m.weapon.v + '）' : 'なにも もって いない'));
+  L.push('　からだ　' + (m.armor  ? m.armor.name  + '（+' + m.armor.v  + '）' : 'なにも つけて いない'));
+  L.push('');
+  const next = C.expNext(m);
+  L.push('　けいけんち　' + m.exp);
+  L.push('　つぎのLvまで　' + (next === Infinity ? '---' : (next - m.exp)));
+  const sp = C.knownSpells(m);
+  if(sp.length){
+    L.push('');
+    L.push('　おぼえた じゅもん');
+    sp.forEach(s=>L.push('　　' + C.spellLabel(s)));
+  }
+  return L;
+}
+function className(cls){
+  const N = {lion:'このえへい', bald:'しょうにん', sena:'うらないし', ruka:'おどりこ',
+             sora:'ゆうしゃ', lumia:'そうりょ', dan:'せんし'};
+  return N[cls] || '';
+}
+function openStatus(){
+  if(C.party.length === 1){
+    msg2(statusLines(C.party[0]), ()=>{ C.G.mode='field'; });
+    return;
+  }
+  menu(C.party.map(m=>m.name + '　Lv' + m.lv).concat(['もどる']), 'つよさを みる', (k)=>{
+    if(k >= C.party.length){ C.G.mode='field'; return; }
+    msg2(statusLines(C.party[k]), ()=>{ C.G.mode='menu'; openStatus(); });
   });
 }
 
