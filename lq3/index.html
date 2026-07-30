@@ -101,7 +101,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T00:48:45", "assets_sha": "cbbaafbf", "lines": {"world": 152, "npc": 544, "core": 2509, "chapters": 435, "bgm": 905, "view2d": 1292, "view": 1277, "ui": 677}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T01:03:55", "assets_sha": "7aefa0e6", "lines": {"world": 152, "npc": 544, "core": 2556, "chapters": 455, "bgm": 905, "view2d": 1292, "view": 1277, "ui": 677}};</script>
 <script src="assets.js"></script>
 <script>/**
  * @license
@@ -1093,6 +1093,19 @@ const CH = {
     ],
 
     bosses: {
+      // ★いそべの ちゅうボス（ふなのりの いらい）
+      world: {
+        key: 'nushicrab',
+        clearedFlag: 'ch3_jobDone',
+        needFlag: 'ch3_tookJob',
+        lockMsg: ['いわばの おくで、なにかが うごいた きが した。',
+                  'だが いまは かまって いられない。'],
+        intro: ['いわばの かげから、おおきな からが せりあがった。',
+                'ふつうの ヤドガニでは ない。からが ふねほども ある。',
+                'ふなのりが いっていた ＜いそべの ぬし＞だ。',
+                'ぬしヤドガニが たちふさがった！'],
+        after: ['おおきな からが、しずかに いわばに よこたわっている。'],
+      },
       minamo_dgn2: {
         key: 'shadowsis_a',
         pair: 'shadowsis_b',                 // ★そうしボス：2たいで あらわれる
@@ -1133,23 +1146,23 @@ const CH = {
       // ② ふなのり：いらいを うける（いそべの まものを 12たい）
       { npc:'ふなのり', cond:['ch3_started'], unless:'ch3_tookJob',
         set:['ch3_tookJob'],
-        startQuota:{need:12, flag:'ch3_jobDone'},
         msg:['ふなのり「しまへ？ ……わるいが かねの もんだいじゃ ない」',
              '「しおが あれてる。おれは うでの ない きゃくは のせない」',
              'ルカ「うで？ おどりなら まかせて」',
              'ふなのり「そういう うでじゃ ねえよ」',
-             '「いそべに まものが ふえた。12たい かたづけてこい」',
-             '「それが できたら、しまへ わたしてやる」',
-             '＊ いそべの まものを 12たい たおそう ＊'] },
+             '「いそべに ＜ぬし＞が いる。おおきな ヤドガニだ」',
+             '「あれが いると ふねが だせん。しとめてこい」',
+             'ふなのり「にしの いわばだ。しおが ひいて いる いまなら いける」',
+             '＊ いそべの ぬしを たおそう ＊'] },
       // ②-b とちゅうけいか（まだ おわって いない）
       { npc:'ふなのり', cond:['ch3_tookJob'], unless:'ch3_jobDone',
-        msg:['ふなのり「まだ たりねえよ」',
-             '「いそべは みなとの すぐ そとだ。にげずに やれ」'] },
+        msg:['ふなのり「まだ しとめて ないだろ」',
+             '「にしの いわばだ。おおきな からが めじるしさ」'] },
       // ②-c たっせい → こぶね
       { npc:'ふなのり', cond:['ch3_jobDone'], unless:'ch3_paidFare',
-        set:['ch3_paidFare'], clearQuota:true,
+        set:['ch3_paidFare'],
         quest:{ch3_q0_fare:'clear', ch3_q1_isle:'active'},
-        msg:['ふなのり「……ほう。ほんとうに かたづけたか」',
+        msg:['ふなのり「……ほう。ほんとうに ぬしを しとめたか」',
              'ふなのり「みなおしたぜ。うでの ない きゃくは のせないが」',
              '「うでの ある きゃくは、ただで のせる」',
              'セナ「ただ、で いいんですか」',
@@ -1187,6 +1200,13 @@ const CH = {
     ],
 
     bossReward: {
+      nushicrab: {
+        set:['ch3_jobDone'],
+        msg:['', 'おおきな からが かたむき、しずかに いわばへ しずんだ。',
+             'ルカ「……ねえさん、いま わたしが たおしたよね？」',
+             'セナ「うん。ちゃんと みてた」',
+             '', 'ふなのりに しらせに もどろう。'],
+      },
       shadowsis_a: {
         set:['ch3_gotShell'],
         quest:{ch3_q4_twins:'clear'},
@@ -3456,6 +3476,17 @@ const SPELL_DEFS = {
   spark:  {name:'スパーク',   mp:2, type:'dmg',    min:12, max:18},
   heal:   {name:'ヒール',     mp:3, type:'heal',   min:20, max:28},
   cure:   {name:'キュア',     mp:2, type:'cure'},
+  // ★ルカの ほのおけい（おどりながら ひを まう）
+  ember:  {name:'ひのこ',        mp:2, type:'dmg',    min:12, max:18},
+  firedance:{name:'ほのおの まい', mp:6, type:'dmgall', min:16, max:24},
+  // ★たんたいに つよい ほのお（おどりから くりだす いちげき）
+  flamestep:{name:'ひばしらの まい',mp:7, type:'dmg',   min:38, max:50},
+  // ★しゅびりょくを さげる（ほのおで よろいを あぶる）
+  scorch: {name:'あぶりの まい',  mp:4, type:'defdown', cut:8},
+  meltdance:{name:'とかしの まい', mp:9, type:'defdown', cut:16},
+  scarletfan:{name:'しんくの おうぎ',mp:16,type:'dmg',  min:82, max:106},
+  blazering:{name:'えんまいの わ', mp:14,type:'dmgall', min:34, max:46},
+  inferno:{name:'ぐれんの まい',  mp:24,type:'dmgall', min:62, max:82},
   blaze:  {name:'ブレイズ',   mp:5, type:'dmg',    min:26, max:34},
   hiheal: {name:'ハイヒール', mp:6, type:'heal',   min:45, max:60},
   nova:   {name:'ノヴァ',     mp:10,type:'dmgall', min:26, max:36},
@@ -3488,9 +3519,13 @@ const CLASSES = {
           learns:[{lv:1,key:'spark'},{lv:3,key:'heal'},{lv:6,key:'ret'},
                   {lv:9,key:'blaze'},{lv:13,key:'cure'},{lv:17,key:'bolt'},{lv:21,key:'nova'}]},
   // 第3章 ルカ（おどりこ）：すばやく かいふくも できる。まもりが うすい。
-  ruka:  {name:'ルカ',  hp:20,mp:8, atk:6,def:5,agi:11,g:{hp:6,mp:3,atk:3,def:2,agi:3},
-          learns:[{lv:2,key:'heal'},{lv:5,key:'ret'},{lv:8,key:'cure'},
-                  {lv:12,key:'hiheal'},{lv:16,key:'spark'},{lv:20,key:'healall'}]},
+  ruka:  {name:'ルカ',  hp:20,mp:10,atk:6,def:5,agi:11,g:{hp:6,mp:3,atk:3,def:2,agi:3},
+          // ★じょばんから じゅもんを つかえる（おどりこ＝しえんやく）
+          // ★かいふくは セナに まかせ、ルカは ほのおと しゅびさげに とくかする
+          learns:[{lv:1,key:'ember'},{lv:3,key:'scorch'},{lv:5,key:'cure'},
+                  {lv:7,key:'firedance'},{lv:9,key:'ret'},{lv:12,key:'flamestep'},
+                  {lv:15,key:'meltdance'},{lv:19,key:'blazering'},
+                  {lv:24,key:'scarletfan'},{lv:29,key:'inferno'}]},
   bald:  {name:'バルド',hp:19,mp:7,atk:6,def:5,agi:7, g:{hp:6,mp:3,atk:2,def:2,agi:2},
           learns:[{lv:3,key:'heal'},{lv:5,key:'ret'},{lv:8,key:'spark'},
                   {lv:12,key:'cure'},{lv:16,key:'hiheal'},{lv:20,key:'blaze'}]},
@@ -3638,14 +3673,20 @@ const ENEMIES = [
 ];
 const MIDBOSS = {
   // ---- 第1章ボス ----
+  // 第3章 ちゅうボス「ぬしヤドガニ」：いそべの ぬし。
+  // しゅびが たかく、こもると ダメージが とおらない。ぼうぎょを くずして たたく。
+  nushicrab:{key:'nushicrab', name:'ぬしヤドガニ', hp:180, atk:18, def:23, agi:7, acts:1,
+    exp:150, gold:180, art:'nushicrab',
+    skill:{p:0.28, mul:1.30, name:'はさみうち'},
+    aoe:{p:0.16, lo:6, hi:10, name:'すなけむり'}},
   // 第3章 そうしボス「しまいの かげ」：ねえと いもうとの 2たい。
   // かたほうを たおしても、もういっぽうが いきていれば よみがえる。
-  shadowsis_a:{key:'shadowsis_a', name:'あねの かげ', hp:310, atk:36, def:16, agi:16, acts:1,
+  shadowsis_a:{key:'shadowsis_a', name:'あねの かげ', hp:275, atk:33, def:16, agi:16, acts:1,
     exp:520, gold:300, art:'sisters',
     skill:{p:0.28, mul:1.32, name:'ゆめの つめ'},
     aoe:{p:0.20, lo:13, hi:19, name:'ふたりの うたごえ'},
     inflict:{type:'sleep', p:0.26}},
-  shadowsis_b:{key:'shadowsis_b', name:'いもうとの かげ', hp:272, atk:31, def:14, agi:20, acts:1,
+  shadowsis_b:{key:'shadowsis_b', name:'いもうとの かげ', hp:240, atk:29, def:14, agi:20, acts:1,
     exp:480, gold:280, art:'sisters',
     skill:{p:0.26, mul:1.25, name:'ゆめの まなざし'},
     aoe:{p:0.18, lo:11, hi:16, name:'ふたりの うたごえ'},
@@ -3756,7 +3797,7 @@ const MAPS = {
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_____~~~~~~~~~~~_._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_____~~~~~~~~~~~~~~~~~~~__...__~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_.....___~~~~~~~~~~~~~~~_......_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_.........__~~~~~~~~~~~~_......._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_..B......__~~~~~~~~~~~~_......._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_.......,..._~~~~~~~___~_...,...._~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_......A....,_~~_____..._........_~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_,.rrrrrrrrr..__................._~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
@@ -4879,6 +4920,11 @@ function triggerBoss(x,y){
       U.msg(bi.after || ['もう だれも いない。'], ()=>{ G.mode='field'; });
       return;
     }
+    // ★いらいを うけて いないと たたかいに ならない
+    if(bi.needFlag && !G.flags[bi.needFlag]){
+      U.msg(bi.lockMsg || ['まだ ここには ようが ない。'], ()=>{ G.mode='field'; });
+      return;
+    }
     // ★だいじなものが ないと たたかいに ならない
     if(bi.needKey && !hasKey(bi.needKey)){
       U.msg(bi.lockMsg || ['まだ ここには はいれない。'], ()=>{ G.mode='field'; });
@@ -5259,6 +5305,22 @@ function memberAct(a, done){
       return;
     }
     if(A.spell) A.spell();
+    // ★defdown：あいての しゅびりょくを さげる
+    if(sp.type==='defdown'){
+      const alive = b.enemies.filter(e=>e.hp>0);
+      if(!alive.length){ done(); return; }
+      const tg = (a.tgt && a.tgt.hp>0) ? a.tgt : alive[0];
+      m.mp -= sp.mp;
+      const cut = sp.cut || 8;
+      const before = eDef(tg);
+      tg.defDown = {v:Math.min((tg.def|0), ((tg.defDown&&tg.defDown.v)||0) + cut)};
+      const after = eDef(tg);
+      const lines=[m.name+'は '+sp.name+'を となえた！'];
+      if(after < before) lines.push(tg.dispName+'の しゅびりょくが さがった！');
+      else lines.push(tg.dispName+'には きかなかった。');
+      U.msg(lines, done);
+      return;
+    }
     // dmg（単体）：えらんだ あいてが たおれていたら ほかへ
     const t = (a.tgt && a.tgt.hp>0) ? a.tgt : alive[0];
     if(!t){ done(); return; }
@@ -5277,7 +5339,7 @@ function memberAct(a, done){
           : alive[Math.floor(Math.random()*alive.length)];
   if(!t){ done(); return; }
   const crit = Math.random()<1/16;
-  let d = Math.max(1, mAtk(m) - Math.floor(t.def/2) + Math.floor(Math.random()*5) - 2);
+  let d = Math.max(1, mAtk(m) - Math.floor(eDef(t)/2) + Math.floor(Math.random()*5) - 2);
   if(crit) d = Math.floor(d*2);
   if(t.tough) d = crit ? Math.max(2, Math.floor(d*0.3)) : (Math.random()<0.5?1:2); // めったに きかない
   A.hit();
@@ -5289,6 +5351,11 @@ function memberAct(a, done){
     if(t.hp<=0){ t.hp=0; lines.push(t.dispName+'を たおした！'); killed(t); }
     U.msg(lines, done);
   });
+}
+// ★てきの しゅびりょく（よわめられて いれば さがる）
+function eDef(e){
+  const cut = e.defDown ? e.defDown.v : 0;
+  return Math.max(0, (e.def|0) - cut);
 }
 function killed(e){ const d=G.dex[e.key]=G.dex[e.key]||{seen:1,kill:0}; d.kill++;
   // ★いらい（たおした かずを かぞえる）
