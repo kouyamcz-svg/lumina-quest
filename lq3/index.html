@@ -119,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T22:45:29", "assets_sha": "d422fdba", "lines": {"world": 161, "npc": 603, "core": 2822, "chapters": 616, "bgm": 925, "view2d": 1357, "view": 1297, "ui": 764}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-30T22:57:45", "assets_sha": "d422fdba", "lines": {"world": 161, "npc": 603, "core": 2829, "chapters": 618, "bgm": 925, "view2d": 1369, "view": 1297, "ui": 764}};</script>
 <script src="assets.js?v=56d52949"></script>
 <script>/**
  * @license
@@ -1363,6 +1363,8 @@ const CH = {
 
     start: {map:'elde_town', x:12, y:16, dir:'front'},
     party: ['zef', 'mio'],
+    // ★ゼフは 30ねんの けんじゃ。はじめから たかい。ミオは でしなので 1から。
+    startLv: {zef: 8, mio: 1},
     gold: 220, herbs: 10, waters: 3,
     equip: {weapon:{kind:'w',name:'けんじゃの つえ',v:6},
             armor: {kind:'a',name:'まもりの ローブ',v:5}},
@@ -3176,7 +3178,9 @@ function buildMap(name){
   curNight = !!(C.G && C.G.night) && !!curScene.outdoor;
   snow = []; foot = []; groundCache = {};
   const m = C.MAPS[name];
-  flakes = curScene.snowfall ? 90 : 0;
+  // ★ワールドは ちほうごとに てんきが ちがう。
+  //   ゆきの ちほう（ヴェルサ・エルデ）に いる ときだけ ゆきを ふらせる。
+  flakes = snowHere() ? 90 : 0;
   for(let i=0;i<flakes;i++)
     snow.push({x:Math.random(), y:Math.random(), v:0.25+Math.random()*0.5, s:1+Math.random()*2});
 }
@@ -3778,6 +3782,16 @@ function setFade(v){ fadeV = v; }
 // ★ゆめみ：がめんを しろく とばして、おとが とおのいた かんじに する
 let dreamOn = false;
 function setDream(on){ dreamOn = !!on; }
+// ★いま ゆきが ふる ばしょか（ワールドは いちで きめる）
+const SNOW_AREAS = [
+  {x0:24, y0:0,  x1:72, y1:24},   // ヴェルサ（きたの せつげん）
+  {x0:0,  y0:24, x1:26, y1:50},   // エルデ（にしの れいほう）
+];
+function snowHere(){
+  if(curMap !== 'world') return !!(curScene && curScene.snowfall);
+  const x = C.P.x, y = C.P.y;
+  return SNOW_AREAS.some(a=>x>=a.x0 && x<=a.x1 && y>=a.y0 && y<=a.y1);
+}
 function drawDream(){
   if(!dreamOn) return;
   cx.fillStyle = 'rgba(236,244,255,0.42)';
@@ -6567,8 +6581,15 @@ function switchChapter(no, newParty){
     const cd = CHD ? CHD.get(no) : null;
     const cls = (newParty && newParty.length) ? newParty
               : (cd && cd.party) ? cd.party : ['sora'];
-    const lv0 = (cd && cd.startLv) ? cd.startLv : 1;   // ★章ごとの はじまりの レベル
-    cls.forEach(k=>party.push(mkMember(k,lv0)));
+    // ★はじまりの レベル。かずでも、なかまごとの ひょうでも よい。
+    //   （ゼフは ながねんの けんじゃ なので、はじめから たかい）
+    const sl = cd && cd.startLv;
+    const lvOf = (k)=>{
+      if(sl == null) return 1;
+      if(typeof sl === 'number') return sl;
+      return sl[k] || 1;
+    };
+    cls.forEach(k=>party.push(mkMember(k, lvOf(k))));
     if(cd){
       if(cd.start){
         const land = safeLanding(cd.start.map, cd.start.x|0, cd.start.y|0);
