@@ -119,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T08:46:34", "assets_sha": "ca357acb", "lines": {"world": 162, "npc": 609, "core": 2888, "chapters": 650, "bgm": 938, "view2d": 1387, "view": 1298, "ui": 773}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T10:15:16", "assets_sha": "ca357acb", "lines": {"world": 162, "npc": 609, "core": 2888, "chapters": 650, "bgm": 948, "view2d": 1387, "view": 1298, "ui": 773}};</script>
 <script src="assets.js?v=a75cc966"></script>
 <script>/**
  * @license
@@ -2375,60 +2375,69 @@ function setFieldVolume(v){
 /* ══ せんとうきょく（ファイル）══ */
 // 第3章いこうの せんとうは レンダリングずみの ファイルを ながす。
 // フィールドきょくとは べつの <audio> を つかい、いきさきを とりちがえない。
-let batEl = null, batWant = false, batVol = 0.55, batSrc = null, batGain = null, batErr = '';
+// ★せんとうきょく（ファイル）
+//   きょくごとに <audio> を べつに もつ。1つの ようそで src を さしかえると、
+//   よみこみの とちゅうで さいせいが みだれる（じっさいに おきた）。
+let batWant = false, batVol = 0.55, batErr = '', batTrack = null;
 const BATTLE_TRACKS = {battle3:'battle3.mp3', boss:'boss.mp3'};
-let batTrack = null;
-function battleAudio(url){
-  if(!batEl){
-    try{
-      batEl = new Audio(url);
-      batEl.loop = true;
-      batEl.preload = 'auto';
-      batEl.volume = 1;
-      batEl.addEventListener('error', ()=>{
-        const e = batEl.error;
-        batErr = 'よみこみ しっぱい' + (e ? '(code '+e.code+')' : '');
-      });
-      try{ batEl.load(); }catch(e){}
-    }catch(e){ batEl = null; batErr = 'つくれない'; }
-  }
-  return batEl;
+const batEls = {};        // なまえ → {el, src, gain}
+function battleEl(track){
+  if(batEls[track]) return batEls[track];
+  const url = BATTLE_TRACKS[track];
+  if(!url) return null;
+  let el = null;
+  try{
+    el = new Audio(url);
+    el.loop = true;
+    el.preload = 'auto';
+    el.volume = 1;
+    el.addEventListener('error', ()=>{
+      const e = el.error;
+      batErr = track + ' よみこみ しっぱい' + (e ? '(code '+e.code+')' : '');
+    });
+    try{ el.load(); }catch(e){}
+  }catch(e){ batErr = track + ' つくれない'; return null; }
+  const slot = {el, src:null, gain:null};
+  batEls[track] = slot;
+  return slot;
 }
-function routeBattle(){
-  const el = battleAudio(BATTLE_TRACKS.battle3); if(!el) return false;
-  if(batSrc) return true;
+function routeBattle(track){
+  const slot = battleEl(track); if(!slot) return false;
+  if(slot.src) return true;
   if(!ctx()) return false;
   if(typeof AC.createMediaElementSource !== 'function') return false;
   try{
     autoClean(AC);
-    batSrc = AC.createMediaElementSource(el);
-    batGain = AC.createGain();
-    batGain.gain.value = batVol;
-    batSrc.connect(batGain);
-    batGain.connect(AC.destination);
+    slot.src = AC.createMediaElementSource(slot.el);
+    slot.gain = AC.createGain();
+    slot.gain.gain.value = batVol;
+    slot.src.connect(slot.gain);
+    slot.gain.connect(AC.destination);
     return true;
   }catch(e){ batErr = 'つなげない: '+e.message; return false; }
 }
+// ★ほかの せんとうきょくは かならず とめる
+function silenceOtherBattle(keep){
+  Object.keys(batEls).forEach(k=>{
+    if(k === keep) return;
+    try{ batEls[k].el.pause(); }catch(e){}
+  });
+}
 function playBattleFile(track){
-  const url = BATTLE_TRACKS[track] || BATTLE_TRACKS.battle3;
+  if(!BATTLE_TRACKS[track]) track = 'battle3';
   stop();                              // ごうせいの せんとうきょくは とめる
   pauseField();                        // フィールドきょくも とめる
   batWant = true;
-  const el = battleAudio(url); if(!el) return;
-  if(batTrack !== track){
-    batTrack = track;
-    try{ el.pause(); el.src = url; el.load(); batErr=''; }catch(e){}
-  }
-  routeBattle();
+  batTrack = track;
+  silenceOtherBattle(track);
+  const slot = battleEl(track); if(!slot) return;
+  const el = slot.el;
+  routeBattle(track);
   try{ AC && AC.resume && AC.resume(); }catch(e){}
-  if(batGain){ try{ batGain.gain.value = batVol; }catch(e){} }
-  // ★せんとうきょくは まいかい あたまから。
-  //   ただし きょくを かえた ちょくごは まだ よみこんで おらず、
-  //   いちを 0に できない。よみこめてから やりなおす。
-  const rewind = ()=>{ try{ if(el.readyState > 0) el.currentTime = 0; }catch(e){} };
-  rewind();
+  if(slot.gain){ try{ slot.gain.gain.value = batVol; }catch(e){} }
+  // ★まいかい あたまから。よみこめて いなければ よみこめてから。
   const startPlay = ()=>{
-    rewind();
+    try{ if(el.readyState > 0) el.currentTime = 0; }catch(e){}
     try{
       const p = el.play();
       if(p && p.catch) p.catch(()=>{ batErr='さいせい きょかまち'; });
@@ -2437,22 +2446,23 @@ function playBattleFile(track){
   if(el.readyState > 0){
     startPlay();
   }else{
-    // よみこめたら 1どだけ はじめる
-    const once = ()=>{ el.removeEventListener('loadeddata', once); if(batWant) startPlay(); };
+    const once = ()=>{ el.removeEventListener('loadeddata', once); if(batWant && batTrack===track) startPlay(); };
     el.addEventListener('loadeddata', once);
-    startPlay();                       // よみこみながらでも ながせる ばあいが ある
+    startPlay();
   }
 }
 function stopBattleFile(){
   const was = batWant;
   batWant = false;
-  if(batEl){ try{ batEl.pause(); }catch(e){} }
+  Object.keys(batEls).forEach(k=>{ try{ batEls[k].el.pause(); }catch(e){} });
   // ★せんとうが おわったら もといた ばしょの きょくへ もどす
   if(was) scheduleResume(220);
 }
 function setBattleVolume(v){
   batVol = Math.max(0, Math.min(1, v));
-  if(batGain){ try{ batGain.gain.value = batVol; }catch(e){} }
+  Object.keys(batEls).forEach(k=>{
+    if(batEls[k].gain){ try{ batEls[k].gain.gain.value = batVol; }catch(e){} }
+  });
 }
 function status(){
   const a = AC;
@@ -2467,7 +2477,7 @@ function status(){
     vol: vol,
     field: fieldEl ? (fieldEl.paused ? 'とまっている' : 'ながれている') : 'みよみこみ',
     track: fieldTrack,
-    battleFile: batEl ? (batEl.paused ? 'とまっている' : 'ながれている') : 'みよみこみ',
+    battleFile: batTrack ? (batEls[batTrack] && !batEls[batTrack].el.paused ? 'ながれている' : 'とまっている') : 'みよみこみ',
     battleErr: batErr || 'なし',
     fieldVol: fieldVol,
     fieldReady: fieldEl ? fieldEl.readyState : -1,
