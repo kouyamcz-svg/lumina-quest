@@ -119,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T01:32:14", "assets_sha": "d422fdba", "lines": {"world": 161, "npc": 603, "core": 2829, "chapters": 620, "bgm": 925, "view2d": 1369, "view": 1297, "ui": 764}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T02:18:21", "assets_sha": "d422fdba", "lines": {"world": 161, "npc": 603, "core": 2829, "chapters": 620, "bgm": 925, "view2d": 1387, "view": 1298, "ui": 764}};</script>
 <script src="assets.js?v=56d52949"></script>
 <script>/**
  * @license
@@ -2455,6 +2455,7 @@ let atlas = {};                // ch → キャンバス
 let curMap = null, curScene = {}, curNight = false, curTS = null;
 let camX = 0, camY = 0;        // カメラの ちゅうしん（タイルたんい）
 let snow = [], foot = [], flakes = 0;
+let snowOn = null;      // ★いま ゆきが ふって いるか（null＝みてい）
 let fadeV = 0;
 let C = null;                  // LQ3 への さんしょう
 let CHRREF = null;             // キャラのスプライト
@@ -3182,9 +3183,7 @@ function buildMap(name){
   const m = C.MAPS[name];
   // ★ワールドは ちほうごとに てんきが ちがう。
   //   ゆきの ちほう（ヴェルサ・エルデ）に いる ときだけ ゆきを ふらせる。
-  flakes = snowHere() ? 90 : 0;
-  for(let i=0;i<flakes;i++)
-    snow.push({x:Math.random(), y:Math.random(), v:0.25+Math.random()*0.5, s:1+Math.random()*2});
+  snowOn = null;            // ★つぎの えがきで あわせなおす
 }
 function resize(){
   if(!cv) return;
@@ -3630,6 +3629,10 @@ function draw(dt, time, actors){
   list.forEach(a=>drawChar(a, ox, oy, ts, time));
 
   // ⑤ てんこう・じかん
+  // ★ワールドは あるくと ちほうが かわる ので、えがく たびに たしかめる。
+  //   まえは マップに はいった ときだけ きめて いた ため、
+  //   ゆきの ちほうに はいっても ふらなかった。
+  updateSnow();
   if(flakes) drawSnow(dt, ts);
   if(curNight && curScene.aurora) drawAurora(time);
   drawTint();
@@ -3789,6 +3792,20 @@ const SNOW_AREAS = [
   {x0:24, y0:0,  x1:72, y1:24},   // ヴェルサ（きたの せつげん）
   {x0:0,  y0:24, x1:26, y1:50},   // エルデ（にしの れいほう）
 ];
+// ★ゆきの ありなしを いまの いちで あわせる
+function updateSnow(){
+  const want = snowHere();
+  if(want === snowOn) return;
+  snowOn = want;
+  if(want){
+    flakes = 90;
+    snow = [];
+    for(let i=0;i<flakes;i++)
+      snow.push({x:Math.random(), y:Math.random(), v:0.25+Math.random()*0.5, s:1+Math.random()*2});
+  }else{
+    flakes = 0; snow = [];
+  }
+}
 function snowHere(){
   if(curMap !== 'world') return !!(curScene && curScene.snowfall);
   const x = C.P.x, y = C.P.y;
@@ -3804,7 +3821,8 @@ function drawDream(){
   cx.fillStyle=g; cx.fillRect(0,0,W,H);
 }
 
-return {init, resize, buildMap, draw, noteStep, setFade, setDream, setMon, setNpcData,
+return {init, resize, buildMap, draw, noteStep, setFade, setDream,
+  debugSnow(){ return !!flakes; }, setMon, setNpcData,
         showMap, hideMap, drawMapOverlay, get mapOn(){return mapOn;},
         battleEnter:battleEnter2D, battleFx:battleFx2D, battleLeave:battleLeave2D, drawBattle,
         get TS(){return TS;}};
@@ -7932,6 +7950,7 @@ window.LQ3View = {
   init, loop, buildMap, setActors, fx, battleEnter, battleLeave, refresh, chest, fade, chapterCard,
   showMap(id){ if(V2&&V2.showMap) V2.showMap(id); },
   setDream(on){ if(V2&&V2.setDream) V2.setDream(on); },
+  debugSnow(){ return V2&&V2.debugSnow ? V2.debugSnow() : null; },
   hideMap(){ if(V2&&V2.hideMap) V2.hideMap(); },
   get mode(){return mode;}, get drawCalls(){return drawCalls;}, get is2D(){return is2D;},
   debugPoses(){ return is2D ? lastPoses2D.slice()
