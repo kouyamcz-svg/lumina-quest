@@ -119,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T04:24:07", "assets_sha": "ca357acb", "lines": {"world": 162, "npc": 609, "core": 2888, "chapters": 650, "bgm": 925, "view2d": 1387, "view": 1298, "ui": 773}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T08:46:34", "assets_sha": "ca357acb", "lines": {"world": 162, "npc": 609, "core": 2888, "chapters": 650, "bgm": 938, "view2d": 1387, "view": 1298, "ui": 773}};</script>
 <script src="assets.js?v=a75cc966"></script>
 <script>/**
  * @license
@@ -2423,12 +2423,25 @@ function playBattleFile(track){
   try{ AC && AC.resume && AC.resume(); }catch(e){}
   if(batGain){ try{ batGain.gain.value = batVol; }catch(e){} }
   // ★せんとうきょくは まいかい あたまから。
-  //   とちゅうから はじまると、みじかい せんとうでは サビに とどかない。
-  try{ el.currentTime = 0; }catch(e){}
-  try{
-    const p = el.play();
-    if(p && p.catch) p.catch(()=>{ batErr='さいせい きょかまち'; });
-  }catch(e){ batErr='さいせい しっぱい'; }
+  //   ただし きょくを かえた ちょくごは まだ よみこんで おらず、
+  //   いちを 0に できない。よみこめてから やりなおす。
+  const rewind = ()=>{ try{ if(el.readyState > 0) el.currentTime = 0; }catch(e){} };
+  rewind();
+  const startPlay = ()=>{
+    rewind();
+    try{
+      const p = el.play();
+      if(p && p.catch) p.catch(()=>{ batErr='さいせい きょかまち'; });
+    }catch(e){ batErr='さいせい しっぱい'; }
+  };
+  if(el.readyState > 0){
+    startPlay();
+  }else{
+    // よみこめたら 1どだけ はじめる
+    const once = ()=>{ el.removeEventListener('loadeddata', once); if(batWant) startPlay(); };
+    el.addEventListener('loadeddata', once);
+    startPlay();                       // よみこみながらでも ながせる ばあいが ある
+  }
 }
 function stopBattleFile(){
   const was = batWant;
