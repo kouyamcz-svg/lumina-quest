@@ -119,8 +119,8 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T02:18:21", "assets_sha": "d422fdba", "lines": {"world": 161, "npc": 603, "core": 2829, "chapters": 620, "bgm": 925, "view2d": 1387, "view": 1298, "ui": 764}};</script>
-<script src="assets.js?v=56d52949"></script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T03:37:03", "assets_sha": "5c840715", "lines": {"world": 161, "npc": 609, "core": 2865, "chapters": 648, "bgm": 925, "view2d": 1387, "view": 1298, "ui": 764}};</script>
+<script src="assets.js?v=11f36f3a"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -703,31 +703,37 @@ const NPCS = {
 // state: 'inactive' → 'active' → 'clear'
 const QUESTS = {
   // ============ 第4章 ろうけんじゃの しょくざい ============
-  ch4_q1_master: {
-    id:'ch4_q1_master', chapter:4, title:'とうの さいじょうかいへ',
-    giver:'ゼフの でし',
-    desc:'ゆめの とびらは とうの さいじょうかいで ひらく。さんどうを のぼり、けんきゅうとうへ。',
+  ch4_q1_key: {
+    id:'ch4_q1_key', chapter:4, title:'とうの かぎを とりかえす',
+    giver:'ゼフ',
+    desc:'さんどうの こやが あらされ、とうの かぎが うばわれた。おくの けものを おえ。',
     steps:[
-      {id:'reach_path',  desc:'れいほう さんどうへ',   flag:'ch4_enteredPath'},
-      {id:'reach_tower', desc:'けんきゅうとうへ',      flag:'ch4_enteredTower'},
+      {id:'see_hut', desc:'あらされた こやを しらべる', flag:'ch4_sawHut'},
+      {id:'beat',    desc:'ゆきの ぬしがみを たおす',   flag:'ch4_gotTowerKey'},
     ],
-    reward:{}, next:'ch4_q2_regret',
+    reward:{}, next:'ch4_q2_tower',
   },
-  ch4_q2_regret: {
-    id:'ch4_q2_regret', chapter:4, title:'こうかいの かげ',
+  ch4_q2_tower: {
+    id:'ch4_q2_tower', chapter:4, title:'とうの さいじょうかいへ',
+    giver:'ゼフ',
+    desc:'かぎを とりかえした。けんきゅうとうを のぼり、さいじょうかいへ。',
+    steps:[{id:'reach_tower', desc:'けんきゅうとうへ はいる', flag:'ch4_enteredTower'}],
+    reward:{}, next:'ch4_q3_regret',
+  },
+  ch4_q3_regret: {
+    id:'ch4_q3_regret', chapter:4, title:'こうかいの かげ',
     giver:'ゼフ',
     desc:'さいじょうかいに、ゼフの こうかいが かたちを とって いる。むきあわねば ならない。',
     steps:[{id:'beat_boss', desc:'こうかいの かげを たおす', flag:'ch4_gotKey'}],
-    reward:{}, next:'ch4_q3_send',
+    reward:{}, next:'ch4_q4_send',
   },
-  ch4_q3_send: {
-    id:'ch4_q3_send', chapter:4, title:'ミオを おくりだす',
-    giver:'ゼフ',
-    desc:'ゼフは ゆめの たいりくへの かぎを といた。ミオを まもりとして たびに だす。',
+  ch4_q4_send: {
+    id:'ch4_q4_send', chapter:4, title:'ミオを おくりだす',
+    giver:'ゼフの でし',
+    desc:'ゼフは ゆめの たいりくへの かぎを といた。ミオが たびに でる。',
     steps:[{id:'depart', desc:'たびに でる', flag:'ch4_departed'}],
     reward:{}, next:null,
   },
-
   // ============ 第3章 みなとの しまい ============
   ch3_q0_fare: {
     id:'ch3_q0_fare', chapter:3, title:'ふなのりの いらい',
@@ -1384,6 +1390,20 @@ const CH = {
     ],
 
     bosses: {
+      // ★さんどうの おく：こやを あらした けもの
+      elde_path: {
+        key: 'snowbeast',
+        clearedFlag: 'ch4_gotTowerKey',
+        needFlag: 'ch4_sawHut',
+        lockMsg: ['ゆきの おくで、なにかが うごいた きが した。'],
+        intro: ['いわばの かげに、しろい けものが うずくまって いた。',
+                'そばに こわされた はこが ころがって いる。',
+                'ミオ「……あれ、こやの はこ」',
+                'ゼフ「かぎの においが する。まちがい ないのう」',
+                'けものが たちあがり、ふぶきが まいた。',
+                'ゆきの ぬしがみが うなりを あげた！'],
+        after: ['こわれた はこが、ゆきに うもれて いる。'],
+      },
       elde_top: {
         key: 'regretshadow',
         clearedFlag: 'ch4_gotKey',
@@ -1408,7 +1428,7 @@ const CH = {
     talkEvents: [
       { npc:'ゼフの でし', unless:'ch4_started',
         set:['ch4_started'],
-        quest:{ch4_q1_master:'active'},
+        quest:{ch4_q2_tower:'active'},
         msg:['でし「ミオさん。ゼフさまが、とうへ いくと」',
              'ミオ「……やっぱり」',
              'ゼフ「30ねん かけて、ようやく わかった」',
@@ -1418,10 +1438,11 @@ const CH = {
              'ミオ「なら なおさら、ひとりでは いかせません」',
              'ミオ「わたしが さきを あるきます。ししょうは うしろに」',
              'ゼフ「……たのもしく なったのう」',
+             'ゼフ「かぎは さんどうの こやに あずけて ある。よって いこう」',
              '＊ クエスト「とうの さいじょうかいへ」＊'] },
       { npc:'ゼフの でし', cond:['ch4_gotKey'], unless:'ch4_reported',
         set:['ch4_reported'],
-        quest:{ch4_q2_regret:'clear', ch4_q3_send:'active'},
+        quest:{ch4_q3_regret:'clear', ch4_q4_send:'active'},
         msg:['でし「ミオさん。……ししょうは？」',
              'ミオ「ししょうの けんきゅうが、ゆめの とびらを ゆるめて いました」',
              'ミオ「ねむりびょうは、ししょうの しわざだった」',
@@ -1433,10 +1454,23 @@ const CH = {
     ],
 
     bossReward: {
+      snowbeast: {
+        set:['ch4_gotTowerKey'],
+        giveKey:'towerkey',
+        quest:{ch4_q1_key:'clear', ch4_q2_tower:'active'},
+        msg:['', 'けものは ゆきの なかへ しずんで いった。',
+             'こわれた はこの そこに、ちいさな かぎが のこって いる。',
+             '＊ とうの かぎを てにいれた！ ＊',
+             '',
+             'ゼフ「……この やまの ぬしじゃった かもしれん」',
+             'ミオ「ぬしが、なぜ こやを？」',
+             'ゼフ「ゆめが みだれると、けものも おちつかん」',
+             'ゼフ「わしの けんきゅうの せいじゃ。……いこう」'],
+      },
       regretshadow: {
         set:['ch4_gotKey'],
         giveKey:'dreamkey',
-        quest:{ch4_q2_regret:'clear'},
+        quest:{ch4_q3_regret:'clear'},
         removeMember:'zef',
         msg:['', 'かげは ひざを ついた。だが、きえない。',
              'かげ「……まだ じゃ。まだ、つぐなって おらん」',
@@ -1466,7 +1500,7 @@ const CH = {
     ending: {
       trigger: 'ch4_reported',
       set:['ch4_cleared'],
-      quest:{ch4_q3_send:'active'},
+      quest:{ch4_q4_send:'active'},
       msg:['ミオは かぎを にぎりしめた。',
            '',
            'でし「ししょうは……もう、おられないのですね」',
@@ -4055,6 +4089,12 @@ const MIDBOSS = {
     exp:150, gold:180, art:'nushicrab',
     skill:{p:0.28, mul:1.30, name:'はさみうち'},
     aoe:{p:0.16, lo:6, hi:10, name:'すなけむり'}},
+  // 第4章 ちゅうボス「ゆきの ぬしがみ」：こやを あらし、かぎを うばった けもの。
+  snowbeast:{key:'snowbeast', name:'ゆきの ぬしがみ', hp:420, atk:40, def:18, agi:15, acts:1,
+    exp:420, gold:300, art:'snowbeast',
+    skill:{p:0.32, mul:1.35, name:'つめの ひとふり'},
+    aoe:{p:0.20, lo:12, hi:18, name:'ふぶきの うなり'},
+    inflict:{type:'freeze', p:0.24}},
   // 第4章 ボス「こうかいの かげ」：ゼフの けんきゅうが うんだ、みずからの こうかい。
   regretshadow:{key:'regretshadow', name:'こうかいの かげ', hp:760, atk:64, def:20, agi:17, acts:1,
     exp:900, gold:520, art:'shardshadow2',
@@ -4275,15 +4315,15 @@ const MAPS = {
     "######################",
     "######################",
     "##=====##=>>========##",
-    "##=C===##===========##",
-    "##==o==##========o==##",
-    "##=====##===========##",
+    "##==HHH##===========##",
+    "##=HHHH##========o==##",
+    "##=HyHH##===========##",
     "##=====##====##=====##",
     "##=t===##====##===t=##",
     "##========o==##=====##",
     "##===========##=====##",
     "##===========##=====##",
-    "##==o========##==o==##",
+    "##==o========##==B==##",
     "##========t==##===C=##",
     "##========<<=##=====##",
     "######################",
@@ -4985,6 +5025,30 @@ function interact(){
     return;
   }
   if(ch==='B'){ triggerBoss(nx,ny); return; }
+  // ★さんどうの こや：かぎを あずけて ある。まものに あらされて いる。
+  if(ch==='y' && P.map==='elde_path' && (G.chapter||1)===4){
+    G.mode='msg';
+    if(!G.flags.ch4_sawHut){
+      G.flags.ch4_sawHut = true;
+      questAdvance('ch4_q1_key','active');
+      U.msg(['こやの とびらが、うちがわから やぶられて いる。',
+             'ゆかに たなが たおれ、ぬのが ちらばって いた。',
+             '',
+             'ミオ「……かぎを しまって おいた はこが、ない」',
+             'ゼフ「けものの あしあとじゃ。おおきい」',
+             'ゼフ「まだ とおくには いっておらん。においが のこっとる」',
+             'ミオ「おくへ いきましょう。とりかえします」',
+             '', '＊ クエスト「とうの かぎを とりかえす」＊'], ()=>{ G.mode='field'; });
+      return;
+    }
+    if(hasKey('towerkey')){
+      U.msg(['あらされた こや。もう、とる ものは ない。'], ()=>{ G.mode='field'; });
+      return;
+    }
+    U.msg(['あらされた こや。かぎは もちさられて いる。',
+           'ゼフ「おくじゃ。けものの においを たどれ」'], ()=>{ G.mode='field'; });
+    return;
+  }
   // ★けっかい：じょうけんが そろうまで はいれない。
   //   （まどろみの しもべを たおすまで かいしょくどうへ はいれない）
   {
@@ -6267,6 +6331,10 @@ function sellGood(map, key, n){
 // こうげき じゅもんは 「ここでは つかえない」。
 // ★けっかい：ここを とおるには じょうけんが いる
 const WARDS = {
+  elde_tower: {chapter:4, flag:'ch4_gotTowerKey',
+    msg:['とうの とびらは かたく とじて いる。',
+         'ミオ「かぎが ないと あきません」',
+         'ゼフ「こやに あずけて あった はずじゃ。さんどうの こやへ」']},
   minamo_dgn1: {chapter:3, flag:'ch3_sawDream',
     msg:['ほらの いりぐちに、うすい ひかりの まくが はっている。',
          'てを のばすと、しおの ような つめたさに はじかれた。',
@@ -6366,6 +6434,8 @@ function castField(ci, key, ti){
 }
 // ---------------- だいじなもの（キーアイテム）----------------
 const KEY_ITEMS = {
+  towerkey:{key:'towerkey', name:'とうの かぎ',
+    desc:'けんきゅうとうの とびらを あける かぎ。こやに あずけて あった。'},
   dreamkey:{key:'dreamkey', name:'ゆめのかぎ',
     desc:'ゼフが 30ねんを かけて つくった かぎ。ゆめの たいりくへの とびらを ひらく。'},
   callshell:{key:'callshell', name:'よびがい',
