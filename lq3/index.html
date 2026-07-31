@@ -119,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T11:02:22", "assets_sha": "b260aa04", "lines": {"world": 162, "npc": 609, "core": 2888, "chapters": 650, "bgm": 948, "view2d": 1387, "view": 1298, "ui": 773}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T11:53:35", "assets_sha": "b260aa04", "lines": {"world": 163, "npc": 609, "core": 2915, "chapters": 650, "bgm": 948, "view2d": 1387, "view": 1298, "ui": 773}};</script>
 <script src="assets.js?v=dd7568e5"></script>
 <script>/**
  * @license
@@ -189,8 +189,9 @@ const MAP_IDS = {
   elde_town:     {region:'elde',  kind:'town', name:'かくれざと エルデ',            scene:'SCENE_ELDE_TOWN'},
   elde_path:     {region:'elde',  kind:'dgn',  name:'れいほう さんどう',            scene:'SCENE_ELDE_CAVE'},
   elde_path2:    {region:'elde',  kind:'dgn',  name:'れいほう さんどう おくち',      scene:'SCENE_ELDE_CAVE'},
-  elde_tower:    {region:'elde',  kind:'dgn',  name:'けんきゅうとう',               scene:'SCENE_ELDE_CAVE'},
-  elde_top:      {region:'elde',  kind:'dgn',  name:'とうの さいじょうかい',          scene:'SCENE_ELDE_CAVE'},
+  elde_tower:    {region:'elde',  kind:'dgn',  name:'けんきゅうとう 1かい',               scene:'SCENE_ELDE_CAVE'},
+  elde_tower2:   {region:'elde',  kind:'dgn',  name:'けんきゅうとう 2かい',          scene:'SCENE_ELDE_CAVE'},
+  elde_top:      {region:'elde',  kind:'dgn',  name:'けんきゅうとう 3かい',          scene:'SCENE_ELDE_CAVE'},
   minamo_port:   {region:'minamo',kind:'town', name:'サンゴの みなと',              scene:'SCENE_MINAMO_TOWN'},
   minamo_isle:   {region:'minamo',kind:'town', name:'しおかぜの むら ナギサ',                 scene:'SCENE_MINAMO_TOWN'},
   minamo_rock:   {region:'minamo',kind:'dgn',  name:'にしの いわば',               scene:'SCENE_MINAMO_CAVE'},
@@ -4170,12 +4171,18 @@ const MIDBOSS = {
             skill:{p:0.28, mul:1.40, name:'むすうの しょくしゅ'},
             inflict:{type:'sleep', p:0.20}},
 };
+// ★マップごとの けいけんち ばいりつ。
+//   「2かいは かせぎば」など、ばしょに やくわりを もたせる。
+const EXP_MUL = {
+  elde_tower2: 1.6,      // とう2かい：かせぎば（けいけんちが おおい）
+};
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
   elde_path:  ['icicleslime','frostbat','blizzardhawk','yukingon','skullbat','wisp'],   // Lv14〜17
   elde_path2: ['blizzardhawk','frostbat','yukingon','skullbat','thornwolf','wisp'],   // Lv12〜15
   elde_tower: ['skeleton','ghostlamp','mushmage','maskshaman','spikelizard','wisp'],    // Lv16〜19
-  elde_top:   ['redgator','spikelizard','maskshaman','mimic','skeleton','metalslime'],  // Lv18〜21
+  elde_tower2:['spikelizard','maskshaman','skeleton','redgator','mimic','ghostlamp'],  // Lv17〜20（けいけんちが おおい）
+  elde_top:   ['redgator','spikelizard','mimic','skeleton','bloodflower','junglemen'],  // Lv19〜22
   minamo_rock: ['seaslug','reefeel','babycrab','seagull','coralslime'],            // いそべ+                        // Lv1〜6
   minamo_dgn0: ['poisonjelly','stingray','hermitcrab','junglemen','armycrab','reefeel'], // しまなみ+
   minamo_dgn1: ['bloodflower','junglemen','redgator','spikelizard','merman','armycrab'],  // おきあい+
@@ -4378,7 +4385,7 @@ const MAPS = {
     "########################",
     "########################"
   ], warps:{}, warpsXY:{'12,13':{to:'elde_path',x:15,y:3},'13,13':{to:'elde_path',x:16,y:3}}},
-  elde_tower:{name:'けんきゅうとう',theme:'castle',enc:true,encRate:0.070,encGrace:4,tiles:[
+  elde_tower:{name:'けんきゅうとう 1かい',theme:'castle',enc:true,encRate:0.070,encGrace:4,tiles:[
     "####################",
     "####################",
     "##=======>>=======##",
@@ -4394,8 +4401,27 @@ const MAPS = {
     "##========<<======##",
     "####################",
     "####################"
-  ], warps:{}, warpsXY:{'10,12':{to:'world',x:20,y:45},'11,12':{to:'world',x:20,y:45},'9,2':{to:'elde_top',x:9,y:9},'10,2':{to:'elde_top',x:10,y:9}}},
-  elde_top:{name:'とうの さいじょうかい',theme:'castle',enc:true,encRate:0.080,encGrace:4,tiles:[
+  ], warps:{}, warpsXY:{'10,12':{to:'world',x:20,y:45},'11,12':{to:'world',x:20,y:45},'9,2':{to:'elde_tower2',x:11,y:12},'10,2':{to:'elde_tower2',x:12,y:12}}},
+  elde_tower2:{name:'けんきゅうとう 2かい',theme:'castle',enc:true,encRate:0.085,encGrace:4,tiles:[
+    "######################",
+    "######################",
+    "##========##>>======##",
+    "##=Co====t##======o=##",
+    "##====##==##========##",
+    "##====##==##========##",
+    "##====##======##====##",
+    "##====##======##====##",
+    "##=t==##==o===##==t=##",
+    "##====##======##====##",
+    "##============##====##",
+    "##============##====##",
+    "##==o=======t=====oC##",
+    "##=========<<=======##",
+    "######################",
+    "######################"
+  ], warps:{}, warpsXY:{'11,13':{to:'elde_tower',x:10,y:3},'12,13':{to:'elde_tower',x:11,y:3},
+                        '12,2':{to:'elde_top',x:9,y:9},'13,2':{to:'elde_top',x:10,y:9}}},
+  elde_top:{name:'けんきゅうとう 3かい',theme:'castle',enc:true,encRate:0.080,encGrace:4,tiles:[
     "##################",
     "##################",
     "##==============##",
@@ -4409,7 +4435,7 @@ const MAPS = {
     "##=======<<=====##",
     "##################",
     "##################"
-  ], warps:{}, warpsXY:{'9,10':{to:'elde_tower',x:10,y:3},'10,10':{to:'elde_tower',x:11,y:3}}},
+  ], warps:{}, warpsXY:{'9,10':{to:'elde_tower2',x:12,y:3},'10,10':{to:'elde_tower2',x:13,y:3}}},
   // ============ 第3章 ミナモ地方（サンゴぐんとう）============
   // ★にしの いわば（第3章：ふなのりの いらい）
   minamo_rock:{name:'にしの いわば',theme:'sea',enc:true,encRate:0.065,encGrace:4,tiles:[
@@ -6216,7 +6242,9 @@ function victory(){
     return;
   }
   const got = b.enemies.filter(e=>!e.fled);
-  const exp = got.reduce((a,e)=>a+e.exp,0);
+  // ★ばしょに よって けいけんちが かわる（かせぎばを つくる）
+  const mul = EXP_MUL[P.map] || 1;
+  const exp = Math.round(got.reduce((a,e)=>a+e.exp,0) * mul);
   const gold = got.reduce((a,e)=>a+e.gold,0);
   P.gold += gold;
   A.win();
