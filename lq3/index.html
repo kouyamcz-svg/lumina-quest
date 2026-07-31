@@ -119,8 +119,8 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T03:37:03", "assets_sha": "5c840715", "lines": {"world": 161, "npc": 609, "core": 2865, "chapters": 648, "bgm": 925, "view2d": 1387, "view": 1298, "ui": 764}};</script>
-<script src="assets.js?v=11f36f3a"></script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T04:24:07", "assets_sha": "ca357acb", "lines": {"world": 162, "npc": 609, "core": 2888, "chapters": 650, "bgm": 925, "view2d": 1387, "view": 1298, "ui": 773}};</script>
+<script src="assets.js?v=a75cc966"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -188,6 +188,7 @@ const MAP_IDS = {
   world:         {region:'versa', kind:'field', name:'ワールドマップ',              scene:'SCENE_WORLD'},
   elde_town:     {region:'elde',  kind:'town', name:'かくれざと エルデ',            scene:'SCENE_ELDE_TOWN'},
   elde_path:     {region:'elde',  kind:'dgn',  name:'れいほう さんどう',            scene:'SCENE_ELDE_CAVE'},
+  elde_path2:    {region:'elde',  kind:'dgn',  name:'れいほう さんどう おくち',      scene:'SCENE_ELDE_CAVE'},
   elde_tower:    {region:'elde',  kind:'dgn',  name:'けんきゅうとう',               scene:'SCENE_ELDE_CAVE'},
   elde_top:      {region:'elde',  kind:'dgn',  name:'とうの さいじょうかい',          scene:'SCENE_ELDE_CAVE'},
   minamo_port:   {region:'minamo',kind:'town', name:'サンゴの みなと',              scene:'SCENE_MINAMO_TOWN'},
@@ -1391,17 +1392,18 @@ const CH = {
 
     bosses: {
       // ★さんどうの おく：こやを あらした けもの
-      elde_path: {
+      elde_path2: {
         key: 'snowbeast',
         clearedFlag: 'ch4_gotTowerKey',
         needFlag: 'ch4_sawHut',
         lockMsg: ['ゆきの おくで、なにかが うごいた きが した。'],
-        intro: ['いわばの かげに、しろい けものが うずくまって いた。',
+        intro: ['おくちの ゆきだまりに、あおい おおおとこが すわって いた。',
                 'そばに こわされた はこが ころがって いる。',
                 'ミオ「……あれ、こやの はこ」',
-                'ゼフ「かぎの においが する。まちがい ないのう」',
-                'けものが たちあがり、ふぶきが まいた。',
-                'ゆきの ぬしがみが うなりを あげた！'],
+                'ひとつの めが、ぎょろりと こちらを むいた。',
+                'あらくれ「じゃまを するな」',
+                'ゼフ「やまに すむ ものじゃ。ゆめの みだれで あれて おる」',
+                'ひとつめの あらくれが こんぼうを かまえた！'],
         after: ['こわれた はこが、ゆきに うもれて いる。'],
       },
       elde_top: {
@@ -1422,6 +1424,7 @@ const CH = {
 
     onEnter: {
       elde_path:  'ch4_enteredPath',
+      elde_path2: 'ch4_enteredPath2',
       elde_tower: 'ch4_enteredTower',
     },
 
@@ -1458,12 +1461,12 @@ const CH = {
         set:['ch4_gotTowerKey'],
         giveKey:'towerkey',
         quest:{ch4_q1_key:'clear', ch4_q2_tower:'active'},
-        msg:['', 'けものは ゆきの なかへ しずんで いった。',
+        msg:['', 'あらくれは こんぼうを おとし、やまの おくへ かえって いった。',
              'こわれた はこの そこに、ちいさな かぎが のこって いる。',
              '＊ とうの かぎを てにいれた！ ＊',
              '',
-             'ゼフ「……この やまの ぬしじゃった かもしれん」',
-             'ミオ「ぬしが、なぜ こやを？」',
+             'ゼフ「……わるい ものでは ないのじゃ」',
+             'ミオ「なら なぜ こやを あらしたの？」',
              'ゼフ「ゆめが みだれると、けものも おちつかん」',
              'ゼフ「わしの けんきゅうの せいじゃ。……いこう」'],
       },
@@ -4090,10 +4093,10 @@ const MIDBOSS = {
     skill:{p:0.28, mul:1.30, name:'はさみうち'},
     aoe:{p:0.16, lo:6, hi:10, name:'すなけむり'}},
   // 第4章 ちゅうボス「ゆきの ぬしがみ」：こやを あらし、かぎを うばった けもの。
-  snowbeast:{key:'snowbeast', name:'ゆきの ぬしがみ', hp:420, atk:40, def:18, agi:15, acts:1,
+  snowbeast:{key:'snowbeast', name:'ひとつめの あらくれ', hp:420, atk:40, def:18, agi:15, acts:1,
     exp:420, gold:300, art:'snowbeast',
-    skill:{p:0.32, mul:1.35, name:'つめの ひとふり'},
-    aoe:{p:0.20, lo:12, hi:18, name:'ふぶきの うなり'},
+    skill:{p:0.32, mul:1.35, name:'こんぼうの ひとふり'},
+    aoe:{p:0.20, lo:12, hi:18, name:'あばれ まわり'},
     inflict:{type:'freeze', p:0.24}},
   // 第4章 ボス「こうかいの かげ」：ゼフの けんきゅうが うんだ、みずからの こうかい。
   regretshadow:{key:'regretshadow', name:'こうかいの かげ', hp:760, atk:64, def:20, agi:17, acts:1,
@@ -4147,6 +4150,7 @@ const MIDBOSS = {
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
   elde_path:  ['icicleslime','frostbat','blizzardhawk','yukingon','skullbat','wisp'],   // Lv14〜17
+  elde_path2: ['blizzardhawk','frostbat','yukingon','skullbat','thornwolf','wisp'],   // Lv12〜15
   elde_tower: ['skeleton','ghostlamp','mushmage','maskshaman','spikelizard','wisp'],    // Lv16〜19
   elde_top:   ['redgator','spikelizard','maskshaman','mimic','skeleton','metalslime'],  // Lv18〜21
   minamo_rock: ['seaslug','reefeel','babycrab','seagull','coralslime'],            // いそべ+                        // Lv1〜6
@@ -4312,23 +4316,45 @@ const MAPS = {
     "############GG############"
   ], warps:{}, warpsXY:{'12,17':{to:'world',x:9,y:30},'13,17':{to:'world',x:9,y:30}}},
   elde_path:{name:'れいほう さんどう',theme:'ice',enc:true,encRate:0.075,encGrace:4,tiles:[
-    "######################",
-    "######################",
-    "##=====##=>>========##",
-    "##==HHH##===========##",
-    "##=HHHH##========o==##",
-    "##=HyHH##===========##",
-    "##=====##====##=====##",
-    "##=t===##====##===t=##",
-    "##========o==##=====##",
-    "##===========##=====##",
-    "##===========##=====##",
-    "##==o========##==B==##",
-    "##========t==##===C=##",
-    "##========<<=##=====##",
-    "######################",
-    "######################"
-  ], warps:{}, warpsXY:{'10,13':{to:'world',x:6,y:41},'11,13':{to:'world',x:6,y:41},'10,2':{to:'elde_tower',x:9,y:11},'11,2':{to:'elde_tower',x:10,y:11}}},
+    "############################",
+    "############################",
+    "##======##=t##=>>=##======##",
+    "##=HHHH=##========##====t=##",
+    "##=HHHH=##==o=====##===C==##",
+    "##=HyHH=##========##======##",
+    "##======##========##======##",
+    "##======##================##",
+    "##=C====================o=##",
+    "##=================o======##",
+    "##=t===========##=========##",
+    "##====##=======##=========##",
+    "##====##=======##====##===##",
+    "##====##====o==##====##===##",
+    "##==o=##=======##====##===##",
+    "##====##=======##==t=##===##",
+    "##====##==o==========##=C=##",
+    "##====##=====t<<=====##===##",
+    "############################",
+    "############################"
+  ], warps:{}, warpsXY:{'14,17':{to:'world',x:6,y:41},'15,17':{to:'world',x:6,y:41},'15,2':{to:'elde_path2',x:12,y:12},'16,2':{to:'elde_path2',x:13,y:12}}},
+  elde_path2:{name:'れいほう さんどう おくち',theme:'ice',enc:true,encRate:0.080,encGrace:4,tiles:[
+    "########################",
+    "########################",
+    "##====================##",
+    "##=C=======t==========##",
+    "##==o======B===##==o==##",
+    "##=====##======##=====##",
+    "##=====##======##=====##",
+    "##=====##======##=====##",
+    "##=t===##==o===##===t=##",
+    "##=====##======##=====##",
+    "##=====##======##=====##",
+    "##==o==##==========o==##",
+    "##=========t========C=##",
+    "##==========<<========##",
+    "########################",
+    "########################"
+  ], warps:{}, warpsXY:{'12,13':{to:'elde_path',x:15,y:3},'13,13':{to:'elde_path',x:16,y:3}}},
   elde_tower:{name:'けんきゅうとう',theme:'castle',enc:true,encRate:0.070,encGrace:4,tiles:[
     "####################",
     "####################",
@@ -5035,7 +5061,7 @@ function interact(){
              'ゆかに たなが たおれ、ぬのが ちらばって いた。',
              '',
              'ミオ「……かぎを しまって おいた はこが、ない」',
-             'ゼフ「けものの あしあとじゃ。おおきい」',
+             'ゼフ「おおきな あしあとじゃ。ひとの ものでは ない」',
              'ゼフ「まだ とおくには いっておらん。においが のこっとる」',
              'ミオ「おくへ いきましょう。とりかえします」',
              '', '＊ クエスト「とうの かぎを とりかえす」＊'], ()=>{ G.mode='field'; });
@@ -5046,7 +5072,7 @@ function interact(){
       return;
     }
     U.msg(['あらされた こや。かぎは もちさられて いる。',
-           'ゼフ「おくじゃ。けものの においを たどれ」'], ()=>{ G.mode='field'; });
+           'ゼフ「おくちじゃ。きたの おくへ すすめ」'], ()=>{ G.mode='field'; });
     return;
   }
   // ★けっかい：じょうけんが そろうまで はいれない。
@@ -8213,6 +8239,14 @@ function showLine(){
   }
   curLine=msgQ.shift(); shown='';
   if(typing) clearInterval(typing);
+  typing=null;
+  // ★からの ぎょう（かんかく あけ）は そのまま だす。
+  //   1もじずつ だす しくみは ながさ0で とまらない ため、
+  //   さきに すすめなく なって いた。
+  if(!curLine || curLine.length===0){
+    msgText.textContent='';
+    return;
+  }
   let i=0;
   typing=setInterval(()=>{
     shown=curLine.slice(0,++i); msgText.textContent=shown;
@@ -8305,6 +8339,8 @@ function press(k){
   else if(k==='A') C.interact();                     // ★A＝しらべる・はなす
   else if(k==='B') openFieldMenu();                  // ★B＝メニュー
 }
+// ★けんしょう ようの くち
+if(typeof globalThis!=='undefined') globalThis.__UI = {press:(k)=>press(k)};
 // ---------------- ちず ----------------
 function openMap(){
   C.G.mode='map';
@@ -8791,7 +8827,6 @@ C.freshState();
 // ★セーブの ありなしに かかわらず タイトルを だす（しょうを えらべる ように）
 titleScreen();
 requestAnimationFrame(V.loop);
-})();
-</script>
+})();</script>
 </body>
 </html>
