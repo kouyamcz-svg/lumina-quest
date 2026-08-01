@@ -119,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-08-01T02:32:16", "assets_sha": "b260aa04", "lines": {"world": 163, "npc": 609, "core": 2917, "chapters": 650, "bgm": 948, "view2d": 1387, "view": 1298, "ui": 774}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-08-01T02:43:06", "assets_sha": "b260aa04", "lines": {"world": 163, "npc": 609, "core": 2920, "chapters": 650, "bgm": 948, "view2d": 1387, "view": 1298, "ui": 774}};</script>
 <script src="assets.js?v=dd7568e5"></script>
 <script>/**
  * @license
@@ -3914,12 +3914,14 @@ const SPELL_DEFS = {
   scarletfan:{name:'ファイジャ',mp:16,type:'dmg',  min:82, max:106},
   blazering:{name:'ほのおの あらし', mp:14,type:'dmgall', min:34, max:46},
   inferno:{name:'ほのおの たいか',  mp:24,type:'dmgall', min:62, max:82},
-  blaze:  {name:'スパーガ',   mp:5, type:'dmg',    min:26, max:34},
+  blaze:  {name:'スパーラ',   mp:5, type:'dmg',    min:26, max:34},
   hiheal: {name:'ヒーラ', mp:6, type:'heal',   min:45, max:60},
   nova:   {name:'ひかりの うず',     mp:10,type:'dmgall', min:26, max:36},
   revive: {name:'リヴァイブ', mp:12,type:'revive'},
   // ---- こうい じゅもん（Lv12いこう） ----
-  bolt:   {name:'スパージャ',   mp:8, type:'dmg',     min:42, max:56},
+  // ★たんたいの さいじょうい（ミオ・セナの きりふだ）
+  boltja: {name:'スパージャ',      mp:18,type:'dmg', min:88, max:116},
+  bolt:   {name:'スパーガ',   mp:8, type:'dmg',     min:42, max:56},
   holyray:{name:'ひかりの あらし',   mp:16,type:'dmgall',  min:42, max:56},
   luminaflare:{name:'ひかりの たいか',mp:26,type:'dmgall', min:74, max:98},
   judgment:{name:'ばんぶつの ひかり',mp:34,type:'dmg',  min:140,max:185},
@@ -3944,7 +3946,7 @@ const CLASSES = {
   // 第3章 セナ（うらないし）：MPが おおく こうげき じゅもんの かなめ。たいきゅうは よわい。
   sena:  {name:'セナ',  hp:16,mp:12,atk:4,def:4,agi:7, g:{hp:5,mp:4,atk:2,def:2,agi:2},
           learns:[{lv:1,key:'spark'},{lv:3,key:'heal'},{lv:6,key:'ret'},
-                  {lv:9,key:'blaze'},{lv:13,key:'cure'},{lv:17,key:'bolt'},{lv:21,key:'nova'}]},
+                  {lv:9,key:'blaze'},{lv:13,key:'cure'},{lv:17,key:'bolt'},{lv:21,key:'nova'},{lv:25,key:'boltja'}]},
   // 第3章 ルカ（おどりこ）：すばやく かいふくも できる。まもりが うすい。
   ruka:  {name:'ルカ',  hp:20,mp:16,atk:6,def:5,agi:11,g:{hp:6,mp:5,atk:3,def:2,agi:3},
           // ★じょばんから じゅもんを つかえる（おどりこ＝しえんやく）
@@ -3964,7 +3966,8 @@ const CLASSES = {
           learns:[{lv:1,key:'heal'},   {lv:3,key:'spark'},  {lv:5,key:'cure'},
                   {lv:7,key:'ret'},    {lv:9,key:'blaze'},  {lv:11,key:'hiheal'},
                   {lv:14,key:'nova'},  {lv:17,key:'bolt'},  {lv:20,key:'healall'},
-                  {lv:24,key:'fullheal'}, {lv:28,key:'holyray'}]},
+                  {lv:22,key:'boltja'},                        // ★きりふだ
+                  {lv:25,key:'fullheal'}, {lv:29,key:'holyray'}]},
   bald:  {name:'バルド',hp:19,mp:7,atk:6,def:5,agi:7, g:{hp:6,mp:3,atk:2,def:2,agi:2},
           learns:[{lv:3,key:'heal'},{lv:5,key:'ret'},{lv:8,key:'spark'},
                   {lv:12,key:'cure'},{lv:16,key:'hiheal'},{lv:20,key:'blaze'}]},
