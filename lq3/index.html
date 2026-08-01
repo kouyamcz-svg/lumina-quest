@@ -119,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-08-01T03:35:10", "assets_sha": "0bb1dba6", "lines": {"world": 162, "npc": 653, "core": 2906, "chapters": 755, "bgm": 948, "view2d": 1387, "view": 1298, "ui": 774}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-08-01T09:30:17", "assets_sha": "0bb1dba6", "lines": {"world": 162, "npc": 659, "core": 2906, "chapters": 755, "bgm": 948, "view2d": 1387, "view": 1298, "ui": 774}};</script>
 <script src="assets.js?v=faeaf530"></script>
 <script>/**
  * @license
@@ -599,17 +599,23 @@ const NPCS = {
         '「そういや ＜アルト＞が むかし いってたな」',
         '「＜ゆめは いつか あふれる＞って」',
         '「じょうだんだと おもって いたが……」']},
-      {text:['「＜アルト＞という うたうたいが、むかし この むらに おった」',
+      {text:['「となりの いえの じいさんも おきん」',
+             '「……こんな こと、はじめてだ」',
+             '「そういや ＜アルト＞という うたうたいが、むかし この むらに おった」',
              '「ジブリの こえまねが うまくてな。みんな わらった」']}]},
+    // ★ルミアは しょうの はじめから ねむって いる。
+    //   おきる のは ゆめの ぬしを たおした あとだけ。
     {at:'7,12', spr:'maid', name:'ルミア', lines:[
       {when:{flag:'ch5_beatLord'}, text:[
         'ルミア「ソラ。……ありがとう」',
         'ルミア「その けん、ひかって いるのね」',
         'ルミア「おとうさんも、おなじ かおを して いたわ」']},
       {when:{flag:'ch5_started'}, text:[
-        '（ルミアは ねむった ままだ）',
+        '（ルミアは ねむった まま、めを あけない）',
         'ソラ「かあさん。……すぐ もどる」']},
-      {text:['ルミア「ソラ。きょうは はやかったのね」']}]},
+      {text:['（ルミアは ねむって いる。いくら よんでも おきない）',
+             'ソラ「……ゆうべまで、ふつうに はなして いたのに」',
+             'ソラ「おさに きいて みよう」']}]},
   ],
   toros_h1: [
     {at:'5,1', spr:'villagerA', name:'いえの ひと', lines:[
