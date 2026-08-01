@@ -211,5 +211,9 @@ T('BFS:ザール→砂の遺跡最深部', bfs('zaal_town',14,18,'zaal_dgn2',8,3
 T('BFS:ミナモ→海食洞最深部', bfs('minamo_port',13,18,'minamo_dgn2',8,3));
 T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
 
+{
+  const seg = require('fs').readFileSync('src/core.js','utf8').match(/const byMapCh = \{[\s\S]*?\};/)[0];
+  T('回帰:5:world上書きなし(序盤即死防止)', !seg.includes("'5:world':"));
+}
 console.log(`\n検査 ${n}項目 / NG ${ng}`);
 process.exit(ng?1:0);
