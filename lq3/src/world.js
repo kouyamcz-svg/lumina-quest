@@ -18,6 +18,8 @@ const REGIONS = {
            desc:'にしの れいほう。けんじゃの かくれざと。'},
   elde:   {id:'elde',   name:'れいほう エルデ',         dir:'西',   chapter:4,
            climate:'peak',   summary:'夢を研究する賢者の隠れ里がある霊峰。'},
+  dream:{id:'dream', name:'ゆめのたいりく',             dir:'中央海', chapter:6,
+         climate:'dream'},
   oldland:{id:'oldland',name:'きゅうたいりく',           dir:'中央', chapter:5,
            climate:'temperate',
            summary:'LQ2の世界。トロス・リベリオン・ハルナ等を高精細タイルでリメイク再登場させる。'},
@@ -54,6 +56,13 @@ const CHAPTERS = [
 // 命名規則： <地方>_<種別><連番>
 //   種別： town / field / cast(城) / dgn(ダンジョン) / in(屋内) / shrine(神殿)
 const MAP_IDS = {
+  // --- ゆめのたいりく（終章・3D） ---
+  dream_field:   {region:'dream', kind:'field', name:'ゆめのたいりく',            scene:'SCENE_DREAM_FIELD'},
+  dream_camp:    {region:'dream', kind:'town',  name:'ばんにんの いおり',        scene:'SCENE_DREAM_CAMP'},
+  dream_cast1:   {region:'dream', kind:'cast',  name:'さかさのしろ 1かい',        scene:'SCENE_DREAM_CASTLE'},
+  dream_cast2:   {region:'dream', kind:'cast',  name:'さかさのしろ 2かい',        scene:'SCENE_DREAM_CASTLE'},
+  dream_cast3:   {region:'dream', kind:'cast',  name:'さかさのしろ さいじょうかい', scene:'SCENE_DREAM_CASTLE'},
+  dream_core:    {region:'dream', kind:'cast',  name:'ゆめの しんいん',           scene:'SCENE_DREAM_CASTLE'},
   // --- ヴェルサ地方（第1章・実装中） ---
   world:         {region:'versa', kind:'field', name:'ワールドマップ',              scene:'SCENE_WORLD'},
   elde_town:     {region:'elde',  kind:'town', name:'かくれざと エルデ',            scene:'SCENE_ELDE_TOWN'},
@@ -95,6 +104,9 @@ const MAP_IDS = {
 // ビューの見た目（背景・霧・ライト・演出）を決める識別子
 // render: '2d' ＝ ドットえ（まち・フィールド・ダンジョン）／ '3d' ＝ しろの なか だけ
 const SCENES = {
+  SCENE_DREAM_FIELD:  {render:'3d', theme:'dream',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
+  SCENE_DREAM_CAMP:   {render:'3d', theme:'dream',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
+  SCENE_DREAM_CASTLE: {render:'3d', theme:'castle', outdoor:false, snowfall:false, aurora:false, footprints:false},
   SCENE_WORLD:        {render:'2d', theme:'world',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
   SCENE_ELDE_TOWN:    {render:'2d', theme:'snow',   outdoor:true,  snowfall:true,  aurora:false, footprints:true},
   SCENE_ELDE_CAVE:    {render:'2d', theme:'ice',    outdoor:false, snowfall:false, aurora:false, footprints:false},
