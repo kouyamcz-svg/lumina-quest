@@ -211,6 +211,47 @@ T('BFS:ザール→砂の遺跡最深部', bfs('zaal_town',14,18,'zaal_dgn2',8,3
 T('BFS:ミナモ→海食洞最深部', bfs('minamo_port',13,18,'minamo_dgn2',8,3));
 T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
 
+// ===== 中ボス：かいどうの デスナイト =====
+{
+  C.freshState(); C.G.chapters={};
+  C.switchChapter(5);
+  T('道ボス:マップ', !!C.MAPS.old_road);
+  T('道ボス:MIDBOSS', !!C.MIDBOSS.dknight);
+  T('道ボス:素材', require('fs').readFileSync('assets.js','utf8').includes('dknight:{w:'));
+  T('道ボス:クエスト', !!C.QUESTS.ch5_q0_road);
+  // 封鎖→おさ→討伐→おさ→洞窟クエストの順序
+  const b0=C.bossInfoAt('old_road');
+  T('道ボス:未達で封鎖', b0 && b0.needFlag==='ch5_roadQuest' && !C.G.flags.ch5_roadQuest);
+  C.P.map='toros';
+  T('おさ1回目=街道クエスト', C.runTalkEvent('むらの おさ')===true);
+  T('roadQuest', !!C.G.flags.ch5_roadQuest);
+  T('cave未解禁', !C.G.flags.ch5_started);
+  C.G.flags.ch5_roadClear=true;   // 討伐相当
+  T('おさ2回目=洞窟クエスト', C.runTalkEvent('むらの おさ')===true);
+  T('started', !!C.G.flags.ch5_started);
+  // ワールド⇄みはりだいの往復とボス隣接
+  function bfsW(sm,sx,sy,gm,gx,gy){
+    const seen=new Set([sm+':'+sx+','+sy]); const q=[[sm,sx,sy]]; let st=0;
+    while(q.length && st++<400000){
+      const [m,x,y]=q.shift();
+      if(m===gm && Math.abs(x-gx)+Math.abs(y-gy)<=1) return true;
+      for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+        const nx=x+dx, ny=y+dy, mp=C.MAPS[m]; if(!mp) continue;
+        const w=(mp.warpsXY||{})[nx+','+ny];
+        if(w && C.MAPS[w.to]){ const k=w.to+':'+w.x+','+w.y;
+          if(!seen.has(k)){ seen.add(k); q.push([w.to,w.x,w.y]); } continue; }
+        if(!C.walkable(m,nx,ny)) continue;
+        const k=m+':'+nx+','+ny;
+        if(!seen.has(k)){ seen.add(k); q.push([m,nx,ny]); }
+      }
+    }
+    return false;
+  }
+  T('BFS:トロス→デスナイト', bfsW('toros',7,13,'old_road',7,2));
+  T('BFS:みはりだい→洞窟', bfsW('old_road',7,9,'cave1',6,10));
+  (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
+}
+
 // ===== LQ1モンスター（旧大陸地帯） =====
 {
   const eKeys2=new Set(C.ENEMIES.map(e=>e.key));
