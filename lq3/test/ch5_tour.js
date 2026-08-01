@@ -248,6 +248,7 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
     return false;
   }
   T('BFS:トロス→デスナイト', bfsW('toros',7,13,'old_road',7,2));
+  T('BFS:洞窟出口→トロス(孤島回帰防止)', bfsW('world',47,48,'toros',7,13));
   T('BFS:みはりだい→洞窟', bfsW('old_road',7,9,'cave1',6,10));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
