@@ -126,6 +126,26 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
 {{BUILD_INFO}}
+<script>
+// ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
+(function(){
+  function show(t){
+    var d=document.getElementById('errband');
+    if(!d){ d=document.createElement('div'); d.id='errband';
+      d.style.cssText='position:fixed;left:0;right:0;top:0;z-index:99999;background:#a00;color:#fff;'+
+        'font:12px/1.5 monospace;padding:8px;white-space:pre-wrap;word-break:break-all;max-height:45%;overflow:auto';
+      d.onclick=function(){ d.remove(); };
+      document.body.appendChild(d); }
+    d.textContent += t + '\n';
+  }
+  window.addEventListener('error', function(e){
+    show('[ERR] '+(e.message||'')+' @ '+(e.filename||'').split('/').pop()+':'+e.lineno);
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    show('[REJ] '+(e.reason && (e.reason.message||e.reason)));
+  });
+})();
+</script>
 <script src="assets.js?v=faeaf530"></script>
 <script>/**
  * @license
