@@ -494,6 +494,15 @@ const QUESTS = {
     steps:[{id:'sail', desc:'ふねで たびだつ', flag:'ch5_sailed'}],
     reward:{}, next:'ch5_q4_north',
   },
+  ch5_q0_road: {
+    id:'ch5_q0_road', chapter:5, title:'かいどうの デスナイト',
+    giver:'むらの おさ',
+    desc:'みなみの かいどうの みはりだいに、よろいの まものが すみついた。',
+    steps:[
+      {id:'beat', desc:'みはりだいの デスナイトを たおす', flag:'ch5_roadClear'},
+    ],
+    reward:{}, next:'ch5_q1_cave',
+  },
   ch6_q1_eater: {
     id:'ch6_q1_eater', chapter:6, title:'ゆめくいを たおせ',
     giver:'ばんにん レイ',
