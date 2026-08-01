@@ -18,6 +18,9 @@ info = {"ver":"M1.5","at":datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
         "assets_sha":asha,"lines":counts}
 shell = shell.replace('{{BUILD_INFO}}',
     '<script>window.LQ3_BUILD='+json.dumps(info, ensure_ascii=False)+';</script>')
+# ★アセットの版クエリを つけかえ（iPhoneのキャッシュずれ ふせぎ）
+import re as _re
+shell = _re.sub(r'assets\.js\?v=[0-9a-f]+', 'assets.js?v='+asha, shell)
 
 open('index.html','w').write(shell)
 print('index.html', len(shell)//1024, 'KB /', json.dumps(counts))
