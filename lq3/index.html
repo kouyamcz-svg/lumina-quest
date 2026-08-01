@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-01T15:58:59", "assets_sha": "61dd5cc5", "lines": {"world": 175, "npc": 744, "chapters": 1151, "bgm": 949, "view2d": 1400, "core": 3227, "view": 1302, "ui": 799}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-01T16:04:20", "assets_sha": "61dd5cc5", "lines": {"world": 175, "npc": 744, "chapters": 1151, "bgm": 949, "view2d": 1400, "core": 3227, "view": 1302, "ui": 799}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -9305,7 +9305,7 @@ function tapMsg(){
   if(typing){ clearInterval(typing); typing=null; shown=curLine; msgText.textContent=curLine; return; }
   showLine();
 }
-function msgVisible(){ return msgWin.style.display==='block'; }
+function msgVisible(){ const d=msgWin.style.display; return d!=='' && d!=='none'; }  // ★msg2は'flex'で ひらく。'block'ひかくは たいへんな バグだった
 
 // ---------------- コマンドメニュー ----------------
 let menuState=null;
