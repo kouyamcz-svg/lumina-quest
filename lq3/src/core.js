@@ -221,6 +221,16 @@ const ENEMIES = [
   {key:'madcyclops',  name:'マッドサイクロプス', hp:213,atk:37,def:28, agi:6,  exp:180, gold:240,
    skill:{p:0.36, mul:1.60, name:'どくの こぶし'}, inflict:{type:'confuse', p:0.25}},
 ];
+// ============ ルミナクエストIの まもの（5章 きゅうたいりく じょばん） ============
+const ENEMIES_LQ1 = [
+  {key:'puyo',   name:'プヨプヨ',       hp:8,  atk:4,  def:2, agi:4,  exp:3,  gold:4,  minLv:1},
+  {key:'goblin', name:'ゴブリン',       hp:13, atk:7,  def:3, agi:6,  exp:8,  gold:10, minLv:1},
+  {key:'bat',    name:'おおコウモリ',   hp:11, atk:6,  def:2, agi:9,  exp:7,  gold:9,  minLv:1},
+  {key:'thief',  name:'やとう',         hp:17, atk:9,  def:4, agi:10, exp:14, gold:20, minLv:3},
+  {key:'skel',   name:'ガイコツけんし', hp:24, atk:13, def:7, agi:4,  exp:26, gold:30, minLv:5},
+];
+ENEMIES_LQ1.forEach(e=>ENEMIES.push(e));
+
 // ============ 終章 ゆめのたいりく（Lv21〜26） ============
 const ENEMIES_CH6 = [
   {key:'yumewisp',   name:'ゆめの ひだま',   hp:150,atk:38, def:22, agi:26, exp:185, gold:55,  minLv:1},
@@ -595,6 +605,9 @@ const MAPS = {
   },
   // ちほうごとに でる まものを かえる
   encZones:[
+    // ★きゅうたいりく（5章 じょばん）：ルミナクエストIの まものが でる
+    {x0:27,y0:24,x1:65,y1:49, pool:['puyo','goblin','bat','thief','skel'],
+     name:'きゅうたいりくの のはら'},
     {x0:26,y0:0, x1:70,y1:23, pool:['icicleslime','hoimislime','yukingon','frostbat'], name:'ヴェルサの せつげん'},
     // ★エルデ：れいほうの ふもと
     {x0:0,y0:24,x1:26,y1:50, pool:['icicleslime','frostbat','yukingon','blizzardhawk','wisp'],
