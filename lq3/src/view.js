@@ -425,6 +425,7 @@ let fxState = null;
 let shake = 0;
 
 const THEME = {
+  dream:  {sky:0x241a4e, fog:[0x7a5fb8,13,34], amb:[0xd8c8ff,0.95],sun:[0xffd8f0,0.5]},
   snow:   {sky:0x9ec8e8, fog:[0xcfe2f2,14,40], amb:[0xdfeaff,0.95],sun:[0xffffff,0.55]},
   castle: {sky:0x2a2c44, fog:[0x2a2c44,10,26], amb:[0xc8c0e0,0.85],sun:[0xffe8c0,0.5]},
   ice:    {sky:0x14283c, fog:[0x14283c,8,22],  amb:[0x9ac8f0,0.8], sun:[0xd8f0ff,0.45]},
@@ -684,6 +685,7 @@ function buildMap(name){
 
   const rows=map.tiles, H=rows.length, W=rows[0].length;
   const cave = map.theme==='cave' || map.theme==='ice';
+  const dream = map.theme==='dream';
   const snow = map.theme==='snow';
   const ice  = map.theme==='ice';
   const cast = map.theme==='castle';
@@ -843,7 +845,8 @@ function buildMap(name){
   // インスタンス化（drawCall削減）
   const box=new THREE.BoxGeometry(1,0.12,1);
   const gm=new THREE.MeshLambertMaterial({
-    map: snow?TEX.snow : ice?TEX.ice : cast?TEX.carpet : TEX.grass});
+    map: snow?TEX.snow : ice?TEX.ice : cast?TEX.carpet : dream?TEX.ice : TEX.grass});
+  if(dream) gm.color.setHex(0xc9b2f2);   // ★ゆめのたいりく：あわい むらさきの ゆか
   if(snow && ts && ts.id!=='NORMAL') gm.color.setHex(ts.snowColor);
   addInstanced(box,gm, (G_.ground||[]).map(p=>[p[0],p[1],p[2]]));
   addInstanced(box,new THREE.MeshLambertMaterial({
