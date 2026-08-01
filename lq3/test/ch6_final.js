@@ -124,5 +124,11 @@ C.freshState(); C.G.chapters={};
 C.switchChapter(5);
 T('ch5:従来どおり', C.party.length===1 && C.party[0].cls==='sora');
 
+// ===== 6. UI退行チェック =====
+{
+  const ui=fs.readFileSync('src/ui.js','utf8');
+  T('msg表示判定の整合', !/msgWin\.style\.display==='block'/.test(ui));
+  T('msg2はflexで開く', ui.includes("msgWin.style.display='flex'"));
+}
 console.log(`\n検査 ${n}項目 / NG ${ng}`);
 process.exit(ng?1:0);
