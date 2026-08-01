@@ -343,7 +343,8 @@ const EXP_MUL = {
 };
 // ★しょうべつの でかた（きょうつう byMap より ゆうせん）。5章の めぐりで つかう
 const byMapCh = {
-  '5:world':       ['bloodwolf','killerpanther','icephoenix','tornado','darkpriest','golem'],
+  // ★'5:world' は おかない。ワールドは encZones（ちたいべつ）が ただしい。
+  //   5章は Lv1で はじまるため、ここを つよい てきで うわがきすると そくしぬ。
   '5:versa_dgn1':  ['icephoenix','bloodwolf','skeleton','ghostlamp','golem','wisp'],
   '5:versa_dgn2':  ['icephoenixlord','shadowassassin','darkguard','icephoenix','bloodwolf'],
   '5:zaal_dgn1':   ['golem','tornado','darkpriest','shadowmimic','killerpanther'],
