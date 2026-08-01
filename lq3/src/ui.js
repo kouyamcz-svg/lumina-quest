@@ -201,7 +201,7 @@ function tapMsg(){
   if(typing){ clearInterval(typing); typing=null; shown=curLine; msgText.textContent=curLine; return; }
   showLine();
 }
-function msgVisible(){ return msgWin.style.display==='block'; }
+function msgVisible(){ const d=msgWin.style.display; return d!=='' && d!=='none'; }  // ★msg2は'flex'で ひらく。'block'ひかくは たいへんな バグだった
 
 // ---------------- コマンドメニュー ----------------
 let menuState=null;
