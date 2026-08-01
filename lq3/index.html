@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-01T16:23:56", "assets_sha": "5875c02e", "lines": {"world": 175, "npc": 744, "chapters": 1151, "bgm": 949, "view2d": 1412, "core": 3240, "view": 1302, "ui": 800}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-01T23:14:48", "assets_sha": "db5331af", "lines": {"world": 176, "npc": 753, "chapters": 1186, "bgm": 949, "view2d": 1412, "core": 3260, "view": 1302, "ui": 800}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -146,7 +146,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=5875c02e"></script>
+<script src="assets.js?v=db5331af"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -212,6 +212,7 @@ const CHAPTERS = [
 // 命名規則： <地方>_<種別><連番>
 //   種別： town / field / cast(城) / dgn(ダンジョン) / in(屋内) / shrine(神殿)
 const MAP_IDS = {
+  old_road: {region:'oldland', kind:'dgn', name:'かいどうの みはりだい', scene:'SCENE_OLD_TOROS'},
   // --- ゆめのたいりく（終章・3D） ---
   dream_field:   {region:'dream', kind:'field', name:'ゆめのたいりく',            scene:'SCENE_DREAM_FIELD'},
   dream_camp:    {region:'dream', kind:'town',  name:'ばんにんの いおり',        scene:'SCENE_DREAM_CAMP'},
@@ -824,6 +825,15 @@ const QUESTS = {
     desc:'きりは よそでも おきて いる。ふねを えて、せかいを めぐる。',
     steps:[{id:'sail', desc:'ふねで たびだつ', flag:'ch5_sailed'}],
     reward:{}, next:'ch5_q4_north',
+  },
+  ch5_q0_road: {
+    id:'ch5_q0_road', chapter:5, title:'かいどうの デスナイト',
+    giver:'むらの おさ',
+    desc:'みなみの かいどうの みはりだいに、よろいの まものが すみついた。',
+    steps:[
+      {id:'beat', desc:'みはりだいの デスナイトを たおす', flag:'ch5_roadClear'},
+    ],
+    reward:{}, next:'ch5_q1_cave',
   },
   ch6_q1_eater: {
     id:'ch6_q1_eater', chapter:6, title:'ゆめくいを たおせ',
@@ -1747,6 +1757,23 @@ const CH = {
     ],
 
     bosses: {
+      old_road: {
+        key: 'dknight',
+        clearedFlag: 'ch5_roadClear',
+        needFlag: 'ch5_roadQuest',
+        lockMsg: ['みはりだいの うえに、くろい よろいが みえる。',
+                  'まず むらの おさに はなしを きこう。'],
+        intro: ['くずれた みはりだいの うえ。',
+                'くろい よろいが、おとも なく たちあがった。',
+                '',
+                '＜……マオウ、サマ……ドコ……＞',
+                'ソラ「あんたの ごしゅじんは、とっくに いないよ」',
+                '＜……ミチ、トオサヌ……＞',
+                '',
+                'デスナイトが おそいかかって きた！'],
+        after: ['よろいは くずれ、なかは からっぽ だった。',
+                'ながい やくめから、ようやく とかれたのだ。'],
+      },
       cave3: {
         key: 'dreamlord',
         clearedFlag: 'ch5_beatLord',
@@ -1831,17 +1858,28 @@ const CH = {
     },
 
     talkEvents: [
-      { npc:'むらの おさ', unless:'ch5_started',
-        set:['ch5_started'],
-        quest:{ch5_q1_cave:'active'},
+      { npc:'むらの おさ', unless:'ch5_roadQuest',
+        set:['ch5_roadQuest'],
+        quest:{ch5_q0_road:'active'},
         msg:['おさ「ソラか。……ルミアさんも おきん」',
              '「むらの はんぶんが、ゆうべから ねむったままじゃ」',
              'ソラ「かあさんが……」',
              'おさ「からだは ここに ある。」',
              'おさ「じゃが、こころが かえって こん」',
              'おさ「ひがしの ＜ゆめみの どうくつ＞から きりが ながれて きた」',
-             'おさ「みなの こころは、」',
-             'おさ「あの きりの おくに とられて おる」',
+             'おさ「じゃが まて。みなみの かいどうに、',
+             'よろいの まものが すみついて おる」',
+             'おさ「むかし まおうに つかえた ＜デスナイト＞じゃ。',
+             'あれを とおらねば どうくつへは いけん」',
+             'ソラ「……おれが たおす。とうさんの けんが ある」',
+             '＊ クエスト「かいどうの デスナイト」＊',
+             '＊ みなみの かいどうの みはりだいに いる ＊'] },
+      { npc:'むらの おさ', cond:['ch5_roadClear'], unless:'ch5_started',
+        set:['ch5_started'],
+        quest:{ch5_q1_cave:'active'},
+        msg:['おさ「デスナイトを たおしたか！ ようやった」',
+             'おさ「これで どうくつへの みちが ひらけた」',
+             'おさ「みなの こころは、きりの おくに とられて おる」',
              'ソラ「……いってくる。おれが いかなきゃ、だれが いくんだ」',
              '＊ クエスト「ゆめみの どうくつへ」＊'] },
       { npc:'むらの おさ', cond:['ch5_beatLord'], unless:'ch5_reported',
@@ -1958,6 +1996,13 @@ const CH = {
     ],
 
     bossReward: {
+      dknight: {
+        set:['ch5_roadClear'],
+        quest:{ch5_q0_road:'clear'},
+        msg:['', 'かいどうに、かぜが とおりぬけた。',
+             'これで ひがしの どうくつへ すすめる。',
+             'むらの おさに ほうこく しよう。'],
+      },
       dreamlord: {
         set:['ch5_beatLord'],
         giveKey:'lightsword',
@@ -4863,6 +4908,9 @@ const MIDBOSS = {
     skill:{p:0.31, mul:1.32, name:'ゆめを すする'},
     aoe:{p:0.23, lo:21, hi:29, name:'くろい こだま'},
     inflict:{type:'sleep', p:0.21}, drain:0.16},
+  dknight:{key:'dknight', name:'デスナイト', hp:74, atk:14, def:8, agi:6, acts:1,
+    exp:100, gold:150, art:'dknight',
+    skill:{p:0.28, mul:1.38, name:'やみの ひとふり'}},
   dreameater_a:{key:'dreameater_a', name:'ゆめくい', hp:1400, atk:51, def:28, agi:20, acts:2,
     exp:2400, gold:1000, art:'regretshadow',
     skill:{p:0.32, mul:1.36, name:'ゆめを くらう'},
@@ -4952,6 +5000,7 @@ const byMapCh = {
   '5:minamo_dgn2': ['deathbishop','demonlord','shadowassassin','darkguard','firedragon'],
 };
 const byMap = {
+  old_road: ['puyo','goblin','bat','thief'],
   // ============ 終章 ゆめのたいりく ============
   dream_field: ['yumewisp','sleepknight','nightpriest','echoshadow','voidgolem'],
   dream_cast1: ['sleepknight','voidgolem','nightpriest','echoshadow','yumewisp'],
@@ -4986,6 +5035,21 @@ const MAPS = {
   // ============ ワールドマップ（5ちほう＋ちゅうおうかい）============
   // ~ うみ / _ すなはま / . くさち / , しげみ / = ゆきげん / : さばく / ^ やま / w みずうみ
   // r かいどう / A おうと / V むら / X どうくつ / Q まだ いけない まち
+  old_road:{name:'かいどうの みはりだい', theme:'village', enc:true, tiles:[
+    "###############",
+    "#f..f.....f..f#",
+    "#....o.B.o....#",
+    "#.....rrr.....#",
+    "#..C..r.r..f..#",
+    "#f....r.r.....#",
+    "#.....r.r...C.#",
+    "#..f..r.r..f..#",
+    "#.....rrr.....#",
+    "#f....r....f..#",
+    "#######r#######"],
+    warpsXY:{
+      '7,10':{to:'world', x:49, y:41}
+    }},
   // ============ 終章：ゆめのたいりく（3D） ============
   dream_field:{name:'ゆめのたいりく', theme:'dream', enc:true, tiles:[
     "##########################",
@@ -5178,6 +5242,7 @@ const MAPS = {
     '74,42':{to:'zaal_dgn1',   x:8,  y:13},
     '48,30':{to:'toros', x:7,  y:13},
     '47,49':{to:'cave1', x:6,  y:10},
+    '49,40':{to:'old_road', x:7, y:9},
 
     '9,29':{to:'elde_town',  x:12, y:16},
     '6,40':{to:'elde_path',  x:10, y:12},
