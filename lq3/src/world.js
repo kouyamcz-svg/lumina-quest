@@ -56,6 +56,7 @@ const CHAPTERS = [
 // 命名規則： <地方>_<種別><連番>
 //   種別： town / field / cast(城) / dgn(ダンジョン) / in(屋内) / shrine(神殿)
 const MAP_IDS = {
+  old_road: {region:'oldland', kind:'dgn', name:'かいどうの みはりだい', scene:'SCENE_OLD_TOROS'},
   // --- ゆめのたいりく（終章・3D） ---
   dream_field:   {region:'dream', kind:'field', name:'ゆめのたいりく',            scene:'SCENE_DREAM_FIELD'},
   dream_camp:    {region:'dream', kind:'town',  name:'ばんにんの いおり',        scene:'SCENE_DREAM_CAMP'},
