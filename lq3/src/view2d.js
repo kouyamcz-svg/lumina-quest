@@ -1131,7 +1131,19 @@ function draw(dt, time, actors){
     if(theme==='world'){
       cx.drawImage(groundTile(x,y,terrainOf), dx0, dy0, ts, ts);   // やきこみずみ 1まい
     }else{
-      const base = (ch==='r') ? road : floor;
+      let base = (ch==='r') ? road : floor;
+      // ★NPC・たからばこ など「うえに のる」ものの あしもとは、
+      //   まわりの じめん（みち r／すな _）を ひきつぐ。
+      //   トロスは すな(_)の うえに NPCが いて、したの くさが みえていた。
+      if('nCB<>SWMIPFt*e'.includes(ch)){
+        let rn=0, sn=0;
+        for(const [ddx,ddy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+          const c2 = rows[y+ddy] && rows[y+ddy][x+ddx];
+          if(c2==='r') rn++; else if(c2==='_') sn++;
+        }
+        if(sn>=2 && sn>=rn) base = atlas.beach;
+        else if(rn>=2) base = road;
+      }
       cx.drawImage(Array.isArray(base)?hashPick(x,y,base):base, dx0, dy0, ts, ts);
     }
   }
