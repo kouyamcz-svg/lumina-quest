@@ -249,6 +249,24 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   }
   T('BFS:トロス→デスナイト', bfsW('toros',7,13,'old_road',7,2));
   T('BFS:洞窟出口→トロス(孤島回帰防止)', bfsW('world',47,48,'toros',7,13));
+  // 地形自然化の回帰：地域分離が保たれている（実walkableで判定）
+  function landReach(sx,sy,gx,gy){
+    const seen=new Set([sx+','+sy]); const q=[[sx,sy]]; let st=0;
+    while(q.length && st++<400000){
+      const [x,y]=q.shift();
+      if(x===gx&&y===gy) return true;
+      for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+        const nx=x+dx,ny=y+dy;
+        if(!C.walkable('world',nx,ny)) continue;
+        const k=nx+','+ny;
+        if(!seen.has(k)){ seen.add(k); q.push([nx,ny]); }
+      }
+    }
+    return false;
+  }
+  T('分離:旧大陸↛ザール砂漠', !landReach(48,31,76,30));
+  T('分離:旧大陸↛北の橋', !landReach(48,31,62,22));
+  T('分離:旧大陸↛zaal_dgn1前', !landReach(48,31,74,42));
   T('BFS:みはりだい→洞窟', bfsW('old_road',7,9,'cave1',6,10));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
