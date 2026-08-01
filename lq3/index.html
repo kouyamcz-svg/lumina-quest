@@ -119,7 +119,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-07-31T11:53:35", "assets_sha": "b260aa04", "lines": {"world": 163, "npc": 609, "core": 2915, "chapters": 650, "bgm": 948, "view2d": 1387, "view": 1298, "ui": 773}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-08-01T02:32:16", "assets_sha": "b260aa04", "lines": {"world": 163, "npc": 609, "core": 2917, "chapters": 650, "bgm": 948, "view2d": 1387, "view": 1298, "ui": 774}};</script>
 <script src="assets.js?v=dd7568e5"></script>
 <script>/**
  * @license
@@ -3958,11 +3958,13 @@ const CLASSES = {
           learns:[{lv:1,key:'spark'},{lv:1,key:'heal'},{lv:3,key:'cure'},{lv:5,key:'scorch'},
                   {lv:7,key:'ret'},{lv:9,key:'blaze'},{lv:12,key:'hiheal'},
                   {lv:15,key:'bolt'},{lv:19,key:'nova'},{lv:24,key:'healall'}]},
-  // 第4章 ミオ（でし）：わかく すばやい。まもりと きりこみの りょうほう。
-  mio:   {name:'ミオ',  hp:26,mp:10,atk:7,def:7,agi:10,g:{hp:8,mp:3,atk:4,def:3,agi:3},
-          learns:[{lv:2,key:'heal'},{lv:4,key:'ember'},{lv:6,key:'cure'},
-                  {lv:9,key:'ret'},{lv:13,key:'hiheal'},{lv:18,key:'firedance'},
-                  {lv:23,key:'healall'}]},
+  // 第4章 ミオ（けんじゃの でし）：こうげきも かいふくも つかえる。
+  //   ゼフほど MPは ないが、まえに たてる だけの からだが ある。
+  mio:   {name:'ミオ',  hp:24,mp:14,atk:6,def:6,agi:9, g:{hp:6,mp:5,atk:2,def:2,agi:3},
+          learns:[{lv:1,key:'heal'},   {lv:3,key:'spark'},  {lv:5,key:'cure'},
+                  {lv:7,key:'ret'},    {lv:9,key:'blaze'},  {lv:11,key:'hiheal'},
+                  {lv:14,key:'nova'},  {lv:17,key:'bolt'},  {lv:20,key:'healall'},
+                  {lv:24,key:'fullheal'}, {lv:28,key:'holyray'}]},
   bald:  {name:'バルド',hp:19,mp:7,atk:6,def:5,agi:7, g:{hp:6,mp:3,atk:2,def:2,agi:2},
           learns:[{lv:3,key:'heal'},{lv:5,key:'ret'},{lv:8,key:'spark'},
                   {lv:12,key:'cure'},{lv:16,key:'hiheal'},{lv:20,key:'blaze'}]},
@@ -4117,13 +4119,13 @@ const MIDBOSS = {
     skill:{p:0.28, mul:1.30, name:'はさみうち'},
     aoe:{p:0.16, lo:6, hi:10, name:'すなけむり'}},
   // 第4章 ちゅうボス「ゆきの ぬしがみ」：こやを あらし、かぎを うばった けもの。
-  snowbeast:{key:'snowbeast', name:'ひとつめの あらくれ', hp:420, atk:40, def:18, agi:15, acts:1,
+  snowbeast:{key:'snowbeast', name:'ひとつめの あらくれ', hp:400, atk:37, def:18, agi:15, acts:1,
     exp:420, gold:300, art:'snowbeast',
     skill:{p:0.32, mul:1.35, name:'こんぼうの ひとふり'},
     aoe:{p:0.20, lo:12, hi:18, name:'あばれ まわり'},
     inflict:{type:'freeze', p:0.24}},
   // 第4章 ボス「こうかいの かげ」：ゼフの けんきゅうが うんだ、みずからの こうかい。
-  regretshadow:{key:'regretshadow', name:'こうかいの かげ', hp:760, atk:64, def:20, agi:17, acts:1,
+  regretshadow:{key:'regretshadow', name:'こうかいの かげ', hp:700, atk:58, def:20, agi:17, acts:1,
     exp:900, gold:520, art:'regretshadow',
     skill:{p:0.32, mul:1.40, name:'あの ひの こえ'},
     aoe:{p:0.22, lo:16, hi:24, name:'とりかえせぬ とき'},
@@ -8451,6 +8453,7 @@ function openFieldMenu(){
 //   ちいさな メッセージまどに ながく ならべると よみにくい ため。
 const STATUS_NAME = {sleep:'ねむり', confuse:'こんらん', freeze:'こおり', slow:'にぶり'};
 const CLASS_NAME  = {lion:'このえへい', bald:'しょうにん', sena:'うらないし', ruka:'おどりこ',
+                     zef:'ろうけんじゃ', mio:'けんじゃの でし',
                      sora:'ゆうしゃ', lumia:'そうりょ', dan:'せんし'};
 function className(cls){ return CLASS_NAME[cls] || ''; }
 const statusEl = $('status');
