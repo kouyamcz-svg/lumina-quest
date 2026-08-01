@@ -125,7 +125,27 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-01T15:53:22", "assets_sha": "61dd5cc5", "lines": {"world": 175, "npc": 744, "chapters": 1151, "bgm": 949, "view2d": 1400, "core": 3227, "view": 1302, "ui": 799}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-01T15:58:59", "assets_sha": "61dd5cc5", "lines": {"world": 175, "npc": 744, "chapters": 1151, "bgm": 949, "view2d": 1400, "core": 3227, "view": 1302, "ui": 799}};</script>
+<script>
+// ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
+(function(){
+  function show(t){
+    var d=document.getElementById('errband');
+    if(!d){ d=document.createElement('div'); d.id='errband';
+      d.style.cssText='position:fixed;left:0;right:0;top:0;z-index:99999;background:#a00;color:#fff;'+
+        'font:12px/1.5 monospace;padding:8px;white-space:pre-wrap;word-break:break-all;max-height:45%;overflow:auto';
+      d.onclick=function(){ d.remove(); };
+      document.body.appendChild(d); }
+    d.textContent += t + '\n';
+  }
+  window.addEventListener('error', function(e){
+    show('[ERR] '+(e.message||'')+' @ '+(e.filename||'').split('/').pop()+':'+e.lineno);
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    show('[REJ] '+(e.reason && (e.reason.message||e.reason)));
+  });
+})();
+</script>
 <script src="assets.js?v=61dd5cc5"></script>
 <script>/**
  * @license
