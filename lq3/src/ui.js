@@ -759,7 +759,8 @@ function chapterSelect(){
   const nos = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA.list() : [1];
   const items = nos.map(no=>{
     const c = CHAPTERS_DATA.get(no);
-    const who = (c.party||[]).map(k=>(C.CLASSES[k]||{}).name||k).join('・');
+    const nm = (c.party||[]).map(k=>(C.CLASSES[k]||{}).name||k);
+    const who = nm.length>2 ? nm[0]+'たち' : nm.join('・');   // ★ながい れつは みきれる ため
     return '第'+no+'しょう　'+c.title+'（'+who+'）';
   }).concat(['もどる']);
   menu(items, 'しょうを えらぶ', (k)=>{
