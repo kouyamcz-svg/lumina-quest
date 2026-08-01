@@ -276,6 +276,9 @@ const MIDBOSS = {
     skill:{p:0.31, mul:1.32, name:'ゆめを すする'},
     aoe:{p:0.23, lo:21, hi:29, name:'くろい こだま'},
     inflict:{type:'sleep', p:0.21}, drain:0.16},
+  dknight:{key:'dknight', name:'デスナイト', hp:74, atk:14, def:8, agi:6, acts:1,
+    exp:100, gold:150, art:'dknight',
+    skill:{p:0.28, mul:1.38, name:'やみの ひとふり'}},
   dreameater_a:{key:'dreameater_a', name:'ゆめくい', hp:1400, atk:51, def:28, agi:20, acts:2,
     exp:2400, gold:1000, art:'regretshadow',
     skill:{p:0.32, mul:1.36, name:'ゆめを くらう'},
@@ -365,6 +368,7 @@ const byMapCh = {
   '5:minamo_dgn2': ['deathbishop','demonlord','shadowassassin','darkguard','firedragon'],
 };
 const byMap = {
+  old_road: ['puyo','goblin','bat','thief'],
   // ============ 終章 ゆめのたいりく ============
   dream_field: ['yumewisp','sleepknight','nightpriest','echoshadow','voidgolem'],
   dream_cast1: ['sleepknight','voidgolem','nightpriest','echoshadow','yumewisp'],
@@ -399,6 +403,21 @@ const MAPS = {
   // ============ ワールドマップ（5ちほう＋ちゅうおうかい）============
   // ~ うみ / _ すなはま / . くさち / , しげみ / = ゆきげん / : さばく / ^ やま / w みずうみ
   // r かいどう / A おうと / V むら / X どうくつ / Q まだ いけない まち
+  old_road:{name:'かいどうの みはりだい', theme:'village', enc:true, tiles:[
+    "###############",
+    "#f..f.....f..f#",
+    "#....o.B.o....#",
+    "#.....rrr.....#",
+    "#..C..r.r..f..#",
+    "#f....r.r.....#",
+    "#.....r.r...C.#",
+    "#..f..r.r..f..#",
+    "#.....rrr.....#",
+    "#f....r....f..#",
+    "#######r#######"],
+    warpsXY:{
+      '7,10':{to:'world', x:49, y:41}
+    }},
   // ============ 終章：ゆめのたいりく（3D） ============
   dream_field:{name:'ゆめのたいりく', theme:'dream', enc:true, tiles:[
     "##########################",
@@ -591,6 +610,7 @@ const MAPS = {
     '74,42':{to:'zaal_dgn1',   x:8,  y:13},
     '48,30':{to:'toros', x:7,  y:13},
     '47,49':{to:'cave1', x:6,  y:10},
+    '49,40':{to:'old_road', x:7, y:9},
 
     '9,29':{to:'elde_town',  x:12, y:16},
     '6,40':{to:'elde_path',  x:10, y:12},
