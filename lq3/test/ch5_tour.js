@@ -211,6 +211,21 @@ T('BFS:ザール→砂の遺跡最深部', bfs('zaal_town',14,18,'zaal_dgn2',8,3
 T('BFS:ミナモ→海食洞最深部', bfs('minamo_port',13,18,'minamo_dgn2',8,3));
 T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
 
+// ===== LQ1モンスター（旧大陸地帯） =====
+{
+  const eKeys2=new Set(C.ENEMIES.map(e=>e.key));
+  ['puyo','goblin','bat','thief','skel'].forEach(k=>T('LQ1敵:'+k, eKeys2.has(k)));
+  const az=(C.MAPS.world.encZones||[]).find(z=>z.name==='きゅうたいりくの のはら');
+  T('旧大陸地帯あり', !!az);
+  T('地帯にトロス周辺(48,30)', az && 48>=az.x0&&48<=az.x1&&30>=az.y0&&30<=az.y1);
+  T('地帯に洞窟前(47,49)', az && 47>=az.x0&&47<=az.x1&&49>=az.y0&&49<=az.y1);
+  // 他地帯と重ならない
+  const others=(C.MAPS.world.encZones||[]).filter(z=>z!==az);
+  const ov=others.some(z=>!(az.x1<z.x0||z.x1<az.x0||az.y1<z.y0||z.y1<az.y0));
+  T('他地帯と非重複', !ov);
+  const assets2=require('fs').readFileSync('assets.js','utf8');
+  ['puyo:','goblin:','bat:','thief:','skel:'].forEach(k=>T('LQ1素材:'+k, assets2.includes('  '+k+'{w:')));
+}
 {
   const seg = require('fs').readFileSync('src/core.js','utf8').match(/const byMapCh = \{[\s\S]*?\};/)[0];
   T('回帰:5:world上書きなし(序盤即死防止)', !seg.includes("'5:world':"));
