@@ -5,6 +5,22 @@ const NPCDATA = (function(){
 //   when: {state:'...', flag:'...', notFlag:'...'} すべて みたす ひつようが ある
 //   when を かかない ものが きほん（さいごに おく）
 const NPCS = {
+  // ============ 終章：ゆめのたいりく ============
+  dream_camp: [
+    {at:'3,3',  spr:'warrior', name:'ばんにん レイ', lines:[
+      {text:['レイ「しろの いただきで まって いる」']}]},
+    {at:'10,7', spr:'mage', name:'いおりの でし', lines:[
+      {text:['でし「レイさまは II の じだいの えいゆうです」']}]},
+  ],
+  dream_core: [
+    {at:'5,2', spr:'warrior', name:'ばんにん レイ', lines:[
+      {text:['レイ「……いって やれ。まって いる」']}]},
+    {at:'7,2', spr:'elder', name:'ヴォクス', lines:[
+      {text:['ちいさな かげは、しずかに ねむって いる。']}]},
+    {at:'6,6', spr:'mage', name:'いおりの でし', lines:[
+      {text:['でし「……ここが、ゆめの みなもと」']}]},
+  ],
+
   elde_town: [
     {at:'12,7', spr:'elder', name:'ゼフの でし', lines:[
       {when:{flag:'ch4_gotKey'}, text:[
@@ -477,6 +493,15 @@ const QUESTS = {
     desc:'きりは よそでも おきて いる。ふねを えて、せかいを めぐる。',
     steps:[{id:'sail', desc:'ふねで たびだつ', flag:'ch5_sailed'}],
     reward:{}, next:'ch5_q4_north',
+  },
+  ch6_q1_eater: {
+    id:'ch6_q1_eater', chapter:6, title:'ゆめくいを たおせ',
+    giver:'ばんにん レイ',
+    desc:'せかいの ねむりの もと、ゆめくいが しろの いただきに いる。',
+    steps:[
+      {id:'beat', desc:'さかさのしろで ゆめくいを たおす', flag:'ch6_beatEater'},
+    ],
+    reward:{}, next:null,
   },
   ch5_q4_north: {
     id:'ch5_q4_north', chapter:5, title:'きたの かけら',
