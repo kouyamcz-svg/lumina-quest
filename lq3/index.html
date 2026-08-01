@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-01T15:25:44", "assets_sha": "61dd5cc5", "lines": {"world": 163, "npc": 719, "chapters": 999, "bgm": 949, "view2d": 1400, "core": 3047, "view": 1299, "ui": 799}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-01T15:41:48", "assets_sha": "61dd5cc5", "lines": {"world": 175, "npc": 744, "chapters": 1151, "bgm": 949, "view2d": 1400, "core": 3226, "view": 1302, "ui": 799}};</script>
 <script src="assets.js?v=61dd5cc5"></script>
 <script>/**
  * @license
@@ -154,6 +154,8 @@ const REGIONS = {
            desc:'にしの れいほう。けんじゃの かくれざと。'},
   elde:   {id:'elde',   name:'れいほう エルデ',         dir:'西',   chapter:4,
            climate:'peak',   summary:'夢を研究する賢者の隠れ里がある霊峰。'},
+  dream:{id:'dream', name:'ゆめのたいりく',             dir:'中央海', chapter:6,
+         climate:'dream'},
   oldland:{id:'oldland',name:'きゅうたいりく',           dir:'中央', chapter:5,
            climate:'temperate',
            summary:'LQ2の世界。トロス・リベリオン・ハルナ等を高精細タイルでリメイク再登場させる。'},
@@ -190,6 +192,13 @@ const CHAPTERS = [
 // 命名規則： <地方>_<種別><連番>
 //   種別： town / field / cast(城) / dgn(ダンジョン) / in(屋内) / shrine(神殿)
 const MAP_IDS = {
+  // --- ゆめのたいりく（終章・3D） ---
+  dream_field:   {region:'dream', kind:'field', name:'ゆめのたいりく',            scene:'SCENE_DREAM_FIELD'},
+  dream_camp:    {region:'dream', kind:'town',  name:'ばんにんの いおり',        scene:'SCENE_DREAM_CAMP'},
+  dream_cast1:   {region:'dream', kind:'cast',  name:'さかさのしろ 1かい',        scene:'SCENE_DREAM_CASTLE'},
+  dream_cast2:   {region:'dream', kind:'cast',  name:'さかさのしろ 2かい',        scene:'SCENE_DREAM_CASTLE'},
+  dream_cast3:   {region:'dream', kind:'cast',  name:'さかさのしろ さいじょうかい', scene:'SCENE_DREAM_CASTLE'},
+  dream_core:    {region:'dream', kind:'cast',  name:'ゆめの しんいん',           scene:'SCENE_DREAM_CASTLE'},
   // --- ヴェルサ地方（第1章・実装中） ---
   world:         {region:'versa', kind:'field', name:'ワールドマップ',              scene:'SCENE_WORLD'},
   elde_town:     {region:'elde',  kind:'town', name:'かくれざと エルデ',            scene:'SCENE_ELDE_TOWN'},
@@ -231,6 +240,9 @@ const MAP_IDS = {
 // ビューの見た目（背景・霧・ライト・演出）を決める識別子
 // render: '2d' ＝ ドットえ（まち・フィールド・ダンジョン）／ '3d' ＝ しろの なか だけ
 const SCENES = {
+  SCENE_DREAM_FIELD:  {render:'3d', theme:'dream',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
+  SCENE_DREAM_CAMP:   {render:'3d', theme:'dream',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
+  SCENE_DREAM_CASTLE: {render:'3d', theme:'castle', outdoor:false, snowfall:false, aurora:false, footprints:false},
   SCENE_WORLD:        {render:'2d', theme:'world',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
   SCENE_ELDE_TOWN:    {render:'2d', theme:'snow',   outdoor:true,  snowfall:true,  aurora:false, footprints:true},
   SCENE_ELDE_CAVE:    {render:'2d', theme:'ice',    outdoor:false, snowfall:false, aurora:false, footprints:false},
@@ -304,6 +316,22 @@ const NPCDATA = (function(){
 //   when: {state:'...', flag:'...', notFlag:'...'} すべて みたす ひつようが ある
 //   when を かかない ものが きほん（さいごに おく）
 const NPCS = {
+  // ============ 終章：ゆめのたいりく ============
+  dream_camp: [
+    {at:'3,3',  spr:'warrior', name:'ばんにん レイ', lines:[
+      {text:['レイ「しろの いただきで まって いる」']}]},
+    {at:'10,7', spr:'mage', name:'いおりの でし', lines:[
+      {text:['でし「レイさまは II の じだいの えいゆうです」']}]},
+  ],
+  dream_core: [
+    {at:'5,2', spr:'warrior', name:'ばんにん レイ', lines:[
+      {text:['レイ「……いって やれ。まって いる」']}]},
+    {at:'7,2', spr:'elder', name:'ヴォクス', lines:[
+      {text:['ちいさな かげは、しずかに ねむって いる。']}]},
+    {at:'6,6', spr:'mage', name:'いおりの でし', lines:[
+      {text:['でし「……ここが、ゆめの みなもと」']}]},
+  ],
+
   elde_town: [
     {at:'12,7', spr:'elder', name:'ゼフの でし', lines:[
       {when:{flag:'ch4_gotKey'}, text:[
@@ -776,6 +804,15 @@ const QUESTS = {
     desc:'きりは よそでも おきて いる。ふねを えて、せかいを めぐる。',
     steps:[{id:'sail', desc:'ふねで たびだつ', flag:'ch5_sailed'}],
     reward:{}, next:'ch5_q4_north',
+  },
+  ch6_q1_eater: {
+    id:'ch6_q1_eater', chapter:6, title:'ゆめくいを たおせ',
+    giver:'ばんにん レイ',
+    desc:'せかいの ねむりの もと、ゆめくいが しろの いただきに いる。',
+    steps:[
+      {id:'beat', desc:'さかさのしろで ゆめくいを たおす', flag:'ch6_beatEater'},
+    ],
+    reward:{}, next:null,
   },
   ch5_q4_north: {
     id:'ch5_q4_north', chapter:5, title:'きたの かけら',
@@ -1979,6 +2016,158 @@ const CH = {
            'なにかが、しずかに めを あけようと して いる。'],
       card: {title:'第5章 完', sub:'ひかりの こ'},
       next: 6,
+    },
+  },
+
+  // ============ 終章「ゆめのたいりく」 ============
+  6: {
+    no:6, id:'ch6_dream', title:'ゆめのたいりく',
+    party: ['sora','lion','bald','sena','ruka','mio'],
+    startLv: {sora:20, lion:20, bald:20, sena:20, ruka:20, mio:20},
+    inheritParty: 5,
+    start: {map:'dream_field', x:12, y:16},
+    home:  {map:'dream_camp', x:6, y:5, name:'ばんにんの いおり'},
+    returnSpots: [
+      {map:'dream_camp',  x:6, y:5},
+      {map:'dream_field', x:12, y:16},
+    ],
+
+    opening: ['しろい きしべに、ふねが ついた。',
+              'そらには さかさまの しろが うかんでいる。',
+              '',
+              'ミオ「……ここが、ゆめの たいりく」',
+              'セナ「みんなの ゆめが、ここに ながれこんでる」',
+              'リオン「きを ぬくな。ここは てきの ふところだ」',
+              'ソラ「……あの しろだ。あそこに、なにかが いる」',
+              '',
+              '＊ ひがしに あかりが みえる。まず たずねよう ＊'],
+
+    bosses: {
+      dream_cast3: {
+        key: 'dreameater_a',
+        clearedFlag: 'ch6_beatEater',
+        needFlag: 'ch6_metRei',
+        lockMsg: ['ぎょくざの まえに、くろい かげが うずくまる。',
+                  'いまは ちからが たりない きが する。',
+                  'ひがしの いおりを たずねて みよう。'],
+        intro: ['さかさの ぎょくざの まえに、それは いた。',
+                'せかいじゅうの ゆめを のみこみ、ふとった かげ。',
+                '',
+                '＜……ゆめは うまい。ねむりは あまい＞',
+                '＜おまえたちも、ゆめに なれ＞',
+                '',
+                'ソラ「みんなの あさを、かえして もらう！」',
+                'ゆめくいが たちふさがった！'],
+        after: ['ぎょくざの まには、しずけさだけが のこった。'],
+      },
+    },
+
+    talkEvents: [
+      // ---- ばんにん・老レイ ----
+      { npc:'ばんにん レイ', unless:'ch6_metRei',
+        set:['ch6_metRei'],
+        quest:{ch6_q1_eater:'active'},
+        msg:['いおりの まえに、しらがの けんしが たっていた。',
+             '',
+             'レイ「……よく きた、ひかりのこ」',
+             '「わしは レイ。とびらの むこうで',
+             'ヴォクスの ゆめを みはって きた ばんにんだ」',
+             'ソラ「ヴォクス……ねむりびょうの もと？」',
+             'レイ「ちがう。ヴォクスは ねむって いるだけだ」',
+             '「やつの ゆめに よりつき、ふとって いるのは',
+             '＜ゆめくい＞。しんの てきは あれだ」',
+             'レイ「わしは おいた。もう けんは ふるえん」',
+             '「……たのめるか。しろの いただきへ」',
+             '',
+             '＊ つかれたら ここで やすんで いくと いい ＊'] },
+
+      // ---- レイの見送り→エンディングへ ----
+      { npc:'ばんにん レイ', cond:['ch6_farewell'], unless:'ch6_worldWake',
+        set:['ch6_worldWake'],
+        msg:['レイ「たいりくが きえる まえに、ゆけ」',
+             'ソラ「レイさんは……？」',
+             'レイ「わしの やくめは おわった。',
+             'さいごまで ここで みおくるさ」',
+             '「……せかいの あさを、たのんだぞ」'] },
+
+      // ---- 休息（何度でも） ----
+      { npc:'ばんにん レイ', cond:['ch6_metRei'], heal:true,
+        msg:['レイ「よく たたかって いるな。やすんで いけ」',
+             '',
+             '＊ ぜんいんの きずと つかれが いえた！ ＊'] },
+
+      // ---- でし（庵のもう一人）：ヒント ----
+      { npc:'いおりの でし', cond:['ch6_metRei'],
+        msg:['でし「しろは うえに いくほど ゆめが こく なる」',
+             '「ねむらされたら、せいすいか きあいで おこして」'] },
+
+      // ---- ヴォクス看取り ----
+      { npc:'ヴォクス', cond:['ch6_beatEater'], unless:'ch6_farewell',
+        set:['ch6_farewell'],
+        msg:['ぎょくざの おくの ま。',
+             'ちいさな かげが、しずかに よこたわって いた。',
+             '',
+             'ヴォクス＜……ゆめくいは、きえたのか＞',
+             'ソラ「ああ。もう だれも、きみの ゆめを たべない」',
+             'ヴォクス＜ながい ゆめ だった。',
+             'こわい ゆめも、やさしい ゆめも みた＞',
+             '',
+             'レイが しずかに あゆみより、てを にぎった。',
+             'レイ「……ようやく おわるのだな、ヴォクス」',
+             'ヴォクス＜レイ。ずっと そばに いてくれた＞',
+             '＜ありがとう。……おやすみ＞',
+             '',
+             'かげは ひかりの つぶに なって、ほどけていった。',
+             'たいりくが、しずかに ゆれはじめる——',
+             '',
+             '＊ そとへ でよう。ふねへ もどるのだ ＊'] },
+
+    ],
+
+    bossReward: {
+      dreameater_a: {
+        nextBoss: 'dreameater_b',
+        msg:['', 'かげが くずれ——ちがう。',
+             'かげは みずから やぶれ、なかから',
+             'しろく かがやく きょだいな すがたが あらわれた！',
+             '',
+             '＜ゆめは おわらない。おわらせない＞',
+             'ゆめくいが しんの すがたを あらわした！'],
+      },
+      dreameater_b: {
+        set:['ch6_beatEater'],
+        quest:{ch6_q1_eater:'clear'},
+        msg:['', 'しろい きょたいが、おとも なく くだけた。',
+             'むすうの ひかりの つぶが、そらへ のぼっていく。',
+             '',
+             'セナ「……せかいじゅうで、みんなが めを さましてる」',
+             'ルカ「きこえる！ まちの こえが きこえるよ！」',
+             '',
+             '＊ ぎょくざの おくから、よわい こえが する ＊'],
+      },
+    },
+
+    ending: {
+      trigger: 'ch6_worldWake',
+      set:['ch6_cleared'],
+      final: true,
+      msg:['ふねは、あさやけの うみを ゆく。',
+           'ふりかえると、しろい たいりくが ひかりに とけていく。',
+           '',
+           'ヴェルサでは おうじょが めざめ、かねが なった。',
+           'ザールの いちばに、キャラバンの こえが もどった。',
+           'ミナモの さんばしで、ふたごが うみに てを ふった。',
+           'エルデの さとに、あたらしい けんきゅうの ひが ともる。',
+           '',
+           'そして トロスむら——',
+           'ルミア「おかえりなさい、ソラ」',
+           'ソラ「ただいま、かあさん」',
+           '',
+           'うわさでは、とおい まちの さかばで',
+           'ねずみのおうこくの ものまねが おおうけ したと いう。',
+           'ソラ「……とうさん、つぎは うちで やってよ」'],
+      card: {title:'終章 完', sub:'ゆめと めざめ'},
+      next: null,
     },
   },
 
@@ -4587,6 +4776,21 @@ const ENEMIES = [
   {key:'madcyclops',  name:'マッドサイクロプス', hp:213,atk:37,def:28, agi:6,  exp:180, gold:240,
    skill:{p:0.36, mul:1.60, name:'どくの こぶし'}, inflict:{type:'confuse', p:0.25}},
 ];
+// ============ 終章 ゆめのたいりく（Lv21〜26） ============
+const ENEMIES_CH6 = [
+  {key:'yumewisp',   name:'ゆめの ひだま',   hp:150,atk:38, def:22, agi:26, exp:185, gold:55,  minLv:1},
+  {key:'sleepknight',name:'ねむりの きし',   hp:215,atk:46, def:30, agi:18, exp:235, gold:75,  minLv:1,
+   inflict:{type:'sleep', p:0.18}},
+  {key:'voidgolem',  name:'こくうの ゴーレム', hp:285,atk:50, def:34, agi:8,  exp:275, gold:88,  minLv:1,
+   skill:{p:0.34, mul:1.5, name:'こくうの てっつい'}},
+  {key:'nightpriest',name:'あくむの しさい', hp:180,atk:42, def:24, agi:22, exp:225, gold:70,  minLv:1,
+   inflict:{type:'confuse', p:0.16}},
+  {key:'echoshadow', name:'こだまの かげ',   hp:190,atk:50, def:26, agi:30, exp:245, gold:80,  minLv:1},
+  {key:'dreamdragon',name:'ゆめの りゅう',   hp:330,atk:54, def:30, agi:20, exp:335, gold:112, minLv:1,
+   aoe:{p:0.34, lo:30, hi:42, name:'ゆめの ほのお'}},
+];
+ENEMIES_CH6.forEach(e=>ENEMIES.push(e));
+
 const MIDBOSS = {
   // ---- 第1章ボス ----
   // 第3章 ちゅうボス「ぬしヤドガニ」：いそべの ぬし。
@@ -4617,6 +4821,16 @@ const MIDBOSS = {
     skill:{p:0.31, mul:1.32, name:'ゆめを すする'},
     aoe:{p:0.23, lo:21, hi:29, name:'くろい こだま'},
     inflict:{type:'sleep', p:0.21}, drain:0.16},
+  dreameater_a:{key:'dreameater_a', name:'ゆめくい', hp:1400, atk:51, def:28, agi:20, acts:2,
+    exp:2400, gold:1000, art:'regretshadow',
+    skill:{p:0.32, mul:1.36, name:'ゆめを くらう'},
+    aoe:{p:0.24, lo:25, hi:34, name:'あんこくの なみ'},
+    inflict:{type:'sleep', p:0.22}, drain:0.15},
+  dreameater_b:{key:'dreameater_b', name:'ゆめくい・しんのすがた', hp:1620, atk:58, def:30, agi:22, acts:2,
+    exp:3200, gold:1400, art:'dreamlord',
+    skill:{p:0.34, mul:1.4, name:'おわらない あくむ'},
+    aoe:{p:0.27, lo:30, hi:40, name:'むの こだま'},
+    inflict:{type:'confuse', p:0.19}, drain:0.2},
   dreamlord:{key:'dreamlord', name:'ゆめの ぬし', hp:270, atk:25, def:16, agi:18, acts:1,
     exp:520, gold:340, art:'dreamlord',
     skill:{p:0.32, mul:1.35, name:'まどろみの て'},
@@ -4695,6 +4909,11 @@ const byMapCh = {
   '5:minamo_dgn2': ['deathbishop','demonlord','shadowassassin','darkguard','firedragon'],
 };
 const byMap = {
+  // ============ 終章 ゆめのたいりく ============
+  dream_field: ['yumewisp','sleepknight','nightpriest','echoshadow','voidgolem'],
+  dream_cast1: ['sleepknight','voidgolem','nightpriest','echoshadow','yumewisp'],
+  dream_cast2: ['voidgolem','echoshadow','sleepknight','dreamdragon','nightpriest'],
+  dream_cast3: ['dreamdragon','voidgolem','echoshadow','sleepknight'],
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
   elde_path:  ['icicleslime','frostbat','blizzardhawk','yukingon','skullbat','wisp'],   // Lv14〜17
   elde_path2: ['blizzardhawk','frostbat','yukingon','skullbat','thornwolf','wisp'],   // Lv12〜15
@@ -4724,6 +4943,116 @@ const MAPS = {
   // ============ ワールドマップ（5ちほう＋ちゅうおうかい）============
   // ~ うみ / _ すなはま / . くさち / , しげみ / = ゆきげん / : さばく / ^ やま / w みずうみ
   // r かいどう / A おうと / V むら / X どうくつ / Q まだ いけない まち
+  // ============ 終章：ゆめのたいりく（3D） ============
+  dream_field:{name:'ゆめのたいりく', theme:'dream', enc:true, tiles:[
+    "##########################",
+    "#####..f....##....f..#####",
+    "###...o......<.......o.###",
+    "##..f....rrrrrrrr....f..##",
+    "#....o...r......r...o....#",
+    "#..f.....r..CC..r.....f..#",
+    "#........r......r........#",
+    "#..o..rrrr..oo..rrrr..o..#",
+    "#.....r....f..f....r.....#",
+    "##....r..o......o..rrrrr##",
+    "###...r....f..f........###",
+    "####..r......~.....r..####",
+    "#####.rrrrrrrrrrrrrr.#####",
+    "######....f....f....######",
+    "#######..o......o..#######",
+    "########....rr....########",
+    "#########...rr...#########",
+    "##########################"],
+    warpsXY:{
+      '13,2':{to:'dream_cast1', x:8, y:12},
+      '24,9':{to:'dream_camp',  x:1,  y:5}
+    }},
+  dream_camp:{name:'ばんにんの いおり', theme:'dream', tiles:[
+    "##############",
+    "#..o......o..#",
+    "#....rrrr....#",
+    "#..n.r..r.W..#",
+    "#....r..r....#",
+    ".rrrrr..rrrr.#",
+    "#....r..r....#",
+    "#..S.r..r.n..#",
+    "#....rrrr....#",
+    "#..o..CC..o..#",
+    "##############"],
+    warpsXY:{
+      '0,5':{to:'dream_field', x:24, y:9}
+    }},
+  dream_cast1:{name:'さかさのしろ 1かい', theme:'castle', enc:true, tiles:[
+    "##################",
+    "#T..............T#",
+    "#.....C....C.....#",
+    "#..#####..#####..#",
+    "#..#..........#..#",
+    "#..#..##..##..#..#",
+    "#T.#..#....#..#.T#",
+    "#..#..#.<..#..#..#",
+    "#..#..######..#..#",
+    "#..#..........#..#",
+    "#..####....####..#",
+    "#T...............#",
+    "#........>.......#",
+    "##################"],
+    warpsXY:{
+      '8,12':{to:'dream_field', x:13, y:3},
+      '8,7':{to:'dream_cast2', x:8, y:11}
+    }},
+  dream_cast2:{name:'さかさのしろ 2かい', theme:'castle', enc:true, tiles:[
+    "##################",
+    "#....T......T....#",
+    "#..C..........C..#",
+    "#....######......#",
+    "#....#....#..#####",
+    "#.<..#.T..#......#",
+    "#....#....#####..#",
+    "######....#......#",
+    "#.........#..#####",
+    "#..#####..#......#",
+    "#..#...........T.#",
+    "#..#....>........#",
+    "#T.###############",
+    "##################"],
+    warpsXY:{
+      '2,5':{to:'dream_cast3', x:8, y:11},
+      '8,11':{to:'dream_cast1', x:8, y:8}
+    }},
+  dream_cast3:{name:'さかさのしろ さいじょうかい', theme:'castle', enc:true, tiles:[
+    "##################",
+    "#T......K......T##",
+    "#.......B........#",
+    "#..T.........T...#",
+    "#.....#....#.....#",
+    "#.....#....#.....#",
+    "#..#..#....#..#..#",
+    "#..#..........#..#",
+    "#..#..T....T..#..#",
+    "#..#..........#..#",
+    "#.....#....#.....#",
+    "#T......>.......T#",
+    "#.......<........#",
+    "##################"],
+    warpsXY:{
+      '8,11':{to:'dream_cast2', x:2, y:6},
+      '8,12':{to:'dream_core', x:6, y:8}
+    }},
+  dream_core:{name:'ゆめの しんいん', theme:'castle', tiles:[
+    "#############",
+    "#T....K....T#",
+    "#....n.n....#",
+    "#...........#",
+    "#..T.....T..#",
+    "#...........#",
+    "#.....n.....#",
+    "#..T.....T..#",
+    "#.....>.....#",
+    "#############"],
+    warpsXY:{
+      '6,8':{to:'dream_cast3', x:8, y:11}
+    }},
   world:{name:'ヴェルサちほう',theme:'world',enc:true,encRate:0.05,encGrace:6,tiles:[
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~______~~~~~~~~~~_____~~===^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~~",
@@ -5325,6 +5654,16 @@ const MAPS = {
 // ---------------- データ：店・宿 ----------------
 const SHOPS = {
   // ============ 第1章 ヴェルサ地方 ============
+  'dream_camp:W':[
+    {name:'ゆめてつの けん',   kind:'w', v:26, price:5200},
+    {name:'ばんにんの つえ',   kind:'w', v:22, price:3600},
+    {name:'ゆめてつの よろい', kind:'a', v:28, price:5600},
+    {name:'ほしくずの ローブ', kind:'a', v:24, price:4200},
+  ],
+  'dream_camp:S':[
+    {name:'やくそう',   kind:'herb',  price:8},
+    {name:'せいすい',   kind:'water', price:24},
+  ],
   'versa_town:S':[                                   // どうぐや
     {kind:'h',  name:'やくそう',        v:20, price:8},
     {kind:'wtr',name:'まほうのせいすい', v:30, price:60},
@@ -5889,6 +6228,7 @@ function runTalkEvent(npcName){
   if(e.takeKey) takeKey(e.takeKey);
   if(e.giveKey) giveKey(e.giveKey);
   if(e.moor){ G.ship={x:e.moor[0], y:e.moor[1]}; G.aboard=false; }   // ★ふねを さずける
+  if(e.heal){ party.concat(reserve).forEach(m=>{ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; }); U.hud(); }
   if(e.join){                                    // ★なかまが くわわる（'lead'＝せんとうと おなじLv）
     (Array.isArray(e.join)?e.join:[e.join]).forEach(j=>{
       const lv = j.lv==='lead' ? (party[0]?party[0].lv:1) : (j.lv||1);
@@ -5953,7 +6293,17 @@ function triggerDream(){
 }
 // ---------------- 章の しめくくり（データから）----------------
 // 章の おわりに 「つぎへ すすむ」か「この しょうを つづける」を えらばせる
-function offerNextChapter(next, title){
+function offerNextChapter(next, title, isFinal){
+  if(isFinal){
+    G.mode = 'msg';
+    U.msg(['＊＊ ルミナクエスト III　かんけつ ＊＊',
+           '',
+           'ながい たびに おつきあい いただき、',
+           'ありがとう ございました！',
+           'せかいは、めざめの あさを むかえた。'],
+          () => { G.mode='field'; });
+    return;
+  }
   const ready = next && CHD && CHD.has(next);
   G.mode = 'msg';
   if(!ready){
@@ -5987,7 +6337,7 @@ function triggerChapterEnd(){
   G.mode = 'msg';
   U.msg(en.msg || ['……'], () => {
     const card = en.card || {title:'', sub:''};
-    V.chapterCard(card.title, card.sub, () => { offerNextChapter(en.next, cd.title); });
+    V.chapterCard(card.title, card.sub, () => { offerNextChapter(en.next, cd.title, en.final); });
   });
 }
 function questOnTalk(npcName){
@@ -6840,6 +7190,13 @@ function victory(){
       '＊＊ ぎじゅつスライス ここまで ＊＊');
   }
   U.hud();
+  // ★れんせん：ボスが すがたを かえる（HP・MPは そのまま）
+  const _cd6 = chData();
+  const nxRw = (b && b.named && _cd6 && _cd6.bossReward) ? _cd6.bossReward[b.named] : null;
+  if(nxRw && nxRw.nextBoss && MIDBOSS[nxRw.nextBoss]){
+    U.msg(lines, ()=>{ startBattle(nxRw.nextBoss); });
+    return;
+  }
   U.msg(lines, ()=>endBattle(true));
 }
 function defeat(){
@@ -7322,8 +7679,19 @@ function switchChapter(no, newParty){
       if(typeof sl === 'number') return sl;
       return sl[k] || 1;
     };
-    cls.forEach((k,i)=>{ const m = mkMember(k, lvOf(k));
-      if(i<4) party.push(m); else reserve.push(m); });   // ★せんとうは 4にんまで
+    const inh = cd && cd.inheritParty ? (G.chapters||{})[cd.inheritParty] : null;
+    if(inh && inh.party && inh.party.length){
+      // ★まえの しょうの なかま・レベル・そうび・しょじひんを ひきつぐ
+      inh.party.forEach(o=>{ const m=reviveMember(o);
+        if(party.length<4) party.push(m); else reserve.push(m); });
+      (inh.reserve||[]).forEach(o=>{ const m=reviveMember(o);
+        if(party.length<4) party.push(m); else reserve.push(m); });
+      P.gold=inh.gold|0; P.herbs=inh.herbs|0; P.waters=inh.waters|0;
+      allMembers().forEach(m=>{ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; });
+    }else{
+      cls.forEach((k,i)=>{ const m = mkMember(k, lvOf(k));
+        if(i<4) party.push(m); else reserve.push(m); });   // ★せんとうは 4にんまで
+    }
     if(cd){
       if(cd.start){
         const land = safeLanding(cd.start.map, cd.start.x|0, cd.start.y|0);
@@ -7838,6 +8206,7 @@ let fxState = null;
 let shake = 0;
 
 const THEME = {
+  dream:  {sky:0x241a4e, fog:[0x7a5fb8,13,34], amb:[0xd8c8ff,0.95],sun:[0xffd8f0,0.5]},
   snow:   {sky:0x9ec8e8, fog:[0xcfe2f2,14,40], amb:[0xdfeaff,0.95],sun:[0xffffff,0.55]},
   castle: {sky:0x2a2c44, fog:[0x2a2c44,10,26], amb:[0xc8c0e0,0.85],sun:[0xffe8c0,0.5]},
   ice:    {sky:0x14283c, fog:[0x14283c,8,22],  amb:[0x9ac8f0,0.8], sun:[0xd8f0ff,0.45]},
@@ -8097,6 +8466,7 @@ function buildMap(name){
 
   const rows=map.tiles, H=rows.length, W=rows[0].length;
   const cave = map.theme==='cave' || map.theme==='ice';
+  const dream = map.theme==='dream';
   const snow = map.theme==='snow';
   const ice  = map.theme==='ice';
   const cast = map.theme==='castle';
@@ -8256,7 +8626,8 @@ function buildMap(name){
   // インスタンス化（drawCall削減）
   const box=new THREE.BoxGeometry(1,0.12,1);
   const gm=new THREE.MeshLambertMaterial({
-    map: snow?TEX.snow : ice?TEX.ice : cast?TEX.carpet : TEX.grass});
+    map: snow?TEX.snow : ice?TEX.ice : cast?TEX.carpet : dream?TEX.ice : TEX.grass});
+  if(dream) gm.color.setHex(0xc9b2f2);   // ★ゆめのたいりく：あわい むらさきの ゆか
   if(snow && ts && ts.id!=='NORMAL') gm.color.setHex(ts.snowColor);
   addInstanced(box,gm, (G_.ground||[]).map(p=>[p[0],p[1],p[2]]));
   addInstanced(box,new THREE.MeshLambertMaterial({
