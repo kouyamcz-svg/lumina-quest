@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-01T15:41:48", "assets_sha": "61dd5cc5", "lines": {"world": 175, "npc": 744, "chapters": 1151, "bgm": 949, "view2d": 1400, "core": 3226, "view": 1302, "ui": 799}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-01T15:53:22", "assets_sha": "61dd5cc5", "lines": {"world": 175, "npc": 744, "chapters": 1151, "bgm": 949, "view2d": 1400, "core": 3227, "view": 1302, "ui": 799}};</script>
 <script src="assets.js?v=61dd5cc5"></script>
 <script>/**
  * @license
@@ -4898,7 +4898,8 @@ const EXP_MUL = {
 };
 // ★しょうべつの でかた（きょうつう byMap より ゆうせん）。5章の めぐりで つかう
 const byMapCh = {
-  '5:world':       ['bloodwolf','killerpanther','icephoenix','tornado','darkpriest','golem'],
+  // ★'5:world' は おかない。ワールドは encZones（ちたいべつ）が ただしい。
+  //   5章は Lv1で はじまるため、ここを つよい てきで うわがきすると そくしぬ。
   '5:versa_dgn1':  ['icephoenix','bloodwolf','skeleton','ghostlamp','golem','wisp'],
   '5:versa_dgn2':  ['icephoenixlord','shadowassassin','darkguard','icephoenix','bloodwolf'],
   '5:zaal_dgn1':   ['golem','tornado','darkpriest','shadowmimic','killerpanther'],
