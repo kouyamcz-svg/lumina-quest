@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.4", "at": "2026-08-01T09:40:25", "assets_sha": "0bb1dba6", "lines": {"world": 162, "npc": 678, "core": 2906, "chapters": 794, "bgm": 948, "view2d": 1387, "view": 1298, "ui": 774}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-01T12:14:18", "assets_sha": "faeaf530", "lines": {"world": 163, "npc": 719, "chapters": 999, "bgm": 949, "view2d": 1400, "core": 3047, "view": 1299, "ui": 799}};</script>
 <script src="assets.js?v=faeaf530"></script>
 <script>/**
  * @license
@@ -775,6 +775,46 @@ const QUESTS = {
     giver:'むらの おさ',
     desc:'きりは よそでも おきて いる。ふねを えて、せかいを めぐる。',
     steps:[{id:'sail', desc:'ふねで たびだつ', flag:'ch5_sailed'}],
+    reward:{}, next:'ch5_q4_north',
+  },
+  ch5_q4_north: {
+    id:'ch5_q4_north', chapter:5, title:'きたの かけら',
+    giver:'ルミア',
+    desc:'しろい かけらが よっつの ちほうに とんだ。まずは きたの ヴェルサへ。',
+    steps:[
+      {id:'meet', desc:'ヴェルサリアで きしだんちょうに あう', flag:'ch5_north'},
+      {id:'beat', desc:'かけらの ばんけんを たおす',           flag:'ch5_shard1'},
+    ],
+    reward:{}, next:'ch5_q5_east',
+  },
+  ch5_q5_east: {
+    id:'ch5_q5_east', chapter:5, title:'ひがしの かけら',
+    giver:'リオン',
+    desc:'ふたつめの かけらは ひがしの すなの まち、ザールに。',
+    steps:[
+      {id:'meet', desc:'ザールで しょうかいちょうに あう', flag:'ch5_east'},
+      {id:'beat', desc:'かけらの ねむりぬしを たおす',     flag:'ch5_shard2'},
+    ],
+    reward:{}, next:'ch5_q6_south',
+  },
+  ch5_q6_south: {
+    id:'ch5_q6_south', chapter:5, title:'みなみの かけら',
+    giver:'バルド',
+    desc:'みっつめの かけらは みなみの サンゴぐんとう、ミナモに。',
+    steps:[
+      {id:'meet', desc:'みなとで うらないの ししょうに あう', flag:'ch5_south'},
+      {id:'beat', desc:'かけらの しまいを たおす',             flag:'ch5_shard3'},
+    ],
+    reward:{}, next:'ch5_q7_west',
+  },
+  ch5_q7_west: {
+    id:'ch5_q7_west', chapter:5, title:'にしの かけら',
+    giver:'セナ',
+    desc:'さいごの かけらは にしの れいほう、エルデの とうに。',
+    steps:[
+      {id:'meet', desc:'さとで ゼフの でしに あう',   flag:'ch5_west'},
+      {id:'beat', desc:'ゆめくいの つかいを たおす', flag:'ch5_shard4'},
+    ],
     reward:{}, next:null,
   },
 
@@ -1643,6 +1683,10 @@ const CH = {
 
     returnSpots: [
       {map:'toros', x:7, y:13},
+      {map:'versa_town',  x:13, y:18},
+      {map:'zaal_town',   x:14, y:18},
+      {map:'minamo_port', x:13, y:18},
+      {map:'elde_town',   x:12, y:16},
     ],
 
     bosses: {
@@ -1667,6 +1711,60 @@ const CH = {
                 'ソラ「そんなの、あんたが きめる ことじゃ ない」',
                 'ゆめの ぬしが たちふさがった！'],
         after: ['きりは はれ、どうくつは しずかに なった。'],
+      },
+      versa_dgn2: {
+        key: 'shardhound',
+        clearedFlag: 'ch5_shard1',
+        needFlag: 'ch5_north',
+        lockMsg: ['こおりの おくで、なにかが しろく ひかって いる。',
+                  'まちの ひとに はなしを きいて からに しよう。'],
+        intro: ['さいしんぶに、しろい かけらが ういて いた。',
+                'かけらから きりが ふきだし、',
+                'おおきな けものの かたちを とる。',
+                'リオン「おうじょさまを ねむらせた けはいだ！」',
+                'かけらの ばんけんが たちふさがった！'],
+        after: ['こおりの さいしんぶに、もう けはいは ない。'],
+      },
+      zaal_dgn2: {
+        key: 'shardgolem',
+        clearedFlag: 'ch5_shard2',
+        needFlag: 'ch5_east',
+        lockMsg: ['いせきの おくで、すなが うずを まいて いる。',
+                  'まちの ひとに はなしを きいて からに しよう。'],
+        intro: ['いせきの さいしんぶ。すなの うずの まんなかに、',
+                'しろい かけらが しずんで いた。',
+                'すなが もりあがり、きょだいな かたちを とる。',
+                'バルド「そうばより たかく つくぜ、これは！」',
+                'かけらの ねむりぬしが たちふさがった！'],
+        after: ['すなは しずまり、いせきは しずかに なった。'],
+      },
+      minamo_dgn2: {
+        key: 'shardsis',
+        clearedFlag: 'ch5_shard3',
+        needFlag: 'ch5_south',
+        lockMsg: ['どうくつの おくから、うたごえの ような おとが する。',
+                  'まちの ひとに はなしを きいて からに しよう。'],
+        intro: ['かいしょくどうの さいしんぶ。しおだまりの うえに、',
+                'しろい かけらが ゆれて いた。',
+                'みずかがみに、ふたつの かげが うつる。',
+                'セナ「……わたしたちの、ゆめの のこりかす」',
+                'ルカ「なら、ちゃんと おわらせなきゃ ね」',
+                'かけらの しまいが たちふさがった！'],
+        after: ['みずかがみには、もう なにも うつらない。'],
+      },
+      elde_top: {
+        key: 'shardeater',
+        clearedFlag: 'ch5_shard4',
+        needFlag: 'ch5_west',
+        lockMsg: ['とうの うえから、ひくい うなりが きこえる。',
+                  'さとの ひとに はなしを きいて からに しよう。'],
+        intro: ['とうの ちょうじょう。さいごの かけらの まえに、',
+                'くろい かげが うずくまって いた。',
+                'かげは かけらに くちを つけ、すすって いる。',
+                'ミオ「……ゆめくいの つかい。ししょうの きろくに あった」',
+                'ソラ「かけらを たべさせは しない！」',
+                'ゆめくいの つかいが たちふさがった！'],
+        after: ['ちょうじょうには、かぜの おとだけが のこった。'],
       },
     },
 
@@ -1698,6 +1796,108 @@ const CH = {
              'おさ「きた、ひがし、みなみ、にし。よっつの ちほうで」',
              'ソラ「……おれ、いってみる」',
              'おさ「ふねを だしてやろう。ソラ、おまえの ちからが いる」'] },
+
+      // ---- しゅっこう（ルミアの みおくり）----
+      { npc:'ルミア', cond:['ch5_reported'], unless:'ch5_sailed',
+        set:['ch5_sailed'], moor:[48,24],
+        quest:{ch5_q3_sail:'clear', ch5_q4_north:'active'},
+        msg:['はまべに、ちいさな ふねが つないで あった。',
+             '',
+             'ルミア「ソラ。……いって らっしゃい」',
+             'ソラ「かあさん、いいの？」',
+             'ルミア「あなたの おとうさんも、',
+             'そうやって でて いったわ」',
+             'ソラ「……おとうさん、',
+             'いまごろ どこかで ものまねしてる」',
+             'ルミア「ふふ。きっと そうね」',
+             '',
+             '＊ そとの きたの はまに、ふねが もやって ある ＊',
+             'ふねに ふれれば のれる。りくに つけば おりる。',
+             'まずは うみを きたへ。ゆきぐに ヴェルサへ。'] },
+
+      // ---- きた：リオン ごうりゅう ----
+      { npc:'きしだんちょう', cond:['ch5_sailed'], unless:'ch5_north',
+        set:['ch5_north'], join:{cls:'lion', lv:'lead',
+          weapon:{kind:'w',name:'きしの けん',v:15}, armor:{kind:'a',name:'きしの よろい',v:14}},
+        msg:['きしだんちょう「その かおだち……ひかりのこ か！」',
+             '「リオン！ れいの ものが きたぞ！」',
+             '',
+             'よろいの わかものが かけて きた。',
+             'リオン「おうじょさまが ゆめで つげられた」',
+             '「＜しろい かけらを おう ひかりが くる＞と」',
+             'ソラ「かけら……？」',
+             'リオン「こおりの どうくつに、しろく ひかる',
+             'なにかが おちたと ほうこくが あった」',
+             'リオン「おうめいに より、どうこう する！」',
+             '',
+             '＊ リオンが なかまに くわわった！ ＊',
+             '＊ こおりの どうくつの さいしんぶへ ＊'] },
+
+      // ---- ひがし：バルド ごうりゅう ----
+      { npc:'しょうかいちょう', cond:['ch5_shard1'], unless:'ch5_east',
+        set:['ch5_east'], join:{cls:'bald', lv:'lead',
+          weapon:{kind:'w',name:'ぎんの たんけん',v:13}, armor:{kind:'a',name:'たびしょうにんの ふく',v:11}},
+        msg:['しょうかいちょう「ひかりのこ だな。はなしは きいた」',
+             'ふくよかな しょうにんが ちずを ひろげた。',
+             'バルド「ひさしぶり、と いって いいのかな」',
+             '「あきないの きろくを ならべると、',
+             'ねむりびょうの ひろがりが ちずに なる」',
+             '「みなもとは すなの いせきの おくだ」',
+             'バルド「あんない ついでに、ひとかせぎ さ」',
+             '',
+             '＊ バルドが なかまに くわわった！ ＊',
+             '＊ すなの いせきの さいしんぶへ ＊'] },
+
+      // ---- みなみ：セナ・ルカ ごうりゅう ----
+      { npc:'うらないの ししょう', cond:['ch5_shard2'], unless:'ch5_south',
+        set:['ch5_south'],
+        join:[{cls:'sena', lv:'lead',
+           weapon:{kind:'w',name:'うらないの つえ',v:10}, armor:{kind:'a',name:'ゆめみの ローブ',v:12}},
+          {cls:'ruka', lv:'lead',
+           weapon:{kind:'w',name:'まいの おうぎ',v:12}, armor:{kind:'a',name:'まいの ころも',v:11}}],
+        msg:['ししょう「きて いたのですね。',
+             'ふたりが ずっと まって います」',
+             '',
+             'さんばしに、ふたりの すがたが あった。',
+             'セナ「……ゆめで みたとおり。むかえに きたのね」',
+             'ルカ「たいへん おまたせ！ さあ いこっか」',
+             'ソラ「え、はなしが はやい……」',
+             'セナ「かいしょくどうの おくに、かけらが みえる」',
+             '',
+             '＊ セナと ルカが なかまに くわわった！ ＊',
+             '＊ せんとうに でられるのは 4にんまで。',
+             'メニューの「いれかえ」で えらべる ＊',
+             '＊ かいしょくどうの さいしんぶへ ＊'] },
+
+      // ---- にし：ミオ ごうりゅう ----
+      { npc:'ゼフの でし', cond:['ch5_shard3'], unless:'ch5_west',
+        set:['ch5_west'], join:{cls:'mio', lv:'lead',
+          weapon:{kind:'w',name:'でしの つえ',v:14}, armor:{kind:'a',name:'まもりの ローブ',v:17}},
+        msg:['でし「おまちして いました、ひかりのこ」',
+             '',
+             'とうの ほうから、ほそい かげが おりて きた。',
+             'ミオ「……ししょうの けんきゅうは、ここに ある」',
+             '「ゆめの たいりくへの とびら。',
+             'かけらが よっつ そろえば、ひらく」',
+             'ミオ「さいごの かけらは、とうの ちょうじょう」',
+             '「……ししょうの ぶんまで、わたしが いく」',
+             '',
+             '＊ ミオが なかまに くわわった！ ＊',
+             '＊ けんきゅうとうの ちょうじょうへ ＊'] },
+
+      // ---- たいりく ふじょう ----
+      { npc:'ゼフの でし', cond:['ch5_shard4'], unless:'ch5_worldTour',
+        set:['ch5_worldTour'],
+        msg:['じめんが、ふかく なりひびいた。',
+             'でし「そとを！ うみを みて ください！」',
+             '',
+             'ちゅうおうの うみの まんなかに——',
+             'しろい たいりくが、ゆっくり うかびあがる。',
+             'ミオ「……ゆめの たいりく」',
+             'セナ「よっつの かけらが、みちしるべに なってる」',
+             'リオン「ぜんいん、そろって いるな」',
+             'バルド「あんしんしろ、ふねなら ある」',
+             'ソラ「……いこう。とびらの むこうへ」'] },
     ],
 
     bossReward: {
@@ -1717,22 +1917,66 @@ const CH = {
              'むらの ほうから、かねの おとが きこえた。',
              'ソラ「……みんな、めを さましたんだ」'],
       },
+      shardhound: {
+        set:['ch5_shard1'],
+        giveKey:'shard_n',
+        quest:{ch5_q4_north:'clear', ch5_q5_east:'active'},
+        msg:['', 'かげが くずれ、しろい かけらが のこった。',
+             '＊ ゆめのかけら（きた）を てにいれた！ ＊',
+             '',
+             'リオン「おうじょさまの おことば どおりだ」',
+             '「＜よっつ そろうとき、とびらは ひらく＞」',
+             'ソラ「よっつ……。あと みっつ、か」',
+             '',
+             'つぎは ひがしの すなの まち、ザールへ。'],
+      },
+      shardgolem: {
+        set:['ch5_shard2'],
+        giveKey:'shard_e',
+        quest:{ch5_q5_east:'clear', ch5_q6_south:'active'},
+        msg:['', 'すなが くずれ、しろい かけらが のこった。',
+             '＊ ゆめのかけら（ひがし）を てにいれた！ ＊',
+             '',
+             'バルド「ねむった キャラバンも、これで めを さます」',
+             'ソラ「のこりは ふたつ」',
+             '',
+             'つぎは みなみの サンゴぐんとう、ミナモへ。'],
+      },
+      shardsis: {
+        set:['ch5_shard3'],
+        giveKey:'shard_s',
+        quest:{ch5_q6_south:'clear', ch5_q7_west:'active'},
+        msg:['', 'かげが とけ、しろい かけらが のこった。',
+             '＊ ゆめのかけら（みなみ）を てにいれた！ ＊',
+             '',
+             'セナ「……つぎで さいご。にしの れいほう」',
+             'ルカ「セナ、なにか みえてるの？」',
+             'セナ「……たかい とうと、くろい かげ」',
+             '',
+             'つぎは にしの れいほう、エルデへ。'],
+      },
+      shardeater: {
+        set:['ch5_shard4'],
+        giveKey:'shard_w',
+        quest:{ch5_q7_west:'clear'},
+        msg:['', 'かげは かすれ、こだまだけを のこして きえた。',
+             '＜……とびらが ひらく。あるじの もとへ＞',
+             '',
+             '＊ ゆめのかけら（にし）を てにいれた！ ＊',
+             'かけらが よっつ そろった。',
+             '',
+             '＊ さとへ おりて、でしの もとへ もどろう ＊'],
+      },
     },
 
     ending: {
-      trigger: 'ch5_reported',
+      trigger: 'ch5_worldTour',
       set:['ch5_cleared'],
-      quest:{ch5_q3_sail:'active'},
-      msg:['はまべに、ちいさな ふねが つないで あった。',
+      msg:['ふねは、しろい たいりくへ むかう。',
+           'なみの うえに、むっつの かげが ならんだ。',
            '',
-           'ルミア「ソラ。……いって らっしゃい」',
-           'ソラ「かあさん、いいの？」',
-           'ルミア「あなたの おとうさんも、そうやって でて いったわ」',
-           'ソラ「……おとうさん、いまごろ どこかで ものまねしてる」',
-           'ルミア「ふふ。きっと そうね」',
-           '',
-           'ソラは ふねに のり、きたの うみへ こぎだした。',
-           'よっつの ちほうに、まだ めざめぬ ものたちが いる。'],
+           'ねむる ものたちの ゆめの おくで、',
+           'なにかが、しずかに めを あけようと して いる。'],
       card: {title:'第5章 完', sub:'ひかりの こ'},
       next: 6,
     },
@@ -3903,8 +4147,20 @@ function draw(dt, time, actors){
       if(!done) drawBoss(ox+x*ts, oy+y*ts, ts);
     }
   }
-  // ④ キャラ（Yじゅんに かさねる）
-  const list = (actors||[]).slice().sort((a,b)=>a.y-b.y);
+  // ★もやって ある ふね（ワールドのみ）
+  if(theme==='world' && C.G && C.G.ship && !C.G.aboard){
+    const sx=C.G.ship.x, sy=C.G.ship.y;
+    cx.drawImage(groundTile(sx,sy,terrainOf), ox+sx*ts, oy+sy*ts, ts, ts);
+    cx.drawImage(atlas.boat, ox+sx*ts, oy+sy*ts, ts, ts);
+  }
+  // ④ キャラ（Yじゅんに かさねる）★ふねの うえでは せんとうだけ・したに ふね
+  let list = (actors||[]).slice();
+  if(C.G && C.G.aboard && theme==='world' && list.length){
+    const lead=list[0];
+    cx.drawImage(atlas.boat, ox+lead.x*ts, oy+lead.y*ts, ts, ts);
+    list=[lead];
+  }
+  list = list.sort((a,b)=>a.y-b.y);
   list.forEach(a=>drawChar(a, ox, oy, ts, time));
 
   // ⑤ てんこう・じかん
@@ -4340,6 +4596,27 @@ const MIDBOSS = {
     skill:{p:0.28, mul:1.30, name:'はさみうち'},
     aoe:{p:0.16, lo:6, hi:10, name:'すなけむり'}},
   // 第5章 ボス「ゆめの ぬし」：むらを のみこんだ きりの ぬし。
+  // 第5章めぐり「よっつの かけら」：かくちの あくむの すがたを うつした かげ
+  shardhound:{key:'shardhound', name:'かけらの ばんけん', hp:520, atk:38, def:19, agi:16, acts:1,
+    exp:800, gold:420, art:'yumebanken',
+    skill:{p:0.31, mul:1.32, name:'ゆめを かみくだく'},
+    aoe:{p:0.21, lo:15, hi:21, name:'しろき とおぼえ'},
+    inflict:{type:'sleep', p:0.23}},
+  shardgolem:{key:'shardgolem', name:'かけらの ねむりぬし', hp:900, atk:49, def:25, agi:12, acts:1,
+    exp:1000, gold:520, art:'golem',
+    skill:{p:0.35, mul:1.45, name:'すなの てっつい'},
+    aoe:{p:0.24, lo:22, hi:29, name:'ねむりの すなあらし'},
+    inflict:{type:'sleep', p:0.24}},
+  shardsis:{key:'shardsis', name:'かけらの しまい', hp:940, atk:46, def:23, agi:20, acts:2,
+    exp:1250, gold:600, art:'sisA',
+    skill:{p:0.29, mul:1.28, name:'ゆめうつしの まい'},
+    aoe:{p:0.22, lo:20, hi:27, name:'しおの さかまき'},
+    inflict:{type:'confuse', p:0.19}},
+  shardeater:{key:'shardeater', name:'ゆめくいの つかい', hp:1080, atk:46, def:25, agi:18, acts:2,
+    exp:1600, gold:750, art:'regretshadow',
+    skill:{p:0.31, mul:1.32, name:'ゆめを すする'},
+    aoe:{p:0.23, lo:21, hi:29, name:'くろい こだま'},
+    inflict:{type:'sleep', p:0.21}, drain:0.16},
   dreamlord:{key:'dreamlord', name:'ゆめの ぬし', hp:270, atk:25, def:16, agi:18, acts:1,
     exp:520, gold:340, art:'dreamlord',
     skill:{p:0.32, mul:1.35, name:'まどろみの て'},
@@ -4404,6 +4681,18 @@ const MIDBOSS = {
 //   「2かいは かせぎば」など、ばしょに やくわりを もたせる。
 const EXP_MUL = {
   elde_tower2: 1.6,      // とう2かい：かせぎば（けいけんちが おおい）
+};
+// ★しょうべつの でかた（きょうつう byMap より ゆうせん）。5章の めぐりで つかう
+const byMapCh = {
+  '5:world':       ['bloodwolf','killerpanther','icephoenix','tornado','darkpriest','golem'],
+  '5:versa_dgn1':  ['icephoenix','bloodwolf','skeleton','ghostlamp','golem','wisp'],
+  '5:versa_dgn2':  ['icephoenixlord','shadowassassin','darkguard','icephoenix','bloodwolf'],
+  '5:zaal_dgn1':   ['golem','tornado','darkpriest','shadowmimic','killerpanther'],
+  '5:zaal_dgn2':   ['darkguard','demonlord','shadowassassin','shadowmimic','tornado'],
+  '5:minamo_rock': ['merman','tornado','darkpriest','killerpanther','ghostlamp'],
+  '5:minamo_dgn0': ['merman','tornado','darkpriest','killerpanther','mushmage'],
+  '5:minamo_dgn1': ['deathbishop','shadowassassin','tornado','demonlord','merman'],
+  '5:minamo_dgn2': ['deathbishop','demonlord','shadowassassin','darkguard','firedragon'],
 };
 const byMap = {
   // ---- 第1章 ヴェルサ地方（リオン単独・Lv1〜6）----
@@ -5141,7 +5430,7 @@ const INN_PRICE = {toros:6, versa_town:8, versa_town2:6, zaal_town:10, zaal_oasi
                    minamo_port:12, minamo_isle:10};
 
 // ---------------- 状態 ----------------
-let G, P, party;
+let G, P, party, reserve = [];
 function startChapter(no){
   const ch=(WORLD.CHAPTERS||[]).find(x=>x.no===no);
   if(!ch) return;
@@ -5150,10 +5439,12 @@ function startChapter(no){
 function freshState(){
   G = {mode:'field', menu:null, battle:null, flags:{}, visited:{}, gotTreasure:{},
        tactic:'manual', dex:{}, trail:[], stepFlip:false, cleared:false,
-       chapter:1, chapters:{}, townState:'NORMAL', night:false, quests:{}, steps:0};
+       chapter:1, chapters:{}, townState:'NORMAL', night:false, quests:{}, steps:0,
+       ship:null, aboard:false};
   P = {map:'versa_town', x:13, y:18, dir:'front', gold:60, herbs:5, waters:0,
        equipBag:[], keyItems:{}, goods:{}};
   party = [mkMember('lion',1)];
+  reserve = [];
   party[0].weapon = {kind:'w',name:'みならいの けん',v:3};
   party[0].armor  = {kind:'a',name:'こまもり',v:2};
   G.visited.versa_town = true;
@@ -5344,17 +5635,17 @@ function interact(){
   // ★こぶね：さんばしの さきで A を おすと うみを わたる。
   //   ふなのりの いらいを こなすまで のれない（イベントの いみを もたせる）。
   // ★かえりの こぶね（ワールドの はまべ）
-  if((G.chapter||1)===3 && P.map==='world'
-     && nx===FERRY_BACK.x && ny===FERRY_BACK.y && G.flags.ch3_paidFare){
+  if(((G.chapter||1)===3 ? G.flags.ch3_paidFare : (G.chapter||1)>=5) && P.map==='world'
+     && nx===FERRY_BACK.x && ny===FERRY_BACK.y){
     G.mode='msg';
     U.msg(FERRY_BACK.msg, ()=>{ doWarp({to:FERRY_BACK.to, x:FERRY_BACK.tx, y:FERRY_BACK.ty}); });
     return;
   }
-  if((G.chapter||1)===3 && FERRY[P.map]){
+  if(((G.chapter||1)===3 || (G.chapter||1)>=5) && FERRY[P.map]){
     const f = FERRY[P.map];
     if(nx===f.x && ny===f.y){
       G.mode='msg';
-      if(!G.flags.ch3_paidFare){
+      if((G.chapter||1)===3 && !G.flags.ch3_paidFare){
         U.msg(['こぶねが つないである。',
                'だが かってに つかう わけには いかない。',
                'ふなのりに たのもう。'], ()=>{ G.mode='field'; });
@@ -5465,6 +5756,27 @@ function stepField(dx,dy){
   // ★ぶつかっただけでは なにも おきない。しらべるのは Aボタン（interact）。
   //   ワープの ます（もん・かいだん・ちてん）は ふんだら すすむ。
   P.dir = dy<0?'back' : dy>0?'front' : (dx<0?'left':'right');
+  // ★ふね：もやって ある ふねに あるいて ふれると のる
+  if(!G.aboard && P.map==='world' && G.ship && nx===G.ship.x && ny===G.ship.y){
+    G.aboard=true;
+    G.trail.unshift([P.x,P.y]); if(G.trail.length>8) G.trail.pop();
+    P.x=nx; P.y=ny; G.stepFlip=!G.stepFlip;
+    V.setActors();
+    return;
+  }
+  // ★ふね：うみを すすむ／りくに あがる（うみでは まものは でない）
+  if(G.aboard){
+    if(ch==='~'){
+      G.trail.unshift([P.x,P.y]); if(G.trail.length>8) G.trail.pop();
+      P.x=nx; P.y=ny; G.stepFlip=!G.stepFlip;
+      V.setActors();
+      return;
+    }
+    if(walkable(P.map,nx,ny)){
+      G.ship={x:P.x, y:P.y};                 // ふねを のこして あがる
+      G.aboard=false;
+    }else return;
+  }
   if(!walkable(P.map,nx,ny)) return;
   G.trail.unshift([P.x,P.y]); if(G.trail.length>8) G.trail.pop();
   P.dir = dy<0?'back' : dy>0?'front' : (dx<0?'left':'right');   // むきを おぼえる
@@ -5485,6 +5797,7 @@ function stepField(dx,dy){
 }
 // ワールドマップは ばしょによって なまえが かわる
 function areaName(map,x,y){
+  if(map==='world' && tileAt(map,x,y)==='~') return 'おおうみ';
   const m=MAPS[map];
   if(!m || !m.encZones) return WORLD.mapName(map);
   const z=(m.encZones||[]).find(z=>x>=z.x0&&x<=z.x1&&y>=z.y0&&y<=z.y1);
@@ -5575,6 +5888,17 @@ function runTalkEvent(npcName){
   if(e.setState && WORLD.TOWN_STATES[e.setState]) G.townState = e.setState;
   if(e.takeKey) takeKey(e.takeKey);
   if(e.giveKey) giveKey(e.giveKey);
+  if(e.moor){ G.ship={x:e.moor[0], y:e.moor[1]}; G.aboard=false; }   // ★ふねを さずける
+  if(e.join){                                    // ★なかまが くわわる（'lead'＝せんとうと おなじLv）
+    (Array.isArray(e.join)?e.join:[e.join]).forEach(j=>{
+      const lv = j.lv==='lead' ? (party[0]?party[0].lv:1) : (j.lv||1);
+      const m = joinMember(j.cls, lv);
+      if(m){                                     // そぶりの そうびを もって くる
+        if(j.weapon) m.weapon = Object.assign({}, j.weapon);
+        if(j.armor)  m.armor  = Object.assign({}, j.armor);
+      }
+    });
+  }
   if(e.startQuota){                              // ★いらいを うける
     G.quota = {n:0, need:e.startQuota.need|0, flag:e.startQuota.flag};
   }
@@ -5739,7 +6063,7 @@ function useInn(){
     U.msg(['やどやへ ようこそ。ひとばん '+price+'ゴールドです。',
            '…おはようございます！ みなさん げんきに なりました！'], ()=>{
       P.gold-=price;
-      party.forEach(m=>{ if(m.hp>0){ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; } });
+      party.concat(reserve).forEach(m=>{ if(m.hp>0){ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; } });
       A.heal(); U.hud(); G.mode='field';
     });
   }else{
@@ -5748,7 +6072,7 @@ function useInn(){
   }
 }
 function useChurch(){
-  const dead = party.filter(p=>p.hp<=0);
+  const dead = party.concat(reserve).filter(p=>p.hp<=0);
   G.mode='msg';
   if(dead.length){
     const cost = 30*dead.length;
@@ -5765,7 +6089,7 @@ function useChurch(){
     U.msg(['しんかんさま「いのりには '+cost+'ゴールドが ひつようです…」'], ()=>{ G.mode='field'; });
     return;
   }
-  party.forEach(p=>{ p.status=null; });
+  party.concat(reserve).forEach(p=>{ p.status=null; });
   U.msg(['しんかんさま「みなさん ごぶじで なにより」',
          '（けがれが きよめられた）'], ()=>{ A.heal(); G.mode='field'; });
 }
@@ -5911,7 +6235,7 @@ function startBattle(kind){
     }
   }else{
     // レベルが たりない まものは まだ でてこない（はじまりの ちいきを あんぜんに たもつ）
-    let all = byMap[P.map];
+    let all = byMapCh[(G.chapter||1)+':'+P.map] || byMap[P.map];
     if(!all){
       const m=MAPS[P.map];
       const z=(m&&m.encZones||[]).find(z=>P.x>=z.x0&&P.x<=z.x1&&P.y>=z.y0&&P.y<=z.y1);
@@ -6457,7 +6781,7 @@ function victory(){
   A.win();
   const lines=['まものたちを たおした！','けいけんち '+exp+'、'+gold+'ゴールドを かくとく！'];
   let leveled=false;
-  aliveMembers().forEach(m=>{
+  aliveMembers().concat(reserve.filter(m=>m.hp>0)).forEach(m=>{
     m.exp += exp;
     while(m.exp >= expNext(m)){
       m.exp -= expNext(m); m.lv++; leveled=true;
@@ -6482,6 +6806,8 @@ function victory(){
       if(rw.removeMember){
         const i2 = party.findIndex(p=>p.cls===rw.removeMember);
         if(i2>=0) party.splice(i2,1);
+        else{ const i3 = reserve.findIndex(p=>p.cls===rw.removeMember);
+              if(i3>=0) reserve.splice(i3,1); }
         V.setActors(true); U.hud();
       }
       if(rw.takeKey) takeKey(rw.takeKey);
@@ -6519,13 +6845,14 @@ function victory(){
 function defeat(){
   A.lose();
   U.msg(['ぜんめつ してしまった…'], ()=>{
-    party.forEach(m=>{ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; });
+    party.concat(reserve).forEach(m=>{ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; });
     P.gold = Math.floor(P.gold/2);
     G.battle=null;
     G.busy=true;
     if(A.bgmStop) A.bgmStop();
     V.battleLeave(()=>{
       const h=homePoint();
+      moorShipFor(h.map);                      // ★ふねも いえの はまへ
       P.map=h.map; P.x=h.x; P.y=h.y; G.trail=[[h.x,h.y],[h.x,h.y]];
       V.buildMap(h.map); V.setActors(); U.label(WORLD.mapName(h.map)); U.hud();
       A.bgm(h.map);
@@ -6665,6 +6992,7 @@ function castReturn(ci, di){
   if(!canReturnHere()) return {ok:false, lines:['ここでは つかえない。','そとへ でなければ ならない。']};
   if(m.mp < sp.mp) return {ok:false, lines:['MPが たりない！']};
   m.mp -= sp.mp;
+  moorShipFor(d.map);                          // ★ふねも いきさきの はまへ
   return {ok:true, warp:{to:d.map, x:d.x, y:d.y},
           lines:[m.name+'は リターンを となえた！','ひかりに つつまれ、そらへ まいあがった——']};
 }
@@ -6724,6 +7052,14 @@ const KEY_ITEMS = {
     desc:'けんきゅうとうの とびらを あける かぎ。こやに あずけて あった。'},
   dreamkey:{key:'dreamkey', name:'ゆめのかぎ',
     desc:'ゼフが 30ねんを かけて つくった かぎ。ゆめの たいりくへの とびらを ひらく。'},
+  shard_n:{key:'shard_n', name:'ゆめのかけら（きた）',
+    desc:'こおりの おくに おちた、しろく ひかる かけら。'},
+  shard_e:{key:'shard_e', name:'ゆめのかけら（ひがし）',
+    desc:'すなの いせきに ねむって いた かけら。'},
+  shard_s:{key:'shard_s', name:'ゆめのかけら（みなみ）',
+    desc:'かいしょくどうの おくで ゆれて いた かけら。'},
+  shard_w:{key:'shard_w', name:'ゆめのかけら（にし）',
+    desc:'けんきゅうとうの ちょうじょうに あった さいごの かけら。'},
   callshell:{key:'callshell', name:'よびがい',
     desc:'しろい かい。ふくと、ゆめの おくへ こえが とどくという。'},
   yukigusa:{id:'yukigusa', name:'ゆきぐさ',
@@ -6828,6 +7164,8 @@ function snapshotChapter(){          // いまの 章の じょうたいを あ�
   G.chapters = G.chapters || {};
   G.chapters[G.chapter] = {
     party: party.map(serializeMember),
+    reserve: reserve.map(serializeMember),
+    ship: G.ship, aboard: G.aboard,
     gold: P.gold, herbs: P.herbs, waters: P.waters,
     map: P.map, x: P.x, y: P.y, dir: P.dir,
     flags: JSON.parse(JSON.stringify(G.flags||{})),
@@ -6872,6 +7210,8 @@ function saveGame(s, slot){
       gold:P.gold, herbs:P.herbs, waters:P.waters, equipBag:P.equipBag, keyItems:P.keyItems,
       goods:P.goods, marketTick:G.marketTick, tradeProfit:G.tradeProfit, quota:G.quota,
       party: party.map(serializeMember),
+      reserve: reserve.map(serializeMember),
+      ship:G.ship, aboard:G.aboard,
       chapter:G.chapter, chapters:G.chapters,
       flags:G.flags, quests:G.quests,
       world:{visited:G.visited, gotTreasure:G.gotTreasure, dex:G.dex},
@@ -6900,12 +7240,21 @@ function loadGame(s, slot){
     G.marketTick = d.marketTick|0; G.tradeProfit = d.tradeProfit|0;
     G.quota = d.quota || null;
     P.dir = d.dir || 'front';
-    const land = safeLanding(d.map, d.x|0, d.y|0);
-    P.map = land.map; P.x = land.x; P.y = land.y;
+    G.ship = (d.ship && typeof d.ship.x==='number') ? {x:d.ship.x|0, y:d.ship.y|0} : null;
+    // ★うみの うえで きろくして いたら、そのまま ふねの うえに もどす
+    if(d.aboard && d.map==='world' && tileAt('world', d.x|0, d.y|0)==='~'){
+      G.aboard = true;
+      P.map='world'; P.x=d.x|0; P.y=d.y|0;
+    }else{
+      G.aboard = false;
+      const land = safeLanding(d.map, d.x|0, d.y|0);
+      P.map = land.map; P.x = land.x; P.y = land.y;
+    }
 
-    party.length = 0;
+    party.length = 0; reserve.length = 0;
     const ps = Array.isArray(d.party) && d.party.length ? d.party : [{cls:'lion',lv:1}];
     ps.forEach(o=>party.push(reviveMember(o)));
+    (Array.isArray(d.reserve) ? d.reserve : []).forEach(o=>reserve.push(reviveMember(o)));
 
     G.chapter   = d.chapter || 1;
     G.chapters  = d.chapters || {};
@@ -6943,12 +7292,20 @@ function switchChapter(no, newParty){
   snapshotChapter();
   G.chapter = no;
   const saved = (G.chapters||{})[no];
-  party.length = 0;
+  party.length = 0; reserve.length = 0;
   if(saved && saved.party && saved.party.length){
     saved.party.forEach(o=>party.push(reviveMember(o)));
+    (saved.reserve||[]).forEach(o=>reserve.push(reviveMember(o)));
     P.gold = saved.gold|0; P.herbs = saved.herbs|0; P.waters = saved.waters|0;
-    const land = safeLanding(saved.map, saved.x|0, saved.y|0);
-    P.map=land.map; P.x=land.x; P.y=land.y; P.dir=saved.dir||'front';
+    G.ship = (saved.ship && typeof saved.ship.x==='number') ? {x:saved.ship.x, y:saved.ship.y} : null;
+    if(saved.aboard && saved.map==='world' && tileAt('world', saved.x|0, saved.y|0)==='~'){
+      G.aboard=true;
+      P.map='world'; P.x=saved.x|0; P.y=saved.y|0; P.dir=saved.dir||'front';
+    }else{
+      G.aboard=false;
+      const land = safeLanding(saved.map, saved.x|0, saved.y|0);
+      P.map=land.map; P.x=land.x; P.y=land.y; P.dir=saved.dir||'front';
+    }
     G.flags = Object.assign({}, saved.flags||{});
     G.visited = Object.assign({}, saved.visited||{});
     G.visited[P.map] = true;
@@ -6965,13 +7322,15 @@ function switchChapter(no, newParty){
       if(typeof sl === 'number') return sl;
       return sl[k] || 1;
     };
-    cls.forEach(k=>party.push(mkMember(k, lvOf(k))));
+    cls.forEach((k,i)=>{ const m = mkMember(k, lvOf(k));
+      if(i<4) party.push(m); else reserve.push(m); });   // ★せんとうは 4にんまで
     if(cd){
       if(cd.start){
         const land = safeLanding(cd.start.map, cd.start.x|0, cd.start.y|0);
         P.map=land.map; P.x=land.x; P.y=land.y; P.dir=cd.start.dir||'front';
       }
       G.visited = {};                       // ★ほかの しょうの きろくを もちこさない
+    G.ship = null; G.aboard = false;      // ★ふねは しょうごと
       if(cd.gold!==undefined)   P.gold   = cd.gold|0;
       if(cd.herbs!==undefined)  P.herbs  = cd.herbs|0;
       if(cd.waters!==undefined) P.waters = cd.waters|0;
@@ -6986,14 +7345,50 @@ function switchChapter(no, newParty){
   return true;
 }
 
+// ---------------- ふね（じゆうこうかい）----------------
+// うみタイルを じぶんで こいで わたる。りくに ふれると あがり、ふねは のこる。
+// リターンや ぜんめつの ときは、いきさきの はまへ ふねが ついてくる（まいご ふせぎ）。
+const MOORS = {
+  toros:       {x:48, y:24},
+  versa_town:  {x:48, y:2},
+  zaal_town:   {x:81, y:48},
+  minamo_port: {x:36, y:51},
+  elde_town:   {x:9,  y:23},
+};
+function moorShipFor(mapId){
+  G.aboard=false;
+  if(G.ship && MOORS[mapId]) G.ship={x:MOORS[mapId].x, y:MOORS[mapId].y};
+}
+
+// ---------------- なかまの いれかえ（ひかえ） ----------------
+function allMembers(){ return party.concat(reserve); }
+function joinMember(cls, lv){                 // ごうりゅう。5にんめ いこうは ひかえへ
+  if(allMembers().some(m=>m.cls===cls)) return null;
+  const m = mkMember(cls, lv||1);
+  if(party.length<4) party.push(m); else reserve.push(m);
+  if(V.setActors) V.setActors(true); U.hud();
+  return m;
+}
+function swapMember(cls){                     // せんとう ⇄ ひかえ
+  const pi = party.findIndex(m=>m.cls===cls);
+  if(pi===0) return {ok:false, msg:party[0].name+'は せんとうから はずせない。'};
+  if(pi>0){ reserve.push(party.splice(pi,1)[0]);
+            if(V.setActors) V.setActors(true); U.hud(); return {ok:true}; }
+  const ri = reserve.findIndex(m=>m.cls===cls);
+  if(ri<0)  return {ok:false, msg:'その なかまは いない。'};
+  if(party.length>=4) return {ok:false, msg:'せんとうに でられるのは 4にんまで。'};
+  party.push(reserve.splice(ri,1)[0]);
+  if(V.setActors) V.setActors(true); U.hud();
+  return {ok:true};
+}
 // ---------------- 公開 ----------------
 return {
   // データ
   MAPS, ENEMIES, MIDBOSS, CLASSES, SPELL_DEFS, SHOPS, INN_PRICE, byMap, TACTICS, LV_CAP,
   get NPC_LINES(){return NPCDATA.NPCS;}, WORLD, QUESTS:NPCDATA.QUESTS,
   // 状態アクセサ
-  get G(){return G;}, get P(){return P;}, get party(){return party;},
-  freshState, mkMember, expNext, mAtk, mDef, knownSpells, spellLabel, aliveMembers,
+  get G(){return G;}, get P(){return P;}, get party(){return party;}, get reserve(){return reserve;},
+  freshState, allMembers, joinMember, swapMember, mkMember, expNext, mAtk, mDef, knownSpells, spellLabel, aliveMembers,
   // マップ
   tileAt, isBlocked, walkable, warpAt,
   // 行動
@@ -7002,6 +7397,7 @@ return {
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
+  moorShipFor, MOORS,
   itemList, useItemField, equipCandidates, equipFromBag, unequip, equipSummary, slotOf,
   fieldSpells, castField, spellNeedsTarget,
   returnDestinations, canReturnHere, castReturn, allReturnSpots, bossInfoAt, chData,
@@ -8615,24 +9011,28 @@ function closeMap(){
 function openFieldMenu(){
   if(statusEl) statusEl.style.display='none';
   C.G.mode='menu';
-  menu(['つよさ','じゅもん','どうぐ','そうび','ちず','さくせん','クエスト','セーブ','とじる'],
-       'メニュー',(sel)=>{
-    if(sel===0){            // つよさ
+  // ★ひかえが いる ときだけ「いれかえ」が ふえる。ばんごうでなく なまえで わける
+  const items=['つよさ','じゅもん','どうぐ','そうび','ちず','さくせん'];
+  if(C.reserve.length>0) items.push('いれかえ');
+  items.push('クエスト','セーブ','とじる');
+  menu(items,'メニュー',(sel)=>{
+    const pick=items[sel];
+    if(pick==='つよさ'){
       openStatus();
 
-    }else if(sel===1){      // じゅもん
+    }else if(pick==='じゅもん'){
       openSpells();
 
-    }else if(sel===2){      // どうぐ
+    }else if(pick==='どうぐ'){
       openItems();
 
-    }else if(sel===3){      // そうび
+    }else if(pick==='そうび'){
       openEquip();
 
-    }else if(sel===4){      // ちず
+    }else if(pick==='ちず'){
       openMap();
 
-    }else if(sel===5){      // さくせん
+    }else if(pick==='さくせん'){
       const keys=Object.keys(C.TACTICS);
       menu(keys.map(k=>C.TACTICS[k]).concat(['もどる']),'さくせん',(k)=>{
         if(k<keys.length){ C.G.tactic=keys[k];
@@ -8640,18 +9040,37 @@ function openFieldMenu(){
         else C.G.mode='field';
       });
 
-    }else if(sel===6){      // クエスト
+    }else if(pick==='いれかえ'){
+      openSwap();
+
+    }else if(pick==='クエスト'){
       const qs=C.questList();
       msg2(qs.length
         ? qs.reduce((a,q)=>a.concat(['＊ '+q.title, '　'+q.desc]),[])
         : ['いまは とくに やることが ない。'], ()=>{ C.G.mode='field'; });
 
-    }else if(sel===7){      // セーブ
+    }else if(pick==='セーブ'){
       const ok=C.saveGame();
       msg2([ok?'ぼうけんの きろくを つけた。':(C.lastSaveError||'きろくに しっぱいした…')],
            ()=>{ C.G.mode='field'; });
 
     }else C.G.mode='field';
+  });
+}
+
+// ---------------- いれかえ ----------------
+// ★えらぶと せんとう ⇄ ひかえが きりかわる トグルしき（そうさ さいしょう）
+function openSwap(){
+  const all = C.allMembers();
+  const rows = all.map(m=>{
+    const inP = C.party.indexOf(m)>=0;
+    return (inP?'▶':'　')+m.name+'　Lv'+m.lv;
+  }).concat(['もどる']);
+  menu(rows, 'いれかえ（▶＝せんとう）', (k)=>{
+    if(k>=all.length){ C.G.mode='field'; return; }
+    const r = C.swapMember(all[k].cls);
+    if(r.ok){ A.cursor && A.cursor(); openSwap(); }        // つづけて いれかえられる
+    else    { msg2([r.msg], ()=>openSwap()); }
   });
 }
 
@@ -8706,7 +9125,7 @@ function statusHTML(m, page, pages){
   return h;
 }
 function showStatus(){
-  const m = C.party[statusWho];
+  const m = C.allMembers()[statusWho];
   if(!m){ hideStatus(); return; }
   const pages = C.knownSpells(m).length ? 2 : 1;
   if(statusPage >= pages) statusPage = 0;
@@ -8719,14 +9138,15 @@ function hideStatus(){
   C.G.mode = 'field';
 }
 function statusNext(){          // A：つぎの ページ／さいごなら とじる
-  const m = C.party[statusWho];
+  const m = C.allMembers()[statusWho];
   const pages = m && C.knownSpells(m).length ? 2 : 1;
   if(statusPage + 1 < pages){ statusPage++; A.cursor && A.cursor(); showStatus(); }
   else { A.cancel && A.cancel(); hideStatus(); }
 }
-function statusOther(){         // B：ほかの なかま
-  if(C.party.length <= 1){ A.cancel && A.cancel(); hideStatus(); return; }
-  statusWho = (statusWho + 1) % C.party.length;
+function statusOther(){         // B：ほかの なかま（ひかえも みられる）
+  const n = C.allMembers().length;
+  if(n <= 1){ A.cancel && A.cancel(); hideStatus(); return; }
+  statusWho = (statusWho + 1) % n;
   statusPage = 0;
   A.cursor && A.cursor();
   showStatus();
