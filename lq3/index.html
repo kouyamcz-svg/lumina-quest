@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T04:48:47", "assets_sha": "4cf5db67", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 949, "view2d": 1428, "core": 3342, "view": 1304, "ui": 800}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T05:16:41", "assets_sha": "4cf5db67", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 949, "view2d": 1428, "core": 3342, "view": 1304, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -9605,7 +9605,13 @@ function menuCancel(){
 function menuVisible(){ return !!menuState; }
 
 // ---------------- HUD ----------------
+function hudVisible(){
+  // ★ステータスは メニューを ひらいた とき と せんとうちゅう だけ だす
+  //   （つねに だすと、へやの うえの ボスと かさなって みえなかった）
+  return menuVisible() || !!(C.G && C.G.battle);
+}
 function hud(){
+  hudEl.style.display = hudVisible() ? '' : 'none';
   hudEl.innerHTML = C.party.map(m=>
     '<div class="hm'+(m.hp<=0?' dead':'')+'">'+
     '<div class="hn">'+m.name+'</div>'+
@@ -9620,6 +9626,13 @@ function hud(){
 function label(t){ labelEl.textContent=t; }
 
 const UI = {msg:msg2, menu, hud, label, openTrade};
+// ★メニューの ひらけしめで ステータスの ひょうじも きりかえる
+const _menuOrig = menu;
+menu = function(items, title, cb){
+  _menuOrig(items, title, (k)=>{ cb(k); hud(); });
+  hud();
+};
+UI.menu = menu;
 
 // ---------------- 入力 ----------------
 function press(k){
