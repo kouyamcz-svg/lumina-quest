@@ -947,7 +947,10 @@ function drawBattle(dt, time){
     const sway = Math.sin(time*0.85+f.ph)*(sc*1.5);
     // はいけいと おなじ せいすうばい ＝ ドットの あらさが そろう
     // ★てきていぎの scale（ボスの おおきさ ばいりつ）を はんえい
-    const esc = Math.max(1, Math.round(sc*0.62*zoom*((f.enemy && f.enemy.scale)||1)));
+    // ★zoom（ヒットえんしゅつ）は せいすうまるめの そとで かける。
+    //   なかに いれると 2ばい→3ばい の だんさに なり、こうげきの たびに
+    //   てきが +50% きょだいか して みえた（じっさいに おきた）。
+    const esc = Math.max(1, Math.round(sc*0.62*((f.enemy && f.enemy.scale)||1)));
     let hh, ww;
     if(f.art){ hh = f.art.h*esc; ww = f.art.w*esc; }
     else { hh = 48*esc; ww = 48*esc; }
@@ -961,7 +964,7 @@ function drawBattle(dt, time){
     if(f.art){
       const img = getImg(f.art.src || f.art.front);
       if(img.complete && img.naturalWidth){
-        const dh = Math.round(hh*breathe), dw = Math.round(ww/breathe);
+        const dh = Math.round(hh*breathe*zoom), dw = Math.round(ww/breathe*zoom);
         cx.drawImage(img, Math.round(cx0-dw/2), Math.round(cy0-dh), dw, dh);
       }
     }else{
