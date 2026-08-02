@@ -1825,8 +1825,10 @@ function triggerChapterEnd(){
 }
 function questOnTalk(npcName){
   const F=G.flags;
-  // ★まず 章データの ものがたりを ためす（第2章いこうは これだけで うごく）
-  if((G.chapter||1) !== 1 && runTalkEvent(npcName)) return;
+  // ★第2章いこうは 章データの ものがたり だけで うごく。
+  //   ここから したの 第1章の きめうち には ぜったいに おちない
+  //   （5章で くすしに はなすと ゆきぐさクエストが はじまる ふぐあいが あった）。
+  if((G.chapter||1) !== 1){ runTalkEvent(npcName); return; }
   // ---- ミルカの くすし ----
   if(npcName==='くすし'){
     if(F.ch1_gotHerb && !hasKey('medicine') && hasKey('yukigusa')){
@@ -1887,7 +1889,11 @@ function questAdvance(id, state){
   G.quests[id]=state;
 }
 function questList(){
-  return Object.keys(G.quests).filter(k=>G.quests[k]==='active').map(k=>NPCDATA.QUESTS[k]);
+  // ★いまの しょうの クエストだけを だす（べつの しょうの まぎれこみ よけ）
+  const ch = G.chapter||1;
+  return Object.keys(G.quests).filter(k=>G.quests[k]==='active')
+    .map(k=>NPCDATA.QUESTS[k])
+    .filter(q=>q && (!q.chapter || q.chapter===ch));
 }
 function useInn(){
   const price = INN_PRICE[P.map]||10;
@@ -3244,7 +3250,7 @@ return {
   tileAt, isBlocked, walkable, warpAt,
   // 行動
   stepField, interact, facing, doWarp, startBattle, beginRound, saveGame, loadGame,
-  runTalkEvent, triggerChapterEnd, offerNextChapter, homePoint,
+  runTalkEvent, questOnTalk, questList, triggerChapterEnd, offerNextChapter, homePoint,
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
