@@ -228,6 +228,10 @@ const ENEMIES_LQ1 = [
   {key:'bat',    name:'おおコウモリ',   hp:11, atk:6,  def:2, agi:9,  exp:7,  gold:9,  minLv:1},
   {key:'thief',  name:'やとう',         hp:17, atk:9,  def:4, agi:10, exp:14, gold:20, minLv:3},
   {key:'skel',   name:'ガイコツけんし', hp:24, atk:13, def:7, agi:4,  exp:26, gold:30, minLv:5},
+  {key:'lizard', name:'ほのおトカゲ',   hp:34, atk:17, def:9,  agi:7,  exp:42, gold:46, minLv:5},
+  {key:'shadow', name:'やみのへいし',   hp:44, atk:19, def:12, agi:8,  exp:52, gold:48, minLv:6},
+  {key:'ogre',   name:'オーガ',         hp:52, atk:21, def:10, agi:3,  exp:60, gold:55, minLv:7},
+  {key:'troll',  name:'トロル',         hp:70, atk:23, def:11, agi:2,  exp:75, gold:70, minLv:8},
 ];
 ENEMIES_LQ1.forEach(e=>ENEMIES.push(e));
 
@@ -289,11 +293,11 @@ const MIDBOSS = {
     skill:{p:0.34, mul:1.4, name:'おわらない あくむ'},
     aoe:{p:0.27, lo:30, hi:40, name:'むの こだま'},
     inflict:{type:'confuse', p:0.19}, drain:0.2},
-  dreamlord:{key:'dreamlord', name:'ゆめの ぬし', hp:270, atk:25, def:16, agi:18, acts:1,
+  dreamlord:{key:'dreamlord', name:'ゆめの ぬし', hp:150, atk:17, def:12, agi:12, acts:1,
     exp:520, gold:340, art:'dreamlord',
-    skill:{p:0.32, mul:1.35, name:'まどろみの て'},
-    aoe:{p:0.22, lo:14, hi:20, name:'しろい きり'},
-    inflict:{type:'sleep', p:0.28}},
+    skill:{p:0.3, mul:1.3, name:'まどろみの て'},
+    aoe:{p:0.2, lo:8, hi:12, name:'しろい きり'},
+    inflict:{type:'sleep', p:0.24}},
   // 第4章 ちゅうボス「ゆきの ぬしがみ」：こやを あらし、かぎを うばった けもの。
   snowbeast:{key:'snowbeast', name:'ひとつめの あらくれ', hp:400, atk:37, def:18, agi:15, acts:1,
     exp:420, gold:300, art:'snowbeast',
@@ -388,11 +392,9 @@ const byMap = {
   zaal_dgn2:   ['mushmage','armycrab','merman','skullbat','mimic','metalslime'],      // Lv11〜15
   versa_dgn1:  ['icicleslime','frostbat','yukingon','blizzardhawk'],        // Lv3〜5
   versa_dgn2:  ['yukingon','blizzardhawk','frostmermaid','thornwolf','metalslime'],// Lv5〜7
-  cave1:['wisp','skeleton','ghostlamp','skullbat','mushmage','armycrab','merman','mimic','golem'],
-  cave2:['darkpriest','tornado','bloodwolf','killerpanther','icephoenix','shadowmimic',
-         'devilknight','blazedragon','stonecyclops','orcking'],
-  cave3:['shadowassassin','icephoenixlord','deathbishop','darkguard','demonlord','firedragon',
-         'bluecyclops','madcyclops'],
+  cave1: ['goblin','bat','thief','skel','lizard'],
+  cave2: ['skel','lizard','shadow','ogre'],
+  cave3: ['lizard','shadow','ogre','troll'],
 };
 
 // ---------------- データ：マップ ----------------
