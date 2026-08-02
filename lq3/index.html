@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T17:29:04", "assets_sha": "3ba4d582", "lines": {"world": 176, "npc": 787, "chapters": 1228, "bgm": 956, "view2d": 1437, "core": 3440, "view": 1371, "ui": 813}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T17:46:45", "assets_sha": "3ba4d582", "lines": {"world": 176, "npc": 787, "chapters": 1228, "bgm": 956, "view2d": 1438, "core": 3440, "view": 1371, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -4249,7 +4249,8 @@ function drawBattle(dt, time){
     const breathe = 1 + Math.sin(time*2.1+f.ph)*0.03;
     const sway = Math.sin(time*0.85+f.ph)*(sc*1.5);
     // はいけいと おなじ せいすうばい ＝ ドットの あらさが そろう
-    const esc = Math.max(1, Math.round(sc*0.62*zoom));
+    // ★てきていぎの scale（ボスの おおきさ ばいりつ）を はんえい
+    const esc = Math.max(1, Math.round(sc*0.62*zoom*((f.enemy && f.enemy.scale)||1)));
     let hh, ww;
     if(f.art){ hh = f.art.h*esc; ww = f.art.w*esc; }
     else { hh = 48*esc; ww = 48*esc; }
@@ -5040,19 +5041,19 @@ const MIDBOSS = {
   dknight:{key:'dknight', name:'デスナイト', hp:74, atk:14, def:8, agi:6, acts:1,
     exp:100, gold:150, art:'dknight',
     skill:{p:0.28, mul:1.38, name:'やみの ひとふり'}},
-  dreameater_a:{key:'dreameater_a', name:'まおう デスグラン', hp:1150, atk:51, def:28, agi:20, acts:2,
+  dreameater_a:{key:'dreameater_a', name:'まおう デスグラン', hp:1150, atk:51, def:28, agi:20, acts:2, scale:1.35,
     exp:1200, gold:500, art:'desgran1',
     skill:{p:0.32, mul:1.36, name:'ゆめを くらう'},
     aoe:{p:0.24, lo:25, hi:34, name:'あんこくの なみ'},
     inflict:{type:'sleep', p:0.22}, drain:0.15,
     charge:{p:0.16, mul:1.2, aoe:true, tell:'あたりの ゆめを すいこんで いる…', name:'ゆめのみの あぎと'},
     enrage:{at:0.40, atk:1.10, name:'デスグランが みぶるいした！'}},
-  dreameater_b:{key:'dreameater_b', name:'デスグラン・おんねんのすがた', hp:950, atk:45, def:26, agi:22, acts:2,
+  dreameater_b:{key:'dreameater_b', name:'デスグラン・おんねんのすがた', hp:950, atk:45, def:26, agi:22, acts:2, scale:1.35,
     exp:1200, gold:500, art:'desgran2',
     aoe:{p:0.32, lo:26, hi:35, name:'おんねんの ほのお'},
     inflict:{type:'confuse', p:0.22}, drain:0.15,
     charge:{p:0.16, mul:1.2, aoe:true, tell:'おんねんが うずを まいて いる…', name:'ごくえんの うねり'}},
-  dreameater_c:{key:'dreameater_c', name:'デスグラン・しんのすがた', hp:1580, atk:58, def:30, agi:22, acts:2,
+  dreameater_c:{key:'dreameater_c', name:'デスグラン・しんのすがた', hp:1580, atk:58, def:30, agi:22, acts:2, scale:1.5,
     exp:3200, gold:1400, art:'desgran3',
     skill:{p:0.34, mul:1.4, name:'むすうの しょくしゅ'},
     aoe:{p:0.27, lo:30, hi:40, name:'むの こだま'},
