@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T01:02:29", "assets_sha": "903baf21", "lines": {"world": 176, "npc": 753, "chapters": 1186, "bgm": 949, "view2d": 1428, "core": 3264, "view": 1302, "ui": 800}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T01:07:22", "assets_sha": "903baf21", "lines": {"world": 176, "npc": 777, "chapters": 1186, "bgm": 949, "view2d": 1428, "core": 3264, "view": 1302, "ui": 800}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -429,6 +429,12 @@ const NPCS = {
         'ししょう「ナギサへ いって、」',
         'ししょう「なにが おきたか みてくるのじゃ」',
         '「ルカ、セナを たのんだよ」']},
+      {when:{ch:5, flag:'ch5_south'}, text:[
+        'ししょう「ふたごを たのむぞ、ひかりのこ」',
+        '「うみの おくの かけら、ゆだんは ならん」']},
+      {when:{ch:5}, text:[
+        'ししょう「……ほう。ゆめの けはいを まとった こじゃ」',
+        '「おまえが うわさの ひかりのこ かえ」']},
       {text:['ししょう「セナ。おまえの ゆめみの ちからは、まだ あさい」',
              '「じゃが いまは その あさい ちからが いる」',
              '「しまじゅうの ものが、ねむったまま おきんのじゃ」']}]},
@@ -517,6 +523,11 @@ const NPCS = {
         'しょうかいちょう「ねむりの すな とな。いせきに あるなら いくしか あるまい」']},
       {when:{flag:'ch2_started'}, text:[
         'しょうかいちょう「オアシスの むらへ いってくれ。すなの たみが なにか しっている」']},
+      {when:{ch:5, flag:'ch5_east'}, text:[
+        'しょうかいちょう「ひがしは たのんだぞ。しょうにんは まちに つよい」']},
+      {when:{ch:5}, text:[
+        'しょうかいちょう「トロスの つかいか。よく きた」',
+        '「この まちも ねむる ものが ふえて こまって おる」']},
       {text:['しょうかいちょう「バルドか。ちょうど よかった」',
              '「みなみへ でた たいしょうが、まるごと きえた」',
              '「にもつも らくだも そのままで、ひとだけが おらぬ」']}]},
@@ -589,6 +600,9 @@ const NPCS = {
       {text:['「＜アルト＞って なまえ、きいた ことは ないか」',
              '「きたの みちで すれちがったんだ。かおは みえなかったが」']}]},
     {at:'13,6', spr:'guardA', name:'もんばん', lines:[
+      {when:{ch:5}, text:[
+        '「よそから きたのか。この まちも ねむりびょうでな」',
+        '「きしだんの わかいのが、けさも 2り たおれた」']},
       {when:{state:'DREAM_INVASION'}, text:[
         '「みなみもんは とじた！ そとは もう ゆめの なかだ！」',
         '「きみも はやく おくへ さがれ、リオン！」']},
@@ -613,6 +627,11 @@ const NPCS = {
         '「けさも まどから ゆきを ながめて おられました」']},
     ]},
     {at:'8,9', spr:'captain', name:'きしだんちょう', lines:[
+      {when:{ch:5, flag:'ch5_north'}, text:[
+        '「きたの こおりの おくは かたづけたか。たのんだぞ」']},
+      {when:{ch:5}, text:[
+        '「トロスの こぞうか。……いい めを している」',
+        '「ねむりびょうの もとを さがして いるなら はなしを きけ」']},
       {when:{flag:'ch1_orderReceived'}, text:[
         '「せつげんの おくに こおりの どうくつが ある」',
         '「きを つけて いけ。おまえは まだ しんまいだ」']},
@@ -762,6 +781,8 @@ const NPCS = {
         'くすし「おや、その ひかり……ゆきぐさ だね」']},
       {when:{flag:'ch1_heardTheft'}, text:[
         'くすし「みなみの こおりの どうくつ。くろい けものだよ」']},
+      {when:{ch:5}, text:['くすし「おや、たびの こかい。とおい ところを」',
+        '「ねむりびょうの ねっこは、くすりでは たてないよ」']},
       {text:['くすし「よく きたね、わかい きし。なにを さがしに?」']}]},
   ],
   versa_cast1: [
@@ -772,6 +793,8 @@ const NPCS = {
         '「せかいを みてこい、リオン。おなじ ねむりの もとを つきとめるのだ」']},
       {when:{flag:'ch1_gotHerb'}, text:[
         'おう「くすりが できたら、すぐに むすめの もとへ」']},
+      {when:{ch:5}, text:['おう「ひかりのこ とやら、うわさは きいて おる」',
+             '「むすめの ねむり……もとを たってくれ。たのむ」']},
       {text:['おう「むすめが めを さまさぬ。いしゃも てだてが ないという」',
              '「たのむ、リオン。おまえだけが たよりだ」']},
     ]},
@@ -1067,6 +1090,7 @@ function pickLines(entry, ctx){
   for(const l of entry.lines){
     const w = l.when;
     if(!w) return l.text;
+    if(w.ch && ctx.chapter !== w.ch) continue;         // ★しょうごとの せりふ
     if(w.state && ctx.townState !== w.state) continue;
     if(w.flag && !ctx.flags[w.flag]) continue;
     if(w.notFlag && ctx.flags[w.notFlag]) continue;
@@ -6318,7 +6342,7 @@ function talkNPC(x,y){
   const entry = NPCDATA.npcAt(P.map, x, y);
   G.mode='msg';
   if(!entry){ U.msg(['「……」'], ()=>{ G.mode='field'; }); return; }
-  const lines = NPCDATA.pickLines(entry, {townState:G.townState, flags:G.flags});
+  const lines = NPCDATA.pickLines(entry, {townState:G.townState, flags:G.flags, chapter:(G.chapter||1)});
   // ★こうえきしょう は はなすと あきないが できる（バルドの ミニイベント）
   if(entry.name === 'こうえきしょう'){
     if(party[0] && party[0].cls !== 'bald'){
