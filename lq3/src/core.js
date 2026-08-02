@@ -454,7 +454,7 @@ const MAPS = {
       '7,10':{to:'world', x:49, y:41}
     }},
   // ============ 終章：ゆめのたいりく（3D） ============
-  dream_field:{name:'ゆめのたいりく', theme:'dream', enc:true, tiles:[
+  dream_field:{name:'ゆめのたいりく', theme:'dream', enc:true, encRate:0.055, encGrace:6, tiles:[
     "##########################",
     "#####..f....##....f..#####",
     "###...o......<.......o.###",
@@ -492,7 +492,7 @@ const MAPS = {
     warpsXY:{
       '0,5':{to:'dream_field', x:24, y:9}
     }},
-  dream_cast1:{name:'さかさのしろ 1かい', theme:'castle', enc:true, tiles:[
+  dream_cast1:{name:'さかさのしろ 1かい', theme:'castle', enc:true, encRate:0.060, encGrace:5, tiles:[
     "##################",
     "#T..............T#",
     "#.....C....C.....#",
@@ -511,7 +511,7 @@ const MAPS = {
       '8,12':{to:'dream_field', x:13, y:3},
       '8,7':{to:'dream_cast2', x:8, y:11}
     }},
-  dream_cast2:{name:'さかさのしろ 2かい', theme:'castle', enc:true, tiles:[
+  dream_cast2:{name:'さかさのしろ 2かい', theme:'castle', enc:true, encRate:0.065, encGrace:5, tiles:[
     "##################",
     "#....T......T....#",
     "#..C..........C..#",
@@ -530,7 +530,7 @@ const MAPS = {
       '2,5':{to:'dream_cast3', x:8, y:11},
       '8,11':{to:'dream_cast1', x:8, y:8}
     }},
-  dream_cast3:{name:'さかさのしろ さいじょうかい', theme:'castle', enc:true, tiles:[
+  dream_cast3:{name:'さかさのしろ さいじょうかい', theme:'castle', enc:true, encRate:0.070, encGrace:5, tiles:[
     "##################",
     "#T......K......T##",
     "#.......B........#",
