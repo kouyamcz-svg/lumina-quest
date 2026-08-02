@@ -1204,12 +1204,12 @@ function draw(dt, time, actors){
     cx.drawImage(groundTile(sx,sy,terrainOf), ox+sx*ts, oy+sy*ts, ts, ts);
     cx.drawImage(atlas.boat, ox+sx*ts, oy+sy*ts, ts, ts);
   }
-  // ④ キャラ（Yじゅんに かさねる）★ふねの うえでは せんとうだけ・したに ふね
+  // ④ キャラ（Yじゅんに かさねる）★ふねに のって いる あいだは ふねだけを えがく
   let list = (actors||[]).slice();
   if(C.G && C.G.aboard && theme==='world' && list.length){
     const lead=list[0];
     cx.drawImage(atlas.boat, ox+lead.x*ts, oy+lead.y*ts, ts, ts);
-    list=[lead];
+    list=[];
   }
   list = list.sort((a,b)=>a.y-b.y);
   list.forEach(a=>drawChar(a, ox, oy, ts, time));
