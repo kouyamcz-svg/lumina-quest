@@ -1123,7 +1123,7 @@ function loop(now){
     else updateBattle(dt,time);
   }
   else if(is2D) update2D(dt,time);
-  else if(V2 && V2.mapOn){
+  else if(V2 && (V2.mapOn || V2.sceneOn)){
     // ★3Dシーンちゅうの「ちず」：2Dキャンバスを かりて ちずだけ えがく。
     //   まえは 3Dでは なにも えがかれず、がめんが こおって みえた。
     if(canvas2d && (canvas2d.width < 4 || canvas2d.height < 4) && V2.resize) V2.resize();
@@ -1133,7 +1133,8 @@ function loop(now){
       g.fillStyle='#000'; g.fillRect(0,0,canvas2d.width,canvas2d.height);
       g.restore();
     }
-    V2.drawMapOverlay(time);
+    if(V2.sceneOn) V2.drawSceneOverlay(time);
+    else V2.drawMapOverlay(time);
   }
   else updateField(dt,time);
   requestAnimationFrame(loop);
@@ -1341,6 +1342,23 @@ function spawnBurst(target){
 
 window.LQ3View = {
   init, loop, buildMap, setActors, fx, battleEnter, battleLeave, refresh, chest, fade, chapterCard,
+  showScene(k){
+    if(!(V2&&V2.showScene)) return;
+    if(!is2D && mode!=='battle'){
+      if(canvas2d) canvas2d.style.display='block';
+      if(canvas)   canvas.style.visibility='hidden';
+      V2.resize();
+    }
+    V2.showScene(k);
+  },
+  hideScene(){
+    if(!(V2&&V2.hideScene)) return;
+    V2.hideScene();
+    if(!is2D && mode!=='battle'){
+      if(canvas2d) canvas2d.style.display='none';
+      if(canvas)   canvas.style.visibility='visible';
+    }
+  },
   showMap(id){
     if(!(V2&&V2.showMap)) return;
     if(!is2D && mode!=='battle'){
