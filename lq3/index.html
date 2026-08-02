@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T05:16:41", "assets_sha": "4cf5db67", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 949, "view2d": 1428, "core": 3342, "view": 1304, "ui": 813}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T10:24:46", "assets_sha": "4cf5db67", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 949, "view2d": 1436, "core": 3435, "view": 1304, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -4987,32 +4987,42 @@ const MIDBOSS = {
   nushicrab:{key:'nushicrab', name:'ぬしヤドガニ', hp:180, atk:18, def:23, agi:7, acts:1,
     exp:150, gold:180, art:'nushicrab',
     skill:{p:0.28, mul:1.30, name:'はさみうち'},
-    aoe:{p:0.16, lo:6, hi:10, name:'すなけむり'}},
+    aoe:{p:0.16, lo:6, hi:10, name:'すなけむり'},
+    brace:{p:0.24, name:'からに こもった！'}},
   // 第5章 ボス「ゆめの ぬし」：むらを のみこんだ きりの ぬし。
   // 第5章めぐり「よっつの かけら」：かくちの あくむの すがたを うつした かげ
   shardhound:{key:'shardhound', name:'よみがえりし ゆめのばんけん', hp:560, atk:40, def:19, agi:16, acts:1,
     exp:800, gold:420, art:'rev_banken',
     skill:{p:0.31, mul:1.32, name:'ゆめを かみくだく'},
     aoe:{p:0.21, lo:15, hi:21, name:'しろき とおぼえ'},
-    inflict:{type:'sleep', p:0.23}},
+    inflict:{type:'sleep', p:0.23},
+    charge:{p:0.18, mul:2.0, tell:'きばに ちからを ためて いる…', name:'だんがいの きば'},
+    enrage:{at:0.35, atk:1.10, chargeP:0.26, name:'ゆめの きばを むきだした！'}},
   shardgolem:{key:'shardgolem', name:'よみがえりし ねむりぬし', hp:960, atk:51, def:25, agi:12, acts:1,
     exp:1000, gold:520, art:'rev_golem',
     skill:{p:0.35, mul:1.45, name:'すなの てっつい'},
     aoe:{p:0.24, lo:22, hi:29, name:'ねむりの すなあらし'},
-    inflict:{type:'sleep', p:0.24}},
+    inflict:{type:'sleep', p:0.24},
+    charge:{p:0.16, mul:1.2, aoe:true, tell:'じめんが ゆれはじめた…', name:'だいちの じんどう'},
+    brace:{p:0.18, name:'いわはだを かたく とじた！'}},
   shardsis:{key:'shardsis', name:'よみがえりし あねのかげ', hp:680, atk:50, def:24, agi:20, acts:1,
     exp:700, gold:330, art:'rev_sisA',
     skill:{p:0.29, mul:1.28, name:'ゆめうつしの まい'},
-    inflict:{type:'confuse', p:0.19}},
+    inflict:{type:'confuse', p:0.19},
+    charge:{p:0.15, mul:2.0, tell:'ゆめの ちからを あつめて いる…', name:'ゆめおとしの まい'},
+    enrage:{at:0.35, atk:1.10, name:'いもうとの なを さけんだ！'}},
   shardsis_b:{key:'shardsis_b', name:'よみがえりし いもうとのかげ', hp:640, atk:48, def:22, agi:24, acts:1,
     exp:550, gold:270, art:'rev_sisB',
     aoe:{p:0.3, lo:22, hi:30, name:'しおの さかまき'},
-    inflict:{type:'sleep', p:0.16}},
+    inflict:{type:'sleep', p:0.16},
+    brace:{p:0.20, name:'みずの まくを はった！'}},
   shardeater:{key:'shardeater', name:'よみがえりし こうかいのかげ', hp:1080, atk:46, def:25, agi:18, acts:2,
     exp:1600, gold:750, art:'rev_shadow',
     skill:{p:0.31, mul:1.32, name:'ゆめを すする'},
     aoe:{p:0.23, lo:21, hi:29, name:'くろい こだま'},
-    inflict:{type:'sleep', p:0.21}, drain:0.16},
+    inflict:{type:'sleep', p:0.21}, drain:0.16,
+    charge:{p:0.15, mul:2.0, tell:'こうかいが ふくれあがって いる…', name:'とりかえせぬ いちげき'},
+    enrage:{at:0.35, atk:1.10, name:'こうかいが あふれだした！'}},
   dknight:{key:'dknight', name:'デスナイト', hp:74, atk:14, def:8, agi:6, acts:1,
     exp:100, gold:150, art:'dknight',
     skill:{p:0.28, mul:1.38, name:'やみの ひとふり'}},
@@ -5020,12 +5030,17 @@ const MIDBOSS = {
     exp:2400, gold:1000, art:'regretshadow',
     skill:{p:0.32, mul:1.36, name:'ゆめを くらう'},
     aoe:{p:0.24, lo:25, hi:34, name:'あんこくの なみ'},
-    inflict:{type:'sleep', p:0.22}, drain:0.15},
+    inflict:{type:'sleep', p:0.22}, drain:0.15,
+    charge:{p:0.16, mul:1.2, aoe:true, tell:'あたりの ゆめを すいこんで いる…', name:'ゆめのみの あぎと'},
+    enrage:{at:0.40, atk:1.10, name:'ゆめくいが みぶるいした！'}},
   dreameater_b:{key:'dreameater_b', name:'ゆめくい・しんのすがた', hp:1690, atk:58, def:30, agi:22, acts:2,
     exp:3200, gold:1400, art:'dreamform',
     skill:{p:0.34, mul:1.4, name:'おわらない あくむ'},
     aoe:{p:0.27, lo:30, hi:40, name:'むの こだま'},
-    inflict:{type:'confuse', p:0.19}, drain:0.2},
+    inflict:{type:'confuse', p:0.19}, drain:0.2,
+    charge:{p:0.18, mul:2.0, tell:'あくむが ひとつに あつまって いく…', name:'おわりの ひとつき'},
+    brace:{p:0.15, name:'ゆめの まくに つつまれた！'},
+    enrage:{at:0.35, atk:1.10, chargeP:0.26, name:'あくむが かたちを かえた！'}},
   dreamlord:{key:'dreamlord', name:'ゆめの ぬし', hp:150, atk:17, def:12, agi:12, acts:1,
     exp:520, gold:340, art:'dreamlord',
     skill:{p:0.3, mul:1.3, name:'まどろみの て'},
@@ -5036,32 +5051,38 @@ const MIDBOSS = {
     exp:420, gold:300, art:'snowbeast',
     skill:{p:0.32, mul:1.35, name:'こんぼうの ひとふり'},
     aoe:{p:0.20, lo:12, hi:18, name:'あばれ まわり'},
-    inflict:{type:'freeze', p:0.24}},
+    inflict:{type:'freeze', p:0.24},
+    charge:{p:0.18, mul:2.0, tell:'こんぼうを たかく ふりかぶった…', name:'たたきつぶし'}},
   // 第4章 ボス「こうかいの かげ」：ゼフの けんきゅうが うんだ、みずからの こうかい。
   regretshadow:{key:'regretshadow', name:'こうかいの かげ', hp:700, atk:58, def:20, agi:17, acts:1,
     exp:900, gold:520, art:'regretshadow',
     skill:{p:0.32, mul:1.40, name:'あの ひの こえ'},
     aoe:{p:0.22, lo:16, hi:24, name:'とりかえせぬ とき'},
-    inflict:{type:'confuse', p:0.26}},
+    inflict:{type:'confuse', p:0.26},
+    charge:{p:0.18, mul:2.0, tell:'あの ひの こえが たかまって いく…', name:'もどらぬ いちげき'},
+    enrage:{at:0.35, atk:1.10, name:'こうかいが かたちを うしなった！'}},
   // 第3章 ちゅうボス「まどろみの しもべ」：しまいの かげに つかえる じゅじゅつし。
   //   ナギサに ついた ころに たたかう（Lv9そうてい）。
   dreamwarlock:{key:'dreamwarlock', name:'まどろみの しもべ', hp:280, atk:30, def:12, agi:18, acts:1,
     exp:260, gold:210, art:'dreamwarlock',
     skill:{p:0.30, mul:1.30, name:'つえの いちげき'},
     aoe:{p:0.20, lo:9, hi:14, name:'ねむりの まじない'},
-    inflict:{type:'sleep', p:0.28}},
+    inflict:{type:'sleep', p:0.28},
+    brace:{p:0.22, name:'つえで まもりを かためた！'}},
   // 第3章 そうしボス「しまいの かげ」：ねえと いもうとの 2たい。
   // かたほうを たおしても、もういっぽうが いきていれば よみがえる。
   shadowsis_a:{key:'shadowsis_a', name:'あねの かげ', hp:275, atk:33, def:16, agi:16, acts:1,
     exp:520, gold:300, art:'sisA',
     skill:{p:0.28, mul:1.32, name:'ゆめの つめ'},
     aoe:{p:0.20, lo:13, hi:19, name:'ふたりの うたごえ'},
-    inflict:{type:'sleep', p:0.26}},
+    inflict:{type:'sleep', p:0.26},
+    charge:{p:0.18, mul:2.0, tell:'つめに ゆめを ためて いる…', name:'ゆめさきの ひとかき'}},
   shadowsis_b:{key:'shadowsis_b', name:'いもうとの かげ', hp:240, atk:29, def:14, agi:20, acts:1,
     exp:480, gold:280, art:'sisB',
     skill:{p:0.26, mul:1.25, name:'ゆめの まなざし'},
     aoe:{p:0.18, lo:11, hi:16, name:'ふたりの うたごえ'},
-    inflict:{type:'slow', p:0.30}},
+    inflict:{type:'slow', p:0.30},
+    brace:{p:0.22, name:'あねの かげに よりそった！'}},
   sandsleeper:{key:'sandsleeper', name:'すなの ねむりぬし', hp:240, atk:25, def:15, agi:14, acts:1,
     exp:600, gold:400, art:'golem',
     skill:{p:0.30, mul:1.35, name:'すなの きば'},
@@ -5075,16 +5096,21 @@ const MIDBOSS = {
   desgran1:{key:'desgran1', name:'まおう デスグラン', hp:500, atk:43, def:28, agi:14, acts:2,
             exp:0, gold:0,
             aoe:{p:0.26, lo:26, hi:36, name:'ダークフレア'},
-            skill:{p:0.30, mul:1.35, name:'まじんの つえ'}},
+            skill:{p:0.30, mul:1.35, name:'まじんの つえ'},
+            charge:{p:0.18, mul:2.0, tell:'つえに やみを ためこんで いる…', name:'あんこくの いちげき'}},
   desgran2:{key:'desgran2', name:'デスグラン・おんねんのすがた', hp:580, atk:48, def:26, agi:17, acts:2,
             exp:0, gold:0,
             aoe:{p:0.34, lo:30, hi:42, name:'おんねんの ほのお'},
-            inflict:{type:'confuse', p:0.24}},
+            inflict:{type:'confuse', p:0.24},
+            charge:{p:0.16, mul:1.2, aoe:true, tell:'おんねんが うずを まいて いる…', name:'ごくえんの うねり'}},
   desgran3:{key:'desgran3', name:'デスグラン・まじんのすがた', hp:750, atk:51, def:30, agi:15, acts:2,
             exp:4000, gold:3000,
             aoe:{p:0.36, lo:30, hi:44, name:'ぜつぼうの まなざし'},
             skill:{p:0.28, mul:1.40, name:'むすうの しょくしゅ'},
-            inflict:{type:'sleep', p:0.20}},
+            inflict:{type:'sleep', p:0.20},
+            charge:{p:0.18, mul:2.0, tell:'まじんが ちからを ためこんで いる…', name:'めっしんの いちげき'},
+            brace:{p:0.14, name:'やみの よろいを まとった！'},
+            enrage:{at:0.35, atk:1.10, chargeP:0.26, name:'デスグランが ほんきを だした！'}},
 };
 // ★マップごとの けいけんち ばいりつ。
 //   「2かいは かせぎば」など、ばしょに やくわりを もたせる。
@@ -6913,6 +6939,8 @@ function beginRound(){
   b.round++;
   if(b.round>200){ endBattle(false); return; }  // 安全弁
   b.queue=[];
+  // ★ボスの「みがまえ」は 1ラウンドで とける
+  b.enemies.forEach(e=>{ if(e.braced && e.bracedAt < b.round) e.braced=false; });
   // じょうたい いじょうの かいふく はんてい
   // ひとりの ときは、ねむり・こんらんで なにも できない じかんが ながすぎるため さめやすくする
   const solo = party.length===1;
@@ -7259,7 +7287,10 @@ function memberAct(a, done){
 // ★てきの しゅびりょく（よわめられて いれば さがる）
 function eDef(e){
   const cut = e.defDown ? e.defDown.v : 0;
-  return Math.max(0, (e.def|0) - cut);
+  let d = Math.max(0, (e.def|0) - cut);
+  if(e.braced)   d = d + Math.floor((e.def|0)*0.5) + 4;  // みがまえ：かたい
+  if(e.charging) d = Math.floor(d*0.5);                  // ためこみ中は すきだらけ
+  return Math.max(0, d);
 }
 function killed(e){ const d=G.dex[e.key]=G.dex[e.key]||{seen:1,kill:0}; d.kill++;
   // ★いらい（たおした かずを かぞえる）
@@ -7268,10 +7299,72 @@ function killed(e){ const d=G.dex[e.key]=G.dex[e.key]||{seen:1,kill:0}; d.kill++
     if(G.quota.n >= G.quota.need) G.flags[G.quota.flag] = true;
   }
   if(A.defeat) A.defeat(); V.refresh(); }
+// ★ためわざの かいほう（1ラウンド ためて、つぎの ラウンドに はなつ）
+function releaseCharge(e, alive, done){
+  const c = e.charge, lines = [];
+  e.charging = false;
+  A.cue(); A.ehit();
+  if(c.aoe){
+    lines.push(e.dispName+'の '+c.name+'！');
+    V.fx('enemyaoe',{from:e}, ()=>{
+      alive.forEach(m=>{
+        let d = Math.floor(e.atk*(c.mul||1.5)) - Math.floor(mDef(m)/3)
+              + Math.floor(Math.random()*7) - 3;
+        d = Math.max(1, d);
+        if(m.guard) d = Math.max(1, Math.ceil(d*0.4));
+        m.hp -= d;
+        lines.push(m.name+'は '+d+'の ダメージ！'+(m.guard?'（ぼうぎょ）':''));
+        if(m.hp<=0){ m.hp=0; m.status=null; lines.push(m.name+'は たおれた…'); }
+      });
+      U.hud(); U.msg(lines, done);
+    });
+    return;
+  }
+  const t = alive[Math.floor(Math.random()*alive.length)];
+  let d = Math.max(1, Math.floor(e.atk*(c.mul||2.0)) - Math.floor(mDef(t)/2)
+                    + Math.floor(Math.random()*7) - 3);
+  if(t.guard) d = Math.max(1, Math.ceil(d*0.4));
+  V.fx('enemyattack',{target:t, from:e}, ()=>{
+    t.hp -= d;
+    lines.push(e.dispName+'の '+c.name+'！',
+               t.name+'は '+d+'の ダメージを うけた！'+(t.guard?'（ぼうぎょ）':''));
+    if(t.hp<=0){ t.hp=0; t.status=null; lines.push(t.name+'は たおれた…'); }
+    U.hud(); U.msg(lines, done);
+  });
+}
 function enemyAct(e, done){
   const alive = aliveMembers();
   if(!alive.length){ defeat(); return; }
   const lines=[];
+  const rnd = (G.battle && G.battle.round) || 0;
+  // ★けいたい へんか：HPが しきいちを われたら 1どだけ ちからを かいほうする
+  if(e.enrage && !e.enraged && e.hp>0 && e.hp <= e.maxhp*(e.enrage.at||0.4)){
+    e.enraged = true;
+    e.atk = Math.floor(e.atk * (e.enrage.atk||1.15));
+    if(e.charge && e.enrage.chargeP) e.charge.p = e.enrage.chargeP;
+    if(e.aoe && e.enrage.aoeP)       e.aoe.p    = e.enrage.aoeP;
+    e.charging = false;                      // ためを キャンセルして すがたを かえる
+    A.cue(); V.refresh();
+    U.msg([e.dispName+'は '+(e.enrage.name||'ちからを かいほうした！'),
+           e.dispName+'の こうげきりょくが あがった！'], done);
+    return;
+  }
+  // ★ためわざ：ためた つぎの ラウンドで はなつ
+  if(e.charging && rnd > e.chargeAt) return releaseCharge(e, alive, done);
+  // ★ためわざ：ためこみ（この ラウンドは こうどうを すてる）
+  if(e.charge && !e.charging && Math.random() < e.charge.p){
+    e.charging = true; e.chargeAt = rnd;
+    A.cue();
+    U.msg([e.dispName+'は '+(e.charge.tell||'ちからを ためこんで いる…')], done);
+    return;
+  }
+  // ★みがまえ：1ラウンド かたくなる
+  if(e.brace && !e.braced && !e.charging && Math.random() < e.brace.p){
+    e.braced = true; e.bracedAt = rnd;
+    A.cue();
+    U.msg([e.dispName+'は '+(e.brace.name||'みを かためた！')], done);
+    return;
+  }
   // にげる（ルスライム）
   if(e.fleeP && Math.random()<e.fleeP){
     e.hp=0; e.fled=true; V.refresh();
