@@ -975,7 +975,9 @@ const MAPS = {
     "#====eeeee===rr====eeeee===#",
     "#============rr============#",
     "#############GG#############"
-  ], warps:{}, warpsXY:{'13,19':{to:'world',x:48,y:9},'14,19':{to:'world',x:48,y:9}}},
+  ], warps:{}, warpsXY:{
+      '13,2':{to:'versa_cast1', x:10, y:14},
+      '14,2':{to:'versa_cast1', x:11, y:14},'13,19':{to:'world',x:48,y:9},'14,19':{to:'world',x:48,y:9}}},
   versa_town2:{name:'くすしの むら ミルカ',theme:'snow',enc:false,tiles:[
     "######################",
     "#====================#",
