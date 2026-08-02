@@ -272,6 +272,26 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
 
+// ===== 5章の町NPC台詞（別章主人公の名で呼ばない） =====
+{
+  C.freshState(); C.G.chapters={};
+  C.switchChapter(5);
+  const NP=(typeof C.NPCDATA!=='undefined'&&C.NPCDATA)||vm.runInContext('NPCDATA',ctx);
+  [['versa_town','13,6','もんばん'],['versa_town','8,9','きしだんちょう'],
+   ['zaal_town','7,8','しょうかいちょう'],['minamo_port','7,9','うらないの ししょう'],
+   ['versa_cast1','10,2','おう']].forEach(([m,at,nm])=>{
+    const entry=NP.npcAt(m, +at.split(',')[0], +at.split(',')[1]);
+    if(!entry){ T('NPCあり:'+nm, false); return; }
+    const t=NP.pickLines(entry,{townState:C.G.townState,flags:C.G.flags,chapter:5}).join('');
+    T('5章台詞:'+nm, !/リオン|バルド|セナ。/.test(t));
+  });
+  // 1章では従来どおり
+  C.freshState(); C.G.chapters={}; C.switchChapter(1);
+  const g=NP.npcAt('versa_town',13,6);
+  const t1=NP.pickLines(g,{townState:C.G.townState,flags:C.G.flags,chapter:1}).join('');
+  T('1章は従来台詞', t1.includes('リオン'));
+}
+
 // ===== ゆめみの洞窟：LQ1進行プール =====
 {
   const need={cave1:['goblin','bat','thief','skel','lizard'],
