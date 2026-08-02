@@ -18,7 +18,8 @@ T('3Dモード:cast', C.WORLD.renderModeOf('dream_cast3')==='3d');
 const eKeys=new Set(C.ENEMIES.map(e=>e.key));
 ['yumewisp','sleepknight','voidgolem','nightpriest','echoshadow','dreamdragon']
   .forEach(k=>T('敵:'+k, eKeys.has(k)));
-['dreameater_a','dreameater_b'].forEach(k=>T('ボス:'+k, !!C.MIDBOSS[k]));
+['dreameater_a','dreameater_b','dreameater_c'].forEach(k=>T('ボス:'+k, !!C.MIDBOSS[k]));
+T('連戦b→c', /nextBoss:\s*'dreameater_c'/.test(chSrc));
 const assets=fs.readFileSync('assets.js','utf8');
 ['regretshadow','dreamform'].forEach(a=>T('ボスart:'+a, assets.includes(a+':')));
 // byMapの敵キー実在
