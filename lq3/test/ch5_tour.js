@@ -272,6 +272,16 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
 
+// ===== 王女調べの章分岐（1章イベント混入防止） =====
+{
+  C.freshState(); C.G.chapters={};
+  C.switchChapter(5);
+  // interactを直接呼べないため、Z分岐のロジックをソースで固定
+  const src=require('fs').readFileSync('src/core.js','utf8');
+  T('Z:章ゲートあり', src.includes("if((G.chapter||1)!==1){") && src.indexOf("if((G.chapter||1)!==1){") < src.indexOf("if(F.ch1_cleared){"));
+  T('Z:5章覚醒分岐', src.includes('こおりの こえが きえたわ'));
+}
+
 // ===== ヴェルサ城の到達性と北後の導線会話 =====
 {
   C.freshState(); C.G.chapters={};
