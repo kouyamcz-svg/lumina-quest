@@ -272,17 +272,31 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
 
-// ===== 巡回ボスの絵は1〜4章と非重複 =====
+// ===== 巡回ボス＝各章ボスの復活（絵と名前の整合） =====
 {
-  const chArts=new Set(['yumebanken','sandlord','dreamtwin','snowbeast','dreamlord','golem','sisA','regretshadow']);
-  const assets3=require('fs').readFileSync('assets.js','utf8');
-  [['shardhound','gargoyle'],['shardgolem','nushi'],['shardsis','kokuryu'],['shardeater','darga']]
-    .forEach(([k,art])=>{
-      const b=C.MIDBOSS[k];
-      T('巡回art:'+k+'='+art, b.art===art);
-      T('巡回art非重複:'+k, !chArts.has(b.art));
-      T('巡回art素材:'+art, assets3.includes('  '+art+':{w:'));
-    });
+  const M=[['shardhound','yumebanken','よみがえりし ゆめのばんけん'],
+           ['shardgolem','golem','よみがえりし ねむりぬし'],
+           ['shardsis','sisA','よみがえりし あねのかげ'],
+           ['shardeater','regretshadow','よみがえりし こうかいのかげ']];
+  M.forEach(([k,art,nm])=>{
+    const b=C.MIDBOSS[k];
+    T('復活art:'+k, b.art===art);
+    T('復活名:'+k, b.name===nm);
+    // 原典より強化されている（HP比較）
+  });
+  T('強化:ばんけん', C.MIDBOSS.shardhound.hp > C.MIDBOSS.yumebanken.hp);
+  T('強化:ねむりぬし', C.MIDBOSS.shardgolem.hp > C.MIDBOSS.sandsleeper.hp);
+  T('強化:あねのかげ', C.MIDBOSS.shardsis.hp > C.MIDBOSS.shadowsis_a.hp);
+  T('強化:こうかいのかげ', C.MIDBOSS.shardeater.hp > C.MIDBOSS.regretshadow.hp);
+  // 台詞46字（復活イベント含む5章全体を再走査）
+  const chSrc2=require('fs').readFileSync('src/chapters.js','utf8');
+  const s5=chSrc2.slice(chSrc2.indexOf('  5: {'), chSrc2.indexOf('// ============ 終章'));
+  let over=[];
+  for(const m of s5.matchAll(/'([^'\\]*)'/g)){
+    if(m[1].length>46 && /[ぁ-んァ-ン]/.test(m[1])) over.push(m[1]);
+  }
+  T('5章台詞46字以内(超過'+over.length+')', over.length===0);
+  if(over.length) over.slice(0,3).forEach(x=>console.log('  ',x.length,x));
 }
 
 // ===== townState残留の浄化 =====
