@@ -1289,6 +1289,34 @@ const HOME = {
   1:{map:'versa_town', x:13, y:9, name:'ヴェルサリアの きょうかい'},
   5:{map:'toros',      x:7,  y:6, name:'トロスむらの きょうかい'},
 };
+// ★ぜんめつの もどりさき：しんだ ばしょに いちばん ちかい まち・むら・しろ。
+//   ダンジョンなら その ちほうの まち、ワールドなら きょりが いちばん ちかい ところ。
+function deathPoint(){
+  const cd = chData();
+  const spots = (cd && cd.returnSpots || []).filter(s=>MAPS[s.map] && walkable(s.map,s.x,s.y));
+  if(!spots.length) return homePoint();
+  const named = (s)=>({map:s.map, x:s.x, y:s.y, name:WORLD.mapName(s.map)});
+  const regionHits = (P.map !== 'world')
+    ? spots.filter(s=>(WORLD.MAP_IDS[s.map]||{}).region === (WORLD.MAP_IDS[P.map]||{}).region)
+    : [];
+  if(regionHits.length===1) return named(regionHits[0]);
+  // ワールド（または ちほうに まちが ない）：ワールドの いりぐち ざひょうで きょり ひかく
+  const wxy = {};
+  const ww = MAPS.world.warpsXY || {};
+  Object.keys(ww).forEach(k=>{
+    const w=ww[k];
+    if(!wxy[w.to]){ const [x,y]=k.split(',').map(Number); wxy[w.to]={x,y}; }
+  });
+  const px = (P.map==='world') ? P.x : ((wxy[P.map]||{}).x ?? P.x);
+  const py = (P.map==='world') ? P.y : ((wxy[P.map]||{}).y ?? P.y);
+  let best=null, bd=1e9;
+  (regionHits.length ? regionHits : spots).forEach(s=>{
+    const c = wxy[s.map]; if(!c) return;
+    const d = Math.abs(c.x-px)+Math.abs(c.y-py);
+    if(d<bd){ bd=d; best=s; }
+  });
+  return best ? named(best) : homePoint();
+}
 function homePoint(){
   // ★章データの home を さいゆうせん（章を ふやしても ここを さわらない）。
   //   これを わすれると、第2章で ぜんめつしても 第1章の まちへ もどされる。
@@ -2697,7 +2725,7 @@ function defeat(){
     G.busy=true;
     if(A.bgmStop) A.bgmStop();
     V.battleLeave(()=>{
-      const h=homePoint();
+      const h=deathPoint();
       moorShipFor(h.map);                      // ★ふねも いえの はまへ
       P.map=h.map; P.x=h.x; P.y=h.y; G.trail=[[h.x,h.y],[h.x,h.y]];
       V.buildMap(h.map); V.setActors(); U.label(WORLD.mapName(h.map)); U.hud();
@@ -3250,7 +3278,7 @@ return {
   tileAt, isBlocked, walkable, warpAt,
   // 行動
   stepField, interact, facing, doWarp, startBattle, beginRound, saveGame, loadGame,
-  runTalkEvent, questOnTalk, questList, triggerChapterEnd, offerNextChapter, homePoint,
+  runTalkEvent, questOnTalk, questList, deathPoint, triggerChapterEnd, offerNextChapter, homePoint,
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
