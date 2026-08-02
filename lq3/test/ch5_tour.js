@@ -287,6 +287,13 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   T('強化:ばんけん', C.MIDBOSS.shardhound.hp > C.MIDBOSS.yumebanken.hp);
   T('強化:ねむりぬし', C.MIDBOSS.shardgolem.hp > C.MIDBOSS.sandsleeper.hp);
   T('強化:あねのかげ', C.MIDBOSS.shardsis.hp > C.MIDBOSS.shadowsis_a.hp);
+  T('姉妹ペア:定義', !!C.MIDBOSS.shardsis_b && C.MIDBOSS.shardsis_b.art==='sisB');
+  T('姉妹ペア:強化', C.MIDBOSS.shardsis_b.hp > C.MIDBOSS.shadowsis_b.hp);
+  {
+    const CH2=(typeof CHAPTERS_DATA!=='undefined')?null:null;
+    const cd5=vm.runInContext('CHAPTERS_DATA',ctx).get(5);
+    T('姉妹ペア:章設定', cd5.bosses.minamo_dgn2.pair==='shardsis_b');
+  }
   T('強化:こうかいのかげ', C.MIDBOSS.shardeater.hp > C.MIDBOSS.regretshadow.hp);
   // 台詞46字（復活イベント含む5章全体を再走査）
   const chSrc2=require('fs').readFileSync('src/chapters.js','utf8');
