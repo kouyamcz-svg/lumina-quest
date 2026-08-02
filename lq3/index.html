@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T03:42:47", "assets_sha": "4cf5db67", "lines": {"world": 176, "npc": 777, "chapters": 1210, "bgm": 949, "view2d": 1428, "core": 3325, "view": 1302, "ui": 800}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T03:58:20", "assets_sha": "4cf5db67", "lines": {"world": 176, "npc": 777, "chapters": 1222, "bgm": 949, "view2d": 1428, "core": 3327, "view": 1302, "ui": 800}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -1975,6 +1975,18 @@ const CH = {
              '',
              '＊ リオンが なかまに くわわった！ ＊',
              '＊ こおりの どうくつの さいしんぶへ ＊'] },
+
+      // ---- きた かたづけの あと：ひがしへの みちびき ----
+      { npc:'きしだんちょう', cond:['ch5_shard1'], unless:'ch5_northThanks',
+        set:['ch5_northThanks'],
+        msg:['だんちょう「こおりの けはいが きえた。',
+             'おぬしらの てがらだ」',
+             'リオン「だんちょう。おれは ひがしへ いきます」',
+             '「ザールにも おなじ かけらが あると きいた」',
+             'だんちょう「……いけ。きたは わしらが まもる」',
+             'だんちょう「ひかりのこ、リオンを たのんだぞ」',
+             '',
+             '＊ ふねで ひがしの ザールへ むかおう ＊'] },
 
       // ---- ひがし：バルド ごうりゅう ----
       { npc:'しょうかいちょう', cond:['ch5_shard1'], unless:'ch5_east',
@@ -5671,7 +5683,9 @@ const MAPS = {
     "#====eeeee===rr====eeeee===#",
     "#============rr============#",
     "#############GG#############"
-  ], warps:{}, warpsXY:{'13,19':{to:'world',x:48,y:9},'14,19':{to:'world',x:48,y:9}}},
+  ], warps:{}, warpsXY:{
+      '13,2':{to:'versa_cast1', x:10, y:14},
+      '14,2':{to:'versa_cast1', x:11, y:14},'13,19':{to:'world',x:48,y:9},'14,19':{to:'world',x:48,y:9}}},
   versa_town2:{name:'くすしの むら ミルカ',theme:'snow',enc:false,tiles:[
     "######################",
     "#====================#",
