@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T14:05:40", "assets_sha": "3007d9b2", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 956, "view2d": 1437, "core": 3435, "view": 1361, "ui": 813}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T14:11:13", "assets_sha": "3007d9b2", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 956, "view2d": 1437, "core": 3435, "view": 1365, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -9289,6 +9289,7 @@ function loop(now){
   else if(V2 && V2.mapOn){
     // ★3Dシーンちゅうの「ちず」：2Dキャンバスを かりて ちずだけ えがく。
     //   まえは 3Dでは なにも えがかれず、がめんが こおって みえた。
+    if(canvas2d && (canvas2d.width < 4 || canvas2d.height < 4) && V2.resize) V2.resize();
     const g = canvas2d && canvas2d.getContext('2d');
     if(g){
       g.save(); g.setTransform(1,0,0,1,0,0);
@@ -9506,9 +9507,12 @@ window.LQ3View = {
   showMap(id){
     if(!(V2&&V2.showMap)) return;
     if(!is2D && mode!=='battle'){
-      V2.resize();
+      // ★じゅんばん だいじ：ひょうじ してから おおきさを はかる。
+      //   かくれたまま resize すると 1x1 の キャンバスに なり、
+      //   1ドットが がめん いっぱいに のびて みどり いっしょくに なった（じっさいに おきた）。
       if(canvas2d) canvas2d.style.display='block';
       if(canvas)   canvas.style.visibility='hidden';
+      V2.resize();
     }
     V2.showMap(id);
   },
