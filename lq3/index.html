@@ -127,7 +127,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T23:50:17", "assets_sha": "19863dc9", "lines": {"world": 176, "npc": 787, "chapters": 1228, "bgm": 956, "view2d": 1458, "core": 3442, "view": 1389, "ui": 813}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T23:59:13", "assets_sha": "19863dc9", "lines": {"world": 176, "npc": 787, "chapters": 1228, "bgm": 956, "view2d": 1461, "core": 3442, "view": 1389, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -4252,7 +4252,10 @@ function drawBattle(dt, time){
     const sway = Math.sin(time*0.85+f.ph)*(sc*1.5);
     // はいけいと おなじ せいすうばい ＝ ドットの あらさが そろう
     // ★てきていぎの scale（ボスの おおきさ ばいりつ）を はんえい
-    const esc = Math.max(1, Math.round(sc*0.62*zoom*((f.enemy && f.enemy.scale)||1)));
+    // ★zoom（ヒットえんしゅつ）は せいすうまるめの そとで かける。
+    //   なかに いれると 2ばい→3ばい の だんさに なり、こうげきの たびに
+    //   てきが +50% きょだいか して みえた（じっさいに おきた）。
+    const esc = Math.max(1, Math.round(sc*0.62*((f.enemy && f.enemy.scale)||1)));
     let hh, ww;
     if(f.art){ hh = f.art.h*esc; ww = f.art.w*esc; }
     else { hh = 48*esc; ww = 48*esc; }
@@ -4266,7 +4269,7 @@ function drawBattle(dt, time){
     if(f.art){
       const img = getImg(f.art.src || f.art.front);
       if(img.complete && img.naturalWidth){
-        const dh = Math.round(hh*breathe), dw = Math.round(ww/breathe);
+        const dh = Math.round(hh*breathe*zoom), dw = Math.round(ww/breathe*zoom);
         cx.drawImage(img, Math.round(cx0-dw/2), Math.round(cy0-dh), dw, dh);
       }
     }else{
