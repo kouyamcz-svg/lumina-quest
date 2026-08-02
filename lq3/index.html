@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T11:45:24", "assets_sha": "3007d9b2", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 949, "view2d": 1436, "core": 3435, "view": 1335, "ui": 813}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T11:49:26", "assets_sha": "3007d9b2", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 956, "view2d": 1436, "core": 3435, "view": 1335, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -3233,7 +3233,14 @@ function playBattleFile(track){
   if(el.readyState > 0){
     startPlay();
   }else{
-    const once = ()=>{ el.removeEventListener('loadeddata', once); if(batWant && batTrack===track) startPlay(); };
+    // ★よみこみまち：さいせいの こころみは 1かいだけ。
+    //   まえは loadeddata でも startPlay を よびなおして いたため、
+    //   よみこみが おわった しゅんかんに あたまへ まきもどり、
+    //   せんとうに はいった ときに きょくが つっかえて きこえた。
+    const once = ()=>{
+      el.removeEventListener('loadeddata', once);
+      if(batWant && batTrack===track && el.paused) startPlay();  // ならって いなければ だけ
+    };
     el.addEventListener('loadeddata', once);
     startPlay();
   }
