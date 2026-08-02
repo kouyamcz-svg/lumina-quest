@@ -127,7 +127,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T23:02:33", "assets_sha": "3ba4d582", "lines": {"world": 176, "npc": 787, "chapters": 1228, "bgm": 956, "view2d": 1438, "core": 3440, "view": 1371, "ui": 813}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T23:10:13", "assets_sha": "19863dc9", "lines": {"world": 176, "npc": 787, "chapters": 1228, "bgm": 956, "view2d": 1458, "core": 3442, "view": 1389, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -148,7 +148,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=3ba4d582"></script>
+<script src="assets.js?v=19863dc9"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -2054,7 +2054,7 @@ const CH = {
 
       // ---- たいりく ふじょう ----
       { npc:'ゼフの でし', cond:['ch5_shard4'], unless:'ch5_worldTour',
-        set:['ch5_worldTour'],
+        set:['ch5_worldTour'], img:'scene_dream_isle',
         msg:['じめんが、ふかく なりひびいた。',
              'でし「そとを！ うみを みて ください！」',
              '',
@@ -4542,6 +4542,7 @@ function draw(dt, time, actors){
   drawTint();
   if(fadeV>0){ cx.fillStyle='rgba(0,0,0,'+fadeV+')'; cx.fillRect(0,0,W,H); }
   drawDream();
+  if(sceneKey) drawSceneOverlay(time);
   if(mapOn) drawMapOverlay(time);
 }
 let NPCREF = null;
@@ -4571,6 +4572,24 @@ function drawNPC(dx,dy,ts,x,y){
 }
 let MONREF = null;
 function setMon(m){ MONREF = m; }
+// ---------------- イベントの いちまいえ ----------------
+let sceneKey = null;
+function showScene(k){ sceneKey = k; }
+function hideScene(){ sceneKey = null; }
+function drawSceneOverlay(time){
+  const a = MONREF && MONREF[sceneKey];
+  if(!a) return;
+  cx.fillStyle='#05060c'; cx.fillRect(0,0,W,H);
+  const img = getImg(a.src);
+  if(!(img.complete && img.naturalWidth)) return;
+  const sc = Math.max(1, Math.floor(Math.min(W/a.w, (H*0.92)/a.h)));
+  const dw=a.w*sc, dh=a.h*sc;
+  const ox=Math.round((W-dw)/2), oy=Math.round((H*0.92-dh)/2);
+  cx.imageSmoothingEnabled=false;
+  cx.drawImage(img, ox, oy, dw, dh);
+  cx.strokeStyle='rgba(255,255,255,0.5)'; cx.lineWidth=2;
+  cx.strokeRect(ox-2, oy-2, dw+4, dh+4);
+}
 function drawBoss(dx,dy,ts){
   const s=ts;
   cx.fillStyle='rgba(40,10,60,0.35)';
@@ -4736,6 +4755,7 @@ function drawDream(){
 return {init, resize, buildMap, draw, noteStep, setFade, setDream,
   debugSnow(){ return !!flakes; }, setMon, setNpcData,
         showMap, hideMap, drawMapOverlay, get mapOn(){return mapOn;},
+        showScene, hideScene, drawSceneOverlay, get sceneOn(){return !!sceneKey;},
         battleEnter:battleEnter2D, battleFx:battleFx2D, battleLeave:battleLeave2D, drawBattle,
         get TS(){return TS;}};
 })();
@@ -6563,7 +6583,9 @@ function runTalkEvent(npcName){
   Object.keys(e.quest || {}).forEach(q => questAdvance(q, e.quest[q]));
 
   const lines = (e.msg || []).slice();
+  if(e.img && V.showScene) V.showScene(e.img);   // ★いちまいえ を せなかに ひょうじ
   U.msg(lines, () => {
+    if(e.img && V.hideScene) V.hideScene();
     U.hud();
     // 章の おわりに たっしたか
     if(cd.ending && cd.ending.trigger && G.flags[cd.ending.trigger] && !G.flags[(cd.ending.set||[])[0]]){
@@ -9306,7 +9328,7 @@ function loop(now){
     else updateBattle(dt,time);
   }
   else if(is2D) update2D(dt,time);
-  else if(V2 && V2.mapOn){
+  else if(V2 && (V2.mapOn || V2.sceneOn)){
     // ★3Dシーンちゅうの「ちず」：2Dキャンバスを かりて ちずだけ えがく。
     //   まえは 3Dでは なにも えがかれず、がめんが こおって みえた。
     if(canvas2d && (canvas2d.width < 4 || canvas2d.height < 4) && V2.resize) V2.resize();
@@ -9316,7 +9338,8 @@ function loop(now){
       g.fillStyle='#000'; g.fillRect(0,0,canvas2d.width,canvas2d.height);
       g.restore();
     }
-    V2.drawMapOverlay(time);
+    if(V2.sceneOn) V2.drawSceneOverlay(time);
+    else V2.drawMapOverlay(time);
   }
   else updateField(dt,time);
   requestAnimationFrame(loop);
@@ -9524,6 +9547,23 @@ function spawnBurst(target){
 
 window.LQ3View = {
   init, loop, buildMap, setActors, fx, battleEnter, battleLeave, refresh, chest, fade, chapterCard,
+  showScene(k){
+    if(!(V2&&V2.showScene)) return;
+    if(!is2D && mode!=='battle'){
+      if(canvas2d) canvas2d.style.display='block';
+      if(canvas)   canvas.style.visibility='hidden';
+      V2.resize();
+    }
+    V2.showScene(k);
+  },
+  hideScene(){
+    if(!(V2&&V2.hideScene)) return;
+    V2.hideScene();
+    if(!is2D && mode!=='battle'){
+      if(canvas2d) canvas2d.style.display='none';
+      if(canvas)   canvas.style.visibility='visible';
+    }
+  },
   showMap(id){
     if(!(V2&&V2.showMap)) return;
     if(!is2D && mode!=='battle'){
