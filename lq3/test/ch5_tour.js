@@ -272,6 +272,37 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
 
+// ===== ヴェルサ城の到達性と北後の導線会話 =====
+{
+  C.freshState(); C.G.chapters={};
+  C.switchChapter(5);
+  function bfs2(sm,sx,sy,gm,gx,gy){
+    const seen=new Set([sm+':'+sx+','+sy]); const q=[[sm,sx,sy]]; let st=0;
+    while(q.length && st++<300000){
+      const [m,x,y]=q.shift();
+      if(m===gm && Math.abs(x-gx)+Math.abs(y-gy)<=1) return true;
+      for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+        const nx=x+dx,ny=y+dy,mp=C.MAPS[m]; if(!mp) continue;
+        const w=(mp.warpsXY||{})[nx+','+ny];
+        if(w && C.MAPS[w.to]){ const k=w.to+':'+w.x+','+w.y;
+          if(!seen.has(k)){ seen.add(k); q.push([w.to,w.x,w.y]); } continue; }
+        if(!C.walkable(m,nx,ny)) continue;
+        const k=m+':'+nx+','+ny;
+        if(!seen.has(k)){ seen.add(k); q.push([m,nx,ny]); }
+      }
+    }
+    return false;
+  }
+  T('城:町→王の間', bfs2('versa_town',13,18,'versa_cast1',10,2));
+  T('城:王の間→町(復路)', bfs2('versa_cast1',10,14,'versa_town',13,18));
+  // 導線会話
+  C.G.flags.ch5_shard1=true;
+  C.P.map='versa_town';
+  T('北後:団長会話', C.runTalkEvent('きしだんちょう')===true);
+  T('northThanks', !!C.G.flags.ch5_northThanks);
+  T('会話は一度きり', C.runTalkEvent('きしだんちょう')!==true || !!C.G.flags.ch5_east===false);
+}
+
 // ===== ソラの呪文（回復系＋勇者独自） =====
 {
   const m50=C.mkMember('sora',50);
