@@ -892,7 +892,14 @@ function playBattleFile(track){
   if(el.readyState > 0){
     startPlay();
   }else{
-    const once = ()=>{ el.removeEventListener('loadeddata', once); if(batWant && batTrack===track) startPlay(); };
+    // ★よみこみまち：さいせいの こころみは 1かいだけ。
+    //   まえは loadeddata でも startPlay を よびなおして いたため、
+    //   よみこみが おわった しゅんかんに あたまへ まきもどり、
+    //   せんとうに はいった ときに きょくが つっかえて きこえた。
+    const once = ()=>{
+      el.removeEventListener('loadeddata', once);
+      if(batWant && batTrack===track && el.paused) startPlay();  // ならって いなければ だけ
+    };
     el.addEventListener('loadeddata', once);
     startPlay();
   }
