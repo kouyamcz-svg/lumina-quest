@@ -1120,6 +1120,7 @@ function loop(now){
   else if(V2 && V2.mapOn){
     // ★3Dシーンちゅうの「ちず」：2Dキャンバスを かりて ちずだけ えがく。
     //   まえは 3Dでは なにも えがかれず、がめんが こおって みえた。
+    if(canvas2d && (canvas2d.width < 4 || canvas2d.height < 4) && V2.resize) V2.resize();
     const g = canvas2d && canvas2d.getContext('2d');
     if(g){
       g.save(); g.setTransform(1,0,0,1,0,0);
@@ -1337,9 +1338,12 @@ window.LQ3View = {
   showMap(id){
     if(!(V2&&V2.showMap)) return;
     if(!is2D && mode!=='battle'){
-      V2.resize();
+      // ★じゅんばん だいじ：ひょうじ してから おおきさを はかる。
+      //   かくれたまま resize すると 1x1 の キャンバスに なり、
+      //   1ドットが がめん いっぱいに のびて みどり いっしょくに なった（じっさいに おきた）。
       if(canvas2d) canvas2d.style.display='block';
       if(canvas)   canvas.style.visibility='hidden';
+      V2.resize();
     }
     V2.showMap(id);
   },
