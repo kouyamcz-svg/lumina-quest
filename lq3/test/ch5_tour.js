@@ -272,6 +272,23 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
 
+// ===== 全滅復帰：直近の街 =====
+{
+  C.freshState(); C.G.chapters={};
+  C.switchChapter(5);
+  const ex=[['versa_dgn2',8,8,'versa_town'],['zaal_dgn1',5,5,'zaal_town'],
+            ['minamo_dgn2',5,5,'minamo_port'],['elde_top',5,5,'elde_town'],
+            ['cave3',5,5,'toros'],['old_road',7,5,'toros'],
+            ['world',10,28,'elde_town'],['world',80,30,'zaal_town'],['world',48,44,'toros']];
+  ex.forEach(([m,x,y,want])=>{
+    C.P.map=m; C.P.x=x; C.P.y=y;
+    T('復帰:'+m+'→'+want, C.deathPoint().map===want);
+  });
+  C.freshState(); C.G.chapters={}; C.switchChapter(6);
+  C.P.map='dream_cast3'; C.P.x=8; C.P.y=5;
+  T('復帰:ch6城→いおり', C.deathPoint().map==='dream_camp');
+}
+
 // ===== 5章で1章クエストが起動しない =====
 {
   C.freshState(); C.G.chapters={};
