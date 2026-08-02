@@ -19,7 +19,6 @@ const eKeys=new Set(C.ENEMIES.map(e=>e.key));
 ['yumewisp','sleepknight','voidgolem','nightpriest','echoshadow','dreamdragon']
   .forEach(k=>T('敵:'+k, eKeys.has(k)));
 ['dreameater_a','dreameater_b','dreameater_c'].forEach(k=>T('ボス:'+k, !!C.MIDBOSS[k]));
-T('連戦b→c', /nextBoss:\s*'dreameater_c'/.test(chSrc));
 const assets=fs.readFileSync('assets.js','utf8');
 ['regretshadow','dreamform'].forEach(a=>T('ボスart:'+a, assets.includes(a+':')));
 // byMapの敵キー実在
@@ -73,6 +72,7 @@ T('でしヒント', C.runTalkEvent('いおりの でし')===true);
 T('連戦定義', (()=>{const cd=C.CHAPTERS_DATA ? null : null; return true;})());
 const rw=/nextBoss:\s*'dreameater_b'/.test(chSrc);
 T('連戦: a→b', rw);
+T('連戦: b→c', /nextBoss:\s*'dreameater_c'/.test(chSrc));
 T('連戦エンジン', fs.readFileSync('src/core.js','utf8').includes('nxRw.nextBoss'));
 // 討伐後
 C.G.flags.ch6_beatEater=true;
