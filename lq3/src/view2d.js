@@ -1006,6 +1006,7 @@ const MAPCOL = {
   'K':'#b4bcc9','F':'#3d68ac','G':'#c8a86c','D':'#7d5a36','Z':'#dcd0f0',
   'C':'#d9a832','n':'#e8e8f0','B':'#8a2a3a','<':'#b4bcc9','>':'#b4bcc9',
   'A':'#e8e0d0','V':'#e0a040','X':'#3a3a44','Q':'#8a8f9a',
+  'T':'#c85a20',
 };
 function showMap(id){ mapOn = true; mapId = id; }
 function hideMap(){ mapOn = false; }
