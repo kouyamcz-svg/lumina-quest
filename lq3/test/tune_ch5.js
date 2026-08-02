@@ -29,8 +29,10 @@ function setup(comp, lv){
   C.P.herbs=8; C.P.waters=2;
   Object.assign(C.G.flags,{ch5_north:true,ch5_east:true,ch5_south:true,ch5_west:true});
 }
+const BOSS_MAP={shardhound:'versa_dgn2',shardgolem:'zaal_dgn2',shardsis:'minamo_dgn2',shardeater:'elde_top'};
 function fight(bossKey, comp, lv){
   setup(comp, lv);
+  if(BOSS_MAP[bossKey]) C.P.map=BOSS_MAP[bossKey];   // ★pairボスはマップ判定で2体になる
   C.NullUI.msgLog.length=0;
   C.startBattle(bossKey);
   let guard=0;
