@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T14:11:13", "assets_sha": "3007d9b2", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 956, "view2d": 1437, "core": 3435, "view": 1365, "ui": 813}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T14:19:42", "assets_sha": "3007d9b2", "lines": {"world": 176, "npc": 787, "chapters": 1223, "bgm": 956, "view2d": 1437, "core": 3435, "view": 1371, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -2189,10 +2189,11 @@ const CH = {
                 'せかいじゅうの ゆめを のみこみ、ふとった かげ。',
                 '',
                 '＜……ゆめは うまい。ねむりは あまい＞',
+                '＜わが なは ムゲンロス。ゆめの まおう＞',
                 '＜おまえたちも、ゆめに なれ＞',
                 '',
                 'ソラ「みんなの あさを、かえして もらう！」',
-                'ゆめくいが たちふさがった！'],
+                'まおう ムゲンロスが たちふさがった！'],
         after: ['ぎょくざの まには、しずけさだけが のこった。'],
       },
     },
@@ -2267,7 +2268,7 @@ const CH = {
              'しろく かがやく きょだいな すがたが あらわれた！',
              '',
              '＜ゆめは おわらない。おわらせない＞',
-             'ゆめくいが しんの すがたを あらわした！'],
+             'ムゲンロスが しんの すがたを あらわした！'],
       },
       dreameater_b: {
         set:['ch6_beatEater'],
@@ -5034,14 +5035,14 @@ const MIDBOSS = {
   dknight:{key:'dknight', name:'デスナイト', hp:74, atk:14, def:8, agi:6, acts:1,
     exp:100, gold:150, art:'dknight',
     skill:{p:0.28, mul:1.38, name:'やみの ひとふり'}},
-  dreameater_a:{key:'dreameater_a', name:'ゆめくい', hp:1460, atk:51, def:28, agi:20, acts:2,
+  dreameater_a:{key:'dreameater_a', name:'まおう ムゲンロス', hp:1460, atk:51, def:28, agi:20, acts:2,
     exp:2400, gold:1000, art:'regretshadow',
     skill:{p:0.32, mul:1.36, name:'ゆめを くらう'},
     aoe:{p:0.24, lo:25, hi:34, name:'あんこくの なみ'},
     inflict:{type:'sleep', p:0.22}, drain:0.15,
     charge:{p:0.16, mul:1.2, aoe:true, tell:'あたりの ゆめを すいこんで いる…', name:'ゆめのみの あぎと'},
-    enrage:{at:0.40, atk:1.10, name:'ゆめくいが みぶるいした！'}},
-  dreameater_b:{key:'dreameater_b', name:'ゆめくい・しんのすがた', hp:1690, atk:58, def:30, agi:22, acts:2,
+    enrage:{at:0.40, atk:1.10, name:'ムゲンロスが みぶるいした！'}},
+  dreameater_b:{key:'dreameater_b', name:'ムゲンロス・しんのすがた', hp:1690, atk:58, def:30, agi:22, acts:2,
     exp:3200, gold:1400, art:'dreamform',
     skill:{p:0.34, mul:1.4, name:'おわらない あくむ'},
     aoe:{p:0.27, lo:30, hi:40, name:'むの こだま'},
@@ -8997,8 +8998,14 @@ function buildMap(name){
       if(got){ lid.rotation.x=-0.9; lid.position.y=topY+0.5; }
     }
     if(ch==='B'){                    // ボス（さいおくの けはい）
-      if(!C.G.flags.desgran){
-        const s=billboard('desgran1',2.4);
+      // ★まえは desgran1（LQ2の まおう）の えを かりて いたため、
+      //   せんとうの すがた（regretshadow）と ちがって いた。
+      //   しょうデータから ボスを ひき、せんとうと おなじ えを つかう。
+      const bi = C.bossInfoAt ? C.bossInfoAt(name) : null;
+      const done = bi && bi.clearedFlag && C.G.flags[bi.clearedFlag];
+      if(bi && !done){
+        const bd = (C.MIDBOSS && C.MIDBOSS[bi.key]) || null;
+        const s=billboard((bd && bd.art) || bi.key, 2.4);
         s.position.set(x,topY+0.75,y); scene.add(s);
         animObjs.push({mesh:s,bill:true,ph:1});
         const li=new THREE.PointLight(0x9a6ad0,1.2,4);
