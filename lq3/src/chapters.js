@@ -933,7 +933,7 @@ const CH = {
 
       // ---- たいりく ふじょう ----
       { npc:'ゼフの でし', cond:['ch5_shard4'], unless:'ch5_worldTour',
-        set:['ch5_worldTour'],
+        set:['ch5_worldTour'], img:'scene_dream_isle',
         msg:['じめんが、ふかく なりひびいた。',
              'でし「そとを！ うみを みて ください！」',
              '',
