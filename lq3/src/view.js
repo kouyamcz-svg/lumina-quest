@@ -735,7 +735,9 @@ function buildMap(name){
         continue;
       }
       if(ch==='Z'){                                  // ねむる おうじょ（ベッドごと 1まいえ）
-        const key = CHR.princessBed ? 'princessBed' : 'princess';
+        // ★5章で きたの かけらを とった あとは、めざめて たっている
+        const awake = C.G && (C.G.chapter||1)===5 && C.G.flags && C.G.flags.ch5_shard1;
+        const key = awake ? 'princess' : (CHR.princessBed ? 'princessBed' : 'princess');
         const d = CHR[key];
         if(d){
           const pm = chrBillboard(key, 1.30);
