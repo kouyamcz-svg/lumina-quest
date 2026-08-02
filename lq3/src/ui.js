@@ -241,7 +241,13 @@ function menuCancel(){
 function menuVisible(){ return !!menuState; }
 
 // ---------------- HUD ----------------
+function hudVisible(){
+  // ★ステータスは メニューを ひらいた とき と せんとうちゅう だけ だす
+  //   （つねに だすと、へやの うえの ボスと かさなって みえなかった）
+  return menuVisible() || !!(C.G && C.G.battle);
+}
 function hud(){
+  hudEl.style.display = hudVisible() ? '' : 'none';
   hudEl.innerHTML = C.party.map(m=>
     '<div class="hm'+(m.hp<=0?' dead':'')+'">'+
     '<div class="hn">'+m.name+'</div>'+
@@ -256,6 +262,13 @@ function hud(){
 function label(t){ labelEl.textContent=t; }
 
 const UI = {msg:msg2, menu, hud, label, openTrade};
+// ★メニューの ひらけしめで ステータスの ひょうじも きりかえる
+const _menuOrig = menu;
+menu = function(items, title, cb){
+  _menuOrig(items, title, (k)=>{ cb(k); hud(); });
+  hud();
+};
+UI.menu = menu;
 
 // ---------------- 入力 ----------------
 function press(k){
