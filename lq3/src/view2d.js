@@ -545,7 +545,7 @@ function buildAtlas(){
   });
 
   // ---------- ワールドの ちてん ----------
-  function marker(draw){ return tile((g,s)=>{ g.drawImage(atlas.plain[0],0,0); draw(g,s); }); }
+  function marker(draw){ return tile((g,s)=>{ draw(g,s); }); }   // ★はいけいは とうか。ゆかは やきこみの ちけいを つかう
   // しろ：とう2つ＋てんしゅ、ぎざぎざの きょうへき、くろい もん。ひかりは みぎうえ。
   atlas.mCastle = marker((g,s)=>{
     const wallL=P16.st0, wallM=P16.st2, wallH=P16.st3, roofD=P16.roof0, roofM=P16.roof1, roofH=P16.roof2;
@@ -1159,6 +1159,7 @@ function draw(dt, time, actors){
   }
   // ③ ちけい・たてもの（うしろから じゅんに）
   const _bossQ = [];
+  const _mkQ = [];   // ★まちの アイコン（おおきく めだたせる）
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
     const ch = rows[y][x];
     if(ch==='C' && C.G.gotTreasure[curMap+':'+x+','+y]){
@@ -1181,6 +1182,9 @@ function draw(dt, time, actors){
       cx.drawImage(atlas.boat, ox+x*ts, oy+y*ts, ts, ts);
     }
     else if(theme==='world' && '.=:_~wr'.includes(ch)) { /* ゆかのみ */ }
+    else if(theme==='world' && (ch==='A'||ch==='V')){
+      _mkQ.push([ch, ox+x*ts, oy+y*ts]);
+    }
     else {
       let art = tileArt(ch, theme);
       if(Array.isArray(art)) art = hashPick(x,y,art);
@@ -1196,6 +1200,13 @@ function draw(dt, time, actors){
       if(!done) _bossQ.push([ox+x*ts, oy+y*ts, ts]);
     }
   }
+  // ★まち・むらは 1.45ばいで えがく（ちいさくて みつけにくかった）
+  _mkQ.forEach(([ch,mx,my])=>{
+    const art = ch==='A' ? atlas.mCastle : atlas.mVillage;
+    const mw = ts*1.45, mh = ts*1.45;
+    cx.drawImage(art, Math.round(mx + ts/2 - mw/2), Math.round(my + ts - mh), mw, mh);
+  });
+  _mkQ.length=0;
   _bossQ.forEach(([bx,by,bts])=>drawBoss(bx,by,bts));
   _bossQ.length=0;
   // ★もやって ある ふね（ワールドのみ）
