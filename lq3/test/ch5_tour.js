@@ -280,6 +280,18 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   const src=require('fs').readFileSync('src/core.js','utf8');
   T('Z:章ゲートあり', src.includes("if((G.chapter||1)!==1){") && src.indexOf("if((G.chapter||1)!==1){") < src.indexOf("if(F.ch1_cleared){"));
   T('Z:5章覚醒分岐', src.includes('こおりの こえが きえたわ'));
+  // 立ち姿分岐と王・じいの目覚め台詞
+  const vsrc=require('fs').readFileSync('src/view.js','utf8');
+  T('Z:立ち姿分岐', vsrc.includes("awake ? 'princess'"));
+  const NP2=vm.runInContext('NPCDATA',ctx);
+  C.G.flags.ch5_shard1=true;
+  const kk=NP2.pickLines(NP2.npcAt('versa_cast1',10,2),{townState:C.G.townState,flags:C.G.flags,chapter:5}).join('');
+  T('王:目覚め台詞', kk.includes('めを さました'));
+  const jj=NP2.pickLines(NP2.npcAt('versa_cast1',8,7),{townState:C.G.townState,flags:C.G.flags,chapter:5}).join('');
+  T('じい:目覚め台詞', jj.includes('おめざめ'));
+  delete C.G.flags.ch5_shard1;
+  const kk2=NP2.pickLines(NP2.npcAt('versa_cast1',10,2),{townState:C.G.townState,flags:C.G.flags,chapter:5}).join('');
+  T('王:目覚め前は依頼台詞', kk2.includes('もとを たってくれ'));
 }
 
 // ===== ヴェルサ城の到達性と北後の導線会話 =====
