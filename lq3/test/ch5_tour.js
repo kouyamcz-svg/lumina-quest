@@ -272,6 +272,27 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
 
+// ===== 5章で1章クエストが起動しない =====
+{
+  C.freshState(); C.G.chapters={};
+  C.switchChapter(5);
+  C.P.map='mirka';
+  C.questOnTalk('くすし');
+  T('1章フラグ汚染なし', !C.G.flags.ch1_heardTheft);
+  T('1章クエスト起動なし', !C.G.quests['ch1_q3_retrieve']);
+  // 一覧の章フィルタ
+  C.G.quests['ch1_q3_retrieve']='active';   // 汚染セーブを模擬
+  C.G.quests['ch5_q0_road']='active';
+  const ids=C.questList().map(q=>q.id);
+  T('一覧に1章クエストなし', !ids.includes('ch1_q3_retrieve'));
+  T('一覧に5章クエストあり', ids.includes('ch5_q0_road'));
+  // 1章は従来どおり起動する
+  C.freshState(); C.G.chapters={}; C.switchChapter(1);
+  C.P.map='mirka';
+  C.questOnTalk('くすし');
+  T('1章では従来どおり', !!C.G.flags.ch1_heardTheft);
+}
+
 // ===== 5章の町NPC台詞（別章主人公の名で呼ばない） =====
 {
   C.freshState(); C.G.chapters={};
