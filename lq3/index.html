@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T11:40:19", "assets_sha": "3007d9b2", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 949, "view2d": 1436, "core": 3435, "view": 1335, "ui": 813}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T11:45:24", "assets_sha": "3007d9b2", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 949, "view2d": 1436, "core": 3435, "view": 1335, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -5180,7 +5180,7 @@ const MAPS = {
       '7,10':{to:'world', x:49, y:41}
     }},
   // ============ 終章：ゆめのたいりく（3D） ============
-  dream_field:{name:'ゆめのたいりく', theme:'dream', enc:true, tiles:[
+  dream_field:{name:'ゆめのたいりく', theme:'dream', enc:true, encRate:0.055, encGrace:6, tiles:[
     "##########################",
     "#####..f....##....f..#####",
     "###...o......<.......o.###",
@@ -5218,7 +5218,7 @@ const MAPS = {
     warpsXY:{
       '0,5':{to:'dream_field', x:24, y:9}
     }},
-  dream_cast1:{name:'さかさのしろ 1かい', theme:'castle', enc:true, tiles:[
+  dream_cast1:{name:'さかさのしろ 1かい', theme:'castle', enc:true, encRate:0.060, encGrace:5, tiles:[
     "##################",
     "#T..............T#",
     "#.....C....C.....#",
@@ -5237,7 +5237,7 @@ const MAPS = {
       '8,12':{to:'dream_field', x:13, y:3},
       '8,7':{to:'dream_cast2', x:8, y:11}
     }},
-  dream_cast2:{name:'さかさのしろ 2かい', theme:'castle', enc:true, tiles:[
+  dream_cast2:{name:'さかさのしろ 2かい', theme:'castle', enc:true, encRate:0.065, encGrace:5, tiles:[
     "##################",
     "#....T......T....#",
     "#..C..........C..#",
@@ -5256,7 +5256,7 @@ const MAPS = {
       '2,5':{to:'dream_cast3', x:8, y:11},
       '8,11':{to:'dream_cast1', x:8, y:8}
     }},
-  dream_cast3:{name:'さかさのしろ さいじょうかい', theme:'castle', enc:true, tiles:[
+  dream_cast3:{name:'さかさのしろ さいじょうかい', theme:'castle', enc:true, encRate:0.070, encGrace:5, tiles:[
     "##################",
     "#T......K......T##",
     "#.......B........#",
