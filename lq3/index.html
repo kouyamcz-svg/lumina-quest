@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T01:38:45", "assets_sha": "903baf21", "lines": {"world": 176, "npc": 777, "chapters": 1186, "bgm": 949, "view2d": 1428, "core": 3308, "view": 1302, "ui": 800}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T01:56:03", "assets_sha": "34f4f2ab", "lines": {"world": 176, "npc": 777, "chapters": 1186, "bgm": 949, "view2d": 1428, "core": 3308, "view": 1302, "ui": 800}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -146,7 +146,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=903baf21"></script>
+<script src="assets.js?v=34f4f2ab"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -1830,7 +1830,7 @@ const CH = {
                 'かけらから きりが ふきだし、',
                 'おおきな けものの かたちを とる。',
                 'リオン「おうじょさまを ねむらせた けはいだ！」',
-                'かけらの ばんけんが たちふさがった！'],
+                'かけらの ガーゴイルが たちふさがった！'],
         after: ['こおりの さいしんぶに、もう けはいは ない。'],
       },
       zaal_dgn2: {
@@ -1843,7 +1843,7 @@ const CH = {
                 'しろい かけらが しずんで いた。',
                 'すなが もりあがり、きょだいな かたちを とる。',
                 'バルド「そうばより たかく つくぜ、これは！」',
-                'かけらの ねむりぬしが たちふさがった！'],
+                'かけらのぬし グラードが あらわれた！'],
         after: ['すなは しずまり、いせきは しずかに なった。'],
       },
       minamo_dgn2: {
@@ -1857,7 +1857,7 @@ const CH = {
                 'みずかがみに、ふたつの かげが うつる。',
                 'セナ「……わたしたちの、ゆめの のこりかす」',
                 'ルカ「なら、ちゃんと おわらせなきゃ ね」',
-                'かけらの しまいが たちふさがった！'],
+                'かけらの こくりゅうが まいおりた！'],
         after: ['みずかがみには、もう なにも うつらない。'],
       },
       elde_top: {
@@ -1871,7 +1871,7 @@ const CH = {
                 'かげは かけらに くちを つけ、すすって いる。',
                 'ミオ「……ゆめくいの つかい。ししょうの きろくに あった」',
                 'ソラ「かけらを たべさせは しない！」',
-                'ゆめくいの つかいが たちふさがった！'],
+                'ゆめくいの つかい ダルガが たちふさがった！'],
         after: ['ちょうじょうには、かぜの おとだけが のこった。'],
       },
     },
@@ -4932,23 +4932,23 @@ const MIDBOSS = {
     aoe:{p:0.16, lo:6, hi:10, name:'すなけむり'}},
   // 第5章 ボス「ゆめの ぬし」：むらを のみこんだ きりの ぬし。
   // 第5章めぐり「よっつの かけら」：かくちの あくむの すがたを うつした かげ
-  shardhound:{key:'shardhound', name:'かけらの ばんけん', hp:520, atk:38, def:19, agi:16, acts:1,
-    exp:800, gold:420, art:'yumebanken',
+  shardhound:{key:'shardhound', name:'かけらの ガーゴイル', hp:520, atk:38, def:19, agi:16, acts:1,
+    exp:800, gold:420, art:'gargoyle',
     skill:{p:0.31, mul:1.32, name:'ゆめを かみくだく'},
     aoe:{p:0.21, lo:15, hi:21, name:'しろき とおぼえ'},
     inflict:{type:'sleep', p:0.23}},
-  shardgolem:{key:'shardgolem', name:'かけらの ねむりぬし', hp:900, atk:49, def:25, agi:12, acts:1,
-    exp:1000, gold:520, art:'golem',
+  shardgolem:{key:'shardgolem', name:'かけらのぬし グラード', hp:900, atk:49, def:25, agi:12, acts:1,
+    exp:1000, gold:520, art:'nushi',
     skill:{p:0.35, mul:1.45, name:'すなの てっつい'},
     aoe:{p:0.24, lo:22, hi:29, name:'ねむりの すなあらし'},
     inflict:{type:'sleep', p:0.24}},
-  shardsis:{key:'shardsis', name:'かけらの しまい', hp:940, atk:46, def:23, agi:20, acts:2,
-    exp:1250, gold:600, art:'sisA',
+  shardsis:{key:'shardsis', name:'かけらの こくりゅう', hp:940, atk:46, def:23, agi:20, acts:2,
+    exp:1250, gold:600, art:'kokuryu',
     skill:{p:0.29, mul:1.28, name:'ゆめうつしの まい'},
     aoe:{p:0.22, lo:20, hi:27, name:'しおの さかまき'},
     inflict:{type:'confuse', p:0.19}},
-  shardeater:{key:'shardeater', name:'ゆめくいの つかい', hp:1080, atk:46, def:25, agi:18, acts:2,
-    exp:1600, gold:750, art:'regretshadow',
+  shardeater:{key:'shardeater', name:'ゆめくいの つかい ダルガ', hp:1080, atk:46, def:25, agi:18, acts:2,
+    exp:1600, gold:750, art:'darga',
     skill:{p:0.31, mul:1.32, name:'ゆめを すする'},
     aoe:{p:0.23, lo:21, hi:29, name:'くろい こだま'},
     inflict:{type:'sleep', p:0.21}, drain:0.16},
