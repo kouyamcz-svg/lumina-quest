@@ -271,6 +271,22 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
 
+// ===== ゆめみの洞窟：LQ1進行プール =====
+{
+  const need={cave1:['goblin','bat','thief','skel','lizard'],
+              cave2:['skel','lizard','shadow','ogre'],
+              cave3:['lizard','shadow','ogre','troll']};
+  for(const m in need){
+    T('洞窟プール:'+m, JSON.stringify(C.byMap[m])===JSON.stringify(need[m]));
+    need[m].forEach(k=>T('洞窟敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
+  }
+  // minLvの段階出現（1階はLv4でも安全帯のみ）
+  const lz=C.ENEMIES.find(e=>e.key==='lizard');
+  T('lizardはLv5から', lz.minLv===5);
+  const tr=C.ENEMIES.find(e=>e.key==='troll');
+  T('trollはLv8から', tr.minLv===8);
+}
+
 // ===== LQ1モンスター（旧大陸地帯） =====
 {
   const eKeys2=new Set(C.ENEMIES.map(e=>e.key));
