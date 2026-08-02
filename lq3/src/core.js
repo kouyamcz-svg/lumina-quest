@@ -2246,7 +2246,17 @@ function collectCommands(i){
       if(!opts.length){ G.mode='msg'; U.msg(['どうぐが ない！'], ()=>{ G.mode='battle'; collectCommands(i); }); return; }
       U.menu(opts.concat(['もどる']), 'どうぐ', (k)=>{
         if(k>=opts.length){ collectCommands(i); return; }
-        b.queue.push({actor:m, type:opts[k].startsWith('やくそう')?'herb':'water'}); collectCommands(i+1);
+        const kind = opts[k].startsWith('やくそう') ? 'herb' : 'water';
+        // ★だれに つかうかを えらぶ（1にんの ときは そのまま）
+        const alive = party.filter(p=>p.hp>0);
+        if(alive.length<=1){
+          b.queue.push({actor:m, type:kind, tgt:alive[0]}); collectCommands(i+1); return;
+        }
+        const names = alive.map(p=> p.name+'　HP'+p.hp+'/'+p.maxhp+(kind==='water' ? '　MP'+p.mp+'/'+p.maxmp : ''));
+        U.menu(names.concat(['もどる']), 'だれに つかう？', (t)=>{
+          if(t>=alive.length){ collectCommands(i); return; }
+          b.queue.push({actor:m, type:kind, tgt:alive[t]}); collectCommands(i+1);
+        });
       });
     }
     else if(sel===3){ b.queue.push({actor:m, type:'guard'}); collectCommands(i+1); }
