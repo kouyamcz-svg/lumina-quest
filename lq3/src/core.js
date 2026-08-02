@@ -3141,6 +3141,9 @@ function loadGame(s, slot){
     G.tactic    = TACTICS[d.tactic] ? d.tactic : 'manual';
     G.cleared   = !!d.cleared;
     G.townState = WORLD.TOWN_STATES[d.townState] ? d.townState : 'NORMAL';
+    // ★townStateは 1章せんようの えんしゅつ。2章いこうの きろくに のこって いたら けす
+    //   （1章クエスト もれこみ ふぐあいの なごりで、5章の トロスが むらさきに なっていた）
+    if((G.chapter||1) !== 1) G.townState = 'NORMAL';
     G.night     = !!d.night;
     G.trail     = [[P.x,P.y],[P.x,P.y]];
     lastSaveError = null;
@@ -3196,6 +3199,7 @@ function switchChapter(no, newParty){
       if(typeof sl === 'number') return sl;
       return sl[k] || 1;
     };
+    G.townState = 'NORMAL';   // ★まちの じょうたいは 章ごとに リセット（1章せんようの しくみ）
     const inh = cd && cd.inheritParty ? (G.chapters||{})[cd.inheritParty] : null;
     if(inh && inh.party && inh.party.length){
       // ★まえの しょうの なかま・レベル・そうび・しょじひんを ひきつぐ
