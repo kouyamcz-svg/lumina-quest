@@ -4580,19 +4580,27 @@ function drawBoss(dx,dy,ts){
     if(yb) arts.push(yb);
   }
   if(arts.length){
-    const sc = Math.max(1, Math.round(ts/TS*0.6));
-    // 2たいの ときは よこに ならべる（すこし かさねて 1くみに みせる）
-    const gap = arts.length>1 ? Math.round(ts*0.30) : 0;
+    // ★そうしボスは 2たいぶん よこはばが いる。まえは タイルはばで ずらして
+    //   いた ため、えの はば（46ドット）に まけて 6わり かさなって いた。
+    //   いまは じっさいの えがきはばを つみあげ、かたを 15% だけ かさねる。
+    const pair = arts.length>1;
+    const sc = Math.max(1, Math.round(ts/TS*(pair?0.45:0.6)));
     let ok = true;
     const imgs = arts.map(a=>getImg(a.src || a.front));
     imgs.forEach(im=>{ if(!(im.complete && im.naturalWidth)) ok = false; });
     if(ok){
+      const ws = arts.map(a=>a.w*sc);
+      let minw = ws[0];
+      ws.forEach(w=>{ if(w<minw) minw=w; });
+      const ov = pair ? Math.round(minw*0.15) : 0;
+      let total = -ov*(arts.length-1);
+      ws.forEach(w=>{ total += w; });
+      let x = dx + s/2 - total/2;
       arts.forEach((a, i)=>{
-        const ww = a.w*sc, hh = a.h*sc;
-        const off = (arts.length>1) ? ((i===0 ? -1 : 1) * gap) : 0;
-        cx.drawImage(imgs[i],
-          Math.round(dx + s/2 - ww/2 + off),
-          Math.round(dy + s*0.95 - hh), ww, hh);
+        const hh = a.h*sc;
+        cx.drawImage(imgs[i], Math.round(x),
+          Math.round(dy + s*0.95 - hh), ws[i], hh);
+        x += ws[i] - ov;
       });
       return;
     }
