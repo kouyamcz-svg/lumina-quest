@@ -828,8 +828,14 @@ function buildMap(name){
       if(got){ lid.rotation.x=-0.9; lid.position.y=topY+0.5; }
     }
     if(ch==='B'){                    // ボス（さいおくの けはい）
-      if(!C.G.flags.desgran){
-        const s=billboard('desgran1',2.4);
+      // ★まえは desgran1（LQ2の まおう）の えを かりて いたため、
+      //   せんとうの すがた（regretshadow）と ちがって いた。
+      //   しょうデータから ボスを ひき、せんとうと おなじ えを つかう。
+      const bi = C.bossInfoAt ? C.bossInfoAt(name) : null;
+      const done = bi && bi.clearedFlag && C.G.flags[bi.clearedFlag];
+      if(bi && !done){
+        const bd = (C.MIDBOSS && C.MIDBOSS[bi.key]) || null;
+        const s=billboard((bd && bd.art) || bi.key, 2.4);
         s.position.set(x,topY+0.75,y); scene.add(s);
         animObjs.push({mesh:s,bill:true,ph:1});
         const li=new THREE.PointLight(0x9a6ad0,1.2,4);
