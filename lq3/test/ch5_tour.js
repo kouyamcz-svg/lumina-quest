@@ -272,6 +272,14 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
 
+// ===== townState残留の浄化 =====
+{
+  C.freshState(); C.G.chapters={};
+  C.G.townState='SLEEPING_SICKNESS';
+  C.switchChapter(5);
+  T('章開始でtownState初期化', C.G.townState==='NORMAL');
+}
+
 // ===== 全滅復帰：直近の街 =====
 {
   C.freshState(); C.G.chapters={};
