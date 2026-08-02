@@ -1599,6 +1599,12 @@ function interact(){
   return true;
 }
 
+// ★ワールドは あるくと ちたいめいが かわる。うごいた あとに つけかえる
+function refreshAreaLabel(){
+  if(P.map!=='world') return;
+  const nm = areaName('world', P.x, P.y);
+  if(nm !== G._areaLabel){ G._areaLabel = nm; U.label(nm); }
+}
 function stepField(dx,dy){
   if(G.mode!=='field' || G.busy) return;
   const nx=P.x+dx, ny=P.y+dy;
@@ -1611,7 +1617,7 @@ function stepField(dx,dy){
     G.aboard=true;
     G.trail.unshift([P.x,P.y]); if(G.trail.length>8) G.trail.pop();
     P.x=nx; P.y=ny; G.stepFlip=!G.stepFlip;
-    V.setActors();
+    V.setActors(); refreshAreaLabel();
     return;
   }
   // ★ふね：うみを すすむ／りくに あがる（うみでは まものは でない）
@@ -1619,7 +1625,7 @@ function stepField(dx,dy){
     if(ch==='~'){
       G.trail.unshift([P.x,P.y]); if(G.trail.length>8) G.trail.pop();
       P.x=nx; P.y=ny; G.stepFlip=!G.stepFlip;
-      V.setActors();
+      V.setActors(); refreshAreaLabel();
       return;
     }
     if(walkable(P.map,nx,ny)){
@@ -1631,7 +1637,7 @@ function stepField(dx,dy){
   G.trail.unshift([P.x,P.y]); if(G.trail.length>8) G.trail.pop();
   P.dir = dy<0?'back' : dy>0?'front' : (dx<0?'left':'right');   // むきを おぼえる
   P.x=nx; P.y=ny; G.stepFlip=!G.stepFlip;
-  V.setActors();
+  V.setActors(); refreshAreaLabel();
   const w = warpAt(P.map,nx,ny);
   // ★けっかい：じょうけんが そろうまで はいれない
   if(w){
