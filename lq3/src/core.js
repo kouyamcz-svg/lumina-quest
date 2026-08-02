@@ -289,7 +289,7 @@ const MIDBOSS = {
     aoe:{p:0.24, lo:25, hi:34, name:'あんこくの なみ'},
     inflict:{type:'sleep', p:0.22}, drain:0.15},
   dreameater_b:{key:'dreameater_b', name:'ゆめくい・しんのすがた', hp:1620, atk:58, def:30, agi:22, acts:2,
-    exp:3200, gold:1400, art:'dreamlord',
+    exp:3200, gold:1400, art:'dreamform',
     skill:{p:0.34, mul:1.4, name:'おわらない あくむ'},
     aoe:{p:0.27, lo:30, hi:40, name:'むの こだま'},
     inflict:{type:'confuse', p:0.19}, drain:0.2},
