@@ -272,6 +272,24 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
 
+// ===== ソラの呪文（回復系＋勇者独自） =====
+{
+  const m50=C.mkMember('sora',50);
+  const names=C.knownSpells(m50).map(s=>s.name);
+  ['ヒール','ヒーラ','ヒーガ','ルミナの いのり','ばんぶつの ひかり','はじまりの ひかり']
+    .forEach(nm=>T('ソラ呪文:'+nm, names.includes(nm)));
+  const m10=C.mkMember('sora',10);
+  T('Lv10でヒーラ未習得', !C.knownSpells(m10).map(s=>s.name).includes('ヒーラ'));
+  // 独自性
+  let leak=false;
+  Object.entries(C.CLASSES).forEach(([k,c])=>{
+    if(k==='sora') return;
+    (c.learns||[]).forEach(l=>{ if(['prayer','genesis','judgment'].includes(l.key)) leak=true; });
+  });
+  T('勇者独自呪文の独自性', !leak);
+  T('レベル上限50', C.LV_CAP===50);
+}
+
 // ===== 巡回ボス＝各章ボスの復活（絵と名前の整合） =====
 {
   const M=[['shardhound','rev_banken','よみがえりし ゆめのばんけん'],
