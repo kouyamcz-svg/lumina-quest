@@ -272,6 +272,19 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
 
+// ===== 巡回ボスの絵は1〜4章と非重複 =====
+{
+  const chArts=new Set(['yumebanken','sandlord','dreamtwin','snowbeast','dreamlord','golem','sisA','regretshadow']);
+  const assets3=require('fs').readFileSync('assets.js','utf8');
+  [['shardhound','gargoyle'],['shardgolem','nushi'],['shardsis','kokuryu'],['shardeater','darga']]
+    .forEach(([k,art])=>{
+      const b=C.MIDBOSS[k];
+      T('巡回art:'+k+'='+art, b.art===art);
+      T('巡回art非重複:'+k, !chArts.has(b.art));
+      T('巡回art素材:'+art, assets3.includes('  '+art+':{w:'));
+    });
+}
+
 // ===== townState残留の浄化 =====
 {
   C.freshState(); C.G.chapters={};
