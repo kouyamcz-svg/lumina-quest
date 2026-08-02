@@ -1820,7 +1820,9 @@ function runTalkEvent(npcName){
   Object.keys(e.quest || {}).forEach(q => questAdvance(q, e.quest[q]));
 
   const lines = (e.msg || []).slice();
+  if(e.img && V.showScene) V.showScene(e.img);   // ★いちまいえ を せなかに ひょうじ
   U.msg(lines, () => {
+    if(e.img && V.hideScene) V.hideScene();
     U.hud();
     // 章の おわりに たっしたか
     if(cd.ending && cd.ending.trigger && G.flags[cd.ending.trigger] && !G.flags[(cd.ending.set||[])[0]]){
