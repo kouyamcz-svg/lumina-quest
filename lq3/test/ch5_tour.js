@@ -268,6 +268,7 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
   T('分離:旧大陸↛北の橋', !landReach(48,31,62,22));
   T('分離:旧大陸↛zaal_dgn1前', !landReach(48,31,74,42));
   T('BFS:みはりだい→洞窟', bfsW('old_road',7,9,'cave1',6,10));
+  T('BFS:洞窟入口→B3Fボス', bfsW('cave1',6,10,'cave3',10,2));
   (C.byMap.old_road||[]).forEach(k=>T('道敵実在:'+k, C.ENEMIES.some(e=>e.key===k)));
 }
 
