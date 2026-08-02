@@ -274,20 +274,22 @@ T('BFS:エルデ→塔頂上', bfs('elde_town',12,16,'elde_top',8,3));
 
 // ===== 巡回ボス＝各章ボスの復活（絵と名前の整合） =====
 {
-  const M=[['shardhound','yumebanken','よみがえりし ゆめのばんけん'],
-           ['shardgolem','golem','よみがえりし ねむりぬし'],
-           ['shardsis','sisA','よみがえりし あねのかげ'],
-           ['shardeater','regretshadow','よみがえりし こうかいのかげ']];
+  const M=[['shardhound','rev_banken','よみがえりし ゆめのばんけん'],
+           ['shardgolem','rev_golem','よみがえりし ねむりぬし'],
+           ['shardsis','rev_sisA','よみがえりし あねのかげ'],
+           ['shardsis_b','rev_sisB','よみがえりし いもうとのかげ'],
+           ['shardeater','rev_shadow','よみがえりし こうかいのかげ']];
   M.forEach(([k,art,nm])=>{
     const b=C.MIDBOSS[k];
     T('復活art:'+k, b.art===art);
     T('復活名:'+k, b.name===nm);
+    T('復活素材:'+art, require('fs').readFileSync('assets.js','utf8').includes('  '+art+':{w:'));
     // 原典より強化されている（HP比較）
   });
   T('強化:ばんけん', C.MIDBOSS.shardhound.hp > C.MIDBOSS.yumebanken.hp);
   T('強化:ねむりぬし', C.MIDBOSS.shardgolem.hp > C.MIDBOSS.sandsleeper.hp);
   T('強化:あねのかげ', C.MIDBOSS.shardsis.hp > C.MIDBOSS.shadowsis_a.hp);
-  T('姉妹ペア:定義', !!C.MIDBOSS.shardsis_b && C.MIDBOSS.shardsis_b.art==='sisB');
+  T('姉妹ペア:定義', !!C.MIDBOSS.shardsis_b && C.MIDBOSS.shardsis_b.art==='rev_sisB');
   T('姉妹ペア:強化', C.MIDBOSS.shardsis_b.hp > C.MIDBOSS.shadowsis_b.hp);
   {
     const CH2=(typeof CHAPTERS_DATA!=='undefined')?null:null;
