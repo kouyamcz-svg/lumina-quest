@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T04:14:02", "assets_sha": "4cf5db67", "lines": {"world": 176, "npc": 777, "chapters": 1222, "bgm": 949, "view2d": 1428, "core": 3342, "view": 1302, "ui": 800}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T04:31:26", "assets_sha": "4cf5db67", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 949, "view2d": 1428, "core": 3342, "view": 1304, "ui": 800}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -793,12 +793,22 @@ const NPCS = {
         '「せかいを みてこい、リオン。おなじ ねむりの もとを つきとめるのだ」']},
       {when:{flag:'ch1_gotHerb'}, text:[
         'おう「くすりが できたら、すぐに むすめの もとへ」']},
+      {when:{ch:5, flag:'ch5_shard1'}, text:[
+             'おう「むすめが めを さました！」',
+             '「そなたらは くにの おんじんじゃ。れいを いう」',
+             '「のこる かけらも、どうか たのむぞ」']},
       {when:{ch:5}, text:['おう「ひかりのこ とやら、うわさは きいて おる」',
              '「むすめの ねむり……もとを たってくれ。たのむ」']},
       {text:['おう「むすめが めを さまさぬ。いしゃも てだてが ないという」',
              '「たのむ、リオン。おまえだけが たよりだ」']},
     ]},
     {at:'8,7', spr:'butler', name:'じい', lines:[
+      {when:{ch:5, flag:'ch5_shard1'}, text:[
+        'じい「おうじょさまが おめざめに なった！」',
+        '「ながい ねむりじゃった。……こころから かんしゃ するぞ」']},
+      {when:{ch:5}, text:[
+        'じい「おうじょさまは おくの ねまじゃ」',
+        '「めざめぬ ねむりが、また はじまって しもうた」']},
       {when:{flag:'ch1_cleared'}, text:[
         'じい「ゆきぐさが きかぬとは……。わしの しる くすりでは もう むりじゃ」']},
       {when:{flag:'ch1_gotHerb'}, text:[
@@ -6267,7 +6277,7 @@ function interact(){
     // ★第1章いがいでは 1章の クエストは うごかさない（5章で 1章イベントが でる ふぐあいが あった）
     if((G.chapter||1)!==1){
       if((G.chapter||1)===5 && F.ch5_shard1){
-        U.msg(['おうじょは めを さまして、まどべに すわって いた。',
+        U.msg(['おうじょは めざめ、まどに むかって たって いた。',
                'おうじょ「こおりの こえが きえたわ」',
                '「……ありがとう。ひかりのこと、わたしの きし」'], ()=>{ G.mode='field'; });
       }else{
@@ -8785,7 +8795,9 @@ function buildMap(name){
         continue;
       }
       if(ch==='Z'){                                  // ねむる おうじょ（ベッドごと 1まいえ）
-        const key = CHR.princessBed ? 'princessBed' : 'princess';
+        // ★5章で きたの かけらを とった あとは、めざめて たっている
+        const awake = C.G && (C.G.chapter||1)===5 && C.G.flags && C.G.flags.ch5_shard1;
+        const key = awake ? 'princess' : (CHR.princessBed ? 'princessBed' : 'princess');
         const d = CHR[key];
         if(d){
           const pm = chrBillboard(key, 1.30);
