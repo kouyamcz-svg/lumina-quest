@@ -1158,6 +1158,7 @@ function draw(dt, time, actors){
     });
   }
   // ③ ちけい・たてもの（うしろから じゅんに）
+  const _bossQ = [];
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
     const ch = rows[y][x];
     if(ch==='C' && C.G.gotTreasure[curMap+':'+x+','+y]){
@@ -1186,13 +1187,17 @@ function draw(dt, time, actors){
       if(art) cx.drawImage(art, ox+x*ts, oy+y*ts, ts, ts);
     }
     if(ch==='n') drawNPC(ox+x*ts, oy+y*ts, ts, x, y);
-    // ★たおした ボスは でなくなる（章データの clearedFlag を みる）
+    // ★ボスは いったん ためて、ちけいを ぜんぶ かいたあとに えがく。
+    //   さきに かくと、みぎ・したの ゆかタイルが ボスの はみだしを うわがきして
+    //   「みぎうでが かける」げんしょうが おきていた。
     if(ch==='B'){
       const bi = C.bossInfoAt ? C.bossInfoAt(curMap) : null;
       const done = bi && bi.clearedFlag && C.G.flags[bi.clearedFlag];
-      if(!done) drawBoss(ox+x*ts, oy+y*ts, ts);
+      if(!done) _bossQ.push([ox+x*ts, oy+y*ts, ts]);
     }
   }
+  _bossQ.forEach(([bx,by,bts])=>drawBoss(bx,by,bts));
+  _bossQ.length=0;
   // ★もやって ある ふね（ワールドのみ）
   if(theme==='world' && C.G && C.G.ship && !C.G.aboard){
     const sx=C.G.ship.x, sy=C.G.ship.y;
