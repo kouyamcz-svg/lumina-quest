@@ -20,7 +20,7 @@ const eKeys=new Set(C.ENEMIES.map(e=>e.key));
   .forEach(k=>T('敵:'+k, eKeys.has(k)));
 ['dreameater_a','dreameater_b'].forEach(k=>T('ボス:'+k, !!C.MIDBOSS[k]));
 const assets=fs.readFileSync('assets.js','utf8');
-['regretshadow','dreamlord'].forEach(a=>T('ボスart:'+a, assets.includes(a+':')));
+['regretshadow','dreamform'].forEach(a=>T('ボスart:'+a, assets.includes(a+':')));
 // byMapの敵キー実在
 ['dream_field','dream_cast1','dream_cast2','dream_cast3'].forEach(m=>{
   (C.byMap[m]||[]).forEach(k=>T('byMap実在:'+m+':'+k, eKeys.has(k)));
