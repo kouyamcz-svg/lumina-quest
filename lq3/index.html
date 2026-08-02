@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T11:54:02", "assets_sha": "3007d9b2", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 956, "view2d": 1436, "core": 3435, "view": 1335, "ui": 813}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T14:05:40", "assets_sha": "3007d9b2", "lines": {"world": 176, "npc": 787, "chapters": 1222, "bgm": 956, "view2d": 1437, "core": 3435, "view": 1361, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -4303,6 +4303,7 @@ const MAPCOL = {
   'K':'#b4bcc9','F':'#3d68ac','G':'#c8a86c','D':'#7d5a36','Z':'#dcd0f0',
   'C':'#d9a832','n':'#e8e8f0','B':'#8a2a3a','<':'#b4bcc9','>':'#b4bcc9',
   'A':'#e8e0d0','V':'#e0a040','X':'#3a3a44','Q':'#8a8f9a',
+  'T':'#c85a20',
 };
 function showMap(id){ mapOn = true; mapId = id; }
 function hideMap(){ mapOn = false; }
@@ -9285,6 +9286,17 @@ function loop(now){
     else updateBattle(dt,time);
   }
   else if(is2D) update2D(dt,time);
+  else if(V2 && V2.mapOn){
+    // ★3Dシーンちゅうの「ちず」：2Dキャンバスを かりて ちずだけ えがく。
+    //   まえは 3Dでは なにも えがかれず、がめんが こおって みえた。
+    const g = canvas2d && canvas2d.getContext('2d');
+    if(g){
+      g.save(); g.setTransform(1,0,0,1,0,0);
+      g.fillStyle='#000'; g.fillRect(0,0,canvas2d.width,canvas2d.height);
+      g.restore();
+    }
+    V2.drawMapOverlay(time);
+  }
   else updateField(dt,time);
   requestAnimationFrame(loop);
 }
@@ -9491,10 +9503,25 @@ function spawnBurst(target){
 
 window.LQ3View = {
   init, loop, buildMap, setActors, fx, battleEnter, battleLeave, refresh, chest, fade, chapterCard,
-  showMap(id){ if(V2&&V2.showMap) V2.showMap(id); },
+  showMap(id){
+    if(!(V2&&V2.showMap)) return;
+    if(!is2D && mode!=='battle'){
+      V2.resize();
+      if(canvas2d) canvas2d.style.display='block';
+      if(canvas)   canvas.style.visibility='hidden';
+    }
+    V2.showMap(id);
+  },
   setDream(on){ if(V2&&V2.setDream) V2.setDream(on); },
   debugSnow(){ return V2&&V2.debugSnow ? V2.debugSnow() : null; },
-  hideMap(){ if(V2&&V2.hideMap) V2.hideMap(); },
+  hideMap(){
+    if(!(V2&&V2.hideMap)) return;
+    V2.hideMap();
+    if(!is2D && mode!=='battle'){
+      if(canvas2d) canvas2d.style.display='none';
+      if(canvas)   canvas.style.visibility='visible';
+    }
+  },
   get mode(){return mode;}, get drawCalls(){return drawCalls;}, get is2D(){return is2D;},
   debugPoses(){ return is2D ? lastPoses2D.slice()
                            : (actors.list||[]).map(o=>o.userData.pose).filter(Boolean); },
