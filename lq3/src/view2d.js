@@ -946,7 +946,8 @@ function drawBattle(dt, time){
     const breathe = 1 + Math.sin(time*2.1+f.ph)*0.03;
     const sway = Math.sin(time*0.85+f.ph)*(sc*1.5);
     // はいけいと おなじ せいすうばい ＝ ドットの あらさが そろう
-    const esc = Math.max(1, Math.round(sc*0.62*zoom));
+    // ★てきていぎの scale（ボスの おおきさ ばいりつ）を はんえい
+    const esc = Math.max(1, Math.round(sc*0.62*zoom*((f.enemy && f.enemy.scale)||1)));
     let hh, ww;
     if(f.art){ hh = f.art.h*esc; ww = f.art.w*esc; }
     else { hh = 48*esc; ww = 48*esc; }
