@@ -1237,6 +1237,7 @@ function draw(dt, time, actors){
   drawTint();
   if(fadeV>0){ cx.fillStyle='rgba(0,0,0,'+fadeV+')'; cx.fillRect(0,0,W,H); }
   drawDream();
+  if(sceneKey) drawSceneOverlay(time);
   if(mapOn) drawMapOverlay(time);
 }
 let NPCREF = null;
@@ -1266,6 +1267,24 @@ function drawNPC(dx,dy,ts,x,y){
 }
 let MONREF = null;
 function setMon(m){ MONREF = m; }
+// ---------------- イベントの いちまいえ ----------------
+let sceneKey = null;
+function showScene(k){ sceneKey = k; }
+function hideScene(){ sceneKey = null; }
+function drawSceneOverlay(time){
+  const a = MONREF && MONREF[sceneKey];
+  if(!a) return;
+  cx.fillStyle='#05060c'; cx.fillRect(0,0,W,H);
+  const img = getImg(a.src);
+  if(!(img.complete && img.naturalWidth)) return;
+  const sc = Math.max(1, Math.floor(Math.min(W/a.w, (H*0.92)/a.h)));
+  const dw=a.w*sc, dh=a.h*sc;
+  const ox=Math.round((W-dw)/2), oy=Math.round((H*0.92-dh)/2);
+  cx.imageSmoothingEnabled=false;
+  cx.drawImage(img, ox, oy, dw, dh);
+  cx.strokeStyle='rgba(255,255,255,0.5)'; cx.lineWidth=2;
+  cx.strokeRect(ox-2, oy-2, dw+4, dh+4);
+}
 function drawBoss(dx,dy,ts){
   const s=ts;
   cx.fillStyle='rgba(40,10,60,0.35)';
@@ -1431,6 +1450,7 @@ function drawDream(){
 return {init, resize, buildMap, draw, noteStep, setFade, setDream,
   debugSnow(){ return !!flakes; }, setMon, setNpcData,
         showMap, hideMap, drawMapOverlay, get mapOn(){return mapOn;},
+        showScene, hideScene, drawSceneOverlay, get sceneOn(){return !!sceneKey;},
         battleEnter:battleEnter2D, battleFx:battleFx2D, battleLeave:battleLeave2D, drawBattle,
         get TS(){return TS;}};
 })();
