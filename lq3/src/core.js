@@ -1670,7 +1670,7 @@ function talkNPC(x,y){
   const entry = NPCDATA.npcAt(P.map, x, y);
   G.mode='msg';
   if(!entry){ U.msg(['「……」'], ()=>{ G.mode='field'; }); return; }
-  const lines = NPCDATA.pickLines(entry, {townState:G.townState, flags:G.flags});
+  const lines = NPCDATA.pickLines(entry, {townState:G.townState, flags:G.flags, chapter:(G.chapter||1)});
   // ★こうえきしょう は はなすと あきないが できる（バルドの ミニイベント）
   if(entry.name === 'こうえきしょう'){
     if(party[0] && party[0].cls !== 'bald'){
