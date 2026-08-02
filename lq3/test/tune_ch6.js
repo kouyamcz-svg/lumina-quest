@@ -1,5 +1,5 @@
 'use strict';
-// ゆめくい連戦（a→b）の勝率実測
+// デスグラン3連戦（a→b→c）の勝率実測
 const fs=require('fs'), vm=require('vm');
 const ctx={console,window:{},localStorage:undefined}; ctx.globalThis=ctx;
 vm.createContext(ctx);
@@ -26,7 +26,7 @@ function fight(lv){
   while(C.G.battle && guard++<800) C.beginRound();
   if(guard>=800) return 'stuck';
   const log=C.NullUI.msgLog.join('');
-  return log.includes('ぜんめつ') ? 0 : (log.includes('しんのすがた') ? 1 : 'nochain');
+  return log.includes('ぜんめつ') ? 0 : (log.includes('しんのすがた') && log.includes('おんねんこそが') ? 1 : 'nochain');
 }
 for(const lv of [24,23]){
   let w=0, other=0;
@@ -34,5 +34,5 @@ for(const lv of [24,23]){
     const r=fight(lv);
     if(r===1) w++; else if(r!==0) other++;
   }
-  console.log(`ゆめくい連戦 Lv${lv} (4人): 勝率 ${(w/2).toFixed(1)}% ${other?('異常:'+other):''}`);
+  console.log(`デスグラン3連戦 Lv${lv} (4人): 勝率 ${(w/2).toFixed(1)}% ${other?('異常:'+other):''}`);
 }
