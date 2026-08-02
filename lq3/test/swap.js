@@ -103,5 +103,22 @@ T('openSwap存在', uiSrc.includes('function openSwap()'));
 T('つよさが全員巡回', uiSrc.includes('const n = C.allMembers().length'));
 T('いれかえ表題46字以内', 'いれかえ（▶＝せんとう）'.length<=46);
 
+// ===== 戦闘どうぐの対象選択 =====
+{
+  const src=require('fs').readFileSync('src/core.js','utf8');
+  T('対象メニューあり', src.includes("'だれに つかう？'"));
+  T('herbにtgt', /type:kind, tgt:alive\[t\]/.test(src));
+  // 実行側：tgt指定が尊重される（低HPの自動選択に流れない）
+  C.freshState(); C.G.chapters={}; C.switchChapter(5);
+  C.party.length=0; C.reserve.length=0;
+  const a=C.mkMember('sora',10), b2=C.mkMember('lion',10);
+  C.party.push(a,b2);
+  a.hp=1;            // 自動なら a が選ばれる状況
+  b2.hp=b2.maxhp-5;  // 対象は b を指定
+  C.P.herbs=1;
+  C.G.battle={enemies:[],queue:[]};
+  // 実行関数はexportされていないため、tgt優先ロジックの式を静的確認
+  T('実行はtgt優先', src.includes('const t = a.tgt && a.tgt.hp>0 ? a.tgt'));
+}
 console.log(`\n検査 ${n}項目 / NG ${ng}`);
 process.exit(ng?1:0);
