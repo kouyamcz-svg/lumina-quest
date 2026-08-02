@@ -475,7 +475,7 @@ const MAPS = {
     "##########################"],
     warpsXY:{
       '13,2':{to:'dream_cast1', x:8, y:12},
-      '24,9':{to:'dream_camp',  x:1,  y:5}
+      '23,9':{to:'dream_camp',  x:1,  y:5}
     }},
   dream_camp:{name:'ばんにんの いおり', theme:'dream', tiles:[
     "##############",
@@ -490,7 +490,7 @@ const MAPS = {
     "#..o..CC..o..#",
     "##############"],
     warpsXY:{
-      '0,5':{to:'dream_field', x:24, y:9}
+      '0,5':{to:'dream_field', x:22, y:9}
     }},
   dream_cast1:{name:'さかさのしろ 1かい', theme:'castle', enc:true, encRate:0.060, encGrace:5, tiles:[
     "##################",
@@ -528,7 +528,7 @@ const MAPS = {
     "##################"],
     warpsXY:{
       '2,5':{to:'dream_cast3', x:8, y:11},
-      '8,11':{to:'dream_cast1', x:8, y:8}
+      '8,11':{to:'dream_cast1', x:7, y:7}
     }},
   dream_cast3:{name:'さかさのしろ さいじょうかい', theme:'castle', enc:true, encRate:0.070, encGrace:5, tiles:[
     "##################",
