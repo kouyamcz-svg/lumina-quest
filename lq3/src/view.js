@@ -837,13 +837,38 @@ function buildMap(name){
       }
     }
     if(ch==='<'||ch==='>'){          // かいだん
+      // ★ゆかと どうけいしょくで うもれて いたので、だんを おおきく・しろく し、
+      //   きんの ふちどりと ひかりの はしらで「でいりぐち」だと ひとめで わかるように。
       for(let i=0;i<3;i++){
-        const st=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.12,0.8-i*0.22),
-          new THREE.MeshLambertMaterial({map:TEX.rock,color:0xbbbbbb}));
-        st.position.set(x,topY-0.02-i*0.12,y+i*0.1); scene.add(st);
+        const st=new THREE.Mesh(new THREE.BoxGeometry(0.94,0.16,0.9-i*0.26),
+          new THREE.MeshLambertMaterial({map:TEX.rock,color:0xf2ede2}));
+        st.position.set(x,topY+0.02+i*0.15,y+i*0.11); scene.add(st);
+        const ed=new THREE.Mesh(new THREE.BoxGeometry(0.98,0.05,0.94-i*0.26),
+          new THREE.MeshBasicMaterial({color:0xe8c25a}));
+        ed.position.set(x,topY+0.11+i*0.15,y+i*0.11); scene.add(ed);
       }
+      const pil=new THREE.Mesh(new THREE.CylinderGeometry(0.34,0.46,2.6,10,1,true),
+        new THREE.MeshBasicMaterial({color:0xffe9a0, transparent:true, opacity:0.22,
+          side:THREE.DoubleSide, depthWrite:false}));
+      pil.position.set(x,topY+1.5,y); scene.add(pil);
+      const pl=new THREE.PointLight(0xffdd88,1.2,4.5);
+      pl.position.set(x,topY+1.0,y); scene.add(pl);
+      animObjs.push({mesh:pil,light:pl,ph:x*0.7+y,beam:true});
     }
   }
+  // ★warpsXYの うち、かいだん文字（<>）が ない ますにも ひかりの はしらを たてる。
+  //   ばんにんの いおりの いりぐち など、しるしゼロで みつからなかった。
+  Object.keys(map.warpsXY||{}).forEach(k=>{
+    const [wx,wy]=k.split(',').map(Number);
+    const ch2=(rows[wy]||'')[wx];
+    if(ch2==='<'||ch2==='>') return;
+    const pil=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.44,2.4,10,1,true),
+      new THREE.MeshBasicMaterial({color:0xa0d8ff, transparent:true, opacity:0.20,
+        side:THREE.DoubleSide, depthWrite:false}));
+    pil.position.set(wx,topY+1.4,wy); scene.add(pil);
+    // ライトは たてない（同時4灯よさんを まもる。はしらだけで じゅうぶん みえる）
+    animObjs.push({mesh:pil,ph:wx+wy*0.7,beam:true});
+  });
   // インスタンス化（drawCall削減）
   const box=new THREE.BoxGeometry(1,0.12,1);
   const gm=new THREE.MeshLambertMaterial({
@@ -1180,6 +1205,12 @@ function updateField(dt,time){
   cam.lookAt(fp[0].x,0.2,fp[0].y-0.9);
   animObjs.forEach(o=>{
     if(o.bill){ o.mesh.quaternion.copy(cam.quaternion); return; }
+    if(o.beam){
+      o.mesh.material.opacity = 0.16 + (Math.sin(time*2.2+o.ph)+1)*0.06;
+      o.mesh.rotation.y = time*0.5;
+      if(o.light) o.light.intensity = 0.9 + Math.sin(time*2.2+o.ph)*0.3;
+      return;
+    }
     o.mesh.scale.setScalar(1+Math.sin(time*9+o.ph)*0.2);
     if(o.light) o.light.intensity=1.2+Math.sin(time*10+o.ph)*0.3;
   });
