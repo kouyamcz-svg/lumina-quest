@@ -125,7 +125,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T02:00:43", "assets_sha": "34f4f2ab", "lines": {"world": 176, "npc": 777, "chapters": 1208, "bgm": 949, "view2d": 1428, "core": 3308, "view": 1302, "ui": 800}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T02:35:12", "assets_sha": "34f4f2ab", "lines": {"world": 176, "npc": 777, "chapters": 1210, "bgm": 949, "view2d": 1428, "core": 3311, "view": 1302, "ui": 800}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -1860,6 +1860,7 @@ const CH = {
       },
       minamo_dgn2: {
         key: 'shardsis',
+        pair: 'shardsis_b',
         clearedFlag: 'ch5_shard3',
         needFlag: 'ch5_south',
         lockMsg: ['どうくつの おくから、うたごえの ような おとが する。',
@@ -1868,12 +1869,13 @@ const CH = {
                 'しろい かけらが ゆれて いた。',
                 'みずかがみに——わすれられない かげが うつる。',
                 '',
-                'セナ「あねさんの かげ……。おわった はずなのに」',
+                'セナ「わたしたちの かげ……。おわった はずなのに」',
+                '＜オキテ＞　＜オキナイデ＞',
                 '＜ユメクイガ ヨンダ。ネムリノ ウミカラ＞',
                 'ルカ「セナ、なかないで。こんどは ふたりと——」',
                 'ルカ「ううん、6にんで おわらせるんだから」',
                 '',
-                'よみがえりし あねのかげが たちあがった！'],
+                'よみがえりし ふたつのかげが たちあがった！'],
         after: ['みずかがみには、もう なにも うつらない。',
                 'セナ「……こんどこそ、さよなら」'],
       },
@@ -4964,11 +4966,14 @@ const MIDBOSS = {
     skill:{p:0.35, mul:1.45, name:'すなの てっつい'},
     aoe:{p:0.24, lo:22, hi:29, name:'ねむりの すなあらし'},
     inflict:{type:'sleep', p:0.24}},
-  shardsis:{key:'shardsis', name:'よみがえりし あねのかげ', hp:940, atk:46, def:23, agi:20, acts:2,
-    exp:1250, gold:600, art:'sisA',
+  shardsis:{key:'shardsis', name:'よみがえりし あねのかげ', hp:680, atk:50, def:24, agi:20, acts:1,
+    exp:700, gold:330, art:'sisA',
     skill:{p:0.29, mul:1.28, name:'ゆめうつしの まい'},
-    aoe:{p:0.22, lo:20, hi:27, name:'しおの さかまき'},
     inflict:{type:'confuse', p:0.19}},
+  shardsis_b:{key:'shardsis_b', name:'よみがえりし いもうとのかげ', hp:640, atk:48, def:22, agi:24, acts:1,
+    exp:550, gold:270, art:'sisB',
+    aoe:{p:0.3, lo:22, hi:30, name:'しおの さかまき'},
+    inflict:{type:'sleep', p:0.16}},
   shardeater:{key:'shardeater', name:'よみがえりし こうかいのかげ', hp:1080, atk:46, def:25, agi:18, acts:2,
     exp:1600, gold:750, art:'regretshadow',
     skill:{p:0.31, mul:1.32, name:'ゆめを すする'},
