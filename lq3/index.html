@@ -4584,7 +4584,7 @@ function drawBoss(dx,dy,ts){
     //   いた ため、えの はば（46ドット）に まけて 6わり かさなって いた。
     //   いまは じっさいの えがきはばを つみあげ、かたを 15% だけ かさねる。
     const pair = arts.length>1;
-    const sc = Math.max(1, Math.round(ts/TS*(pair?0.45:0.6)));
+    const sc = Math.max(1, Math.round(ts/TS*0.6));
     let ok = true;
     const imgs = arts.map(a=>getImg(a.src || a.front));
     imgs.forEach(im=>{ if(!(im.complete && im.naturalWidth)) ok = false; });
