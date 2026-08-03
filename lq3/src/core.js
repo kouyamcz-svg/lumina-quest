@@ -1896,7 +1896,14 @@ function offerNextChapter(next, title, isFinal){
         V.buildMap(P.map); V.setActors(true);
         U.label(WORLD.mapName(P.map)); U.hud();
         A.bgm(P.map);
-        V.chapterCard('第' + next + 'しょう', nc.title, () => { G.mode = 'field'; });
+        // ★しょうの はじまりの せつめい（opening）を ここでも だす。
+        //   まえは ニューゲームで その しょうから はじめた とき しか でて おらず、
+        //   ふつうに すすめると ぜんしょうで せつめいが とんで いた。
+        V.chapterCard('第' + next + 'しょう', nc.title, () => {
+          const open = nc.opening;
+          if(open && open.length) U.msg(open.slice(), () => { G.mode = 'field'; });
+          else G.mode = 'field';
+        });
       }else G.mode = 'field';
     });
   });
