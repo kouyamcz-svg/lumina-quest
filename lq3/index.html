@@ -127,7 +127,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-02T23:59:13", "assets_sha": "19863dc9", "lines": {"world": 176, "npc": 787, "chapters": 1228, "bgm": 956, "view2d": 1461, "core": 3442, "view": 1389, "ui": 813}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-03T00:14:46", "assets_sha": "cc9fa4d3", "lines": {"world": 176, "npc": 787, "chapters": 1228, "bgm": 956, "view2d": 1461, "core": 3444, "view": 1389, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -148,7 +148,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=19863dc9"></script>
+<script src="assets.js?v=cc9fa4d3"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -2293,7 +2293,7 @@ const CH = {
     ending: {
       trigger: 'ch6_worldWake',
       set:['ch6_cleared'],
-      final: true,
+      final: true, img:'scene_toros_reunion',
       msg:['ふねは、あさやけの うみを ゆく。',
            'ふりかえると、しろい たいりくが ひかりに とけていく。',
            '',
@@ -6675,7 +6675,9 @@ function triggerChapterEnd(){
   G.cleared = true;
   Object.keys(en.quest || {}).forEach(q => questAdvance(q, en.quest[q]));
   G.mode = 'msg';
+  if(en.img && V.showScene) V.showScene(en.img);   // ★エンディングの いちまいえ
   U.msg(en.msg || ['……'], () => {
+    if(en.img && V.hideScene) V.hideScene();
     const card = en.card || {title:'', sub:''};
     V.chapterCard(card.title, card.sub, () => { offerNextChapter(en.next, cd.title, en.final); });
   });
