@@ -1909,7 +1909,9 @@ function triggerChapterEnd(){
   G.cleared = true;
   Object.keys(en.quest || {}).forEach(q => questAdvance(q, en.quest[q]));
   G.mode = 'msg';
+  if(en.img && V.showScene) V.showScene(en.img);   // ★エンディングの いちまいえ
   U.msg(en.msg || ['……'], () => {
+    if(en.img && V.hideScene) V.hideScene();
     const card = en.card || {title:'', sub:''};
     V.chapterCard(card.title, card.sub, () => { offerNextChapter(en.next, cd.title, en.final); });
   });
