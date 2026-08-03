@@ -127,7 +127,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-03T15:14:24", "assets_sha": "cc9fa4d3", "lines": {"world": 176, "npc": 787, "chapters": 1228, "bgm": 956, "view2d": 1461, "core": 3451, "view": 1389, "ui": 813}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-03T15:27:11", "assets_sha": "cc9fa4d3", "lines": {"world": 176, "npc": 787, "chapters": 1228, "bgm": 966, "view2d": 1461, "core": 3451, "view": 1389, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -3134,7 +3134,13 @@ function playField(track){
   if(fieldGain){ try{ fieldGain.gain.value = volOf(fieldTrack); }catch(e){} }
   try{
     const p = el.play();
-    if(p && p.catch) p.catch(err=>{ fieldErr = 'さいせい きょかまち'; });
+    if(p && p.then){
+      p.then(()=>{
+        // ★かなった ときには もう せんとうに はいって いた、を ふせぐ。
+        //   （playの やくそくは pauseの あとに かなる ことが ある）
+        if(!fieldWant || playing || batWant){ try{ el.pause(); }catch(e){} }
+      }).catch(()=>{ fieldErr = 'さいせい きょかまち'; });
+    }
   }catch(e){ fieldErr = 'さいせい しっぱい'; }
 }
 function pauseField(){                // せんとうの あいだの いちじ ていし（いしは のこす）
@@ -3220,10 +3226,10 @@ function silenceOtherBattle(keep){
 }
 function playBattleFile(track){
   if(!BATTLE_TRACKS[track]) track = 'battle3';
+  batWant = true;                      // ★さきに いしを たてる。あとの pause だと
+  batTrack = track;                    //   ほりゅうちゅうの play やくそくが みのがす
   stop();                              // ごうせいの せんとうきょくは とめる
   pauseField();                        // フィールドきょくも とめる
-  batWant = true;
-  batTrack = track;
   silenceOtherBattle(track);
   const slot = battleEl(track); if(!slot) return;
   const el = slot.el;
@@ -3235,7 +3241,11 @@ function playBattleFile(track){
     try{ if(el.readyState > 0) el.currentTime = 0; }catch(e){}
     try{
       const p = el.play();
-      if(p && p.catch) p.catch(()=>{ batErr='さいせい きょかまち'; });
+      if(p && p.then){
+        p.then(()=>{
+          if(!batWant || batTrack!==track){ try{ el.pause(); }catch(e){} }
+        }).catch(()=>{ batErr='さいせい きょかまち'; });
+      }
     }catch(e){ batErr='さいせい しっぱい'; }
   };
   if(el.readyState > 0){
