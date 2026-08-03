@@ -785,7 +785,13 @@ function playField(track){
   if(fieldGain){ try{ fieldGain.gain.value = volOf(fieldTrack); }catch(e){} }
   try{
     const p = el.play();
-    if(p && p.catch) p.catch(err=>{ fieldErr = 'さいせい きょかまち'; });
+    if(p && p.then){
+      p.then(()=>{
+        // ★かなった ときには もう せんとうに はいって いた、を ふせぐ。
+        //   （playの やくそくは pauseの あとに かなる ことが ある）
+        if(!fieldWant || playing || batWant){ try{ el.pause(); }catch(e){} }
+      }).catch(()=>{ fieldErr = 'さいせい きょかまち'; });
+    }
   }catch(e){ fieldErr = 'さいせい しっぱい'; }
 }
 function pauseField(){                // せんとうの あいだの いちじ ていし（いしは のこす）
@@ -871,10 +877,10 @@ function silenceOtherBattle(keep){
 }
 function playBattleFile(track){
   if(!BATTLE_TRACKS[track]) track = 'battle3';
+  batWant = true;                      // ★さきに いしを たてる。あとの pause だと
+  batTrack = track;                    //   ほりゅうちゅうの play やくそくが みのがす
   stop();                              // ごうせいの せんとうきょくは とめる
   pauseField();                        // フィールドきょくも とめる
-  batWant = true;
-  batTrack = track;
   silenceOtherBattle(track);
   const slot = battleEl(track); if(!slot) return;
   const el = slot.el;
@@ -886,7 +892,11 @@ function playBattleFile(track){
     try{ if(el.readyState > 0) el.currentTime = 0; }catch(e){}
     try{
       const p = el.play();
-      if(p && p.catch) p.catch(()=>{ batErr='さいせい きょかまち'; });
+      if(p && p.then){
+        p.then(()=>{
+          if(!batWant || batTrack!==track){ try{ el.pause(); }catch(e){} }
+        }).catch(()=>{ batErr='さいせい きょかまち'; });
+      }
     }catch(e){ batErr='さいせい しっぱい'; }
   };
   if(el.readyState > 0){
