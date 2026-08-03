@@ -794,6 +794,17 @@ function playField(track){
     }
   }catch(e){ fieldErr = 'さいせい しっぱい'; }
 }
+let fieldGuard = null, guardHits = 0;
+function startFieldGuard(){
+  if(fieldGuard) return;
+  fieldGuard = setInterval(()=>{
+    if(!batWant){ clearInterval(fieldGuard); fieldGuard = null; return; }
+    if(fieldEl && !fieldEl.paused){
+      guardHits++;                       // ★なんかい ふせいだか（デバッグひょうじ用）
+      try{ fieldEl.pause(); }catch(e){}
+    }
+  }, 400);
+}
 function pauseField(){                // せんとうの あいだの いちじ ていし（いしは のこす）
   cancelResume();                    // ★もどす しごとを けす（きょくが かさならない ように）
   if(!fieldEl) return;
@@ -879,6 +890,7 @@ function playBattleFile(track){
   if(!BATTLE_TRACKS[track]) track = 'battle3';
   batWant = true;                      // ★さきに いしを たてる。あとの pause だと
   batTrack = track;                    //   ほりゅうちゅうの play やくそくが みのがす
+  startFieldGuard();                   // ★ばんけん：せんとうちゅうの フィールドきょく もれを けす
   stop();                              // ごうせいの せんとうきょくは とめる
   pauseField();                        // フィールドきょくも とめる
   silenceOtherBattle(track);
@@ -939,6 +951,7 @@ function status(){
     scheduled: fired,
     vol: vol,
     field: fieldEl ? (fieldEl.paused ? 'とまっている' : 'ながれている') : 'みよみこみ',
+    guardHits: guardHits,
     track: fieldTrack,
     battleFile: batTrack ? (batEls[batTrack] && !batEls[batTrack].el.paused ? 'ながれている' : 'とまっている') : 'みよみこみ',
     battleErr: batErr || 'なし',
