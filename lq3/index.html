@@ -127,7 +127,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-03T00:14:46", "assets_sha": "cc9fa4d3", "lines": {"world": 176, "npc": 787, "chapters": 1228, "bgm": 956, "view2d": 1461, "core": 3444, "view": 1389, "ui": 813}};</script>
+<script>window.LQ3_BUILD={"ver": "M1.5", "at": "2026-08-03T15:14:24", "assets_sha": "cc9fa4d3", "lines": {"world": 176, "npc": 787, "chapters": 1228, "bgm": 956, "view2d": 1461, "core": 3451, "view": 1389, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -6662,7 +6662,14 @@ function offerNextChapter(next, title, isFinal){
         V.buildMap(P.map); V.setActors(true);
         U.label(WORLD.mapName(P.map)); U.hud();
         A.bgm(P.map);
-        V.chapterCard('第' + next + 'しょう', nc.title, () => { G.mode = 'field'; });
+        // ★しょうの はじまりの せつめい（opening）を ここでも だす。
+        //   まえは ニューゲームで その しょうから はじめた とき しか でて おらず、
+        //   ふつうに すすめると ぜんしょうで せつめいが とんで いた。
+        V.chapterCard('第' + next + 'しょう', nc.title, () => {
+          const open = nc.opening;
+          if(open && open.length) U.msg(open.slice(), () => { G.mode = 'field'; });
+          else G.mode = 'field';
+        });
       }else G.mode = 'field';
     });
   });
