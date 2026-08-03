@@ -1172,7 +1172,7 @@ const CH = {
     ending: {
       trigger: 'ch6_worldWake',
       set:['ch6_cleared'],
-      final: true,
+      final: true, img:'scene_toros_reunion',
       msg:['ふねは、あさやけの うみを ゆく。',
            'ふりかえると、しろい たいりくが ひかりに とけていく。',
            '',
