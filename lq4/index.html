@@ -127,7 +127,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-05T14:45:12", "assets_sha": "cc9fa4d3", "lines": {"world": 97, "npc": 100, "chapters": 153, "bgm": 979, "view2d": 1461, "core": 2131, "view": 1389, "ui": 813}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-05T14:59:09", "assets_sha": "cc9fa4d3", "lines": {"world": 97, "npc": 103, "chapters": 153, "bgm": 979, "view2d": 1461, "core": 2133, "view": 1389, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -276,9 +276,12 @@ const NPCS = {
       {when:{flag:'ch0_riftOpen'}, text:[
         '「空が 裂けてる……あんなの 見たこと ない」',
         '「北の 広場だ。人が まだ 残ってる！」']},
+      {when:{flag:'ch0_trialDone'}, text:[
+        '「試験は 終わったのか。……おい、北を 見ろ」',
+        '「日が 落ちたのに 空が 光ってる。北の 門の 先だ」']},
       {text:['「下層区は 地上生まれの 街だ」',
              '「上の 連中は おれたちを 重い者と 呼ぶ」']}]},
-    {at:'8,4', spr:'villagerB', name:'光珠管の 技師', lines:[
+    {at:'12,4', spr:'villagerB', name:'光珠管の 技師', lines:[
       {text:['「この 管には 炉の 光が 流れてる」',
              '「……最近、少し 濁ってる 気が するんだ」']}]},
     {at:'12,7', spr:'butler', name:'うわさずきの 男', lines:[
@@ -3101,24 +3104,26 @@ const MAPS = {
     }},
 
   // ============ 序章：下層区（地上生まれの移民と労働者の街） ============
+  // ★でぐちは かならず 見て わかる ように する：
+  //   G＝北の門／D＝イオの家の とびら／r＝道。ただの ゆかに ワープを おかない。
   lower_dist:{name:'下層区', theme:'village', enc:false, tiles:[
-    "#################",
-    "#...............#",
-    "#.S...I...P.....#",
-    "#...............#",
-    "#..n....n....C..#",
-    "#...............#",
+    "########G########",
+    "#.......r.......#",
+    "#.S...I.r.P.....#",
+    "#.......r.......#",
+    "#..n....r...n...#",
+    "#.......r....C..#",
     "#.....rrr.......#",
     "#.....r.r...n...#",
     "#.....r.r.......#",
     "#.....r.r.......#",
-    "#.....r.r.......#",
+    "#..D..r.r.......#",
     "#.....rrr.......#",
     "########r########"],
     warpsXY:{
       '3,10':{to:'home_forge', x:4, y:5},
       '8,12':{to:'trial_yard', x:6, y:8},
-      '8,1' :{to:'rift_yard',  x:6, y:8}
+      '8,0' :{to:'rift_yard',  x:6, y:8}
     }},
 
   // ============ 序章：騎士団 見習い試験場 ============
@@ -3148,7 +3153,7 @@ const MAPS = {
     "#...........#",
     "######.######"],
     warpsXY:{
-      '6,8':{to:'lower_dist', x:8, y:2}
+      '6,8':{to:'lower_dist', x:8, y:1}
     }},
 };
 
