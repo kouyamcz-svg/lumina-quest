@@ -1,0 +1,98 @@
+# ルミナクエストIV 引き継ぎ（M0 時点）
+
+最終更新：2026-08-05 ／ 状態：**M0 実装ずみ・未デプロイ**
+構想書は `lq4/docs/LQ4_構想書.md`。物語・技の確定稿は同フォルダの3文書を正とする。本書は「いまどうなっているか」だけを書く。
+
+---
+
+## 1. 場所
+
+| 項目 | 内容 |
+|---|---|
+| 公開URL（予定） | https://kouyamcz-svg.github.io/lumina-quest/lq4/ |
+| リポジトリ | `kouyamcz-svg/lumina-quest`（`lq4/` 配下・lq3と同居） |
+| 作業ディレクトリ | `/home/claude/lq4/` |
+| **PAT** | **文書・メモリに保存しない。毎回依頼し、会話ごとに使い捨て・作業後に失効** |
+| 取得方法 | API がレート制限に当たるときは `https://codeload.github.com/kouyamcz-svg/lumina-quest/tar.gz/refs/heads/main` で tarball 取得（トークン不要） |
+
+## 2. M0 の到達点
+
+垂直スライスが通しで動く（自動テストで確認ずみ、実機確認はこれから）。
+
+イオの家 → 下層区 → 見習い試験場 → グランに話す → 木人戦 → セレン加入 → 裂け目の広場 → ウンブラ戦 → 章末 → セーブ/ロード復元
+
+- lq4 は lq3 と干渉しない：`LQ4_SAVE_1〜3` ／ `CACHE='lq4-v1'` ／ `window.LQ4_BUILD` ／ `LQ4View`
+- inflict（sleep/confuse/slow・単体/全体・ボスは p 半減・immune対応・**st2 で2段掛け**）と buff（atk/def/agi・nターン）が実装ずみ
+- 検証ハーネス（構想書 §7 の 1〜5）が `test/` にそろっている
+
+## 3. ファイル構成
+
+```
+lq4/
+  index.html    ビルド成果物（src/*.js を結合）
+  assets.js     ★lq3のものを仮置き（LQ4の絵は未着手）
+  shell.html    HTML骨組み・PWAメタ（タイトル ルミクエⅣ）
+  build.py      src/*.js → index.html
+  sw.js         CACHE='lq4-v1'
+  BUILD.txt     Pages再ビルド起こし用
+  apple-touch-icon.png / icon-180.png / icon-512.png  ★lq3のものを仮置き
+  src/          core / chapters / npc / world / view / view2d / ui / bgm
+  docs/         構想書・詳細ストーリー・第3章五地方降下・技リスト・本書
+  test/         下記
+  *.mp3         ★lq3のものを暫定流用（field/town/castle/dungeon/battle3/boss）
+```
+
+## 4. テスト
+
+```bash
+cd /home/claude/lq4
+sh test/all.sh                # ぜんぶ
+node test/build_verify.js     # 27項目：構文・ビルド・残骸・せりふ46字
+node test/audit.js            # 84項目：重複キー・参照実在・ワープ・BFS到達性
+node test/battle_inflict.js   # 25項目：inflict / buff / st2
+node test/ch0_tour.js         # 34項目：序章の通し＋セーブ/ロード
+node test/tune_umbra.js 200   # ウンブラ勝率の実測
+```
+
+**ぜんめつ判定の注意**：core は全滅しても町へ戻して全快させる。`aliveMembers()>0` では勝敗が分からない。メッセージ「ぜんめつ」で判定すること（tune_umbra.js がその実装）。
+
+## 5. 実測ずみのバランス
+
+| Lv | ウンブラ勝率（200戦・イオ＋セレン・やくそう3） |
+|---|---|
+| 3 | 3% |
+| 4 | 58% |
+| 5 | **93%** |
+| 6 | 99% |
+
+§5 の基準（到達Lv≈90% ／ 1つ下 50〜80%）を満たす。ウンブラは hp235 / atk17 / def9 / agi10。
+木人（trialdummy）は Lv1 のイオが確実に勝てる強さ（hp34 / atk3）。
+
+## 6. LQ3 から直したこと（IVでは再発させない）
+
+1. **ボス報酬が「第2章以降だけ」動く決め打ち** → 全章で章データ駆動に統一
+2. **NPC会話が「第1章だけ別扱い」** → 撤去。`questOnTalk` は `runTalkEvent` を呼ぶだけ
+3. **defdown が MP を二重に引く** → 修正（LQ3本体は未修正）
+4. world.js の**重複キー `elde`** → 除去（監査が検出）
+5. LQ3固有のハードコードを削除：こぶね・ゆめみ・王女・玉座・第1章の締めくくり・デスグラン3連戦・交易相場・M0技術スライス残骸
+
+## 7. 未着手・要判断
+
+1. **絵**：`assets.js` は lq3 の流用。イオ／セレン／ノエ／アマネ、悪夢獣、ウンブラの新規絵が必要（カタログPNG承認後に組込）
+2. **BGM**：lq3 の6曲（field/town/castle/dungeon/battle3/boss）を**暫定流用**。新規作曲後に同じ名前で差し替えれば鳴る
+3. **タイル**：天空様式（白石・光珠灯・雲海縁）は未作成。いまは lq3 の village/dream テーマを流用
+4. ~~とこよの ゆめ~~ → **決着**。敵の状態は1枠しか持てないため、`inflict` に `st2`（1つめが外れた／すでに掛かっている時の2つめ）を追加して表現する。`tokoyo` は st:'sleep' p0.35 ／ st2:'slow' p2:0.55。**必ず何かは入る上位技**として成立させた
+5. **オート戦闘（gungan/inochi）が inflict・buff を使わない**：`autoCommand` に判断を足す。→ **M1 で入れる**（決定ずみ）
+6. 飛翔グライダー・騎士団任務ランク・悪夢侵食度・行商ミニは M1 以降
+
+## 8. デプロイ手順（まだ実行していない）
+
+1. **最新コミットを確認**。想定外のコミットがあれば中断して確認（並行セッション対策）
+2. GitHub Contents API で PUT（GET sha → PUT）
+3. Pages ビルドを `status=='built'` までポーリング
+4. 拾われないときは `lq4/BUILD.txt` を更新して再ビルドを起こす
+5. 納品連絡に毎回「アプリ再起動で反映・セーブ維持」を添える
+
+## 9. 地雷集
+
+構想書 §10 を正とする。本書では重複管理しない。
