@@ -60,6 +60,15 @@ C.interact();
 T('試験前は 木人と たたかえない', said('騎士団長に 話を'), log.join(' / ').slice(0,60));
 T('たたかいに なって いない', !C.G.battle);
 
+// ===== 3.5 試験前は 北の門で とめられる（あるいて たしかめる）=====
+clearLog();
+walkTo('trial_yard', 6, 7); C.stepField(0,1);       // 下層区（8,11）へ
+C.G.mode='field';
+for(let i=0;i<11;i++) C.stepField(0,-1);
+T('試験前は 広場へ いけない', C.P.map==='lower_dist', C.P.map);
+T('とめられた わけが でる', said('人どおり'), log.join(' / ').slice(0,60));
+walkTo('trial_yard', 6, 5);
+
 // ===== 4. グランに はなす =====
 clearLog();
 walkTo('trial_yard', 3, 3); face('back');       // 上の (3,2) が グラン
@@ -86,11 +95,19 @@ T('セレンは せんとうと おなじLv', C.party[1].lv===lvAfterTrial, C.pa
 T('セレンは 槍を もつ', C.party[1].weapon && C.party[1].weapon.name.indexOf('槍')>=0);
 
 // ===== 7. 広場（夜）へ =====
-walkTo('trial_yard', 6, 8);
-C.doWarp(C.MAPS.trial_yard.warpsXY['6,8']);
-T('下層区へ もどる', C.P.map==='lower_dist');
-walkTo('lower_dist', 8, 1);
-C.doWarp(C.MAPS.lower_dist.warpsXY['8,1']);
+//   ★ここは API（doWarp）では なく、じっさいに あるいて ためす。
+//     LQ3で「文書には あるのに UIを とおる みちが なかった」ふぐあいが あった。
+function walkPath(steps){ for(const [dx,dy] of steps) C.stepField(dx,dy); }
+
+walkTo('trial_yard', 6, 7);
+walkPath([[0,1]]);                                  // 南の でぐちを ふむ
+T('あるいて 下層区へ もどれる', C.P.map==='lower_dist', C.P.map+' '+C.P.x+','+C.P.y);
+
+// 試験場から もどった ばしょ（8,11）から 北の門（8,0）まで 道を あるく
+C.G.mode='field';
+walkPath(new Array(11).fill([0,-1]));
+T('道づたいに 北の門へ たどりつける（とちゅうで つっかえない）',
+  C.P.map==='rift_yard', C.P.map+' '+C.P.x+','+C.P.y);
 T('広場へ はいれる', C.P.map==='rift_yard');
 T('裂け目の めじるしが たつ', C.G.flags.ch0_riftOpen===true);
 T('まちの ようすが かわる', C.G.townState==='NIGHT_RIFT');
