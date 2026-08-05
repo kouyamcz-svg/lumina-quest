@@ -96,13 +96,13 @@ const TACTICS = {manual:'めいれいさせろ', gungan:'ガンガンいこう�
 // 序章〜第1章ぶん。倒すと黒い紙片になって消える（ノエだけが顔色を変える伏線）。
 const ENEMIES = [
   // ---- 序章 下層区（Lv1〜5）----
-  {key:'kagekakera', name:'影のかけら',   hp:16, atk:5,  def:3,  agi:5,  exp:5,  gold:4,  minLv:1},
-  {key:'shihenchu',  name:'紙片蟲',       hp:20, atk:6,  def:5,  agi:6,  exp:7,  gold:5,  minLv:1},
-  {key:'akumuga',    name:'悪夢蛾',       hp:22, atk:7,  def:4,  agi:11, exp:9,  gold:6,  minLv:2,
+  {key:'kagekakera', name:'影のかけら',   hp:16, atk:5,  def:3,  agi:5,  exp:8,  gold:4,  minLv:1},
+  {key:'shihenchu',  name:'紙片蟲',       hp:20, atk:6,  def:5,  agi:6,  exp:11, gold:5,  minLv:1},
+  {key:'akumuga',    name:'悪夢蛾',       hp:22, atk:7,  def:4,  agi:11, exp:14, gold:6,  minLv:2,
    inflict:{type:'sleep', p:0.16}},
-  {key:'yamiinu',    name:'闇犬',         hp:28, atk:9,  def:5,  agi:9,  exp:12, gold:8,  minLv:2,
+  {key:'yamiinu',    name:'闇犬',         hp:28, atk:9,  def:5,  agi:9,  exp:18, gold:8,  minLv:2,
    skill:{p:0.24, mul:1.20, name:'かみつき'}},
-  {key:'sumibami',   name:'すすばみ',     hp:34, atk:11, def:7,  agi:7,  exp:16, gold:11, minLv:4},
+  {key:'sumibami',   name:'すすばみ',     hp:34, atk:11, def:7,  agi:7,  exp:24, gold:11, minLv:4},
   // ---- 第1章 下層区の亀裂（Lv8〜11）※M1で ふやす ----
   {key:'kansuiki',   name:'管漏れの影',   hp:46, atk:15, def:10, agi:8,  exp:26, gold:18, minLv:7,
    skill:{p:0.26, mul:1.25, name:'にじみだし'}},
@@ -115,7 +115,7 @@ const MIDBOSS = {
     exp:14, gold:0, art:'nushicrab',
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 序章ボス：悪夢獣 ウンブラ（影の座）----
-  umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:235, atk:17, def:9, agi:10, acts:1,
+  umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:205, atk:13, def:9, agi:10, acts:1,
     exp:140, gold:90, art:'rev_shadow', scale:1.30,
     skill:{p:0.28, mul:1.25, name:'かげの つめ'},
     aoe:{p:0.16, lo:6, hi:10, name:'くらやみの さざなみ'},
@@ -172,7 +172,7 @@ const MAPS = {
     warpsXY:{
       '3,10':{to:'home_forge', x:4, y:5},
       '8,12':{to:'trial_yard', x:6, y:8},
-      '8,0' :{to:'rift_yard',  x:6, y:8}
+      '8,0' :{to:'rift_yard',  x:8, y:11}
     }},
 
   // ============ 序章：騎士団 見習い試験場 ============
@@ -191,18 +191,25 @@ const MAPS = {
     }},
 
   // ============ 序章：夜の広場（黒い裂け目） ============
-  rift_yard:{name:'裂け目の広場', theme:'dream', enc:true, encRate:0.10, encGrace:3, tiles:[
-    "#############",
-    "#...........#",
-    "#..o.....o..#",
-    "#...........#",
-    "#.....B.....#",
-    "#...........#",
-    "#..o.....o..#",
-    "#...........#",
-    "######.######"],
+  // ★ボスまでの みちのりを ながく とる。
+  //   いきなり ウンブラに ぶつかると Lvが たりない（じっさいに でた もんだい）。
+  //   おれまがった みちを あるく あいだに、しぜんに 5〜8かい たたかう ように する。
+  rift_yard:{name:'裂け目の広場', theme:'dream', enc:true, encRate:0.14, encGrace:2, tiles:[
+    "#################",
+    "#....o.....o....#",
+    "#....B..........#",
+    "#..........o....#",
+    "#.###############",
+    "#...............#",
+    "###############.#",
+    "#...............#",
+    "#.###############",
+    "#...............#",
+    "###############.#",
+    "#n..............#",
+    "########G########"],
     warpsXY:{
-      '6,8':{to:'lower_dist', x:8, y:1}
+      '8,12':{to:'lower_dist', x:8, y:1}
     }},
 };
 
