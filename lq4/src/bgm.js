@@ -543,12 +543,12 @@ let t0=0, idx=0, loopN=0, vol=0.42, lastNow=-1, stall=0, pending=null;
 let songStart=0, loopSpan=1, idxStart=0;
 const LOOKAHEAD=0.35, TICK=60;
 
-// ★こうかおんと おなじ AudioContext を つかう。
+// ★こうかおんと おなじ AudioContext を 使う。
 //   べつべつに つくると、かたほうだけ「ていし」の ままに なり、
 //   さいしょの すうびょうだけ なって とまる（じっさいに でた ふぐあい）。
 let SHARED = null;
 // ★こうかおんと べつの コンテキストに なると、こちらだけ「ていし」の まま に なり
-//   おとが でない。わたされた ものを かならず つかう。
+//   おとが でない。わたされた ものを かならず 使う。
 function attach(ac){
   if(!ac) return;
   SHARED = ac;
@@ -650,7 +650,7 @@ function begin(name){
   t0 = AC.currentTime + 0.10 - songStart;   // ここから ならすと じこくを あわせる
   lastNow = -1;                  // さいしょの pump を みはりで はじかない
   gainNow(vol);                  // ★のこっている フェードを とりけして おんりょうを もどす
-  pump();                        // だせない じょうたいなら pump が たてなおしを つづける
+  pump();                        // だせない 状態なら pump が たてなおしを つづける
   if(timer) clearInterval(timer);
   timer = setInterval(pump, TICK);
 }
