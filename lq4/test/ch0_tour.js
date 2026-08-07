@@ -50,8 +50,8 @@ T('壁に うまって いない', C.walkable('lower_dist', C.P.x, C.P.y));
 
 // ===== 3. 試験前は 木人と たたかえない =====
 clearLog();
-walkTo('lower_dist', 8, 12);
-C.doWarp(C.MAPS.lower_dist.warpsXY['8,12']);
+walkTo('lower_dist', 10, 14);
+C.doWarp(C.MAPS.lower_dist.warpsXY['10,14']);
 T('試験場へ はいる', C.P.map==='trial_yard');
 T('onEnter が たつ', C.G.flags.ch0_enteredYard===true);
 clearLog();
@@ -62,9 +62,9 @@ T('たたかいに なって いない', !C.G.battle);
 
 // ===== 3.5 試験前は 北の門で とめられる（あるいて たしかめる）=====
 clearLog();
-walkTo('trial_yard', 6, 7); C.stepField(0,1);       // 下層区（8,11）へ
+walkTo('trial_yard', 6, 7); C.stepField(0,1);       // 下層区（10,13）へ
 C.G.mode='field';
-for(let i=0;i<11;i++) C.stepField(0,-1);
+for(let i=0;i<14;i++) C.stepField(0,-1);
 T('試験前は 広場へ いけない', C.P.map==='lower_dist', C.P.map);
 T('とめられた わけが でる', said('人どおり'), log.join(' / ').slice(0,60));
 walkTo('trial_yard', 6, 5);
@@ -103,9 +103,9 @@ walkTo('trial_yard', 6, 7);
 walkPath([[0,1]]);                                  // 南の でぐちを ふむ
 T('あるいて 下層区へ もどれる', C.P.map==='lower_dist', C.P.map+' '+C.P.x+','+C.P.y);
 
-// 試験場から もどった ばしょ（8,11）から 北の門（8,0）まで 道を あるく
+// 試験場から もどった ばしょ（10,13）から 北の門（10,0）まで 大通りを あるく
 C.G.mode='field';
-walkPath(new Array(11).fill([0,-1]));
+walkPath(new Array(14).fill([0,-1]));
 T('道づたいに 北の門へ たどりつける（とちゅうで つっかえない）',
   C.P.map==='rift_yard', C.P.map+' '+C.P.x+','+C.P.y);
 T('広場へ はいれる', C.P.map==='rift_yard');
