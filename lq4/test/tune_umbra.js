@@ -6,7 +6,7 @@
 //   A) 全快・Lv固定  … 素の つよさを 見る
 //   B) 通しどおり     … 下層区から 道を あるいて（ざこ戦で けずられた まま）ボスへ。
 //                       じっさいの プレイに ちかい。M0で「いきなり キツい」と なった ため 追加。
-// ★ぜんめつしても core は まちへ もどして 全快させる。メッセージで かちまけを 見る こと。
+// ★全滅しても core は まちへ もどして 全快させる。メッセージで かちまけを 見る こと。
 const fs=require('fs'), vm=require('vm');
 const ctx={console,window:{},localStorage:undefined}; ctx.globalThis=ctx; vm.createContext(ctx);
 for(const f of ['world.js','npc.js','chapters.js','core.js'])
@@ -14,7 +14,7 @@ for(const f of ['world.js','npc.js','chapters.js','core.js'])
 const C=vm.runInContext('LQ4',ctx);
 let lost=false;
 C.bind(C.NullView, {
-  msg(l,d){ if(l.some(x=>String(x).indexOf('ぜんめつ')>=0)) lost=true; d&&d(); },
+  msg(l,d){ if(l.some(x=>String(x).indexOf('全滅')>=0)) lost=true; d&&d(); },
   menu(i,t,cb){cb(0);}, hud(){}, label(){}
 }, C.NullAudio);
 
@@ -28,14 +28,13 @@ function setParty(lv){
   C.party[1].armor ={kind:'a',name:'貴族の 胸当て',v:5};
   C.P.herbs=3;
 }
-// 入口(8,11)から ボス前(5,3)までの みちのり
+// 入口(10,13)から ボス前(10,4)までの みちのり（51歩）
 const PATH=[];
-for(let i=0;i<7;i++)PATH.push([1,0]);  for(let i=0;i<2;i++)PATH.push([0,-1]);
-for(let i=0;i<14;i++)PATH.push([-1,0]);for(let i=0;i<2;i++)PATH.push([0,-1]);
-for(let i=0;i<14;i++)PATH.push([1,0]); for(let i=0;i<2;i++)PATH.push([0,-1]);
-for(let i=0;i<14;i++)PATH.push([-1,0]);for(let i=0;i<2;i++)PATH.push([0,-1]);
-for(let i=0;i<4;i++)PATH.push([1,0]);
-
+const push=(n,d)=>{ for(let i=0;i<n;i++) PATH.push(d); };
+push(7,[1,0]); push(3,[0,-1]);      // 東へ → 東の のぼり
+push(15,[-1,0]); push(3,[0,-1]);    // 中段を 西へ → 西の のぼり
+push(15,[1,0]); push(3,[0,-1]);     // 上段を 東へ → おくの のぼり
+push(7,[-1,0]); push(1,[0,1]);      // ボスの間を 西へ
 function fullHeal(lv, N){
   let win=0;
   for(let i=0;i<N;i++){
@@ -47,10 +46,10 @@ function fullHeal(lv, N){
 function throughRun(N){
   let win=0, lvs={}, wipedOnWay=0;
   for(let i=0;i<N;i++){
-    setParty(2); C.P.map='rift_yard'; C.P.x=8; C.P.y=11; C.G.mode='field';
+    setParty(2); C.P.map='rift_yard'; C.P.x=10; C.P.y=13; C.G.mode='field';
     lost=false;
     for(const [dx,dy] of PATH){ C.stepField(dx,dy); if(C.G.mode!=='field') C.G.mode='field'; }
-    if(lost) wipedOnWay++;                    // みちみちで ぜんめつ
+    if(lost) wipedOnWay++;                    // みちみちで 全滅
     const lv=C.party[0].lv; lvs[lv]=(lvs[lv]||0)+1;
     lost=false; C.G.mode='field';
     C.startBattle('umbra');
@@ -63,7 +62,7 @@ const N=Number(process.argv[2]||200);
 console.log('A) 全快・Lv固定');
 for(const lv of [3,4,5,6]) console.log('   Lv'+lv+'　勝率 '+fullHeal(lv,N).toFixed(1)+'%');
 const r=throughRun(N);
-console.log('B) 通しどおり（Lv2で 入口 → 道を あるいて ボス）');
+console.log('B) 通しどおり（Lv2で 入口 → 51歩の 道を あるいて ボス）');
 console.log('   ボス前の Lv ぶんぷ '+JSON.stringify(r.lvs));
-console.log('   みちみちの ぜんめつ '+r.wipedOnWay+'/'+N);
+console.log('   みちみちの 全滅 '+r.wipedOnWay+'/'+N);
 console.log('   ウンブラ 勝率 '+r.win.toFixed(1)+'%');
