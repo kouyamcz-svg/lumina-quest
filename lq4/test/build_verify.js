@@ -50,7 +50,18 @@ MODS.forEach(m=>{
   });
 }
 
-// 6. せりふ46もじ（台詞窓の うえげん）
+// 6. 表記のゆれ：IVは 漢字OK。システム文が Ⅲの ひらがなの まま 残って いないか
+{
+  // ※ コメントは 見ない。画面に 出る 文字（クオートの 中）だけを 見る。
+  const src = MODS.map(m=>fs.readFileSync('src/'+m+'.js','utf8'))
+    .join('\n').split('\n').filter(l=>!/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n');
+  const strs = (src.match(/'[^'\\\n]*'/g)||[]).join('\n');
+  const old = ['こうげき','じゅもん','どうぐ','そうび','たおした','かいふく',
+               'けいけんち','やくそう','ぼうぎょ','ちず','つよさ','さくせん','ぜんめつ'];
+  old.forEach(w=>T('Ⅲの ひらがな表記なし「'+w+'」', !strs.includes(w)));
+}
+
+// 7. せりふ46もじ（台詞窓の うえげん）
 {
   const chSrc = fs.readFileSync('src/chapters.js','utf8');
   const tooLong = [];
