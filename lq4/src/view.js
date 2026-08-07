@@ -191,9 +191,9 @@ function chrTex(key,pose){
   }
   return chrTexCache[k];
 }
-// むき → つかう ポーズ
+// むき → 使う ポーズ
 // ※ げんがの よこむきは 「ひだりむき」。したがって みぎへ すすむ ときに はんてんする。
-// walk=true の ときは 「いっぽ ふみだした」フレーム（…W）を つかう。
+// walk=true の ときは 「いっぽ ふみだした」フレーム（…W）を 使う。
 function poseOf(key,dir,walk){
   const d=CHR[key]; if(!d) return {pose:'front',flip:false};
   let base='front', flip=false;
@@ -830,7 +830,7 @@ function buildMap(name){
     if(ch==='B'){                    // ボス（さいおくの けはい）
       // ★まえは desgran1（LQ2の まおう）の えを かりて いたため、
       //   せんとうの すがた（regretshadow）と ちがって いた。
-      //   しょうデータから ボスを ひき、せんとうと おなじ えを つかう。
+      //   しょうデータから ボスを ひき、せんとうと おなじ えを 使う。
       const bi = C.bossInfoAt ? C.bossInfoAt(name) : null;
       const done = bi && bi.clearedFlag && C.G.flags[bi.clearedFlag];
       if(bi && !done){
@@ -1083,7 +1083,7 @@ function fx(kind, data, done){
   if(kind==='attack'||kind==='spell'||kind==='spellall'){
     fxState={kind:'pattack', t:0, done, target:data.target};
   }else if(kind==='enemyattack'||kind==='enemyaoe'){
-    // こうげきしてくる 1たいだけを うごかす（ぜんいんが せまってこないように）
+    // 攻撃してくる 1たいだけを うごかす（ぜんいんが せまってこないように）
     const actor = data && data.from ? foes.find(f=>f.enemy===data.from) : null;
     fxState={kind:'eattack', t:0, done, actor, wide:(kind==='enemyaoe')};
   }else if(kind==='heal'){
@@ -1124,7 +1124,7 @@ function loop(now){
   }
   else if(is2D) update2D(dt,time);
   else if(V2 && (V2.mapOn || V2.sceneOn)){
-    // ★3Dシーンちゅうの「ちず」：2Dキャンバスを かりて ちずだけ えがく。
+    // ★3Dシーンちゅうの「地図」：2Dキャンバスを かりて 地図だけ えがく。
     //   まえは 3Dでは なにも えがかれず、がめんが こおって みえた。
     if(canvas2d && (canvas2d.width < 4 || canvas2d.height < 4) && V2.resize) V2.resize();
     const g = canvas2d && canvas2d.getContext('2d');
@@ -1209,7 +1209,7 @@ function updateField(dt,time){
       }
       objs[i].scale.x = pf.flip?-1:1;
       objs[i].scale.y = 1;
-      // あるく はずみ：ふみだす たびに すこし しずんで もどる
+      // あるく はずみ：ふみだす たびに すこし しずんで 戻る
       if(moving){
         const t=1-Math.min(1,dist);                       // 0→1 で 1ますぶん
         objs[i].position.y += Math.abs(Math.sin(t*Math.PI))*0.045;
