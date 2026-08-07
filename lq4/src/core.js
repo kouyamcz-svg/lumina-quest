@@ -32,7 +32,7 @@ const SPELL_DEFS = {
 
   // ============ ノエ（夢術）：回復と弱体 ============
   heal:       {name:'ヒール',      mp:3, type:'heal', min:20, max:28},
-  mezamashi:  {name:'めざまし',    mp:2, type:'cure'},
+  mezamashi:  {name:'目覚まし',    mp:2, type:'cure'},
   madoromi:   {name:'まどろみ',    mp:4, type:'inflict', st:'sleep',   p:0.65},
   hiira:      {name:'ヒーラ',      mp:6, type:'heal', min:45, max:60},
   yumeomori:  {name:'ゆめおもり',  mp:6, type:'inflict', st:'slow',    p:0.50, all:true},
@@ -90,7 +90,7 @@ const CLASSES = {
                  {lv:28,key:'hayate'},{lv:34,key:'revive'},{lv:38,key:'holyray'},
                  {lv:45,key:'sparja'},{lv:50,key:'hikari_taika'},{lv:56,key:'shiratatsu'}]},
 };
-const TACTICS = {manual:'めいれいさせろ', gungan:'ガンガンいこうぜ', inochi:'いのちだいじに'};
+const TACTICS = {manual:'命令させろ', gungan:'ガンガンいこうぜ', inochi:'命大事に'};
 
 // ---------------- データ：敵（悪夢獣。名づけは星座名＝ボス級のみ） ----------------
 // 序章〜第1章ぶん。倒すと黒い紙片になって消える（ノエだけが顔色を変える伏線）。
@@ -156,23 +156,25 @@ const MAPS = {
   // ★でぐちは かならず 見て わかる ように する：
   //   G＝北の門／D＝イオの家の とびら／r＝道。ただの ゆかに ワープを おかない。
   lower_dist:{name:'下層区', theme:'village', enc:false, tiles:[
-    "########G########",
-    "#.......r.......#",
-    "#.S...I.r.P.....#",
-    "#.......r.......#",
-    "#..n....r...n...#",
-    "#.......r....C..#",
-    "#.....rrr.......#",
-    "#.....r.r...n...#",
-    "#.....r.r.......#",
-    "#.....r.r.......#",
-    "#..D..r.r.......#",
-    "#.....rrr.......#",
-    "########r########"],
+    "##########G##########",
+    "#.........r.........#",
+    "#.#####...r...#####.#",
+    "#.#####...r...#####.#",
+    "#.##I##...r...##S##.#",
+    "#....n.t..r..t....n.#",
+    "#rrrrrrrrrrrrrrrrrrr#",
+    "#.....o..tr...o.....#",
+    "#.#P##....r....####.#",
+    "#.####....r.n..####.#",
+    "#.####....r....####.#",
+    "#rrrrrrrrrrrrrr####r#",
+    "#.#D#..tn.r..t.####.#",
+    "#.###.....r......C..#",
+    "##########r##########"],
     warpsXY:{
-      '3,10':{to:'home_forge', x:4, y:5},
-      '8,12':{to:'trial_yard', x:6, y:8},
-      '8,0' :{to:'rift_yard',  x:8, y:11}
+      '3,12' :{to:'home_forge', x:4, y:5},
+      '10,14':{to:'trial_yard', x:6, y:8},
+      '10,0' :{to:'rift_yard',  x:10, y:13}
     }},
 
   // ============ 序章：騎士団 見習い試験場 ============
@@ -187,37 +189,40 @@ const MAPS = {
     "#...........#",
     "######.######"],
     warpsXY:{
-      '6,8':{to:'lower_dist', x:8, y:11}
+      '6,8':{to:'lower_dist', x:10, y:13}
     }},
 
   // ============ 序章：夜の広場（黒い裂け目） ============
-  // ★ボスまでの みちのりを ながく とる。
-  //   いきなり ウンブラに ぶつかると Lvが たりない（じっさいに でた もんだい）。
-  //   おれまがった みちを あるく あいだに、しぜんに 5〜8かい たたかう ように する。
-  rift_yard:{name:'裂け目の広場', theme:'dream', enc:true, encRate:0.14, encGrace:2, tiles:[
-    "#################",
-    "#....o.....o....#",
-    "#....B..........#",
-    "#..........o....#",
-    "#.###############",
-    "#...............#",
-    "###############.#",
-    "#...............#",
-    "#.###############",
-    "#...............#",
-    "###############.#",
-    "#n..............#",
-    "########G########"],
+  // ★みちのりを ながく とり、わき道を 2本 つける（宝箱／逃げ遅れた子）。
+  //   まっすぐな ろうかを ならべる だけの 水増しに しない。
+  //   ★1ますの ろうかに かざりの 岩を おかない（通れなくなる／わき道が
+  //     ぬけ道に なる ふぐあいを 2けん だした）。岩は ひろい ところだけ。
+  rift_yard:{name:'裂け目の広場', theme:'dream', enc:true, encRate:0.17, encGrace:2, tiles:[
+    "#####################",
+    "#####################",
+    "####...............##",
+    "####..o...B...o....##",
+    "####...............##",
+    "########C.#######..##",
+    "#################..##",
+    "##.................##",
+    "##..#################",
+    "##..########.n#######",
+    "##.................##",
+    "#################..##",
+    "##............o....##",
+    "##....o............##",
+    "##########G##########"],
     warpsXY:{
-      '8,12':{to:'lower_dist', x:8, y:1}
+      '10,14':{to:'lower_dist', x:10, y:1}
     }},
 };
 
 // ---------------- データ：店・宿 ----------------
 const SHOPS = {
   'lower_dist:S':[
-    {kind:'h',  name:'やくそう',         v:20, price:8},
-    {kind:'wtr',name:'まほうのせいすい', v:30, price:60},
+    {kind:'h',  name:'薬草',         v:20, price:8},
+    {kind:'wtr',name:'魔法の 聖水', v:30, price:60},
     {kind:'w',  name:'鍛冶場の 短剣',    v:4,  price:80},
     {kind:'a',  name:'作業着',           v:3,  price:60},
     {kind:'w',  name:'見習いの 槍',      v:6,  price:180},
@@ -245,7 +250,7 @@ function freshState(){
   party[0].armor  = {kind:'a',name:'見習いの 胴着',v:2};
   G.visited.home_forge = true;
 }
-// ---------------- まちの じょうたい ----------------
+// ---------------- まちの 状態 ----------------
 function setTownState(id){
   if(!WORLD.TOWN_STATES[id]) return false;
   G.townState = id;
@@ -257,7 +262,7 @@ function setNight(v){
   V.buildMap(P.map); V.setActors(true);
   return G.night;
 }
-// 章ごとの ふっきてん（ぜんめつしたとき もどる まち）
+// 章ごとの ふっきてん（ぜんめつしたとき 戻る まち）
 // ※ 章データ（chapters.js）に うつした。ここは よびだしの ための のこり。
 const HOME = {
   1:{map:'lower_dist', x:10, y:3, name:'下層区の 光珠堂'},
@@ -322,12 +327,17 @@ function buffMul(m, stat){
 }
 function mAtk(m){ return Math.round((m.batk + (m.weapon?m.weapon.v:0)) * buffMul(m,'atk')); }
 function mDef(m){ return Math.round((m.bdef + (m.armor?m.armor.v:0)) * buffMul(m,'def')); }
-// ★じゅもんの ひょうじ：なまえの あとに しゅるいを つける。
+// ★技の ひょうじ：なまえの あとに しゅるいを つける。
 //   なまえだけでは たんたい／ぜんたい／しゅびさげが わかりにくい ため。
-const SPELL_TAG = {dmg:'たんたい', dmgall:'ぜんたい', heal:'かいふく',
-                   healall:'ぜんたいかいふく', cure:'じょうたい', revive:'そせい',
-                   defdown:'しゅびさげ', 'return':'いどう',
-                   inflict:'じょうたい', buff:'きょうか'};
+// ★イオ・セレンは 剣技／槍技、ノエ・アマネは 夢術／光術。
+//   「じゅもんを となえる」で ひとくくりに しない。
+function castVerb(m){
+  return (m && (m.cls==='io' || m.cls==='seren')) ? 'を 放った！' : 'を 唱えた！';
+}
+const SPELL_TAG = {dmg:'単体', dmgall:'全体', heal:'回復',
+                   healall:'全体回復', cure:'状態', revive:'蘇生',
+                   defdown:'守り下げ', 'return':'移動',
+                   inflict:'状態', buff:'強化'};
 function spellLabel(s){
   const tag = SPELL_TAG[s.type] || '';
   return s.name + '　' + s.mp + (tag ? '　' + tag : '');
@@ -445,7 +455,7 @@ function stepField(dx,dy){
   if(G.mode!=='field' || G.busy) return;
   const nx=P.x+dx, ny=P.y+dy;
   const ch = tileAt(P.map,nx,ny);
-  // ★ぶつかっただけでは なにも おきない。しらべるのは Aボタン（interact）。
+  // ★ぶ使っただけでは なにも おきない。しらべるのは Aボタン（interact）。
   //   ワープの ます（もん・かいだん・ちてん）は ふんだら すすむ。
   P.dir = dy<0?'back' : dy>0?'front' : (dx<0?'left':'right');
   // ★ふね：もやって ある ふねに あるいて ふれると のる
@@ -571,7 +581,7 @@ function runTalkEvent(npcName){
     (Array.isArray(e.join)?e.join:[e.join]).forEach(j=>{
       const lv = j.lv==='lead' ? (party[0]?party[0].lv:1) : (j.lv||1);
       const m = joinMember(j.cls, lv);
-      if(m){                                     // そぶりの そうびを もって くる
+      if(m){                                     // そぶりの 装備を もって くる
         if(j.weapon) m.weapon = Object.assign({}, j.weapon);
         if(j.armor)  m.armor  = Object.assign({}, j.armor);
       }
@@ -604,7 +614,7 @@ function runTalkEvent(npcName){
 function offerNextChapter(next, title, isFinal){
   if(isFinal){
     G.mode = 'msg';
-    U.msg(['＊＊ ルミナクエスト III　かんけつ ＊＊',
+    U.msg(['＊＊ ルミナクエスト III　完結 ＊＊',
            '',
            'ながい たびに おつきあい いただき、',
            'ありがとう ございました！',
@@ -615,12 +625,12 @@ function offerNextChapter(next, title, isFinal){
   const ready = next && CHD && CHD.has(next);
   G.mode = 'msg';
   if(!ready){
-    U.msg(['＊＊ ' + (title||'') + ' かんけつ ＊＊',
+    U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊',
            '（つづきの しょうは これから つくります）'], () => { G.mode='field'; });
     return;
   }
   const nc = CHD.get(next);
-  U.msg(['＊＊ ' + (title||'') + ' かんけつ ＊＊',
+  U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊',
          'つぎは 第' + next + 'しょう「' + nc.title + '」。'], () => {
     G.mode = 'menu';
     U.menu(['第' + next + 'しょうへ すすむ', 'この しょうを つづける'], 'これから', (k) => {
@@ -677,14 +687,14 @@ function useInn(){
   const price = INN_PRICE[P.map]||10;
   G.mode='msg';
   if(P.gold>=price){
-    U.msg(['やどやへ ようこそ。ひとばん '+price+'ゴールドです。',
+    U.msg(['宿屋へ ようこそ。一晩 '+price+'ゴールドです。',
            '…おはようございます！ みなさん げんきに なりました！'], ()=>{
       P.gold-=price;
       party.concat(reserve).forEach(m=>{ if(m.hp>0){ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; } });
       A.heal(); U.hud(); G.mode='field';
     });
   }else{
-    U.msg(['やどやへ ようこそ。ひとばん '+price+'ゴールドです。',
+    U.msg(['宿屋へ ようこそ。一晩 '+price+'ゴールドです。',
            'おきゃくさん、おかねが たりないようで…'], ()=>{ G.mode='field'; });
   }
 }
@@ -694,9 +704,9 @@ function useChurch(){
   if(dead.length){
     const cost = 30*dead.length;
     if(P.gold>=cost){
-      U.msg(['しんかんさま「いのりましょう…」',
+      U.msg(['神官「祈りましょう…」',
              '（'+cost+'ゴールドを おさめた）',
-             'たおれた なかまが めを さました！'], ()=>{
+             '倒れた なかまが 目を 覚ました！'], ()=>{
         P.gold-=cost;
         dead.forEach(p=>{ p.hp=Math.ceil(p.maxhp/2); p.status=null; });
         A.heal(); U.hud(); G.mode='field';
@@ -720,16 +730,16 @@ function openChest(x,y){
   const r=Math.random();
   if(r<0.45){
     const g=30+Math.floor(Math.random()*40); P.gold+=g;
-    U.msg(['たからばこを あけた！', g+'ゴールドを てにいれた！'], ()=>{ U.hud(); G.mode='field'; });
+    U.msg(['宝箱を 開けた！', g+'ゴールドを てにいれた！'], ()=>{ U.hud(); G.mode='field'; });
   }else if(r<0.8){
     P.herbs+=2;
-    U.msg(['たからばこを あけた！','やくそうを 2つ てにいれた！'], ()=>{ G.mode='field'; });
+    U.msg(['宝箱を 開けた！','薬草を 2つ てにいれた！'], ()=>{ G.mode='field'; });
   }else{
     P.waters+=1;
-    U.msg(['たからばこを あけた！','まほうのせいすいを てにいれた！'], ()=>{ G.mode='field'; });
+    U.msg(['宝箱を 開けた！','魔法の 聖水を てにいれた！'], ()=>{ G.mode='field'; });
   }
 }
-// ボスの ばしょ・とうじょうの ことば・たおした あとは 章データから ひく
+// ボスの ばしょ・とうじょうの ことば・倒した あとは 章データから ひく
 function bossInfoAt(map){
   if(!CHD) return null;
   // まず いまの 章、なければ ぜんしょうから さがす（えがきは どの マップでも ひく）
@@ -786,48 +796,48 @@ function openShop(kind){
     P.gold -= it.price;
     if(it.kind==='h'){ P.herbs++; U.msg([it.name+'を かった！'], ()=>{ U.hud(); G.mode='field'; }); return; }
     if(it.kind==='wtr'){ P.waters++; U.msg([it.name+'を かった！'], ()=>{ U.hud(); G.mode='field'; }); return; }
-    // その わくが いちばん よわい なかまに そうび（きゅうそうびは ふくろへ）
+    // その わくが いちばん よわい なかまに 装備（きゅう装備は ふくろへ）
     const slot = it.kind==='w'?'weapon':'armor';
     const target = party.slice().sort((a,b)=>
       ((a[slot]?a[slot].v:0)-(b[slot]?b[slot].v:0)))[0];
     if(target[slot] && target[slot].v>=it.v){
-      U.msg(['すでに もっと よい そうびを つけています。'], ()=>{ P.gold+=it.price; U.hud(); G.mode='field'; });
+      U.msg(['すでに もっと よい 装備を つけています。'], ()=>{ P.gold+=it.price; U.hud(); G.mode='field'; });
       return;
     }
     if(target[slot]) P.equipBag.push(target[slot]);
     target[slot] = {kind:it.kind, name:it.name, v:it.v};
-    U.msg([it.name+'を かった！', target.name+'が そうびした！'], ()=>{ U.hud(); G.mode='field'; });
+    U.msg([it.name+'を かった！', target.name+'が 装備した！'], ()=>{ U.hud(); G.mode='field'; });
   });
 }
 
 // ---------------- 戦闘 ----------------
-// ひとり たびの あいだは じょうたい いじょうを うけにくくする
+// ひとり たびの あいだは 状態 いじょうを うけにくくする
 function statusText(type){
-  return type==='sleep'   ? 'ねむってしまった！'
-       : type==='confuse' ? 'こんらんした！'
-       : type==='freeze'  ? 'こおりついた！'
+  return type==='sleep'   ? '眠ってしまった！'
+       : type==='confuse' ? '混乱した！'
+       : type==='freeze'  ? '凍りついた！'
        : type==='slow'    ? 'うごきが にぶった！'
-       : 'じょうたいが おかしい！';
+       : '状態が おかしい！';
 }
-// にぶっていると すばやさが はんぶんに なる（こうどうは できる）
+// にぶっていると 素早さが はんぶんに なる（こうどうは できる）
 function effAgi(m){
   const base = m.status==='slow' ? m.agi*0.5 : m.agi;
   return base * buffMul(m,'agi');
 }
-// ★LQ4：てき がわの じょうたい いじょう
+// ★LQ4：てき がわの 状態 いじょう
 const ESTATUS_MSG = {
-  sleep:  'は ねむってしまった！',
-  confuse:'は こんらんした！',
+  sleep:  'は 眠ってしまった！',
+  confuse:'は 混乱した！',
   slow:   'の うごきが にぶった！',
 };
 const ESTATUS_WAKE = {
-  sleep:  'は めを さました！',
-  confuse:'は しょうきに もどった！',
-  slow:   'の うごきが もどった！',
+  sleep:  'は 目を 覚ました！',
+  confuse:'は 正気に 戻った！',
+  slow:   'の 動きが 戻った！',
 };
 const ESTATUS_WAKE_P = {sleep:0.30, confuse:0.34, slow:0.28};
 function eEffAgi(e){ return e.status==='slow' ? e.agi*0.5 : e.agi; }
-// ボスは じょうたい いじょうが かかりにくい（p はんげん）。immune:true なら むこう
+// ボスは 状態 いじょうが かかりにくい（p はんげん）。immune:true なら むこう
 function inflictHit(e, st, p){
   if(e.immune) return false;
   if(e.immuneSt && e.immuneSt.indexOf(st)>=0) return false;
@@ -848,7 +858,7 @@ function startBattle(kind){
   let enemies;
   if(kind){
     enemies = [makeEnemy(MIDBOSS[kind])];
-    enemies[0].boss = true;                 // ★LQ4：じょうたい いじょうは はんげん
+    enemies[0].boss = true;                 // ★LQ4：状態 いじょうは はんげん
     // ★そうしボス：章データに pair が あれば 2たいで あらわれる
     {
       const bi = bossInfoAt(P.map);
@@ -875,7 +885,7 @@ function startBattle(kind){
     const lv = party[0].lv;
     const byLv    = lv<4 ? 1 : (lv<9 ? 2 : 3);          // レベルが ひくいうちは たいぐんに ならない
     // ★ひとりの ときも、そだつに つれて かずを ふやす。
-    //   2たい どまりだと けいけんちが たまらず、レベルあげが ながすぎる
+    //   2たい どまりだと 経験値が たまらず、レベルあげが ながすぎる
     //   （第2章で Lv12まで 188せん かかっていた）。
     const byParty = party.length===1 ? (lv<5 ? 1 : lv<9 ? 2 : 3)
                                      : party.length+1;
@@ -905,7 +915,7 @@ function startBattle(kind){
   //   いまは とめる しょりに なっている）。せんとうきょくは startBattle で たのむ。
   V.battleEnter(enemies, ()=>{
     const cnt={}; enemies.forEach(e=>{ cnt[e.name]=(cnt[e.name]||0)+1; });
-    const intro = Object.keys(cnt).map(n=>cnt[n]>1?n+' '+cnt[n]+'たい':n).join('と ')+'が あらわれた！';
+    const intro = Object.keys(cnt).map(n=>cnt[n]>1?n+' '+cnt[n]+'たい':n).join('と ')+'が 現れた！';
     U.msg([intro], ()=>beginRound());
   });
 }
@@ -916,20 +926,20 @@ function beginRound(){
   b.queue=[];
   // ★ボスの「みがまえ」は 1ラウンドで とける
   b.enemies.forEach(e=>{ if(e.braced && e.bracedAt < b.round) e.braced=false; });
-  // じょうたい いじょうの かいふく はんてい
-  // ひとりの ときは、ねむり・こんらんで なにも できない じかんが ながすぎるため さめやすくする
+  // 状態 いじょうの 回復 はんてい
+  // ひとりの ときは、眠り・混乱で なにも できない じかんが ながすぎるため さめやすくする
   const solo = party.length===1;
   const wakeSleep   = solo ? 0.60 : 0.34;
   const wakeConfuse = solo ? 0.62 : 0.38;
-  const wakeFreeze  = solo ? 0.62 : 0.40;   // こおりは とけやすい
-  const wakeSlow    = 0.30;                 // にぶりは こうどうできるので きゅうさいは しない
+  const wakeFreeze  = solo ? 0.62 : 0.40;   // 凍りは とけやすい
+  const wakeSlow    = 0.30;                 // 鈍りは こうどうできるので きゅうさいは しない
   // ★なおった ことを かならず しらせる。
   //   しらせが ないと 「じねんに なおらない」と おもわれて しまう。
   const RECOVER_MSG = {
-    sleep:  'は めを さました！',
-    confuse:'は しょうきに もどった！',
-    freeze: 'の こおりが とけた！',
-    slow:   'の うごきが もどった！',
+    sleep:  'は 目を 覚ました！',
+    confuse:'は 正気に 戻った！',
+    freeze: 'の 凍りが とけた！',
+    slow:   'の 動きが 戻った！',
   };
   const healed = [];
   party.forEach(m=>{
@@ -939,13 +949,13 @@ function beginRound(){
     else if(st==='confuse' && Math.random()<wakeConfuse) ok = true;
     else if(st==='freeze'  && Math.random()<wakeFreeze)  ok = true;
     else if(st==='slow'    && Math.random()<wakeSlow)    ok = true;
-    if(ok){ m.status = null; healed.push(m.name + (RECOVER_MSG[st] || 'は もとに もどった！')); }
+    if(ok){ m.status = null; healed.push(m.name + (RECOVER_MSG[st] || 'は 元に 戻った！')); }
   });
-  // ★LQ4：てきの じょうたい いじょうも さめる
+  // ★LQ4：てきの 状態 いじょうも さめる
   b.enemies.filter(e=>e.hp>0 && e.status).forEach(e=>{
     if(Math.random() < (ESTATUS_WAKE_P[e.status]||0.3)){
       const st=e.status; e.status=null;
-      healed.push(e.dispName + (ESTATUS_WAKE[st]||'は もとに もどった！'));
+      healed.push(e.dispName + (ESTATUS_WAKE[st]||'は 元に 戻った！'));
     }
   });
   // ★LQ4：あじかたの バフの きげんぎれ
@@ -954,7 +964,7 @@ function beginRound(){
     Object.keys(m.buffs).forEach(k=>{
       if(m.buffs[k].until < b.round){
         delete m.buffs[k];
-        healed.push(m.name+'の '+(BUFF_JP[k]||k)+'が もとに もどった。');
+        healed.push(m.name+'の '+(BUFF_JP[k]||k)+'が 元に 戻った。');
       }
     });
   });
@@ -974,29 +984,29 @@ function collectCommands(i){
   if(m.status==='freeze'){ b.queue.push({actor:m, type:'frozen'}); collectCommands(i+1); return; }
   if(G.tactic!=='manual'){ b.queue.push(autoCommand(m)); collectCommands(i+1); return; }
   G.menu={kind:'battle'};
-  const items=['こうげき','じゅもん','どうぐ','ぼうぎょ','にげる'];
+  const items=['攻撃','技','道具','防御','逃げる'];
   U.menu(items, m.name, (sel)=>{
     if(sel===0){
       chooseTarget(m, (tgt)=>{
-        if(tgt===null){ collectCommands(i); return; }        // もどる
+        if(tgt===null){ collectCommands(i); return; }        // 戻る
         b.queue.push({actor:m, type:'attack', tgt}); collectCommands(i+1);
       });
     }
     else if(sel===1){
       const sp = knownSpells(m).filter(s=>s.mp<=m.mp);
-      if(!sp.length){ G.mode='msg'; U.msg(['つかえる じゅもんが ない！'], ()=>{ G.mode='battle'; collectCommands(i); }); return; }
-      U.menu(sp.map(spellLabel).concat(['もどる']), m.name+'　じゅもん', (k)=>{
+      if(!sp.length){ G.mode='msg'; U.msg(['つかえる 技が ない！'], ()=>{ G.mode='battle'; collectCommands(i); }); return; }
+      U.menu(sp.map(spellLabel).concat(['戻る']), m.name+'　技', (k)=>{
         if(k>=sp.length){ collectCommands(i); return; }
         const chosen=sp[k];
         if(chosen.type==='dmg' || chosen.type==='defdown'
-           || (chosen.type==='inflict' && !chosen.all)){      // あいてを えらぶ じゅもん
+           || (chosen.type==='inflict' && !chosen.all)){      // あいてを えらぶ 技
           chooseTarget(m, (tgt)=>{
             if(tgt===null){ collectCommands(i); return; }
             b.queue.push({actor:m, type:'spell', sp:chosen, tgt}); collectCommands(i+1);
           });
           return;
         }
-        // ★かいふく・じょうたいかいふく・そせいは 「だれに つかうか」を えらぶ
+        // ★回復・状態回復・そせいは 「誰に 使うか」を えらぶ
         if(spellNeedsTarget(chosen)){
           chooseMember(m, chosen, (tgt)=>{
             if(tgt===null){ collectCommands(i); return; }
@@ -1009,19 +1019,19 @@ function collectCommands(i){
     }
     else if(sel===2){
       const opts=[];
-      if(P.herbs>0) opts.push('やくそう '+P.herbs);
-      if(P.waters>0) opts.push('まほうのせいすい '+P.waters);
-      if(!opts.length){ G.mode='msg'; U.msg(['どうぐが ない！'], ()=>{ G.mode='battle'; collectCommands(i); }); return; }
-      U.menu(opts.concat(['もどる']), 'どうぐ', (k)=>{
+      if(P.herbs>0) opts.push('薬草 '+P.herbs);
+      if(P.waters>0) opts.push('魔法の 聖水 '+P.waters);
+      if(!opts.length){ G.mode='msg'; U.msg(['道具が ない！'], ()=>{ G.mode='battle'; collectCommands(i); }); return; }
+      U.menu(opts.concat(['戻る']), '道具', (k)=>{
         if(k>=opts.length){ collectCommands(i); return; }
-        const kind = opts[k].startsWith('やくそう') ? 'herb' : 'water';
-        // ★だれに つかうかを えらぶ（1にんの ときは そのまま）
+        const kind = opts[k].startsWith('薬草') ? 'herb' : 'water';
+        // ★誰に 使うかを えらぶ（1にんの ときは そのまま）
         const alive = party.filter(p=>p.hp>0);
         if(alive.length<=1){
           b.queue.push({actor:m, type:kind, tgt:alive[0]}); collectCommands(i+1); return;
         }
         const names = alive.map(p=> p.name+'　HP'+p.hp+'/'+p.maxhp+(kind==='water' ? '　MP'+p.mp+'/'+p.maxmp : ''));
-        U.menu(names.concat(['もどる']), 'だれに つかう？', (t)=>{
+        U.menu(names.concat(['戻る']), '誰に 使う？', (t)=>{
           if(t>=alive.length){ collectCommands(i); return; }
           b.queue.push({actor:m, type:kind, tgt:alive[t]}); collectCommands(i+1);
         });
@@ -1035,13 +1045,13 @@ function bestHeal(m, need){
   const sp = knownSpells(m).filter(s=>s.type==='heal' && s.mp<=m.mp).sort((a,b)=>b.max-a.max);
   if(!sp.length) return null;
   const enough = sp.filter(s=>s.max>=need).sort((a,b)=>a.mp-b.mp);
-  return enough[0] || sp[0];      // まかなえる いちばん やすい じゅもん／なければ さいだい
+  return enough[0] || sp[0];      // まかなえる いちばん やすい 技／なければ さいだい
 }
 // あいてが 2たい いじょう なら えらばせる。1たいなら そのまま。
-// ★せんとうちゅうに 「だれに つかうか」を えらぶ。
+// ★せんとうちゅうに 「誰に 使うか」を えらぶ。
 //   ひとりしか いない ときは きかない。
-const STATUS_JP = {sleep:'ねむり', confuse:'こんらん', freeze:'こおり', slow:'にぶり'};
-const BUFF_JP   = {atk:'こうげきりょく', def:'しゅびりょく', agi:'すばやさ'};
+const STATUS_JP = {sleep:'眠り', confuse:'混乱', freeze:'凍り', slow:'鈍り'};
+const BUFF_JP   = {atk:'攻撃力', def:'守備力', agi:'素早さ'};
 function chooseMember(m, sp, done){
   const alive = (sp.type==='revive') ? party.filter(p=>p.hp<=0) : aliveMembers();
   if(!alive.length){ done(null); return; }
@@ -1051,33 +1061,33 @@ function chooseMember(m, sp, done){
     if(sp.type==='cure')  return p.name + '　' + (p.status ? (STATUS_JP[p.status]||p.status) : 'そうかい');
     return p.name;
   });
-  U.menu(label.concat(['もどる']), sp.name + '　だれに？', (k)=>{
+  U.menu(label.concat(['戻る']), sp.name + '　誰に？', (k)=>{
     done(k >= alive.length ? null : alive[k]);
   });
 }
 function chooseTarget(m, cb){
   const alive = G.battle.enemies.filter(e=>e.hp>0);
   if(alive.length<=1){ cb(alive[0]||null); return; }
-  U.menu(alive.map(e=>e.dispName).concat(['もどる']), 'だれを ねらう？', (k)=>{
+  U.menu(alive.map(e=>e.dispName).concat(['戻る']), '誰を 狙う？', (k)=>{
     cb(k>=alive.length ? null : alive[k]);
   });
 }
 function autoCommand(m){
   const b=G.battle;
   const sp = knownSpells(m).filter(s=>s.mp<=m.mp);
-  // ① たおれた なかまの そせい
+  // ① 倒れた なかまの そせい
   const dead = party.find(p=>p.hp<=0);
   if(dead){
     const rv = sp.find(s=>s.type==='revive');
     if(rv) return {actor:m, type:'spell', sp:rv, tgt:dead};
   }
-  // ②-a ぜんたいかいふく（3にん いじょう きずついていたら）
+  // ②-a ぜんたい回復（3にん いじょう きずついていたら）
   const hurtAll = party.filter(p=>p.hp>0 && p.hp<p.maxhp*0.62);
   if(hurtAll.length>=2){
     const ha = sp.filter(s=>s.type==='healall').sort((a,c)=>c.max-a.max)[0];
     if(ha) return {actor:m, type:'spell', sp:ha};
   }
-  // ② かいふく（のこりHPの わりあいで はんだん）
+  // ② 回復（のこりHPの わりあいで はんだん）
   const wounded = party.filter(p=>p.hp>0 && p.hp<p.maxhp)
                        .sort((a,c)=>a.hp/a.maxhp - c.hp/c.maxhp);
   if(wounded.length){
@@ -1092,7 +1102,7 @@ function autoCommand(m){
   // ③ MPぎれなら せいすい
   if(m.maxmp>0 && m.mp<6 && P.waters>0 && knownSpells(m).some(s=>s.type==='heal'))
     return {actor:m, type:'water', tgt:m};
-  // ④ こうげき
+  // ④ 攻撃
   const alive = b.enemies.filter(e=>e.hp>0);
   const dmg = sp.filter(s=>s.type==='dmg'||s.type==='dmgall');
   if(dmg.length && alive.length>=2){
@@ -1102,7 +1112,7 @@ function autoCommand(m){
   const single = dmg.filter(s=>s.type==='dmg').sort((a,c)=>c.max-a.max)[0];
   if(single && m.mp > single.mp*3 && mAtk(m) < single.max)
     return {actor:m, type:'spell', sp:single,
-            tgt:alive.slice().sort((x,y)=>x.hp-y.hp)[0]};   // ぶつりが よわい なかまは じゅもん
+            tgt:alive.slice().sort((x,y)=>x.hp-y.hp)[0]};   // ぶつりが よわい なかまは 技
   const weakest = alive.slice().sort((x,y)=>x.hp-y.hp)[0];
   return {actor:m, type:'attack', tgt:weakest};
 }
@@ -1138,25 +1148,25 @@ function stepAction(acts,i){
 function memberAct(a, done){
   const b=G.battle, m=a.actor;
   const alive = b.enemies.filter(e=>e.hp>0);
-  if(a.type==='sleep'){ U.msg([m.name+'は ねむっている…'], done); return; }
-  if(a.type==='frozen'){ U.msg([m.name+'は こおりついて うごけない！'], done); return; }
-  if(a.type==='confused'){ // こんらん：てきか みかたか わからなくなる
+  if(a.type==='sleep'){ U.msg([m.name+'は 眠っている…'], done); return; }
+  if(a.type==='frozen'){ U.msg([m.name+'は 凍りついて うごけない！'], done); return; }
+  if(a.type==='confused'){ // 混乱：てきか みかたか わからなくなる
     const allies=aliveMembers().filter(p=>p!==m);
     if(Math.random()<0.45 && allies.length){
       const t2=allies[Math.floor(Math.random()*allies.length)];
       const d2=Math.max(1, Math.floor(mAtk(m)*0.6) - Math.floor(mDef(t2)/2));
       t2.hp-=d2; A.hit(); U.hud();
-      const l=[m.name+'は こんらんしている！', m.name+'は '+t2.name+'を こうげき！',
-               t2.name+'は '+d2+'の ダメージを うけた！'];
-      if(t2.hp<=0){ t2.hp=0; t2.status=null; l.push(t2.name+'は たおれた…'); }
+      const l=[m.name+'は 混乱している！', m.name+'は '+t2.name+'を 攻撃！',
+               t2.name+'は '+d2+'の ダメージを 受けた！'];
+      if(t2.hp<=0){ t2.hp=0; t2.status=null; l.push(t2.name+'は 倒れた…'); }
       U.msg(l, done); return;
     }
-    U.msg([m.name+'は こんらんしている！', m.name+'は ふらふらと あるきまわった。'], done);
+    U.msg([m.name+'は 混乱している！', m.name+'は ふらふらと あるきまわった。'], done);
     return;
   }
   if(a.type==='guard'){ m.guard=true; U.msg([m.name+'は みを まもっている。'], done); return; }
   if(a.type==='flee'){
-    if(b.named){ U.msg(['にげられない！'], done); return; }
+    if(b.named){ U.msg(['逃げられない！'], done); return; }
     if(Math.random()<0.6){ b.fled=true; if(A.flee) A.flee();
       U.msg([m.name+'たちは にげだした！'], ()=>endBattle(false)); }
     else U.msg([m.name+'は にげようとしたが まわりこまれた！'], done);
@@ -1168,7 +1178,7 @@ function memberAct(a, done){
     const t = a.tgt && a.tgt.hp>0 ? a.tgt : aliveMembers().sort((x,y)=>x.hp/x.maxhp-y.hp/y.maxhp)[0];
     const h = Math.min(t.maxhp-t.hp, 20+Math.floor(Math.random()*9));
     t.hp+=h; A.heal(); U.hud();
-    V.fx('heal',{member:t}, ()=>U.msg([m.name+'は やくそうを つかった！', t.name+'の HPが '+h+' かいふく！'], done));
+    V.fx('heal',{member:t}, ()=>U.msg([m.name+'は 薬草を 使った！', t.name+'の HPが '+h+' 回復！'], done));
     return;
   }
   if(a.type==='water'){
@@ -1177,7 +1187,7 @@ function memberAct(a, done){
     const t = a.tgt && a.tgt.hp>0 ? a.tgt : aliveMembers().filter(p=>p.maxmp>0).sort((x,y)=>x.mp-y.mp)[0]||m;
     const h = Math.min(t.maxmp-t.mp, 30);
     t.mp+=h; A.heal(); U.hud();
-    U.msg([m.name+'は まほうのせいすいを つかった！', t.name+'の MPが '+h+' かいふく！'], done);
+    U.msg([m.name+'は 魔法の 聖水を 使った！', t.name+'の MPが '+h+' 回復！'], done);
     return;
   }
   if(a.type==='spell'){
@@ -1188,18 +1198,18 @@ function memberAct(a, done){
       const t = a.tgt && a.tgt.hp>0 ? a.tgt : aliveMembers().sort((x,y)=>x.hp/x.maxhp-y.hp/y.maxhp)[0];
       const h = Math.min(t.maxhp-t.hp, sp.min+Math.floor(Math.random()*(sp.max-sp.min+1)));
       t.hp+=h; A.heal(); U.hud();
-      V.fx('heal',{member:t}, ()=>U.msg([m.name+'は '+sp.name+'を となえた！', t.name+'の HPが '+h+' かいふく！'], done));
+      V.fx('heal',{member:t}, ()=>U.msg([m.name+'は '+sp.name+castVerb(m), t.name+'の HPが '+h+' 回復！'], done));
       return;
     }
     if(sp.type==='healall'){
       const targets=aliveMembers();
-      const lines=[m.name+'は '+sp.name+'を となえた！'];
+      const lines=[m.name+'は '+sp.name+castVerb(m)];
       A.heal();
       targets.forEach(tg=>{
         const h=Math.min(tg.maxhp-tg.hp, sp.min+Math.floor(Math.random()*(sp.max-sp.min+1)));
-        if(h>0){ tg.hp+=h; lines.push(tg.name+'の HPが '+h+' かいふく！'); }
+        if(h>0){ tg.hp+=h; lines.push(tg.name+'の HPが '+h+' 回復！'); }
       });
-      if(lines.length===1) lines.push('しかし こうかが なかった。');
+      if(lines.length===1) lines.push('しかし 効果が なかった。');
       U.hud();
       V.fx('heal',{}, ()=>U.msg(lines, done));
       return;
@@ -1207,45 +1217,45 @@ function memberAct(a, done){
     if(sp.type==='cure'){
       const t = party.find(p=>p.status) || m;
       t.status=null; A.heal();
-      U.msg([m.name+'は '+sp.name+'を となえた！', t.name+'の じょうたいが もどった。'], done);
+      U.msg([m.name+'は '+sp.name+castVerb(m), t.name+'の 状態が 戻った。'], done);
       return;
     }
     if(sp.type==='revive'){
       const t = party.find(p=>p.hp<=0);
-      if(!t){ U.msg(['しかし こうかが なかった。'], done); return; }
+      if(!t){ U.msg(['しかし 効果が なかった。'], done); return; }
       t.hp=Math.ceil(t.maxhp/2); t.status=null; A.heal(); U.hud();
-      U.msg([m.name+'は '+sp.name+'を となえた！', t.name+'は いきかえった！'], done);
+      U.msg([m.name+'は '+sp.name+castVerb(m), t.name+'は 生き返った！'], done);
       return;
     }
     if(sp.type==='dmgall'){
-      const lines=[m.name+'は '+sp.name+'を となえた！'];
+      const lines=[m.name+'は '+sp.name+castVerb(m)];
       A.hit();
       V.fx('spellall',{}, ()=>{
         alive.forEach(e=>{
           const d = sp.min+Math.floor(Math.random()*(sp.max-sp.min+1));
           e.hp-=d; lines.push(e.dispName+'に '+d+'の ダメージ！');
-          if(e.hp<=0){ e.hp=0; lines.push(e.dispName+'を たおした！'); killed(e); }
+          if(e.hp<=0){ e.hp=0; lines.push(e.dispName+'を 倒した！'); killed(e); }
         });
         U.msg(lines, done);
       });
       return;
     }
     if(A.spell) A.spell();
-    // ★LQ4 inflict：あいてに じょうたい いじょうを あたえる
+    // ★LQ4 inflict：あいてに 状態 いじょうを あたえる
     if(sp.type==='inflict'){
       const live = b.enemies.filter(e=>e.hp>0);
       if(!live.length){ done(); return; }
       const tgts = sp.all ? live : [ (a.tgt && a.tgt.hp>0) ? a.tgt : live[0] ];
-      const lines=[m.name+'は '+sp.name+'を となえた！'];
+      const lines=[m.name+'は '+sp.name+castVerb(m)];
       let any=false;
-      // ★st2 が ある じゅもんは、1つめが かからなかった とき（または すでに かかって
-      //   いる とき）に 2つめを ためす。てきの じょうたいは 1つしか もてない ため、
-      //   「ねむり＋にぶり どうじ」は こう いう かたちで あらわす（とこよの ゆめ）。
+      // ★st2 が ある 技は、1つめが かからなかった とき（または すでに かかって
+      //   いる とき）に 2つめを ためす。てきの 状態は 1つしか もてない ため、
+      //   「眠り＋鈍り どうじ」は こう いう かたちで あらわす（とこよの ゆめ）。
       const cands = sp.st2 ? [sp.st, sp.st2] : [sp.st];
       tgts.forEach(tg=>{
         let done2 = false;
         for(const st of cands){
-          if(tg.status===st){                       // すでに その じょうたい
+          if(tg.status===st){                       // すでに その 状態
             if(st===cands[cands.length-1]){
               lines.push(tg.dispName+'は すでに '+(STATUS_JP[st]||st)+'。'); done2=true;
             }
@@ -1253,11 +1263,11 @@ function memberAct(a, done){
           }
           if(inflictHit(tg, st, (st===sp.st ? sp.p : (sp.p2 || sp.p)))){
             tg.status = st; any=true; done2=true;
-            lines.push(tg.dispName + (ESTATUS_MSG[st]||'の じょうたいが かわった！'));
+            lines.push(tg.dispName + (ESTATUS_MSG[st]||'の 状態が かわった！'));
             break;
           }
         }
-        if(!done2) lines.push(tg.dispName+'には きかなかった。');
+        if(!done2) lines.push(tg.dispName+'には 効かなかった。');
       });
       if(any) V.refresh();
       U.msg(lines, done);
@@ -1268,19 +1278,19 @@ function memberAct(a, done){
       const tgts = sp.all ? aliveMembers()
                           : [ (a.tgt && a.tgt.hp>0) ? a.tgt : m ];
       const until = (b.round|0) + (sp.turns||3);
-      const lines=[m.name+'は '+sp.name+'を となえた！'];
+      const lines=[m.name+'は '+sp.name+castVerb(m)];
       tgts.forEach(tg=>{
         tg.buffs = tg.buffs || {};
         const cur = tg.buffs[sp.stat];
         // かさねがけは のびるだけ（ばいりつは たかいほうを のこす）
         tg.buffs[sp.stat] = {mul: Math.max(sp.mul||1.25, cur?cur.mul:0), until: Math.max(until, cur?cur.until:0)};
-        lines.push(tg.name+'の '+(BUFF_JP[sp.stat]||sp.stat)+'が あがった！');
+        lines.push(tg.name+'の '+(BUFF_JP[sp.stat]||sp.stat)+'が 上がった！');
       });
       U.hud();
       U.msg(lines, done);
       return;
     }
-    // ★defdown：あいての しゅびりょくを さげる
+    // ★defdown：あいての 守備力を さげる
     if(sp.type==='defdown'){
       const alive = b.enemies.filter(e=>e.hp>0);
       if(!alive.length){ done(); return; }
@@ -1289,9 +1299,9 @@ function memberAct(a, done){
       const before = eDef(tg);
       tg.defDown = {v:Math.min((tg.def|0), ((tg.defDown&&tg.defDown.v)||0) + cut)};
       const after = eDef(tg);
-      const lines=[m.name+'は '+sp.name+'を となえた！'];
-      if(after < before) lines.push(tg.dispName+'の しゅびりょくが さがった！');
-      else lines.push(tg.dispName+'には きかなかった。');
+      const lines=[m.name+'は '+sp.name+castVerb(m)];
+      if(after < before) lines.push(tg.dispName+'の 守備力が さがった！');
+      else lines.push(tg.dispName+'には 効かなかった。');
       U.msg(lines, done);
       return;
     }
@@ -1302,13 +1312,13 @@ function memberAct(a, done){
     A.hit();
     V.fx('spell',{target:t}, ()=>{
       t.hp-=d;
-      const lines=[m.name+'は '+sp.name+'を となえた！', t.dispName+'に '+d+'の ダメージ！'];
-      if(t.hp<=0){ t.hp=0; lines.push(t.dispName+'を たおした！'); killed(t); }
+      const lines=[m.name+'は '+sp.name+castVerb(m), t.dispName+'に '+d+'の ダメージ！'];
+      if(t.hp<=0){ t.hp=0; lines.push(t.dispName+'を 倒した！'); killed(t); }
       U.msg(lines, done);
     });
     return;
   }
-  // 通常こうげき：えらんだ あいてが たおれていたら ほかへ
+  // 通常攻撃：えらんだ あいてが たおれていたら ほかへ
   const t = (a.tgt && a.tgt.hp>0) ? a.tgt
           : alive[Math.floor(Math.random()*alive.length)];
   if(!t){ done(); return; }
@@ -1319,14 +1329,14 @@ function memberAct(a, done){
   A.hit();
   V.fx('attack',{member:m, target:t}, ()=>{
     t.hp-=d;
-    const lines=[m.name+'の こうげき！'];
-    if(crit) lines.push('かいしんの いちげき！！');
+    const lines=[m.name+'の 攻撃！'];
+    if(crit) lines.push('会心の 一撃！！');
     lines.push(t.dispName+'に '+d+'の ダメージ！');
-    if(t.hp<=0){ t.hp=0; lines.push(t.dispName+'を たおした！'); killed(t); }
+    if(t.hp<=0){ t.hp=0; lines.push(t.dispName+'を 倒した！'); killed(t); }
     U.msg(lines, done);
   });
 }
-// ★てきの しゅびりょく（よわめられて いれば さがる）
+// ★てきの 守備力（よわめられて いれば さがる）
 function eDef(e){
   const cut = e.defDown ? e.defDown.v : 0;
   let d = Math.max(0, (e.def|0) - cut);
@@ -1335,7 +1345,7 @@ function eDef(e){
   return Math.max(0, d);
 }
 function killed(e){ const d=G.dex[e.key]=G.dex[e.key]||{seen:1,kill:0}; d.kill++;
-  // ★いらい（たおした かずを かぞえる）
+  // ★いらい（倒した かずを かぞえる）
   if(G.quota && G.quota.n < G.quota.need){
     G.quota.n++;
     if(G.quota.n >= G.quota.need) G.flags[G.quota.flag] = true;
@@ -1355,8 +1365,8 @@ function releaseCharge(e, alive, done){
         d = Math.max(1, d);
         if(m.guard) d = Math.max(1, Math.ceil(d*0.4));
         m.hp -= d;
-        lines.push(m.name+'は '+d+'の ダメージ！'+(m.guard?'（ぼうぎょ）':''));
-        if(m.hp<=0){ m.hp=0; m.status=null; lines.push(m.name+'は たおれた…'); }
+        lines.push(m.name+'は '+d+'の ダメージ！'+(m.guard?'（防御）':''));
+        if(m.hp<=0){ m.hp=0; m.status=null; lines.push(m.name+'は 倒れた…'); }
       });
       U.hud(); U.msg(lines, done);
     });
@@ -1369,8 +1379,8 @@ function releaseCharge(e, alive, done){
   V.fx('enemyattack',{target:t, from:e}, ()=>{
     t.hp -= d;
     lines.push(e.dispName+'の '+c.name+'！',
-               t.name+'は '+d+'の ダメージを うけた！'+(t.guard?'（ぼうぎょ）':''));
-    if(t.hp<=0){ t.hp=0; t.status=null; lines.push(t.name+'は たおれた…'); }
+               t.name+'は '+d+'の ダメージを 受けた！'+(t.guard?'（防御）':''));
+    if(t.hp<=0){ t.hp=0; t.status=null; lines.push(t.name+'は 倒れた…'); }
     U.hud(); U.msg(lines, done);
   });
 }
@@ -1379,19 +1389,19 @@ function enemyAct(e, done){
   if(!alive.length){ defeat(); return; }
   const lines=[];
   const rnd = (G.battle && G.battle.round) || 0;
-  // ★LQ4：ねむっている てきは こうどう できない
-  if(e.status==='sleep'){ U.msg([e.dispName+'は ねむっている…'], done); return; }
-  // ★LQ4：こんらんした てきは なかまを たたく ことが ある
+  // ★LQ4：眠っている てきは こうどう できない
+  if(e.status==='sleep'){ U.msg([e.dispName+'は 眠っている…'], done); return; }
+  // ★LQ4：混乱した てきは なかまを たたく ことが ある
   if(e.status==='confuse' && Math.random()<0.5){
     const mates = G.battle.enemies.filter(x=>x.hp>0 && x!==e);
-    if(!mates.length){ U.msg([e.dispName+'は こんらんして あばれている！'], done); return; }
+    if(!mates.length){ U.msg([e.dispName+'は 混乱して あばれている！'], done); return; }
     const t2 = mates[Math.floor(Math.random()*mates.length)];
     const d2 = Math.max(1, Math.floor(e.atk*0.7) - Math.floor(eDef(t2)/2));
     A.ehit();
     t2.hp -= d2;
-    const l=[e.dispName+'は こんらんしている！', e.dispName+'は '+t2.dispName+'を こうげき！',
+    const l=[e.dispName+'は 混乱している！', e.dispName+'は '+t2.dispName+'を 攻撃！',
              t2.dispName+'に '+d2+'の ダメージ！'];
-    if(t2.hp<=0){ t2.hp=0; l.push(t2.dispName+'を たおした！'); killed(t2); }
+    if(t2.hp<=0){ t2.hp=0; l.push(t2.dispName+'を 倒した！'); killed(t2); }
     V.refresh();
     U.msg(l, done);
     return;
@@ -1405,7 +1415,7 @@ function enemyAct(e, done){
     e.charging = false;                      // ためを キャンセルして すがたを かえる
     A.cue(); V.refresh();
     U.msg([e.dispName+'は '+(e.enrage.name||'ちからを かいほうした！'),
-           e.dispName+'の こうげきりょくが あがった！'], done);
+           e.dispName+'の 攻撃力が 上がった！'], done);
     return;
   }
   // ★ためわざ：ためた つぎの ラウンドで はなつ
@@ -1447,12 +1457,12 @@ function enemyAct(e, done){
     V.fx('enemyattack',{target:ts, from:e}, ()=>{
       ts.hp-=ds;
       lines.push(e.dispName+'の '+e.skill.name+'！',
-                 ts.name+'は '+ds+'の ダメージを うけた！'+(ts.guard?'（ぼうぎょ）':''));
+                 ts.name+'は '+ds+'の ダメージを 受けた！'+(ts.guard?'（防御）':''));
       if(e.drain){
         const h=Math.min(e.maxhp-e.hp, Math.floor(ds*e.drain));
-        if(h>0){ e.hp+=h; lines.push(e.dispName+'は HPを '+h+' すいとった！'); }
+        if(h>0){ e.hp+=h; lines.push(e.dispName+'は HPを '+h+' 吸い取った！'); }
       }
-      if(ts.hp<=0){ ts.hp=0; ts.status=null; lines.push(ts.name+'は たおれた…'); }
+      if(ts.hp<=0){ ts.hp=0; ts.status=null; lines.push(ts.name+'は 倒れた…'); }
       else if(e.inflict && Math.random()<inflictP(e) && !ts.status){
         ts.status=e.inflict.type;
         lines.push(ts.name+'は '+statusText(e.inflict.type));
@@ -1461,7 +1471,7 @@ function enemyAct(e, done){
     });
     return;
   }
-  // じゅもん
+  // 技
   if(e.spell && Math.random()<e.spell.p){
     const sp=e.spell;
     if(sp.kind==='heal'){
@@ -1470,8 +1480,8 @@ function enemyAct(e, done){
       const tg=hurt||e;
       const h=Math.min(tg.maxhp-tg.hp, sp.lo+Math.floor(Math.random()*(sp.hi-sp.lo+1)));
       tg.hp+=h; A.heal();
-      U.msg([e.dispName+'は '+sp.name+'を となえた！',
-             tg.dispName+'の きずが ふさがった！ HPが '+h+' かいふく！'], done);
+      U.msg([e.dispName+'は '+sp.name+castVerb(m),
+             tg.dispName+'の きずが ふさがった！ HPが '+h+' 回復！'], done);
       return;
     }
     const tp=alive[Math.floor(Math.random()*alive.length)];
@@ -1481,9 +1491,9 @@ function enemyAct(e, done){
     A.cue(); A.ehit();
     V.fx('enemyattack',{target:tp, from:e}, ()=>{
       tp.hp-=dp;
-      lines.push(e.dispName+'は '+sp.name+'を となえた！',
-                 tp.name+'は '+dp+'の ダメージを うけた！');
-      if(tp.hp<=0){ tp.hp=0; tp.status=null; lines.push(tp.name+'は たおれた…'); }
+      lines.push(e.dispName+'は '+sp.name+castVerb(m),
+                 tp.name+'は '+dp+'の ダメージを 受けた！');
+      if(tp.hp<=0){ tp.hp=0; tp.status=null; lines.push(tp.name+'は 倒れた…'); }
       else{
         const inf = e.spellInflict || e.inflict;     // うたは ねむらせ、まなざしは にぶらせる
         if(inf && Math.random()<inflictP({inflict:inf}) && !tp.status){
@@ -1502,10 +1512,10 @@ function enemyAct(e, done){
     V.fx('enemyaoe',{from:e}, ()=>{
       alive.forEach(m=>{
         let d = e.aoe.lo + Math.floor(Math.random()*(e.aoe.hi-e.aoe.lo+1));
-        d = Math.max(1, d - Math.floor(mDef(m)/4));   // いき・ぜんたいわざにも そうびが きく
+        d = Math.max(1, d - Math.floor(mDef(m)/4));   // いき・ぜんたいわざにも 装備が きく
         if(m.guard) d = Math.max(1, Math.ceil(d*0.4));
-        m.hp-=d; lines.push(m.name+'は '+d+'の ダメージ！'+(m.guard?'（ぼうぎょ）':''));
-        if(m.hp<=0){ m.hp=0; m.status=null; lines.push(m.name+'は たおれた…'); }
+        m.hp-=d; lines.push(m.name+'は '+d+'の ダメージ！'+(m.guard?'（防御）':''));
+        if(m.hp<=0){ m.hp=0; m.status=null; lines.push(m.name+'は 倒れた…'); }
       });
       U.hud(); U.msg(lines, done);
     });
@@ -1517,12 +1527,12 @@ function enemyAct(e, done){
   A.cue(); A.ehit();
   V.fx('enemyattack',{target:t, from:e}, ()=>{
     t.hp-=d;
-    lines.push(e.dispName+'の こうげき！', t.name+'は '+d+'の ダメージを うけた！'+(t.guard?'（ぼうぎょ）':''));
+    lines.push(e.dispName+'の 攻撃！', t.name+'は '+d+'の ダメージを 受けた！'+(t.guard?'（防御）':''));
     if(e.drain){
       const h=Math.min(e.maxhp-e.hp, Math.floor(d*e.drain));
-      if(h>0){ e.hp+=h; lines.push(e.dispName+'は HPを '+h+' すいとった！'); }
+      if(h>0){ e.hp+=h; lines.push(e.dispName+'は HPを '+h+' 吸い取った！'); }
     }
-    if(t.hp<=0){ t.hp=0; t.status=null; lines.push(t.name+'は たおれた…'); }
+    if(t.hp<=0){ t.hp=0; t.status=null; lines.push(t.name+'は 倒れた…'); }
     else if(e.inflict && Math.random()<inflictP(e) && !t.status){
       t.status=e.inflict.type;
       lines.push(t.name+'は '+statusText(e.inflict.type));
@@ -1542,13 +1552,13 @@ function victory(){
   const b=G.battle;
   if(A.bgmStop) A.bgmStop();      // しょうりBGMは はいし。せんとうきょくを とめるだけ。
   const got = b.enemies.filter(e=>!e.fled);
-  // ★ばしょに よって けいけんちが かわる（かせぎばを つくる）
+  // ★ばしょに よって 経験値が かわる（かせぎばを つくる）
   const mul = EXP_MUL[P.map] || 1;
   const exp = Math.round(got.reduce((a,e)=>a+e.exp,0) * mul);
   const gold = got.reduce((a,e)=>a+e.gold,0);
   P.gold += gold;
   A.win();
-  const lines=['まものたちを たおした！','けいけんち '+exp+'、'+gold+'ゴールドを かくとく！'];
+  const lines=['魔物たちを 倒した！','経験値 '+exp+'、'+gold+'ゴールドを 獲得！'];
   let leveled=false;
   aliveMembers().concat(reserve.filter(m=>m.hp>0)).forEach(m=>{
     m.exp += exp;
@@ -1558,9 +1568,9 @@ function victory(){
       m.maxhp+=g.hp; m.maxmp+=g.mp; m.batk+=g.atk; m.bdef+=g.def;
       if(m.lv%2===0) m.agi+=g.agi;
       m.hp=m.maxhp; m.mp=m.maxmp;
-      lines.push(m.name+'は レベル'+m.lv+'に あがった！');
+      lines.push(m.name+'は レベル'+m.lv+'に 上がった！');
       const ns = CLASSES[m.cls].learns.find(l=>l.lv===m.lv);
-      if(ns) lines.push(m.name+'は '+SPELL_DEFS[ns.key].name+'を おぼえた！');
+      if(ns) lines.push(m.name+'は '+SPELL_DEFS[ns.key].name+'を 覚えた！');
     }
   });
   if(leveled) A.lvup();
@@ -1597,7 +1607,7 @@ function victory(){
 }
 function defeat(){
   A.lose();
-  U.msg(['ぜんめつ してしまった…'], ()=>{
+  U.msg(['全滅して しまった…'], ()=>{
     party.concat(reserve).forEach(m=>{ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; });
     P.gold = Math.floor(P.gold/2);
     G.battle=null;
@@ -1610,13 +1620,13 @@ function defeat(){
       V.buildMap(h.map); V.setActors(); U.label(WORLD.mapName(h.map)); U.hud();
       A.bgm(h.map);
       G.mode='field'; G.busy=false;
-      U.msg(['きがつくと '+h.name+'に いた。','（ゴールドを はんぶん おとした…）'], ()=>{});
+      U.msg(['気がつくと '+h.name+'に いた。','（ゴールドを 半分 落とした…）'], ()=>{});
     });
   });
 }
 function endBattle(won){
-  // ★せんとうが おわったら じょうたい いじょうは とける。
-  //   のこったままだと、あるいて いる あいだ ずっと こんらんの ままに なる。
+  // ★せんとうが おわったら 状態 いじょうは とける。
+  //   のこったままだと、あるいて いる あいだ ずっと 混乱の ままに なる。
   party.forEach(p=>{ if(p.hp>0) p.status=null; p.buffs=null; });
   G.battle=null; G.menu=null;
   G.busy=true;
@@ -1637,7 +1647,7 @@ const TRADE_GOODS = {
   silver: {key:'silver', name:'ぎんの かざり',  base:120},
 };
 // まちごとの そうば（1.0が きじゅん）
-const TRADE_MARKET = {};   // ★行商ミニは M2（2章・湧き水の町）で つかう
+const TRADE_MARKET = {};   // ★行商ミニは M2（2章・湧き水の町）で 使う
 function tradeTowns(){ return Object.keys(TRADE_MARKET); }
 // そうばは まちに はいる たびに すこし ゆれる
 function marketSeed(map){
@@ -1685,9 +1695,9 @@ function sellGood(map, key, n){
   G.tradeProfit = (G.tradeProfit | 0) + gain;
   return {ok:true, msg:TRADE_GOODS[key].name + 'を ' + n + 'こ うった！（' + gain + 'G）', gain};
 }
-// ---------------- じゅもん（せんとうの そとで つかう）----------------
-// そとで つかえるのは かいふく・じょうたい かいふく・そせい だけ。
-// こうげき じゅもんは 「ここでは つかえない」。
+// ---------------- 技（せんとうの そとで 使う）----------------
+// そとで つかえるのは 回復・状態 回復・そせい だけ。
+// 攻撃 技は 「ここでは つかえない」。
 // ★けっかい：ここを とおるには じょうけんが いる
 const WARDS = {
   rift_yard: {chapter:1, flag:'ch0_trialDone',
@@ -1722,12 +1732,12 @@ function castReturn(ci, di){
   const list = returnDestinations();
   const d = list[di];
   if(!m || !d) return {ok:false, lines:['どこへ いく？']};
-  if(!canReturnHere()) return {ok:false, lines:['ここでは つかえない。','そとへ でなければ ならない。']};
+  if(!canReturnHere()) return {ok:false, lines:['ここでは 使えない。','そとへ でなければ ならない。']};
   if(m.mp < sp.mp) return {ok:false, lines:['MPが たりない！']};
   m.mp -= sp.mp;
   moorShipFor(d.map);                          // ★ふねも いきさきの はまへ
   return {ok:true, warp:{to:d.map, x:d.x, y:d.y},
-          lines:[m.name+'は リターンを となえた！','ひかりに つつまれ、そらへ まいあがった——']};
+          lines:[m.name+'は リターンを 唱えた！','光に 包まれ、空へ 舞い上がった——']};
 }
 function fieldSpells(m){
   return knownSpells(m).filter(s=>FIELD_SPELL[s.type]);
@@ -1737,22 +1747,22 @@ function spellNeedsTarget(sp){ return sp.type==='heal' || sp.type==='cure' || sp
 function castField(ci, key, ti){
   const m = party[ci];
   const sp = SPELL_DEFS[key];
-  if(!m || !sp) return {ok:false, lines:['その じゅもんは つかえない。']};
-  if(m.hp<=0)   return {ok:false, lines:[m.name+'は たおれている。']};
+  if(!m || !sp) return {ok:false, lines:['その 技は 使えない。']};
+  if(m.hp<=0)   return {ok:false, lines:[m.name+'は 倒れている。']};
   if(!FIELD_SPELL[sp.type]) return {ok:false, lines:['ここでは つかっても しかたが ない。']};
   if(m.mp < sp.mp) return {ok:false, lines:['MPが たりない！']};
 
   const t = (ti===undefined||ti===null) ? null : party[ti];
-  const lines = [m.name+'は '+sp.name+'を となえた！'];
+  const lines = [m.name+'は '+sp.name+castVerb(m)];
 
   if(sp.type==='heal'){
-    if(!t) return {ok:false, lines:['だれに つかう？']};
-    if(t.hp<=0) return {ok:false, lines:[t.name+'は たおれている。リヴァイブが ひつよう だ。']};
+    if(!t) return {ok:false, lines:['誰に 使う？']};
+    if(t.hp<=0) return {ok:false, lines:[t.name+'は 倒れている。リヴァイブが ひつよう だ。']};
     if(t.hp>=t.maxhp) return {ok:false, lines:[t.name+'の HPは まんたんだ。']};
     m.mp -= sp.mp;
     const v = Math.min(t.maxhp-t.hp, sp.min+Math.floor(Math.random()*(sp.max-sp.min+1)));
     t.hp += v;
-    lines.push(t.name+'の HPが '+v+' かいふくした！');
+    lines.push(t.name+'の HPが '+v+' 回復した！');
   }else if(sp.type==='healall'){
     const alive = party.filter(x=>x.hp>0 && x.hp<x.maxhp);
     if(!alive.length) return {ok:false, lines:['みんな げんきだ。']};
@@ -1760,16 +1770,16 @@ function castField(ci, key, ti){
     alive.forEach(x=>{
       const v = Math.min(x.maxhp-x.hp, sp.min+Math.floor(Math.random()*(sp.max-sp.min+1)));
       x.hp += v;
-      lines.push(x.name+'の HPが '+v+' かいふくした！');
+      lines.push(x.name+'の HPが '+v+' 回復した！');
     });
   }else if(sp.type==='cure'){
-    if(!t) return {ok:false, lines:['だれに つかう？']};
+    if(!t) return {ok:false, lines:['誰に 使う？']};
     if(!t.status) return {ok:false, lines:[t.name+'は なんとも ない。']};
     m.mp -= sp.mp;
     t.status = null;
     lines.push(t.name+'の からだが らくに なった！');
   }else if(sp.type==='revive'){
-    if(!t) return {ok:false, lines:['だれに つかう？']};
+    if(!t) return {ok:false, lines:['誰に 使う？']};
     if(t.hp>0) return {ok:false, lines:[t.name+'は たおれていない。']};
     m.mp -= sp.mp;
     t.hp = Math.max(1, Math.floor(t.maxhp*0.5));
@@ -1789,50 +1799,50 @@ function takeKey(id){ if(P.keyItems) delete P.keyItems[id]; }
 function keyItemList(){
   return Object.keys(P.keyItems||{}).map(k=>KEY_ITEMS[k]).filter(Boolean);
 }
-// ---------------- どうぐ（せんとうの そとで つかう）----------------
+// ---------------- 道具（せんとうの そとで 使う）----------------
 function itemList(){
   const out=[];
-  if(P.herbs>0)  out.push({kind:'h',   name:'やくそう',         num:P.herbs});
-  if(P.waters>0) out.push({kind:'wtr', name:'まほうのせいすい', num:P.waters});
+  if(P.herbs>0)  out.push({kind:'h',   name:'薬草',         num:P.herbs});
+  if(P.waters>0) out.push({kind:'wtr', name:'魔法の 聖水', num:P.waters});
   return out;
 }
 function useItemField(kind, mi){
   const m = party[mi];
-  if(!m) return {ok:false, lines:['だれに つかう？']};
+  if(!m) return {ok:false, lines:['誰に 使う？']};
   if(kind==='h'){
-    if(P.herbs<=0) return {ok:false, lines:['やくそうを もっていない。']};
-    if(m.hp<=0)    return {ok:false, lines:[m.name+'は たおれている。きょうかいへ いこう。']};
+    if(P.herbs<=0) return {ok:false, lines:['薬草を もっていない。']};
+    if(m.hp<=0)    return {ok:false, lines:[m.name+'は 倒れている。きょうかいへ いこう。']};
     if(m.hp>=m.maxhp) return {ok:false, lines:[m.name+'の HPは まんたんだ。']};
     P.herbs--;
     const h=Math.min(m.maxhp-m.hp, 20+Math.floor(Math.random()*9));
     m.hp+=h;
-    return {ok:true, lines:[m.name+'は やくそうを つかった！', m.name+'の HPが '+h+' かいふく！']};
+    return {ok:true, lines:[m.name+'は 薬草を 使った！', m.name+'の HPが '+h+' 回復！']};
   }
   if(kind==='wtr'){
-    if(P.waters<=0) return {ok:false, lines:['まほうのせいすいを もっていない。']};
-    if(m.maxmp<=0)  return {ok:false, lines:[m.name+'は じゅもんを つかえない。']};
+    if(P.waters<=0) return {ok:false, lines:['魔法の 聖水を もっていない。']};
+    if(m.maxmp<=0)  return {ok:false, lines:[m.name+'は 技を 使えない。']};
     if(m.mp>=m.maxmp) return {ok:false, lines:[m.name+'の MPは まんたんだ。']};
     P.waters--;
     const h=Math.min(m.maxmp-m.mp, 30);
     m.mp+=h;
-    return {ok:true, lines:[m.name+'は まほうのせいすいを つかった！', m.name+'の MPが '+h+' かいふく！']};
+    return {ok:true, lines:[m.name+'は 魔法の 聖水を 使った！', m.name+'の MPが '+h+' 回復！']};
   }
-  return {ok:false, lines:['つかえない。']};
+  return {ok:false, lines:['使えない。']};
 }
-// ---------------- そうび ----------------
+// ---------------- 装備 ----------------
 function slotOf(it){ return it && it.kind==='w' ? 'weapon' : 'armor'; }
 function equipCandidates(slot){
   return (P.equipBag||[]).map((it,i)=>({it,i})).filter(x=>slotOf(x.it)===slot);
 }
 function equipFromBag(mi, bagIndex){
   const m=party[mi], it=P.equipBag[bagIndex];
-  if(!m||!it) return {ok:false, lines:['そうびできない。']};
+  if(!m||!it) return {ok:false, lines:['装備できない。']};
   const slot=slotOf(it);
   const cur=m[slot];
   m[slot]=it;
   P.equipBag.splice(bagIndex,1);
   if(cur) P.equipBag.push(cur);
-  return {ok:true, lines:[m.name+'は '+it.name+'を そうびした！'
+  return {ok:true, lines:[m.name+'は '+it.name+'を 装備した！'
     + (cur ? '（'+cur.name+'は ふくろへ）' : '')]};
 }
 function unequip(mi, slot){
@@ -1844,9 +1854,9 @@ function unequip(mi, slot){
 }
 function equipSummary(mi){
   const m=party[mi];
-  return [m.name+'　こうげき '+mAtk(m)+'　しゅび '+mDef(m),
-          '　みぎて：'+(m.weapon?m.weapon.name+'（+'+m.weapon.v+'）':'なし'),
-          '　からだ：'+(m.armor ?m.armor.name +'（+'+m.armor.v +'）':'なし')];
+  return [m.name+'　攻撃 '+mAtk(m)+'　しゅび '+mDef(m),
+          '　右手：'+(m.weapon?m.weapon.name+'（+'+m.weapon.v+'）':'なし'),
+          '　体：'+(m.armor ?m.armor.name +'（+'+m.armor.v +'）':'なし')];
 }
 // ---------------- セーブ ----------------
 const SAVE_VERSION = 2;
@@ -1876,7 +1886,7 @@ function migrate(d){
   }
   return d;
 }
-function snapshotChapter(){          // いまの 章の じょうたいを あずける
+function snapshotChapter(){          // いまの 章の 状態を あずける
   G.chapters = G.chapters || {};
   G.chapters[G.chapter] = {
     party: party.map(serializeMember),
@@ -1892,7 +1902,7 @@ function serializeMember(m){
   return {cls:m.cls, lv:m.lv, exp:m.exp, hp:m.hp, mp:m.mp,
           weapon:m.weapon, armor:m.armor, status:m.status};
 }
-// --- ぼうぎょてき ふくげん：こわれた セーブでも おちない ---
+// --- 防御てき ふくげん：こわれた セーブでも おちない ---
 function reviveMember(o){
   const cls = CLASSES[o.cls] ? o.cls : 'sora';
   if(cls !== o.cls) console.warn('[save] しらない クラス: '+o.cls+' → '+cls);
@@ -2006,7 +2016,7 @@ function saveInfo(s, slot){
             gold:d.gold||0, map:WORLD.mapName(d.map||'')};
   }catch(e){ return {broken:true}; }
 }
-// 章の きりかえ（M2いこうで つかう）
+// 章の きりかえ（M2いこうで 使う）
 function switchChapter(no, newParty){
   snapshotChapter();
   G.chapter = no;
@@ -2041,10 +2051,10 @@ function switchChapter(no, newParty){
       if(typeof sl === 'number') return sl;
       return sl[k] || 1;
     };
-    G.townState = 'NORMAL';   // ★まちの じょうたいは 章ごとに リセット（1章せんようの しくみ）
+    G.townState = 'NORMAL';   // ★まちの 状態は 章ごとに リセット（1章せんようの しくみ）
     const inh = cd && cd.inheritParty ? (G.chapters||{})[cd.inheritParty] : null;
     if(inh && inh.party && inh.party.length){
-      // ★まえの しょうの なかま・レベル・そうび・しょじひんを ひきつぐ
+      // ★まえの しょうの なかま・レベル・装備・しょじひんを ひきつぐ
       inh.party.forEach(o=>{ const m=reviveMember(o);
         if(party.length<4) party.push(m); else reserve.push(m); });
       (inh.reserve||[]).forEach(o=>{ const m=reviveMember(o);
@@ -2085,7 +2095,7 @@ function moorShipFor(mapId){
   if(G.ship && MOORS[mapId]) G.ship={x:MOORS[mapId].x, y:MOORS[mapId].y};
 }
 
-// ---------------- なかまの いれかえ（ひかえ） ----------------
+// ---------------- なかまの 入れ替え（ひかえ） ----------------
 function allMembers(){ return party.concat(reserve); }
 function joinMember(cls, lv){                 // ごうりゅう。5にんめ いこうは ひかえへ
   if(allMembers().some(m=>m.cls===cls)) return null;
