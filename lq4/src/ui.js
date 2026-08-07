@@ -39,7 +39,7 @@ function sfxBus(){                 // こうかおんは まとめて すこし 
 // こうかおん（DQふう）
 //  ・とうは くけい／さんかくは の たんじゅんな はっしんき
 //  ・「あたる」おとは ノイズ＋ひくい ドスン
-//  ・じゅもんは アルペジオ、レベルアップは のぼる ファンファーレ
+//  ・技は アルペジオ、レベルアップは のぼる ファンファーレ
 // ============================================================
 let NOISEBUF=null;
 function noiseBuf(){
@@ -85,7 +85,7 @@ function noise(d,v,w,hp,lp){
   node.connect(g); g.connect(sfxBus()||ac.destination);
   s.start(t0); s.stop(t0+d+0.02);
 }
-// アルペジオ（じゅもん・レベルアップ）
+// アルペジオ（技・レベルアップ）
 function arp(freqs, step, dur, type, v, w){
   freqs.forEach((f,i)=>tone(f,dur,type,v,(w||0)+i*step));
 }
@@ -105,7 +105,7 @@ const A = {
   chest(){  arp([523,659,784,1047],0.055,0.13,'square',0.055);
             tone(1568,0.22,'triangle',0.05,0.24); },      // たからばこ
   item(){   tone(784,0.08,'triangle',0.06);
-            tone(1047,0.12,'triangle',0.05,0.07); },      // どうぐを つかう
+            tone(1047,0.12,'triangle',0.05,0.07); },      // 道具を 使う
   buy(){    tone(1047,0.06,'square',0.055);
             tone(1319,0.06,'square',0.05,0.05);
             tone(1568,0.10,'square',0.045,0.10); },       // かいもの
@@ -113,21 +113,21 @@ const A = {
   encounter(){ tone(196,0.10,'square',0.07);
                tone(262,0.10,'square',0.07,0.09);
                tone(392,0.16,'square',0.07,0.18);
-               noise(0.20,0.05,0.18,600,4000); },         // まものが あらわれた
+               noise(0.20,0.05,0.18,600,4000); },         // まものが 現れた
   hit(){    noise(0.10,0.10,0,300,2600);
-            tone(160,0.13,'square',0.08,0,60); },         // こちらの こうげきが あたる
+            tone(160,0.13,'square',0.08,0,60); },         // こちらの 攻撃が あたる
   crit(){   noise(0.14,0.13,0,500,5200);
             tone(320,0.10,'square',0.09,0,80);
-            tone(1200,0.10,'square',0.06,0.02,300); },    // かいしんの いちげき
+            tone(1200,0.10,'square',0.06,0.02,300); },    // 会心の 一撃
   miss(){   noise(0.09,0.05,0,1800,6000); },              // はずれ
   ehit(){   noise(0.12,0.11,0.16,180,1600);
             tone(110,0.20,'triangle',0.09,0.17,45); },    // こちらが うける
   spell(){  arp([392,523,659,880],0.035,0.11,'sawtooth',0.05);
-            noise(0.18,0.04,0.12,800,5000); },            // こうげき じゅもん
+            noise(0.18,0.04,0.12,800,5000); },            // 攻撃 技
   heal(){   arp([523,659,784,1047],0.055,0.16,'sine',0.06);
-            tone(1319,0.30,'sine',0.045,0.22); },         // かいふく じゅもん
+            tone(1319,0.30,'sine',0.045,0.22); },         // 回復 技
   defeat(){ tone(300,0.22,'square',0.06,0,90);
-            noise(0.22,0.05,0.02,300,2200); },            // てきを たおした
+            noise(0.22,0.05,0.02,300,2200); },            // てきを 倒した
   flee(){   tone(880,0.10,'square',0.05,0,300);
             tone(660,0.14,'square',0.045,0.08,220); },    // にげる
   // ---- しょうはい・せいちょう ----
@@ -236,7 +236,7 @@ function menuCancel(){
   const st=menuState; menuState=null;
   cmdWin.style.display='none';
   A.cancel && A.cancel();               // ★とりけしの おと
-  st.onPick(st.items.length-1);       // 末尾＝やめる／もどる
+  st.onPick(st.items.length-1);       // 末尾＝やめる／戻る
 }
 function menuVisible(){ return !!menuState; }
 
@@ -257,7 +257,7 @@ function hud(){
     '</div>').join('') +
     '<div class="hm gold">'+
     '<div class="hn">ゴールド</div><div class="hv">'+C.P.gold+'G</div>'+
-    '<div class="hv">やくそう '+C.P.herbs+'</div></div>';
+    '<div class="hv">薬草 '+C.P.herbs+'</div></div>';
 }
 function label(t){ labelEl.textContent=t; }
 
@@ -280,14 +280,14 @@ function press(k){
     else if(k==='B') menuCancel();
     return;
   }
-  // ★つよさ：A＝つぎの ページ／さいごで とじる、B＝ほかの なかま
+  // ★強さ：A＝つぎの ページ／さいごで とじる、B＝ほかの なかま
   if(C.G.mode==='status'){
     if(k==='A') statusNext();
     else if(k==='B') statusOther();
     else if(k==='U'||k==='D') statusOther();
     return;
   }
-  if(C.G.mode==='map'){ closeMap(); return; }        // ちずは どの ボタンでも とじる
+  if(C.G.mode==='map'){ closeMap(); return; }        // 地図は どの ボタンでも とじる
   if(C.G.mode!=='field'||C.G.busy) return;
   if(k==='U') C.stepField(0,-1);
   else if(k==='D') C.stepField(0,1);
@@ -298,7 +298,7 @@ function press(k){
 }
 // ★けんしょう ようの くち
 if(typeof globalThis!=='undefined') globalThis.__UI = {press:(k)=>press(k)};
-// ---------------- ちず ----------------
+// ---------------- 地図 ----------------
 function openMap(){
   C.G.mode='map';
   $('cmd-win').style.display='none';
@@ -312,36 +312,36 @@ function closeMap(){
 function openFieldMenu(){
   if(statusEl) statusEl.style.display='none';
   C.G.mode='menu';
-  // ★ひかえが いる ときだけ「いれかえ」が ふえる。ばんごうでなく なまえで わける
-  const items=['つよさ','じゅもん','どうぐ','そうび','ちず','さくせん'];
-  if(C.reserve.length>0) items.push('いれかえ');
+  // ★ひかえが いる ときだけ「入れ替え」が ふえる。ばんごうでなく なまえで わける
+  const items=['強さ','技','道具','装備','地図','作戦'];
+  if(C.reserve.length>0) items.push('入れ替え');
   items.push('クエスト','セーブ','とじる');
   menu(items,'メニュー',(sel)=>{
     const pick=items[sel];
-    if(pick==='つよさ'){
+    if(pick==='強さ'){
       openStatus();
 
-    }else if(pick==='じゅもん'){
+    }else if(pick==='技'){
       openSpells();
 
-    }else if(pick==='どうぐ'){
+    }else if(pick==='道具'){
       openItems();
 
-    }else if(pick==='そうび'){
+    }else if(pick==='装備'){
       openEquip();
 
-    }else if(pick==='ちず'){
+    }else if(pick==='地図'){
       openMap();
 
-    }else if(pick==='さくせん'){
+    }else if(pick==='作戦'){
       const keys=Object.keys(C.TACTICS);
-      menu(keys.map(k=>C.TACTICS[k]).concat(['もどる']),'さくせん',(k)=>{
+      menu(keys.map(k=>C.TACTICS[k]).concat(['戻る']),'作戦',(k)=>{
         if(k<keys.length){ C.G.tactic=keys[k];
-          msg2(['さくせんを 「'+C.TACTICS[keys[k]]+'」に した。'],()=>{C.G.mode='field';}); }
+          msg2(['作戦を 「'+C.TACTICS[keys[k]]+'」に した。'],()=>{C.G.mode='field';}); }
         else C.G.mode='field';
       });
 
-    }else if(pick==='いれかえ'){
+    }else if(pick==='入れ替え'){
       openSwap();
 
     }else if(pick==='クエスト'){
@@ -359,26 +359,26 @@ function openFieldMenu(){
   });
 }
 
-// ---------------- いれかえ ----------------
+// ---------------- 入れ替え ----------------
 // ★えらぶと せんとう ⇄ ひかえが きりかわる トグルしき（そうさ さいしょう）
 function openSwap(){
   const all = C.allMembers();
   const rows = all.map(m=>{
     const inP = C.party.indexOf(m)>=0;
     return (inP?'▶':'　')+m.name+'　Lv'+m.lv;
-  }).concat(['もどる']);
-  menu(rows, 'いれかえ（▶＝せんとう）', (k)=>{
+  }).concat(['戻る']);
+  menu(rows, '入れ替え（▶＝せんとう）', (k)=>{
     if(k>=all.length){ C.G.mode='field'; return; }
     const r = C.swapMember(all[k].cls);
-    if(r.ok){ A.cursor && A.cursor(); openSwap(); }        // つづけて いれかえられる
+    if(r.ok){ A.cursor && A.cursor(); openSwap(); }        // つづけて 入れ替えられる
     else    { msg2([r.msg], ()=>openSwap()); }
   });
 }
 
-// ---------------- つよさ ----------------
+// ---------------- 強さ ----------------
 // ★がめん ぜんたいに おおきく だす。
 //   ちいさな メッセージまどに ながく ならべると よみにくい ため。
-const STATUS_NAME = {sleep:'ねむり', confuse:'こんらん', freeze:'こおり', slow:'にぶり'};
+const STATUS_NAME = {sleep:'眠り', confuse:'混乱', freeze:'凍り', slow:'鈍り'};
 const CLASS_NAME  = {lion:'このえへい', bald:'しょうにん', sena:'うらないし', ruka:'おどりこ',
                      zef:'ろうけんじゃ', mio:'けんじゃの でし',
                      sora:'ゆうしゃ', lumia:'そうりょ', dan:'せんし'};
@@ -398,24 +398,24 @@ function statusHTML(m, page, pages){
     h += '<div class="st-grid">'
        + row('HP', m.hp + ' / ' + m.maxhp)
        + (m.maxmp>0 ? row('MP', m.mp + ' / ' + m.maxmp) : '')
-       + row('じょうたい', m.status ? (STATUS_NAME[m.status]||m.status) : 'そうかい')
-       + row('こうげきりょく', C.mAtk(m))
-       + row('しゅびりょく', C.mDef(m))
-       + row('すばやさ', m.agi)
+       + row('状態', m.status ? (STATUS_NAME[m.status]||m.status) : 'そうかい')
+       + row('攻撃力', C.mAtk(m))
+       + row('守備力', C.mDef(m))
+       + row('素早さ', m.agi)
        + '</div>'
-       + '<div class="st-sec">そうび</div>'
+       + '<div class="st-sec">装備</div>'
        + '<div class="st-grid">'
-       + row('みぎて', m.weapon ? m.weapon.name+'（+'+m.weapon.v+'）' : 'なし')
+       + row('右手', m.weapon ? m.weapon.name+'（+'+m.weapon.v+'）' : 'なし')
        + row('からだ', m.armor  ? m.armor.name +'（+'+m.armor.v +'）' : 'なし')
        + '</div>'
        + '<div class="st-sec">けいけん</div>'
        + '<div class="st-grid">'
-       + row('けいけんち', m.exp)
+       + row('経験値', m.exp)
        + row('つぎのLvまで', next===Infinity ? '---' : (next - m.exp))
        + '</div>';
   }else{
     const sp = C.knownSpells(m);
-    h += '<div class="st-sec">おぼえた じゅもん</div>';
+    h += '<div class="st-sec">覚えた 技</div>';
     h += sp.length
       ? '<div class="st-sp">' + sp.map(s=>esc(C.spellLabel(s))).join('<br>') + '</div>'
       : '<div class="st-sp">まだ おぼえて いない</div>';
@@ -457,17 +457,17 @@ function openStatus(){
   showStatus();
 }
 
-// ---------------- じゅもん ----------------
+// ---------------- 技 ----------------
 function openSpells(){
   const casters = C.party.filter(m=>m.hp>0 && C.fieldSpells(m).length>0);
   if(!casters.length){
-    msg2(['ここで つかえる じゅもんは ない。'], ()=>{ C.G.mode='field'; });
+    msg2(['ここで つかえる 技は ない。'], ()=>{ C.G.mode='field'; });
     return;
   }
   if(C.party.length===1){ spellsOf(0); return; }
   const idx = C.party.map((m,i)=>i).filter(i=>C.party[i].hp>0);
   menu(idx.map(i=>C.party[i].name+(C.party[i].maxmp>0?'　MP'+C.party[i].mp+'/'+C.party[i].maxmp:''))
-       .concat(['もどる']),'だれの じゅもん？',(k)=>{
+       .concat(['戻る']),'誰の 技？',(k)=>{
     if(k>=idx.length){ C.G.mode='field'; return; }
     spellsOf(idx[k]);
   });
@@ -476,18 +476,18 @@ function spellsOf(ci){
   const m = C.party[ci];
   const sp = C.fieldSpells(m);
   if(!sp.length){
-    msg2([m.name+'は ここで つかえる じゅもんを おぼえていない。'],
+    msg2([m.name+'は ここで つかえる 技を おぼえていない。'],
          ()=>{ C.G.mode='menu'; openSpells(); });
     return;
   }
-  menu(sp.map(s=>C.spellLabel(s)).concat(['もどる']), m.name+'　じゅもん',(k)=>{
+  menu(sp.map(s=>C.spellLabel(s)).concat(['戻る']), m.name+'　技',(k)=>{
     if(k>=sp.length){ C.G.mode='field'; return; }
     const s = sp[k];
     if(s.type==='return'){ chooseReturn(ci); return; }
     if(!C.spellNeedsTarget(s)){ applySpell(ci, s.key, null); return; }
     if(C.party.length===1){ applySpell(ci, s.key, 0); return; }
-    menu(C.party.map(t=>t.name+'　HP'+t.hp+'/'+t.maxhp+(t.hp<=0?'（たおれている）':''))
-         .concat(['もどる']), s.name+'を だれに？',(ti)=>{
+    menu(C.party.map(t=>t.name+'　HP'+t.hp+'/'+t.maxhp+(t.hp<=0?'（倒れている）':''))
+         .concat(['戻る']), s.name+'を 誰に？',(ti)=>{
       if(ti>=C.party.length){ C.G.mode='menu'; spellsOf(ci); return; }
       applySpell(ci, s.key, ti);
     });
@@ -496,7 +496,7 @@ function spellsOf(ci){
 // ---------------- リターン ----------------
 function chooseReturn(ci){
   if(!C.canReturnHere()){
-    msg2(['ここでは つかえない。','そとへ でなければ ならない。'],
+    msg2(['ここでは 使えない。','そとへ でなければ ならない。'],
          ()=>{ C.G.mode='menu'; spellsOf(ci); });
     return;
   }
@@ -505,7 +505,7 @@ function chooseReturn(ci){
     msg2(['まだ いける ばしょが ない。'], ()=>{ C.G.mode='menu'; spellsOf(ci); });
     return;
   }
-  menu(list.map(d=>d.name).concat(['もどる']), 'どこへ いく？',(k)=>{
+  menu(list.map(d=>d.name).concat(['戻る']), 'どこへ いく？',(k)=>{
     if(k>=list.length){ C.G.mode='menu'; spellsOf(ci); return; }
     const r = C.castReturn(ci, k);
     hud();
@@ -524,7 +524,7 @@ function applySpell(ci, key, ti){
 function openTrade(){
   const map = C.P.map;
   const keys = Object.keys(C.TRADE_GOODS);
-  const items = ['しいれる', 'うる', 'そうばを みる', 'もどる'];
+  const items = ['仕入れる', 'うる', 'そうばを みる', '戻る'];
   menu(items, 'あきない（' + C.goodsTotal() + '/' + C.GOODS_LIMIT + '）', (k) => {
     if(k === 0) tradeBuy(map, keys);
     else if(k === 1) tradeSell(map, keys);
@@ -538,10 +538,10 @@ function tradeBuy(map, keys){
     const g = C.TRADE_GOODS[k];
     return g.name + '　' + C.tradePrice(map, k) + 'G'
          + (C.goodsCount(k) ? '（' + C.goodsCount(k) + '）' : '');
-  }).concat(['もどる']);
-  menu(items, 'しいれる　' + C.P.gold + 'G', (k) => {
+  }).concat(['戻る']);
+  menu(items, '仕入れる　' + C.P.gold + 'G', (k) => {
     if(k >= list.length){ C.G.mode = 'menu'; openTrade(); return; }
-    tradeAmount('しいれる', list[k], (n) => {
+    tradeAmount('仕入れる', list[k], (n) => {
       const r = C.buyGood(map, list[k], n);
       hud();
       msg2([r.msg], () => { C.G.mode = 'menu'; tradeBuy(map, keys); });
@@ -557,7 +557,7 @@ function tradeSell(map, keys){
   const items = list.map(k => {
     const g = C.TRADE_GOODS[k];
     return g.name + '×' + C.goodsCount(k) + '　' + C.sellPrice(map, k) + 'G';
-  }).concat(['もどる']);
+  }).concat(['戻る']);
   menu(items, 'うる　' + C.P.gold + 'G', (k) => {
     if(k >= list.length){ C.G.mode = 'menu'; openTrade(); return; }
     tradeAmount('うる', list[k], (n) => {
@@ -569,7 +569,7 @@ function tradeSell(map, keys){
 }
 function tradeAmount(verb, key, done){
   const g = C.TRADE_GOODS[key];
-  menu(['1こ', '5こ', '10こ', 'もどる'], g.name + 'を ' + verb, (k) => {
+  menu(['1こ', '5こ', '10こ', '戻る'], g.name + 'を ' + verb, (k) => {
     if(k >= 3){ C.G.mode = 'menu'; openTrade(); return; }
     done([1, 5, 10][k]);
   });
@@ -584,22 +584,22 @@ function tradeInfo(map, keys){
     const rel = b > g.base * 1.15 ? '　たかい' : b < g.base * 0.85 ? '　やすい' : '';
     lines.push('　' + g.name + '　かい ' + b + 'G ／ うり ' + s + 'G' + rel);
   });
-  lines.push('（やすい まちで しいれ、たかい まちで うる）');
+  lines.push('（安い 町で 仕入れ、高い 町で 売る）');
   msg2(lines, () => { C.G.mode = 'menu'; openTrade(); });
 }
 
-// ---------------- どうぐ ----------------
+// ---------------- 道具 ----------------
 function openItems(){
   const items=C.itemList();
   const keys=C.keyItemList();
   const opts=items.map(it=>it.name+'　'+it.num)
     .concat(keys.map(k=>'◆'+k.name))
-    .concat(['もどる']);
+    .concat(['戻る']);
   if(!opts.length===0){ }
   if(!items.length && !keys.length){
-    msg2(['どうぐを なにも もっていない。'],()=>{C.G.mode='field';}); return;
+    msg2(['道具を なにも もっていない。'],()=>{C.G.mode='field';}); return;
   }
-  menu(opts,'どうぐ',(k)=>{
+  menu(opts,'道具',(k)=>{
     if(k>=items.length+keys.length){ C.G.mode='field'; return; }
     if(k>=items.length){                    // だいじなもの は せつめいを みるだけ
       const ki=keys[k-items.length];
@@ -608,8 +608,8 @@ function openItems(){
     }
     const it=items[k];
     if(C.party.length===1){ applyItem(it.kind,0); return; }
-    menu(C.party.map(m=>m.name+'　HP'+m.hp+'/'+m.maxhp).concat(['もどる']),
-         it.name+'を だれに？',(mi)=>{
+    menu(C.party.map(m=>m.name+'　HP'+m.hp+'/'+m.maxhp).concat(['戻る']),
+         it.name+'を 誰に？',(mi)=>{
       if(mi>=C.party.length){ openItems(); return; }
       applyItem(it.kind,mi);
     });
@@ -621,10 +621,10 @@ function applyItem(kind,mi){
   msg2(r.lines, ()=>{ C.G.mode='menu'; openItems(); });
 }
 
-// ---------------- そうび ----------------
+// ---------------- 装備 ----------------
 function openEquip(){
   if(C.party.length===1){ equipMember(0); return; }
-  menu(C.party.map(m=>m.name).concat(['もどる']),'そうび',(mi)=>{
+  menu(C.party.map(m=>m.name).concat(['戻る']),'装備',(mi)=>{
     if(mi>=C.party.length){ C.G.mode='field'; return; }
     equipMember(mi);
   });
@@ -633,7 +633,7 @@ function equipMember(mi){
   const m=C.party[mi];
   const w=m.weapon?m.weapon.name:'なし';
   const a=m.armor ?m.armor.name :'なし';
-  menu(['みぎて：'+w, 'からだ：'+a, 'つよさを みる', 'もどる'], m.name+'の そうび',(k)=>{
+  menu(['右手：'+w, '体：'+a, '強さを みる', '戻る'], m.name+'の 装備',(k)=>{
     if(k===0) chooseEquip(mi,'weapon');
     else if(k===1) chooseEquip(mi,'armor');
     else if(k===2) msg2(C.equipSummary(mi), ()=>{ C.G.mode='menu'; equipMember(mi); });
@@ -643,10 +643,10 @@ function equipMember(mi){
 function chooseEquip(mi, slot){
   const m=C.party[mi];
   const cands=C.equipCandidates(slot);
-  const label=slot==='weapon'?'みぎて':'からだ';
+  const label=slot==='weapon'?'右手':'からだ';
   const opts=cands.map(x=>x.it.name+'（+'+x.it.v+'）');
   if(m[slot]) opts.push('はずす');
-  opts.push('もどる');
+  opts.push('戻る');
   if(!cands.length && !m[slot]){
     msg2(['ふくろに つけられる ものが ない。'], ()=>{ C.G.mode='menu'; equipMember(mi); });
     return;
@@ -757,7 +757,7 @@ function titleScreen(){
   bootDone();                                   // ★タイトルでも ローディングを かならず 消す
   const cont = info && !info.broken
     ? 'つづきから（'+info.lead+' Lv'+info.lv+'）' : 'つづきから';
-  menu(['はじめから',cont,'しょうを えらぶ'],'ルミナクエストIII',(sel)=>{
+  menu(['はじめから',cont,'章を 選ぶ'],'ルミナクエストIII',(sel)=>{
     if(sel===1){
       if(C.loadGame()) startGame(true);
       else msg2([C.lastSaveError||'きろくが よめませんでした',
@@ -766,7 +766,7 @@ function titleScreen(){
     else{ C.freshState(); startGame(false); }
   });
 }
-// ---------------- しょうを えらぶ ----------------
+// ---------------- 章を 選ぶ ----------------
 // つくりおえた しょうを えらんで はじめる（ためしに あそぶ ため）。
 function chapterSelect(){
   const nos = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA.list() : [1];
@@ -775,8 +775,8 @@ function chapterSelect(){
     const nm = (c.party||[]).map(k=>(C.CLASSES[k]||{}).name||k);
     const who = nm.length>2 ? nm[0]+'たち' : nm.join('・');   // ★ながい れつは みきれる ため
     return '第'+no+'しょう　'+c.title+'（'+who+'）';
-  }).concat(['もどる']);
-  menu(items, 'しょうを えらぶ', (k)=>{
+  }).concat(['戻る']);
+  menu(items, '章を 選ぶ', (k)=>{
     if(k>=nos.length){ titleScreen(); return; }
     const no = nos[k];
     C.freshState();
