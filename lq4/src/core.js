@@ -185,16 +185,21 @@ const MAPS = {
     }},
 
   // ============ 序章：イオの家（父の鍛冶場） ============
-  home_forge:{name:'イオの家', theme:'village', enc:false, tiles:[
-    "#########",
-    "#t.....t#",
-    "#.n.....#",
-    "#.......#",
-    "#...C...#",
-    "#.......#",
-    "####.####"],
+  // 父の 鍛冶場。左に 炉、右に 道具棚。奥が 寝間。
+  home_forge:{name:'イオの家（父の鍛冶場）', theme:'village', enc:false, tiles:[
+    "###############",
+    "#t...........t#",
+    "#..###...###..#",
+    "#..#C#...#e#..#",
+    "#..#.#...#.#..#",
+    "#.............#",
+    "#..n.......e..#",
+    "#.............#",
+    "#t...........t#",
+    "#.............#",
+    "#######.#######"],
     warpsXY:{
-      '4,6':{to:'lower_dist', x:3, y:11}
+      '7,10':{to:'lower_dist', x:3, y:11}
     }},
 
   // ============ 序章：下層区（地上生まれの移民と労働者の街） ============
@@ -217,7 +222,7 @@ const MAPS = {
     "#.###.....r......C..#",
     "##########r##########"],
     warpsXY:{
-      '3,12' :{to:'home_forge', x:4, y:5},
+      '3,12' :{to:'home_forge', x:7, y:9},
       '10,14':{to:'trial_yard', x:6, y:8},
       '10,0' :{to:'rift_yard',  x:10, y:13},
       '20,6' :{to:'world',      x:13, y:24}
@@ -291,7 +296,7 @@ function freshState(){
        ship:null, aboard:false, tileEdits:{}};      // ★しかけで 書きかえた ます
   if(!MAPS_ORIG) snapshotMaps();
   restoreMaps();                                    // ★しかけを もとに もどす
-  P = {map:'home_forge', x:4, y:5, dir:'front', gold:40, herbs:3, waters:0,
+  P = {map:'home_forge', x:7, y:8, dir:'front', gold:40, herbs:3, waters:0,
        equipBag:[], keyItems:{}, goods:{}};
   party = [mkMember('io',1)];
   reserve = [];
