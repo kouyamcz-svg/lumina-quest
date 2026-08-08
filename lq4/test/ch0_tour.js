@@ -38,13 +38,13 @@ C.freshState();
 C.G.tactic = 'gungan';        // せんとうは じどうで さいごまで はしらせる
 
 // ===== 1. はじまり =====
-T('はじまりは イオの家', C.P.map==='home_forge' && C.P.x===4 && C.P.y===5);
+T('はじまりは イオの家', C.P.map==='home_forge' && C.P.x===7 && C.P.y===8, C.P.x+','+C.P.y);
 T('パーティは イオ ひとり', C.party.length===1 && C.party[0].cls==='io');
 T('父の 剣を もつ', C.party[0].weapon && C.party[0].weapon.v===4);
 T('章データが ひける', !!C.chData() && C.chData().id==='ch0_trial');
 
 // ===== 2. 家 → 下層区 =====
-C.doWarp(C.MAPS.home_forge.warpsXY['4,6']);
+C.doWarp(C.MAPS.home_forge.warpsXY['7,10']);
 T('下層区へ でる', C.P.map==='lower_dist' && C.P.x===3 && C.P.y===11);
 T('壁に うまって いない', C.walkable('lower_dist', C.P.x, C.P.y));
 
