@@ -1,6 +1,6 @@
 'use strict';
 // ============================================================
-// ルミナクエストIII / UI層・音層・入力・起動
+// ルミナクエストIV / UI層・音層・入力・起動
 // ============================================================
 (function(){
 const C = LQ4, V = window.LQ4View;
@@ -753,11 +753,11 @@ C.bind(V, UI, A);
 function titleScreen(){
   const info=C.saveInfo();
   C.G.mode='menu';
-  V.buildMap(C.P.map); V.setActors(true); label('ルミナクエストIII'); hud();
+  V.buildMap(C.P.map); V.setActors(true); label('ルミナクエストIV 〜天空のルミナ〜'); hud();
   bootDone();                                   // ★タイトルでも ローディングを かならず 消す
   const cont = info && !info.broken
     ? 'つづきから（'+info.lead+' Lv'+info.lv+'）' : 'つづきから';
-  menu(['はじめから',cont,'章を 選ぶ'],'ルミナクエストIII',(sel)=>{
+  menu(['はじめから',cont,'章を 選ぶ'],'ルミナクエストIV',(sel)=>{
     if(sel===1){
       if(C.loadGame()) startGame(true);
       else msg2([C.lastSaveError||'きろくが よめませんでした',
