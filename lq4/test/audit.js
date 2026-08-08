@@ -9,6 +9,7 @@ vm.createContext(ctx);
 for (const f of ['world.js','npc.js','chapters.js','core.js'])
   vm.runInContext(fs.readFileSync('src/'+f,'utf8'), ctx, {filename:f});
 const C = vm.runInContext('LQ4', ctx);
+const CHD = vm.runInContext('CHAPTERS_DATA', ctx);
 C.bind(C.NullView, C.NullUI, C.NullAudio);
 
 let n=0, ng=0;
@@ -127,7 +128,10 @@ Object.keys(C.MAPS).forEach(mp=>{
 // 4. BFS到達性（孤立床ゼロ／宝箱・イベント・出口に とどく）
 // ============================================================
 // しらべる ますは 「となりに 立てるか」で はんてい する
-const INTERACT = new Set(['C','B','I','P','S','W','M','n','Q']);
+const INTERACT = new Set(['C','B','I','P','S','W','M','n','Q','L','l','O','K']);
+// ★しかけの ます（x 穴／O 動かせる岩／K 扉）は 「といたら 通れる」ので、
+//   とうたつせいの けんさでは 通れる ものと して あつかう。
+const SOLVABLE = new Set(['x','O','K']);
 // ふねで しか いけない ところが ある マップは 陸路BFSでは わりきれないので のぞく。
 // LQ4では、そういう マップに MAPS[..].auditSkipBFS=true を つけて 明示する こと。
 const BFS_SKIP = new Set(Object.keys(C.MAPS).filter(k=>C.MAPS[k].auditSkipBFS));
@@ -136,7 +140,11 @@ Object.keys(C.MAPS).forEach(mp=>{
   if(BFS_SKIP.has(mp)) return;
   const m = C.MAPS[mp];
   const H = m.tiles.length, Wd = Math.max(...m.tiles.map(r=>r.length));
-  const walk = (x,y)=> x>=0&&y>=0&&y<H&&x<Wd && !blocked(mp,x,y);
+  const walk = (x,y)=>{
+    if(x<0||y<0||y>=H||x>=Wd) return false;
+    const ch = tileAt(mp,x,y);
+    return SOLVABLE.has(ch) || !blocked(mp,x,y);
+  };
   // 出発点：ワープ発地 → なければ さいしょの 床
   let start = null;
   const wk = Object.keys(m.warpsXY||{})[0];
@@ -171,6 +179,70 @@ Object.keys(C.MAPS).forEach(mp=>{
   Object.keys(m.warpsXY||{}).forEach(k=>{
     T('出口到達 '+mp+' '+k, seen.has(k));
   });
+});
+
+// ============================================================
+// 5. しかけ監査（IVから：押し岩・穴・光珠灯・扉）
+// ============================================================
+Object.keys(C.MAPS).forEach(mp=>{
+  const m = C.MAPS[mp];
+  const H = m.tiles.length, Wd = Math.max(...m.tiles.map(r=>r.length));
+  const rocks=[], pits=[], lamps=[], gates=[];
+  for(let y=0;y<H;y++) for(let x=0;x<Wd;x++){
+    const c = tileAt(mp,x,y);
+    if(c==='O') rocks.push([x,y]);
+    if(c==='x') pits.push([x,y]);
+    if(c==='L'||c==='l') lamps.push([x,y]);
+    if(c==='K') gates.push([x,y]);
+  }
+  // 岩は さいしょ かならず 押せる（どこかへ うごかせる）
+  rocks.forEach(([x,y])=>{
+    const ok = [[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>{
+      const t = tileAt(mp,x+dx,y+dy), back = tileAt(mp,x-dx,y-dy);
+      return (t==='.'||t==='r'||t==='x') && !blocked(mp,x-dx,y-dy);
+    });
+    T('岩が 押せる '+mp+' ('+x+','+y+')', ok);
+  });
+  // 穴が ある マップには 岩が 2つ いじょう（1つだと 詰むと やりなおせない）
+  if(pits.length) T('穴の ある マップに 岩が 2つ いじょう '+mp+'（岩'+rocks.length+'）', rocks.length>=2);
+  // 岩を まっすぐ おして とどく 穴が ある
+  if(pits.length){
+    const reach = rocks.some(([x,y])=>[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>{
+      if(blocked(mp,x-dx,y-dy)) return false;          // うしろに 立てない
+      for(let i=1;i<40;i++){
+        const c = tileAt(mp,x+dx*i,y+dy*i);
+        if(c==='x') return true;
+        if(c!=='.'&&c!=='r') return false;
+      }
+      return false;
+    }));
+    T('まっすぐ おして 穴に とどく 岩が ある '+mp, reach);
+  }
+  // 光珠灯は となりに 立てる（しらべられる）
+  lamps.forEach(([x,y])=>{
+    const ok = [[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>!blocked(mp,x+dx,y+dy));
+    T('光珠灯を しらべられる '+mp+' ('+x+','+y+')', ok);
+  });
+  // 扉には あける てだてが かかれて いる（lampGates か locks）
+  gates.forEach(([x,y])=>{
+    let ok=false;
+    CHD.CH && Object.keys(CHD.CH).forEach(no=>{
+      const cd = CHD.CH[no];
+      const lg = cd.lampGates && cd.lampGates[mp];
+      if(lg && (lg.open||[]).some(o=>o.x===x && o.y===y)) ok=true;
+      const lk = cd.locks && cd.locks[mp+':'+x+','+y];
+      if(lk && lk.key) ok=true;
+    });
+    T('扉に あける てだてが ある '+mp+' ('+x+','+y+')', ok);
+  });
+  // 光珠灯が ある なら、それを ともす さきの 扉が ある
+  if(lamps.length){
+    let has=false;
+    CHD.CH && Object.keys(CHD.CH).forEach(no=>{
+      if(CHD.CH[no].lampGates && CHD.CH[no].lampGates[mp]) has=true;
+    });
+    T('光珠灯に ひらく さきが ある '+mp, has);
+  }
 });
 
 console.log('\n--- audit: ' + (n-ng) + '/' + n + ' 通過（ワープ ' + warpN + 'けん）---');
