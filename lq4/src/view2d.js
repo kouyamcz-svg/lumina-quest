@@ -921,6 +921,60 @@ function battleFx2D(kind, data, done){
 }
 function battleLeave2D(done){ bFx = {kind:'leave', t:0, done}; }
 
+// ============================================================
+// ★ダメージの ポップアップ（IVから）
+//   すうじが とびだすと、なにが おきたか ひとめで わかる。
+//   kind: 'dmg'（あかるい白）／'crit'（きん・おおきい）／'heal'（みどり）
+//         'status'（むらさき）／'miss'（はいいろ）
+// ============================================================
+let bPops = [];
+const POP_COL = {dmg:'#ffffff', crit:'#ffd257', heal:'#7ef0a0',
+                 status:'#c8a8ff', miss:'#b8c0cc', pdmg:'#ff8a7a'};
+function pop2D(data){
+  if(!cv) return;
+  const d = data || {};
+  let x = W/2, y = H*0.46;
+  if(d.enemy){
+    const f = bFoes.find(x2=>x2.enemy===d.enemy);
+    if(f){ x = f._cx; y = f._cy - 16; }
+  }else if(d.side==='party'){
+    const n = Math.max(1, (C.party||[]).length);
+    const i = Math.max(0, d.index|0);
+    x = W*(0.5 + (i-(n-1)/2)*0.16);
+    y = H*0.80;
+  }
+  bPops.push({x, y, text:String(d.text==null?'':d.text),
+    kind:d.kind||'dmg', t:0,
+    life:(d.kind==='crit'?1.0:0.8),
+    vx:(Math.random()-0.5)*26, vy:-(d.kind==='crit'?150:118)});
+  if(bPops.length>24) bPops.splice(0, bPops.length-24);
+  if(d.kind==='crit'){ bShake=Math.max(bShake,0.40); bFlash=Math.max(bFlash,0.55); }
+  if(d.kind==='status'){ bFlash=Math.max(bFlash,0.30); }
+}
+function drawPops(dt){
+  if(!bPops.length) return;
+  const base = Math.max(13, Math.round(H*0.042));
+  for(let i=bPops.length-1;i>=0;i--){
+    const p=bPops[i];
+    p.t += dt;
+    if(p.t>=p.life){ bPops.splice(i,1); continue; }
+    const k = p.t/p.life;
+    const y = p.y + p.vy*p.t + 210*p.t*p.t;      // うちあげて おちる
+    const x = p.x + p.vx*p.t;
+    const size = base*(p.kind==='crit'?1.5:1.0)*(1 + Math.max(0, 0.35-k*1.6));
+    cx.save();
+    cx.globalAlpha = k<0.75 ? 1 : (1-(k-0.75)/0.25);
+    cx.font = 'bold '+Math.round(size)+'px "Hiragino Kaku Gothic ProN",sans-serif';
+    cx.textAlign='center'; cx.textBaseline='middle';
+    cx.lineWidth = Math.max(3, size*0.24);
+    cx.strokeStyle = 'rgba(12,14,22,0.92)';
+    cx.strokeText(p.text, x, y);
+    cx.fillStyle = POP_COL[p.kind] || '#fff';
+    cx.fillText(p.text, x, y);
+    cx.restore();
+  }
+}
+
 function burst2D(target){
   const f = target ? bFoes.find(x=>x.enemy===target) : bFoes[0];
   const cx0 = f ? f._cx : W/2, cy0 = f ? f._cy : H/2;
@@ -1018,6 +1072,9 @@ function drawBattle(dt, time){
     cx.fillRect(Math.round(p.x), Math.round(p.y), sc*2, sc*2);
     return true;
   });
+
+  // ---- ダメージの すうじ（つぶの あとに かさねる）----
+  drawPops(dt);
 
   // ---- とうじょうの スライドイン ----
   if(bEnter<1){
@@ -1490,6 +1547,7 @@ return {init, resize, buildMap, draw, noteStep, setFade, setDream,
         showMap, hideMap, drawMapOverlay, get mapOn(){return mapOn;},
         showScene, hideScene, drawSceneOverlay, get sceneOn(){return !!sceneKey;},
         battleEnter:battleEnter2D, battleFx:battleFx2D, battleLeave:battleLeave2D, drawBattle,
+        pop:pop2D,
         get TS(){return TS;}};
 })();
 
