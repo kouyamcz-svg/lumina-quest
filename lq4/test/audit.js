@@ -135,7 +135,7 @@ const SOLVABLE = new Set(['x','O','K']);
 // ふねで しか いけない ところが ある マップは 陸路BFSでは わりきれないので のぞく。
 // LQ4では、そういう マップに MAPS[..].auditSkipBFS=true を つけて 明示する こと。
 const BFS_SKIP = new Set(Object.keys(C.MAPS).filter(k=>C.MAPS[k].auditSkipBFS));
-if(C.MAPS.world) BFS_SKIP.add('world');   // LQ3ざんぞん：ふね まえていの ワールドマップ
+// ★IVの world は ふねが ない（雲海は 落ちる だけ）。すべて 陸つづきで なければ ならない。
 Object.keys(C.MAPS).forEach(mp=>{
   if(BFS_SKIP.has(mp)) return;
   const m = C.MAPS[mp];
