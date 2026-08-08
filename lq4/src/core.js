@@ -806,7 +806,7 @@ function runTalkEvent(npcName){
 function offerNextChapter(next, title, isFinal){
   if(isFinal){
     G.mode = 'msg';
-    U.msg(['＊＊ ルミナクエスト III　完結 ＊＊',
+    U.msg(['＊＊ ルミナクエスト IV　完結 ＊＊',
            '',
            'ながい たびに おつきあい いただき、',
            'ありがとう ございました！',
