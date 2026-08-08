@@ -1178,7 +1178,13 @@ function draw(dt, time, actors){
   // tilesTall は「すくなくとも これだけは うつす」という かずなので、
   // まるめは きりすて（round だと たてが たりなく なることが ある）。
   const tilesTall = (theme==='world') ? 18 : 15;
-  const scale = Math.max(2, Math.floor(H / (tilesTall*TS)));
+  let scale = Math.max(2, Math.floor(H / (tilesTall*TS)));
+  // ★ちいさい マップ（家・小部屋）は 画面に あまるので、はいる ところまで 大きくする。
+  //   まえは 左上に ちいさく はりついて、画面の まんなかが あいていた。
+  if(MW*TS*scale < W && MH*TS*scale < H){
+    const fit = Math.min(Math.floor(W/(MW*TS)), Math.floor(H/(MH*TS)));
+    if(fit > scale) scale = Math.min(fit, 6);   // 大きくしすぎない
+  }
   const ts = TS*scale;   // かならず せいすうばい
 
   // カメラ（プレイヤーちゅうしん・はしで とめる）
@@ -1187,7 +1193,10 @@ function draw(dt, time, actors){
   camX = Math.min(Math.max(p.x+0.5, viewW/2), Math.max(viewW/2, MW-viewW/2));
   camY = Math.min(Math.max(p.y+0.5, viewH/2), Math.max(viewH/2, MH-viewH/2));
   // カメラの ずれも せいすうに して、すべての タイルが ぴったり ならぶように する
-  const ox = Math.round(W/2 - camX*ts), oy = Math.round(H/2 - camY*ts);
+  // ★マップが 画面より 小さい ときは まんなかに おく（左上に よらない）
+  const mapW = MW*ts, mapH = MH*ts;
+  const ox = (mapW <= W) ? Math.round((W-mapW)/2) : Math.round(W/2 - camX*ts);
+  const oy = (mapH <= H) ? Math.round((H-mapH)/2) : Math.round(H/2 - camY*ts);
 
   // はいけい
   cx.fillStyle = theme==='ice' ? '#0d2036' : theme==='cave' ? '#0a1020'
