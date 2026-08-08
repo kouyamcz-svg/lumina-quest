@@ -115,7 +115,7 @@ const MIDBOSS = {
     exp:14, gold:0, art:'nushicrab',
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 序章ボス：悪夢獣 ウンブラ（影の座）----
-  umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:205, atk:13, def:9, agi:10, acts:1,
+  umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:175, atk:12, def:8, agi:10, acts:1,
     exp:140, gold:90, art:'rev_shadow', scale:1.30,
     skill:{p:0.28, mul:1.25, name:'かげの つめ'},
     aoe:{p:0.16, lo:6, hi:10, name:'くらやみの さざなみ'},
@@ -195,23 +195,24 @@ const MAPS = {
   // ============ 序章：夜の広場（黒い裂け目） ============
   // ★みちのりを ながく とり、わき道を 2本 つける（宝箱／逃げ遅れた子）。
   //   まっすぐな ろうかを ならべる だけの 水増しに しない。
-  //   ★1ますの ろうかに かざりの 岩を おかない（通れなくなる／わき道が
-  //     ぬけ道に なる ふぐあいを 2けん だした）。岩は ひろい ところだけ。
-  rift_yard:{name:'裂け目の広場', theme:'dream', enc:true, encRate:0.17, encGrace:2, tiles:[
+  //   ★しかけ2つ：①岩(O)を 穴(x)に 押しこんで 足場を つくる
+  //                ②光珠灯(L)を ふたつ ともすと 奥の 扉(K)が ひらく
+  //   ★1ますの ろうかに かざりの 岩(o)を おかない（通れなくなる）。
+  rift_yard:{name:'裂け目の広場', theme:'dream', enc:true, encRate:0.24, encGrace:2, tiles:[
     "#####################",
     "#####################",
     "####...............##",
     "####..o...B...o....##",
     "####...............##",
-    "########C.#######..##",
-    "#################..##",
+    "################K####",
+    "#####L######L###.####",
     "##.................##",
-    "##..#################",
-    "##..########.n#######",
+    "###.#################",
+    "##...............C.##",
+    "##xxxxxxxxxxxxxxxxx##",
     "##.................##",
-    "#################..##",
-    "##............o....##",
-    "##....o............##",
+    "##...O.......O.....##",
+    "##n....O...........##",
     "##########G##########"],
     warpsXY:{
       '10,14':{to:'lower_dist', x:10, y:1}
@@ -241,7 +242,9 @@ function freshState(){
   G = {mode:'field', menu:null, battle:null, flags:{}, visited:{}, gotTreasure:{},
        tactic:'manual', dex:{}, trail:[], stepFlip:false, cleared:false,
        chapter:1, chapters:{}, townState:'NORMAL', night:false, quests:{}, steps:0,
-       ship:null, aboard:false};
+       ship:null, aboard:false, tileEdits:{}};      // ★しかけで 書きかえた ます
+  if(!MAPS_ORIG) snapshotMaps();
+  restoreMaps();                                    // ★しかけを もとに もどす
   P = {map:'home_forge', x:4, y:5, dir:'front', gold:40, herbs:3, waters:0,
        equipBag:[], keyItems:{}, goods:{}};
   party = [mkMember('io',1)];
@@ -355,7 +358,48 @@ const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
           : (typeof require!=='undefined' ? require('./chapters.js') : null);
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
-const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j']);
+const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
+                       'O','x','L','l']);
+// ★しかけ用の タイル（IVから）
+//   O 動かせる岩（押せる）／x 穴（岩で 埋まる）／L 消えた光珠灯／l ついた光珠灯
+//   K 施錠された扉（かぎで あく）
+const GIMMICK_TILES = new Set(['O','x','L','l','K']);
+
+// ============================================================
+// タイルの 書きかえ（しかけの ため）
+//   MAPS の 文字列を じかに 書きかえる。こうすると 描画・当たり判定・
+//   監査が すべて そのまま ついてくる（読みかえの 通し忘れが 起きない）。
+//   もとの すがたは MAPS_ORIG に とっておき、はじめから／ロード時に もどす。
+// ============================================================
+let MAPS_ORIG = null;
+function snapshotMaps(){
+  MAPS_ORIG = {};
+  Object.keys(MAPS).forEach(k=>{ MAPS_ORIG[k] = MAPS[k].tiles.slice(); });
+}
+function restoreMaps(){
+  if(!MAPS_ORIG) return;
+  Object.keys(MAPS_ORIG).forEach(k=>{ MAPS[k].tiles = MAPS_ORIG[k].slice(); });
+}
+function setTile(map,x,y,ch){
+  const m = MAPS[map]; if(!m) return false;
+  const row = m.tiles[y];
+  if(row===undefined || x<0 || x>=row.length) return false;
+  m.tiles[y] = row.slice(0,x) + ch + row.slice(x+1);
+  G.tileEdits = G.tileEdits || {};
+  G.tileEdits[map+':'+x+','+y] = ch;
+  return true;
+}
+function applyTileEdits(){
+  restoreMaps();
+  const ed = G.tileEdits || {};
+  Object.keys(ed).forEach(k=>{
+    const [map, xy] = k.split(':');
+    const [x,y] = xy.split(',').map(Number);
+    const m = MAPS[map]; if(!m) return;
+    const row = m.tiles[y]; if(row===undefined) return;
+    m.tiles[y] = row.slice(0,x) + ed[k] + row.slice(x+1);
+  });
+}
 function tileAt(map,x,y){
   const m = MAPS[map]; if(!m) return '#';
   if(y<0||x<0||y>=m.tiles.length||x>=m.tiles[y].length) return '#';
@@ -438,7 +482,19 @@ function interact(){
     return;
   }
   if(ch==='B'){ triggerBoss(nx,ny); return; }
-  // ★IVの とくべつな ますは 章データの specialTiles で くわえる（M1いこう）
+  // ★しかけ（IVから）
+  if(ch==='L' || ch==='l'){ toggleLamp(nx,ny); return; }
+  if(ch==='x'){
+    G.mode='msg';
+    U.msg(['深い 穴が あいている。','……なにか 埋めれば 渡れそうだ。'], ()=>{ G.mode='field'; });
+    return;
+  }
+  if(ch==='O'){
+    G.mode='msg';
+    U.msg(['大きな 岩だ。押せば 動きそうだ。'], ()=>{ G.mode='field'; });
+    return;
+  }
+  if(ch==='K'){ openLockedDoor(nx,ny); return; }
   // なにも なければ
   G.mode='msg';
   U.msg(['そこには なにも ない。'], ()=>{ G.mode='field'; });
@@ -479,6 +535,8 @@ function stepField(dx,dy){
       G.aboard=false;
     }else return;
   }
+  // ★動かせる岩（O）：むこうが 床なら 押せる。穴（x）なら 埋まる。
+  if(ch==='O'){ pushRock(nx,ny,dx,dy); return; }
   if(!walkable(P.map,nx,ny)) return;
   G.trail.unshift([P.x,P.y]); if(G.trail.length>8) G.trail.pop();
   P.dir = dy<0?'back' : dy>0?'front' : (dx<0?'left':'right');   // むきを おぼえる
@@ -497,6 +555,93 @@ function stepField(dx,dy){
   if(w){ doWarp(w); return; }
   if(MAPS[P.map].enc) maybeEncounter();
 }
+// ★施錠された扉：章データの locks に かかれた かぎが いる。
+function openLockedDoor(nx,ny){
+  const lk = ((chData()||{}).locks||{})[P.map+':'+nx+','+ny];
+  G.mode='msg';
+  if(!lk){ U.msg(['固く 閉ざされている。'], ()=>{ G.mode='field'; }); return; }
+  if(!lk.key || !hasKey(lk.key)){          // かぎの ない 扉は べつの しかけで あける
+    U.msg(lk.lockMsg || ['鍵が かかっている。'], ()=>{ G.mode='field'; });
+    return;
+  }
+  setTile(P.map,nx,ny,'.');
+  A.door && A.door();
+  V.refresh && V.refresh();
+  U.msg(lk.openMsg || ['鍵を 使った。扉が 開いた。'], ()=>{ G.mode='field'; });
+}
+
+// ★岩を おす。むこうが 床なら ずらす。穴なら 岩ごと 埋まって 道に なる。
+function pushRock(rx,ry,dx,dy){
+  const tx = rx+dx, ty = ry+dy;
+  const t = tileAt(P.map,tx,ty);
+  if(t==='x'){                                  // 穴を 埋める
+    setTile(P.map,rx,ry,'.');
+    setTile(P.map,tx,ty,'.');
+    A.door && A.door();
+    G.mode='msg';
+    U.msg(['岩が 穴に はまった。','足場が できた。'], ()=>{ G.mode='field'; V.refresh&&V.refresh(); });
+    return;
+  }
+  if(t!=='.' && t!=='r'){                       // 押せない
+    G.mode='msg';
+    U.msg(['岩は びくとも しない。'], ()=>{ G.mode='field'; });
+    return;
+  }
+  setTile(P.map,rx,ry,'.');
+  setTile(P.map,tx,ty,'O');
+  A.door && A.door();
+  G.trail.unshift([P.x,P.y]); if(G.trail.length>8) G.trail.pop();
+  P.x=rx; P.y=ry; G.stepFlip=!G.stepFlip;
+  V.setActors(); V.refresh&&V.refresh();
+}
+
+// ★岩づまり すくい：穴が ひとつも 埋まって おらず、どの岩も もう 押せない ときは
+//   その マップの しかけを もとに もどす。手づまりで 進めなく なるのを ふせぐ。
+function gimmickRescue(map){
+  const m = MAPS[map], org = MAPS_ORIG && MAPS_ORIG[map];
+  if(!m || !org) return false;
+  const pitsNow = m.tiles.join('').split('x').length-1;
+  const pitsOrg = org.join('').split('x').length-1;
+  if(pitsOrg===0 || pitsNow<pitsOrg) return false;      // 穴が ない／もう 埋めた
+  let canPush = false;
+  for(let y=0;y<m.tiles.length && !canPush;y++){
+    for(let x=0;x<m.tiles[y].length && !canPush;x++){
+      if(m.tiles[y][x] !== 'O') continue;
+      [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{
+        const t = tileAt(map,x+dx,y+dy);
+        const back = tileAt(map,x-dx,y-dy);
+        if((t==='.'||t==='r'||t==='x') && !isBlocked(back)) canPush = true;
+      });
+    }
+  }
+  if(canPush) return false;
+  m.tiles = org.slice();
+  Object.keys(G.tileEdits||{}).forEach(k=>{ if(k.indexOf(map+':')===0) delete G.tileEdits[k]; });
+  return true;
+}
+
+// ★光珠灯：しらべると つく／消える。ぜんぶ つくと 章データの lampGate が ひらく。
+function toggleLamp(nx,ny){
+  const cur = tileAt(P.map,nx,ny);
+  setTile(P.map,nx,ny, cur==='L' ? 'l' : 'L');
+  A.item && A.item();
+  V.refresh && V.refresh();
+  const lines = [cur==='L' ? '光珠に 火が ともった。' : '光珠の 火が 消えた。'];
+  const gate = (chData()||{}).lampGates && (chData()||{}).lampGates[P.map];
+  if(gate && allLampsLit(P.map)){
+    gate.open.forEach(o=>setTile(P.map,o.x,o.y,o.ch||'.'));
+    if(gate.flag) G.flags[gate.flag]=true;
+    lines.push(...(gate.msg||['どこかで 石の きしむ 音が した。']));
+    V.refresh && V.refresh();
+  }
+  G.mode='msg';
+  U.msg(lines, ()=>{ G.mode='field'; });
+}
+function allLampsLit(map){
+  const m = MAPS[map]; if(!m) return false;
+  return !m.tiles.some(r=>r.indexOf('L')>=0);
+}
+
 // ワールドマップは ばしょによって なまえが かわる
 function areaName(map,x,y){
   if(map==='world' && tileAt(map,x,y)==='~') return 'おおうみ';
@@ -510,6 +655,7 @@ function doWarp(w){
   if(A.door) A.door();
   V.fade(1, ()=>{
     P.map=w.to; P.x=w.x; P.y=w.y; P.dir='front';
+    if(gimmickRescue(w.to)) G._rescued = true;      // ★岩づまりを もとに もどした
     G.trail=[[w.x,w.y],[w.x,w.y]];
     G.visited[w.to]=true;
     // ★章データの onEnter / onEnterState
@@ -1942,6 +2088,7 @@ function saveGame(s, slot){
       flags:G.flags, quests:G.quests,
       world:{visited:G.visited, gotTreasure:G.gotTreasure, dex:G.dex},
       tactic:G.tactic, cleared:G.cleared, townState:G.townState, night:G.night,
+      tileEdits:G.tileEdits,                    // ★しかけの じょうたい
     }));
     lastSaveError=null;
     return true;
@@ -1963,6 +2110,11 @@ function loadGame(s, slot){
     P.equipBag = Array.isArray(d.equipBag) ? d.equipBag : [];
     P.keyItems = (d.keyItems && typeof d.keyItems==='object') ? d.keyItems : {};
     P.goods = (d.goods && typeof d.goods==='object') ? d.goods : {};
+    // ★しかけ：まず もとの マップに もどしてから、きろくぶんを あてなおす。
+    //   （ロード前に 押した 岩が のこったままに ならない ように）
+    if(!MAPS_ORIG) snapshotMaps();
+    G.tileEdits = (d.tileEdits && typeof d.tileEdits==='object') ? d.tileEdits : {};
+    applyTileEdits();
     G.marketTick = d.marketTick|0; G.tradeProfit = d.tradeProfit|0;
     G.quota = d.quota || null;
     P.dir = d.dir || 'front';
@@ -2120,6 +2272,9 @@ function swapMember(cls){                     // せんとう ⇄ ひかえ
 return {
   // データ
   MAPS, ENEMIES, MIDBOSS, CLASSES, SPELL_DEFS, SHOPS, INN_PRICE, byMap, byMapCh, TACTICS, LV_CAP,
+  // ★しかけ（IVから）
+  setTile, applyTileEdits, restoreMaps, snapshotMaps, allLampsLit, GIMMICK_TILES,
+  pushRock, toggleLamp, gimmickRescue,
   // ★LQ4：けんしょうよう（テストから 戦闘を 1てずつ たたく）
   memberAct, enemyAct, endBattle, buffMul, eEffAgi, inflictHit,
   get NPC_LINES(){return NPCDATA.NPCS;}, WORLD, QUESTS:NPCDATA.QUESTS,
