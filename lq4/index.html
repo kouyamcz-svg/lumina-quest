@@ -127,7 +127,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-08T07:58:58", "assets_sha": "cc9fa4d3", "lines": {"world": 97, "npc": 114, "chapters": 171, "bgm": 979, "view2d": 1496, "core": 2305, "view": 1389, "ui": 813}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-08T14:52:55", "assets_sha": "cc9fa4d3", "lines": {"world": 99, "npc": 123, "chapters": 171, "bgm": 979, "view2d": 1496, "core": 2351, "view": 1389, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -198,6 +198,7 @@ const CHAPTERS = [
 // ---------------- マップID ----------------
 //   種別： town / field / cast(城) / dgn(ダンジョン) / in(屋内) / shrine(神殿)
 const MAP_IDS = {
+  world:      {region:'sky', kind:'field',name:'天空大陸 ルミナリア', scene:'SCENE_SKY_FIELD'},
   home_forge: {region:'sky', kind:'in',   name:'イオの家',        scene:'SCENE_SKY_IN'},
   lower_dist: {region:'sky', kind:'town', name:'下層区',          scene:'SCENE_SKY_TOWN'},
   trial_yard: {region:'sky', kind:'town', name:'見習い試験場',    scene:'SCENE_SKY_TOWN'},
@@ -208,6 +209,7 @@ const MAP_IDS = {
 // render: '2d' ＝ ドット絵（天空大陸の各区は 2Dが 主）
 //         '3d' ＝ 飛翔区間・夢の内界 だけ（構想書 §3）
 const SCENES = {
+  SCENE_SKY_FIELD:{render:'2d', theme:'world',  outdoor:true,  snowfall:false, aurora:false, footprints:false},
   SCENE_SKY_TOWN: {render:'2d', theme:'sky',    outdoor:true,  snowfall:false, aurora:false, footprints:false},
   SCENE_SKY_IN:   {render:'2d', theme:'indoor', outdoor:false},
   SCENE_SKY_RIFT: {render:'2d', theme:'dream',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
@@ -272,7 +274,7 @@ const NPCS = {
 
   // ============ 序章：下層区 ============
   lower_dist: [
-    {at:'5,5', spr:'villagerA', name:'荷運びの 男', lines:[
+    {at:'8,12', spr:'villagerA', name:'荷運びの 男', lines:[
       {when:{flag:'ch0_riftOpen'}, text:[
         '「空が 裂けてる……あんなの 見たこと ない」',
         '「北の 広場だ。人が まだ 残ってる！」']},
@@ -281,9 +283,16 @@ const NPCS = {
         '「日が 落ちたのに 空が 光ってる。北の 門の 先だ」']},
       {text:['「下層区は 地上生まれの 街だ」',
              '「上の 連中は おれたちを 重い者と 呼ぶ」']}]},
-    {at:'18,5', spr:'villagerB', name:'光珠管の 技師', lines:[
+    {at:'5,5', spr:'villagerB', name:'光珠管の 技師', lines:[
       {text:['「この 管には 炉の 光が 流れてる」',
              '「……最近、少し 濁ってる 気が するんだ」']}]},
+    {at:'18,5', spr:'guardA', name:'東門の 見張り', lines:[
+      {when:{flag:'ch0_trialDone'}, text:[
+        '「東の 門から 外へ 出られる。下層の たなだ」',
+        '「中層へ 昇る 道は あるが、許しが なければ 通れん」',
+        '「悪夢獣が 出る。日が 落ちる 前に 戻れ」']},
+      {text:['「外は 下層の たな。牧草地と 岩場ばかりだ」',
+             '「今日は 試験だろう。寄り道は あとに しろ」']}]},
     {at:'12,9', spr:'butler', name:'うわさずきの 男', lines:[
       {when:{flag:'ch0_trialDone'}, text:[
         '「騎士団長の グランさまは 地上生まれにも 公平だ」',
@@ -291,6 +300,8 @@ const NPCS = {
       {text:['「今日は 見習い試験だ。南の 試験場だよ」']}]},
   ],
 
+  // ============ 序章：下層区（東門の 見張り）============
+  // ※ フィールドへ 出る 前に、どこへ 行けるかを 教える
   // ============ 序章：裂け目の広場（夜） ============
   rift_yard: [
     {at:'13,9', spr:'villagerA', name:'逃げ遅れた 子ども', lines:[
@@ -3143,6 +3154,7 @@ const EXP_MUL = {};
 const byMapCh = {};
 const byMap = {
   rift_yard: ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
+  world:     ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
 };
 
 // ---------------- データ：マップ ----------------
@@ -3153,6 +3165,50 @@ const MAPS = {
   // 共通タイル: . ゆか / # かべ / o いわ / r みち / t あかり
   //   I やどや / P きょうかい / S みせ / n じゅうみん / C たからばこ / B ボス
   // ※ M0は かりの タイル（天空様式：白石・光珠灯・雲海縁 は M1で 新規に する）
+
+  // ============ 天空大陸 ルミナリア（フィールド）============
+  //   ★マップIDは 'world'。まわりは 雲海（~）で 落ちられない。
+  //   ★序章で 入れるのは 下層区（V）だけ。ほかの ちてんは Q（これから つくる）。
+  world:{name:'天空大陸 ルミナリア', theme:'world', enc:true, encRate:0.09, encGrace:4,
+    encZones:[
+      {x0:4,  y0:20, x1:39, y1:27, name:'下層の たな'},
+      {x0:6,  y0:12, x1:37, y1:20, name:'中層の たな'},
+      {x0:11, y0:4,  x1:32, y1:12, name:'上層の たな'},
+    ],
+    tiles:[
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~...~.~~~~....~~.~~~~~~~~~~~",
+    "~~~~~~~~~~~..........r...f.......~~~~~~~~~~~",
+    "~~~~~~~~~~~.........rQr..........~~~~~~~~~~~",
+    "~~~~~~~~~~~..........rr.......r..~~~~~~~~~~~",
+    "~~~~~~~~~~~..........,rrrrrrrrQr.~~~~~~~~~~~",
+    "~~~~~~~~~~~...........r.......r..~~~~~~~~~~~",
+    "~~~~~~~~~~~........^^rr^^^...,..f~~~~~~~~~~~",
+    "~~~~~~~~~~~........^^rr^^^...o...~~~~~~~~~~~",
+    "~~~~~~...f...^.......fr...............~~~~~~",
+    "~~~~~~...rrrrrrrrrrrrrr...............~~~~~~",
+    "~~~~~~,.rQr....o......r...............~~~~~~",
+    "~~~~~~.f.r............r.f...,.........~~~~~~",
+    "~~~~~~.o.............rQrrrrrrrrrrrr.f.~~~~~~",
+    "~~~~~~....f........^..r..o.......rQr..~~~~~~",
+    "~~~~~~.f...f..fffffff.r...........r...~~~~~~",
+    "~~~~~~.^....o.fffffff.r...............~~~~~~",
+    "~~~~..................r.....^...........~~~~",
+    "~~~~......^.rrrrrrrrrrr...^............~~~~~",
+    "~~~~........r.....................^.f...~~~~",
+    "~~~~........r.f......f.................~~~~~",
+    "~~~~.......rVr....,.^..........f.......~~~~~",
+    "~~~~........r..o.......^................~~~~",
+    "~~~~.~.o...~.~~~.~~.~..~.~~~.~~.~..~~~..~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",],
+    warpsXY:{
+      '12,24':{to:'lower_dist', x:19, y:6}
+    }},
 
   // ============ 序章：イオの家（父の鍛冶場） ============
   home_forge:{name:'イオの家', theme:'village', enc:false, tiles:[
@@ -3177,7 +3233,7 @@ const MAPS = {
     "#.#####...r...#####.#",
     "#.##I##...r...##S##.#",
     "#....n.t..r..t....n.#",
-    "#rrrrrrrrrrrrrrrrrrr#",
+    "#rrrrrrrrrrrrrrrrrrrG",
     "#.....o..tr...o.....#",
     "#.#P##....r....####.#",
     "#.####....r.n..####.#",
@@ -3189,7 +3245,8 @@ const MAPS = {
     warpsXY:{
       '3,12' :{to:'home_forge', x:4, y:5},
       '10,14':{to:'trial_yard', x:6, y:8},
-      '10,0' :{to:'rift_yard',  x:10, y:13}
+      '10,0' :{to:'rift_yard',  x:10, y:13},
+      '20,6' :{to:'world',      x:13, y:24}
     }},
 
   // ============ 序章：騎士団 見習い試験場 ============
@@ -3491,9 +3548,9 @@ function interact(){
   }
   if(ch==='Q'){                               // まだ いけない ちほう
     G.mode='msg';
-    U.msg(['とおくに まちの かげが みえる。',
-           'だが いまの ' + (party[0] ? party[0].name : 'かれら') + 'には、ここから さきへ すすむ すべが ない。',
-           '（この ちほうは これから つくられます）'], ()=>{ G.mode='field'; });
+    U.msg(['光珠灯の 列が、雲の 上へ 続いている。',
+           'だが いまの ' + (party[0] ? party[0].name : '彼ら') + 'に、ここから 先へ 進む 手だては ない。',
+           '（この 場所は これから 作られます）'], ()=>{ G.mode='field'; });
     return;
   }
   if(ch==='B'){ triggerBoss(nx,ny); return; }
@@ -3659,7 +3716,7 @@ function allLampsLit(map){
 
 // ワールドマップは ばしょによって なまえが かわる
 function areaName(map,x,y){
-  if(map==='world' && tileAt(map,x,y)==='~') return 'おおうみ';
+  if(map==='world' && tileAt(map,x,y)==='~') return '雲海';
   const m=MAPS[map];
   if(!m || !m.encZones) return WORLD.mapName(map);
   const z=(m.encZones||[]).find(z=>x>=z.x0&&x<=z.x1&&y>=z.y0&&y<=z.y1);
