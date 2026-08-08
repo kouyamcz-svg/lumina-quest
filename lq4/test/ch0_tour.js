@@ -110,11 +110,29 @@ T('道づたいに 北の門へ たどりつける（とちゅうで つっか�
   C.P.map==='rift_yard', C.P.map+' '+C.P.x+','+C.P.y);
 T('広場へ はいれる', C.P.map==='rift_yard');
 
+// ===== 7.2 天空大陸（フィールド）へ 出られる =====
+{
+  walkTo('lower_dist', 19, 6); C.G.mode='field';
+  C.stepField(1,0);                                  // 東の門
+  T('フィールドへ 出られる', C.P.map==='world', C.P.map+' '+C.P.x+','+C.P.y);
+  T('雲海には 落ちない', C.walkable('world', C.P.x, C.P.y));
+  // 下層区へ もどる（V を しらべる）
+  C.G.mode='field'; C.P.x=13; C.P.y=24; C.P.dir='left';
+  C.interact();
+  T('ちてんから 町へ 入れる', C.P.map==='lower_dist', C.P.map+' '+C.P.x+','+C.P.y);
+  // まだ 作って いない ちてん
+  clearLog();
+  C.P.map='world'; C.P.x=23; C.P.y=16; C.P.dir='left'; C.G.mode='field';
+  C.interact();
+  T('未完成の ちてんは 断られる', said('これから 作られます'), log.join(' / ').slice(0,50));
+  walkTo('lower_dist', 10, 13);
+}
+
 // ===== 7.5 しかけを といて ボスの間まで あるく（UIを とおる みち）=====
 function goField(){ C.G.mode='field'; }
 function walkG(steps){ for(const [dx,dy] of steps){ goField(); C.stepField(dx,dy); } }
 function faceDo(dir){ goField(); C.P.dir=dir; C.interact(); }
-C.P.x=10; C.P.y=13; goField();
+C.P.map='rift_yard'; C.P.x=10; C.P.y=13; goField();
 walkG([[-1,0],[-1,0],[-1,0],[-1,0],[-1,0]]);      // (5,13)へ
 walkG([[0,-1],[0,-1]]);                            // 岩を 2かい おして 穴を うめる
 T('しかけ：穴が うまる', C.tileAt('rift_yard',5,10)==='.', C.tileAt('rift_yard',5,10));
