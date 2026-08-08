@@ -40,6 +40,7 @@ const CHAPTERS = [
 // ---------------- マップID ----------------
 //   種別： town / field / cast(城) / dgn(ダンジョン) / in(屋内) / shrine(神殿)
 const MAP_IDS = {
+  world:      {region:'sky', kind:'field',name:'天空大陸 ルミナリア', scene:'SCENE_SKY_FIELD'},
   home_forge: {region:'sky', kind:'in',   name:'イオの家',        scene:'SCENE_SKY_IN'},
   lower_dist: {region:'sky', kind:'town', name:'下層区',          scene:'SCENE_SKY_TOWN'},
   trial_yard: {region:'sky', kind:'town', name:'見習い試験場',    scene:'SCENE_SKY_TOWN'},
@@ -50,6 +51,7 @@ const MAP_IDS = {
 // render: '2d' ＝ ドット絵（天空大陸の各区は 2Dが 主）
 //         '3d' ＝ 飛翔区間・夢の内界 だけ（構想書 §3）
 const SCENES = {
+  SCENE_SKY_FIELD:{render:'2d', theme:'world',  outdoor:true,  snowfall:false, aurora:false, footprints:false},
   SCENE_SKY_TOWN: {render:'2d', theme:'sky',    outdoor:true,  snowfall:false, aurora:false, footprints:false},
   SCENE_SKY_IN:   {render:'2d', theme:'indoor', outdoor:false},
   SCENE_SKY_RIFT: {render:'2d', theme:'dream',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
