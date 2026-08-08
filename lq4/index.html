@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-08T15:50:28", "assets_sha": "cc9fa4d3", "lines": {"world": 99, "npc": 123, "chapters": 171, "bgm": 979, "view2d": 1563, "core": 2368, "view": 1394, "ui": 977}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-08T16:05:48", "assets_sha": "cc9fa4d3", "lines": {"world": 99, "npc": 123, "chapters": 171, "bgm": 979, "view2d": 1563, "core": 2373, "view": 1394, "ui": 977}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -273,7 +273,7 @@ const NPCDATA = (function(){
 const NPCS = {
   // ============ 序章：イオの家（父の鍛冶場） ============
   home_forge: [
-    {at:'2,2', spr:'elderWoman', name:'となりの おばさん', lines:[
+    {at:'3,6', spr:'elderWoman', name:'となりの おばさん', lines:[
       {when:{flag:'ch0_trialDone'}, text:[
         '「首席は 上層の お嬢さんだったってね」',
         '「……あんたの 父さんも、ずっと そうだったよ」']},
@@ -411,7 +411,7 @@ const CH = {
     title: '見習い試験の日',
     region: 'sky',
 
-    start: {map:'home_forge', x:4, y:5, dir:'front'},
+    start: {map:'home_forge', x:7, y:8, dir:'front'},
     party: ['io'],
     gold: 40, herbs: 3, waters: 0,
     equip: {weapon:{kind:'w', name:'父の 打った 剣', v:4},
@@ -2722,7 +2722,7 @@ function draw(dt, time, actors){
   //   まえは 左上に ちいさく はりついて、画面の まんなかが あいていた。
   if(MW*TS*scale < W && MH*TS*scale < H){
     const fit = Math.min(Math.floor(W/(MW*TS)), Math.floor(H/(MH*TS)));
-    if(fit > scale) scale = Math.min(fit, 6);   // 大きくしすぎない
+    if(fit > scale) scale = Math.min(fit, 4);   // ★4ばいまで。それ以上は 拡大しすぎに 見える
   }
   const ts = TS*scale;   // かならず せいすうばい
 
@@ -3287,16 +3287,21 @@ const MAPS = {
     }},
 
   // ============ 序章：イオの家（父の鍛冶場） ============
-  home_forge:{name:'イオの家', theme:'village', enc:false, tiles:[
-    "#########",
-    "#t.....t#",
-    "#.n.....#",
-    "#.......#",
-    "#...C...#",
-    "#.......#",
-    "####.####"],
+  // 父の 鍛冶場。左に 炉、右に 道具棚。奥が 寝間。
+  home_forge:{name:'イオの家（父の鍛冶場）', theme:'village', enc:false, tiles:[
+    "###############",
+    "#t...........t#",
+    "#..###...###..#",
+    "#..#C#...#e#..#",
+    "#..#.#...#.#..#",
+    "#.............#",
+    "#..n.......e..#",
+    "#.............#",
+    "#t...........t#",
+    "#.............#",
+    "#######.#######"],
     warpsXY:{
-      '4,6':{to:'lower_dist', x:3, y:11}
+      '7,10':{to:'lower_dist', x:3, y:11}
     }},
 
   // ============ 序章：下層区（地上生まれの移民と労働者の街） ============
@@ -3319,7 +3324,7 @@ const MAPS = {
     "#.###.....r......C..#",
     "##########r##########"],
     warpsXY:{
-      '3,12' :{to:'home_forge', x:4, y:5},
+      '3,12' :{to:'home_forge', x:7, y:9},
       '10,14':{to:'trial_yard', x:6, y:8},
       '10,0' :{to:'rift_yard',  x:10, y:13},
       '20,6' :{to:'world',      x:13, y:24}
@@ -3393,7 +3398,7 @@ function freshState(){
        ship:null, aboard:false, tileEdits:{}};      // ★しかけで 書きかえた ます
   if(!MAPS_ORIG) snapshotMaps();
   restoreMaps();                                    // ★しかけを もとに もどす
-  P = {map:'home_forge', x:4, y:5, dir:'front', gold:40, herbs:3, waters:0,
+  P = {map:'home_forge', x:7, y:8, dir:'front', gold:40, herbs:3, waters:0,
        equipBag:[], keyItems:{}, goods:{}};
   party = [mkMember('io',1)];
   reserve = [];
