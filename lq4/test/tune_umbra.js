@@ -28,13 +28,22 @@ function setParty(lv){
   C.party[1].armor ={kind:'a',name:'貴族の 胸当て',v:5};
   C.P.herbs=3;
 }
-// 入口(10,13)から ボス前(10,4)までの みちのり（51歩）
-const PATH=[];
-const push=(n,d)=>{ for(let i=0;i<n;i++) PATH.push(d); };
-push(7,[1,0]); push(3,[0,-1]);      // 東へ → 東の のぼり
-push(15,[-1,0]); push(3,[0,-1]);    // 中段を 西へ → 西の のぼり
-push(15,[1,0]); push(3,[0,-1]);     // 上段を 東へ → おくの のぼり
-push(7,[-1,0]); push(1,[0,1]);      // ボスの間を 西へ
+// 入口(10,13)から ボス前(10,4)まで、しかけを といて あるく
+function walkTo(dx,dy,n){ for(let i=0;i<n;i++){ C.G.mode='field'; C.stepField(dx,dy); } }
+function doFace(dir){ C.G.mode='field'; C.P.dir=dir; C.interact(); }
+function walkThrough(){
+  C.P.x=10; C.P.y=13;
+  walkTo(-1,0,5);            // (5,13)
+  walkTo(0,-1,2);            // 岩を 2かい おす → 穴が うまる
+  walkTo(0,-1,3);            // 穴を こえて 中段（5,9）
+  walkTo(-1,0,2);            // (3,9)
+  walkTo(0,-1,2);            // (3,7) 上段
+  walkTo(1,0,2);  doFace('back');   // 光珠灯 1つめ (5,6)
+  walkTo(1,0,7);  doFace('back');   // 光珠灯 2つめ (12,6)
+  walkTo(1,0,4);             // (16,7)
+  walkTo(0,-1,3);            // 扉を くぐって ボスの間 (16,4)
+  walkTo(-1,0,6);            // ボスの となり (10,4)
+}
 function fullHeal(lv, N){
   let win=0;
   for(let i=0;i<N;i++){
@@ -46,9 +55,9 @@ function fullHeal(lv, N){
 function throughRun(N){
   let win=0, lvs={}, wipedOnWay=0;
   for(let i=0;i<N;i++){
-    setParty(2); C.P.map='rift_yard'; C.P.x=10; C.P.y=13; C.G.mode='field';
+    setParty(2); C.P.map='rift_yard'; C.G.mode='field';
     lost=false;
-    for(const [dx,dy] of PATH){ C.stepField(dx,dy); if(C.G.mode!=='field') C.G.mode='field'; }
+    walkThrough();
     if(lost) wipedOnWay++;                    // みちみちで 全滅
     const lv=C.party[0].lv; lvs[lv]=(lvs[lv]||0)+1;
     lost=false; C.G.mode='field';
@@ -62,7 +71,7 @@ const N=Number(process.argv[2]||200);
 console.log('A) 全快・Lv固定');
 for(const lv of [3,4,5,6]) console.log('   Lv'+lv+'　勝率 '+fullHeal(lv,N).toFixed(1)+'%');
 const r=throughRun(N);
-console.log('B) 通しどおり（Lv2で 入口 → 51歩の 道を あるいて ボス）');
+console.log('B) 通しどおり（Lv2で 入口 → しかけを といて ボスへ）');
 console.log('   ボス前の Lv ぶんぷ '+JSON.stringify(r.lvs));
 console.log('   みちみちの 全滅 '+r.wipedOnWay+'/'+N);
 console.log('   ウンブラ 勝率 '+r.win.toFixed(1)+'%');
