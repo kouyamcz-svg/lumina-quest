@@ -749,12 +749,176 @@ function unlockAudio(){
 UNLOCK_EVENTS.forEach(ev=>{ addEventListener(ev, unlockAudio, {passive:true}); });
 V.init();
 C.bind(V, UI, A);
+
+// ============================================================
+// タイトル画面（IVから）
+//   雲海に うかぶ 大陸・そらを よこぎる 白竜・ロゴ。
+//   絵は すべて この場で えがく（画像ファイルは つかわない）。
+// ============================================================
+const Title = (function(){
+  let cv=null, g=null, raf=0, t0=0, onGo=null, live=false;
+  const W=()=>cv.width, H=()=>cv.height;
+
+  function fit(){
+    const el=document.getElementById('title');
+    const dpr=Math.min(devicePixelRatio||1, 2);
+    cv.width  = Math.max(2, Math.round(el.clientWidth *dpr));
+    cv.height = Math.max(2, Math.round(el.clientHeight*dpr));
+  }
+  // ゆるやかに ながれる 雲の おび
+  function cloudBand(y, amp, speed, col, t, seed){
+    const w=W(), h=H();
+    g.fillStyle=col; g.beginPath(); g.moveTo(0,h);
+    for(let x=0;x<=w;x+=6){
+      const p = x/w*6.28318;
+      const yy = y*h
+        + Math.sin(p*1.7 + t*speed + seed)*amp*h
+        + Math.sin(p*3.1 - t*speed*0.7 + seed*2)*amp*h*0.45;
+      g.lineTo(x, yy);
+    }
+    g.lineTo(w,h); g.closePath(); g.fill();
+  }
+  // うかぶ 大陸（三段の たな）の シルエット
+  function continent(t){
+    const w=W(), h=H();
+    const cx=w*0.5, cy=h*0.46 + Math.sin(t*0.6)*h*0.008;
+    const sc=Math.min(w,h);
+    g.fillStyle='#141a30';
+    const shelf=(dy,rw,rh)=>{
+      g.beginPath();
+      g.ellipse(cx, cy+dy*sc, rw*sc, rh*sc, 0, 0, 6.28318);
+      g.fill();
+    };
+    // 下に のびる 岩の 根
+    g.beginPath();
+    g.moveTo(cx-sc*0.26, cy+sc*0.03);
+    g.lineTo(cx-sc*0.06, cy+sc*0.30);
+    g.lineTo(cx+sc*0.02, cy+sc*0.19);
+    g.lineTo(cx+sc*0.10, cy+sc*0.34);
+    g.lineTo(cx+sc*0.28, cy+sc*0.03);
+    g.closePath(); g.fill();
+    shelf(0.00, 0.30, 0.045);
+    g.fillStyle='#1b2340'; shelf(-0.045, 0.21, 0.035);
+    g.fillStyle='#222b4c'; shelf(-0.085, 0.12, 0.026);
+    // 光珠の あかり
+    for(let i=0;i<9;i++){
+      const a=(i/9)*6.28318;
+      const lx=cx+Math.cos(a)*sc*0.26, ly=cy-sc*0.012+Math.sin(a)*sc*0.028;
+      const bl=0.55+0.45*Math.sin(t*2.2+i);
+      g.fillStyle='rgba(180,220,255,'+(0.25+bl*0.5).toFixed(3)+')';
+      g.beginPath(); g.arc(lx,ly, sc*0.006*(1+bl*0.5), 0, 6.28318); g.fill();
+    }
+    // 城の シルエット（いちばん うえの たな）
+    g.fillStyle='#2a3358';
+    const bx=cx, by=cy-sc*0.10;
+    g.fillRect(bx-sc*0.035, by-sc*0.055, sc*0.07, sc*0.055);
+    g.fillRect(bx-sc*0.052, by-sc*0.030, sc*0.018, sc*0.030);
+    g.fillRect(bx+sc*0.034, by-sc*0.030, sc*0.018, sc*0.030);
+    g.beginPath(); g.moveTo(bx-sc*0.040, by-sc*0.055);
+    g.lineTo(bx, by-sc*0.095); g.lineTo(bx+sc*0.040, by-sc*0.055);
+    g.closePath(); g.fill();
+  }
+  // 白竜が そらを よこぎる
+  function dragon(t){
+    const w=W(), h=H(), sc=Math.min(w,h);
+    const cyc=(t*0.055)%1.6;
+    if(cyc>1.0) return;
+    const x = -w*0.15 + cyc*w*1.3;
+    const y = h*0.24 + Math.sin(cyc*6.28318)*h*0.035;
+    const s = sc*0.055;
+    const flap = Math.sin(t*5.0);
+    g.save(); g.translate(x,y);
+    g.fillStyle='rgba(232,242,255,0.92)';
+    g.beginPath(); g.ellipse(0,0, s*0.9, s*0.20, 0, 0, 6.28318); g.fill();   // からだ
+    g.beginPath();                                                            // つばさ
+    g.moveTo(-s*0.1,0); g.quadraticCurveTo(-s*0.5, -s*(0.55+flap*0.28), -s*1.15, -s*0.10);
+    g.quadraticCurveTo(-s*0.5, -s*0.05, -s*0.1, s*0.05); g.closePath(); g.fill();
+    g.beginPath();
+    g.moveTo(-s*0.1,0); g.quadraticCurveTo(-s*0.5, s*(0.45-flap*0.22), -s*1.0, s*0.28);
+    g.quadraticCurveTo(-s*0.5, s*0.10, -s*0.1, s*0.05); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(s*0.85,-s*0.05);                                  // あたま
+    g.lineTo(s*1.25, s*0.02); g.lineTo(s*0.85, s*0.10); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(-s*0.85,0);                                       // しっぽ
+    g.quadraticCurveTo(-s*1.5, s*0.10, -s*1.9, -s*0.02);
+    g.quadraticCurveTo(-s*1.4, s*0.02, -s*0.85, s*0.06); g.closePath(); g.fill();
+    g.restore();
+  }
+  function logo(t){
+    const w=W(), h=H(), sc=Math.min(w,h);
+    const big = Math.max(20, sc*0.105), small = Math.max(11, sc*0.036);
+    const y = h*0.20;
+    g.textAlign='center'; g.textBaseline='middle';
+    // にじむ ひかり
+    g.save();
+    g.shadowColor='rgba(140,200,255,0.85)'; g.shadowBlur=sc*0.06*(0.75+0.25*Math.sin(t*1.6));
+    g.fillStyle='#f2f8ff';
+    g.font='bold '+big+'px "Hiragino Mincho ProN","Yu Mincho",serif';
+    g.fillText('ルミナクエスト', w/2, y);
+    g.font='bold '+(big*1.15)+'px "Hiragino Mincho ProN","Yu Mincho",serif';
+    g.fillText('Ⅳ', w/2, y+big*0.98);
+    g.restore();
+    g.fillStyle='rgba(200,222,255,0.9)';
+    g.font=small+'px "Hiragino Mincho ProN","Yu Mincho",serif';
+    g.fillText('〜 天空のルミナ 〜', w/2, y+big*1.78);
+    // かざりの よこせん
+    g.strokeStyle='rgba(160,200,255,0.45)'; g.lineWidth=Math.max(1,sc*0.002);
+    const lw=sc*0.16;
+    g.beginPath(); g.moveTo(w/2-lw, y+big*2.12); g.lineTo(w/2+lw, y+big*2.12); g.stroke();
+  }
+  function frame(now){
+    if(!live) return;
+    const t=(now-t0)/1000;
+    const w=W(), h=H();
+    const sky=g.createLinearGradient(0,0,0,h);
+    sky.addColorStop(0,'#070b18'); sky.addColorStop(0.45,'#122043'); sky.addColorStop(1,'#2b3f6b');
+    g.fillStyle=sky; g.fillRect(0,0,w,h);
+    // ほし
+    for(let i=0;i<40;i++){
+      const sx=((i*97)%100)/100*w, sy=((i*61)%45)/100*h;
+      const tw=0.35+0.65*Math.abs(Math.sin(t*1.3+i));
+      g.fillStyle='rgba(255,255,255,'+(tw*0.5).toFixed(3)+')';
+      g.fillRect(sx, sy, Math.max(1,w*0.0016), Math.max(1,w*0.0016));
+    }
+    dragon(t);
+    continent(t);
+    cloudBand(0.62, 0.022, 0.30, 'rgba(120,150,205,0.30)', t, 0.0);
+    cloudBand(0.72, 0.028, 0.46, 'rgba(150,180,225,0.38)', t, 1.7);
+    cloudBand(0.84, 0.034, 0.66, 'rgba(196,216,245,0.50)', t, 3.4);
+    logo(t);
+    raf=requestAnimationFrame(frame);
+  }
+  function tap(){ if(live && onGo){ const f=onGo; onGo=null; hide(); f(); } }
+  function show(go){
+    const el=document.getElementById('title');
+    if(!el){ go(); return; }
+    cv=document.getElementById('titlecv'); g=cv.getContext('2d');
+    onGo=go; live=true; el.classList.add('show');
+    fit(); t0=performance.now(); raf=requestAnimationFrame(frame);
+    window.addEventListener('resize', fit);
+    el.addEventListener('pointerdown', tap);
+    document.addEventListener('keydown', tap);
+  }
+  function hide(){
+    live=false; cancelAnimationFrame(raf);
+    const el=document.getElementById('title');
+    if(el){ el.classList.remove('show'); el.removeEventListener('pointerdown', tap); }
+    document.removeEventListener('keydown', tap);
+    window.removeEventListener('resize', fit);
+  }
+  return {show, hide, get on(){return live;}};
+})();
+
 // ---------------- タイトル ----------------
 function titleScreen(){
+  C.G.mode='menu';
+  V.buildMap(C.P.map); V.setActors(true); hud();
+  bootDone();                                   // ★タイトルでも ローディングを かならず 消す
+  Title.show(()=>titleMenu());                  // ★まず タイトル画面。タップで メニューへ
+}
+function titleMenu(){
   const info=C.saveInfo();
   C.G.mode='menu';
-  V.buildMap(C.P.map); V.setActors(true); label('ルミナクエストIV 〜天空のルミナ〜'); hud();
-  bootDone();                                   // ★タイトルでも ローディングを かならず 消す
+  label('ルミナクエストIV 〜天空のルミナ〜');
   const cont = info && !info.broken
     ? 'つづきから（'+info.lead+' Lv'+info.lv+'）' : 'つづきから';
   menu(['はじめから',cont,'章を 選ぶ'],'ルミナクエストIV',(sel)=>{
