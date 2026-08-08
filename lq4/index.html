@@ -127,7 +127,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-08T14:52:55", "assets_sha": "cc9fa4d3", "lines": {"world": 99, "npc": 123, "chapters": 171, "bgm": 979, "view2d": 1496, "core": 2351, "view": 1389, "ui": 813}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-08T15:09:48", "assets_sha": "cc9fa4d3", "lines": {"world": 99, "npc": 123, "chapters": 171, "bgm": 979, "view2d": 1496, "core": 2351, "view": 1389, "ui": 813}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -551,7 +551,7 @@ return {CH, get, has, list, bossAt, specialTile};
 </script>
 <script>"use strict";
 // ============================================================
-// ルミナクエストIII / BGM エンジン
+// ルミナクエストIV / BGM エンジン
 // せんとうきょく「双嶺の誓約」（144BPM・84しょうせつ・7セクション）を
 // ライブさいせいする。おんげんファイルは つかわず、すべて はっしんきで つくる。
 // ※ きょくデータ・おんしょくは ユーザーていきょうの オリジナル。
@@ -1530,7 +1530,7 @@ return {play, stop, setVolume, resume, attach, status,
 </script>
 <script>'use strict';
 // ============================================================
-// ルミナクエストIII / 2Dドットえ レンダラ
+// ルミナクエストIV / 2Dドットえ レンダラ
 // まち・フィールド・ダンジョンは こちらで えがく（3Dは しろの なかだけ）。
 // みおろしがた。タイルは きどうじに てつづきで えがいて アトラスに ためる。
 // ============================================================
@@ -3832,7 +3832,7 @@ function runTalkEvent(npcName){
 function offerNextChapter(next, title, isFinal){
   if(isFinal){
     G.mode = 'msg';
-    U.msg(['＊＊ ルミナクエスト III　完結 ＊＊',
+    U.msg(['＊＊ ルミナクエスト IV　完結 ＊＊',
            '',
            'ながい たびに おつきあい いただき、',
            'ありがとう ございました！',
@@ -5377,7 +5377,7 @@ return {
 </script>
 <script>'use strict';
 // ============================================================
-// ルミナクエストIII / ビュー層（Three.js）
+// ルミナクエストIV / ビュー層（Three.js）
 // コア層からは V.* のインタフェースだけを呼ばれる
 // ============================================================
 (function(){
@@ -6766,7 +6766,7 @@ window.LQ4View = {
 </script>
 <script>'use strict';
 // ============================================================
-// ルミナクエストIII / UI層・音層・入力・起動
+// ルミナクエストIV / UI層・音層・入力・起動
 // ============================================================
 (function(){
 const C = LQ4, V = window.LQ4View;
@@ -7519,11 +7519,11 @@ C.bind(V, UI, A);
 function titleScreen(){
   const info=C.saveInfo();
   C.G.mode='menu';
-  V.buildMap(C.P.map); V.setActors(true); label('ルミナクエストIII'); hud();
+  V.buildMap(C.P.map); V.setActors(true); label('ルミナクエストIV 〜天空のルミナ〜'); hud();
   bootDone();                                   // ★タイトルでも ローディングを かならず 消す
   const cont = info && !info.broken
     ? 'つづきから（'+info.lead+' Lv'+info.lv+'）' : 'つづきから';
-  menu(['はじめから',cont,'章を 選ぶ'],'ルミナクエストIII',(sel)=>{
+  menu(['はじめから',cont,'章を 選ぶ'],'ルミナクエストIV',(sel)=>{
     if(sel===1){
       if(C.loadGame()) startGame(true);
       else msg2([C.lastSaveError||'きろくが よめませんでした',
