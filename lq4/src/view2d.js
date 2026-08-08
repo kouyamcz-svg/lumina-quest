@@ -1183,7 +1183,7 @@ function draw(dt, time, actors){
   //   まえは 左上に ちいさく はりついて、画面の まんなかが あいていた。
   if(MW*TS*scale < W && MH*TS*scale < H){
     const fit = Math.min(Math.floor(W/(MW*TS)), Math.floor(H/(MH*TS)));
-    if(fit > scale) scale = Math.min(fit, 6);   // 大きくしすぎない
+    if(fit > scale) scale = Math.min(fit, 4);   // ★4ばいまで。それ以上は 拡大しすぎに 見える
   }
   const ts = TS*scale;   // かならず せいすうばい
 
