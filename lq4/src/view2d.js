@@ -356,6 +356,37 @@ function buildAtlas(){
   });
 
   // ---------- たいまつ・たからばこ・かいだん ----------
+  // ★しかけ（IVから）
+  // うごかせる岩：ふつうの 岩より あかるく、まわりに ひびを いれて 「押せる」と わからせる
+  atlas.rockPush = tile((g,s)=>{
+    blobJag(g,8,9,5,P16.mt1,true);
+    blobJag(g,8,8,4,P16.mt3,true);
+    R(g,3,13,10,1,'#00000033');
+    P(g,5,6,'#ffffff55'); P(g,6,5,'#ffffff44');
+    P(g,4,10,P16.mt0); P(g,12,10,P16.mt0);
+  });
+  // 穴：まんなかを くらく、ふちに ハイライト
+  atlas.pit = tile((g,s)=>{
+    R(g,2,3,12,11,'#1a1520');
+    R(g,3,4,10,9,'#0d0a12');
+    R(g,2,2,12,1,'#4a4258');
+    R(g,2,14,12,1,'#2a2434');
+    P(g,3,3,'#6a6078'); P(g,12,3,'#6a6078');
+  });
+  // 光珠灯（消）：はしらだけ。ついて いないことが ひとめで わかる ように くらい
+  atlas.lampOff = tile((g,s)=>{
+    R(g,7,7,2,8,'#4a4a58');
+    R(g,6,14,4,1,'#3a3a46');
+    R(g,6,4,4,4,'#5a5a6a'); R(g,7,5,2,2,'#6a6a7a');
+  });
+  // 光珠灯（点）：白い ひかりが ともる
+  atlas.lampOn = tile((g,s)=>{
+    R(g,7,7,2,8,'#6a6a78');
+    R(g,6,14,4,1,'#4a4a56');
+    R(g,6,4,4,4,'#cfe6ff'); R(g,7,3,2,6,'#ffffff');
+    P(g,5,5,'#9fd0ff88'); P(g,10,5,'#9fd0ff88');
+    P(g,8,2,'#e8f4ff66');
+  });
   atlas.torch = tile((g,s)=>{
     R(g,7,8,2,7,P16.wood0);
     R(g,6,4,4,4,'#c85a20'); R(g,7,3,2,4,'#e08828'); P(g,8,3,'#f0c058');
@@ -669,6 +700,10 @@ function tileArt(ch, theme){
     case 'w': return atlas.water;
     case 'f': return snowT?atlas.tree : atlas.tree_g;
     case 'o': return ice?atlas.icicle : atlas.rock;
+    case 'O': return atlas.rockPush;      // ★動かせる岩
+    case 'x': return atlas.pit;           // ★穴
+    case 'L': return atlas.lampOff;       // ★光珠灯（消）
+    case 'l': return atlas.lampOn;        // ★光珠灯（点）
     case 't': return atlas.torch;
     case 'C': return atlas.chest;
     case 'I': return atlas.inn;
@@ -1140,7 +1175,7 @@ function draw(dt, time, actors){
       // ★NPC・たからばこ など「うえに のる」ものの あしもとは、
       //   まわりの じめん（みち r／すな _）を ひきつぐ。
       //   トロスは すな(_)の うえに NPCが いて、したの くさが みえていた。
-      if('nCB<>SWMIPFt*e'.includes(ch)){
+      if('nCB<>SWMIPFt*eOLl'.includes(ch)){
         let rn=0, sn=0;
         for(const [ddx,ddy] of [[1,0],[-1,0],[0,1],[0,-1]]){
           const c2 = rows[y+ddy] && rows[y+ddy][x+ddx];
