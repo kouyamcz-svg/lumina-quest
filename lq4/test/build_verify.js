@@ -28,6 +28,16 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
   const bad = html.match(/LQ3_[A-Z_]+|LQ3View|const LQ3|window\.LQ3/g) || [];
   T('LQ3の しるしが のこって いない', bad.length===0, bad.slice(0,3).join(','));
 }
+// ★タイトルの ずれ：Ⅲの なまえが どこにも のこって いない こと
+{
+  const files = ['index.html','shell.html','sw.js'].concat(MODS.map(m=>'src/'+m+'.js'));
+  const hits = [];
+  files.forEach(f=>{
+    const t = fs.readFileSync(f,'utf8');
+    (t.match(/ルミナクエスト\s*III|ルミクエⅢ|ルミナクエストⅢ/g)||[]).forEach(h=>hits.push(f+':'+h));
+  });
+  T('Ⅲの タイトルが のこって いない', hits.length===0, hits.slice(0,4).join(' '));
+}
 MODS.forEach(m=>{
   const src = fs.readFileSync('src/'+m+'.js','utf8');
   const head = src.split('\n').slice(0,6).join('\n');
