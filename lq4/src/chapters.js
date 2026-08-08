@@ -22,7 +22,7 @@ const CH = {
     title: '見習い試験の日',
     region: 'sky',
 
-    start: {map:'home_forge', x:4, y:5, dir:'front'},
+    start: {map:'home_forge', x:7, y:8, dir:'front'},
     party: ['io'],
     gold: 40, herbs: 3, waters: 0,
     equip: {weapon:{kind:'w', name:'父の 打った 剣', v:4},
