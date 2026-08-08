@@ -109,6 +109,31 @@ walkPath(new Array(14).fill([0,-1]));
 T('道づたいに 北の門へ たどりつける（とちゅうで つっかえない）',
   C.P.map==='rift_yard', C.P.map+' '+C.P.x+','+C.P.y);
 T('広場へ はいれる', C.P.map==='rift_yard');
+
+// ===== 7.5 しかけを といて ボスの間まで あるく（UIを とおる みち）=====
+function goField(){ C.G.mode='field'; }
+function walkG(steps){ for(const [dx,dy] of steps){ goField(); C.stepField(dx,dy); } }
+function faceDo(dir){ goField(); C.P.dir=dir; C.interact(); }
+C.P.x=10; C.P.y=13; goField();
+walkG([[-1,0],[-1,0],[-1,0],[-1,0],[-1,0]]);      // (5,13)へ
+walkG([[0,-1],[0,-1]]);                            // 岩を 2かい おして 穴を うめる
+T('しかけ：穴が うまる', C.tileAt('rift_yard',5,10)==='.', C.tileAt('rift_yard',5,10));
+walkG([[0,-1],[0,-1],[0,-1]]);                     // 穴を こえて 中段へ
+T('しかけ：穴を こえられる', C.P.y<=10, 'y='+C.P.y);
+// (3,9)→(3,8)→(3,7) 上段へ
+while(C.P.x>3){ goField(); C.stepField(-1,0); }
+while(C.P.y>7){ goField(); C.stepField(0,-1); }
+T('上段へ 出られる', C.P.y===7 && C.P.map==='rift_yard', C.P.x+','+C.P.y);
+// 光珠灯 ふたつ
+while(C.P.x<5){ goField(); C.stepField(1,0); }
+faceDo('back');
+while(C.P.x<12){ goField(); C.stepField(1,0); }
+faceDo('back');
+T('しかけ：扉が ひらく', C.tileAt('rift_yard',16,5)==='.', C.tileAt('rift_yard',16,5));
+// 扉を くぐって ボスの間へ
+while(C.P.x<16){ goField(); C.stepField(1,0); }
+walkG([[0,-1],[0,-1],[0,-1]]);
+T('ボスの間へ たどりつける', C.P.y<=4, C.P.x+','+C.P.y);
 T('裂け目の めじるしが たつ', C.G.flags.ch0_riftOpen===true);
 T('まちの ようすが かわる', C.G.townState==='NIGHT_RIFT');
 
