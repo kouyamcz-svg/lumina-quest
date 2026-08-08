@@ -1090,6 +1090,10 @@ function fx(kind, data, done){
     fxState={kind:'heal', t:0, done};
   }else{ done&&done(); }
 }
+// ★ダメージの すうじ（IVから）。せんとうちゅうだけ。とまらない（done なし）。
+function pop(data){
+  if(mode==='battle' && V2 && V2.pop) V2.pop(data);
+}
 function flash(v){
   const f=document.getElementById('flash');
   f.style.transition='none'; f.style.opacity=v;
@@ -1341,6 +1345,7 @@ function spawnBurst(target){
 }
 
 window.LQ4View = {
+  pop,
   init, loop, buildMap, setActors, fx, battleEnter, battleLeave, refresh, chest, fade, chapterCard,
   showScene(k){
     if(!(V2&&V2.showScene)) return;
