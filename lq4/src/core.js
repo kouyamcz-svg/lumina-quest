@@ -471,6 +471,7 @@ const NullView = {
   buildMap(){}, setActors(){}, fx(kind,data,done){ done&&done(); },
   battleEnter(_,done){ done&&done(); }, battleLeave(done){ done&&done(); },
   refresh(){}, chest(){}, fade(_,done){ done&&done(); }, chapterCard(_,__,done){ done&&done(); },
+  pop(){},
   setDream(){},
 };
 const NullUI = {
@@ -1370,7 +1371,10 @@ function memberAct(a, done){
     const t = a.tgt && a.tgt.hp>0 ? a.tgt : aliveMembers().sort((x,y)=>x.hp/x.maxhp-y.hp/y.maxhp)[0];
     const h = Math.min(t.maxhp-t.hp, 20+Math.floor(Math.random()*9));
     t.hp+=h; A.heal(); U.hud();
-    V.fx('heal',{member:t}, ()=>U.msg([m.name+'は 薬草を 使った！', t.name+'の HPが '+h+' 回復！'], done));
+    V.fx('heal',{member:t}, ()=>{
+      V.pop({side:'party', index:party.indexOf(t), text:'+'+h, kind:'heal'});
+      U.msg([m.name+'は 薬草を 使った！', t.name+'の HPが '+h+' 回復！'], done);
+    });
     return;
   }
   if(a.type==='water'){
@@ -1390,7 +1394,10 @@ function memberAct(a, done){
       const t = a.tgt && a.tgt.hp>0 ? a.tgt : aliveMembers().sort((x,y)=>x.hp/x.maxhp-y.hp/y.maxhp)[0];
       const h = Math.min(t.maxhp-t.hp, sp.min+Math.floor(Math.random()*(sp.max-sp.min+1)));
       t.hp+=h; A.heal(); U.hud();
-      V.fx('heal',{member:t}, ()=>U.msg([m.name+'は '+sp.name+castVerb(m), t.name+'の HPが '+h+' 回復！'], done));
+      V.fx('heal',{member:t}, ()=>{
+        V.pop({side:'party', index:party.indexOf(t), text:'+'+h, kind:'heal'});
+        U.msg([m.name+'は '+sp.name+castVerb(m), t.name+'の HPが '+h+' 回復！'], done);
+      });
       return;
     }
     if(sp.type==='healall'){
@@ -1425,7 +1432,8 @@ function memberAct(a, done){
       V.fx('spellall',{}, ()=>{
         alive.forEach(e=>{
           const d = sp.min+Math.floor(Math.random()*(sp.max-sp.min+1));
-          e.hp-=d; lines.push(e.dispName+'に '+d+'の ダメージ！');
+          e.hp-=d; V.pop({enemy:e, text:d, kind:'dmg'});
+          lines.push(e.dispName+'に '+d+'の ダメージ！');
           if(e.hp<=0){ e.hp=0; lines.push(e.dispName+'を 倒した！'); killed(e); }
         });
         U.msg(lines, done);
@@ -1455,11 +1463,15 @@ function memberAct(a, done){
           }
           if(inflictHit(tg, st, (st===sp.st ? sp.p : (sp.p2 || sp.p)))){
             tg.status = st; any=true; done2=true;
+            V.pop({enemy:tg, text:(STATUS_JP[st]||st)+'！', kind:'status'});
             lines.push(tg.dispName + (ESTATUS_MSG[st]||'の 状態が かわった！'));
             break;
           }
         }
-        if(!done2) lines.push(tg.dispName+'には 効かなかった。');
+        if(!done2){
+          lines.push(tg.dispName+'には 効かなかった。');
+          V.pop({enemy:tg, text:'ミス', kind:'miss'});
+        }
       });
       if(any) V.refresh();
       U.msg(lines, done);
@@ -1503,6 +1515,7 @@ function memberAct(a, done){
     const d = sp.min+Math.floor(Math.random()*(sp.max-sp.min+1));
     A.hit();
     V.fx('spell',{target:t}, ()=>{
+      V.pop({enemy:t, text:d, kind:'dmg'});
       t.hp-=d;
       const lines=[m.name+'は '+sp.name+castVerb(m), t.dispName+'に '+d+'の ダメージ！'];
       if(t.hp<=0){ t.hp=0; lines.push(t.dispName+'を 倒した！'); killed(t); }
@@ -1521,6 +1534,7 @@ function memberAct(a, done){
   A.hit();
   V.fx('attack',{member:m, target:t}, ()=>{
     t.hp-=d;
+    V.pop({enemy:t, text:d, kind:crit?'crit':'dmg'});
     const lines=[m.name+'の 攻撃！'];
     if(crit) lines.push('会心の 一撃！！');
     lines.push(t.dispName+'に '+d+'の ダメージ！');
@@ -1557,6 +1571,7 @@ function releaseCharge(e, alive, done){
         d = Math.max(1, d);
         if(m.guard) d = Math.max(1, Math.ceil(d*0.4));
         m.hp -= d;
+        V.pop({side:'party', index:party.indexOf(m), text:d, kind:'pdmg'});
         lines.push(m.name+'は '+d+'の ダメージ！'+(m.guard?'（防御）':''));
         if(m.hp<=0){ m.hp=0; m.status=null; lines.push(m.name+'は 倒れた…'); }
       });
@@ -1648,6 +1663,7 @@ function enemyAct(e, done){
     A.cue(); A.ehit();
     V.fx('enemyattack',{target:ts, from:e}, ()=>{
       ts.hp-=ds;
+      V.pop({side:'party', index:party.indexOf(ts), text:ds, kind:'pdmg'});
       lines.push(e.dispName+'の '+e.skill.name+'！',
                  ts.name+'は '+ds+'の ダメージを 受けた！'+(ts.guard?'（防御）':''));
       if(e.drain){
@@ -1683,6 +1699,7 @@ function enemyAct(e, done){
     A.cue(); A.ehit();
     V.fx('enemyattack',{target:tp, from:e}, ()=>{
       tp.hp-=dp;
+      V.pop({side:'party', index:party.indexOf(tp), text:dp, kind:'pdmg'});
       lines.push(e.dispName+'は '+sp.name+castVerb(m),
                  tp.name+'は '+dp+'の ダメージを 受けた！');
       if(tp.hp<=0){ tp.hp=0; tp.status=null; lines.push(tp.name+'は 倒れた…'); }
