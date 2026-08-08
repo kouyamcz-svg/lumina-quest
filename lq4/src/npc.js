@@ -7,7 +7,7 @@ const NPCDATA = (function(){
 const NPCS = {
   // ============ 序章：イオの家（父の鍛冶場） ============
   home_forge: [
-    {at:'2,2', spr:'elderWoman', name:'となりの おばさん', lines:[
+    {at:'3,6', spr:'elderWoman', name:'となりの おばさん', lines:[
       {when:{flag:'ch0_trialDone'}, text:[
         '「首席は 上層の お嬢さんだったってね」',
         '「……あんたの 父さんも、ずっと そうだったよ」']},
