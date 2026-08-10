@@ -55,7 +55,7 @@ C.doWarp(C.MAPS.lower_dist.warpsXY['10,14']);
 T('試験場へ はいる', C.P.map==='trial_yard');
 T('onEnter が たつ', C.G.flags.ch0_enteredYard===true);
 clearLog();
-walkTo('trial_yard', 6, 5); face('back');      // 上の (6,4) が B
+walkTo('trial_yard', 3, 5); face('back');      // 上の (3,4) が 木人
 C.interact();
 T('試験前は 木人と たたかえない', said('騎士団長に 話を'), log.join(' / ').slice(0,60));
 T('たたかいに なって いない', !C.G.battle);
@@ -67,7 +67,7 @@ C.G.mode='field';
 for(let i=0;i<14;i++) C.stepField(0,-1);
 T('試験前は 広場へ いけない', C.P.map==='lower_dist', C.P.map);
 T('とめられた わけが でる', said('人どおり'), log.join(' / ').slice(0,60));
-walkTo('trial_yard', 6, 5);
+walkTo('trial_yard', 3, 5);
 
 // ===== 4. グランに はなす =====
 clearLog();
@@ -77,13 +77,46 @@ T('グランと はなせる', said('試験を 始める'), log.join(' / ').slic
 T('ch0_started が たつ', C.G.flags.ch0_started===true);
 T('クエストが はじまる', C.G.quests.ch0_q1_trial==='active');
 
-// ===== 5. 見習い試験（木人） =====
+// ===== 4.5 炉技師の おつかい（フィールドへ 出る）=====
+{
+  clearLog();
+  walkTo('lower_dist', 5, 6); face('back');     // 上の (5,5) が 技師
+  C.interact();
+  T('おつかいを うける', C.G.flags.ch0_errandTaken===true);
+  T('ノルマが たつ', C.G.quota && C.G.quota.need===3, JSON.stringify(C.G.quota));
+  T('クエストが たつ', C.G.quests.ch0_q0_errand==='active');
+  // フィールドで 3たい たおす
+  C.G.tactic='gungan';
+  C.P.map='world'; C.P.x=13; C.P.y=24;
+  for(let i=0;i<3;i++){ C.G.mode='field'; C.startBattle(); C.party.forEach(p=>{p.hp=p.maxhp;p.mp=p.maxmp;}); }
+  T('3たいで ノルマ たっせい', C.G.flags.ch0_errandDone===true, JSON.stringify(C.G.quota));
+  clearLog();
+  C.G.tactic='manual';
+  const g0=C.P.gold;
+  walkTo('lower_dist', 5, 6); face('back');
+  C.interact();
+  T('手間賃を もらえる', C.P.gold===g0+120, C.P.gold+' ← '+g0);
+  T('伏線の せりふが でる', said('寄ってくるんだ'), log.join(' / ').slice(-60));
+  T('クエストが 片づく', C.G.quests.ch0_q0_errand==='clear');
+}
+
+// ===== 5. 見習い試験（木人 → セレンとの 模擬戦）=====
 clearLog();
-walkTo('trial_yard', 6, 5); face('back');
+walkTo('trial_yard', 3, 5); face('back');
+C.G.tactic='gungan';
 C.interact();
 T('木人に かてる', C.G.flags.ch0_trialDone===true);
-T('試験の むすびが でる', said('実技、一位'), log.join(' / ').slice(0,80));
+T('前半の むすびが でる', said('東の 立ち合いへ'), log.join(' / ').slice(0,80));
+T('この 時点では まだ 首席発表は ない', !said('首席'));
+
+clearLog();
+walkTo('trial_yard', 9, 5); face('back');
+C.interact();
+T('セレンと 模擬戦に なる', C.G.flags.ch0_sparDone===true);
+T('模擬戦の むすびが でる', said('実技一位、イオ'), log.join(' / ').slice(0,90));
+T('家格の 話が 出る', said('家格も 見る'));
 T('クエストが すすむ', C.G.quests.ch0_q1_trial==='clear' && C.G.quests.ch0_q2_umbra==='active');
+C.G.tactic='manual';
 const lvAfterTrial = C.party[0].lv;
 
 // ===== 6. セレンが なかまに なる =====
