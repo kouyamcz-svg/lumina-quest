@@ -105,6 +105,16 @@ const NPCS = {
 };
 
 const QUESTS = {
+  ch0_q0_errand: {
+    id:'ch0_q0_errand', chapter:1, title:'たなの 影ばらい',
+    giver:'光珠管の 技師',
+    desc:'東門の 外の たなで 悪夢獣を 3体 倒す。',
+    steps:[
+      {id:'kill',   desc:'悪夢獣を 3体 倒す', flag:'ch0_errandDone'},
+      {id:'report', desc:'技師に 報告する',   flag:'ch0_errandPaid'},
+    ],
+    reward:{}, next:'ch0_q1_trial',
+  },
   ch0_q1_trial: {
     id:'ch0_q1_trial', chapter:1, title:'見習い試験',
     giver:'騎士団長 グラン',
