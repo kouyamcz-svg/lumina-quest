@@ -42,7 +42,8 @@ const CH = {
 
     // --- ボスが いる ばしょ（マップ → ボスのキー）---
     bosses: {
-      trial_yard: {
+      // ★1まいの マップに 2つ：'マップ名:x,y' で ますごとに 分ける
+      'trial_yard:3,4': {
         key: 'trialdummy',
         clearedFlag: 'ch0_trialDone',
         needFlag: 'ch0_started',
@@ -53,7 +54,30 @@ const CH = {
                 '＊ 見習い試験 開始 ＊'],
         after: ['木人は 割れた ままに なっている。'],
       },
-      rift_yard: {
+      // ★仕上げ：セレンとの 模擬戦
+      'trial_yard:9,4': {
+        key: 'seren_spar',
+        clearedFlag: 'ch0_sparDone',
+        needFlag: 'ch0_trialDone',
+        lockMsg: ['試験官が 立っている。',
+                  '試験官「木人が 先だ。順番を 守れ」'],
+        intro: ['試験官「実技の 仕上げだ。見習い同士で 立ち合え」',
+                'セレン「……下層の。手加減は しないから」',
+                'イオ「頼む。しないでくれ」',
+                '＊ 模擬戦 開始 ＊'],
+        after: ['セレンは 槍の 手入れを している。'],
+      },
+      // ★広場の 中ボス（道の 途中）
+      'rift_yard:9,5': {
+        key: 'shadowmaw',
+        clearedFlag: 'ch0_mawDown',
+        intro: ['行き止まりの くぼみに、宝箱と 影が ある。',
+                '口だけが 大きく 裂けた 形を していた。',
+                'セレン「箱を 守ってる……わけ ないわよね」',
+                '＊ かげの あぎと が 現れた！ ＊'],
+        after: ['影の 残りが 床に にじんでいる。'],
+      },
+      'rift_yard:10,3': {
         key: 'umbra',
         clearedFlag: 'ch0_umbraDown',
         intro: ['広場の 空に、黒い 裂け目が 口を あけている。',
@@ -99,6 +123,42 @@ const CH = {
              'グラン「守る 順番を 間違えるな。それだけだ」',
              '＊ クエスト「見習い試験」＊'] },
 
+      // ---- 試験の 前：炉技師の 頼み（フィールドへ 出る きっかけ）----
+      { npc:'光珠管の 技師', unless:'ch0_errandTaken',
+        set:['ch0_errandTaken'],
+        startQuota:{need:3, flag:'ch0_errandDone'},
+        quest:{ch0_q0_errand:'active'},
+        msg:['技師「イオ、試験の 前に ひとつ 頼まれてくれ」',
+             '技師「東門の 外の たなに 影が 出るように なった」',
+             '技師「管の 点検に 出られん。三体で いい、散らしてくれ」',
+             'イオ「試験に 遅れませんか」',
+             '技師「お前の 父さんなら 行ったよ」',
+             '', '＊ クエスト「たなの 影ばらい」＊',
+             '＊ 東門の 外で 悪夢獣を 3体 倒そう ＊'] },
+
+      { npc:'光珠管の 技師', cond:['ch0_errandDone'], unless:'ch0_errandPaid',
+        set:['ch0_errandPaid'],
+        clearQuota:true,
+        quest:{ch0_q0_errand:'clear'},
+        gold:120, herbs:2,
+        msg:['技師「もう 済んだのか。早いな」',
+             '技師「これは 手間賃。薬草も 持っていけ」',
+             '技師「……ひとつ 妙な ことを 言うぞ」',
+             '技師「あの 影ども、管の 近くにしか 湧かん」',
+             '技師「光を 嫌うなら 逆だろうに。寄ってくるんだ」',
+             '', '＊ 120ゴールドと 薬草2つを 受け取った ＊'] },
+
+      // ---- 試験のあと：上層の 使者 ----
+      { npc:'うわさずきの 男', cond:['ch0_sparDone'], unless:'ch0_heraldSeen',
+        set:['ch0_heraldSeen'],
+        msg:['「見たか、上層から 使者が 来てたぞ」',
+             '「首席の 発表を わざわざ 確かめに 来たんだと」',
+             '「地上生まれが 一位を 取ったら 困るんだとさ」',
+             'セレン「……それ、わたしの 家の 使いよ」',
+             'セレン「止めなかった わたしも 同じ」',
+             'イオ「気にしていない」',
+             'セレン「気にしなさいよ。わたしが 気にするんだから」'] },
+
       // ---- ウンブラ撃破後 ----
       { npc:'逃げ遅れた 子ども', cond:['ch0_umbraDown'], unless:'ch0_childSaved',
         set:['ch0_childSaved'],
@@ -129,7 +189,7 @@ const CH = {
              'グラン「……いずれ お前に 話す 日が 来る」',
              '＊ 手当てを 受けた。HPとMPが 全快した ＊'] },
 
-      { npc:'セレン', cond:['ch0_trialDone'], unless:'ch0_serenJoined',
+      { npc:'セレン', cond:['ch0_sparDone'], unless:'ch0_serenJoined',
         set:['ch0_serenJoined'],
         join:{cls:'seren', lv:'lead',
               weapon:{kind:'w', name:'見習いの 槍', v:6},
@@ -145,13 +205,32 @@ const CH = {
     bossReward: {
       trialdummy: {
         set:['ch0_trialDone'],
-        quest:{ch0_q1_trial:'clear', ch0_q2_umbra:'active'},
         msg:['', '木人は 肩から 下へ、まっすぐに 割れた。',
-             'グラン「……実技、一位。記録に 残す」',
-             '試験官「首席は セレン。上層の 家の 者だ」',
+             'グラン「……いい太刀だ。腰が 逃げていない」',
+             'グラン「仕上げが ある。東の 立ち合いへ 行け」',
+             '', '＊ 実技 前半を 終えた ＊'],
+      },
+      seren_spar: {
+        set:['ch0_sparDone'],
+        quest:{ch0_q1_trial:'clear', ch0_q2_umbra:'active'},
+        heal:true,
+        msg:['', 'セレンの 槍が 手から 離れ、乾いた 音を 立てた。',
+             'セレン「……いま、わざと 外したでしょう」',
+             'イオ「胴を 打てば 怪我を させる」',
+             'セレン「わたしは 打ちに いった。それが 差よ」',
+             '',
+             '試験官「実技一位、イオ。首席、セレン」',
+             'イオ「……首席は」',
+             '試験官「家格も 見る。そういう 決まりだ」',
              'グラン「順位が すべてでは ない。剣を 置くな」',
              '', '＊ 見習い試験を 終えた ＊',
              'セレンに 話しかけてみよう。'],
+      },
+      shadowmaw: {
+        set:['ch0_mawDown'],
+        msg:['', 'あぎとは ひしゃげて 紙片に なった。',
+             'セレン「……いまの、噛みつく 前に 息を 吸った」',
+             'セレン「獣の 真似を してる。中身は 獣じゃ ない」'],
       },
       umbra: {
         set:['ch0_umbraDown'],
