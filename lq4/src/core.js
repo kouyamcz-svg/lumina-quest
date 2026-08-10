@@ -112,11 +112,22 @@ const ENEMIES = [
 const MIDBOSS = {
   // ---- 序章：見習い試験の的（チュートリアル戦。負けても やりなおせる）----
   trialdummy:{key:'trialdummy', name:'訓練用の 木人', hp:34, atk:3, def:4, agi:2, acts:1,
-    exp:40, gold:0, art:'nushicrab',
+    exp:40, gold:0, art:'madrock',
     brace:{p:0.15, name:'かまえを かためた！'}},
+  // ---- 序章：見習い試験の 仕上げ（セレンとの 模擬戦）----
+  //   負けても やりなおせる。手加減の 描写を acts と atk で 出す。
+  seren_spar:{key:'seren_spar', name:'見習い セレン', hp:70, atk:8, def:7, agi:14, acts:1,
+    exp:30, gold:0, art:'sleepknight',
+    skill:{p:0.30, mul:1.25, name:'疾風突き'},
+    brace:{p:0.18, name:'槍を 立てて かまえた！'}},
+  // ---- 序章：広場の 中ボス（影の あぎと）----
+  shadowmaw:{key:'shadowmaw', name:'かげの あぎと', hp:120, atk:10, def:7, agi:8, acts:1,
+    exp:70, gold:40, art:'echoshado', scale:1.10,
+    skill:{p:0.26, mul:1.20, name:'噛みくだき'},
+    inflict:{type:'confuse', p:0.14}},
   // ---- 序章ボス：悪夢獣 ウンブラ（影の座）----
   umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:160, atk:11, def:8, agi:10, acts:1,
-    exp:140, gold:90, art:'rev_shadow', scale:1.30,
+    exp:140, gold:90, art:'regretshado', scale:1.30,
     skill:{p:0.28, mul:1.25, name:'かげの つめ'},
     aoe:{p:0.16, lo:6, hi:10, name:'くらやみの さざなみ'},
     inflict:{type:'sleep', p:0.18},
@@ -234,7 +245,7 @@ const MAPS = {
     "#...........#",
     "#..n.....n..#",
     "#...........#",
-    "#.....B.....#",
+    "#..B.....B..#",
     "#...........#",
     "#..n........#",
     "#...........#",
@@ -947,20 +958,23 @@ function openChest(x,y){
   }
 }
 // ボスの ばしょ・とうじょうの ことば・倒した あとは 章データから ひく
-function bossInfoAt(map){
+// ★1まいの マップに ボスますが 2つ いじょう ある ばあいは、
+//   'マップ名:x,y' の かたちで 章データに かけば ますごとに 分けられる。
+function bossInfoAt(map, x, y){
   if(!CHD) return null;
-  // まず いまの 章、なければ ぜんしょうから さがす（えがきは どの マップでも ひく）
-  const here = CHD.bossAt(G.chapter||1, map);
+  const key = (x!==undefined) ? (map+':'+x+','+y) : null;
+  const pick = (no)=> (key && CHD.bossAt(no, key)) || CHD.bossAt(no, map);
+  const here = pick(G.chapter||1);
   if(here) return here;
   for(const no of CHD.list()){
-    const b = CHD.bossAt(no, map);
+    const b = pick(no);
     if(b) return b;
   }
   return null;
 }
 function triggerBoss(x,y){
   // ★章データに かかれた ボスを ひく（章を ふやしても ここは さわらない）
-  const bi = bossInfoAt(P.map);
+  const bi = bossInfoAt(P.map, x, y);
   if(bi){
     G.mode='msg';
     if(bi.clearedFlag && G.flags[bi.clearedFlag]){
