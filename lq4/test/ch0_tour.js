@@ -180,12 +180,60 @@ T('まちの ようすが かわる', C.G.townState==='NIGHT_RIFT');
   T('ウンブラ 勝率（'+win+'%）', win>=70 && win<=100);
 }
 
+// ===== 9.5 ウンブラ撃破後 =====
+{
+  C.freshState();
+  C.G.tactic='gungan';
+  ['ch0_started','ch0_trialDone','ch0_serenJoined'].forEach(f=>C.G.flags[f]=true);
+  // ★Lvは mkMember で つくる。lv を あとから ぬりかえても のうりょくちは 上がらない
+  C.party.length = 0;
+  C.party.push(C.mkMember('io', 6));
+  C.party.push(C.mkMember('seren', 6));
+  C.P.map='rift_yard'; C.P.x=10; C.P.y=4; C.G.mode='field';
+  clearLog();
+  C.startBattle('umbra');
+  T('撃破：紙片の えがきが でる', said('夢の 切れはし'), log.join(' / ').slice(0,60));
+  T('撃破：グランが あらわれる', C.tileAt('rift_yard',12,3)==='n', C.tileAt('rift_yard',12,3));
+  T('撃破：報告クエストが たつ', C.G.quests.ch0_q3_report==='active');
+
+  // 子どもに 話す（ごほうび）
+  clearLog();
+  const g0=C.P.gold, h0=C.P.herbs;
+  C.G.mode='field'; C.P.map='rift_yard'; C.P.x=3; C.P.y=13; C.P.dir='left';
+  C.interact();
+  T('子ども：礼を もらえる', C.P.gold===g0+30 && C.P.herbs===h0+2,
+    C.P.gold+'/'+C.P.herbs+' ← '+g0+'/'+h0);
+  T('子ども：めじるしが たつ', C.G.flags.ch0_childSaved===true);
+  T('子ども：2かいめは くりかえさない', (()=>{
+    const g1=C.P.gold; C.G.mode='field'; C.P.dir='left'; C.interact(); return C.P.gold===g1;
+  })());
+
+  // 下層区の せりふが 変わる
+  clearLog();
+  C.G.mode='field'; C.P.map='lower_dist'; C.P.x=8; C.P.y=11; C.P.dir='front';
+  C.interact();
+  T('町の せりふが 撃破後に 変わる', said('団長さま'), log.join(' / ').slice(0,60));
+
+  // グランに 報告 → 章末
+  clearLog();
+  C.party.forEach(p=>{ p.hp=1; p.mp=0; });
+  C.G.mode='field'; C.P.map='rift_yard'; C.P.x=12; C.P.y=4; C.P.dir='back';
+  C.interact();
+  T('グラン：入団の やりとり', said('震えたまま 立てたなら'), log.join(' / ').slice(0,60));
+  T('グラン：手当てで 全快', C.party.every(p=>p.hp===p.maxhp && p.mp===p.maxmp));
+  T('グラン：報告クエストが 片づく', C.G.quests.ch0_q3_report==='clear');
+  T('章末が つづけて でる', said('正騎士に 任ずる'), log.join(' / ').slice(-80));
+  T('章末：セレンの しめ', said('次は わたしも 下りる'));
+  T('章末：ノエの 伏線', said('まだ 何かを 探していた'));
+  T('ch0_cleared が たつ', C.G.flags.ch0_cleared===true);
+}
+
 // ===== 10. 章末と セーブ/ロード =====
 clearLog();
 C.party.forEach(p=>{ p.hp=p.maxhp; p.mp=p.maxmp; p.status=null; });
 C.G.flags.ch0_umbraDown = true;
 C.triggerChapterEnd();
-T('章末が でる', said('天空騎士団 所属だ'), log.join(' / ').slice(0,80));
+T('章末が でる', said('正騎士に 任ずる'), log.join(' / ').slice(0,80));
 T('ch0_cleared が たつ', C.G.flags.ch0_cleared===true);
 
 const goldBefore = C.P.gold, lvBefore = C.party[0].lv;
