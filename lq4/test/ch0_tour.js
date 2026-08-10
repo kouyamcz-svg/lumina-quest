@@ -224,7 +224,7 @@ T('まちの ようすが かわる', C.G.townState==='NIGHT_RIFT');
   T('グラン：報告クエストが 片づく', C.G.quests.ch0_q3_report==='clear');
   T('章末が つづけて でる', said('正騎士に 任ずる'), log.join(' / ').slice(-80));
   T('章末：セレンの しめ', said('次は わたしも 下りる'));
-  T('章末：ノエの 伏線', said('まだ 何かを 探していた'));
+  T('章末：ノエの 伏線', said('どこかに 戻ったって'));
   T('ch0_cleared が たつ', C.G.flags.ch0_cleared===true);
 }
 
