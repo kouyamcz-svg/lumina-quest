@@ -96,13 +96,13 @@ const TACTICS = {manual:'命令させろ', gungan:'ガンガンいこうぜ', in
 // 序章〜第1章ぶん。倒すと黒い紙片になって消える（ノエだけが顔色を変える伏線）。
 const ENEMIES = [
   // ---- 序章 下層区（Lv1〜5）----
-  {key:'kagekakera', name:'影のかけら',   hp:16, atk:5,  def:3,  agi:5,  exp:8,  gold:4,  minLv:1},
-  {key:'shihenchu',  name:'紙片蟲',       hp:20, atk:6,  def:5,  agi:6,  exp:11, gold:5,  minLv:1},
-  {key:'akumuga',    name:'悪夢蛾',       hp:22, atk:7,  def:4,  agi:11, exp:14, gold:6,  minLv:2,
+  {key:'kagekakera', name:'影のかけら',   hp:16, atk:5,  def:3,  agi:5,  exp:16, gold:6,  minLv:1},
+  {key:'shihenchu',  name:'紙片蟲',       hp:20, atk:6,  def:5,  agi:6,  exp:22, gold:8,  minLv:1},
+  {key:'akumuga',    name:'悪夢蛾',       hp:22, atk:7,  def:4,  agi:11, exp:28, gold:9,  minLv:2,
    inflict:{type:'sleep', p:0.16}},
-  {key:'yamiinu',    name:'闇犬',         hp:28, atk:9,  def:5,  agi:9,  exp:18, gold:8,  minLv:2,
+  {key:'yamiinu',    name:'闇犬',         hp:28, atk:9,  def:5,  agi:9,  exp:36, gold:12,  minLv:2,
    skill:{p:0.24, mul:1.20, name:'かみつき'}},
-  {key:'sumibami',   name:'すすばみ',     hp:34, atk:11, def:7,  agi:7,  exp:24, gold:11, minLv:4},
+  {key:'sumibami',   name:'すすばみ',     hp:34, atk:11, def:7,  agi:7,  exp:48, gold:16, minLv:4},
   // ---- 第1章 下層区の亀裂（Lv8〜11）※M1で ふやす ----
   {key:'kansuiki',   name:'管漏れの影',   hp:46, atk:15, def:10, agi:8,  exp:26, gold:18, minLv:7,
    skill:{p:0.26, mul:1.25, name:'にじみだし'}},
@@ -112,10 +112,10 @@ const ENEMIES = [
 const MIDBOSS = {
   // ---- 序章：見習い試験の的（チュートリアル戦。負けても やりなおせる）----
   trialdummy:{key:'trialdummy', name:'訓練用の 木人', hp:34, atk:3, def:4, agi:2, acts:1,
-    exp:14, gold:0, art:'nushicrab',
+    exp:40, gold:0, art:'nushicrab',
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 序章ボス：悪夢獣 ウンブラ（影の座）----
-  umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:175, atk:12, def:8, agi:10, acts:1,
+  umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:160, atk:11, def:8, agi:10, acts:1,
     exp:140, gold:90, art:'rev_shadow', scale:1.30,
     skill:{p:0.28, mul:1.25, name:'かげの つめ'},
     aoe:{p:0.16, lo:6, hi:10, name:'くらやみの さざなみ'},
@@ -143,7 +143,7 @@ const MAPS = {
   // ============ 天空大陸 ルミナリア（フィールド）============
   //   ★マップIDは 'world'。まわりは 雲海（~）で 落ちられない。
   //   ★序章で 入れるのは 下層区（V）だけ。ほかの ちてんは Q（これから つくる）。
-  world:{name:'天空大陸 ルミナリア', theme:'world', enc:true, encRate:0.09, encGrace:4,
+  world:{name:'天空大陸 ルミナリア', theme:'world', enc:true, encRate:0.07, encGrace:5,
     encZones:[
       {x0:4,  y0:20, x1:39, y1:27, name:'下層の たな'},
       {x0:6,  y0:12, x1:37, y1:20, name:'中層の たな'},
@@ -249,7 +249,7 @@ const MAPS = {
   //   ★しかけ2つ：①岩(O)を 穴(x)に 押しこんで 足場を つくる
   //                ②光珠灯(L)を ふたつ ともすと 奥の 扉(K)が ひらく
   //   ★1ますの ろうかに かざりの 岩(o)を おかない（通れなくなる）。
-  rift_yard:{name:'裂け目の広場', theme:'dream', enc:true, encRate:0.24, encGrace:2, tiles:[
+  rift_yard:{name:'裂け目の広場', theme:'dream', enc:true, encRate:0.10, encGrace:4, tiles:[
     "#####################",
     "#####################",
     "####...............##",
