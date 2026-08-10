@@ -791,6 +791,15 @@ function runTalkEvent(npcName){
   if(e.clearQuota) G.quota = null;
   if(e.takeGold) P.gold = Math.max(0, P.gold - e.takeGold);
   if(e.gold) P.gold += e.gold;
+  if(e.herbs) P.herbs += e.herbs;
+  // ★ますを 書きかえる（人が あらわれる・道が ひらく など）。
+  //   IVの しかけ（setTile）を ものがたりからも つかえる ように する。
+  if(e.setTiles){
+    (Array.isArray(e.setTiles)?e.setTiles:[e.setTiles]).forEach(o=>{
+      setTile(o.map||P.map, o.x, o.y, o.ch||'.');
+    });
+    V.refresh && V.refresh();
+  }
   Object.keys(e.quest || {}).forEach(q => questAdvance(q, e.quest[q]));
 
   const lines = (e.msg || []).slice();
@@ -1804,6 +1813,12 @@ function victory(){
         V.setActors(true); U.hud();
       }
       if(rw.takeKey) takeKey(rw.takeKey);
+      if(rw.setTiles){
+        (Array.isArray(rw.setTiles)?rw.setTiles:[rw.setTiles]).forEach(o=>{
+          setTile(o.map||P.map, o.x, o.y, o.ch||'.');
+        });
+        V.refresh && V.refresh();
+      }
       if(rw.setState && WORLD.TOWN_STATES[rw.setState]) G.townState = rw.setState;
       Object.keys(rw.quest||{}).forEach(q=>questAdvance(q, rw.quest[q]));
       lines.push(...(rw.msg||[]));
