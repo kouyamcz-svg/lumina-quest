@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T04:29:56", "assets_sha": "51e4d44b", "lines": {"world": 99, "npc": 168, "chapters": 303, "bgm": 979, "view2d": 1563, "core": 2404, "view": 1394, "ui": 977}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T04:44:49", "assets_sha": "58818c1c", "lines": {"world": 99, "npc": 168, "chapters": 304, "bgm": 979, "view2d": 1563, "core": 2409, "view": 1394, "ui": 977}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -157,7 +157,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=51e4d44b"></script>
+<script src="assets.js?v=58818c1c"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -514,6 +514,7 @@ const CH = {
       'rift_yard:10,3': {
         key: 'umbra',
         clearedFlag: 'ch0_umbraDown',
+        img: 'scene_ch0_rift',
         intro: ['広場の 空に、黒い 裂け目が 口を あけている。',
                 'そこから にじみ出た 影が、ゆっくりと 形を とった。',
                 '＜……オマエタチノ、イラナカッタ ユメ＞',
@@ -3393,7 +3394,7 @@ const ENEMIES = [
 const MIDBOSS = {
   // ---- 序章：見習い試験の的（チュートリアル戦。負けても やりなおせる）----
   trialdummy:{key:'trialdummy', name:'訓練用の 木人', hp:34, atk:3, def:4, agi:2, acts:1,
-    exp:40, gold:0, art:'madrock',
+    exp:40, gold:0, art:'trialdummy',
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 序章：見習い試験の 仕上げ（セレンとの 模擬戦）----
   //   負けても やりなおせる。手加減の 描写を acts と atk で 出す。
@@ -3403,7 +3404,7 @@ const MIDBOSS = {
     brace:{p:0.18, name:'槍を 立てて かまえた！'}},
   // ---- 序章：広場の 中ボス（影の あぎと）----
   shadowmaw:{key:'shadowmaw', name:'かげの あぎと', hp:120, atk:10, def:7, agi:8, acts:1,
-    exp:70, gold:40, art:'echoshado', scale:1.10,
+    exp:70, gold:40, art:'shadowmaw', scale:1.10,
     skill:{p:0.26, mul:1.20, name:'噛みくだき'},
     inflict:{type:'confuse', p:0.14}},
   // ---- 序章ボス：悪夢獣 ウンブラ（影の座）----
@@ -4272,7 +4273,12 @@ function triggerBoss(x,y){
       U.msg(bi.lockMsg || ['まだ ここには はいれない。'], ()=>{ G.mode='field'; });
       return;
     }
-    U.msg(bi.intro || ['まものが たちふさがった！'], ()=>{ startBattle(bi.key); });
+    // ★ボスの とうじょうでも いちまいえを 出せる（章データの img）
+    if(bi.img && V.showScene) V.showScene(bi.img);
+    U.msg(bi.intro || ['まものが たちふさがった！'], ()=>{
+      if(bi.img && V.hideScene) V.hideScene();
+      startBattle(bi.key);
+    });
     return;
   }
   if(G.flags.desgran){
