@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T14:07:09", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 328, "bgm": 979, "view2d": 1876, "core": 2414, "view": 1394, "ui": 977}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T14:25:37", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 332, "bgm": 979, "view2d": 1876, "core": 2414, "view": 1394, "ui": 977}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -502,12 +502,13 @@ const CH = {
         after: ['セレンは 槍の 手入れを している。'],
       },
       // ★広場の 中ボス（道の 途中）
-      'rift_yard:9,5': {
+      'rift_yard:16,9': {
         key: 'shadowmaw',
         clearedFlag: 'ch0_mawDown',
-        intro: ['行き止まりの くぼみに、宝箱と 影が ある。',
-                '口だけが 大きく 裂けた 形を していた。',
+        intro: ['通路の 行き止まり。その 先に 宝箱が 見える。',
+                '手前に、口だけが 大きく 裂けた 影が わだかまっていた。',
                 'セレン「箱を 守ってる……わけ ないわよね」',
+                'イオ「どく 気は なさそうだ」',
                 '＊ かげの あぎと が 現れた！ ＊'],
         after: ['影の 残りが 床に にじんでいる。'],
       },
@@ -687,6 +688,9 @@ const CH = {
       },
       shadowmaw: {
         set:['ch0_mawDown'],
+        // ★倒したら 道を あける。B ますは 通れない ので、
+        //   のこすと 奥の 宝箱に たどりつけない。
+        setTiles:[{map:'rift_yard', x:16, y:9, ch:'.'}],
         msg:['', 'あぎとは ひしゃげて 紙片に なった。',
              'セレン「……いまの、噛みつく 前に 息を 吸った」',
              'セレン「獣の 真似を してる。中身は 獣じゃ ない」'],
@@ -3891,7 +3895,7 @@ const MAPS = {
     "#####L######L###.####",
     "##.................##",
     "###.#################",
-    "##...............C.##",
+    "##..............BC.##",
     "##xxxxxxxxxxxxxxxxx##",
     "##.................##",
     "##...O.......O.....##",
