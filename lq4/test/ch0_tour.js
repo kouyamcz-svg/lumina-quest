@@ -85,18 +85,48 @@ T('クエストが はじまる', C.G.quests.ch0_q1_trial==='active');
   T('おつかいを うける', C.G.flags.ch0_errandTaken===true);
   T('ノルマが たつ', C.G.quota && C.G.quota.need===3, JSON.stringify(C.G.quota));
   T('クエストが たつ', C.G.quests.ch0_q0_errand==='active');
-  // フィールドで 3たい たおす
+  // ★東門 → 世界地図 → 点検路 へ あるいて 入る
+  walkTo('lower_dist', 19, 6); C.G.mode='field';
+  C.stepField(1,0);
+  T('東門から 外へ 出る', C.P.map==='world', C.P.map);
+  C.G.mode='field'; C.P.x=13; C.P.y=24; C.P.dir='right';
+  C.interact();
+  T('点検路へ 入れる', C.P.map==='pipe_path', C.P.map+' '+C.P.x+','+C.P.y);
+  T('点検路の めじるしが たつ', C.G.flags.ch0_enteredPipe===true);
+
+  // 点検路で 3たい たおす
   C.G.tactic='gungan';
-  C.P.map='world'; C.P.x=13; C.P.y=24;
   for(let i=0;i<3;i++){ C.G.mode='field'; C.startBattle(); C.party.forEach(p=>{p.hp=p.maxhp;p.mp=p.maxmp;}); }
   T('3たいで ノルマ たっせい', C.G.flags.ch0_errandDone===true, JSON.stringify(C.G.quota));
+
+  // 光珠灯 ふたつで おくの 壁が ひらく
+  C.G.tactic='manual';
+  T('はじめは おくが 閉じている', C.tileAt('pipe_path',9,5)==='#', C.tileAt('pipe_path',9,5));
+  C.G.mode='field'; C.P.map='pipe_path'; C.P.x=2; C.P.y=6; C.P.dir='right'; C.interact();
+  C.G.mode='field'; C.P.x=14; C.P.y=8; C.P.dir='left'; C.interact();
+  T('管に 光が 通ると おくが ひらく', C.tileAt('pipe_path',9,5)==='.', C.tileAt('pipe_path',9,5));
+
+  // あぎと 初戦（にげられる。たたかいには ならない）
+  clearLog();
+  C.G.mode='field'; C.P.x=8; C.P.y=8; C.P.dir='back';
+  C.interact();
+  T('あぎとに 出会う', C.G.flags.ch0_mawFled===true);
+  T('たたかいには ならない', !C.G.battle);
+  T('にげた ことが わかる', said('逃げた。追えない'), log.join(' / ').slice(-60));
+  T('あぎとは その場から 消える', C.tileAt('pipe_path',8,7)==='.', C.tileAt('pipe_path',8,7));
+
+  // 技師に 報告（父の 話）
+  clearLog();
+  walkTo('lower_dist', 5, 6); face('back'); C.interact();
+  T('技師が 父の 話を する', said('お前の 父さんが、同じ ことを'), log.join(' / ').slice(0,60));
+  T('めじるしが たつ', C.G.flags.ch0_mawTold===true);
   clearLog();
   C.G.tactic='manual';
   const g0=C.P.gold;
   walkTo('lower_dist', 5, 6); face('back');
   C.interact();
   T('手間賃を もらえる', C.P.gold===g0+120, C.P.gold+' ← '+g0);
-  T('伏線の せりふが でる', said('寄ってくるんだ'), log.join(' / ').slice(-60));
+  T('伏線の せりふが でる', said('湧く もとを'), log.join(' / ').slice(-60));
   T('クエストが 片づく', C.G.quests.ch0_q0_errand==='clear');
 }
 
