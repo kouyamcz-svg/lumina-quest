@@ -80,6 +80,7 @@ const CH = {
       'rift_yard:10,3': {
         key: 'umbra',
         clearedFlag: 'ch0_umbraDown',
+        img: 'scene_ch0_rift',
         intro: ['広場の 空に、黒い 裂け目が 口を あけている。',
                 'そこから にじみ出た 影が、ゆっくりと 形を とった。',
                 '＜……オマエタチノ、イラナカッタ ユメ＞',
