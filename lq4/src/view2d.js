@@ -44,6 +44,15 @@ const P16 = {
   wall1:'#c8bfa8', wall2:'#e2dcc6', wood0:'#5a3f26', wood1:'#7d5a36',
   win:'#2f5f96', winL:'#4a83b8', gold:'#b89040',
   blk:'#141018',
+  // ★天空様式（IVから）。参考画の 昼の街路から 色を ひろった。
+  //   白石は 真っ白に しない。目地の 青で 形を 見せる。
+  sk0:'#8fa6c8', sk1:'#b9c9df', sk2:'#dbe4ef', sk3:'#f0f4f9',  // 白石（暗→明）
+  skJ:'#a3b8d6',                                                // 目地の 青（ほそく うすく）
+  skR:'#e6eef8', skRj:'#b4c7de',                                // 通り（すこし 明るい）
+  sky0:'#5c8fd6', sky1:'#78bbfd', sky2:'#a8d4ff',               // 空・雲海の 影
+  orb0:'#2d6ea8', orb1:'#5fb4ee', orb2:'#a8e2ff', orb3:'#eafaff',// 光珠
+  skG0:'#4a6a72', skG1:'#5f8a86', skG2:'#7aa89c',               // 青みの 芝
+  skD0:'#4a5f80', skD1:'#6a80a4',                               // 濃い 石（柱・台座）
 };
 
 function mk(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
@@ -209,7 +218,115 @@ function buildAtlas(){
     }
   });
 
-  // ---------- さばく ----------
+  // ---------- 天空様式（IVから）----------
+  // 白石の 床：大きめの 石を ずらして 積む。目地は 青。
+  // ★ゆかは 1しゅるいだけに する。tileSet で ずれを 変えると、
+  //   となりの タイルと れんがの 目が あわず、ばらばらに 見える（じっさいに 出た）。
+  atlas.skystone = tile((g,s)=>{
+    R(g,0,0,s,s,P16.skJ);
+    // 上の 段：8ドットの 石が 2つ ／ 下の 段：4ドット ずらす
+    const brick=(bx,by)=>{
+      R(g,bx,by,7,7,P16.sk2);
+      R(g,bx,by,7,1,P16.sk3);
+      R(g,bx,by,1,7,P16.sk3);
+      R(g,bx,by+6,7,1,P16.sk1);
+      R(g,bx+6,by,1,7,P16.sk1);
+    };
+    brick(0,0); brick(8,0);
+    brick(-4,8); brick(4,8); brick(12,8);
+    P(g,3,3,P16.sk3); P(g,10,11,P16.sk3);
+  });
+  // 通り：白石より 明るい。目地は ほとんど 見えない。
+  atlas.skyroad = tile((g,s)=>{
+    R(g,0,0,s,s,P16.skRj);
+    const brick=(bx,by)=>{
+      R(g,bx,by,7,7,P16.skR);
+      R(g,bx,by,7,1,'#ffffff');
+      R(g,bx,by,1,7,'#ffffff');
+      R(g,bx,by+6,7,1,P16.sk2);
+      R(g,bx+6,by,1,7,P16.sk2);
+    };
+    brick(0,0); brick(8,0); brick(0,8); brick(8,8);
+  });
+  // 白石の 壁
+  atlas.skywall = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.sk1);
+    for(let j=0;j<4;j++){
+      const off=(j%2)?4:0;
+      for(let i=-1;i<3;i++){
+        const bx=i*8+off, by=j*4;
+        R(g,bx+1,by,6,3,P16.sk2);
+        R(g,bx+1,by,6,1,P16.sk3);
+      }
+    }
+    R(g,0,0,s,1,P16.sk3);
+  });
+  // 雲海：もくもくした かたまりに する。ノイズだけだと 砂あらしに 見える。
+  atlas.cloudedge = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.sky1);
+    // まるい 雲を いくつか かさねる（タイルの ふちを またぐ ように おく）
+    const puff=(cx0,cy0,r,col)=>{
+      for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){
+        if(x*x+y*y>r*r) continue;
+        const X=((cx0+x)%s+s)%s, Y=((cy0+y)%s+s)%s;
+        P(g,X,Y,col);
+      }
+    };
+    const seeds=[[3,4,4],[11,3,3],[6,11,4],[13,12,3],[0,8,3]];
+    seeds.forEach(([cx0,cy0,r],k)=>{
+      if((k+v)%5===4) return;
+      puff(cx0+v, cy0, r, P16.sky2);
+      puff(cx0+v, cy0-1, r-1, '#ffffff');
+    });
+    // したがわに かげ（下が ぬけている かんじ）
+    for(let x=0;x<s;x++){
+      if(nz(x+v*3, 13, v+2) < 0.45) P(g,x,(13+v)%s,P16.sky0);
+    }
+  });
+  // 青みの 芝（上層の 庭園）
+  atlas.skygrass = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.skG1);
+    speckle(g, v*17+3, [P16.skG0,P16.skG2], 0.30);
+    for(let i=0;i<3;i++){
+      const gx=(v*5+i*6)%s, gy=(v*3+i*5)%s;
+      P(g,gx,gy,P16.skG2); P(g,gx,gy-1,P16.skG2);
+    }
+  });
+  // 光珠灯：石の 柱の うえに 青白い 球。四角く ならない ように 角を おとす。
+  atlas.orblamp = tile((g,s)=>{
+    R(g,6,9,4,6,P16.skD1);                      // 柱
+    R(g,6,9,1,6,P16.sk2);
+    R(g,4,15,8,1,P16.skD0);                     // 台座
+    R(g,5,14,6,1,P16.skD1);
+    R(g,5,7,6,2,P16.sk2);                       // 球うけ
+    // 球（まるく）
+    R(g,6,2,4,1,P16.orb1);
+    R(g,5,3,6,1,P16.orb1);
+    R(g,4,4,8,3,P16.orb1);
+    R(g,5,7,6,1,P16.orb1);
+    R(g,5,4,4,2,P16.orb2);
+    R(g,6,4,2,1,P16.orb3); P(g,6,5,P16.orb3);
+    P(g,4,4,P16.orb0); P(g,11,4,P16.orb0);
+    P(g,4,6,P16.orb0); P(g,11,6,P16.orb0);
+    // ひかりの にじみ
+    P(g,3,5,'#a8e2ff55'); P(g,12,5,'#a8e2ff55');
+    P(g,7,1,'#a8e2ff55'); P(g,8,1,'#a8e2ff55');
+  });
+  // 白石の 手すり（雲海の へり）：柱と 横木
+  atlas.skyrail = tile((g,s)=>{
+    R(g,0,5,s,2,P16.sk3);                       // 上の 横木
+    R(g,0,7,s,1,P16.sk1);
+    for(let x=1;x<s;x+=5){                      // 柱（ふくらみ つき）
+      R(g,x,8,3,6,P16.sk2);
+      R(g,x,10,3,2,P16.sk3);
+      P(g,x,8,P16.sk3);
+      R(g,x,13,3,1,P16.sk1);
+    }
+    R(g,0,14,s,2,P16.sk2);                      // 下の 台
+    R(g,0,14,s,1,P16.sk3);
+  });
+
+  // ---------- さばく ----------  // ---------- さばく ----------
   atlas.desert = tileSet((g,s,v)=>{
     R(g,0,0,s,s,P16.sd2);
     speckle(g, v*13+5, [P16.sd1,P16.sd3], 0.26);
@@ -686,9 +803,10 @@ function drawBuilding(rows,x,y,dx,dy,ts){
 // ---------------- タイル → え の わりあて ----------------
 function tileArt(ch, theme){
   const ice = theme==='ice', snowT = theme==='snow', cave = theme==='cave';
+  const sky = (theme==='sky' || theme==='skygarden');
   switch(ch){
     // ---- ワールドマップ ----
-    case '~': return atlas.sea;
+    case '~': return sky?atlas.cloudedge : atlas.sea;
     case '_': return atlas.beach;
     case ',': return atlas.woods;
     case '^': return atlas.mount;
@@ -696,7 +814,7 @@ function tileArt(ch, theme){
     case 'V': return atlas.mVillage;
     case 'X': return atlas.mCave;
     case 'Q': return atlas.mFuture;
-    case '#': return ice?atlas.icewall : (cave?atlas.rockwall : atlas.wall);
+    case '#': return sky?atlas.skywall : (ice?atlas.icewall : (cave?atlas.rockwall : atlas.wall));
     case 'w': return atlas.water;
     case 'f': return snowT?atlas.tree : atlas.tree_g;
     case 'o': return ice?atlas.icicle : atlas.rock;
@@ -704,12 +822,12 @@ function tileArt(ch, theme){
     case 'x': return atlas.pit;           // ★穴
     case 'L': return atlas.lampOff;       // ★光珠灯（消）
     case 'l': return atlas.lampOn;        // ★光珠灯（点）
-    case 't': return atlas.torch;
+    case 't': return sky?atlas.orblamp : atlas.torch;
     case 'C': return atlas.chest;
     case 'I': return atlas.inn;
     case 'P': return atlas.church;
     case 'w': return atlas.well;      // ※ ワールドの みずうみは floorで しょり
-    case 'e': return atlas.fence;
+    case 'e': return sky?atlas.skyrail : atlas.fence;
     case '*': return atlas.flower;
     case 'y': return atlas.signpost;
 
@@ -731,6 +849,8 @@ const THEME_FLOOR = {
   desert:  {floor:'desert',    road:'highway'},   // さばくの まち：すなの じめんに ふみかためた みち
   ice:     {floor:'ice',       road:'ice'},
   cave:    {floor:'road',      road:'road'},
+  sky:     {floor:'skystone',  road:'skyroad'},   // ★天空大陸：白石の 床に 光の 通り
+  skygarden:{floor:'skygrass', road:'skyroad'},   // ★上層の 庭園
   village: {floor:'grass',     road:'road'},
   field:   {floor:'grass',     road:'road'},
   indoor:  {floor:'pave',      road:'road'},
@@ -746,6 +866,15 @@ function roadArt(theme){  return atlas[themeArt(theme).road]; }
 const DIRS8=[['N',0,-1],['S',0,1],['W',-1,0],['E',1,0],
              ['NW',-1,-1],['NE',1,-1],['SW',-1,1],['SE',1,1]];
 let groundCache = {};
+// ★天空大陸（skyWorld）では ちけいの 絵を さしかえる。
+//   うみ→雲海、みち→白石の 通り。ならびの しくみ（TERRAIN_RANK）は そのまま。
+function skyTerrain(t){
+  const m = C.MAPS && C.MAPS[curMap];
+  if(!(m && m.skyWorld)) return t;
+  if(t==='sea' || t==='lake') return 'cloudedge';
+  if(t==='highway') return 'skyroad';
+  return t;
+}
 function groundTile(x,y,terrainOf){
   const k = curMap+':'+x+','+y;
   const hit = groundCache[k];
@@ -753,14 +882,15 @@ function groundTile(x,y,terrainOf){
   const t = terrainOf(x,y);
   const c = mk(TS,TS), g = c.getContext('2d');
   g.imageSmoothingEnabled = false;
-  g.drawImage(hashPick(x,y,atlas[t]),0,0);
+  g.drawImage(hashPick(x,y,atlas[skyTerrain(t)]),0,0);
   const rank = TERRAIN_RANK[t]||0;
   DIRS8.forEach(([dir,dx,dy])=>{
     const nt = terrainOf(x+dx,y+dy);
     if(!nt || nt===t) return;
     if((TERRAIN_RANK[nt]||0) <= rank) return;
-    const src = hashPick(x+dx,y+dy,atlas[nt]);
-    g.drawImage(edgeTile(src, nt+':'+atlas[nt].indexOf(src), dir),0,0);
+    const na = atlas[skyTerrain(nt)];
+    const src = hashPick(x+dx,y+dy,na);
+    g.drawImage(edgeTile(src, nt+':'+na.indexOf(src), dir),0,0);
   });
   groundCache[k] = c;
   return c;
