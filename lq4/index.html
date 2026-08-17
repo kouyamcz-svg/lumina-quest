@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T12:07:12", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 304, "bgm": 979, "view2d": 1709, "core": 2409, "view": 1394, "ui": 977}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T12:10:38", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 304, "bgm": 979, "view2d": 1713, "core": 2409, "view": 1394, "ui": 977}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -2609,9 +2609,13 @@ function groundTile(x,y,terrainOf){
     const nt = terrainOf(x+dx,y+dy);
     if(!nt || nt===t) return;
     if((TERRAIN_RANK[nt]||0) <= rank) return;
-    const na = atlas[skyTerrain(nt)];
-    const src = hashPick(x+dx,y+dy,na);
-    g.drawImage(edgeTile(src, nt+':'+na.indexOf(src), dir),0,0);
+    // ★atlas の なかみは 「1まい」の ときも 「なんまいかの ならび」の ときも ある。
+    //   ならびだと きめつけて indexOf を よんで こわれた（天空大陸で 落ちた）。
+    const key = skyTerrain(nt);
+    const na = atlas[key];
+    const arr = Array.isArray(na) ? na : [na];
+    const src = hashPick(x+dx,y+dy,arr);
+    g.drawImage(edgeTile(src, key+':'+arr.indexOf(src), dir),0,0);
   });
   groundCache[k] = c;
   return c;
