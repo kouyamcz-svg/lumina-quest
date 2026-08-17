@@ -223,6 +223,27 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★ぎゃくも しらべる：章データに かいた ボスの ますが 地図に あるか。
+//   ★地図を つくり直した とき、章データの ざひょうが とり残されて
+//     「ぜったいに 出てこない ボス」に なって いた（じっさいに 出た）。
+Object.keys(CHD.CH).forEach(no=>{
+  const bs = CHD.CH[no].bosses || {};
+  Object.keys(bs).forEach(k=>{
+    const mp = k.split(':')[0];
+    T('ボスの 置き場が ある '+k, !!C.MAPS[mp], 'マップが ない');
+    if(!C.MAPS[mp]) return;
+    if(k.indexOf(':')>=0){
+      const [x,y] = k.split(':')[1].split(',').map(Number);
+      T('ボスの ますが Bに なっている '+k, tileAt(mp,x,y)==='B', 'いまは「'+tileAt(mp,x,y)+'」');
+      const near = [[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>!blocked(mp,x+dx,y+dy));
+      T('ボスに たどりつける '+k, near);
+    }else{
+      const any = C.MAPS[mp].tiles.some(r=>r.indexOf('B')>=0);
+      T('マップに Bますが ある '+k, any);
+    }
+  });
+});
+
 // ============================================================
 // 5. しかけ監査（IVから：押し岩・穴・光珠灯・扉）
 // ============================================================
