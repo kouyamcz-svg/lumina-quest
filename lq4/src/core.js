@@ -541,11 +541,14 @@ function interact(){
       doWarp(w); return;
     }
   }
-  if(ch==='Q'){                               // まだ いけない ちほう
+  if(ch==='Q'){                               // まだ 入れない 場所
+    // ★「これから 作られます」の ような 中の 人の ことばを 画面に 出さない。
+    //   行けない りゆうは 物語の 中で つける。ばしょごとの 文は 章データの gates に かく。
     G.mode='msg';
-    U.msg(['光珠灯の 列が、雲の 上へ 続いている。',
-           'だが いまの ' + (party[0] ? party[0].name : '彼ら') + 'に、ここから 先へ 進む 手だては ない。',
-           '（この 場所は これから 作られます）'], ()=>{ G.mode='field'; });
+    const gt = ((chData()||{}).gates||{})[P.map+':'+nx+','+ny];
+    U.msg(gt || ['道は 先へ 続いている。',
+                 'だが 今の ' + (party[0] ? party[0].name : '彼ら') + 'に、ここから 先へ 進む 用は ない。'],
+      ()=>{ G.mode='field'; });
     return;
   }
   if(ch==='B'){ triggerBoss(nx,ny); return; }
