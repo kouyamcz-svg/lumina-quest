@@ -199,6 +199,31 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
 });
 
 // ============================================================
+// 4-3. ボスますの 絵（1まいに 2たい 置いた ときの ひきわけ）
+//   ★ざひょうを わたさずに 章データを ひくと 絵が 出ず、
+//     どの ボスも 同じ 紫の かたまりに 見えた（じっさいに 出た）。
+// ============================================================
+Object.keys(C.MAPS).forEach(mp=>{
+  const m = C.MAPS[mp];
+  for(let y=0;y<m.tiles.length;y++){
+    for(let x=0;x<m.tiles[y].length;x++){
+      if(tileAt(mp,x,y)!=='B') continue;
+      let hit = null;
+      Object.keys(CHD.CH).forEach(no=>{
+        const b = CHD.CH[no].bosses || {};
+        hit = hit || b[mp+':'+x+','+y] || b[mp];
+      });
+      T('Bますに ボスが ひもづく '+mp+' ('+x+','+y+')', !!hit);
+      if(hit){
+        const e = C.MIDBOSS[hit.key];
+        T('ボス '+hit.key+' が 実在する', !!e);
+        T('ボス '+hit.key+' に 絵が ある', !!(e && e.art));
+      }
+    }
+  }
+});
+
+// ============================================================
 // 5. しかけ監査（IVから：押し岩・穴・光珠灯・扉）
 // ============================================================
 Object.keys(C.MAPS).forEach(mp=>{
