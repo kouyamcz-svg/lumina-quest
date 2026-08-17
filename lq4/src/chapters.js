@@ -183,6 +183,8 @@ const CH = {
       // ---- ウンブラ撃破後 ----
       { npc:'逃げ遅れた 子ども', cond:['ch0_umbraDown'], unless:'ch0_childSaved',
         set:['ch0_childSaved'],
+        // ★「走っていった」と 書いた のに その場に のこって いた
+        setTiles:[{map:'rift_yard', x:2, y:13, ch:'.'}],
         herbs:2, gold:30,
         msg:['子ども「……もう、いない？」',
              'イオ「ああ。下で お母さんが 待ってる」',
@@ -212,6 +214,8 @@ const CH = {
 
       { npc:'セレン', cond:['ch0_sparDone'], unless:'ch0_serenJoined',
         set:['ch0_serenJoined'],
+        // ★仲間に なったら 地図の NPCを 消す。のこすと 本人が 2人に なる。
+        setTiles:[{map:'trial_yard', x:9, y:2, ch:'.'}],
         join:{cls:'seren', lv:'lead',
               weapon:{kind:'w', name:'見習いの 槍', v:6},
               armor: {kind:'a', name:'貴族の 胸当て', v:5}},
