@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T13:18:47", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 304, "bgm": 979, "view2d": 1757, "core": 2411, "view": 1394, "ui": 977}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T13:22:14", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 304, "bgm": 979, "view2d": 1805, "core": 2411, "view": 1394, "ui": 977}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -1773,6 +1773,10 @@ const P16 = {
   // ★屋内：床は 木、壁は 濃い 石。同じ 灰色だと 見わけが つかない。
   wd0:'#4a3524', wd1:'#6b4c33', wd2:'#8a6444', wd3:'#a67e56',   // 板の 床
   in0:'#2f3242', in1:'#43485e', in2:'#5b6178', in3:'#7a8098',   // 屋内の 壁
+  // ★天空大陸の のはら・木・岩山：ふつうの みどり茶では なく 寒色に よせる
+  sg0:'#3c5c52', sg1:'#4e7566', sg2:'#638d78', sg3:'#7fa992',   // 天空の 草
+  st0:'#2a4a48', st1:'#3a6560', st2:'#4f8278',                  // 天空の 木
+  sm0:'#6a7c9c', sm1:'#8fa0bd', sm2:'#b6c4dc', sm3:'#dee6f2',   // 天空の 岩山（白石）
   // ★かべは ゆかと はっきり 明暗を 分ける（同色で 見わけが つかなかった）
   skW0:'#48597d', skW1:'#63779e', skW2:'#8194b6', skW3:'#a3b3cd',
 };
@@ -2048,6 +2052,43 @@ function buildAtlas(){
     }
     R(g,0,14,s,2,P16.sk2);                      // 下の 台
     R(g,0,14,s,1,P16.sk3);
+  });
+
+  // ---------- 天空大陸の のはら（IVから）----------
+  atlas.skyplain = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.sg1);
+    speckle(g, v*13+5, [P16.sg0,P16.sg2], 0.34);
+    for(let i=0;i<4;i++){
+      const gx=(v*5+i*7)%s, gy=(v*3+i*4)%s;
+      P(g,gx,gy,P16.sg3); P(g,gx,(gy+15)%s,P16.sg2);
+    }
+  });
+  // 天空の 木立
+  atlas.skywoods = tileSet((g,s,v)=>{
+    g.drawImage(hashPick(v,v,atlas.skyplain),0,0);
+    const tree=(cx0,cy0)=>{
+      R(g,cx0-2,cy0-4,5,4,P16.st1);
+      R(g,cx0-3,cy0-3,7,2,P16.st1);
+      R(g,cx0-1,cy0-5,3,1,P16.st2);
+      R(g,cx0-2,cy0-2,2,1,P16.st2);
+      R(g,cx0,cy0,1,2,'#4a3a2e');
+      R(g,cx0-3,cy0-1,7,1,P16.st0);
+    };
+    tree(4+(v%2),7); tree(11,12); tree(9,5);
+  });
+  // 天空の 岩山：白石の いわ
+  atlas.skymount = tileSet((g,s,v)=>{
+    g.drawImage(hashPick(v,v,atlas.skyplain),0,0);
+    const peak=(bx,by,w)=>{
+      for(let i=0;i<w;i++){
+        const h=Math.min(w-i, i+1);
+        R(g,bx+i,by-h,1,h+1,P16.sm1);
+      }
+      R(g,bx+1,by-2,1,2,P16.sm2);
+      R(g,bx+Math.floor(w/2),by-Math.floor(w/2)-1,1,2,P16.sm3);
+      R(g,bx,by,w,1,P16.sm0);
+    };
+    peak(2+(v%2),13,7); peak(9,15,6);
   });
 
   // ---------- 屋内（IVから）----------
@@ -2633,11 +2674,15 @@ const DIRS8=[['N',0,-1],['S',0,1],['W',-1,0],['E',1,0],
 let groundCache = {};
 // ★天空大陸（skyWorld）では ちけいの 絵を さしかえる。
 //   うみ→雲海、みち→白石の 通り。ならびの しくみ（TERRAIN_RANK）は そのまま。
-function skyTerrain(t){
+function isSkyWorld(){
   const m = C.MAPS && C.MAPS[curMap];
-  if(!(m && m.skyWorld)) return t;
+  return !!(m && m.skyWorld);
+}
+function skyTerrain(t){
+  if(!isSkyWorld()) return t;
   if(t==='sea' || t==='lake') return 'cloudedge';
   if(t==='highway') return 'skyroad';
+  if(t==='plain') return 'skyplain';
   return t;
 }
 function groundTile(x,y,terrainOf){
@@ -3194,7 +3239,10 @@ function draw(dt, time, actors){
       _mkQ.push([ch, ox+x*ts, oy+y*ts]);
     }
     else {
-      let art = tileArt(ch, theme);
+      // ★天空大陸では 木・岩山も 寒色の 天空版に する
+      let art = (theme==='world' && isSkyWorld() && ch===',') ? atlas.skywoods
+              : (theme==='world' && isSkyWorld() && ch==='^') ? atlas.skymount
+              : tileArt(ch, theme);
       if(Array.isArray(art)) art = hashPick(x,y,art);
       if(art) cx.drawImage(art, ox+x*ts, oy+y*ts, ts, ts);
     }
