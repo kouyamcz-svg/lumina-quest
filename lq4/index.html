@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T12:10:38", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 304, "bgm": 979, "view2d": 1713, "core": 2409, "view": 1394, "ui": 977}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T13:18:47", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 304, "bgm": 979, "view2d": 1757, "core": 2411, "view": 1394, "ui": 977}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -1770,6 +1770,9 @@ const P16 = {
   orb0:'#2d6ea8', orb1:'#5fb4ee', orb2:'#a8e2ff', orb3:'#eafaff',// 光珠
   skG0:'#4a6a72', skG1:'#5f8a86', skG2:'#7aa89c',               // 青みの 芝
   skD0:'#4a5f80', skD1:'#6a80a4',                               // 濃い 石（柱・台座）
+  // ★屋内：床は 木、壁は 濃い 石。同じ 灰色だと 見わけが つかない。
+  wd0:'#4a3524', wd1:'#6b4c33', wd2:'#8a6444', wd3:'#a67e56',   // 板の 床
+  in0:'#2f3242', in1:'#43485e', in2:'#5b6178', in3:'#7a8098',   // 屋内の 壁
   // ★かべは ゆかと はっきり 明暗を 分ける（同色で 見わけが つかなかった）
   skW0:'#48597d', skW1:'#63779e', skW2:'#8194b6', skW3:'#a3b3cd',
 };
@@ -2047,7 +2050,47 @@ function buildAtlas(){
     R(g,0,14,s,1,P16.sk3);
   });
 
-  // ---------- さばく ----------  // ---------- さばく ----------
+  // ---------- 屋内（IVから）----------
+  // 板の 床：たてに ながい 板を ならべる。石の 床と まちがえない ように。
+  atlas.woodfloor = tile((g,s)=>{
+    R(g,0,0,s,s,P16.wd1);
+    for(let i=0;i<4;i++){
+      const bx=i*4;
+      R(g,bx,0,3,s,P16.wd2);
+      R(g,bx,0,1,s,P16.wd3);          // 板の 左に ひかり
+      R(g,bx+3,0,1,s,P16.wd0);        // つぎめの 影
+    }
+    R(g,0,7,s,1,P16.wd0);             // 板の きれめ
+    R(g,0,8,s,1,P16.wd1);
+    P(g,2,3,P16.wd1); P(g,9,11,P16.wd1); P(g,13,2,P16.wd1);
+  });
+  // 屋内の 壁：くらい 石。うえに 笠、したに 影。
+  atlas.indoorwall = tile((g,s)=>{
+    R(g,0,0,s,s,P16.in0);
+    for(let j=0;j<4;j++){
+      const off=(j%2)?4:0;
+      for(let i=-1;i<3;i++){
+        const bx=i*8+off, by=j*4;
+        R(g,bx+1,by+1,6,3,P16.in1);
+        R(g,bx+1,by+1,6,1,P16.in2);
+      }
+    }
+    R(g,0,0,s,1,P16.in3);
+    R(g,0,s-1,s,1,'#1c1f2b');
+  });
+  // 道具棚（屋内の e）
+  atlas.shelf = tile((g,s)=>{
+    R(g,1,2,14,13,P16.wd1);
+    R(g,1,2,14,1,P16.wd3);
+    R(g,1,6,14,1,P16.wd0);
+    R(g,1,10,14,1,P16.wd0);
+    R(g,1,14,14,1,P16.wd0);
+    R(g,3,3,3,3,'#9aa6bd'); R(g,8,3,2,3,'#c3a24a');
+    R(g,4,7,4,3,'#7a8a6a'); R(g,10,7,3,3,'#9aa6bd');
+    R(g,3,11,5,3,'#8a6444'); R(g,10,11,3,3,'#c3a24a');
+  });
+
+  // ---------- さばく ----------
   atlas.desert = tileSet((g,s,v)=>{
     R(g,0,0,s,s,P16.sd2);
     speckle(g, v*13+5, [P16.sd1,P16.sd3], 0.26);
@@ -2535,7 +2578,8 @@ function tileArt(ch, theme){
     case 'V': return atlas.mVillage;
     case 'X': return atlas.mCave;
     case 'Q': return atlas.mFuture;
-    case '#': return sky?atlas.skywall : (ice?atlas.icewall : (cave?atlas.rockwall : atlas.wall));
+    case '#': return theme==='indoor' ? atlas.indoorwall
+            : sky?atlas.skywall : (ice?atlas.icewall : (cave?atlas.rockwall : atlas.wall));
     case 'w': return atlas.water;
     case 'f': return snowT?atlas.tree : atlas.tree_g;
     case 'o': return ice?atlas.icicle : atlas.rock;
@@ -2543,12 +2587,12 @@ function tileArt(ch, theme){
     case 'x': return atlas.pit;           // ★穴
     case 'L': return atlas.lampOff;       // ★光珠灯（消）
     case 'l': return atlas.lampOn;        // ★光珠灯（点）
-    case 't': return sky?atlas.orblamp : atlas.torch;
+    case 't': return (sky||theme==='indoor') ? atlas.orblamp : atlas.torch;
     case 'C': return atlas.chest;
     case 'I': return atlas.inn;
     case 'P': return atlas.church;
     case 'w': return atlas.well;      // ※ ワールドの みずうみは floorで しょり
-    case 'e': return sky?atlas.skyrail : atlas.fence;
+    case 'e': return theme==='indoor' ? atlas.shelf : (sky?atlas.skyrail : atlas.fence);
     case '*': return atlas.flower;
     case 'y': return atlas.signpost;
 
@@ -2574,7 +2618,7 @@ const THEME_FLOOR = {
   skygarden:{floor:'skygrass', road:'skyroad'},   // ★上層の 庭園
   village: {floor:'grass',     road:'road'},
   field:   {floor:'grass',     road:'road'},
-  indoor:  {floor:'pave',      road:'road'},
+  indoor:  {floor:'woodfloor', road:'pave'},      // ★屋内：板の 床。かべは くらい 石
   castle:  {floor:'pave',      road:'pave'},      // ※ しろは 3Dで えがく
   world:   {floor:'plain',     road:'highway'},   // ※ ワールドは タイルごとに きめる
 };
@@ -3629,12 +3673,14 @@ const MAPS = {
 
   // ============ 序章：イオの家（父の鍛冶場） ============
   // 父の 鍛冶場。左に 炉、右に 道具棚。奥が 寝間。
+  // 父の 鍛冶場。壁(#)は くらい 石、ゆか(.)は 板、e は 棚。
+  //   左おくに 炉と 宝箱、右おくに 道具棚。手前が 土間。
   home_forge:{name:'イオの家（父の鍛冶場）', theme:'indoor', enc:false, tiles:[
     "###############",
     "#t...........t#",
-    "#..###...###..#",
-    "#..#C#...#e#..#",
-    "#..#.#...#.#..#",
+    "#.###.....###.#",
+    "#.#C#.....#e#.#",
+    "#.#.#.....#.#.#",
     "#.............#",
     "#..n.......e..#",
     "#.............#",
