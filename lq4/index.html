@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T13:51:42", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 324, "bgm": 979, "view2d": 1874, "core": 2414, "view": 1394, "ui": 977}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T14:07:09", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 328, "bgm": 979, "view2d": 1876, "core": 2414, "view": 1394, "ui": 977}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -617,6 +617,8 @@ const CH = {
       // ---- ウンブラ撃破後 ----
       { npc:'逃げ遅れた 子ども', cond:['ch0_umbraDown'], unless:'ch0_childSaved',
         set:['ch0_childSaved'],
+        // ★「走っていった」と 書いた のに その場に のこって いた
+        setTiles:[{map:'rift_yard', x:2, y:13, ch:'.'}],
         herbs:2, gold:30,
         msg:['子ども「……もう、いない？」',
              'イオ「ああ。下で お母さんが 待ってる」',
@@ -646,6 +648,8 @@ const CH = {
 
       { npc:'セレン', cond:['ch0_sparDone'], unless:'ch0_serenJoined',
         set:['ch0_serenJoined'],
+        // ★仲間に なったら 地図の NPCを 消す。のこすと 本人が 2人に なる。
+        setTiles:[{map:'trial_yard', x:9, y:2, ch:'.'}],
         join:{cls:'seren', lv:'lead',
               weapon:{kind:'w', name:'見習いの 槍', v:6},
               armor: {kind:'a', name:'貴族の 胸当て', v:5}},
@@ -3340,9 +3344,11 @@ function draw(dt, time, actors){
     //   さきに かくと、みぎ・したの ゆかタイルが ボスの はみだしを うわがきして
     //   「みぎうでが かける」げんしょうが おきていた。
     if(ch==='B'){
-      const bi = C.bossInfoAt ? C.bossInfoAt(curMap) : null;
+      // ★ますごとに ボスが ちがう ことが ある（1まいの マップに 2たい）。
+      //   ざひょうを わたさないと、絵が ひけずに 紫の かたまりに なる。
+      const bi = C.bossInfoAt ? C.bossInfoAt(curMap, x, y) : null;
       const done = bi && bi.clearedFlag && C.G.flags[bi.clearedFlag];
-      if(!done) _bossQ.push([ox+x*ts, oy+y*ts, ts]);
+      if(!done) _bossQ.push([ox+x*ts, oy+y*ts, ts, x, y]);
     }
   }
   // ★まち・むらは 1.45ばいで えがく（ちいさくて みつけにくかった）
@@ -3352,7 +3358,7 @@ function draw(dt, time, actors){
     cx.drawImage(art, Math.round(mx + ts/2 - mw/2), Math.round(my + ts - mh), mw, mh);
   });
   _mkQ.length=0;
-  _bossQ.forEach(([bx,by,bts])=>drawBoss(bx,by,bts));
+  _bossQ.forEach(([bx,by,bts,tx,ty])=>drawBoss(bx,by,bts,tx,ty));
   _bossQ.length=0;
   // ★もやって ある ふね（ワールドのみ）
   if(theme==='world' && C.G && C.G.ship && !C.G.aboard){
@@ -3428,7 +3434,7 @@ function drawSceneOverlay(time){
   cx.strokeStyle='rgba(255,255,255,0.5)'; cx.lineWidth=2;
   cx.strokeRect(ox-2, oy-2, dw+4, dh+4);
 }
-function drawBoss(dx,dy,ts){
+function drawBoss(dx,dy,ts,tx,ty){
   const s=ts;
   cx.fillStyle='rgba(40,10,60,0.35)';
   cx.beginPath(); cx.ellipse(dx+s/2, dy+s*0.86, s*0.36, s*0.12, 0, 0, Math.PI*2); cx.fill();
@@ -3437,7 +3443,7 @@ function drawBoss(dx,dy,ts){
   // ★そのマップの ボスの えを つかう（せんとうちゅうと おなじ すがた）。
   //   そうしボス（pair）は 2たいで 1くみ なので、ならべて えがく。
   const arts = [];
-  const bi = C.bossInfoAt ? C.bossInfoAt(C.P.map) : null;
+  const bi = C.bossInfoAt ? C.bossInfoAt(C.P.map, tx, ty) : null;
   if(bi){
     const pick = (key)=>{
       const b = C.MIDBOSS && C.MIDBOSS[key];
