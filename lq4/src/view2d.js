@@ -1307,13 +1307,16 @@ function draw(dt, time, actors){
   // ばらついて「てうちドット」に みえなくなる。
   // tilesTall は「すくなくとも これだけは うつす」という かずなので、
   // まるめは きりすて（round だと たてが たりなく なることが ある）。
-  const tilesTall = (theme==='world') ? 18 : 15;
+  // ★引きの ぐあい。数を ふやすほど 引く（ひろく うつる）。
+  //   ばいりつは せいすうしか つかえない（ドットを ぼかさない ため）ので、
+  //   ここを 15→20 に すると 3ばい→2ばいに おちて、まちが まるごと 入る。
+  const tilesTall = (theme==='world') ? 24 : 20;
   let scale = Math.max(2, Math.floor(H / (tilesTall*TS)));
   // ★ちいさい マップ（家・小部屋）は 画面に あまるので、はいる ところまで 大きくする。
   //   まえは 左上に ちいさく はりついて、画面の まんなかが あいていた。
   if(MW*TS*scale < W && MH*TS*scale < H){
     const fit = Math.min(Math.floor(W/(MW*TS)), Math.floor(H/(MH*TS)));
-    if(fit > scale) scale = Math.min(fit, 4);   // ★4ばいまで。それ以上は 拡大しすぎに 見える
+    if(fit > scale) scale = Math.min(fit, 3);   // ★3ばいまで。それ以上は 拡大しすぎに 見える
   }
   const ts = TS*scale;   // かならず せいすうばい
 
@@ -1490,8 +1493,8 @@ function drawNPC(dx,dy,ts,x,y){
   if(d){
     const img=getImg(d.front||d.src);
     if(img.complete && img.naturalWidth){
-      const sc=ts/TS;
-      const ww=Math.round(d.w*sc), hh=Math.round(d.h*sc);
+      const csc=chrDrawScale(s);
+      const ww=Math.round(d.w*csc), hh=Math.round(d.h*csc);
       cx.drawImage(img, Math.round(dx+s/2-ww/2), Math.round(dy+s*0.95-hh), ww, hh);
       return;
     }
@@ -1580,6 +1583,14 @@ function getImg(src){
   if(!imgCache[src]){ const i=new Image(); i.src=src; imgCache[src]=i; }
   return imgCache[src];
 }
+// ★フィールドでの 人の 大きさ。
+//   LQ4の 立ち絵は たかさ40ドット（LQ3は24）。そのまま タイルばいりつで えがくと
+//   人が 家より 大きく なる。ここで 「タイル1.7こぶん」に そろえる。
+//   NPCごとの せの高さの ちがいは のこる（子どもは ひくい、団長は たかい）。
+const CHR_REF_H = 40;                 // きじゅんに する 立ち絵の たかさ
+const CHR_TILES = 1.7;                // 人の たかさ ＝ タイル なんこぶん
+function chrDrawScale(ts){ return (ts*CHR_TILES) / CHR_REF_H; }
+
 function drawChar(a, ox, oy, ts, time){
   const d = CHRREF && CHRREF[a.cls];
   const dx = ox + a.x*ts, dy = oy + a.y*ts;
@@ -1593,7 +1604,8 @@ function drawChar(a, ox, oy, ts, time){
   // ★タイルと おなじ ばいりつで えがく ＝ ドットの あらさが そろう
   //   よこむきは はばが ちがう ので、その えの はばを つかう
   const baseW = (pose.indexOf('side')===0 && d.sideW_) ? d.sideW_ : d.w;
-  const ww = Math.round(baseW*sc), hh = Math.round(d.h*sc);
+  const csc = chrDrawScale(ts);
+  const ww = Math.round(baseW*csc), hh = Math.round(d.h*csc);
   const bx = Math.round(dx + ts/2 - ww/2);
   const by = Math.round(dy + ts*0.95 - hh + (a.bob||0)*ts);
   cx.save();
