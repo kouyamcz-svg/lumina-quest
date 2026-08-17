@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T14:25:37", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 332, "bgm": 979, "view2d": 1876, "core": 2414, "view": 1394, "ui": 977}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T15:16:25", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 332, "bgm": 979, "view2d": 1885, "core": 2414, "view": 1394, "ui": 977}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -2017,28 +2017,19 @@ function buildAtlas(){
     R(g,0,s-1,s,1,'#2b3652');                 // したの 影
     if(v%3===0) P(g,3,9,P16.skW2);
   });
-  // 雲海：もくもくした かたまりに する。ノイズだけだと 砂あらしに 見える。
+  // 雲海の 下地：うごかない ものは しずかに する。
+  //   ★白い もくもくを タイルに 焼きこむと、うえで 雲を うごかしても
+  //     したの 白と まざって 「うごいて いない」ように 見える。
+  //     ここは ほとんど 青だけに して、白い 雲は うえの そうで うごかす。
   atlas.cloudedge = tileSet((g,s,v)=>{
-    R(g,0,0,s,s,P16.sky1);
-    // まるい 雲を いくつか かさねる（タイルの ふちを またぐ ように おく）
-    const puff=(cx0,cy0,r,col)=>{
-      for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){
-        if(x*x+y*y>r*r) continue;
-        const X=((cx0+x)%s+s)%s, Y=((cy0+y)%s+s)%s;
-        P(g,X,Y,col);
-      }
-    };
-    const seeds=[[3,4,4],[11,3,3],[6,11,4],[13,12,3],[0,8,3]];
-    seeds.forEach(([cx0,cy0,r],k)=>{
-      if((k+v)%5===4) return;
-      puff(cx0+v, cy0, r, P16.sky2);
-      puff(cx0+v, cy0-1, r-1, '#ffffff');
-    });
-    // したがわに かげ（下が ぬけている かんじ）
-    for(let x=0;x<s;x++){
-      if(nz(x+v*3, 13, v+2) < 0.45) P(g,x,(13+v)%s,P16.sky0);
+    R(g,0,0,s,s,P16.sky0);
+    for(let y=0;y<s;y++)for(let x=0;x<s;x++){
+      const n = nz(x+v*5, y+v*3, v+7);
+      if(n < 0.42) P(g,x,y,P16.sky1);
+      else if(n > 0.88) P(g,x,y,'#4a72b4');
     }
   });
+
   // 青みの 芝（上層の 庭園）
   atlas.skygrass = tileSet((g,s,v)=>{
     R(g,0,0,s,s,P16.skG1);
@@ -2713,35 +2704,53 @@ function skyTerrain(t){
   if(t==='plain') return 'skyplain';
   return t;
 }
-// ★雲海：ながれる 雲と、ときどき 見える 切れ間。
-//   タイルを やきこんで しまうと うごかせない ので、うえに かさねて えがく。
+// ★雲海：大きな 雲の かたまりが、タイルを またいで つながって ながれる。
+//   タイルの 中だけで えがくと ぶつ切りに 見える ので、
+//   「せかいの ざひょう」で 雲の いちを きめて、タイルごとに 切り出す。
+const CLOUD_L = 4;          // 雲の 間かく（タイル）
+const CLOUD_R = 1.8;        // 雲の 大きさ（タイル）※すきまが ないと 動きが 見えない
+function cloudJit(gx, gy, k){
+  const h = Math.sin(gx*127.1 + gy*311.7 + k*74.7) * 43758.5453;
+  return h - Math.floor(h);
+}
 function drawCloudSea(x, y, dx0, dy0, ts, time, terrainOf){
-  const sc = ts/TS;
-  const t = time*0.35;                       // ゆっくり ながれる
   cx.save();
   cx.beginPath(); cx.rect(dx0, dy0, ts, ts); cx.clip();
-  // ながれる 雲の すじ（2そう。はやさを 変えて おくゆきを 出す）
-  for(let k=0;k<2;k++){
-    const spd = k? 9 : 5, band = k? 4 : 9;
-    const off = ((t*spd) % 24) - 12;
-    cx.globalAlpha = k? 0.42 : 0.30;
-    cx.fillStyle = '#ffffff';
-    for(let i=-1;i<3;i++){
-      const wy = ((y*7 + x*3 + i*11 + k*5) % 16);
-      const wx = dx0 + ((x*13 + i*17 + k*7) % 16)*sc + off*sc;
-      cx.fillRect(Math.round(wx), Math.round(dy0 + wy*sc), Math.round(band*sc), Math.round(2*sc));
+  for(let layer=0; layer<2; layer++){
+    const spd = layer ? 0.62 : 0.34;              // タイル／びょう
+    const off = time * spd;
+    const alpha = layer ? 0.95 : 0.55;
+    const col = layer ? '#ffffff' : '#cfe2ff';
+    const r = CLOUD_R * (layer ? 1.0 : 1.35);
+    // この タイルに かかりうる 雲だけを まわす
+    const g0x = Math.floor((x - off - r) / CLOUD_L) - 1;
+    const g1x = Math.floor((x - off + r) / CLOUD_L) + 1;
+    const g0y = Math.floor((y - r) / CLOUD_L) - 1;
+    const g1y = Math.floor((y + r) / CLOUD_L) + 1;
+    cx.globalAlpha = alpha;
+    cx.fillStyle = col;
+    for(let gy=g0y; gy<=g1y; gy++){
+      for(let gx=g0x; gx<=g1x; gx++){
+        if(cloudJit(gx,gy,layer+3) < 0.44) continue;          // まばらに 抜く（すきまを 作る）
+        const jx = (cloudJit(gx,gy,layer)   - 0.5) * CLOUD_L * 0.8;
+        const jy = (cloudJit(gx,gy,layer+1) - 0.5) * CLOUD_L * 0.8;
+        const cxT = gx*CLOUD_L + jx + off;                    // せかい ざひょう（タイル）
+        const cyT = gy*CLOUD_L + jy;
+        const rr  = r * (0.65 + cloudJit(gx,gy,layer+2)*0.7);
+        // 3つの まるを かさねて もくもくに する
+        const px0 = dx0 + (cxT - x)*ts, py0 = dy0 + (cyT - y)*ts;
+        cx.beginPath();
+        cx.ellipse(px0,             py0,             rr*ts*0.62, rr*ts*0.34, 0, 0, 6.283);
+        cx.ellipse(px0 - rr*ts*0.4, py0 + rr*ts*0.1, rr*ts*0.40, rr*ts*0.26, 0, 0, 6.283);
+        cx.ellipse(px0 + rr*ts*0.42,py0 + rr*ts*0.06,rr*ts*0.36, rr*ts*0.24, 0, 0, 6.283);
+        cx.fill();
+      }
     }
-  }
-  // 切れ間：ときどき 下の くらやみが のぞく
-  const gap = (Math.sin(x*2.3 + y*1.7) + Math.sin(t*0.5 + x*0.7))*0.5;
-  if(gap > 0.72){
-    cx.globalAlpha = 0.30;
-    cx.fillStyle = '#20355c';
-    cx.fillRect(dx0+Math.round(4*sc), dy0+Math.round(6*sc), Math.round(7*sc), Math.round(4*sc));
   }
   cx.restore();
   cx.globalAlpha = 1;
 }
+
 // ★遠くに 浮かぶ 島：雲海の きまった ばしょに、ちいさく えがく。
 //   「ここは そらの うえだ」と ひとめで わかる ように する。
 const FAR_ISLES = [[6,6],[36,6],[42,10],[11,1],[31,1],[1,1],[21,1],[41,1]];
