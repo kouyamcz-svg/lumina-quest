@@ -892,9 +892,13 @@ function groundTile(x,y,terrainOf){
     const nt = terrainOf(x+dx,y+dy);
     if(!nt || nt===t) return;
     if((TERRAIN_RANK[nt]||0) <= rank) return;
-    const na = atlas[skyTerrain(nt)];
-    const src = hashPick(x+dx,y+dy,na);
-    g.drawImage(edgeTile(src, nt+':'+na.indexOf(src), dir),0,0);
+    // ★atlas の なかみは 「1まい」の ときも 「なんまいかの ならび」の ときも ある。
+    //   ならびだと きめつけて indexOf を よんで こわれた（天空大陸で 落ちた）。
+    const key = skyTerrain(nt);
+    const na = atlas[key];
+    const arr = Array.isArray(na) ? na : [na];
+    const src = hashPick(x+dx,y+dy,arr);
+    g.drawImage(edgeTile(src, key+':'+arr.indexOf(src), dir),0,0);
   });
   groundCache[k] = c;
   return c;
