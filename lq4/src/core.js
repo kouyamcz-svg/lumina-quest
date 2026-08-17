@@ -119,7 +119,7 @@ const MIDBOSS = {
   // ---- 序章：見習い試験の 仕上げ（セレンとの 模擬戦）----
   //   負けても やりなおせる。手加減の 描写を acts と atk で 出す。
   seren_spar:{key:'seren_spar', name:'見習い セレン', hp:70, atk:8, def:7, agi:14, acts:1,
-    exp:30, gold:0, art:'sleepknight',
+    exp:30, gold:0, art:'seren_spar',
     skill:{p:0.30, mul:1.25, name:'疾風突き'},
     brace:{p:0.18, name:'槍を 立てて かまえた！'}},
   // ---- 序章：広場の 中ボス（影の あぎと）----
