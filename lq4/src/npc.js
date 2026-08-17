@@ -33,6 +33,9 @@ const NPCS = {
       {text:['「下層区は 地上生まれの 街だ」',
              '「上の 連中は おれたちを 重い者と 呼ぶ」']}]},
     {at:'5,5', spr:'villagerB', name:'光珠管の 技師', lines:[
+      {when:{flag:'ch0_mawTold'}, text:[
+        '技師「あの 口だけの 獣、また 出たら 逃げろ」',
+        '技師「……お前の 父さんは 逃げなかった。それだけだ」']},
       {when:{flag:'ch0_umbraDown'}, text:[
         '「割れた 光珠灯は もう 替えた。仕事が 早いだろ」',
         '「……ただな。取り替えた 新しい 管も、光が 濁ってる」',
@@ -65,6 +68,12 @@ const NPCS = {
 
   // ============ 序章：下層区（東門の 見張り）============
   // ※ フィールドへ 出る 前に、どこへ 行けるかを 教える
+  // ============ 序章：光珠管の 点検路 ============
+  pipe_path: [
+    {at:'8,7', spr:'villagerA', name:'かげの あぎと', lines:[
+      {text:['黒い 塊が 管に 貼りついている。']}]},
+  ],
+
   // ============ 序章：裂け目の広場（夜） ============
   rift_yard: [
     {at:'12,3', spr:'captain', name:'騎士団長 グラン', lines:[
@@ -106,12 +115,13 @@ const NPCS = {
 
 const QUESTS = {
   ch0_q0_errand: {
-    id:'ch0_q0_errand', chapter:1, title:'たなの 影ばらい',
+    id:'ch0_q0_errand', chapter:1, title:'管の 影ばらい',
     giver:'光珠管の 技師',
-    desc:'東門の 外の たなで 悪夢獣を 3体 倒す。',
+    desc:'東門の 外の 点検路で 悪夢獣を 3体 倒す。',
     steps:[
-      {id:'kill',   desc:'悪夢獣を 3体 倒す', flag:'ch0_errandDone'},
-      {id:'report', desc:'技師に 報告する',   flag:'ch0_errandPaid'},
+      {id:'kill',   desc:'悪夢獣を 3体 倒す',   flag:'ch0_errandDone'},
+      {id:'maw',    desc:'管に いた ものを 見る', flag:'ch0_mawFled'},
+      {id:'report', desc:'技師に 報告する',     flag:'ch0_errandPaid'},
     ],
     reward:{}, next:'ch0_q1_trial',
   },
