@@ -172,6 +172,19 @@ C.P.map='rift_yard'; C.P.x=10; C.P.y=13; goField();
 walkG([[-1,0],[-1,0],[-1,0],[-1,0],[-1,0]]);      // (5,13)へ
 walkG([[0,-1],[0,-1]]);                            // 岩を 2かい おして 穴を うめる
 T('しかけ：穴が うまる', C.tileAt('rift_yard',5,10)==='.', C.tileAt('rift_yard',5,10));
+T('中ボスの ますが 地図に ある', C.tileAt('rift_yard',16,9)==='B', C.tileAt('rift_yard',16,9));
+// 中ボスを たおすと 道が あき、奥の 宝箱に とどく
+{
+  const tac=C.G.tactic; C.G.tactic='gungan';
+  C.G.mode='field'; C.P.map='rift_yard'; C.P.x=15; C.P.y=9; C.P.dir='right';
+  C.party.forEach(p=>{ p.hp=p.maxhp; p.mp=p.maxmp; });
+  C.interact();
+  T('中ボスに かてる', C.G.flags.ch0_mawDown===true);
+  T('倒すと 道が あく', C.tileAt('rift_yard',16,9)==='.', C.tileAt('rift_yard',16,9));
+  C.G.tactic=tac;
+  // もとの ばしょ（うめた 穴の うえ）へ もどす
+  C.G.mode='field'; C.P.map='rift_yard'; C.P.x=5; C.P.y=11;
+}
 walkG([[0,-1],[0,-1],[0,-1]]);                     // 穴を こえて 中段へ
 T('しかけ：穴を こえられる', C.P.y<=10, 'y='+C.P.y);
 // (3,9)→(3,8)→(3,7) 上段へ
