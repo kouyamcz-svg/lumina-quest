@@ -126,6 +126,8 @@ C.interact();
 T('セレンが くわわる', C.party.length===2 && C.party[1].cls==='seren');
 T('セレンは せんとうと おなじLv', C.party[1].lv===lvAfterTrial, C.party[1].lv+'/'+lvAfterTrial);
 T('セレンは 槍を もつ', C.party[1].weapon && C.party[1].weapon.name.indexOf('槍')>=0);
+T('地図の セレンが 消える（2人に ならない）',
+  C.tileAt('trial_yard',9,2)==='.', C.tileAt('trial_yard',9,2));
 
 // ===== 7. 広場（夜）へ =====
 //   ★ここは API（doWarp）では なく、じっさいに あるいて ためす。
@@ -238,6 +240,7 @@ T('まちの ようすが かわる', C.G.townState==='NIGHT_RIFT');
   T('子ども：礼を もらえる', C.P.gold===g0+30 && C.P.herbs===h0+2,
     C.P.gold+'/'+C.P.herbs+' ← '+g0+'/'+h0);
   T('子ども：めじるしが たつ', C.G.flags.ch0_childSaved===true);
+  T('子ども：走っていって 消える', C.tileAt('rift_yard',2,13)==='.', C.tileAt('rift_yard',2,13));
   T('子ども：2かいめは くりかえさない', (()=>{
     const g1=C.P.gold; C.G.mode='field'; C.P.dir='left'; C.interact(); return C.P.gold===g1;
   })());
