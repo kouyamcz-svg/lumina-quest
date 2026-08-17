@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T04:44:49", "assets_sha": "58818c1c", "lines": {"world": 99, "npc": 168, "chapters": 304, "bgm": 979, "view2d": 1563, "core": 2409, "view": 1394, "ui": 977}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-17T04:49:48", "assets_sha": "0861036b", "lines": {"world": 99, "npc": 168, "chapters": 304, "bgm": 979, "view2d": 1563, "core": 2409, "view": 1394, "ui": 977}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -157,7 +157,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=58818c1c"></script>
+<script src="assets.js?v=0861036b"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -339,7 +339,7 @@ const NPCS = {
         'グラン「下へ 戻れ。皆が 待っている」']},
       {text:['グランが 灯りを 掲げて 立っている。',
              'グラン「……話がある。こっちへ 来い」']}]},
-    {at:'2,13', spr:'villagerA', name:'逃げ遅れた 子ども', lines:[
+    {at:'2,13', spr:'childA', name:'逃げ遅れた 子ども', lines:[
       {when:{flag:'ch0_umbraDown'}, text:[
         '「……お母さん、見つかった？」',
         'イオ「ああ。下で 待ってる」']},
@@ -359,7 +359,7 @@ const NPCS = {
         'グラン「守る 順番を 間違えるな。それだけだ」']},
       {text:['グラン「イオか。時間どおりだな」',
              'グラン「試験を 始める。真ん中の 木人を 打て」']}]},
-    {at:'9,2', spr:'guardA', name:'セレン', lines:[
+    {at:'9,2', spr:'seren', name:'セレン', lines:[
       {when:{flag:'ch0_trialDone'}, text:[
         'セレン「首席は わたし。……実技は あなたが 上だった」',
         'セレン「わたしは その 顔を 忘れないと 思う」']},
@@ -3399,7 +3399,7 @@ const MIDBOSS = {
   // ---- 序章：見習い試験の 仕上げ（セレンとの 模擬戦）----
   //   負けても やりなおせる。手加減の 描写を acts と atk で 出す。
   seren_spar:{key:'seren_spar', name:'見習い セレン', hp:70, atk:8, def:7, agi:14, acts:1,
-    exp:30, gold:0, art:'sleepknight',
+    exp:30, gold:0, art:'seren_spar',
     skill:{p:0.30, mul:1.25, name:'疾風突き'},
     brace:{p:0.18, name:'槍を 立てて かまえた！'}},
   // ---- 序章：広場の 中ボス（影の あぎと）----
