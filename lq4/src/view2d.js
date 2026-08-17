@@ -968,6 +968,65 @@ function skyTerrain(t){
   if(t==='plain') return 'skyplain';
   return t;
 }
+// ★雲海：ながれる 雲と、ときどき 見える 切れ間。
+//   タイルを やきこんで しまうと うごかせない ので、うえに かさねて えがく。
+function drawCloudSea(x, y, dx0, dy0, ts, time, terrainOf){
+  const sc = ts/TS;
+  const t = time*0.35;                       // ゆっくり ながれる
+  cx.save();
+  cx.beginPath(); cx.rect(dx0, dy0, ts, ts); cx.clip();
+  // ながれる 雲の すじ（2そう。はやさを 変えて おくゆきを 出す）
+  for(let k=0;k<2;k++){
+    const spd = k? 9 : 5, band = k? 4 : 9;
+    const off = ((t*spd) % 24) - 12;
+    cx.globalAlpha = k? 0.42 : 0.30;
+    cx.fillStyle = '#ffffff';
+    for(let i=-1;i<3;i++){
+      const wy = ((y*7 + x*3 + i*11 + k*5) % 16);
+      const wx = dx0 + ((x*13 + i*17 + k*7) % 16)*sc + off*sc;
+      cx.fillRect(Math.round(wx), Math.round(dy0 + wy*sc), Math.round(band*sc), Math.round(2*sc));
+    }
+  }
+  // 切れ間：ときどき 下の くらやみが のぞく
+  const gap = (Math.sin(x*2.3 + y*1.7) + Math.sin(t*0.5 + x*0.7))*0.5;
+  if(gap > 0.72){
+    cx.globalAlpha = 0.30;
+    cx.fillStyle = '#20355c';
+    cx.fillRect(dx0+Math.round(4*sc), dy0+Math.round(6*sc), Math.round(7*sc), Math.round(4*sc));
+  }
+  cx.restore();
+  cx.globalAlpha = 1;
+}
+// ★遠くに 浮かぶ 島：雲海の きまった ばしょに、ちいさく えがく。
+//   「ここは そらの うえだ」と ひとめで わかる ように する。
+const FAR_ISLES = [[6,6],[36,6],[42,10],[11,1],[31,1],[1,1],[21,1],[41,1]];
+function drawFarIsle(x, y, dx0, dy0, ts, time){
+  if(!FAR_ISLES.some(([ix,iy])=>ix===x && iy===y)) return;
+  const sc = ts/TS;
+  const bob = Math.sin(time*0.6 + x*1.3)*sc*0.8;
+  const R2=(a,b,w,h,col)=>{ cx.fillStyle=col;
+    cx.fillRect(Math.round(dx0+a*sc), Math.round(dy0+b*sc+bob), Math.round(w*sc), Math.round(h*sc)); };
+  R2(3,7,10,2,'#5d7bb0');      // 島の うわめん
+  R2(4,6,8,1,'#8fa8d4');
+  R2(5,9,6,2,'#41598a');       // 岩の ね
+  R2(6,11,4,2,'#33486f');
+  R2(7,13,2,1,'#2a3c5e');
+  R2(6,4,2,2,'#c8dcff');       // 上の たてもの
+  R2(9,5,2,1,'#c8dcff');
+}
+// ★崖の 影：大陸の へりの すぐ 下（雲海がわ）を くらくする。
+//   「地面が ここで 途切れて 下は 何も ない」ことを 見せる。
+function drawCliffShadow(x, y, dx0, dy0, ts, terrainOf){
+  const below = terrainOf(x, y+1);
+  if(below!=='sea' && below!=='lake') return;
+  const sc = ts/TS;
+  cx.globalAlpha = 0.45;
+  cx.fillStyle = '#1b2a48';
+  cx.fillRect(dx0, dy0+Math.round(13*sc), ts, Math.round(3*sc));
+  cx.globalAlpha = 0.25;
+  cx.fillRect(dx0, dy0+Math.round(11*sc), ts, Math.round(2*sc));
+  cx.globalAlpha = 1;
+}
 function groundTile(x,y,terrainOf){
   const k = curMap+':'+x+','+y;
   const hit = groundCache[k];
@@ -1466,6 +1525,16 @@ function draw(dt, time, actors){
     const dx0 = ox+x*ts, dy0 = oy+y*ts;
     if(theme==='world'){
       cx.drawImage(groundTile(x,y,terrainOf), dx0, dy0, ts, ts);   // やきこみずみ 1まい
+      // ★天空大陸：雲海を うごかし、大陸の へりに 崖の 影を つける。
+      //   じっと している 青い 面だと 「うみ」に 見えて しまう。
+      if(isSkyWorld()){
+        const tt = terrainOf(x,y);
+        if(tt==='sea' || tt==='lake'){
+          drawCloudSea(x, y, dx0, dy0, ts, time, terrainOf);
+          drawFarIsle(x, y, dx0, dy0, ts, time);
+        }
+        else drawCliffShadow(x, y, dx0, dy0, ts, terrainOf);
+      }
     }else{
       let base = (ch==='r') ? road : floor;
       // ★NPC・たからばこ など「うえに のる」ものの あしもとは、
