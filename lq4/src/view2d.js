@@ -1603,9 +1603,11 @@ function draw(dt, time, actors){
     //   さきに かくと、みぎ・したの ゆかタイルが ボスの はみだしを うわがきして
     //   「みぎうでが かける」げんしょうが おきていた。
     if(ch==='B'){
-      const bi = C.bossInfoAt ? C.bossInfoAt(curMap) : null;
+      // ★ますごとに ボスが ちがう ことが ある（1まいの マップに 2たい）。
+      //   ざひょうを わたさないと、絵が ひけずに 紫の かたまりに なる。
+      const bi = C.bossInfoAt ? C.bossInfoAt(curMap, x, y) : null;
       const done = bi && bi.clearedFlag && C.G.flags[bi.clearedFlag];
-      if(!done) _bossQ.push([ox+x*ts, oy+y*ts, ts]);
+      if(!done) _bossQ.push([ox+x*ts, oy+y*ts, ts, x, y]);
     }
   }
   // ★まち・むらは 1.45ばいで えがく（ちいさくて みつけにくかった）
@@ -1615,7 +1617,7 @@ function draw(dt, time, actors){
     cx.drawImage(art, Math.round(mx + ts/2 - mw/2), Math.round(my + ts - mh), mw, mh);
   });
   _mkQ.length=0;
-  _bossQ.forEach(([bx,by,bts])=>drawBoss(bx,by,bts));
+  _bossQ.forEach(([bx,by,bts,tx,ty])=>drawBoss(bx,by,bts,tx,ty));
   _bossQ.length=0;
   // ★もやって ある ふね（ワールドのみ）
   if(theme==='world' && C.G && C.G.ship && !C.G.aboard){
@@ -1691,7 +1693,7 @@ function drawSceneOverlay(time){
   cx.strokeStyle='rgba(255,255,255,0.5)'; cx.lineWidth=2;
   cx.strokeRect(ox-2, oy-2, dw+4, dh+4);
 }
-function drawBoss(dx,dy,ts){
+function drawBoss(dx,dy,ts,tx,ty){
   const s=ts;
   cx.fillStyle='rgba(40,10,60,0.35)';
   cx.beginPath(); cx.ellipse(dx+s/2, dy+s*0.86, s*0.36, s*0.12, 0, 0, Math.PI*2); cx.fill();
@@ -1700,7 +1702,7 @@ function drawBoss(dx,dy,ts){
   // ★そのマップの ボスの えを つかう（せんとうちゅうと おなじ すがた）。
   //   そうしボス（pair）は 2たいで 1くみ なので、ならべて えがく。
   const arts = [];
-  const bi = C.bossInfoAt ? C.bossInfoAt(C.P.map) : null;
+  const bi = C.bossInfoAt ? C.bossInfoAt(C.P.map, tx, ty) : null;
   if(bi){
     const pick = (key)=>{
       const b = C.MIDBOSS && C.MIDBOSS[key];
