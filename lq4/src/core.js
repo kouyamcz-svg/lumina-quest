@@ -96,17 +96,19 @@ const TACTICS = {manual:'命令させろ', gungan:'ガンガンいこうぜ', in
 // 序章〜第1章ぶん。倒すと黒い紙片になって消える（ノエだけが顔色を変える伏線）。
 const ENEMIES = [
   // ---- 序章 下層区（Lv1〜5）----
-  {key:'kagekakera', name:'影のかけら',   hp:16, atk:5,  def:3,  agi:5,  exp:16, gold:6,  minLv:1},
-  {key:'shihenchu',  name:'紙片蟲',       hp:20, atk:6,  def:5,  agi:6,  exp:22, gold:8,  minLv:1},
-  {key:'akumuga',    name:'悪夢蛾',       hp:22, atk:7,  def:4,  agi:11, exp:28, gold:9,  minLv:2,
+  {key:'kagekakera', name:'影のかけら',   hp:16, atk:5,  def:3,  agi:5,  exp:16, gold:6,  minLv:1, art:'kagekakera'},
+  {key:'shihenchu',  name:'紙片蟲',       hp:20, atk:6,  def:5,  agi:6,  exp:22, gold:8,  minLv:1, art:'shihenchu'},
+  {key:'akumuga',    name:'悪夢蛾',       hp:22, atk:7,  def:4,  agi:11, exp:28, gold:9,  minLv:2, art:'akumuga',
    inflict:{type:'sleep', p:0.16}},
-  {key:'yamiinu',    name:'闇犬',         hp:28, atk:9,  def:5,  agi:9,  exp:36, gold:12,  minLv:2,
+  {key:'yamiinu',    name:'闇犬',         hp:28, atk:9,  def:5,  agi:9,  exp:36, gold:12,  minLv:2, art:'yamiinu',
    skill:{p:0.24, mul:1.20, name:'かみつき'}},
-  {key:'sumibami',   name:'すすばみ',     hp:34, atk:11, def:7,  agi:7,  exp:48, gold:16, minLv:4},
+  {key:'sumibami',   name:'すすばみ',     hp:34, atk:11, def:7,  agi:7,  exp:48, gold:16, minLv:4, art:'sumibami'},
   // ---- 第1章 下層区の亀裂（Lv8〜11）※M1で ふやす ----
-  {key:'kansuiki',   name:'管漏れの影',   hp:46, atk:15, def:10, agi:8,  exp:26, gold:18, minLv:7,
+  {key:'kansuiki',   name:'管漏れの影',   hp:46, atk:15, def:10, agi:8,  exp:26, gold:18, minLv:7, art:'kansuiki',
    skill:{p:0.26, mul:1.25, name:'にじみだし'}},
-  {key:'hakoyami',   name:'箱闇',         hp:58, atk:17, def:14, agi:6,  exp:34, gold:24, minLv:8,
+  {key:'shokudai',   name:'燭台の 亡霊',  hp:52, atk:16, def:11, agi:10, exp:30, gold:20, minLv:7,
+   art:'lampghost', inflict:{type:'sleep', p:0.16}},
+  {key:'hakoyami',   name:'箱闇',         hp:58, atk:17, def:14, agi:6,  exp:34, gold:24, minLv:8, art:'hakoyami',
    brace:{p:0.20, name:'ふたを とじた！'}},
 ];
 const MIDBOSS = {
@@ -127,7 +129,7 @@ const MIDBOSS = {
     inflict:{type:'confuse', p:0.14}},
   // ---- 序章ボス：悪夢獣 ウンブラ（影の座）----
   umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:160, atk:11, def:8, agi:10, acts:1,
-    exp:140, gold:90, art:'regretshado', scale:1.30,
+    exp:140, gold:90, art:'umbra', scale:1.15,
     skill:{p:0.28, mul:1.25, name:'かげの つめ'},
     aoe:{p:0.16, lo:6, hi:10, name:'くらやみの さざなみ'},
     inflict:{type:'sleep', p:0.18},
