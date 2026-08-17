@@ -156,7 +156,7 @@ const MAPS = {
   // ============ 天空大陸 ルミナリア（フィールド）============
   //   ★マップIDは 'world'。まわりは 雲海（~）で 落ちられない。
   //   ★序章で 入れるのは 下層区（V）だけ。ほかの ちてんは Q（これから つくる）。
-  world:{name:'天空大陸 ルミナリア', theme:'world', enc:true, encRate:0.07, encGrace:5,
+  world:{name:'天空大陸 ルミナリア', theme:'world', skyWorld:true, enc:true, encRate:0.07, encGrace:5,
     encZones:[
       {x0:4,  y0:20, x1:39, y1:27, name:'下層の たな'},
       {x0:6,  y0:12, x1:37, y1:20, name:'中層の たな'},
@@ -199,7 +199,7 @@ const MAPS = {
 
   // ============ 序章：イオの家（父の鍛冶場） ============
   // 父の 鍛冶場。左に 炉、右に 道具棚。奥が 寝間。
-  home_forge:{name:'イオの家（父の鍛冶場）', theme:'village', enc:false, tiles:[
+  home_forge:{name:'イオの家（父の鍛冶場）', theme:'indoor', enc:false, tiles:[
     "###############",
     "#t...........t#",
     "#..###...###..#",
@@ -218,7 +218,7 @@ const MAPS = {
   // ============ 序章：下層区（地上生まれの移民と労働者の街） ============
   // ★でぐちは かならず 見て わかる ように する：
   //   G＝北の門／D＝イオの家の とびら／r＝道。ただの ゆかに ワープを おかない。
-  lower_dist:{name:'下層区', theme:'village', enc:false, tiles:[
+  lower_dist:{name:'下層区', theme:'sky', enc:false, tiles:[
     "##########G##########",
     "#.........r.........#",
     "#.#####...r...#####.#",
@@ -242,7 +242,7 @@ const MAPS = {
     }},
 
   // ============ 序章：騎士団 見習い試験場 ============
-  trial_yard:{name:'見習い試験場', theme:'village', enc:false, tiles:[
+  trial_yard:{name:'見習い試験場', theme:'sky', enc:false, tiles:[
     "#############",
     "#...........#",
     "#..n.....n..#",
