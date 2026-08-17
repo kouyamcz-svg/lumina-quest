@@ -114,7 +114,7 @@ const ENEMIES = [
 const MIDBOSS = {
   // ---- 序章：見習い試験の的（チュートリアル戦。負けても やりなおせる）----
   trialdummy:{key:'trialdummy', name:'訓練用の 木人', hp:34, atk:3, def:4, agi:2, acts:1,
-    exp:40, gold:0, art:'madrock',
+    exp:40, gold:0, art:'trialdummy',
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 序章：見習い試験の 仕上げ（セレンとの 模擬戦）----
   //   負けても やりなおせる。手加減の 描写を acts と atk で 出す。
@@ -124,7 +124,7 @@ const MIDBOSS = {
     brace:{p:0.18, name:'槍を 立てて かまえた！'}},
   // ---- 序章：広場の 中ボス（影の あぎと）----
   shadowmaw:{key:'shadowmaw', name:'かげの あぎと', hp:120, atk:10, def:7, agi:8, acts:1,
-    exp:70, gold:40, art:'echoshado', scale:1.10,
+    exp:70, gold:40, art:'shadowmaw', scale:1.10,
     skill:{p:0.26, mul:1.20, name:'噛みくだき'},
     inflict:{type:'confuse', p:0.14}},
   // ---- 序章ボス：悪夢獣 ウンブラ（影の座）----
@@ -993,7 +993,12 @@ function triggerBoss(x,y){
       U.msg(bi.lockMsg || ['まだ ここには はいれない。'], ()=>{ G.mode='field'; });
       return;
     }
-    U.msg(bi.intro || ['まものが たちふさがった！'], ()=>{ startBattle(bi.key); });
+    // ★ボスの とうじょうでも いちまいえを 出せる（章データの img）
+    if(bi.img && V.showScene) V.showScene(bi.img);
+    U.msg(bi.intro || ['まものが たちふさがった！'], ()=>{
+      if(bi.img && V.hideScene) V.hideScene();
+      startBattle(bi.key);
+    });
     return;
   }
   if(G.flags.desgran){
