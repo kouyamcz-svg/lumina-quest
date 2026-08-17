@@ -53,10 +53,15 @@ MODS.forEach(m=>{
 
 // 5. テスト文言の まじりこみ（地雷集 §10-10）
 {
-  const banned = ['ぎじゅつスライス', 'デバッグ', 'TODO', 'FIXME', 'てすと ここまで'];
+  // ★中の 人の ことばを 画面に 出さない（「これから 作られます」が じっさいに 出た）
+  const banned = ['ぎじゅつスライス', 'デバッグ', 'TODO', 'FIXME', 'てすと ここまで',
+                  '作られます', 'つくられます', '未実装', '仮の', 'ダミー', 'placeholder'];
+  // ※ コメントは 見ない。画面に 出る 文字（クオートの 中）だけを 見る。
+  const code = MODS.map(m=>fs.readFileSync('src/'+m+'.js','utf8'))
+    .join('\n').split('\n').filter(l=>!/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n');
+  const strs = (code.match(/'[^'\\\n]*'/g)||[]).join('\n');
   banned.forEach(w=>{
-    const src = MODS.map(m=>fs.readFileSync('src/'+m+'.js','utf8')).join('\n');
-    T('テスト文言なし「'+w+'」', !src.includes(w));
+    T('テスト文言なし「'+w+'」', !strs.includes(w));
   });
 }
 
