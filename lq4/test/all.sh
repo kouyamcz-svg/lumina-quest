@@ -1,7 +1,7 @@
 #!/bin/sh
 # lq4/ 直下で： sh test/all.sh
 set -e
-for t in build_verify audit battle_inflict gimmick ch0_tour; do
+for t in build_verify audit tiles battle_inflict gimmick ch0_tour; do
   echo "===== $t ====="
   node test/$t.js
 done
