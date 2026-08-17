@@ -46,13 +46,15 @@ const P16 = {
   blk:'#141018',
   // ★天空様式（IVから）。参考画の 昼の街路から 色を ひろった。
   //   白石は 真っ白に しない。目地の 青で 形を 見せる。
-  sk0:'#8fa6c8', sk1:'#b9c9df', sk2:'#dbe4ef', sk3:'#f0f4f9',  // 白石（暗→明）
-  skJ:'#a3b8d6',                                                // 目地の 青（ほそく うすく）
-  skR:'#e6eef8', skRj:'#b4c7de',                                // 通り（すこし 明るい）
+  sk0:'#8fa6c8', sk1:'#a9bcd8', sk2:'#c4d2e6', sk3:'#d9e3f0',  // 白石（暗→明）※ゆかは 中あかるさ
+  skJ:'#8ea6c8',                                                // 目地の 青
+  skR:'#eef3fa', skRj:'#b4c7de',                                // 通り（ゆかより はっきり 明るい）
   sky0:'#5c8fd6', sky1:'#78bbfd', sky2:'#a8d4ff',               // 空・雲海の 影
   orb0:'#2d6ea8', orb1:'#5fb4ee', orb2:'#a8e2ff', orb3:'#eafaff',// 光珠
   skG0:'#4a6a72', skG1:'#5f8a86', skG2:'#7aa89c',               // 青みの 芝
   skD0:'#4a5f80', skD1:'#6a80a4',                               // 濃い 石（柱・台座）
+  // ★かべは ゆかと はっきり 明暗を 分ける（同色で 見わけが つかなかった）
+  skW0:'#48597d', skW1:'#63779e', skW2:'#8194b6', skW3:'#a3b3cd',
 };
 
 function mk(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
@@ -248,18 +250,20 @@ function buildAtlas(){
     };
     brick(0,0); brick(8,0); brick(0,8); brick(8,8);
   });
-  // 白石の 壁
+  // 白石の 壁：ゆかより はっきり 暗く する。うえに 笠石、したに 影。
   atlas.skywall = tileSet((g,s,v)=>{
-    R(g,0,0,s,s,P16.sk1);
+    R(g,0,0,s,s,P16.skW0);
     for(let j=0;j<4;j++){
       const off=(j%2)?4:0;
       for(let i=-1;i<3;i++){
         const bx=i*8+off, by=j*4;
-        R(g,bx+1,by,6,3,P16.sk2);
-        R(g,bx+1,by,6,1,P16.sk3);
+        R(g,bx+1,by+1,6,3,P16.skW1);
+        R(g,bx+1,by+1,6,1,P16.skW2);
       }
     }
-    R(g,0,0,s,1,P16.sk3);
+    R(g,0,0,s,1,P16.skW3);                    // うえの ふちに ひかり（1ドットだけ）
+    R(g,0,s-1,s,1,'#2b3652');                 // したの 影
+    if(v%3===0) P(g,3,9,P16.skW2);
   });
   // 雲海：もくもくした かたまりに する。ノイズだけだと 砂あらしに 見える。
   atlas.cloudedge = tileSet((g,s,v)=>{
