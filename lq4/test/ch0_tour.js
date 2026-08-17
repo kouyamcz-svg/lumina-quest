@@ -157,7 +157,8 @@ T('広場へ はいれる', C.P.map==='rift_yard');
   clearLog();
   C.P.map='world'; C.P.x=23; C.P.y=16; C.P.dir='left'; C.G.mode='field';
   C.interact();
-  T('未完成の ちてんは 断られる', said('これから 作られます'), log.join(' / ').slice(0,50));
+  T('まだ 入れない ちてんは 物語で 断られる', said('許可証'), log.join(' / ').slice(0,50));
+  T('中の 人の ことばが 画面に 出ない', !said('作られます') && !said('未実装'));
   walkTo('lower_dist', 10, 13);
 }
 
