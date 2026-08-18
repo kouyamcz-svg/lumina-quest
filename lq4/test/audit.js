@@ -191,8 +191,10 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   (NPCD.NPCS[mp]||[]).forEach(e=>{
     const [x,y] = e.at.split(',').map(Number);
     const ch = tileAt(mp,x,y);
-    // ものがたりの 途中で 出てくる 人は setTiles で 足すので、'.' も ゆるす
-    T('NPCの ます '+mp+' '+e.at+' '+e.name, ch==='n' || ch==='.', 'いまは「'+ch+'」');
+    // ものがたりの 途中で 出てくる 人は setTiles で 足すので '.' も ゆるす。
+    // 'B' は 「たたかいの あとに その ますへ 立つ 人」（セレンの 立ち合い）。
+    T('NPCの ます '+mp+' '+e.at+' '+e.name, ch==='n' || ch==='.' || ch==='B',
+      'いまは「'+ch+'」');
     const near = [[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>!blocked(mp,x+dx,y+dy));
     T('NPCに 話しかけられる '+mp+' '+e.at, near);
     // ★人でない もの（棚・管など）に 人の 絵を あてると
@@ -254,6 +256,28 @@ Object.keys(CHD.CH).forEach(no=>{
       const any = C.MAPS[mp].tiles.some(r=>r.indexOf('B')>=0);
       T('マップに Bますが ある '+k, any);
     }
+  });
+});
+
+// ★人が 二重に 見えない こと：
+//   おなじ人の なまえが、1まいの 地図で NPCと ボスますに 同時に
+//   出て いないか（セレンが 2人 ならんで 見えた）。
+Object.keys(NPCD.NPCS).forEach(mp=>{
+  const names = (NPCD.NPCS[mp]||[]).map(e=>e.name);
+  Object.keys(CHD.CH).forEach(no=>{
+    const bs = CHD.CH[no].bosses || {};
+    Object.keys(bs).forEach(k=>{
+      if(k.split(':')[0] !== mp) return;
+      const key = bs[k].key, e = C.MIDBOSS[key];
+      if(!e) return;
+      names.forEach(nm=>{
+        // 「見習い セレン」と「セレン」の ように、なまえが かさなる ばあい
+        if(!(e.name.indexOf(nm)>=0 || nm.indexOf(e.name)>=0)) return;
+        const at = (NPCD.NPCS[mp].find(x=>x.name===nm)||{}).at;
+        T('同じ人が 2か所に いない '+mp+' '+nm, at===k.split(':')[1],
+          'NPCは '+at+' ／ ボスますは '+k.split(':')[1]);
+      });
+    });
   });
 });
 

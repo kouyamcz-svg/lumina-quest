@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18T07:34:56", "assets_sha": "b13c4a90", "lines": {"world": 100, "npc": 196, "chapters": 444, "bgm": 979, "view2d": 1913, "core": 2440, "view": 1394, "ui": 1021}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18T07:41:15", "assets_sha": "b13c4a90", "lines": {"world": 100, "npc": 194, "chapters": 448, "bgm": 979, "view2d": 1913, "core": 2440, "view": 1394, "ui": 1021}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -387,11 +387,9 @@ const NPCS = {
         'グラン「守る 順番を 間違えるな。それだけだ」']},
       {text:['グラン「イオか。時間どおりだな」',
              'グラン「試験を 始める。真ん中の 木人を 打て」']}]},
-    {at:'9,2', spr:'seren', name:'セレン', lines:[
-      {when:{flag:'ch0_trialDone'}, text:[
-        'セレン「首席は わたし。……実技は あなたが 上だった」',
-        'セレン「わたしは その 顔を 忘れないと 思う」']},
-      {text:['セレン「あなた、下層の。地上の 血で 剣が 振れるの？」']}]},
+    {at:'9,4', spr:'seren', name:'セレン', lines:[
+      {text:['セレン「首席は わたし。……実技は あなたが 上だった」',
+             'セレン「わたしは その 顔を 忘れないと 思う」']}]},
     {at:'3,6', spr:'guardB', name:'試験官', lines:[
       {text:['「順位は 実技だけでは 決まらん。血筋も 見る」',
              '「……そういう 決まりだ」']}]},
@@ -522,8 +520,9 @@ const CH = {
         key: 'seren_spar',
         clearedFlag: 'ch0_sparDone',
         needFlag: 'ch0_trialDone',
-        lockMsg: ['試験官が 立っている。',
-                  '試験官「木人が 先だ。順番を 守れ」'],
+        lockMsg: ['セレンが 槍の 石突きで 床を ついた。',
+                  'セレン「木人が 先。順番を 守って」',
+                  'セレン「……わたしを 木人の 代わりに する 気？」'],
         intro: ['試験官「実技の 仕上げだ。見習い同士で 立ち合え」',
                 'セレン「……下層の。手加減は しないから」',
                 'イオ「頼む。しないでくれ」',
@@ -788,7 +787,7 @@ const CH = {
       { npc:'セレン', cond:['ch0_sparDone'], unless:'ch0_serenJoined',
         set:['ch0_serenJoined'],
         // ★仲間に なったら 地図の NPCを 消す。のこすと 本人が 2人に なる。
-        setTiles:[{map:'trial_yard', x:9, y:2, ch:'.'}],
+        setTiles:[{map:'trial_yard', x:9, y:4, ch:'.'}],
         join:{cls:'seren', lv:'lead',
               weapon:{kind:'w', name:'見習いの 槍', v:6},
               armor: {kind:'a', name:'貴族の 胸当て', v:5}},
@@ -810,6 +809,9 @@ const CH = {
       },
       seren_spar: {
         set:['ch0_sparDone'],
+        // ★同じ ますに 本人を 立たせる。まえは NPCと 立ち合い相手が
+        //   となりに 2人 ならんで、セレンが 二重に 見えた。
+        setTiles:[{map:'trial_yard', x:9, y:4, ch:'n'}],
         quest:{ch0_q1_trial:'clear', ch0_q2_umbra:'active'},
         heal:true,
         msg:['', 'セレンの 槍が 手から 離れ、乾いた 音を 立てた。',
@@ -4070,7 +4072,7 @@ const MAPS = {
   trial_yard:{name:'見習い試験場', theme:'sky', enc:false, tiles:[
     "#############",
     "#...........#",
-    "#..n.....n..#",
+    "#..n........#",
     "#...........#",
     "#..B.....B..#",
     "#...........#",

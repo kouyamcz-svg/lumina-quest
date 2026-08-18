@@ -59,8 +59,9 @@ const CH = {
         key: 'seren_spar',
         clearedFlag: 'ch0_sparDone',
         needFlag: 'ch0_trialDone',
-        lockMsg: ['試験官が 立っている。',
-                  '試験官「木人が 先だ。順番を 守れ」'],
+        lockMsg: ['セレンが 槍の 石突きで 床を ついた。',
+                  'セレン「木人が 先。順番を 守って」',
+                  'セレン「……わたしを 木人の 代わりに する 気？」'],
         intro: ['試験官「実技の 仕上げだ。見習い同士で 立ち合え」',
                 'セレン「……下層の。手加減は しないから」',
                 'イオ「頼む。しないでくれ」',
@@ -325,7 +326,7 @@ const CH = {
       { npc:'セレン', cond:['ch0_sparDone'], unless:'ch0_serenJoined',
         set:['ch0_serenJoined'],
         // ★仲間に なったら 地図の NPCを 消す。のこすと 本人が 2人に なる。
-        setTiles:[{map:'trial_yard', x:9, y:2, ch:'.'}],
+        setTiles:[{map:'trial_yard', x:9, y:4, ch:'.'}],
         join:{cls:'seren', lv:'lead',
               weapon:{kind:'w', name:'見習いの 槍', v:6},
               armor: {kind:'a', name:'貴族の 胸当て', v:5}},
@@ -347,6 +348,9 @@ const CH = {
       },
       seren_spar: {
         set:['ch0_sparDone'],
+        // ★同じ ますに 本人を 立たせる。まえは NPCと 立ち合い相手が
+        //   となりに 2人 ならんで、セレンが 二重に 見えた。
+        setTiles:[{map:'trial_yard', x:9, y:4, ch:'n'}],
         quest:{ch0_q1_trial:'clear', ch0_q2_umbra:'active'},
         heal:true,
         msg:['', 'セレンの 槍が 手から 離れ、乾いた 音を 立てた。',

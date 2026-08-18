@@ -185,13 +185,15 @@ const lvAfterTrial = C.party[0].lv;
 
 // ===== 6. セレンが なかまに なる =====
 clearLog();
-walkTo('trial_yard', 9, 3); face('back');       // 上の (9,2) が セレン
+walkTo('trial_yard', 9, 5); face('back');       // 上の (9,4) に セレン本人が 立つ
+T('立ち合いの あと 本人が その ますに 立つ',
+  C.tileAt('trial_yard',9,4)==='n', C.tileAt('trial_yard',9,4));
 C.interact();
 T('セレンが くわわる', C.party.length===2 && C.party[1].cls==='seren');
 T('セレンは せんとうと おなじLv', C.party[1].lv===lvAfterTrial, C.party[1].lv+'/'+lvAfterTrial);
 T('セレンは 槍を もつ', C.party[1].weapon && C.party[1].weapon.name.indexOf('槍')>=0);
 T('地図の セレンが 消える（2人に ならない）',
-  C.tileAt('trial_yard',9,2)==='.', C.tileAt('trial_yard',9,2));
+  C.tileAt('trial_yard',9,4)==='.', C.tileAt('trial_yard',9,4));
 
 // ===== 7. 広場（夜）へ =====
 //   ★ここは API（doWarp）では なく、じっさいに あるいて ためす。
