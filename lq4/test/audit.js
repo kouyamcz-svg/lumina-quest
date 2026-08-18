@@ -363,6 +363,15 @@ Object.keys(C.MAPS).forEach(mp=>{
       if(CHD.CH[no].lampGates && CHD.CH[no].lampGates[mp]) has=true;
     });
     T('光珠灯に ひらく さきが ある '+mp, has);
+    // ★灯りの しかけが ある マップには 灯りが 2つ いじょう。
+    //   1つだと 点けた とたんに 開いて しまい、しかけに ならない
+    //   （地図を 書きかえた ときに 1つ 消えて いた）。
+    let gate=null;
+    Object.keys(CHD.CH).forEach(no=>{
+      const g2 = CHD.CH[no].lampGates && CHD.CH[no].lampGates[mp];
+      if(g2) gate = g2;
+    });
+    if(gate) T('灯りの しかけに 灯りが 2つ いじょう '+mp+'（'+lamps.length+'）', lamps.length>=2);
   }
 });
 

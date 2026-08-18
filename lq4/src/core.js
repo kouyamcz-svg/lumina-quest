@@ -231,7 +231,7 @@ const MAPS = {
     "##.q.ppppKpp.q.##",
     "##.L.q.C...q.q.##",
     "##.q.q..nn.q.q.##",
-    "##.q.q.....q.q.##",
+    "##.q.q.....q.L.##",
     "##.q.ppppppp.q.##",
     "##.q.........q.##",
     "##.ppppppppppp.##",

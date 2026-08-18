@@ -134,6 +134,7 @@ T('クエストが はじまる', C.G.quests.ch0_q1_trial==='active');
   C.interact();
   T('点検口に あけ方が 書いてある', said('灯り 二基'), log.join(' / ').slice(0,60));
   C.G.mode='field'; C.P.map='pipe_path'; C.P.x=2; C.P.y=6; C.P.dir='right'; C.interact();
+  T('灯り ひとつでは まだ ひらかない', C.tileAt('pipe_path',9,5)==='K', C.tileAt('pipe_path',9,5));
   C.G.mode='field'; C.P.x=14; C.P.y=8; C.P.dir='left'; C.interact();
   T('管に 光が 通ると おくが ひらく', C.tileAt('pipe_path',9,5)==='.', C.tileAt('pipe_path',9,5));
 
