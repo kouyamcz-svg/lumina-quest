@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 08:38 JST", "build":"d8c4caa7","assets_sha": "f716ed9d", "lines": {"world": 104, "npc": 343, "chapters": 958, "bgm": 979, "view2d": 1934, "core": 2589, "view": 1394, "ui": 1129}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 08:52 JST", "build":"96bc3e60","assets_sha": "f716ed9d", "lines": {"world": 104, "npc": 343, "chapters": 958, "bgm": 979, "view2d": 1934, "core": 2589, "view": 1394, "ui": 1129}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -4581,35 +4581,35 @@ const TACTICS = {manual:'命令させろ', gungan:'ガンガンいこうぜ', in
 // 序章〜第1章ぶん。倒すと黒い紙片になって消える（ノエだけが顔色を変える伏線）。
 const ENEMIES = [
   // ---- 序章 下層区（Lv1〜5）----
-  {key:'kagekakera', name:'影のかけら',   hp:16, atk:5,  def:3,  agi:5,  exp:16, gold:6,  minLv:1, art:'kagekakera'},
-  {key:'shihenchu',  name:'紙片蟲',       hp:20, atk:6,  def:5,  agi:6,  exp:22, gold:8,  minLv:1, art:'shihenchu'},
-  {key:'akumuga',    name:'悪夢蛾',       hp:22, atk:7,  def:4,  agi:11, exp:28, gold:9,  minLv:2, art:'akumuga',
+  {key:'kagekakera', name:'影のかけら',   hp:16, atk:5,  def:3,  agi:5,  exp:44, gold:10,  minLv:1, art:'kagekakera'},
+  {key:'shihenchu',  name:'紙片蟲',       hp:20, atk:6,  def:5,  agi:6,  exp:60, gold:14,  minLv:1, art:'shihenchu'},
+  {key:'akumuga',    name:'悪夢蛾',       hp:22, atk:7,  def:4,  agi:11, exp:76, gold:17,  minLv:2, art:'akumuga',
    inflict:{type:'sleep', p:0.16}},
-  {key:'yamiinu',    name:'闇犬',         hp:28, atk:9,  def:5,  agi:9,  exp:36, gold:12,  minLv:2, art:'yamiinu',
+  {key:'yamiinu',    name:'闇犬',         hp:28, atk:9,  def:5,  agi:9,  exp:96, gold:22,  minLv:2, art:'yamiinu',
    skill:{p:0.24, mul:1.20, name:'かみつき'}},
-  {key:'sumibami',   name:'すすばみ',     hp:34, atk:11, def:7,  agi:7,  exp:48, gold:16, minLv:4, art:'sumibami'},
+  {key:'sumibami',   name:'すすばみ',     hp:34, atk:11, def:7,  agi:7,  exp:128, gold:30, minLv:4, art:'sumibami'},
   // ---- 第1章 下層区の亀裂（Lv8〜11）※M1で ふやす ----
-  {key:'kansuiki',   name:'管漏れの影',   hp:46, atk:15, def:10, agi:8,  exp:26, gold:18, minLv:7, art:'kansuiki',
+  {key:'kansuiki',   name:'管漏れの影',   hp:52, atk:12, def:10, agi:8,  exp:120, gold:44, minLv:7, art:'kansuiki',
    skill:{p:0.26, mul:1.25, name:'にじみだし'}},
-  {key:'shokudai',   name:'燭台の 亡霊',  hp:52, atk:16, def:11, agi:10, exp:30, gold:20, minLv:7,
+  {key:'shokudai',   name:'燭台の 亡霊',  hp:58, atk:13, def:11, agi:10, exp:140, gold:50, minLv:7,
    art:'lampghost', inflict:{type:'sleep', p:0.16}},
-  {key:'hakoyami',   name:'箱闇',         hp:58, atk:17, def:14, agi:6,  exp:34, gold:24, minLv:8, art:'hakoyami',
+  {key:'hakoyami',   name:'箱闇',         hp:66, atk:14, def:14, agi:6,  exp:170, gold:60, minLv:8, art:'hakoyami',
    brace:{p:0.20, name:'ふたを とじた！'}},
 ];
 const MIDBOSS = {
   // ---- 序章：見習い試験の的（チュートリアル戦。負けても やりなおせる）----
   trialdummy:{key:'trialdummy', name:'訓練用の 木人', hp:34, atk:3, def:4, agi:2, acts:1,
-    exp:40, gold:0, art:'trialdummy',
+    exp:100, gold:0, art:'trialdummy',
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第1章 中ボス：かんむれ（管に 巣くう 群れ）----
-  kanmure:{key:'kanmure', name:'かんむれ', hp:210, atk:19, def:12, agi:14, acts:2,
+  kanmure:{key:'kanmure', name:'かんむれ', hp:310, atk:25, def:14, agi:14, acts:2,
     exp:220, gold:150, art:'kansuiki', scale:1.25,
     skill:{p:0.30, mul:1.15, name:'つぎめ くだき'},
     inflict:{type:'confuse', p:0.14}},
 
   // ---- 第1章ボス：あくむじゅう オボロ（朧の座）----
   //   下層に 巣くった 親玉。管の 破れ目から 湧く ものを 束ねている。
-  oboro:{key:'oboro', name:'あくむじゅう オボロ', hp:420, atk:26, def:15, agi:12, acts:1,
+  oboro:{key:'oboro', name:'あくむじゅう オボロ', hp:560, atk:32, def:17, agi:12, acts:1,
     exp:520, gold:340, art:'umbra', scale:1.35,
     skill:{p:0.28, mul:1.30, name:'にじみの つめ'},
     aoe:{p:0.20, lo:14, hi:22, name:'よどんだ ながれ'},
@@ -4620,7 +4620,7 @@ const MIDBOSS = {
   // ---- 序章：見習い試験の 仕上げ（セレンとの 模擬戦）----
   //   負けても やりなおせる。手加減の 描写を acts と atk で 出す。
   seren_spar:{key:'seren_spar', name:'見習い セレン', hp:70, atk:8, def:7, agi:14, acts:1,
-    exp:30, gold:0, art:'seren', scale:1.7,     // ★人の 絵。戦闘では すこし 大きく 見せる
+    exp:80, gold:0, art:'seren', scale:1.7,     // ★人の 絵。戦闘では すこし 大きく 見せる
     skill:{p:0.30, mul:1.25, name:'疾風突き'},
     brace:{p:0.18, name:'槍を 立てて かまえた！'}},
   // ---- 序章：広場の 中ボス（影の あぎと）----
@@ -4629,7 +4629,7 @@ const MIDBOSS = {
     skill:{p:0.26, mul:1.20, name:'噛みくだき'},
     inflict:{type:'confuse', p:0.14}},
   // ---- 序章ボス：悪夢獣 ウンブラ（影の座）----
-  umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:160, atk:11, def:8, agi:10, acts:1,
+  umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:320, atk:19, def:10, agi:10, acts:1,
     exp:140, gold:90, art:'umbra', scale:1.15,
     skill:{p:0.28, mul:1.25, name:'かげの つめ'},
     aoe:{p:0.16, lo:6, hi:10, name:'くらやみの さざなみ'},
@@ -4871,7 +4871,7 @@ const MAPS = {
   //   ★しかけ2つ：①岩(O)を 穴(x)に 押しこんで 足場を つくる
   //                ②光珠灯(L)を ふたつ ともすと 奥の 扉(K)が ひらく
   //   ★1ますの ろうかに かざりの 岩(o)を おかない（通れなくなる）。
-  rift_yard:{name:'裂け目の広場', theme:'sky', enc:true, encRate:0.10, encGrace:4, tiles:[
+  rift_yard:{name:'裂け目の広場', theme:'sky', enc:true, encRate:0.13, encGrace:3, tiles:[
     "#####################",
     "#####################",
     "####...............##",

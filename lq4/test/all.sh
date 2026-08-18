@@ -8,3 +8,4 @@ done
 echo "===== tune_umbra（実測・参考）====="
 node test/tune_umbra.js 200
 node test/tune_oboro.js
+node test/tune_ch1.js 150

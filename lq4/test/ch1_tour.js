@@ -137,7 +137,12 @@ T('技師が 止める', said('まず 点検路だ'), log.join(' / ').slice(0,60
 
 clearLog();
 C.G.tactic='gungan';
-C.party.forEach(p=>{ p.hp=p.maxhp; p.mp=p.maxmp; });
+// ★ものがたりの たしかめが 目当て。つよさの つりあいは test/tune_ch1.js で 別に はかる。
+C.party.length=0;
+C.party.push(C.mkMember('io',12)); C.party.push(C.mkMember('seren',12));
+C.party[0].weapon={kind:'w',name:'剣',v:9}; C.party[0].armor={kind:'a',name:'胴',v:8};
+C.party[1].weapon={kind:'w',name:'槍',v:11};C.party[1].armor={kind:'a',name:'胸当',v:9};
+C.P.herbs=8;
 const g5=C.P.gold;
 stand('pipe_path', 8, 8, 'back');
 C.interact();
@@ -208,7 +213,12 @@ T('灯り ふたつで ひらく', C.tileAt('old_pipe',10,7)==='.', C.tileAt('ol
 // ===== 11. オボロ =====
 clearLog();
 C.G.tactic='gungan';
-C.party.forEach(p=>{ p.hp=p.maxhp; p.mp=p.maxmp; });
+// ★ものがたりの たしかめが 目当て。つよさの つりあいは test/tune_ch1.js で 別に はかる。
+C.party.length=0;
+C.party.push(C.mkMember('io',13)); C.party.push(C.mkMember('seren',13));
+C.party[0].weapon={kind:'w',name:'剣',v:9}; C.party[0].armor={kind:'a',name:'胴',v:8};
+C.party[1].weapon={kind:'w',name:'槍',v:11};C.party[1].armor={kind:'a',name:'胸当',v:9};
+C.P.herbs=8;
 stand('old_pipe', 10, 3, 'back');
 C.interact();
 T('オボロの 名が 出る', said('オボロ'), log.join(' / ').slice(0,90));

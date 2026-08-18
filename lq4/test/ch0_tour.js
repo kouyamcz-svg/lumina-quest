@@ -331,9 +331,13 @@ T('まちの ようすが かわる', C.G.townState==='NIGHT_RIFT');
   C.G.tactic='gungan';
   ['ch0_started','ch0_trialDone','ch0_serenJoined'].forEach(f=>C.G.flags[f]=true);
   // ★Lvは mkMember で つくる。lv を あとから ぬりかえても のうりょくちは 上がらない
+  // ★ものがたりの たしかめが 目当て なので、かならず 勝てる Lvに する
+  //   （つよさの つりあいは test/tune_umbra.js で 別に はかる）
   C.party.length = 0;
-  C.party.push(C.mkMember('io', 6));
-  C.party.push(C.mkMember('seren', 6));
+  C.party.push(C.mkMember('io', 9));
+  C.party.push(C.mkMember('seren', 9));
+  C.party[0].weapon={kind:'w',name:'剣',v:9}; C.party[0].armor={kind:'a',name:'胴',v:8};
+  C.party[1].weapon={kind:'w',name:'槍',v:11};C.party[1].armor={kind:'a',name:'胸当',v:9};
   C.P.map='rift_yard'; C.P.x=10; C.P.y=4; C.G.mode='field';
   clearLog();
   C.startBattle('umbra');
