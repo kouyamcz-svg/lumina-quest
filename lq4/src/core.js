@@ -210,7 +210,7 @@ const MAPS = {
     "#.#C#.....#e#.#",
     "#.#.#.....#.#.#",
     "#.............#",
-    "#..n.......e..#",
+    "#..n.......n..#",
     "#.............#",
     "#t...........t#",
     "#.............#",
@@ -836,18 +836,20 @@ function runTalkEvent(npcName){
   if(e.herbs) P.herbs += e.herbs;
   // ★ますを 書きかえる（人が あらわれる・道が ひらく など）。
   //   IVの しかけ（setTile）を ものがたりからも つかえる ように する。
-  if(e.setTiles){
-    (Array.isArray(e.setTiles)?e.setTiles:[e.setTiles]).forEach(o=>{
-      setTile(o.map||P.map, o.x, o.y, o.ch||'.');
-    });
-    V.refresh && V.refresh();
-  }
   Object.keys(e.quest || {}).forEach(q => questAdvance(q, e.quest[q]));
 
   const lines = (e.msg || []).slice();
   if(e.img && V.showScene) V.showScene(e.img);   // ★いちまいえ を せなかに ひょうじ
   U.msg(lines, () => {
     if(e.img && V.hideScene) V.hideScene();
+    // ★ますの 書きかえは 会話が おわってから。
+    //   さきに やると、「逃げた」と 読む まえに 姿が 消えて しまう。
+    if(e.setTiles){
+      (Array.isArray(e.setTiles)?e.setTiles:[e.setTiles]).forEach(o=>{
+        setTile(o.map||P.map, o.x, o.y, o.ch||'.');
+      });
+      V.refresh && V.refresh();
+    }
     U.hud();
     // 章の おわりに たっしたか
     if(cd.ending && cd.ending.trigger && G.flags[cd.ending.trigger] && !G.flags[(cd.ending.set||[])[0]]){

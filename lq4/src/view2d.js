@@ -1669,7 +1669,9 @@ function drawNPC(dx,dy,ts,x,y){
     const e=NPCREF.npcAt(curMap, x, y);
     if(e && e.spr) key=e.spr;
   }
-  const d = CHRREF && CHRREF[key];
+  // ★人だけで なく まもの の 絵も つかえる ように する
+  //   （物語に 出てくる 悪夢獣を 地図に 立たせる ため）
+  const d = (CHRREF && CHRREF[key]) || (MONREF && MONREF[key]);
   if(d){
     const img=getImg(d.front||d.src);
     if(img.complete && img.naturalWidth){

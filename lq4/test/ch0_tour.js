@@ -120,6 +120,25 @@ T('クエストが はじまる', C.G.quests.ch0_q1_trial==='active');
   walkTo('lower_dist', 5, 6); face('back'); C.interact();
   T('技師が 父の 話を する', said('お前の 父さんが、同じ ことを'), log.join(' / ').slice(0,60));
   T('めじるしが たつ', C.G.flags.ch0_mawTold===true);
+
+  // ---- 家に もどって 父の 道具棚を しらべる ----
+  clearLog();
+  C.doWarp(C.MAPS.lower_dist.warpsXY['3,12']);
+  T('家に もどれる', C.P.map==='home_forge', C.P.map);
+  C.G.mode='field'; C.P.x=11; C.P.y=7; C.P.dir='back';
+  C.interact();
+  T('父の 覚え書きを 読める', C.G.flags.ch0_notebookRead===true);
+  T('十年前で 止まって いる', said('気の せいだと 思いたい'), log.join(' / ').slice(0,70));
+  T('記録に 残らない 話', said('下の 者の 話は 記録に 残らない'));
+
+  clearLog();
+  const h1=C.P.herbs;
+  C.G.mode='field'; C.P.x=3; C.P.y=7; C.P.dir='back';
+  C.interact();
+  T('おばさんが 父の ことを 話す', C.G.flags.ch0_auntTold===true);
+  T('薬草を もらえる', C.P.herbs===h1+3, C.P.herbs+' ← '+h1);
+  T('帰らなかった 夜の 話', said('一度も 帰って こなかった 夜'));
+  C.doWarp(C.MAPS.home_forge.warpsXY['7,10']);
   clearLog();
   C.G.tactic='manual';
   const g0=C.P.gold;
@@ -302,6 +321,15 @@ T('まちの ようすが かわる', C.G.townState==='NIGHT_RIFT');
   T('グラン：入団の やりとり', said('震えたまま 立てたなら'), log.join(' / ').slice(0,60));
   T('グラン：手当てで 全快', C.party.every(p=>p.hp===p.maxhp && p.mp===p.maxmp));
   T('グラン：報告クエストが 片づく', C.G.quests.ch0_q3_report==='clear');
+  // ★覚え書きを 読んで いれば、グランに 父の ことを 聞ける
+  if(C.G.flags.ch0_notebookRead){
+    clearLog();
+    C.G.mode='field'; C.P.map='rift_yard'; C.P.x=12; C.P.y=4; C.P.dir='back';
+    C.interact();
+    T('グランに 父の ことを 聞ける', C.G.flags.ch0_askedFather===true);
+    T('グランが 覚えて いる', said('だが おれは 覚えている'), log.join(' / ').slice(0,70));
+    T('報告を 通すと 約束する', said('おれが 必ず 上へ 通す'));
+  }
   T('章末が つづけて でる', said('正騎士に 任ずる'), log.join(' / ').slice(-80));
   T('章末：セレンの しめ', said('次は わたしも 下りる'));
   T('章末：ノエの 伏線', said('どこかに 戻ったって'));

@@ -7,7 +7,19 @@ const NPCDATA = (function(){
 const NPCS = {
   // ============ 序章：イオの家（父の鍛冶場） ============
   home_forge: [
+    {at:'11,6', spr:'villagerB', name:'父の 道具棚', lines:[
+      {when:{flag:'ch0_notebookRead'}, text:[
+        '父の 帳面。十年 前で 止まっている。']},
+      {when:{flag:'ch0_mawTold'}, text:[
+        '父の 道具棚。奥に 油紙の 包みが 見える。']},
+      {text:['父の 道具棚。鑢と 槌が きちんと 並んでいる。',
+             '手前の 段だけ、埃が 薄い。']}]},
     {at:'3,6', spr:'elderWoman', name:'となりの おばさん', lines:[
+      {when:{flag:'ch0_auntTold'}, text:[
+        '「読んだ なら、もう 子どもじゃ ないね」',
+        '「気を つけて お行き」']},
+      {when:{flag:'ch0_notebookRead'}, text:[
+        '「その 顔は……棚を 開けたね」']},
       {when:{flag:'ch0_trialDone'}, text:[
         '「首席は 上層の お嬢さんだったってね」',
         '「……あんたの 父さんも、ずっと そうだったよ」']},
@@ -70,7 +82,7 @@ const NPCS = {
   // ※ フィールドへ 出る 前に、どこへ 行けるかを 教える
   // ============ 序章：光珠管の 点検路 ============
   pipe_path: [
-    {at:'8,7', spr:'villagerA', name:'かげの あぎと', lines:[
+    {at:'8,7', spr:'shadowmaw', name:'かげの あぎと', lines:[
       {text:['黒い 塊が 管に 貼りついている。']}]},
   ],
 
