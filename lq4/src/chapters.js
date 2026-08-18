@@ -354,10 +354,22 @@ const CH = {
              'グラン「だから 代わりに ひとつ 約束する」',
              'グラン「お前の 報告は、おれが 必ず 上へ 通す」'] },
 
+      // ★もう 仲間に なって いるのに 地図に のこって いる セレン を 消す。
+      //   ふるい セーブ（本人の 立ち位置を まとめる 前の もの）だと、
+      //   仲間の セレンと 地図の セレンが 2人 ならんで 見えて しまう。
+      //   一度 話しかければ 直る。あたらしく 始めた ときは そもそも 出ない。
+      { npc:'セレン', cond:['ch0_serenJoined'], unless:'ch0_serenGone',
+        set:['ch0_serenGone'],
+        setTiles:[{map:'trial_yard', x:9, y:2, ch:'.'},
+                  {map:'trial_yard', x:9, y:4, ch:'.'}],
+        msg:['セレン「いつまで ここに いる 気？」',
+             'セレン「日が 暮れる。行きましょう」'] },
+
       { npc:'セレン', cond:['ch0_sparDone'], unless:'ch0_serenJoined',
         set:['ch0_serenJoined'],
         // ★仲間に なったら 地図の NPCを 消す。のこすと 本人が 2人に なる。
-        setTiles:[{map:'trial_yard', x:9, y:4, ch:'.'}],
+        setTiles:[{map:'trial_yard', x:9, y:2, ch:'.'},
+                  {map:'trial_yard', x:9, y:4, ch:'.'}],
         join:{cls:'seren', lv:'lead',
               weapon:{kind:'w', name:'見習いの 槍', v:6},
               armor: {kind:'a', name:'貴族の 胸当て', v:5}},

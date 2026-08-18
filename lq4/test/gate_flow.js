@@ -78,6 +78,24 @@ function kill(k){
   T('C あとから 父の 話が 出る', C.G.flags.ch0_mawTold===true);
 }
 
+// ============ ふるい セーブでも 人が 二重に ならない か ============
+//   ★立ち位置を まとめる 前の セーブだと、仲間の セレンと
+//     地図の セレンが 2人 ならんで 見えた。一度 話せば 直る こと。
+{
+  C.freshState();
+  ['ch0_errandPaid','ch0_started','ch0_trialDone','ch0_sparDone','ch0_serenJoined']
+    .forEach(f=>C.G.flags[f]=true);
+  C.setTile('trial_yard',9,4,'n');          // 地図に のこった セレン
+  C.party.push(C.mkMember('seren',3));      // すでに 仲間
+  T('ふるい セーブ：地図にも いる', C.tileAt('trial_yard',9,4)==='n');
+  log.length=0;
+  C.G.mode='field'; C.P.map='trial_yard'; C.P.x=9; C.P.y=5; C.P.dir='back';
+  C.interact();
+  T('話すと 地図から 消える', C.tileAt('trial_yard',9,4)==='.', C.tileAt('trial_yard',9,4));
+  T('見おくりの ことばが 出る', said('日が 暮れる'), log.join(' / ').slice(0,50));
+  T('仲間は そのまま', C.party.length===2 && C.party[1].cls==='seren');
+}
+
 // ============ すべての けっかいが いつか 開くか ============
 {
   C.freshState();
