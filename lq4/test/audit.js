@@ -195,6 +195,19 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
     T('NPCの ます '+mp+' '+e.at+' '+e.name, ch==='n' || ch==='.', 'いまは「'+ch+'」');
     const near = [[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>!blocked(mp,x+dx,y+dy));
     T('NPCに 話しかけられる '+mp+' '+e.at, near);
+    // ★人でない もの（棚・管など）に 人の 絵を あてると
+    //   「いない はずの 人が いる」ように 見える（じっさいに 出た）。
+    //   なまえに 人以外を 示す ことばが あれば、人の 絵を つかっていない こと。
+    //   ※ 人の 肩書きに「管」などが 入る ことが ある ので、
+    //     「〜の 技師」の ような 人を あらわす ことばが あれば のぞく。
+    const PERSON = /技師|男|女|子ども|団長|試験官|見張り|神官|おばさん|セレン|イオ|グラン/.test(e.name);
+    const THING = !PERSON && /棚|管|机|箱|扉|石|像|びん|樽/.test(e.name);
+    if(THING){
+      const HUMAN = ['villagerA','villagerB','elderWoman','guardA','guardB',
+                     'butler','captain','childA','priestess','seren','io'];
+      T('もの に 人の 絵を つかって いない '+mp+' '+e.name,
+        HUMAN.indexOf(e.spr)<0, 'いまは '+e.spr);
+    }
   });
 });
 

@@ -7,7 +7,7 @@ const NPCDATA = (function(){
 const NPCS = {
   // ============ 序章：イオの家（父の鍛冶場） ============
   home_forge: [
-    {at:'11,6', spr:'villagerB', name:'父の 道具棚', lines:[
+    {at:'11,6', spr:'shelfobj', name:'父の 道具棚', lines:[
       {when:{flag:'ch0_notebookRead'}, text:[
         '父の 帳面。十年 前で 止まっている。']},
       {when:{flag:'ch0_mawTold'}, text:[
@@ -84,7 +84,7 @@ const NPCS = {
   pipe_path: [
     {at:'8,7', spr:'shadowmaw', name:'かげの あぎと', lines:[
       {text:['黒い 塊が 管に 貼りついている。']}]},
-    {at:'9,7', spr:'villagerB', name:'こわれた 管', lines:[
+    {at:'9,7', spr:'pipeobj', name:'こわれた 管', lines:[
       {when:{flag:'ch0_mawFled'}, text:[
         '管の 継ぎ目が 内側から 溶けている。',
         '光は 通っているが、色が 濁っている。']},

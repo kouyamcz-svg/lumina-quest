@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18T04:14:44", "assets_sha": "2fb97051", "lines": {"world": 100, "npc": 196, "chapters": 444, "bgm": 979, "view2d": 1913, "core": 2440, "view": 1394, "ui": 1010}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18T07:29:48", "assets_sha": "b13c4a90", "lines": {"world": 100, "npc": 196, "chapters": 444, "bgm": 979, "view2d": 1913, "core": 2440, "view": 1394, "ui": 1010}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -157,7 +157,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=2fb97051"></script>
+<script src="assets.js?v=b13c4a90"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -274,7 +274,7 @@ const NPCDATA = (function(){
 const NPCS = {
   // ============ 序章：イオの家（父の鍛冶場） ============
   home_forge: [
-    {at:'11,6', spr:'villagerB', name:'父の 道具棚', lines:[
+    {at:'11,6', spr:'shelfobj', name:'父の 道具棚', lines:[
       {when:{flag:'ch0_notebookRead'}, text:[
         '父の 帳面。十年 前で 止まっている。']},
       {when:{flag:'ch0_mawTold'}, text:[
@@ -351,7 +351,7 @@ const NPCS = {
   pipe_path: [
     {at:'8,7', spr:'shadowmaw', name:'かげの あぎと', lines:[
       {text:['黒い 塊が 管に 貼りついている。']}]},
-    {at:'9,7', spr:'villagerB', name:'こわれた 管', lines:[
+    {at:'9,7', spr:'pipeobj', name:'こわれた 管', lines:[
       {when:{flag:'ch0_mawFled'}, text:[
         '管の 継ぎ目が 内側から 溶けている。',
         '光は 通っているが、色が 濁っている。']},
