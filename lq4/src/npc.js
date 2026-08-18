@@ -70,6 +70,18 @@ const NPCS = {
         '「悪夢獣が 出る。日が 落ちる 前に 戻れ」']},
       {text:['「外は 下層の たな。牧草地と 岩場ばかりだ」',
              '「今日は 試験だろう。寄り道は あとに しろ」']}]},
+    {at:'12,13', spr:'elderWoman', name:'見習いの 母', lines:[
+      {when:{flag:'ch1_sonThanked'}, text:[
+        '「知らない 名前を、知らない 声で……」',
+        '「あの子、しばらく 管には 下ろしません」']},
+      {when:{flag:'ch1_sonFound'}, text:[
+        '「帰って きました。ありがとう ございます」']},
+      {when:{flag:'ch1_sonAsked'}, text:[
+        '「西の 昇降口です。お願いします」']},
+      {when:{flag:'ch1_pipeTold'}, text:[
+        '「騎士さま。……お願いが あります」']},
+      {text:['「息子が 管の 見習いを して います」',
+             '「危ない 仕事だと 言うのに、聞かなくて」']}]},
     {at:'12,9', spr:'butler', name:'うわさずきの 男', lines:[
       {when:{flag:'ch0_knighted'}, text:[
         '「上層じゃ もう 別の 話に なってる」',
@@ -96,7 +108,7 @@ const NPCS = {
         '書記「下層区の 技師に 話を 聞け」',
         '書記「あの 男が いちばん 管を 知っている」']},
       {text:['書記「合同任務の 者か。用紙を 出す」']}]},
-    {at:'13,9', spr:'butler', name:'上層の 使い', lines:[
+    {at:'14,5', spr:'butler', name:'上層の 使い', lines:[
       {when:{flag:'ch1_oboroDown'}, text:[
         '「……管だった、だと？」',
         '「まあ、そういう ことも あるだろうな」',
@@ -108,6 +120,11 @@ const NPCS = {
         '「塞いだ ときの 立ち会いが、下層の 鍛冶屋だった そうだ」']},
       {text:['「中層は 静かな もんだ。湧くのは 下だけ」',
              '「……なぜだと 思う？　管が 古いからさ」']}]},
+    {at:'3,5', spr:'villagerA', name:'中層の 宿の 主人', lines:[
+      {when:{flag:'ch1_innTalk'}, text:[
+        '主人「よく 眠れたかね」',
+        '主人「……壁が 薄くてね。すまない」']},
+      {text:['主人「泊まりかね。合同任務の 方は 割引だよ」']}]},
     {at:'16,13', spr:'elderWoman', name:'花売りの 女', lines:[
       {text:['「上層の 庭園から 来る 花よ。中層じゃ 咲かないの」',
              '「光が 足りないんですって」']}]},
@@ -116,8 +133,46 @@ const NPCS = {
              '「……お嬢様の お名前でも な」']}]},
   ],
 
+  // ============ 第1章：中層詰所 ============
+  mid_post: [
+    {at:'6,3', spr:'guardB', name:'詰所の 副長', lines:[
+      {when:{flag:'ch1_reported'}, text:[
+        '副長「書類は 上げた。返事は 期待するな」',
+        '副長「……だが 綴りには 残る」']},
+      {when:{flag:'ch1_oboroDown'}, text:[
+        '副長「討ったなら 報告に 来い。書式は こちらで 整える」']},
+      {text:['副長「団長は 上層だ。まだ 戻らん」']}]},
+    {at:'5,6', spr:'guardA', name:'非番の 騎士', lines:[
+      {when:{flag:'ch1_oboroDown'}, text:[
+        '「下層で 大物を 討ったって？　正騎士が ひとりで」',
+        '「……いや、二人か。上層の お嬢さんと」']},
+      {text:['「合同任務なんて 何年ぶりだ」',
+             '「下層と 上層で 組ませる。上の 考える ことは 分からん」']}]},
+  ],
+
+  // ============ 第1章：記録庫 ============
+  mid_arch: [
+    {at:'6,5', spr:'elderWoman', name:'記録係', lines:[
+      {when:{flag:'ch1_foundPaper'}, text:[
+        '記録係「あの 年の 綴りだけ、やけに 薄いだろう」']},
+      {text:['記録係「申請の 綴りだ。年ごとに 並べてある」',
+             '記録係「十年 前？　いちばん 下の 棚だよ」']}]},
+    {at:'2,2', spr:'shelfobj', name:'古い 書類の 束', lines:[
+      {when:{flag:'ch1_foundPaper'}, text:[
+        '十年 前の 綴り。封鎖申請の 写しが 一枚。']},
+      {text:['十年 前の 綴り。埃が 薄く、誰かが 最近 触れている。']}]},
+  ],
+
   // ============ 第1章：旧管路 ============
   old_pipe: [
+    {at:'16,9', spr:'villagerA', name:'たおれた 見習い', lines:[
+      {when:{flag:'ch1_sonFound'}, text:[
+        '見習いが いた あたり。工具袋が 落ちている。']},
+      {text:['壁ぎわに 人が うずくまっている。']}]},
+    {at:'10,3', spr:'pipeobj', name:'管の 底', lines:[
+      {when:{flag:'ch1_foundShard'}, text:[
+        '割れた 光珠の あった ところ。床に 黒い すじが 残っている。']},
+      {text:['オボロが いた あたり。何か 落ちている。']}]},
     {at:'17,13', spr:'pipeobj', name:'破れた 管', lines:[
       {when:{flag:'ch1_sawBreach'}, text:[
         '裂け目は 内側から 溶けている。',
@@ -184,6 +239,25 @@ const QUESTS = {
       {id:'ask', desc:'下層区の 技師に 話を 聞く', flag:'ch1_pipeTold'},
     ],
     reward:{}, next:'ch1_q2_pipe',
+  },
+  ch1_q4_son: {
+    id:'ch1_q4_son', chapter:2, title:'帰らない 子',
+    giver:'見習いの 母',
+    desc:'旧管路に 下りたきりの 見習い技師を 探す。',
+    steps:[
+      {id:'find',  desc:'旧管路で 見つける', flag:'ch1_sonFound'},
+      {id:'tell',  desc:'母に 報せる',       flag:'ch1_sonThanked'},
+    ],
+    reward:{}, next:null,
+  },
+  ch1_q3_paper: {
+    id:'ch1_q3_paper', chapter:2, title:'十年前の 綴り',
+    giver:'詰所の 副長',
+    desc:'中層の 記録庫で、十年前の 申請を 探す。',
+    steps:[
+      {id:'find', desc:'古い 書類の 束を 調べる', flag:'ch1_foundPaper'},
+    ],
+    reward:{}, next:null,
   },
   ch1_q2_pipe: {
     id:'ch1_q2_pipe', chapter:2, title:'旧管路の 底',

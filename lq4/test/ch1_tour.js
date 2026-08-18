@@ -81,9 +81,32 @@ T('期限が 示される', said('三日'), log.join(' / ').slice(0,80));
 T('クエストが たつ', C.G.quests.ch1_q1_survey==='active');
 
 // ===== 5. 上層の 使い（差別の 噂）=====
-talk('mid_dist', 13, 10, 'back');
+talk('mid_dist', 14, 6, 'back');
 T('噂を 聞く', C.G.flags.ch1_heardSlur===true);
 T('セレンが 立場を 言う', said('怒って いい 立場'), log.join(' / ').slice(-60));
+
+// ===== 5.5 詰所：団長の 不在と 上からの 圧 =====
+stand('mid_dist', 12, 10, 'back');
+C.stepField(0,-1);
+T('詰所へ 入れる', C.P.map==='mid_post', C.P.map+' '+C.P.x+','+C.P.y);
+talk('mid_post', 6, 4, 'back');
+T('副長の 話を 聞く', C.G.flags.ch1_postHeard===true);
+T('団長が 上層に 呼ばれて いる', said('上層へ 呼ばれた'), log.join(' / ').slice(0,60));
+T('結論が 先に ある', said('結論が 先に あって'));
+
+// ===== 5.7 記録庫：十年前の 封鎖申請 =====
+stand('mid_post', 6, 8, 'front'); C.stepField(0,1);
+T('中層区へ もどる', C.P.map==='mid_dist', C.P.map);
+stand('mid_dist', 12, 12, 'back');
+C.stepField(0,-1);
+T('記録庫へ 入れる', C.P.map==='mid_arch', C.P.map+' '+C.P.x+','+C.P.y);
+talk('mid_arch', 2, 3, 'back');
+T('十年前の 申請を 見つける', C.G.flags.ch1_foundPaper===true);
+T('封鎖の 理由が 書いてある', said('予算 未計上'), log.join(' / ').slice(0,90));
+T('グランの 名が ある', said('立会　グラン'));
+talk('mid_arch', 6, 6, 'back');
+T('記録係が 綴りの 薄さを 言う', said('やけに 薄い'), log.join(' / ').slice(-60));
+stand('mid_arch', 6, 8, 'front'); C.stepField(0,1);
 
 // ===== 6. 下層区の 技師：旧管路の 入口が ひらく =====
 T('はじめは 昇降口が ない', C.tileAt('lower_dist',1,13)!=='D', C.tileAt('lower_dist',1,13));
@@ -92,6 +115,12 @@ T('技師が 三の 管を 教える', said('三の 管'), log.join(' / ').slice
 T('十年 前に 塞いだ 話', said('直す 金が 下りなかった'));
 T('昇降口が ひらく', C.tileAt('lower_dist',1,13)==='D', C.tileAt('lower_dist',1,13));
 T('クエストが すすむ', C.G.quests.ch1_q1_survey==='clear' && C.G.quests.ch1_q2_pipe==='active');
+
+// ===== 6.5 下層区：行方不明の 見習い =====
+talk('lower_dist', 12, 12, 'front');
+T('見習い探しを たのまれる', C.G.flags.ch1_sonAsked===true);
+T('西の 昇降口と 言われる', said('西の 昇降口'), log.join(' / ').slice(0,70));
+T('クエストが たつ', C.G.quests.ch1_q4_son==='active');
 
 // ===== 7. 旧管路へ =====
 stand('lower_dist', 2, 13, 'left');
@@ -118,6 +147,25 @@ T('亀裂が うまる', C.tileAt('old_pipe',10,12)==='.', C.tileAt('old_pipe',1
 C.G.mode='field'; C.stepField(0,-1); C.G.mode='field'; C.stepField(0,-1);
 T('むこうへ わたれる', C.P.y<=12, 'y='+C.P.y);
 
+// ===== 8.5 中ボス：かんむれ =====
+clearLog();
+C.G.tactic='gungan';
+C.party.forEach(p=>{ p.hp=p.maxhp; p.mp=p.maxmp; });
+stand('old_pipe', 15, 13, 'right');
+C.interact();
+T('かんむれに かてる', C.G.flags.ch1_swarmDown===true);
+T('束ねられて いた と 言う', said('手綱'), log.join(' / ').slice(-70));
+T('倒すと 道が あく', C.tileAt('old_pipe',16,13)==='.', C.tileAt('old_pipe',16,13));
+C.G.tactic='manual';
+
+// ===== 8.7 見習いを 見つける =====
+C.party.forEach(p=>{ p.hp=1; });
+talk('old_pipe', 16, 10, 'back');
+T('見習いを 見つける', C.G.flags.ch1_sonFound===true);
+T('奥から 声が した と 言う', said('人の 声みたいな'), log.join(' / ').slice(0,90));
+T('知らない 名を 呼ばれた', said('名前を 呼ばれた'));
+T('手当てで 全快', C.party.every(p=>p.hp===p.maxhp));
+
 // ===== 9. 破れた 管を 見る =====
 talk('old_pipe', 16, 13, 'right');
 T('破れ目を 見る', C.G.flags.ch1_sawBreach===true);
@@ -140,9 +188,46 @@ C.party.forEach(p=>{ p.hp=p.maxhp; p.mp=p.maxmp; });
 stand('old_pipe', 10, 3, 'back');
 C.interact();
 T('オボロの 名が 出る', said('オボロ'), log.join(' / ').slice(0,90));
+T('申請書の 文言を 口に する', said('シュウゼン'), log.join(' / ').slice(0,200));
+T('十年 かけて 育った と わかる', said('食べた ぶん 育つ'));
 T('オボロに かてる', C.G.flags.ch1_oboroDown===true);
 T('原因は 管だと わかる', said('人の 血じゃ ない'));
+T('千年ぶん 溜めている と 言う', said('千年ぶん 溜めてる'));
 T('クエストが 片づく', C.G.quests.ch1_q2_pipe==='clear');
+
+// ===== 11.2 上層の 使いに 結果を つきつける =====
+talk('mid_dist', 14, 6, 'back');
+T('使いに 結果を 言う', C.G.flags.ch1_slurAnswered===true);
+T('読む 者が いるかは 別、と 言われる', said('読む 者が いるかは'), log.join(' / ').slice(0,90));
+T('家の ためと 釘を さされる', said('深入りなさいません'));
+
+// ===== 11.3 母に 報せる =====
+{
+  const g0=C.P.gold;
+  talk('lower_dist', 12, 12, 'front');
+  T('母に 報せる', C.G.flags.ch1_sonThanked===true);
+  T('礼を もらえる', C.P.gold===g0+180, C.P.gold+' ← '+g0);
+  T('知らない 名だった と 言う', said('自分の 名では なかった'));
+  T('クエストが 片づく', C.G.quests.ch1_q4_son==='clear');
+}
+
+// ===== 11.4 宿の 夜：セレンの 立場 =====
+talk('mid_dist', 3, 6, 'back');
+T('宿で 夜の 場面に なる', C.G.flags.ch1_innTalk===true);
+T('綴りの 名が 消える 理由', said('書いても 意味が ない'), log.join(' / ').slice(0,120));
+T('セレンが 自分の 家を 言う', said('わたしの 家は、その'));
+
+// ===== 11.5 管の 底：濁った 光珠の かけら =====
+talk('old_pipe', 10, 4, 'back');
+T('かけらを 拾う', C.G.flags.ch1_foundShard===true);
+T('炉から 来た 珠だと わかる', said('炉から 来た 珠'), log.join(' / ').slice(0,80));
+
+// ===== 11.7 詰所へ 報告 =====
+C.party.forEach(p=>{ p.hp=1; p.mp=0; });
+talk('mid_post', 6, 4, 'back');
+T('報告できる', C.G.flags.ch1_reported===true);
+T('通らない 書類でも 綴りに 残る', said('綴りには 残る'), log.join(' / ').slice(-70));
+T('手当てで 全快', C.party.every(p=>p.hp===p.maxhp));
 
 // ===== 12. 章末：炉の 光が 濁っている =====
 clearLog();
@@ -151,6 +236,8 @@ C.triggerChapterEnd();
 T('章末が でる', said('炉の 光が、この十年'), log.join(' / ').slice(-90));
 T('炉が もとだと ほのめかす', said('もとの 火が 弱ってる'));
 T('第2章へ つながる', said('今度は 上へ'));
+T('原因が 調査中に されて しまう', said('原因　調査中'));
+T('団長の 名だけが 残って いる', said('名が 残って いるのは'));
 T('ch1_cleared が たつ', C.G.flags.ch1_cleared===true);
 
 // ===== 13. セーブ/ロード =====

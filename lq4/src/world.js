@@ -46,6 +46,8 @@ const MAP_IDS = {
   pipe_path:  {region:'sky', kind:'dgn',  name:'光珠管の 点検路', scene:'SCENE_SKY_TOWN'},
   mid_dist:   {region:'sky', kind:'town', name:'中層区',        scene:'SCENE_SKY_TOWN'},
   old_pipe:   {region:'sky', kind:'dgn',  name:'旧管路',        scene:'SCENE_SKY_TOWN'},
+  mid_post:   {region:'sky', kind:'in',   name:'中層詰所',      scene:'SCENE_SKY_IN'},
+  mid_arch:   {region:'sky', kind:'in',   name:'記録庫',        scene:'SCENE_SKY_IN'},
   trial_yard: {region:'sky', kind:'town', name:'見習い試験場',    scene:'SCENE_SKY_TOWN'},
   rift_yard:  {region:'sky', kind:'dgn',  name:'裂け目の広場',    scene:'SCENE_SKY_RIFT'},
 };
