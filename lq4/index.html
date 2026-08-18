@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18 17:01 JST", "build":"559f7292","assets_sha": "b13c4a90", "lines": {"world": 100, "npc": 194, "chapters": 448, "bgm": 979, "view2d": 1913, "core": 2444, "view": 1394, "ui": 1022}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18 17:11 JST", "build":"576d3a6f","assets_sha": "b13c4a90", "lines": {"world": 100, "npc": 194, "chapters": 479, "bgm": 979, "view2d": 1913, "core": 2444, "view": 1394, "ui": 1022}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -662,6 +662,50 @@ const CH = {
              '',
              '＊ 光珠管に 黒い 紙片が 残っている ＊'] },
 
+      // ★あぎとを 見て、3体も 倒した あとの 報告。
+      //   まえは 「父の 話」と 「手間賃」が べつの 会話に なって いて、
+      //   一度 話した だけでは 依頼が おわらず、試験場の 門が 開かなかった。
+      //   ひとつの 会話に まとめる。
+      { npc:'光珠管の 技師', cond:['ch0_errandDone','ch0_mawFled'], unless:'ch0_errandPaid',
+        set:['ch0_errandPaid','ch0_mawTold'],
+        clearQuota:true,
+        quest:{ch0_q0_errand:'clear'},
+        gold:120, herbs:2,
+        msg:['技師「もう 済んだのか。早いな」',
+             '技師「これは 手間賃。薬草も 持っていけ」',
+             '',
+             'イオ「管に 貼りついている ものが いました」',
+             'イオ「口だけの、大きな……獣のような」',
+             '技師「口だけ？　……そいつは 管を 咥えていたか」',
+             'イオ「はい。光を 吸っている ように 見えました」',
+             '',
+             '技師は しばらく 黙って、工具を 置いた。',
+             '技師「二十年 この 仕事を してるが、聞いたことが ない」',
+             '技師「……いや。一度だけ ある」',
+             '技師「お前の 父さんが、同じ ことを 言っていた」',
+             'イオ「父が」',
+             '技師「十年 前だ。管の 光が 濁りはじめた 年さ」',
+             '',
+             '＊ 120ゴールドと 薬草2つを 受け取った ＊',
+             '＊ 試験場の 門が 開く ころだ ＊'] },
+
+      // あぎとを 見ずに 3体だけ 倒して 戻った ばあい
+      { npc:'光珠管の 技師', cond:['ch0_errandDone'], unless:'ch0_errandPaid',
+        set:['ch0_errandPaid'],
+        clearQuota:true,
+        quest:{ch0_q0_errand:'clear'},
+        gold:120, herbs:2,
+        msg:['技師「もう 済んだのか。早いな」',
+             '技師「これは 手間賃。薬草も 持っていけ」',
+             '技師「管の 光は 戻ったか」',
+             'イオ「……濁ったままです」',
+             '技師「だろうな。散らしても また 湧く」',
+             '技師「湧く もとを どうにか せんことには な」',
+             '',
+             '＊ 120ゴールドと 薬草2つを 受け取った ＊',
+             '＊ 試験場の 門が 開く ころだ ＊'] },
+
+      // 手間賃を もらった あとで あぎとを 見た ばあい（順序が 逆の とき）
       { npc:'光珠管の 技師', cond:['ch0_mawFled'], unless:'ch0_mawTold',
         set:['ch0_mawTold'],
         msg:['イオ「管に 貼りついている ものが いました」',
@@ -675,19 +719,6 @@ const CH = {
              '技師「お前の 父さんが、同じ ことを 言っていた」',
              'イオ「父が」',
              '技師「十年 前だ。管の 光が 濁りはじめた 年さ」'] },
-
-      { npc:'光珠管の 技師', cond:['ch0_errandDone'], unless:'ch0_errandPaid',
-        set:['ch0_errandPaid'],
-        clearQuota:true,
-        quest:{ch0_q0_errand:'clear'},
-        gold:120, herbs:2,
-        msg:['技師「もう 済んだのか。早いな」',
-             '技師「これは 手間賃。薬草も 持っていけ」',
-             '技師「管の 光は 戻ったか」',
-             'イオ「……濁ったままです」',
-             '技師「だろうな。散らしても また 湧く」',
-             '技師「湧く もとを どうにか せんことには な」',
-             '', '＊ 120ゴールドと 薬草2つを 受け取った ＊'] },
 
       // ---- 父の 遺したもの：技師の 話を 聞いてから 家の 棚を しらべる ----
       { npc:'父の 道具棚', cond:['ch0_mawTold'], unless:'ch0_notebookRead',

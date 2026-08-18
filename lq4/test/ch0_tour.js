@@ -147,11 +147,17 @@ T('クエストが はじまる', C.G.quests.ch0_q1_trial==='active');
   T('にげた ことが わかる', said('逃げた。追えない'), log.join(' / ').slice(-60));
   T('あぎとは その場から 消える', C.tileAt('pipe_path',8,7)==='.', C.tileAt('pipe_path',8,7));
 
-  // 技師に 報告（父の 話）
+  // 技師に 報告（★1回の 会話で 手間賃も 父の 話も 出る）
   clearLog();
+  C.G.tactic='manual';
+  const g0=C.P.gold;
   walkTo('lower_dist', 5, 6); face('back'); C.interact();
-  T('技師が 父の 話を する', said('お前の 父さんが、同じ ことを'), log.join(' / ').slice(0,60));
+  T('手間賃を もらえる', C.P.gold===g0+120, C.P.gold+' ← '+g0);
+  T('技師が 父の 話を する', said('お前の 父さんが、同じ ことを'), log.join(' / ').slice(0,80));
   T('めじるしが たつ', C.G.flags.ch0_mawTold===true);
+  T('クエストが 片づく', C.G.quests.ch0_q0_errand==='clear');
+  // ★一度の 会話で 試験場の 門が 開く こと
+  T('一度の 会話で 門が 開く', !C.wardBlocks('trial_yard'));
 
   // ---- 家に もどって 父の 道具棚を しらべる ----
   clearLog();
@@ -171,14 +177,8 @@ T('クエストが はじまる', C.G.quests.ch0_q1_trial==='active');
   T('薬草を もらえる', C.P.herbs===h1+3, C.P.herbs+' ← '+h1);
   T('帰らなかった 夜の 話', said('一度も 帰って こなかった 夜'));
   C.doWarp(C.MAPS.home_forge.warpsXY['7,10']);
-  clearLog();
-  C.G.tactic='manual';
-  const g0=C.P.gold;
-  walkTo('lower_dist', 5, 6); face('back');
-  C.interact();
-  T('手間賃を もらえる', C.P.gold===g0+120, C.P.gold+' ← '+g0);
-  T('伏線の せりふが でる', said('湧く もとを'), log.join(' / ').slice(-60));
-  T('クエストが 片づく', C.G.quests.ch0_q0_errand==='clear');
+  // ここでの 報告は 「あぎとを 見る」まえに 行うと 別の 会話に なる ので、
+  // ほんすじ どおり あぎとを 見てから 報告する（下の 節で まとめて 行う）。
 }
 
 // ===== 5. 見習い試験（木人 → セレンとの 模擬戦）=====
