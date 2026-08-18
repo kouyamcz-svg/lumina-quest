@@ -14,13 +14,22 @@ for m in MODS:
 
 assets = open('assets.js','rb').read()
 asha = hashlib.sha1(assets).hexdigest()[:8]
-info = {"ver":"M0","at":datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
+# ★時こくは 日本時間で 書く。まえは 世界標準時（UTC）で 出して いた ため、
+#   画面の 時こくと 手もとの 時計が 9時間 ずれて 見え、
+#   「ふるい ままだ」と まちがえる もとに なった。
+_jst = datetime.timezone(datetime.timedelta(hours=9))
+info = {"ver":"M0",
+        "at":datetime.datetime.now(_jst).strftime('%Y-%m-%d %H:%M')+" JST",
         "assets_sha":asha,"lines":counts}
 shell = shell.replace('{{BUILD_INFO}}',
     '<script>window.LQ4_BUILD='+json.dumps(info, ensure_ascii=False)+';</script>')
 # ★アセットの版クエリを つけかえ（iPhoneのキャッシュずれ ふせぎ）
 import re as _re
 shell = _re.sub(r'assets\.js\?v=[0-9a-f]+', 'assets.js?v='+asha, shell)
+
+# ★みじかい 印（この ばんの sha）を 画面にも 出す
+_pre = hashlib.sha1(shell.encode('utf-8')).hexdigest()[:8]
+shell = shell.replace('"assets_sha"', '"build":"'+_pre+'","assets_sha"', 1)
 
 open('index.html','w').write(shell)
 

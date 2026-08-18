@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18T07:55:22", "assets_sha": "b13c4a90", "lines": {"world": 100, "npc": 194, "chapters": 448, "bgm": 979, "view2d": 1913, "core": 2444, "view": 1394, "ui": 1021}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18 17:01 JST", "build":"559f7292","assets_sha": "b13c4a90", "lines": {"world": 100, "npc": 194, "chapters": 448, "bgm": 979, "view2d": 1913, "core": 2444, "view": 1394, "ui": 1022}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -8506,7 +8506,8 @@ const Title = (function(){
         g.font=Math.max(9, sc*0.020)+'px sans-serif';
         g.fillStyle='rgba(190,208,236,0.55)';
         g.textAlign='right';
-        g.fillText(b.at.replace('T',' '), w-sc*0.03, h-sc*0.02);
+        // ★どの ばんが 動いて いるか。時こくと あわせて みじかい 印も 出す。
+        g.fillText(b.at + (b.build ? '  #'+b.build : ''), w-sc*0.03, h-sc*0.02);
         g.textAlign='center';
       }
     }catch(e){}

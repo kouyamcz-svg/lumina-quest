@@ -867,7 +867,8 @@ const Title = (function(){
         g.font=Math.max(9, sc*0.020)+'px sans-serif';
         g.fillStyle='rgba(190,208,236,0.55)';
         g.textAlign='right';
-        g.fillText(b.at.replace('T',' '), w-sc*0.03, h-sc*0.02);
+        // ★どの ばんが 動いて いるか。時こくと あわせて みじかい 印も 出す。
+        g.fillText(b.at + (b.build ? '  #'+b.build : ''), w-sc*0.03, h-sc*0.02);
         g.textAlign='center';
       }
     }catch(e){}
