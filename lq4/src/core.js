@@ -288,7 +288,7 @@ const MAPS = {
   //   ★しかけ2つ：①岩(O)を 穴(x)に 押しこんで 足場を つくる
   //                ②光珠灯(L)を ふたつ ともすと 奥の 扉(K)が ひらく
   //   ★1ますの ろうかに かざりの 岩(o)を おかない（通れなくなる）。
-  rift_yard:{name:'裂け目の広場', theme:'dream', enc:true, encRate:0.10, encGrace:4, tiles:[
+  rift_yard:{name:'裂け目の広場', theme:'sky', enc:true, encRate:0.10, encGrace:4, tiles:[
     "#####################",
     "#####################",
     "####...............##",
