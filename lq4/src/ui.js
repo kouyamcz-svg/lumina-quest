@@ -865,25 +865,58 @@ const Title = (function(){
     const lw=sc*0.16;
     g.beginPath(); g.moveTo(w/2-lw, y+big*2.12); g.lineTo(w/2+lw, y+big*2.12); g.stroke();
   }
+  // ★えほんばん（assets.js の scene_title）が あれば それを つかう。
+  //   なければ その場で えがく ほう（下の continent/dragon）に おちる。
+  let bgImg = null, bgTried = false;
+  function bgReady(){
+    if(bgTried) return bgImg;
+    bgTried = true;
+    const a = (typeof MON!=='undefined') && MON && MON.scene_title;
+    if(a && a.src){ const i=new Image(); i.src=a.src; bgImg=i; }
+    return bgImg;
+  }
+  // 画面に あわせて 「はみ出す ほうに」ぴったり おさめる（cover）
+  function drawBg(){
+    const im = bgReady();
+    if(!(im && im.complete && im.naturalWidth)) return false;
+    const w=W(), h=H();
+    const sc = Math.max(w/im.naturalWidth, h/im.naturalHeight);
+    const dw = im.naturalWidth*sc, dh = im.naturalHeight*sc;
+    g.imageSmoothingEnabled = false;
+    // よこは まんなか、たては 下より（雲海を のこす）
+    g.drawImage(im, (w-dw)/2, (h-dh)*0.62, dw, dh);
+    return true;
+  }
   function frame(now){
     if(!live) return;
     const t=(now-t0)/1000;
     const w=W(), h=H();
-    const sky=g.createLinearGradient(0,0,0,h);
-    sky.addColorStop(0,'#070b18'); sky.addColorStop(0.45,'#122043'); sky.addColorStop(1,'#2b3f6b');
-    g.fillStyle=sky; g.fillRect(0,0,w,h);
-    // ほし
-    for(let i=0;i<40;i++){
-      const sx=((i*97)%100)/100*w, sy=((i*61)%45)/100*h;
-      const tw=0.35+0.65*Math.abs(Math.sin(t*1.3+i));
-      g.fillStyle='rgba(255,255,255,'+(tw*0.5).toFixed(3)+')';
-      g.fillRect(sx, sy, Math.max(1,w*0.0016), Math.max(1,w*0.0016));
+    if(!drawBg()){
+      // ---- 絵が まだ 読めない ときの ひかえ ----
+      const sky=g.createLinearGradient(0,0,0,h);
+      sky.addColorStop(0,'#070b18'); sky.addColorStop(0.45,'#122043'); sky.addColorStop(1,'#2b3f6b');
+      g.fillStyle=sky; g.fillRect(0,0,w,h);
+      for(let i=0;i<40;i++){
+        const sx=((i*97)%100)/100*w, sy=((i*61)%45)/100*h;
+        const tw=0.35+0.65*Math.abs(Math.sin(t*1.3+i));
+        g.fillStyle='rgba(255,255,255,'+(tw*0.5).toFixed(3)+')';
+        g.fillRect(sx, sy, Math.max(1,w*0.0016), Math.max(1,w*0.0016));
+      }
+      dragon(t);
+      continent(t);
     }
-    dragon(t);
-    continent(t);
-    cloudBand(0.62, 0.022, 0.30, 'rgba(120,150,205,0.30)', t, 0.0);
-    cloudBand(0.72, 0.028, 0.46, 'rgba(150,180,225,0.38)', t, 1.7);
-    cloudBand(0.84, 0.034, 0.66, 'rgba(196,216,245,0.50)', t, 3.4);
+    // ★絵の うえに ながれる 雲を うすく かさねる（止まった 絵に 見せない）
+    cloudBand(0.74, 0.020, 0.26, 'rgba(180,205,240,0.16)', t, 0.0);
+    cloudBand(0.86, 0.026, 0.40, 'rgba(214,230,252,0.20)', t, 2.2);
+    // ★題名の 下じきを うっすら くらくして、文字を 読みやすくする
+    {
+      const sh=g.createLinearGradient(0,0,0,h*0.42);
+      sh.addColorStop(0,'rgba(6,10,24,0.55)'); sh.addColorStop(1,'rgba(6,10,24,0)');
+      g.fillStyle=sh; g.fillRect(0,0,w,h*0.42);
+      const sh2=g.createLinearGradient(0,h*0.78,0,h);
+      sh2.addColorStop(0,'rgba(6,10,24,0)'); sh2.addColorStop(1,'rgba(6,10,24,0.55)');
+      g.fillStyle=sh2; g.fillRect(0,h*0.78,w,h*0.22);
+    }
     logo(t);
     raf=requestAnimationFrame(frame);
   }
