@@ -281,6 +281,27 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 });
 
+// ★けっかい（WARDS）：とおせんぼの じょうけんが 物語で 立つ ものか。
+//   ★どこにも 立たない めじるしを 指すと、えいえんに 入れなく なる。
+{
+  const raised = new Set();
+  Object.keys(CHD.CH).forEach(no=>{
+    const cd = CHD.CH[no];
+    (cd.talkEvents||[]).forEach(e=>(e.set||[]).forEach(f=>raised.add(f)));
+    Object.keys(cd.bossReward||{}).forEach(k=>(cd.bossReward[k].set||[]).forEach(f=>raised.add(f)));
+    Object.keys(cd.bosses||{}).forEach(k=>{ const b=cd.bosses[k]; if(b.clearedFlag) raised.add(b.clearedFlag); });
+    Object.keys(cd.onEnter||{}).forEach(k=>raised.add(cd.onEnter[k]));
+    Object.keys(cd.lampGates||{}).forEach(k=>{ const g2=cd.lampGates[k]; if(g2.flag) raised.add(g2.flag); });
+    if(cd.ending) (cd.ending.set||[]).forEach(f=>raised.add(f));
+  });
+  Object.keys(C.WARDS||{}).forEach(mp=>{
+    const wd = C.WARDS[mp];
+    T('けっかいの さき '+mp+' が 実在する', !!C.MAPS[mp]);
+    T('けっかいの めじるし '+wd.flag+' は どこかで 立つ', raised.has(wd.flag), 'どこでも 立たない');
+    T('けっかいに ことわりの ことばが ある '+mp, !!(wd.msg && wd.msg.length));
+  });
+}
+
 // ============================================================
 // 5. しかけ監査（IVから：押し岩・穴・光珠灯・扉）
 // ============================================================

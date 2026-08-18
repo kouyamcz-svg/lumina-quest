@@ -48,10 +48,24 @@ C.doWarp(C.MAPS.home_forge.warpsXY['7,10']);
 T('下層区へ でる', C.P.map==='lower_dist' && C.P.x===3 && C.P.y===11);
 T('壁に うまって いない', C.walkable('lower_dist', C.P.x, C.P.y));
 
+// ===== 2.5 依頼の まえは 試験場に 入れない =====
+//   ★まえは たのまれごとを とばして 試験に 行けて しまい、
+//     点検路も かげの あぎとも 見ずに 話が すすんで いた。
+clearLog();
+walkTo('lower_dist', 10, 13); C.G.mode='field';
+C.stepField(0,1);
+T('依頼まえは 試験場に 入れない（あるく）', C.P.map==='lower_dist', C.P.map);
+T('門番が ことわる', said('受付は 鐘 ふたつ あとだ'), log.join(' / ').slice(0,50));
+C.G.mode='field';
+C.doWarp(C.MAPS.lower_dist.warpsXY['10,14']);
+T('依頼まえは 試験場に 入れない（ワープ）', C.P.map==='lower_dist', C.P.map);
+
 // ===== 3. 試験前は 木人と たたかえない =====
 clearLog();
+C.G.flags.ch0_errandPaid = true;          // 依頼を すませた てい（本すじは 4.5 で とおす）
 walkTo('lower_dist', 10, 14);
 C.doWarp(C.MAPS.lower_dist.warpsXY['10,14']);
+T('依頼を すませると 入れる', C.P.map==='trial_yard');
 T('試験場へ はいる', C.P.map==='trial_yard');
 T('onEnter が たつ', C.G.flags.ch0_enteredYard===true);
 clearLog();
@@ -80,6 +94,8 @@ T('クエストが はじまる', C.G.quests.ch0_q1_trial==='active');
 // ===== 4.5 炉技師の おつかい（フィールドへ 出る）=====
 {
   clearLog();
+  // 2.5 で さきに 立てた めじるしを もどして、ほんらいの すじで 通す
+  C.G.flags.ch0_errandPaid = false;
   walkTo('lower_dist', 5, 6); face('back');     // 上の (5,5) が 技師
   C.interact();
   T('おつかいを うける', C.G.flags.ch0_errandTaken===true);

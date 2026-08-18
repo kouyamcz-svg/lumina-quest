@@ -555,14 +555,7 @@ function interact(){
   if(ch==='A'||ch==='V'||ch==='X'){          // ワールドの ちてん
     const w=warpAt(P.map,nx,ny);
     if(w){
-      // ★けっかい：じょうけんが そろうまで はいれない
-      const wd = WARDS[w.to];
-      if(wd && (G.chapter||1)===wd.chapter && !G.flags[wd.flag]){
-        G.mode='msg';
-        U.msg(wd.msg, ()=>{ G.mode='field'; });
-        return;
-      }
-      doWarp(w); return;
+      doWarp(w); return;      // ★けっかいの はんていは doWarp の 中
     }
   }
   if(ch==='Q'){                               // まだ 入れない 場所
@@ -637,16 +630,7 @@ function stepField(dx,dy){
   P.x=nx; P.y=ny; G.stepFlip=!G.stepFlip;
   V.setActors(); refreshAreaLabel();
   const w = warpAt(P.map,nx,ny);
-  // ★けっかい：じょうけんが そろうまで はいれない
-  if(w){
-    const wd = WARDS[w.to];
-    if(wd && (G.chapter||1)===wd.chapter && !G.flags[wd.flag]){
-      G.mode='msg';
-      U.msg(wd.msg, ()=>{ G.mode='field'; });
-      return;
-    }
-  }
-  if(w){ doWarp(w); return; }
+  if(w){ doWarp(w); return; }      // ★けっかいの はんていは doWarp の 中
   if(MAPS[P.map].enc) maybeEncounter();
 }
 // ★施錠された扉：章データの locks に かかれた かぎが いる。
@@ -744,7 +728,18 @@ function areaName(map,x,y){
   const z=(m.encZones||[]).find(z=>x>=z.x0&&x<=z.x1&&y>=z.y0&&y<=z.y1);
   return z ? z.name : WORLD.mapName(map);
 }
+// ★けっかい：じょうけんが そろうまで 入れない。
+//   はんていは ここ 1か所。よそで 見おとしても かならず ここで 止まる。
+function wardBlocks(to){
+  const wd = WARDS[to];
+  return !!(wd && (G.chapter||1)===wd.chapter && !G.flags[wd.flag]);
+}
 function doWarp(w){
+  if(w && wardBlocks(w.to)){
+    G.mode='msg';
+    U.msg(WARDS[w.to].msg, ()=>{ G.mode='field'; });
+    return;
+  }
   G.busy=true;
   if(A.door) A.door();
   V.fade(1, ()=>{
@@ -1981,6 +1976,14 @@ function sellGood(map, key, n){
 // 攻撃 技は 「ここでは つかえない」。
 // ★けっかい：ここを とおるには じょうけんが いる
 const WARDS = {
+  // ★試験場：技師の 頼みを 済ませるまで 入れない。
+  //   まえは たのまれごとを とばして 試験に 行けて しまい、
+  //   点検路も かげの あぎとも 見ずに 話が すすんで いた。
+  trial_yard: {chapter:1, flag:'ch0_errandPaid',
+    msg:['試験場の 門は まだ 閉じている。',
+         '門番「受付は 鐘 ふたつ あとだ。今 入っても 待つだけだぞ」',
+         '門番「団長も まだ 見回りから 戻っておらん」',
+         'イオ「……先に 技師さんの 頼みを 済ませるか」']},
   rift_yard: {chapter:1, flag:'ch0_trialDone',
     msg:['広場へ つづく 道は、まだ 昼の 人どおりで にぎわって いる。',
          'イオ「……試験が おわってから だな」']},
@@ -2409,6 +2412,7 @@ return {
   MAPS, ENEMIES, MIDBOSS, CLASSES, SPELL_DEFS, SHOPS, INN_PRICE, byMap, byMapCh, TACTICS, LV_CAP,
   // ★しかけ（IVから）
   setTile, applyTileEdits, restoreMaps, snapshotMaps, allLampsLit, GIMMICK_TILES,
+  WARDS, wardBlocks,
   pushRock, toggleLamp, gimmickRescue,
   // ★LQ4：けんしょうよう（テストから 戦闘を 1てずつ たたく）
   memberAct, enemyAct, endBattle, buffMul, eEffAgi, inflictHit,
