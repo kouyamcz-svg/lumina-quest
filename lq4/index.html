@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18 21:31 JST", "build":"e35eb3e3","assets_sha": "b13c4a90", "lines": {"world": 100, "npc": 194, "chapters": 479, "bgm": 979, "view2d": 1913, "core": 2444, "view": 1394, "ui": 1075}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18 21:42 JST", "build":"307686ff","assets_sha": "b13c4a90", "lines": {"world": 100, "npc": 194, "chapters": 479, "bgm": 979, "view2d": 1913, "core": 2444, "view": 1394, "ui": 1122}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -7699,15 +7699,33 @@ function ctx(){
 let SFXBUS=null;
 // ★おとの おおきさ（0〜1）。せっていで 変えられ、つぎに あそぶ ときも のこる。
 const SND_KEY = 'LQ4_SOUND';
-const snd = {bgm:0.8, se:0.8};
+//   mix＝ほかの アプリの 音楽を 止めずに 鳴らす（音楽アプリを 聞きながら あそぶ）
+const snd = {bgm:0.8, se:0.8, mix:false};
 try{
   const raw = localStorage.getItem(SND_KEY);
   if(raw){ const o=JSON.parse(raw);
     if(typeof o.bgm==='number') snd.bgm=Math.max(0,Math.min(1,o.bgm));
-    if(typeof o.se ==='number') snd.se =Math.max(0,Math.min(1,o.se)); }
+    if(typeof o.se ==='number') snd.se =Math.max(0,Math.min(1,o.se));
+    if(typeof o.mix==='boolean') snd.mix=o.mix; }
 }catch(e){}
+
+// ★ほかの アプリの 音楽を 止めるか どうかは、ブラウザの「音の 使いかた」で きまる。
+//   'ambient'  … ほかの 音と まざる。音楽アプリは 止まらない
+//   'playback' … この ページの 音だけに する（ほかは 止まる。ふつうの ゲーム）
+//   iOS16.4 より 古い ブラウザには この しくみが ない。
+function audioMixSupported(){
+  try{ return !!(navigator.audioSession && 'type' in navigator.audioSession); }
+  catch(e){ return false; }
+}
+function applyAudioSession(){
+  if(!audioMixSupported()) return false;
+  try{ navigator.audioSession.type = snd.mix ? 'ambient' : 'playback'; return true; }
+  catch(e){ return false; }
+}
+applyAudioSession();      // ★音を 出す まえに きめる
 function sndSave(){ try{ localStorage.setItem(SND_KEY, JSON.stringify(snd)); }catch(e){} }
 function sndApply(){
+  applyAudioSession();
   if(SFXBUS){ try{ SFXBUS.gain.value = 1.6*snd.se; }catch(e){} }
   if(typeof BGM!=='undefined'){
     try{
@@ -8007,12 +8025,41 @@ function bar(v){
   return '■'.repeat(n) + '□'.repeat(10-n) + ' ' + n;
 }
 function openSound(){
-  const items = ['音楽　'+bar(snd.bgm), '効果音　'+bar(snd.se), '戻る'];
-  menu(items, '音の 大きさ', (sel)=>{
+  const mixLabel = !audioMixSupported() ? 'ほかの 音楽と 混ぜる　（使えません）'
+                 : (snd.mix ? 'ほかの 音楽と 混ぜる　オン' : 'ほかの 音楽と 混ぜる　オフ');
+  const items = ['音楽　'+bar(snd.bgm), '効果音　'+bar(snd.se), mixLabel, '戻る'];
+  menu(items, '音の 設定', (sel)=>{
     if(sel===0) tuneSound('bgm', '音楽');
     else if(sel===1) tuneSound('se', '効果音');
+    else if(sel===2) toggleMix();
     else C.G.mode='field';
   });
+}
+// ★音楽アプリを 聞きながら あそぶ ための きりかえ
+function toggleMix(){
+  if(!audioMixSupported()){
+    msg2(['この ブラウザでは まだ 使えません。',
+          'ほかの アプリの 音楽は 止まって しまいます。',
+          '（iOS 16.4 より あとの Safari で 使えます）'], ()=>{ openSound(); });
+    return;
+  }
+  snd.mix = !snd.mix;
+  const lines = [];
+  if(snd.mix){
+    // ★混ぜる ときに ゲームの 音楽が そのままだと 二重に なって うるさい。
+    //   いちど 消して、ほしい 人だけ 上げ直せる ように する。
+    if(snd.bgm > 0){ snd.bgm = 0; lines.push('ゲームの 音楽を 消しました。'); }
+    lines.unshift('ほかの アプリの 音楽を 止めなく なりました。');
+    lines.push('効果音は そのまま 鳴ります。',
+               '両方 聞きたい ときは 「音楽」を 上げて ください。');
+  }else{
+    lines.push('ふつうの ゲームの 音に 戻しました。',
+               'ほかの アプリの 音楽は 止まります。');
+    if(snd.bgm === 0){ snd.bgm = 0.8; lines.push('ゲームの 音楽を 戻しました。'); }
+  }
+  sndApply(); sndSave();
+  if(typeof BGM!=='undefined'){ try{ BGM.resume(); }catch(e){} }
+  msg2(lines, ()=>{ openSound(); });
 }
 function tuneSound(key, label){
   const items = ['小さく　◀', '大きく　▶', '消す', '戻る'];
