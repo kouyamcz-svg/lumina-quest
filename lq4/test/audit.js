@@ -332,6 +332,23 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★門の むき：G＝よこに ながれる かべ（南北の 出入口）、g＝たての かべ（東西）。
+//   ★同じ 絵を つかうと、東の 門が かべに 埋もれて 向きが おかしく 見えた。
+Object.keys(C.MAPS).forEach(mp=>{
+  const t = C.MAPS[mp].tiles;
+  for(let y=0;y<t.length;y++){
+    for(let x=0;x<t[y].length;x++){
+      const ch = tileAt(mp,x,y);
+      if(ch!=='G' && ch!=='g') continue;
+      const lr = blocked(mp,x-1,y) && blocked(mp,x+1,y);
+      const ud = blocked(mp,x,y-1) && blocked(mp,x,y+1);
+      const want = lr ? 'G' : (ud ? 'g' : null);
+      T('門の むきが かべに あう '+mp+' ('+x+','+y+')', want===null || ch===want,
+        'いま「'+ch+'」／ほしい「'+(want||'?')+'」');
+    }
+  }
+});
+
 // ============================================================
 // 5. しかけ監査（IVから：押し岩・穴・光珠灯・扉）
 // ============================================================

@@ -788,11 +788,25 @@ function buildAtlas(){
     R(g,4,5,8,10,P16.wood0); R(g,4,5,8,1,P16.wood1);
     R(g,5,6,6,8,P16.wood1); R(g,9,10,1,2,P16.gold);
   });
+  // ★門は かべの むきで かたちが 変わる。
+  //   G＝よこに ながれる かべの 門（南北の 出入口）。柱は 左右
+  //   g＝たてに ながれる かべの 門（東西の 出入口）。柱は 上下
+  //   同じ 絵を つかうと、東の 門が かべに 埋もれて 向きが おかしく 見える。
   atlas.gate = tile((g,s)=>{
     R(g,0,0,s,s,P16.sd1);
     R(g,1,2,3,13,P16.st2); R(g,12,2,3,13,P16.st2);
     R(g,1,2,3,1,P16.st3);  R(g,12,2,3,1,P16.st3);
     for(let y=0;y<3;y++){ R(g,1,1-y,3,1,P16.roof1); R(g,12,1-y,3,1,P16.roof1); }
+  });
+  atlas.gateSide = tile((g,s)=>{
+    R(g,0,0,s,s,P16.sd1);
+    // 上下に よこたわる 柱（たての かべに はまる かたち）
+    R(g,0,1,s,3,P16.st2);  R(g,0,12,s,3,P16.st2);
+    R(g,0,1,s,1,P16.st3);  R(g,0,12,s,1,P16.st3);
+    R(g,0,3,s,1,P16.st0);  R(g,0,14,s,1,P16.st0);
+    // かさ木（門の しるし）。左右の はしに 出す
+    R(g,0,0,3,1,P16.roof1); R(g,13,0,3,1,P16.roof1);
+    R(g,0,15,3,1,P16.roof1); R(g,13,15,3,1,P16.roof1);
   });
 
   // ---------- ワールドの ちてん ----------
@@ -939,7 +953,8 @@ function tileArt(ch, theme){
 
     case 'K': return atlas.castgate;
     case 'F': return atlas.fountain;
-    case 'G': return atlas.gate;
+    case 'G': return atlas.gate;       // よこの かべの 門（南北）
+    case 'g': return atlas.gateSide;   // たての かべの 門（東西）
     case 'T': return atlas.tower;
     case 'D': return atlas.door;
     case '<': case '>': return atlas.stairs;
