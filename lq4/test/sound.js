@@ -10,7 +10,8 @@ const src=fs.readFileSync('src/ui.js','utf8');
 const i=src.indexOf('const SND_KEY'), j=src.indexOf('function sfxBus()');
 const body=src.slice(i,j)+`
 function bar(v){const n=Math.round(v*10);return '■'.repeat(n)+'□'.repeat(10-n)+' '+n;}
-globalThis.__api={snd,sndSave,sndApply,bar,audioMixSupported,applyAudioSession};`;
+globalThis.__api={snd,sndSave,sndApply,bar,audioMixSupported,applyAudioSession,
+  setAC(v){AC=v;}};`;
 const session={type:'playback'};
 const navigator={audioSession:session};
 const sb={console,localStorage,JSON,Math,navigator,BGM:{
@@ -18,7 +19,7 @@ const sb={console,localStorage,JSON,Math,navigator,BGM:{
   setFieldVolume(v){this._f=v;}, setBattleVolume(v){this._b=v;}, setVolume(v){this._v=v;}
 }};
 sb.globalThis=sb; vm.createContext(sb);
-vm.runInContext('let SFXBUS=null;'+body, sb);
+vm.runInContext('let SFXBUS=null; let AC=null;'+body, sb);
 const {snd,sndSave,sndApply,bar,audioMixSupported,applyAudioSession}=sb.__api;
 let n=0,ng=0; const T=(a,c,d)=>{n++;if(!c){ng++;console.log('NG',a,d||'');}};
 T('はじめの おおきさ', snd.bgm===0.8 && snd.se===0.8, JSON.stringify(snd));
@@ -31,23 +32,28 @@ T('のこる', JSON.parse(stored.LQ4_SOUND).bgm===0.3, stored.LQ4_SOUND);
 const sb2={console,localStorage,JSON,Math,navigator:{audioSession:{type:'playback'}},
   BGM:{setFieldVolume(){},setBattleVolume(){},setVolume(){}}};
 sb2.globalThis=sb2; vm.createContext(sb2);
-vm.runInContext('let SFXBUS=null;'+body, sb2);
+vm.runInContext('let SFXBUS=null; let AC=null;'+body, sb2);
 T('つぎに あそぶ ときも のこる', sb2.__api.snd.bgm===0.3, JSON.stringify(sb2.__api.snd));
 // ---- ほかの アプリの 音楽と 混ぜる ----
 T('この しくみが 使えるか わかる', audioMixSupported()===true);
-T('はじめは ふつうの ゲームの 音', session.type==='playback', session.type);
-snd.mix=true; applyAudioSession();
+// ★ページを ひらいた だけの ときは さわらない（Safariが ことわって 赤い おびが 出た）
+T('音を 出す まえは さわらない', session.type==='playback', session.type);
+snd.mix=true;
+T('音を 出す まえは あてに いかない', applyAudioSession()===false && session.type==='playback');
+sb.__api.setAC({});          // 音を つくった てい
+applyAudioSession();
 T('オンで ほかの 音と まざる', session.type==='ambient', session.type);
 snd.mix=false; applyAudioSession();
-T('オフで もどる', session.type==='playback', session.type);
+T('オフは ブラウザに まかせる', session.type==='auto', session.type);
 snd.mix=true; sndSave();
 T('きりかえも のこる', JSON.parse(stored.LQ4_SOUND).mix===true, stored.LQ4_SOUND);
 {
   // しくみの ない ブラウザでも 落ちない こと
   const sb3={console,localStorage,JSON,Math,navigator:{},BGM:{setFieldVolume(){},setBattleVolume(){},setVolume(){}}};
   sb3.globalThis=sb3; vm.createContext(sb3);
-  vm.runInContext('let SFXBUS=null;'+body, sb3);
+  vm.runInContext('let SFXBUS=null; let AC=null;'+body, sb3);
   T('しくみが なくても 落ちない', sb3.__api.audioMixSupported()===false);
+  sb3.__api.setAC({});
   T('しくみが なくても あてに いける', sb3.__api.applyAudioSession()===false);
 }
 

@@ -22,6 +22,7 @@ function ctx(){
     if(!AC){
       AC = new (window.AudioContext||window.webkitAudioContext)();
       if(typeof BGM!=='undefined' && BGM.attach) BGM.attach(AC);   // BGMと きょうゆう
+      applyAudioSession();                     // ★音を つくった あとで あてる
     }
   }catch(e){}
   return AC;
@@ -47,12 +48,17 @@ function audioMixSupported(){
   try{ return !!(navigator.audioSession && 'type' in navigator.audioSession); }
   catch(e){ return false; }
 }
+// ★ページを ひらいた だけの ときに さわっては いけない。
+//   Safari は 「まだ さわられて いない ページ」が 音を はじめようと すると
+//   ことわる（Failed to start the audio device の 赤い おび）。
+//   さわった あと＝AudioContext を つくった あとに だけ あてる。
+//   また、ふつうの ときは 'playback' を 指定せず、ブラウザに まかせる。
 function applyAudioSession(){
   if(!audioMixSupported()) return false;
-  try{ navigator.audioSession.type = snd.mix ? 'ambient' : 'playback'; return true; }
+  if(!AC) return false;                      // まだ 音を 出して いない
+  try{ navigator.audioSession.type = snd.mix ? 'ambient' : 'auto'; return true; }
   catch(e){ return false; }
 }
-applyAudioSession();      // ★音を 出す まえに きめる
 function sndSave(){ try{ localStorage.setItem(SND_KEY, JSON.stringify(snd)); }catch(e){} }
 function sndApply(){
   applyAudioSession();
@@ -387,6 +393,7 @@ function toggleMix(){
                'ほかの アプリの 音楽は 止まります。');
     if(snd.bgm === 0){ snd.bgm = 0.8; lines.push('ゲームの 音楽を 戻しました。'); }
   }
+  ctx();                    // ★まだ 音を 出して いなければ ここで つくる（メニュー操作＝さわった あと）
   sndApply(); sndSave();
   if(typeof BGM!=='undefined'){ try{ BGM.resume(); }catch(e){} }
   msg2(lines, ()=>{ openSound(); });

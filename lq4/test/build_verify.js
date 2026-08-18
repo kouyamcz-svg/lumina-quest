@@ -28,6 +28,17 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
   const bad = html.match(/LQ3_[A-Z_]+|LQ3View|const LQ3|window\.LQ3/g) || [];
   T('LQ3の しるしが のこって いない', bad.length===0, bad.slice(0,3).join(','));
 }
+// ★ページを ひらいた だけで 音の しくみを さわって いない こと
+//   （Safariが ことわり、赤い おびで [REJ] Failed to start the audio device が 出た）
+{
+  const ui = fs.readFileSync('src/ui.js','utf8');
+  // よびだしが 「かんすうの 外」＝ 読みこみと 同時に はしる かたちに なって いないか
+  const top = ui.split('\n').filter(l=>/^applyAudioSession\(\);/.test(l));
+  T('読みこみと 同時に 音を さわって いない', top.length===0, top.join(' '));
+  T('音を つくった あとに あてて いる', ui.includes('applyAudioSession();                     // ★音を つくった あとで あてる'));
+  T('ふつうの ときは ブラウザに まかせる', ui.includes("'ambient' : 'auto'"));
+}
+
 // ★サービスワーカーの キャッシュ名が この ビルドの ものに なっている こと
 //   （固定の ままだと、なおしても 端末に ふるい ものが のこる）
 {
