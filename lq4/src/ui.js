@@ -27,10 +27,30 @@ function ctx(){
   return AC;
 }
 let SFXBUS=null;
+// ★おとの おおきさ（0〜1）。せっていで 変えられ、つぎに あそぶ ときも のこる。
+const SND_KEY = 'LQ4_SOUND';
+const snd = {bgm:0.8, se:0.8};
+try{
+  const raw = localStorage.getItem(SND_KEY);
+  if(raw){ const o=JSON.parse(raw);
+    if(typeof o.bgm==='number') snd.bgm=Math.max(0,Math.min(1,o.bgm));
+    if(typeof o.se ==='number') snd.se =Math.max(0,Math.min(1,o.se)); }
+}catch(e){}
+function sndSave(){ try{ localStorage.setItem(SND_KEY, JSON.stringify(snd)); }catch(e){} }
+function sndApply(){
+  if(SFXBUS){ try{ SFXBUS.gain.value = 1.6*snd.se; }catch(e){} }
+  if(typeof BGM!=='undefined'){
+    try{
+      BGM.setFieldVolume  && BGM.setFieldVolume(snd.bgm);
+      BGM.setBattleVolume && BGM.setBattleVolume(snd.bgm);
+      BGM.setVolume       && BGM.setVolume(snd.bgm);
+    }catch(e){}
+  }
+}
 function sfxBus(){                 // こうかおんは まとめて すこし おおきく
   const ac=ctx(); if(!ac) return null;
   if(!SFXBUS){
-    try{ SFXBUS=ac.createGain(); SFXBUS.gain.value=1.6; SFXBUS.connect(ac.destination); }
+    try{ SFXBUS=ac.createGain(); SFXBUS.gain.value=1.6*snd.se; SFXBUS.connect(ac.destination); }
     catch(e){ SFXBUS=null; }
   }
   return SFXBUS;
@@ -142,6 +162,7 @@ const A = {
     if(typeof BGM==='undefined') return;
     BGM.stop();                    // せんとうきょくは とめる
     BGM.playField(trackFor(mapId));
+    sndApply();          // ★かけなおす たびに せっていを あてる
   },
   battleBgm(kind){                 // ★しょうで せんとうきょくを かえる
     const ac = ctx();
@@ -158,6 +179,7 @@ const A = {
       BGM.stopBattleFile && BGM.stopBattleFile();
       BGM.play('battle');                       // 第1・2章：ごうせいの 双嶺の誓約
     }
+    sndApply();          // ★かけなおす たびに せっていを あてる
   },
   bgmStop(){ if(typeof BGM!=='undefined'){ BGM.stopBattleAll ? BGM.stopBattleAll() : BGM.stop(); } },
 };
@@ -309,13 +331,41 @@ function closeMap(){
   if(V.hideMap) V.hideMap();
   C.G.mode='field';
 }
+// ★おとの せってい。0〜10の 11だんかい。えらぶ たびに その場で 鳴らして 耳で たしかめる。
+function bar(v){
+  const n = Math.round(v*10);
+  return '■'.repeat(n) + '□'.repeat(10-n) + ' ' + n;
+}
+function openSound(){
+  const items = ['音楽　'+bar(snd.bgm), '効果音　'+bar(snd.se), '戻る'];
+  menu(items, '音の 大きさ', (sel)=>{
+    if(sel===0) tuneSound('bgm', '音楽');
+    else if(sel===1) tuneSound('se', '効果音');
+    else C.G.mode='field';
+  });
+}
+function tuneSound(key, label){
+  const items = ['小さく　◀', '大きく　▶', '消す', '戻る'];
+  const show = ()=>{
+    menu(items, label+'　'+bar(snd[key]), (sel)=>{
+      if(sel===0) snd[key] = Math.max(0, Math.round(snd[key]*10-1)/10);
+      else if(sel===1) snd[key] = Math.min(1, Math.round(snd[key]*10+1)/10);
+      else if(sel===2) snd[key] = 0;
+      else { sndSave(); openSound(); return; }
+      sndApply(); sndSave();
+      if(key==='se') A.ok && A.ok();       // 効果音は その場で 鳴らして たしかめる
+      show();
+    });
+  };
+  show();
+}
 function openFieldMenu(){
   if(statusEl) statusEl.style.display='none';
   C.G.mode='menu';
   // ★ひかえが いる ときだけ「入れ替え」が ふえる。ばんごうでなく なまえで わける
   const items=['強さ','技','道具','装備','地図','作戦'];
   if(C.reserve.length>0) items.push('入れ替え');
-  items.push('クエスト','セーブ','とじる');
+  items.push('クエスト','音','セーブ','とじる');
   menu(items,'メニュー',(sel)=>{
     const pick=items[sel];
     if(pick==='強さ'){
@@ -343,6 +393,9 @@ function openFieldMenu(){
 
     }else if(pick==='入れ替え'){
       openSwap();
+
+    }else if(pick==='音'){
+      openSound();
 
     }else if(pick==='クエスト'){
       const qs=C.questList();
@@ -996,7 +1049,7 @@ function chapterSelect(){
 function startGame(loaded){
   V.buildMap(C.P.map);
   bootDone();
-  if(typeof BGM!=='undefined') BGM.playField(trackFor(C.P.map));   // ばしょの きょく
+  if(typeof BGM!=='undefined'){ BGM.playField(trackFor(C.P.map)); sndApply(); }   // ばしょの きょく
   V.setActors(true);
   label(C.WORLD.mapName(C.P.map));
   hud();
