@@ -211,7 +211,7 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
     //   なまえに 人以外を 示す ことばが あれば、人の 絵を つかっていない こと。
     //   ※ 人の 肩書きに「管」などが 入る ことが ある ので、
     //     「〜の 技師」の ような 人を あらわす ことばが あれば のぞく。
-    const PERSON = /技師|男|女|子ども|団長|試験官|見張り|神官|おばさん|セレン|イオ|グラン/.test(e.name);
+    const PERSON = /技師|男|女|子ども|団長|試験官|見張り|神官|おばさん|セレン|イオ|グラン|衛兵|書記|職人|使い|花売り/.test(e.name);
     const THING = !PERSON && /棚|管|机|箱|扉|石|像|びん|樽/.test(e.name);
     if(THING){
       const HUMAN = ['villagerA','villagerB','elderWoman','guardA','guardB',

@@ -1,0 +1,168 @@
+'use strict';
+// ルミナクエストIV / 第1章 通しテスト
+// 使い方： node test/ch1_tour.js
+//   中層区で 任務 → 下層区の 技師 → 旧管路（岩・灯り）→ オボロ → 章末
+const fs = require('fs'), vm = require('vm');
+const store = {};
+const fakeLS = {getItem:k=>(k in store?store[k]:null), setItem:(k,v)=>{store[k]=String(v);},
+                removeItem:k=>{delete store[k];}};
+const ctx = {console, window:{}, localStorage:fakeLS}; ctx.globalThis = ctx;
+vm.createContext(ctx);
+for (const f of ['world.js','npc.js','chapters.js','core.js'])
+  vm.runInContext(fs.readFileSync('src/'+f,'utf8'), ctx, {filename:f});
+const C = vm.runInContext('LQ4', ctx);
+
+const log=[];
+C.bind(C.NullView, {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); }, menu(i,t,cb){cb(0);},
+                    hud(){}, label(){}, openTrade(){}}, C.NullAudio);
+
+let n=0, ng=0;
+function T(name, cond, detail){ n++; if(!cond){ ng++; console.log('NG', name, detail!==undefined?'  '+detail:''); } }
+function said(w){ return log.some(l=>l.indexOf(w)>=0); }
+function clearLog(){ log.length=0; }
+function stand(map,x,y,dir){ C.G.mode='field'; C.P.map=map; C.P.x=x; C.P.y=y; if(dir) C.P.dir=dir; }
+function talk(map,x,y,dir){ clearLog(); stand(map,x,y,dir); C.interact(); }
+
+// ===== 0. 章えらびで 直接 はじめた ばあい（ひきつぐ ものが ない）=====
+{
+  C.freshState();
+  C.G.chapters = {};                 // 序章の きろくが ない てい
+  C.switchChapter(2);
+  T('直接：二人 いる', C.party.length===2 && C.party[1].cls==='seren',
+    C.party.map(p=>p.cls).join(','));
+  T('直接：Lv8', C.party[0].lv===8, ''+C.party[0].lv);
+  T('直接：ふたりとも 武器を もつ',
+    !!(C.party[0].weapon && C.party[1].weapon),
+    JSON.stringify([C.party[0].weapon, C.party[1].weapon]));
+  T('直接：セレンも 防具を もつ', !!C.party[1].armor);
+}
+
+// ===== 1. 序章から つづけて 第1章へ =====
+C.freshState();
+// 序章を おえた てい（二人・Lv8・そこそこの 装備）
+C.party.length = 0;
+C.party.push(C.mkMember('io', 8));
+C.party.push(C.mkMember('seren', 8));
+C.party[0].weapon={kind:'w',name:'天空鋼の 短剣',v:9};
+C.party[0].armor ={kind:'a',name:'騎士団の 胴',v:8};
+C.party[1].weapon={kind:'w',name:'白木の 長槍',v:11};
+C.party[1].armor ={kind:'a',name:'銀の 胸当て',v:9};
+C.P.gold = 300; C.P.herbs = 5;
+C.G.flags.ch0_cleared = true;
+C.switchChapter(2);
+T('第1章に なる', C.G.chapter===2);
+T('はじまりは 下層区', C.P.map==='lower_dist', C.P.map+' '+C.P.x+','+C.P.y);
+T('二人 いる', C.party.length===2 && C.party[0].cls==='io' && C.party[1].cls==='seren',
+  C.party.map(p=>p.cls).join(','));
+T('Lv8 で はじまる', C.party[0].lv===8, ''+C.party[0].lv);
+T('そだてた 装備を ひきつぐ', C.party[0].weapon.v===9 && C.party[1].weapon.v===11,
+  JSON.stringify([C.party[0].weapon.v, C.party[1].weapon.v]));
+T('おかねも ひきつぐ', C.P.gold===300, ''+C.P.gold);
+T('章データが ひける', C.chData() && C.chData().id==='ch1_lower');
+
+// ===== 2. 中層区へ（世界地図ごし）=====
+stand('lower_dist', 19, 6, 'right');
+C.stepField(1,0);
+T('東門から 外へ 出る', C.P.map==='world', C.P.map);
+stand('world', 21, 16, 'right');
+C.interact();
+T('中層区へ 入れる', C.P.map==='mid_dist', C.P.map+' '+C.P.x+','+C.P.y);
+T('中層区の めじるしが たつ', C.G.flags.ch1_enteredMid===true);
+
+// ===== 3. 上層へは まだ 行けない =====
+talk('mid_dist', 10, 1, 'back');
+T('上層の 石段で 断られる', said('許可証は 中層までだ'), log.join(' / ').slice(0,60));
+T('中層区から 出て いない', C.P.map==='mid_dist');
+
+// ===== 4. 任務を うける =====
+talk('mid_dist', 5, 6, 'back');
+T('任務を うける', C.G.flags.ch1_taskTaken===true);
+T('期限が 示される', said('三日'), log.join(' / ').slice(0,80));
+T('クエストが たつ', C.G.quests.ch1_q1_survey==='active');
+
+// ===== 5. 上層の 使い（差別の 噂）=====
+talk('mid_dist', 13, 10, 'back');
+T('噂を 聞く', C.G.flags.ch1_heardSlur===true);
+T('セレンが 立場を 言う', said('怒って いい 立場'), log.join(' / ').slice(-60));
+
+// ===== 6. 下層区の 技師：旧管路の 入口が ひらく =====
+T('はじめは 昇降口が ない', C.tileAt('lower_dist',1,13)!=='D', C.tileAt('lower_dist',1,13));
+talk('lower_dist', 5, 6, 'back');
+T('技師が 三の 管を 教える', said('三の 管'), log.join(' / ').slice(0,80));
+T('十年 前に 塞いだ 話', said('直す 金が 下りなかった'));
+T('昇降口が ひらく', C.tileAt('lower_dist',1,13)==='D', C.tileAt('lower_dist',1,13));
+T('クエストが すすむ', C.G.quests.ch1_q1_survey==='clear' && C.G.quests.ch1_q2_pipe==='active');
+
+// ===== 7. 旧管路へ =====
+stand('lower_dist', 2, 13, 'left');
+C.stepField(-1,0);
+T('旧管路へ 入れる', C.P.map==='old_pipe', C.P.map+' '+C.P.x+','+C.P.y);
+T('旧管路の めじるしが たつ', C.G.flags.ch1_enteredPipe===true);
+
+// ===== 8. 亀裂は 岩で 埋める =====
+{
+  const walk=(x,y)=>C.walkable('old_pipe',x,y);
+  const seen=new Set(['9,15']); const q=[[9,15]];
+  while(q.length){ const [x,y]=q.shift();
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ const k=(x+dx)+','+(y+dy);
+      if(!seen.has(k)&&walk(x+dx,y+dy)){ seen.add(k); q.push([x+dx,y+dy]); } } }
+  T('亀裂の むこうへは そのままでは 行けない', !seen.has('10,9'), '中の 間に 入れて しまう');
+  T('岩が 3つ ある', C.MAPS.old_pipe.tiles.join('').split('O').length-1===3);
+}
+T('はじめは 亀裂が ある', C.tileAt('old_pipe',10,12)==='x', C.tileAt('old_pipe',10,12));
+stand('old_pipe', 10, 15, 'back');
+C.stepField(0,-1);                       // 岩(10,14)を 北へ おす → (10,13)
+T('岩が うごく', C.tileAt('old_pipe',10,13)==='O', C.tileAt('old_pipe',10,13));
+C.G.mode='field'; C.stepField(0,-1);     // さらに 北 → 亀裂に はまる
+T('亀裂が うまる', C.tileAt('old_pipe',10,12)==='.', C.tileAt('old_pipe',10,12));
+C.G.mode='field'; C.stepField(0,-1); C.G.mode='field'; C.stepField(0,-1);
+T('むこうへ わたれる', C.P.y<=12, 'y='+C.P.y);
+
+// ===== 9. 破れた 管を 見る =====
+talk('old_pipe', 16, 13, 'right');
+T('破れ目を 見る', C.G.flags.ch1_sawBreach===true);
+T('内側から 溶けている', said('中から'), log.join(' / ').slice(0,80));
+T('十年 閉じこめた 話', said('閉じこめた'));
+
+// ===== 10. 灯り 2つで 最奥が ひらく =====
+T('はじめは 隔壁が しまっている', C.tileAt('old_pipe',10,7)==='K', C.tileAt('old_pipe',10,7));
+talk('old_pipe', 10, 8, 'back');
+T('あけかたの ヒントが でる', said('両脇の 灯り'), log.join(' / ').slice(0,70));
+stand('old_pipe', 2, 10, 'left'); C.interact();
+T('灯り ひとつでは まだ ひらかない', C.tileAt('old_pipe',10,7)==='K');
+stand('old_pipe', 18, 10, 'right'); C.interact();
+T('灯り ふたつで ひらく', C.tileAt('old_pipe',10,7)==='.', C.tileAt('old_pipe',10,7));
+
+// ===== 11. オボロ =====
+clearLog();
+C.G.tactic='gungan';
+C.party.forEach(p=>{ p.hp=p.maxhp; p.mp=p.maxmp; });
+stand('old_pipe', 10, 3, 'back');
+C.interact();
+T('オボロの 名が 出る', said('オボロ'), log.join(' / ').slice(0,90));
+T('オボロに かてる', C.G.flags.ch1_oboroDown===true);
+T('原因は 管だと わかる', said('人の 血じゃ ない'));
+T('クエストが 片づく', C.G.quests.ch1_q2_pipe==='clear');
+
+// ===== 12. 章末：炉の 光が 濁っている =====
+clearLog();
+C.G.tactic='manual';
+C.triggerChapterEnd();
+T('章末が でる', said('炉の 光が、この十年'), log.join(' / ').slice(-90));
+T('炉が もとだと ほのめかす', said('もとの 火が 弱ってる'));
+T('第2章へ つながる', said('今度は 上へ'));
+T('ch1_cleared が たつ', C.G.flags.ch1_cleared===true);
+
+// ===== 13. セーブ/ロード =====
+const g=C.P.gold, lv=C.party[0].lv;
+T('セーブできる', C.saveGame(0)===true, C.lastSaveError);
+C.freshState();
+T('ロードできる', C.loadGame(0)===true);
+T('ロード：章が もどる', C.G.chapter===2);
+T('ロード：なかまが もどる', C.party.length===2);
+T('ロード：しかけが もどる', C.tileAt('old_pipe',10,12)==='.' && C.tileAt('old_pipe',10,7)==='.');
+T('ロード：おかねが もどる', C.P.gold===g);
+T('ロード：Lvが もどる', C.party[0].lv===lv);
+
+console.log('\n--- ch1_tour: ' + (n-ng) + '/' + n + ' 通過 ---');
+process.exit(ng ? 1 : 0);

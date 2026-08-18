@@ -21,7 +21,9 @@ const C = vm.runInContext('LQ4', ctx);
 const log = [];
 const UI = {
   msg(lines, done){ lines.forEach(l=>log.push(l)); done && done(); },
-  menu(items, title, onPick){ onPick(0); },
+  // ★章末の「これから」だけは「この しょうを つづける」を えらぶ。
+  //   0ばんを えらぶと 第1章へ すすんで しまい、序章の たしかめが できない。
+  menu(items, title, onPick){ onPick(title==='これから' ? 1 : 0); },
   hud(){}, label(){}, openTrade(){},
 };
 C.bind(C.NullView, UI, C.NullAudio);
@@ -251,9 +253,9 @@ T('広場へ はいれる', C.P.map==='rift_yard');
   T('ちてんから 町へ 入れる', C.P.map==='lower_dist', C.P.map+' '+C.P.x+','+C.P.y);
   // まだ 作って いない ちてん
   clearLog();
-  C.P.map='world'; C.P.x=23; C.P.y=16; C.P.dir='left'; C.G.mode='field';
+  C.P.map='world'; C.P.x=35; C.P.y=17; C.P.dir='left'; C.G.mode='field';
   C.interact();
-  T('まだ 入れない ちてんは 物語で 断られる', said('許可証'), log.join(' / ').slice(0,50));
+  T('まだ 入れない ちてんは 物語で 断られる', said('船頭'), log.join(' / ').slice(0,50));
   T('中の 人の ことばが 画面に 出ない', !said('作られます') && !said('未実装'));
   walkTo('lower_dist', 10, 13);
 }
@@ -388,7 +390,7 @@ clearLog();
 C.party.forEach(p=>{ p.hp=p.maxhp; p.mp=p.maxmp; p.status=null; });
 C.G.flags.ch0_umbraDown = true;
 C.triggerChapterEnd();
-T('章末が でる', said('正騎士に 任ずる'), log.join(' / ').slice(0,80));
+T('章末が でる', said('正騎士に 任ずる'), log.join(' / ').slice(0,120));
 T('ch0_cleared が たつ', C.G.flags.ch0_cleared===true);
 
 const goldBefore = C.P.gold, lvBefore = C.party[0].lv;

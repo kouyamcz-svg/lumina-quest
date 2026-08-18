@@ -116,6 +116,16 @@ const MIDBOSS = {
   trialdummy:{key:'trialdummy', name:'訓練用の 木人', hp:34, atk:3, def:4, agi:2, acts:1,
     exp:40, gold:0, art:'trialdummy',
     brace:{p:0.15, name:'かまえを かためた！'}},
+  // ---- 第1章ボス：あくむじゅう オボロ（朧の座）----
+  //   下層に 巣くった 親玉。管の 破れ目から 湧く ものを 束ねている。
+  oboro:{key:'oboro', name:'あくむじゅう オボロ', hp:420, atk:26, def:15, agi:12, acts:1,
+    exp:520, gold:340, art:'umbra', scale:1.35,
+    skill:{p:0.28, mul:1.30, name:'にじみの つめ'},
+    aoe:{p:0.20, lo:14, hi:22, name:'よどんだ ながれ'},
+    inflict:{type:'slow', p:0.20},
+    charge:{p:0.20, mul:2.0, tell:'管の 光を 吸いこんで いる…', name:'ひかりの ぎゃくりゅう'},
+    enrage:{at:0.35, atk:1.14, name:'オボロの 輪郭が ほどけた！'}},
+
   // ---- 序章：見習い試験の 仕上げ（セレンとの 模擬戦）----
   //   負けても やりなおせる。手加減の 描写を acts と atk で 出す。
   seren_spar:{key:'seren_spar', name:'見習い セレン', hp:70, atk:8, def:7, agi:14, acts:1,
@@ -143,6 +153,7 @@ const byMap = {
   rift_yard: ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
   world:     ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
   pipe_path: ['kagekakera','shihenchu','akumuga','yamiinu'],
+  old_pipe:  ['kansuiki','shokudai','hakoyami','yamiinu','sumibami'],
 };
 
 // ---------------- データ：マップ ----------------
@@ -180,7 +191,7 @@ const MAPS = {
     "~~~~~~...rrrrrrrrrrrrrr...............~~~~~~",
     "~~~~~~,.rQr....o......r...............~~~~~~",
     "~~~~~~.f.r............r.f...,.........~~~~~~",
-    "~~~~~~.o.............rQrrrrrrrrrrrr.f.~~~~~~",
+    "~~~~~~.o.............rVrrrrrrrrrrrr.f.~~~~~~",
     "~~~~~~....f........^..r..o.......rQr..~~~~~~",
     "~~~~~~.f...f..fffffff.r...........r...~~~~~~",
     "~~~~~~.^....o.fffffff.r...............~~~~~~",
@@ -196,7 +207,8 @@ const MAPS = {
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",],
     warpsXY:{
       '12,24':{to:'lower_dist', x:19, y:6},
-      '14,24':{to:'pipe_path',  x:13, y:13}
+      '14,24':{to:'pipe_path',  x:13, y:13},
+      '22,16':{to:'mid_dist',   x:10, y:13}
     }},
 
   // ============ 序章：イオの家（父の鍛冶場） ============
@@ -241,6 +253,51 @@ const MAPS = {
       '13,13':{to:'world', x:15, y:24}
     }},
 
+  // ============ 第1章：中層区（技師と 職人の 街。上層への 関所）============
+  mid_dist:{name:'中層区', theme:'sky', enc:false, tiles:[
+    "##########Q##########",
+    "#.........r.........#",
+    "#.#####...r...#####.#",
+    "#.#####...r...#####.#",
+    "#.##I##...r...##S##.#",
+    "#....n..t.r.t.......#",
+    "#rrrrrrrrrrrrrrrrrrr#",
+    "#..t......r......t..#",
+    "#.##P##...r...#####.#",
+    "#.#####...r..n#####.#",
+    "#.#####...r...#####.#",
+    "#.n.......r...#####.#",
+    "#rrrrrrrrrrrrrrrrrrr#",
+    "#......nt.r.t...n.C.#",
+    "##########G##########"],
+    warpsXY:{
+      '10,14':{to:'world', x:22, y:17}
+    }},
+
+  // ============ 第1章：旧管路（下層の 地下。管が 破れて 悪夢が 漏れる）============
+  //   しかけ：岩(O)で 亀裂(x)を 埋めて わたる ／ 光珠灯 2つで 最奥の 扉(K)
+  old_pipe:{name:'旧管路', theme:'sky', enc:true, encRate:0.12, encGrace:3, tiles:[
+    "#####################",
+    "q#ppppppppppppppppp#q",
+    "q#........B........#q",
+    "q#.................#q",
+    "q###.............###q",
+    "q###...........C.###q",
+    "q###.............###q",
+    "q#ppppppppKpppppppp#q",
+    "q#########.#########q",
+    "q#.................#q",
+    "qL.................Lq",
+    "q#.................#q",
+    "q##xxxxxxxxxxxxxxx##q",
+    "q#...............n.#q",
+    "q#...O....O....O...#q",
+    "q#.C...............#q",
+    "ppppppppp.ppppppppppp"],
+    warpsXY:{
+      '9,16':{to:'lower_dist', x:1, y:13}
+    }},
+
   // ============ 序章：下層区（地上生まれの移民と労働者の街） ============
   // ★でぐちは かならず 見て わかる ように する：
   //   G＝北の門／D＝イオの家の とびら／r＝道。ただの ゆかに ワープを おかない。
@@ -258,12 +315,13 @@ const MAPS = {
     "#.####....r....####.#",
     "#rrrrrrrrrrrrrr####r#",
     "#.#D#..tn.r..t.####.#",
-    "#.###.....r......C..#",
+    "#....r....r......C..#",
     "##########r##########"],
     warpsXY:{
       '3,12' :{to:'home_forge', x:7, y:9},
       '10,14':{to:'trial_yard', x:6, y:8},
       '10,0' :{to:'rift_yard',  x:10, y:13},
+      '1,13' :{to:'old_pipe',   x:9,  y:15},
       '20,6' :{to:'world',      x:13, y:24}
     }},
 
@@ -311,6 +369,14 @@ const MAPS = {
 
 // ---------------- データ：店・宿 ----------------
 const SHOPS = {
+  'mid_dist:S':[
+    {kind:'h',  name:'薬草',            v:20, price:8},
+    {kind:'wtr',name:'魔法の 聖水',     v:30, price:60},
+    {kind:'w',  name:'天空鋼の 短剣',   v:9,  price:520},
+    {kind:'w',  name:'白木の 長槍',     v:11, price:640},
+    {kind:'a',  name:'騎士団の 胴',     v:8,  price:480},
+    {kind:'a',  name:'銀の 胸当て',     v:9,  price:600},
+  ],
   'lower_dist:S':[
     {kind:'h',  name:'薬草',         v:20, price:8},
     {kind:'wtr',name:'魔法の 聖水', v:30, price:60},
@@ -320,7 +386,7 @@ const SHOPS = {
     {kind:'a',  name:'なめし革の 胴',    v:6,  price:200},
   ],
 };
-const INN_PRICE = {lower_dist:6};
+const INN_PRICE = {lower_dist:6, mid_dist:18};
 // ---------------- 状態 ----------------
 let G, P, party, reserve = [];
 function startChapter(no){
@@ -2352,7 +2418,16 @@ function switchChapter(no, newParty){
       return sl[k] || 1;
     };
     G.townState = 'NORMAL';   // ★まちの 状態は 章ごとに リセット（1章せんようの しくみ）
-    const inh = cd && cd.inheritParty ? (G.chapters||{})[cd.inheritParty] : null;
+    // ★ひきつぎ：ただ「まえの 章の きろく」を 見るだけだと、
+    //   章えらびで 直接 はじめた ときにも Lv1の きろくを 拾って しまう。
+    //   「その 章を おえた しるし」が あるときだけ ひきつぐ。
+    //   かきかた： inheritParty: 1   … きろくが あれば ひきつぐ（むかしの かたち）
+    //             inheritParty: {from:1, ifFlag:'ch0_cleared'}
+    const ip = cd && cd.inheritParty;
+    const ipFrom = (ip && typeof ip==='object') ? ip.from : ip;
+    const ipFlag = (ip && typeof ip==='object') ? ip.ifFlag : null;
+    let inh = ipFrom ? (G.chapters||{})[ipFrom] : null;
+    if(inh && ipFlag && !(inh.flags && inh.flags[ipFlag])) inh = null;
     if(inh && inh.party && inh.party.length){
       // ★まえの しょうの なかま・レベル・装備・しょじひんを ひきつぐ
       inh.party.forEach(o=>{ const m=reviveMember(o);
@@ -2372,12 +2447,25 @@ function switchChapter(no, newParty){
       }
       G.visited = {};                       // ★ほかの しょうの きろくを もちこさない
     G.ship = null; G.aboard = false;      // ★ふねは しょうごと
-      if(cd.gold!==undefined)   P.gold   = cd.gold|0;
-      if(cd.herbs!==undefined)  P.herbs  = cd.herbs|0;
-      if(cd.waters!==undefined) P.waters = cd.waters|0;
-      if(cd.equip && party[0]){
-        if(cd.equip.weapon) party[0].weapon = Object.assign({}, cd.equip.weapon);
-        if(cd.equip.armor)  party[0].armor  = Object.assign({}, cd.equip.armor);
+      // ★まえの 章から ひきついだ ときは、持ちものや 装備を 上書きしない。
+      //   上書きすると、そだてた 装備が 章の はじめに 消えて しまう。
+      const inherited = !!(inh && inh.party && inh.party.length);
+      if(!inherited){
+        if(cd.gold!==undefined)   P.gold   = cd.gold|0;
+        if(cd.herbs!==undefined)  P.herbs  = cd.herbs|0;
+        if(cd.waters!==undefined) P.waters = cd.waters|0;
+        // ★装備は 「しゅじんこうだけ」でも 「なかまごと」でも かける。
+        //   なかまごとに かかないと、章えらびで 直接 はじめた とき
+        //   ふたりめが 素手の まま 出てきて、ボスに 勝てない。
+        if(cd.equip){
+          const put = (m, e)=>{
+            if(!m || !e) return;
+            if(e.weapon) m.weapon = Object.assign({}, e.weapon);
+            if(e.armor)  m.armor  = Object.assign({}, e.armor);
+          };
+          if(cd.equip.weapon || cd.equip.armor) put(party[0], cd.equip);
+          else allMembers().forEach(m=>put(m, cd.equip[m.cls]));
+        }
       }
       G.visited[P.map] = true;
     }

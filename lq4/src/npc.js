@@ -45,6 +45,12 @@ const NPCS = {
       {text:['「下層区は 地上生まれの 街だ」',
              '「上の 連中は おれたちを 重い者と 呼ぶ」']}]},
     {at:'5,5', spr:'villagerB', name:'光珠管の 技師', lines:[
+      {when:{flag:'ch1_oboroDown'}, text:[
+        '技師「管の 光が 戻った。二十年で 初めてだ」',
+        '技師「……お前の 父さんに 見せたかったな」']},
+      {when:{flag:'ch1_pipeTold'}, text:[
+        '技師「三の 管だ。気を つけろ」',
+        '技師「十年 誰も 入って いない」']},
       {when:{flag:'ch0_mawTold'}, text:[
         '技師「あの 口だけの 獣、また 出たら 逃げろ」',
         '技師「……お前の 父さんは 逃げなかった。それだけだ」']},
@@ -80,6 +86,45 @@ const NPCS = {
 
   // ============ 序章：下層区（東門の 見張り）============
   // ※ フィールドへ 出る 前に、どこへ 行けるかを 教える
+  // ============ 第1章：中層区 ============
+  mid_dist: [
+    {at:'5,5', spr:'guardB', name:'任務書記', lines:[
+      {when:{flag:'ch1_pipeTold'}, text:[
+        '書記「旧管路か。……よく 昇降口を 開けさせたな」',
+        '書記「気を つけろ。十年 誰も 入って いない」']},
+      {when:{flag:'ch1_taskTaken'}, text:[
+        '書記「下層区の 技師に 話を 聞け」',
+        '書記「あの 男が いちばん 管を 知っている」']},
+      {text:['書記「合同任務の 者か。用紙を 出す」']}]},
+    {at:'13,9', spr:'butler', name:'上層の 使い', lines:[
+      {when:{flag:'ch1_oboroDown'}, text:[
+        '「……管だった、だと？」',
+        '「まあ、そういう ことも あるだろうな」',
+        '「わたしは 最初から そう 思って いたよ」']},
+      {text:['「下層にだけ 湧くそうだ。理由は 分かるだろう」']}]},
+    {at:'7,13', spr:'villagerB', name:'中層の 職人', lines:[
+      {when:{flag:'ch1_sawBreach'}, text:[
+        '「旧管路に 入ったのか。あそこは 十年 前に 塞がれた」',
+        '「塞いだ ときの 立ち会いが、下層の 鍛冶屋だった そうだ」']},
+      {text:['「中層は 静かな もんだ。湧くのは 下だけ」',
+             '「……なぜだと 思う？　管が 古いからさ」']}]},
+    {at:'16,13', spr:'elderWoman', name:'花売りの 女', lines:[
+      {text:['「上層の 庭園から 来る 花よ。中層じゃ 咲かないの」',
+             '「光が 足りないんですって」']}]},
+    {at:'2,11', spr:'guardA', name:'石段の 衛兵', lines:[
+      {text:['「上層へは 通せん。許可証は 中層までだ」',
+             '「……お嬢様の お名前でも な」']}]},
+  ],
+
+  // ============ 第1章：旧管路 ============
+  old_pipe: [
+    {at:'17,13', spr:'pipeobj', name:'破れた 管', lines:[
+      {when:{flag:'ch1_sawBreach'}, text:[
+        '裂け目は 内側から 溶けている。',
+        '十年 塞がれていた 管の 中で、何が 育ったのか。']},
+      {text:['管の 継ぎ目が 大きく 裂けている。']}]},
+  ],
+
   // ============ 序章：光珠管の 点検路 ============
   pipe_path: [
     {at:'8,7', spr:'shadowmaw', name:'かげの あぎと', lines:[
@@ -130,6 +175,27 @@ const NPCS = {
 };
 
 const QUESTS = {
+  // ============ 第1章 ============
+  ch1_q1_survey: {
+    id:'ch1_q1_survey', chapter:2, title:'下層区の 亀裂',
+    giver:'任務書記',
+    desc:'下層区にだけ 悪夢獣が 湧く 原因を 特定する。',
+    steps:[
+      {id:'ask', desc:'下層区の 技師に 話を 聞く', flag:'ch1_pipeTold'},
+    ],
+    reward:{}, next:'ch1_q2_pipe',
+  },
+  ch1_q2_pipe: {
+    id:'ch1_q2_pipe', chapter:2, title:'旧管路の 底',
+    giver:'光珠管の 技師',
+    desc:'下層区の 西はずれから 旧管路へ。破れ目の もとを 断つ。',
+    steps:[
+      {id:'breach', desc:'破れた 管を 見る',   flag:'ch1_sawBreach'},
+      {id:'boss',   desc:'オボロを 討ち取る', flag:'ch1_oboroDown'},
+    ],
+    reward:{}, next:null,
+  },
+
   ch0_q0_errand: {
     id:'ch0_q0_errand', chapter:1, title:'管の 影ばらい',
     giver:'光珠管の 技師',

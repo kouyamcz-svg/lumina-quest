@@ -44,6 +44,8 @@ const MAP_IDS = {
   home_forge: {region:'sky', kind:'in',   name:'イオの家',        scene:'SCENE_SKY_IN'},
   lower_dist: {region:'sky', kind:'town', name:'下層区',          scene:'SCENE_SKY_TOWN'},
   pipe_path:  {region:'sky', kind:'dgn',  name:'光珠管の 点検路', scene:'SCENE_SKY_TOWN'},
+  mid_dist:   {region:'sky', kind:'town', name:'中層区',        scene:'SCENE_SKY_TOWN'},
+  old_pipe:   {region:'sky', kind:'dgn',  name:'旧管路',        scene:'SCENE_SKY_TOWN'},
   trial_yard: {region:'sky', kind:'town', name:'見習い試験場',    scene:'SCENE_SKY_TOWN'},
   rift_yard:  {region:'sky', kind:'dgn',  name:'裂け目の広場',    scene:'SCENE_SKY_RIFT'},
 };
