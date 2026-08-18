@@ -99,11 +99,16 @@ function kill(k){
 // ============ すべての けっかいが いつか 開くか ============
 {
   C.freshState();
+  // ★けっかいは 章ごと。その 章に なって いないと 閉じない。
   Object.keys(C.WARDS).forEach(mp=>{
-    T('けっかい '+mp+' は はじめ 閉じている', C.wardBlocks(mp));
-    C.G.flags[C.WARDS[mp].flag] = true;
+    const wd = C.WARDS[mp];
+    C.G.chapter = wd.chapter;
+    C.G.flags[wd.flag] = false;
+    T('けっかい '+mp+' は はじめ 閉じている（第'+wd.chapter+'章）', C.wardBlocks(mp));
+    C.G.flags[wd.flag] = true;
     T('けっかい '+mp+' は めじるしで 開く', !C.wardBlocks(mp));
   });
+  C.G.chapter = 1;
 }
 
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');

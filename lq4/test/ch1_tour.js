@@ -122,6 +122,41 @@ T('見習い探しを たのまれる', C.G.flags.ch1_sonAsked===true);
 T('西の 昇降口と 言われる', said('西の 昇降口'), log.join(' / ').slice(0,70));
 T('クエストが たつ', C.G.quests.ch1_q4_son==='active');
 
+// ===== 6.7 点検路の 群れ：かんむれ（旧管路の 前）=====
+talk('lower_dist', 5, 6, 'back');
+T('点検路の 詰まりを 告げられる', C.G.flags.ch1_swarmTold===true);
+T('半年前の あぎとに つながる', said('口だけの、あれ'), log.join(' / ').slice(0,120));
+T('クエストが たつ', C.G.quests.ch1_q5_swarm==='active');
+T('点検路に 群れが 置かれる', C.tileAt('pipe_path',8,7)==='B', C.tileAt('pipe_path',8,7));
+
+// ★群れを 散らす まえは 旧管路に 下りられない
+stand('lower_dist', 2, 13, 'left');
+C.stepField(-1,0);
+T('先に 旧管路へは 行けない', C.P.map==='lower_dist', C.P.map);
+T('技師が 止める', said('まず 点検路だ'), log.join(' / ').slice(0,60));
+
+clearLog();
+C.G.tactic='gungan';
+C.party.forEach(p=>{ p.hp=p.maxhp; p.mp=p.maxmp; });
+const g5=C.P.gold;
+stand('pipe_path', 8, 8, 'back');
+C.interact();
+T('かんむれに かてる', C.G.flags.ch1_swarmDown===true);
+T('半年前と くらべる', said('あの ときは 一匹'), log.join(' / ').slice(0,150));
+T('束ねられて いた と 言う', said('手綱'));
+T('行き先が 旧管路だと わかる', said('旧管路ね'));
+T('倒すと 道が あく', C.tileAt('pipe_path',8,7)==='.', C.tileAt('pipe_path',8,7));
+T('クエストが 片づく', C.G.quests.ch1_q5_swarm==='clear');
+C.G.tactic='manual';
+// 技師に 報告して 礼を もらう
+{
+  const g6=C.P.gold;
+  talk('lower_dist', 5, 6, 'back');
+  T('技師に 報告できる', C.G.flags.ch1_swarmPaid===true);
+  T('礼を もらえる', C.P.gold===g6+160, C.P.gold+' ← '+g6);
+  T('旧管路へ 向かえと 言われる', said('旧管路だ'), log.join(' / ').slice(-70));
+}
+
 // ===== 7. 旧管路へ =====
 stand('lower_dist', 2, 13, 'left');
 C.stepField(-1,0);
@@ -146,17 +181,6 @@ C.G.mode='field'; C.stepField(0,-1);     // さらに 北 → 亀裂に はま�
 T('亀裂が うまる', C.tileAt('old_pipe',10,12)==='.', C.tileAt('old_pipe',10,12));
 C.G.mode='field'; C.stepField(0,-1); C.G.mode='field'; C.stepField(0,-1);
 T('むこうへ わたれる', C.P.y<=12, 'y='+C.P.y);
-
-// ===== 8.5 中ボス：かんむれ =====
-clearLog();
-C.G.tactic='gungan';
-C.party.forEach(p=>{ p.hp=p.maxhp; p.mp=p.maxmp; });
-stand('old_pipe', 15, 13, 'right');
-C.interact();
-T('かんむれに かてる', C.G.flags.ch1_swarmDown===true);
-T('束ねられて いた と 言う', said('手綱'), log.join(' / ').slice(-70));
-T('倒すと 道が あく', C.tileAt('old_pipe',16,13)==='.', C.tileAt('old_pipe',16,13));
-C.G.tactic='manual';
 
 // ===== 8.7 見習いを 見つける =====
 C.party.forEach(p=>{ p.hp=1; });

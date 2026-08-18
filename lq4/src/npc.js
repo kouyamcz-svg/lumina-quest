@@ -240,6 +240,15 @@ const QUESTS = {
     ],
     reward:{}, next:'ch1_q2_pipe',
   },
+  ch1_q5_swarm: {
+    id:'ch1_q5_swarm', chapter:2, title:'詰まった 点検路',
+    giver:'光珠管の 技師',
+    desc:'東門の 外の 点検路。奥の 間に 溜まった 群れを 散らす。',
+    steps:[
+      {id:'clear', desc:'かんむれを 散らす', flag:'ch1_swarmDown'},
+    ],
+    reward:{}, next:'ch1_q2_pipe',
+  },
   ch1_q4_son: {
     id:'ch1_q4_son', chapter:2, title:'帰らない 子',
     giver:'見習いの 母',

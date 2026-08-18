@@ -20,3 +20,11 @@ for(const lv of [8,9,10,11,12]){
     C.startBattle('oboro'); if(!lost) w++; }
   console.log('Lv'+lv+'　勝率 '+(w/2).toFixed(1)+'%');
 }
+
+// ---- かんむれ（点検路の 群れ。旧管路の 前）----
+console.log('--- かんむれ ---');
+for(const lv of [8,9,10]){
+  let w=0; for(let i=0;i<200;i++){ set(lv); C.P.map='pipe_path'; C.G.mode='field'; lost=false;
+    C.startBattle('kanmure'); if(!lost) w++; }
+  console.log('Lv'+lv+'　勝率 '+(w/2).toFixed(1)+'%');
+}

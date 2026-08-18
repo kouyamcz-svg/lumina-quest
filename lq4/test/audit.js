@@ -258,7 +258,15 @@ Object.keys(CHD.CH).forEach(no=>{
     if(!C.MAPS[mp]) return;
     if(k.indexOf(':')>=0){
       const [x,y] = k.split(':')[1].split(',').map(Number);
-      T('ボスの ますが Bに なっている '+k, tileAt(mp,x,y)==='B', 'いまは「'+tileAt(mp,x,y)+'」');
+      // ★物語の 途中で 置かれる ボスも ある（setTiles で 'B' に する）。
+      //   その ばあいは、どこかの 会話が その ますを 'B' に して いる こと。
+      const placed = Object.keys(CHD.CH).some(no2=>
+        (CHD.CH[no2].talkEvents||[]).some(e=>
+          (e.setTiles ? (Array.isArray(e.setTiles)?e.setTiles:[e.setTiles]) : [])
+            .some(o=>(o.map===mp) && o.x===x && o.y===y && o.ch==='B')));
+      T('ボスの ますが Bに なっている '+k,
+        tileAt(mp,x,y)==='B' || placed,
+        'いまは「'+tileAt(mp,x,y)+'」／物語で 置かれる：'+placed);
       const near = [[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>!blocked(mp,x+dx,y+dy));
       T('ボスに たどりつける '+k, near);
     }else{
