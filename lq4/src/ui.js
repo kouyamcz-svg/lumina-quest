@@ -486,9 +486,9 @@ function openSwap(){
 // ★がめん ぜんたいに おおきく だす。
 //   ちいさな メッセージまどに ながく ならべると よみにくい ため。
 const STATUS_NAME = {sleep:'眠り', confuse:'混乱', freeze:'凍り', slow:'鈍り'};
-const CLASS_NAME  = {lion:'このえへい', bald:'しょうにん', sena:'うらないし', ruka:'おどりこ',
-                     zef:'ろうけんじゃ', mio:'けんじゃの でし',
-                     sora:'ゆうしゃ', lumia:'そうりょ', dan:'せんし'};
+// ★IVの なかまの 肩書き。LQ3の ものが そのまま のこって いた。
+const CLASS_NAME  = {io:'見習い騎士', seren:'槍の 使い手',
+                     noe:'夢守り', amane:'光の 巫女'};
 function className(cls){ return CLASS_NAME[cls] || ''; }
 const statusEl = $('status');
 let statusPage = 0, statusWho = 0;
@@ -1090,7 +1090,7 @@ function chapterSelect(){
     const c = CHAPTERS_DATA.get(no);
     const nm = (c.party||[]).map(k=>(C.CLASSES[k]||{}).name||k);
     const who = nm.length>2 ? nm[0]+'たち' : nm.join('・');   // ★ながい れつは みきれる ため
-    return '第'+no+'しょう　'+c.title+'（'+who+'）';
+    return '第'+no+'章　'+c.title+'（'+who+'）';
   }).concat(['戻る']);
   menu(items, '章を 選ぶ', (k)=>{
     if(k>=nos.length){ titleScreen(); return; }

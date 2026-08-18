@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 00:15 JST", "build":"ea533795","assets_sha": "f716ed9d", "lines": {"world": 104, "npc": 334, "chapters": 905, "bgm": 979, "view2d": 1919, "core": 2582, "view": 1394, "ui": 1129}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 08:25 JST", "build":"a28a0f50","assets_sha": "f716ed9d", "lines": {"world": 104, "npc": 334, "chapters": 905, "bgm": 979, "view2d": 1919, "core": 2582, "view": 1394, "ui": 1129}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -5396,14 +5396,14 @@ function offerNextChapter(next, title, isFinal){
   G.mode = 'msg';
   if(!ready){
     U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊',
-           '（つづきの しょうは これから つくります）'], () => { G.mode='field'; });
+           '（つづきの 章は これから 作ります）'], () => { G.mode='field'; });
     return;
   }
   const nc = CHD.get(next);
   U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊',
-         'つぎは 第' + next + 'しょう「' + nc.title + '」。'], () => {
+         'つぎは 第' + next + '章「' + nc.title + '」。'], () => {
     G.mode = 'menu';
-    U.menu(['第' + next + 'しょうへ すすむ', 'この しょうを つづける'], 'これから', (k) => {
+    U.menu(['第' + next + '章へ 進む', 'この 章を 続ける'], 'これから', (k) => {
       if(k === 0){
         switchChapter(next);
         G.mode = 'msg';
@@ -5413,7 +5413,7 @@ function offerNextChapter(next, title, isFinal){
         // ★しょうの はじまりの せつめい（opening）を ここでも だす。
         //   まえは ニューゲームで その しょうから はじめた とき しか でて おらず、
         //   ふつうに すすめると ぜんしょうで せつめいが とんで いた。
-        V.chapterCard('第' + next + 'しょう', nc.title, () => {
+        V.chapterCard('第' + next + '章', nc.title, () => {
           const open = nc.opening;
           if(open && open.length) U.msg(open.slice(), () => { G.mode = 'field'; });
           else G.mode = 'field';
@@ -8870,9 +8870,9 @@ function openSwap(){
 // ★がめん ぜんたいに おおきく だす。
 //   ちいさな メッセージまどに ながく ならべると よみにくい ため。
 const STATUS_NAME = {sleep:'眠り', confuse:'混乱', freeze:'凍り', slow:'鈍り'};
-const CLASS_NAME  = {lion:'このえへい', bald:'しょうにん', sena:'うらないし', ruka:'おどりこ',
-                     zef:'ろうけんじゃ', mio:'けんじゃの でし',
-                     sora:'ゆうしゃ', lumia:'そうりょ', dan:'せんし'};
+// ★IVの なかまの 肩書き。LQ3の ものが そのまま のこって いた。
+const CLASS_NAME  = {io:'見習い騎士', seren:'槍の 使い手',
+                     noe:'夢守り', amane:'光の 巫女'};
 function className(cls){ return CLASS_NAME[cls] || ''; }
 const statusEl = $('status');
 let statusPage = 0, statusWho = 0;
@@ -9474,7 +9474,7 @@ function chapterSelect(){
     const c = CHAPTERS_DATA.get(no);
     const nm = (c.party||[]).map(k=>(C.CLASSES[k]||{}).name||k);
     const who = nm.length>2 ? nm[0]+'たち' : nm.join('・');   // ★ながい れつは みきれる ため
-    return '第'+no+'しょう　'+c.title+'（'+who+'）';
+    return '第'+no+'章　'+c.title+'（'+who+'）';
   }).concat(['戻る']);
   menu(items, '章を 選ぶ', (k)=>{
     if(k>=nos.length){ titleScreen(); return; }

@@ -988,14 +988,14 @@ function offerNextChapter(next, title, isFinal){
   G.mode = 'msg';
   if(!ready){
     U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊',
-           '（つづきの しょうは これから つくります）'], () => { G.mode='field'; });
+           '（つづきの 章は これから 作ります）'], () => { G.mode='field'; });
     return;
   }
   const nc = CHD.get(next);
   U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊',
-         'つぎは 第' + next + 'しょう「' + nc.title + '」。'], () => {
+         'つぎは 第' + next + '章「' + nc.title + '」。'], () => {
     G.mode = 'menu';
-    U.menu(['第' + next + 'しょうへ すすむ', 'この しょうを つづける'], 'これから', (k) => {
+    U.menu(['第' + next + '章へ 進む', 'この 章を 続ける'], 'これから', (k) => {
       if(k === 0){
         switchChapter(next);
         G.mode = 'msg';
@@ -1005,7 +1005,7 @@ function offerNextChapter(next, title, isFinal){
         // ★しょうの はじまりの せつめい（opening）を ここでも だす。
         //   まえは ニューゲームで その しょうから はじめた とき しか でて おらず、
         //   ふつうに すすめると ぜんしょうで せつめいが とんで いた。
-        V.chapterCard('第' + next + 'しょう', nc.title, () => {
+        V.chapterCard('第' + next + '章', nc.title, () => {
           const open = nc.opening;
           if(open && open.length) U.msg(open.slice(), () => { G.mode = 'field'; });
           else G.mode = 'field';
