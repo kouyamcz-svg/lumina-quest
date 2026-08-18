@@ -23,4 +23,15 @@ import re as _re
 shell = _re.sub(r'assets\.js\?v=[0-9a-f]+', 'assets.js?v='+asha, shell)
 
 open('index.html','w').write(shell)
+
+# ★サービスワーカーの キャッシュ名を ビルドごとに かえる。
+#   ここを 固定に して いた ため、ふるい index.html が いつまでも
+#   のこり、なおした はずの ものが 端末に とどかなかった。
+bsha = hashlib.sha1(shell.encode('utf-8')).hexdigest()[:8]
+sw = open('sw.js', encoding='utf-8').read()
+sw2 = _re.sub(r"const CACHE='lq4-[0-9a-zA-Z]+';", "const CACHE='lq4-"+bsha+"';", sw)
+assert sw2 != sw or ("lq4-"+bsha) in sw, 'sw.js の CACHE を みつけられない'
+open('sw.js','w',encoding='utf-8').write(sw2)
+
 print('index.html', len(shell)//1024, 'KB /', json.dumps(counts))
+print('sw CACHE = lq4-'+bsha)

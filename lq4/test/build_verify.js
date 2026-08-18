@@ -28,6 +28,16 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
   const bad = html.match(/LQ3_[A-Z_]+|LQ3View|const LQ3|window\.LQ3/g) || [];
   T('LQ3の しるしが のこって いない', bad.length===0, bad.slice(0,3).join(','));
 }
+// ★サービスワーカーの キャッシュ名が この ビルドの ものに なっている こと
+//   （固定の ままだと、なおしても 端末に ふるい ものが のこる）
+{
+  const crypto = require('crypto');
+  const sw = fs.readFileSync('sw.js','utf8');
+  const want = 'lq4-' + crypto.createHash('sha1').update(html).digest('hex').slice(0,8);
+  T('sw.js の キャッシュ名が ビルドと そろっている', sw.includes("const CACHE='"+want+"'"),
+    (sw.match(/const CACHE='[^']*'/)||[''])[0] + ' / ほしいのは ' + want);
+}
+
 // ★タイトルの ずれ：Ⅲの なまえが どこにも のこって いない こと
 {
   const files = ['index.html','shell.html','sw.js'].concat(MODS.map(m=>'src/'+m+'.js'));

@@ -860,6 +860,17 @@ const Title = (function(){
     g.fillStyle='rgba(200,222,255,0.9)';
     g.font=small+'px "Hiragino Mincho ProN","Yu Mincho",serif';
     g.fillText('〜 天空のルミナ 〜', w/2, y+big*1.78);
+    // ★どの ビルドが 動いて いるか（キャッシュの 切り分け用）
+    try{
+      const b = window.LQ4_BUILD;
+      if(b && b.at){
+        g.font=Math.max(9, sc*0.020)+'px sans-serif';
+        g.fillStyle='rgba(190,208,236,0.55)';
+        g.textAlign='right';
+        g.fillText(b.at.replace('T',' '), w-sc*0.03, h-sc*0.02);
+        g.textAlign='center';
+      }
+    }catch(e){}
     // かざりの よこせん
     g.strokeStyle='rgba(160,200,255,0.45)'; g.lineWidth=Math.max(1,sc*0.002);
     const lw=sc*0.16;

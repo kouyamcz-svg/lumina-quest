@@ -1,8 +1,10 @@
 // ルミナクエストIV サービスワーカー
 // assets.js は ?v=… つきで よみこむ。ないようが かわると URLも かわるので、
 // ふるい キャッシュは つかわれない（え を さしかえても ふるい ままに なる ふぐあいの たいさく）。
-const CACHE='lq4-v1';
-const ASSETS=['./','./index.html','./assets.js'];   // field.mp3 は はじめて つかう ときに キャッシュ
+const CACHE='lq4-5b58c9e7';
+// ★installで index.html を 先に とりこむと、ふるい ものを つかみ続ける ことが ある。
+//   ここでは からの まま はじめて、つかった ものだけ ためる。
+const ASSETS=[];
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
@@ -22,6 +24,8 @@ self.addEventListener('fetch',e=>{
     return;
   }
   // それ いがいは ネットゆうせん（こうしんを すぐ うけとる）
+  //   ★キャッシュ名が ビルドごとに かわる ので、
+  //     つながらない ときに 出る ひかえも「その ビルドの もの」に なる。
   e.respondWith(
     fetch(e.request).then(res=>{
       const copy=res.clone(); caches.open(CACHE).then(c=>c.put(e.request,copy)); return res;
