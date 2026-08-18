@@ -207,6 +207,17 @@ T('立ち合いの あと 本人が その ますに 立つ',
   C.tileAt('trial_yard',9,4)==='n', C.tileAt('trial_yard',9,4));
 C.interact();
 T('セレンが くわわる', C.party.length===2 && C.party[1].cls==='seren');
+// ★話した ばしょに 立ったまま 仲間に なり、うごくと ついてくる
+T('その場に 立ったまま 仲間に なる',
+  C.G.trail[0] && C.G.trail[0][0]===9 && C.G.trail[0][1]===4,
+  JSON.stringify(C.G.trail[0]));
+{
+  const before = C.G.trail[0].slice();
+  C.G.mode='field'; C.stepField(0,1);
+  T('うごくと ついてくる（1歩 おくれ）',
+    C.G.trail[0][0]===9 && C.G.trail[0][1]===5, JSON.stringify(C.G.trail[0])+' ← '+JSON.stringify(before));
+  C.G.mode='field'; C.stepField(0,-1);
+}
 T('セレンは せんとうと おなじLv', C.party[1].lv===lvAfterTrial, C.party[1].lv+'/'+lvAfterTrial);
 T('セレンは 槍を もつ', C.party[1].weapon && C.party[1].weapon.name.indexOf('槍')>=0);
 T('地図の セレンが 消える（2人に ならない）',

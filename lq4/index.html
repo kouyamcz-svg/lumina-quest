@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18 22:07 JST", "build":"a9b4e2f2","assets_sha": "f716ed9d", "lines": {"world": 100, "npc": 194, "chapters": 491, "bgm": 979, "view2d": 1919, "core": 2444, "view": 1394, "ui": 1129}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18 22:54 JST", "build":"83661620","assets_sha": "f716ed9d", "lines": {"world": 100, "npc": 194, "chapters": 491, "bgm": 979, "view2d": 1919, "core": 2454, "view": 1394, "ui": 1129}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -4626,6 +4626,7 @@ function maybeEncounter(){
 
 // ---------------- NPC・施設 ----------------
 function talkNPC(x,y){
+  G._joinAt = [x, y];        // ★この人が 仲間に なる ときの 立ち位置
   const entry = NPCDATA.npcAt(P.map, x, y);
   G.mode='msg';
   if(!entry){ U.msg(['「……」'], ()=>{ G.mode='field'; }); return; }
@@ -4671,6 +4672,15 @@ function runTalkEvent(npcName){
         if(j.armor)  m.armor  = Object.assign({}, j.armor);
       }
     });
+    // ★くわわった 人は「いま 立って いた ところ」から ついてくる。
+    //   たいれつの いちは 足あと（trail）で きまる。そろえないと、
+    //   話した とたんに 主人公の うしろへ ワープして 見える。
+    if(G._joinAt){
+      G.trail = G.trail || [];
+      G.trail.unshift([G._joinAt[0], G._joinAt[1]]);
+      while(G.trail.length > 8) G.trail.pop();
+      V.setActors && V.setActors(true);
+    }
   }
   if(e.startQuota){                              // ★いらいを うける
     G.quota = {n:0, need:e.startQuota.need|0, flag:e.startQuota.flag};

@@ -776,6 +776,7 @@ function maybeEncounter(){
 
 // ---------------- NPC・施設 ----------------
 function talkNPC(x,y){
+  G._joinAt = [x, y];        // ★この人が 仲間に なる ときの 立ち位置
   const entry = NPCDATA.npcAt(P.map, x, y);
   G.mode='msg';
   if(!entry){ U.msg(['「……」'], ()=>{ G.mode='field'; }); return; }
@@ -821,6 +822,15 @@ function runTalkEvent(npcName){
         if(j.armor)  m.armor  = Object.assign({}, j.armor);
       }
     });
+    // ★くわわった 人は「いま 立って いた ところ」から ついてくる。
+    //   たいれつの いちは 足あと（trail）で きまる。そろえないと、
+    //   話した とたんに 主人公の うしろへ ワープして 見える。
+    if(G._joinAt){
+      G.trail = G.trail || [];
+      G.trail.unshift([G._joinAt[0], G._joinAt[1]]);
+      while(G.trail.length > 8) G.trail.pop();
+      V.setActors && V.setActors(true);
+    }
   }
   if(e.startQuota){                              // ★いらいを うける
     G.quota = {n:0, need:e.startQuota.need|0, flag:e.startQuota.flag};
