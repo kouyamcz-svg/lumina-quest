@@ -365,6 +365,30 @@ function buildAtlas(){
     peak(2+(v%2),13,7); peak(9,15,6);
   });
 
+  // ---------- 光珠管（IVから）----------
+  // 街に 光を おくる 白い 管。かべ ぞいに はっている。
+  //   p＝よこ向き ／ q＝たて向き。中を 青白い 光が ながれる。
+  atlas.pipeH = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.skW1);                     // 下じきは かべ
+    R(g,0,4,s,8,P16.sk1);                      // 管の 胴
+    R(g,0,4,s,1,P16.sk3);
+    R(g,0,11,s,1,P16.skW0);
+    R(g,0,7,s,2,P16.orb1);                     // 中を ながれる 光
+    R(g,0,7,s,1,P16.orb2);
+    if(v%2===0){ R(g,3,3,3,10,P16.skD1); R(g,3,3,3,1,P16.sk3); }   // とめ金
+    else { R(g,10,3,3,10,P16.skD1); R(g,10,3,3,1,P16.sk3); }
+  });
+  atlas.pipeV = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.skW1);
+    R(g,4,0,8,s,P16.sk1);
+    R(g,4,0,1,s,P16.sk3);
+    R(g,11,0,1,s,P16.skW0);
+    R(g,7,0,2,s,P16.orb1);
+    R(g,7,0,1,s,P16.orb2);
+    if(v%2===0){ R(g,3,3,10,3,P16.skD1); R(g,3,3,1,3,P16.sk3); }
+    else { R(g,3,10,10,3,P16.skD1); R(g,3,10,1,3,P16.sk3); }
+  });
+
   // ---------- 屋内（IVから）----------
   // 板の 床：たてに ながい 板を ならべる。石の 床と まちがえない ように。
   atlas.woodfloor = tile((g,s)=>{
@@ -900,6 +924,8 @@ function tileArt(ch, theme){
     case 'o': return ice?atlas.icicle : atlas.rock;
     case 'O': return atlas.rockPush;      // ★動かせる岩
     case 'x': return atlas.pit;           // ★穴
+    case 'p': return atlas.pipeH;         // ★光珠管（よこ）
+    case 'q': return atlas.pipeV;         // ★光珠管（たて）
     case 'L': return atlas.lampOff;       // ★光珠灯（消）
     case 'l': return atlas.lampOn;        // ★光珠灯（点）
     case 't': return (sky||theme==='indoor') ? atlas.orblamp : atlas.torch;

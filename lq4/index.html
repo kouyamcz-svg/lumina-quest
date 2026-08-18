@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18T03:38:43", "assets_sha": "2fb97051", "lines": {"world": 100, "npc": 190, "chapters": 438, "bgm": 979, "view2d": 1887, "core": 2440, "view": 1394, "ui": 1010}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-18T04:14:44", "assets_sha": "2fb97051", "lines": {"world": 100, "npc": 196, "chapters": 444, "bgm": 979, "view2d": 1913, "core": 2440, "view": 1394, "ui": 1010}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -351,6 +351,12 @@ const NPCS = {
   pipe_path: [
     {at:'8,7', spr:'shadowmaw', name:'かげの あぎと', lines:[
       {text:['黒い 塊が 管に 貼りついている。']}]},
+    {at:'9,7', spr:'villagerB', name:'こわれた 管', lines:[
+      {when:{flag:'ch0_mawFled'}, text:[
+        '管の 継ぎ目が 内側から 溶けている。',
+        '光は 通っているが、色が 濁っている。']},
+      {text:['管の 継ぎ目に、黒い すすの ような ものが こびりついている。',
+             '拭っても 指に つかない。']}]},
   ],
 
   // ============ 序章：裂け目の広場（夜） ============
@@ -579,7 +585,8 @@ const CH = {
       pipe_path: {
         flag:'ch0_pipeLit',
         open:[{x:9, y:5, ch:'.'}],
-        msg:['管に 光が 通った。','奥の 間の 壁が 一枚、静かに ずれた。'],
+        msg:['光珠灯が ふたつとも ともった。',
+             '管を 流れる 光が 太く なり、点検口の 錠が 外れた。'],
       },
       rift_yard: {
         flag:'ch0_gateOpen',
@@ -590,6 +597,11 @@ const CH = {
     },
     // --- しかけ：扉（かぎでは 開かない ものは ここに 理由を 書く）---
     locks: {
+      'pipe_path:9,5': {
+        lockMsg:['管の 点検口。金具で 固く 締めてある。',
+                 '「灯り 二基 点火の うえ 開放の こと」と 彫ってある。',
+                 'イオ「……両脇の 光珠灯か」'],
+      },
       'rift_yard:16,5': {
         lockMsg:['固く 閉ざされた 扉。',
                  '両脇の 光珠が ふたつとも 消えている。',
@@ -2239,6 +2251,30 @@ function buildAtlas(){
     peak(2+(v%2),13,7); peak(9,15,6);
   });
 
+  // ---------- 光珠管（IVから）----------
+  // 街に 光を おくる 白い 管。かべ ぞいに はっている。
+  //   p＝よこ向き ／ q＝たて向き。中を 青白い 光が ながれる。
+  atlas.pipeH = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.skW1);                     // 下じきは かべ
+    R(g,0,4,s,8,P16.sk1);                      // 管の 胴
+    R(g,0,4,s,1,P16.sk3);
+    R(g,0,11,s,1,P16.skW0);
+    R(g,0,7,s,2,P16.orb1);                     // 中を ながれる 光
+    R(g,0,7,s,1,P16.orb2);
+    if(v%2===0){ R(g,3,3,3,10,P16.skD1); R(g,3,3,3,1,P16.sk3); }   // とめ金
+    else { R(g,10,3,3,10,P16.skD1); R(g,10,3,3,1,P16.sk3); }
+  });
+  atlas.pipeV = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.skW1);
+    R(g,4,0,8,s,P16.sk1);
+    R(g,4,0,1,s,P16.sk3);
+    R(g,11,0,1,s,P16.skW0);
+    R(g,7,0,2,s,P16.orb1);
+    R(g,7,0,1,s,P16.orb2);
+    if(v%2===0){ R(g,3,3,10,3,P16.skD1); R(g,3,3,1,3,P16.sk3); }
+    else { R(g,3,10,10,3,P16.skD1); R(g,3,10,1,3,P16.sk3); }
+  });
+
   // ---------- 屋内（IVから）----------
   // 板の 床：たてに ながい 板を ならべる。石の 床と まちがえない ように。
   atlas.woodfloor = tile((g,s)=>{
@@ -2774,6 +2810,8 @@ function tileArt(ch, theme){
     case 'o': return ice?atlas.icicle : atlas.rock;
     case 'O': return atlas.rockPush;      // ★動かせる岩
     case 'x': return atlas.pit;           // ★穴
+    case 'p': return atlas.pipeH;         // ★光珠管（よこ）
+    case 'q': return atlas.pipeV;         // ★光珠管（たて）
     case 'L': return atlas.lampOff;       // ★光珠灯（消）
     case 'l': return atlas.lampOn;        // ★光珠灯（点）
     case 't': return (sky||theme==='indoor') ? atlas.orblamp : atlas.torch;
@@ -3987,15 +4025,15 @@ const MAPS = {
     "#################",
     "#################",
     "##.............##",
-    "##.#.#########.##",
-    "##.#.........#.##",
-    "##.#.#.#####.#.##",
-    "##.L.#.C...#.#.##",
-    "##.#.#..n..#.#.##",
-    "##.#.#.....#.L.##",
-    "##.#.#######.#.##",
-    "##.#.........#.##",
-    "##.###########.##",
+    "##.#.ppppppppp.##",
+    "##.q.........q.##",
+    "##.q.ppppKpp.q.##",
+    "##.L.q.C...q.q.##",
+    "##.q.q..nn.q.q.##",
+    "##.q.q.....q.q.##",
+    "##.q.ppppppp.q.##",
+    "##.q.........q.##",
+    "##.ppppppppppp.##",
     "##.............##",
     "#############.###"],
     warpsXY:{
@@ -4210,7 +4248,7 @@ const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
-                       'O','x','L','l']);
+                       'O','x','L','l','p','q']);   // p/q＝光珠管（かべ あつかい）
 // ★しかけ用の タイル（IVから）
 //   O 動かせる岩（押せる）／x 穴（岩で 埋まる）／L 消えた光珠灯／l ついた光珠灯
 //   K 施錠された扉（かぎで あく）
