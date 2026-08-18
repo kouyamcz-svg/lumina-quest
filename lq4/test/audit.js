@@ -187,6 +187,15 @@ Object.keys(C.MAPS).forEach(mp=>{
 //   「話しかけられない NPC」に なる ことが ある（じっさいに でた）。
 // ============================================================
 const NPCD = vm.runInContext('NPCDATA', ctx);
+// 絵（assets.js）と えがき方（view2d.js）も 見る
+let CHRD={}, MOND={}, V2SRC='';
+try{
+  const ac = {console, window:{}}; ac.globalThis = ac; vm.createContext(ac);
+  vm.runInContext(fs.readFileSync('assets.js','utf8'), ac, {filename:'assets.js'});
+  CHRD = vm.runInContext('CHR', ac) || {};
+  MOND = vm.runInContext('MON', ac) || {};
+  V2SRC = fs.readFileSync('src/view2d.js','utf8');
+}catch(e){}
 Object.keys(NPCD.NPCS).forEach(mp=>{
   (NPCD.NPCS[mp]||[]).forEach(e=>{
     const [x,y] = e.at.split(',').map(Number);
@@ -258,6 +267,27 @@ Object.keys(CHD.CH).forEach(no=>{
     }
   });
 });
+
+// ★人の 絵を つかう ボスの 大きさ：
+//   ★まもの と おなじ ばいりつで えがくと、人だけ 大きく 見える
+//     （立ち合いの セレンが イオの 1.5ばいに なって いた）。
+//     人の 絵（CHR）を つかう ボスは、地図では 人の 大きさで えがく こと。
+{
+  Object.keys(CHD.CH).forEach(no=>{
+    const bs = CHD.CH[no].bosses || {};
+    Object.keys(bs).forEach(k=>{
+      const e = C.MIDBOSS[bs[k].key];
+      if(!e || !e.art) return;
+      const isChr = !!CHRD[e.art], isMon = !!MOND[e.art];
+      T('ボスの 絵が どこかに ある '+e.name, isChr || isMon, 'art='+e.art);
+      if(isChr && !isMon){
+        // 人の 絵を つかう ボスは、地図で 人の 大きさに そろえる しくみを 通る
+        T('人の 絵の ボスは 人の 大きさで えがく '+e.name,
+          V2SRC.includes('a._isChr ? chrDrawScale(s) : sc'), 'view2d.js に しくみが ない');
+      }
+    });
+  });
+}
 
 // ★人が 二重に 見えない こと：
 //   おなじ人の なまえが、1まいの 地図で NPCと ボスますに 同時に

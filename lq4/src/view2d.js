@@ -1741,11 +1741,16 @@ function drawBoss(dx,dy,ts,tx,ty){
   const arts = [];
   const bi = C.bossInfoAt ? C.bossInfoAt(C.P.map, tx, ty) : null;
   if(bi){
+    // ★人の 絵を つかう ボス（立ち合いの セレンなど）は、まもの と おなじ
+    //   大きさで えがくと 人だけ 大きく 見える。人は 人の 大きさに そろえる。
     const pick = (key)=>{
       const b = C.MIDBOSS && C.MIDBOSS[key];
       const art = (b && b.art) || key;
-      return (MONREF && (MONREF[art] || MONREF[key]))
-          || (CHRREF && (CHRREF[art] || CHRREF[key])) || null;
+      const mon = MONREF && (MONREF[art] || MONREF[key]);
+      if(mon) return mon;
+      const chr = CHRREF && (CHRREF[art] || CHRREF[key]);
+      if(chr){ const o = Object.create(chr); o._isChr = true; return o; }
+      return null;
     };
     const a1 = pick(bi.key);
     if(a1) arts.push(a1);
@@ -1765,7 +1770,7 @@ function drawBoss(dx,dy,ts,tx,ty){
     const imgs = arts.map(a=>getImg(a.src || a.front));
     imgs.forEach(im=>{ if(!(im.complete && im.naturalWidth)) ok = false; });
     if(ok){
-      const ws = arts.map(a=>a.w*sc);
+      const ws = arts.map(a=>Math.round(a.w*(a._isChr ? chrDrawScale(s) : sc)));
       let minw = ws[0];
       ws.forEach(w=>{ if(w<minw) minw=w; });
       const ov = pair ? Math.round(minw*0.15) : 0;
@@ -1773,9 +1778,10 @@ function drawBoss(dx,dy,ts,tx,ty){
       ws.forEach(w=>{ total += w; });
       let x = dx + s/2 - total/2;
       arts.forEach((a, i)=>{
-        const hh = a.h*sc;
-        cx.drawImage(imgs[i], Math.round(x),
-          Math.round(dy + s*0.95 - hh), ws[i], hh);
+        const csc = a._isChr ? chrDrawScale(s) : sc;   // ★人は 人の 大きさで
+        const w2 = Math.round(a.w*csc), hh = Math.round(a.h*csc);
+        cx.drawImage(imgs[i], Math.round(x + (ws[i]-w2)/2),
+          Math.round(dy + s*0.95 - hh), w2, hh);
         x += ws[i] - ov;
       });
       return;
