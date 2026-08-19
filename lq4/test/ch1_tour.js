@@ -100,8 +100,8 @@ T('噂を 聞く', C.G.flags.ch1_heardSlur===true);
 T('セレンが 立場を 言う', said('怒って いい 立場'), log.join(' / ').slice(-60));
 
 // ===== 5.5 詰所：団長の 不在と 上からの 圧 =====
-stand('mid_dist', 12, 10, 'back');
-C.stepField(0,-1);
+stand('mid_dist', 13, 9, 'right');
+C.stepField(1,0);
 T('詰所へ 入れる', C.P.map==='mid_post', C.P.map+' '+C.P.x+','+C.P.y);
 talk('mid_post', 6, 4, 'back');
 T('副長の 話を 聞く', C.G.flags.ch1_postHeard===true);
@@ -111,8 +111,8 @@ T('結論が 先に ある', said('結論が 先に あって'));
 // ===== 5.7 記録庫：十年前の 封鎖申請 =====
 stand('mid_post', 6, 8, 'front'); C.stepField(0,1);
 T('中層区へ もどる', C.P.map==='mid_dist', C.P.map);
-stand('mid_dist', 12, 12, 'back');
-C.stepField(0,-1);
+stand('mid_dist', 13, 11, 'right');
+C.stepField(1,0);
 T('記録庫へ 入れる', C.P.map==='mid_arch', C.P.map+' '+C.P.x+','+C.P.y);
 talk('mid_arch', 2, 3, 'back');
 T('十年前の 申請を 見つける', C.G.flags.ch1_foundPaper===true);

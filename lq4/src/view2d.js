@@ -389,6 +389,29 @@ function buildAtlas(){
     else { R(g,3,10,10,3,P16.skD1); R(g,3,10,1,3,P16.sk3); }
   });
 
+  // ★天空の 噴水：タイル いっぱいに 大きく。小さいと 何か 分からない。
+  atlas.skyfountain = tile((g,s)=>{
+    R(g,0,0,s,s,'#c9d8ee');                       // 広場の 石
+    // 外の ふち（八角の 水盤）
+    R(g,1,4,14,9,'#8ea6c8');
+    R(g,3,2,10,13,'#8ea6c8');
+    R(g,2,3,12,11,'#a9bcd8');
+    R(g,2,3,12,1,'#d9e3f0');
+    // 水
+    R(g,3,5,10,7,'#2f6ea8');
+    R(g,4,4,8,9,'#2f6ea8');
+    R(g,4,5,8,6,'#5fb4ee');
+    R(g,5,6,6,4,'#a8e2ff');
+    // 中央の 柱と 噴き上がる 水
+    R(g,7,1,2,7,'#d9e3f0');
+    R(g,7,0,2,2,'#eafaff');
+    P(g,6,1,'#a8e2ff'); P(g,9,1,'#a8e2ff');
+    P(g,5,3,'#eafaff'); P(g,10,3,'#eafaff');
+    // しぶき
+    P(g,4,8,'#ffffff'); P(g,11,7,'#ffffff'); P(g,8,11,'#ffffff');
+    R(g,2,13,12,1,'#8ea6c8');
+  });
+
   // ---------- 街の くらしむき（IVから）----------
   // ★下層と 中層の ちがいを 地面で 見せる。
   //   , ＝ 割れた 白石（継ぎ当て。下層）
@@ -991,7 +1014,7 @@ function tileArt(ch, theme){
     case 'y': return atlas.signpost;
 
     case 'K': return atlas.castgate;
-    case 'F': return atlas.fountain;
+    case 'F': return sky ? atlas.skyfountain : atlas.fountain;
     case 'G': return atlas.gate;       // よこの かべの 門（南北）
     case 'g': return atlas.gateSide;   // たての かべの 門（東西）
     case 'T': return atlas.tower;
