@@ -118,14 +118,14 @@ const MIDBOSS = {
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第1章 中ボス：かんむれ（管に 巣くう 群れ）----
   kanmure:{key:'kanmure', name:'かんむれ', hp:310, atk:25, def:14, agi:14, acts:2,
-    exp:220, gold:150, art:'kansuiki', scale:1.25,
+    exp:220, gold:150, art:'kanmure', scale:1.10,
     skill:{p:0.30, mul:1.15, name:'つぎめ くだき'},
     inflict:{type:'confuse', p:0.14}},
 
   // ---- 第1章ボス：あくむじゅう オボロ（朧の座）----
   //   下層に 巣くった 親玉。管の 破れ目から 湧く ものを 束ねている。
   oboro:{key:'oboro', name:'あくむじゅう オボロ', hp:560, atk:32, def:17, agi:12, acts:1,
-    exp:520, gold:340, art:'umbra', scale:1.35,
+    exp:520, gold:340, art:'oboro', scale:1.15,
     skill:{p:0.28, mul:1.30, name:'にじみの つめ'},
     aoe:{p:0.20, lo:14, hi:22, name:'よどんだ ながれ'},
     inflict:{type:'slow', p:0.20},
