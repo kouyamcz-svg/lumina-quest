@@ -340,6 +340,24 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★「まだ 起きて いない こと」を 前提に した せりふが、じょうけん なしで 出ないか。
+//   ★オボロを 倒す 前から「オボロが いた あたり」と 過去形で 言って いた。
+{
+  const DONE = ['オボロ','ウンブラ','あぎと','かんむれ','討った','倒した','いた あたり'];
+  Object.keys(NPCD.NPCS).forEach(mp=>{
+    (NPCD.NPCS[mp]||[]).forEach(e=>{
+      (e.lines||[]).forEach(l=>{
+        if(l.when) return;                      // じょうけん つきは よい
+        (l.text||[]).forEach(t=>{
+          const hit = DONE.filter(w=>t.indexOf(w)>=0);
+          T('じょうけん なしの せりふが 先ばしって いない '+mp+' '+e.name,
+            hit.length===0, hit.join(' ')+' ｜ '+t.slice(0,30));
+        });
+      });
+    });
+  });
+}
+
 // ★扉（D）は 建物の かべに つける。通りの 上に 浮かせない。
 //   ★かべから 1ます はなれて いると、扉だけ 飛び出して 見えた。
 Object.keys(C.MAPS).forEach(mp=>{

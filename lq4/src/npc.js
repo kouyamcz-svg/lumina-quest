@@ -195,7 +195,11 @@ const NPCS = {
     {at:'10,3', spr:'pipeobj', name:'管の 底', lines:[
       {when:{flag:'ch1_foundShard'}, text:[
         '割れた 光珠の あった ところ。床に 黒い すじが 残っている。']},
-      {text:['オボロが いた あたり。何か 落ちている。']}]},
+      {when:{flag:'ch1_oboroDown'}, text:[
+        'オボロが いた あたり。何か 落ちている。']},
+      // ★倒す 前に 「いた」と 過去形で 言って いた
+      {text:['床に 黒い すじが 走っている。',
+             'すじは 破れた 管の ほうへ、まっすぐ 伸びていた。']}]},
     {at:'17,13', spr:'pipeobj', name:'破れた 管', lines:[
       {when:{flag:'ch1_sawBreach'}, text:[
         '裂け目は 内側から 溶けている。',

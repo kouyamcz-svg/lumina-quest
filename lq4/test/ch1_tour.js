@@ -176,6 +176,14 @@ C.G.tactic='manual';
   T('旧管路へ 向かえと 言われる', said('旧管路だ'), log.join(' / ').slice(-70));
 }
 
+// ★倒す 前の 「管の 底」は 過去形で 言わない
+{
+  clearLog();
+  stand('old_pipe', 10, 4, 'back'); C.interact();
+  T('倒す前は 過去形で 言わない', !said('いた あたり'), log.join(' / ').slice(0,60));
+  T('倒す前の 手がかりが 出る', said('黒い すじが 走っている'));
+}
+
 // ===== 7. 旧管路へ =====
 stand('lower_dist', 2, 13, 'left');
 C.stepField(-1,0);

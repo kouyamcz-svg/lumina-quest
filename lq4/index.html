@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 21:44 JST", "build":"77a3bc37","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 370, "chapters": 970, "bgm": 979, "view2d": 1996, "core": 2601, "view": 1394, "ui": 1129}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 21:50 JST", "build":"409c5f07","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 374, "chapters": 970, "bgm": 979, "view2d": 1996, "core": 2601, "view": 1394, "ui": 1129}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -466,7 +466,11 @@ const NPCS = {
     {at:'10,3', spr:'pipeobj', name:'管の 底', lines:[
       {when:{flag:'ch1_foundShard'}, text:[
         '割れた 光珠の あった ところ。床に 黒い すじが 残っている。']},
-      {text:['オボロが いた あたり。何か 落ちている。']}]},
+      {when:{flag:'ch1_oboroDown'}, text:[
+        'オボロが いた あたり。何か 落ちている。']},
+      // ★倒す 前に 「いた」と 過去形で 言って いた
+      {text:['床に 黒い すじが 走っている。',
+             'すじは 破れた 管の ほうへ、まっすぐ 伸びていた。']}]},
     {at:'17,13', spr:'pipeobj', name:'破れた 管', lines:[
       {when:{flag:'ch1_sawBreach'}, text:[
         '裂け目は 内側から 溶けている。',
