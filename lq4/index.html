@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 08:52 JST", "build":"96bc3e60","assets_sha": "f716ed9d", "lines": {"world": 104, "npc": 343, "chapters": 958, "bgm": 979, "view2d": 1934, "core": 2589, "view": 1394, "ui": 1129}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 09:03 JST", "build":"949e2f20","assets_sha": "f716ed9d", "lines": {"world": 104, "npc": 359, "chapters": 970, "bgm": 979, "view2d": 1934, "core": 2597, "view": 1394, "ui": 1129}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -286,6 +286,9 @@ const NPCS = {
       {text:['父の 道具棚。鑢と 槌が きちんと 並んでいる。',
              '手前の 段だけ、埃が 薄い。']}]},
     {at:'3,6', spr:'elderWoman', name:'となりの おばさん', lines:[
+      {when:{ch:2}, text:[
+        '「正騎士さまが うちの となりから 出るとはね」',
+        '「……父さんの 帳面、まだ 持ってるかい」']},
       {when:{flag:'ch0_auntTold'}, text:[
         '「読んだ なら、もう 子どもじゃ ないね」',
         '「気を つけて お行き」']},
@@ -301,6 +304,9 @@ const NPCS = {
   // ============ 序章：下層区 ============
   lower_dist: [
     {at:'8,12', spr:'villagerA', name:'荷運びの 男', lines:[
+      {when:{ch:2}, text:[
+        '「近ごろ 荷が 減った。中層が 下層の 品を 買わなくなってな」',
+        '「湧くのが 下だけだからと。……荷に 何が うつるってんだ」']},
       {when:{flag:'ch0_knighted'}, text:[
         '「布告、見たぞ。下層区から 正騎士だ」',
         '「うちの 親父が 生きてたら 泣いてたな」']},
@@ -332,6 +338,9 @@ const NPCS = {
       {text:['「この 管には 炉の 光が 流れてる」',
              '「……最近、少し 濁ってる 気が するんだ」']}]},
     {at:'18,5', spr:'guardA', name:'東門の 見張り', lines:[
+      {when:{ch:2}, text:[
+        '「点検路が 詰まってる。技師が 手を 焼いてた」',
+        '「外は 前より 湧く。日が 高いうちに 戻れよ」']},
       {when:{flag:'ch0_umbraDown'}, text:[
         '「昨夜は 助かった。門を 守るのが 俺の 役目なのに」',
         '「外の たなにも 影が 出るように なった。気をつけろ」']},
@@ -354,6 +363,9 @@ const NPCS = {
       {text:['「息子が 管の 見習いを して います」',
              '「危ない 仕事だと 言うのに、聞かなくて」']}]},
     {at:'12,9', spr:'butler', name:'うわさずきの 男', lines:[
+      {when:{ch:2}, text:[
+        '「上じゃ『下層の 血』で 話が まとまってるとさ」',
+        '「言い返せる 者が いないんだ。ここには」']},
       {when:{flag:'ch0_knighted'}, text:[
         '「上層じゃ もう 別の 話に なってる」',
         '「『地上の 血が 悪夢を 呼び込んだ』とさ」',
@@ -495,6 +507,10 @@ const NPCS = {
       {text:['セレン「首席は わたし。……実技は あなたが 上だった」',
              'セレン「わたしは その 顔を 忘れないと 思う」']}]},
     {at:'3,6', spr:'guardB', name:'試験官', lines:[
+      {when:{ch:2}, text:[
+        '試験官「団長なら 上層だ。もう 四日に なる」',
+        '試験官「試験場も 当分 使わん。次の 見習いも 来ないしな」',
+        '試験官「……下層から 来る 者が 減った」']},
       {text:['「順位は 実技だけでは 決まらん。血筋も 見る」',
              '「……そういう 決まりだ」']}]},
   ],
@@ -1171,6 +1187,18 @@ const CH = {
         after: ['破れた 管から、澄んだ 光が 流れている。'],
       },
     },
+
+    // ★章の はじめに ますを ととのえる（序章の 人・ボスを かたづける）
+    setTiles: [
+      {map:'trial_yard', x:3, y:2, ch:'.'},   // 団長グラン（上層へ 呼ばれて いる）
+      {map:'trial_yard', x:3, y:4, ch:'.'},   // 訓練用の 木人（試験は 終わった）
+      {map:'trial_yard', x:9, y:4, ch:'.'},   // 立ち合いの セレン（仲間に なった）
+      {map:'rift_yard',  x:12, y:3, ch:'.'},  // 広場の グラン
+      {map:'rift_yard',  x:2,  y:13, ch:'.'}, // 逃げ遅れた 子ども
+      {map:'rift_yard',  x:10, y:3, ch:'.'},  // ウンブラ（討った）
+      {map:'rift_yard',  x:9,  y:5, ch:'.'},  // かげの あぎと（討った）
+      {map:'pipe_path',  x:8,  y:7, ch:'.'},  // 序章の あぎと（逃げた あと）
+    ],
 
     onEnter: {
       old_pipe: 'ch1_enteredPipe',
@@ -6998,6 +7026,14 @@ function switchChapter(no, newParty){
           if(cd.equip.weapon || cd.equip.armor) put(party[0], cd.equip);
           else allMembers().forEach(m=>put(m, cd.equip[m.cls]));
         }
+      }
+      // ★章の はじめに ますを ととのえる。
+      //   まえの 章の 人が 立ったまま に なるのを ふせぐ
+      //   （第1章で 上層に いる はずの 団長が 試験場に いた）。
+      if(cd.setTiles){
+        (Array.isArray(cd.setTiles)?cd.setTiles:[cd.setTiles]).forEach(o=>{
+          setTile(o.map, o.x, o.y, o.ch||'.');
+        });
       }
       G.visited[P.map] = true;
     }

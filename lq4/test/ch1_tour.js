@@ -59,6 +59,20 @@ T('そだてた 装備を ひきつぐ', C.party[0].weapon.v===9 && C.party[1].w
   JSON.stringify([C.party[0].weapon.v, C.party[1].weapon.v]));
 T('おかねも ひきつぐ', C.P.gold===300, ''+C.P.gold);
 T('章データが ひける', C.chData() && C.chData().id==='ch1_lower');
+// ★序章の 人・ボスが 地図に のこって いない こと
+//   （上層に 呼ばれて いる はずの 団長が 試験場に 立って いた）
+T('団長は 試験場に いない',  C.tileAt('trial_yard',3,2)==='.', C.tileAt('trial_yard',3,2));
+T('木人は かたづいて いる',  C.tileAt('trial_yard',3,4)==='.', C.tileAt('trial_yard',3,4));
+T('立ち合いの セレンも いない', C.tileAt('trial_yard',9,4)==='.', C.tileAt('trial_yard',9,4));
+T('広場の 団長も いない',    C.tileAt('rift_yard',12,3)==='.', C.tileAt('rift_yard',12,3));
+T('ウンブラは いない',       C.tileAt('rift_yard',10,3)==='.', C.tileAt('rift_yard',10,3));
+T('序章の あぎとも いない',  C.tileAt('pipe_path',8,7)==='.', C.tileAt('pipe_path',8,7));
+// 試験官は のこるが、第1章の せりふを 言う
+{
+  clearLog();
+  stand('trial_yard', 3, 7, 'back'); C.interact();
+  T('試験官が 第1章の 話を する', said('もう 四日'), log.join(' / ').slice(0,60));
+}
 
 // ===== 2. 中層区へ（世界地図ごし）=====
 stand('lower_dist', 19, 6, 'right');

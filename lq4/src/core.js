@@ -2514,6 +2514,14 @@ function switchChapter(no, newParty){
           else allMembers().forEach(m=>put(m, cd.equip[m.cls]));
         }
       }
+      // ★章の はじめに ますを ととのえる。
+      //   まえの 章の 人が 立ったまま に なるのを ふせぐ
+      //   （第1章で 上層に いる はずの 団長が 試験場に いた）。
+      if(cd.setTiles){
+        (Array.isArray(cd.setTiles)?cd.setTiles:[cd.setTiles]).forEach(o=>{
+          setTile(o.map, o.x, o.y, o.ch||'.');
+        });
+      }
       G.visited[P.map] = true;
     }
   }

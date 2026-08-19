@@ -558,6 +558,18 @@ const CH = {
       },
     },
 
+    // ★章の はじめに ますを ととのえる（序章の 人・ボスを かたづける）
+    setTiles: [
+      {map:'trial_yard', x:3, y:2, ch:'.'},   // 団長グラン（上層へ 呼ばれて いる）
+      {map:'trial_yard', x:3, y:4, ch:'.'},   // 訓練用の 木人（試験は 終わった）
+      {map:'trial_yard', x:9, y:4, ch:'.'},   // 立ち合いの セレン（仲間に なった）
+      {map:'rift_yard',  x:12, y:3, ch:'.'},  // 広場の グラン
+      {map:'rift_yard',  x:2,  y:13, ch:'.'}, // 逃げ遅れた 子ども
+      {map:'rift_yard',  x:10, y:3, ch:'.'},  // ウンブラ（討った）
+      {map:'rift_yard',  x:9,  y:5, ch:'.'},  // かげの あぎと（討った）
+      {map:'pipe_path',  x:8,  y:7, ch:'.'},  // 序章の あぎと（逃げた あと）
+    ],
+
     onEnter: {
       old_pipe: 'ch1_enteredPipe',
       mid_dist: 'ch1_enteredMid',
