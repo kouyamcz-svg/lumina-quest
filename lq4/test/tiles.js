@@ -98,7 +98,8 @@ Object.keys(atlas).forEach(k=>{
 });
 
 // ---- 2. 天空様式の タイルが そろっている ----
-['skystone','skyroad','skywall','cloudedge','skygrass','orblamp','skyrail','pipeH','pipeV'].forEach(k=>{
+['skystone','skyroad','skywall','cloudedge','skygrass','orblamp','skyrail','pipeH','pipeV',
+ 'bulkhead','skyfountain','flowerbed','plaza','crackstone'].forEach(k=>{
   T('天空様式 '+k+' が ある', !!atlas[k]);
 });
 

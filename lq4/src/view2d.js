@@ -412,6 +412,30 @@ function buildAtlas(){
     R(g,2,13,12,1,'#8ea6c8');
   });
 
+  // ★閉じた 隔壁（K）。城門の 絵だと 「通れる 門」に 見えて、
+  //   ふさがって いる ことが 伝わらなかった。
+  atlas.bulkhead = tile((g,s)=>{
+    R(g,0,0,s,s,P16.skW1);                       // まわりの かべ
+    R(g,1,0,14,s,P16.sk1);                       // 分厚い 白石の 板
+    R(g,1,0,14,1,P16.sk3);
+    R(g,1,s-1,14,1,P16.skW0);
+    R(g,1,0,1,s,P16.sk2); R(g,14,0,1,s,P16.sk0);
+    // 横に わたした 太い 金具（3本）
+    for(const y of [2,7,12]){
+      R(g,1,y,14,3,P16.skD1);
+      R(g,1,y,14,1,'#93a6c0');
+      R(g,1,y+2,14,1,P16.skD0);
+      P(g,3,y+1,'#2b3652'); P(g,12,y+1,'#2b3652');   // リベット
+    }
+    // まん中の 錠
+    R(g,6,6,4,5,P16.skD0);
+    R(g,6,6,4,1,'#93a6c0');
+    R(g,7,8,2,2,'#1c2333');
+    // 継ぎ目（開かない ことを 見せる 縦の 線）
+    R(g,7,0,1,2,P16.sk0); R(g,8,0,1,2,P16.sk3);
+    R(g,7,14,1,2,P16.sk0); R(g,8,14,1,2,P16.sk3);
+  });
+
   // ---------- 街の くらしむき（IVから）----------
   // ★下層と 中層の ちがいを 地面で 見せる。
   //   , ＝ 割れた 白石（継ぎ当て。下層）
@@ -1013,7 +1037,7 @@ function tileArt(ch, theme){
     case '*': return atlas.flower;
     case 'y': return atlas.signpost;
 
-    case 'K': return atlas.castgate;
+    case 'K': return sky ? atlas.bulkhead : atlas.castgate;
     case 'F': return sky ? atlas.skyfountain : atlas.fountain;
     case 'G': return atlas.gate;       // よこの かべの 門（南北）
     case 'g': return atlas.gateSide;   // たての かべの 門（東西）

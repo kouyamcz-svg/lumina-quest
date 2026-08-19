@@ -358,6 +358,15 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★とおせんぼの ますは、見た目でも 止まって いると 分かる こと。
+//   ★隔壁(K)に 城門の 絵を あてて いて、通れる 門に 見えた。
+{
+  const V2 = fs.readFileSync('src/view2d.js','utf8');
+  const hasK = /case 'K': return sky \? atlas\.bulkhead/.test(V2);
+  T('隔壁に とじた 絵が ある', hasK, '天空の 街で 城門の 絵に なって いる');
+  T('とじた 隔壁の 絵が かかれて いる', V2.indexOf('atlas.bulkhead = tile')>=0);
+}
+
 // ★ボスの 絵は タイル なんこぶんも 上へ のびる。
 //   ★地図の 上ばしに 置くと 頭が 画面の 外に 出て 切れた。
 //     絵の たかさ ぶんの 空きが ますの 上に ある こと。
