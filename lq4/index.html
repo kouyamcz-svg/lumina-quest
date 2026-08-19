@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 21:50 JST", "build":"409c5f07","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 374, "chapters": 970, "bgm": 979, "view2d": 1996, "core": 2601, "view": 1394, "ui": 1129}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 22:05 JST", "build":"4d016743","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 374, "chapters": 970, "bgm": 979, "view2d": 1996, "core": 2612, "view": 1394, "ui": 1129}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -459,11 +459,11 @@ const NPCS = {
 
   // ============ 第1章：旧管路 ============
   old_pipe: [
-    {at:'16,9', spr:'villagerA', name:'たおれた 見習い', lines:[
+    {at:'19,22', spr:'villagerA', name:'たおれた 見習い', lines:[
       {when:{flag:'ch1_sonFound'}, text:[
         '見習いが いた あたり。工具袋が 落ちている。']},
       {text:['壁ぎわに 人が うずくまっている。']}]},
-    {at:'10,3', spr:'pipeobj', name:'管の 底', lines:[
+    {at:'13,3', spr:'pipeobj', name:'管の 底', lines:[
       {when:{flag:'ch1_foundShard'}, text:[
         '割れた 光珠の あった ところ。床に 黒い すじが 残っている。']},
       {when:{flag:'ch1_oboroDown'}, text:[
@@ -471,7 +471,7 @@ const NPCS = {
       // ★倒す 前に 「いた」と 過去形で 言って いた
       {text:['床に 黒い すじが 走っている。',
              'すじは 破れた 管の ほうへ、まっすぐ 伸びていた。']}]},
-    {at:'17,13', spr:'pipeobj', name:'破れた 管', lines:[
+    {at:'1,13', spr:'pipeobj', name:'破れた 管', lines:[
       {when:{flag:'ch1_sawBreach'}, text:[
         '裂け目は 内側から 溶けている。',
         '十年 塞がれていた 管の 中で、何が 育ったのか。']},
@@ -1225,13 +1225,13 @@ const CH = {
     lampGates: {
       old_pipe: {
         flag:'ch1_deepLit',
-        open:[{x:10, y:7, ch:'.'}],
+        open:[{x:10, y:4, ch:'.'}],
         msg:['両脇の 光珠灯が ともった。',
              '管の 圧が 上がり、最奥の 隔壁が 持ちあがった。'],
       },
     },
     locks: {
-      'old_pipe:10,7': {
+      'old_pipe:10,4': {
         lockMsg:['最奥への 隔壁。分厚い 白石で 塞がれている。',
                  'セレン「圧が 足りないと 上がらない 造りね」',
                  'セレン「……両脇の 灯りを 入れて みたら？」'],
@@ -4908,26 +4908,37 @@ const MAPS = {
 
   // ============ 第1章：旧管路（下層の 地下。管が 破れて 悪夢が 漏れる）============
   //   しかけ：岩(O)で 亀裂(x)を 埋めて わたる ／ 光珠灯 2つで 最奥の 扉(K)
-  old_pipe:{name:'旧管路', theme:'sky', enc:true, encRate:0.12, encGrace:3, tiles:[
-    "#####################",
-    "q#ppppppppppppppppp#q",
-    "q#........B........#q",
-    "q#........n........#q",
-    "q###.............###q",
-    "q###...........C.###q",
-    "q###.............###q",
-    "q#ppppppppKpppppppp#q",
-    "q#########.#########q",
-    "q#..............n..#q",
-    "qL.................Lq",
-    "q#.................#q",
-    "q##xxxxxxxxxxxxxxx##q",
-    "q#...............n.#q",
-    "q#...O....O....O...#q",
-    "q#.C...............#q",
-    "ppppppppp.ppppppppppp"],
+  // ★入り組んだ 地下。亀裂(x)を 岩(O)で 埋めて 北へ わたり、
+  //   灯り(L) 2つで 隔壁(K)を 上げて ボスの間へ。
+  //   かべは 光珠管（p/q）。行き止まりに 宝箱と 人。
+  old_pipe:{name:'旧管路', theme:'sky', enc:true, encRate:0.075, encGrace:5, tiles:[
+    "#p#p##p##p##p##p##p###",
+    "######..........######",
+    "######....B.....######",
+    "######.......n..######",
+    "#########pKp##########",
+    "#....................#",
+    "q.##.#.###.#.##.#.##.q",
+    "#.qL.q.#C..q.#..#..#.#",
+    "#.#..#.#.#.#.q..#p#q.#",
+    "q.#..#...#.#.#.....#.q",
+    "#.#p#p###.#.###.##.#.#",
+    "#.........q....#...q.#",
+    "q.#p###.#.#.##.q.#p#.q",
+    "#nq...q.q.#..#.#...#L#",
+    "#.#.#.#.#.#.##.#.#...#",
+    "q...#...#...#..#.....q",
+    "#xxxxxxxxxxxxxxxxxxxx#",
+    "#O..#O..#..O#.......O#",
+    "q...q...#...q....#...q",
+    "#.#.#.#.#.#.##p#.q.#.#",
+    "#.q...#...q....C.#.q.#",
+    "q.#p###.#p###.##.#.#.q",
+    "#.......#.....#..q.n.#",
+    "#p##p#.....#....#p#p##",
+    "#p#p##p###.#p##p##p###"],
     warpsXY:{
-      '9,16':{to:'lower_dist', x:1, y:13}
+      '10,24':{to:'lower_dist', x:1, y:13}
     }},
 
   // ============ 序章：下層区（地上生まれの移民と労働者の街） ============
@@ -4955,7 +4966,7 @@ const MAPS = {
       '3,12' :{to:'home_forge', x:7, y:9},
       '10,14':{to:'trial_yard', x:6, y:8},
       '10,0' :{to:'rift_yard',  x:10, y:13},
-      '1,13' :{to:'old_pipe',   x:9,  y:15},
+      '1,13' :{to:'old_pipe',   x:10, y:24},
       '20,6' :{to:'world',      x:13, y:24}
     }},
 
