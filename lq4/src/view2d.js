@@ -389,6 +389,43 @@ function buildAtlas(){
     else { R(g,3,10,10,3,P16.skD1); R(g,3,10,1,3,P16.sk3); }
   });
 
+  // ---------- 街の くらしむき（IVから）----------
+  // ★下層と 中層の ちがいを 地面で 見せる。
+  //   , ＝ 割れた 白石（継ぎ当て。下層）
+  //   % ＝ 花壇（中層）
+  //   ; ＝ 磨かれた 白石（中層の 広場）
+  atlas.crackstone = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.skJ);
+    const brick=(bx,by)=>{
+      R(g,bx,by,7,7,P16.sk1);              // 中層より くすんだ 石
+      R(g,bx,by,7,1,P16.sk2);
+      R(g,bx,by+6,7,1,P16.sk0);
+    };
+    brick(0,0); brick(8,0); brick(-4,8); brick(4,8); brick(12,8);
+    // ひび・継ぎ当て
+    const cr=[[3,1],[4,2],[5,3],[5,4],[11,9],[12,10],[13,11],[2,12],[3,13]];
+    cr.forEach(([x,y],i)=>{ if((i+v)%4!==3) P(g,x,y,'#6f86ab'); });
+    if(v%3===0){ R(g,9,2,4,3,'#9aacc6'); R(g,9,2,4,1,'#b8c8de'); }   // あて板
+    if(v%3===1){ R(g,2,9,3,3,'#8a9cb8'); }
+  });
+  atlas.plaza = tile((g,s)=>{
+    R(g,0,0,s,s,'#c9d8ee');
+    R(g,0,0,s,1,'#eef4fc'); R(g,0,0,1,s,'#eef4fc');
+    R(g,0,s-1,s,1,'#a9bcd8'); R(g,s-1,0,1,s,'#a9bcd8');
+    // みがいた てり
+    R(g,2,2,5,1,'#ffffff'); R(g,9,10,5,1,'#ffffff');
+    R(g,2,3,3,1,'#e6eefa');
+  });
+  atlas.flowerbed = tile((g,s)=>{
+    R(g,0,0,s,s,'#8ea6c8');                       // 石の ふち
+    R(g,1,1,14,14,'#4e7566');                     // 土と 草
+    R(g,1,1,14,1,'#7fa992');
+    const put=(x,y,c)=>{ P(g,x,y,c); P(g,x+1,y,c); P(g,x,y+1,c); P(g,x+1,y+1,c); };
+    put(3,4,'#e8f0ff'); put(9,3,'#cfe2ff'); put(6,8,'#e8f0ff');
+    put(11,9,'#a8d4ff'); put(4,11,'#cfe2ff');
+    P(g,3,3,'#ffffff'); P(g,10,4,'#ffffff');
+  });
+
   // ---------- 屋内（IVから）----------
   // 板の 床：たてに ながい 板を ならべる。石の 床と まちがえない ように。
   atlas.woodfloor = tile((g,s)=>{
@@ -925,7 +962,7 @@ function tileArt(ch, theme){
     // ---- ワールドマップ ----
     case '~': return sky?atlas.cloudedge : atlas.sea;
     case '_': return atlas.beach;
-    case ',': return atlas.woods;
+    case ',': return sky ? atlas.crackstone : atlas.woods;
     case '^': return atlas.mount;
     case 'A': return atlas.mCastle;
     case 'V': return atlas.mVillage;
@@ -938,6 +975,8 @@ function tileArt(ch, theme){
     case 'o': return ice?atlas.icicle : atlas.rock;
     case 'O': return atlas.rockPush;      // ★動かせる岩
     case 'x': return atlas.pit;           // ★穴
+    case '%': return atlas.flowerbed;     // ★花壇（中層）
+    case ';': return atlas.plaza;         // ★磨かれた 白石（中層の 広場）
     case 'p': return atlas.pipeH;         // ★光珠管（よこ）
     case 'q': return atlas.pipeV;         // ★光珠管（たて）
     case 'L': return atlas.lampOff;       // ★光珠灯（消）

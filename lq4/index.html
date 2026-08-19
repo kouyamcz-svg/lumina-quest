@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 09:03 JST", "build":"949e2f20","assets_sha": "f716ed9d", "lines": {"world": 104, "npc": 359, "chapters": 970, "bgm": 979, "view2d": 1934, "core": 2597, "view": 1394, "ui": 1129}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 09:09 JST", "build":"8a0b3bf7","assets_sha": "f716ed9d", "lines": {"world": 104, "npc": 370, "chapters": 970, "bgm": 979, "view2d": 1973, "core": 2601, "view": 1394, "ui": 1129}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -304,6 +304,10 @@ const NPCS = {
   // ============ 序章：下層区 ============
   lower_dist: [
     {at:'8,12', spr:'villagerA', name:'荷運びの 男', lines:[
+      {when:{ch:2, flag:'ch1_enteredMid'}, text:[
+        '「中層へ 行ったのか。石畳が つるつるだろう」',
+        '「うちの 通りは 継ぎ当てだらけさ。転ばんように な」',
+        '「灯りも あっちは 通りごとに ある」']},
       {when:{ch:2}, text:[
         '「近ごろ 荷が 減った。中層が 下層の 品を 買わなくなってな」',
         '「湧くのが 下だけだからと。……荷に 何が うつるってんだ」']},
@@ -398,6 +402,10 @@ const NPCS = {
         '「わたしは 最初から そう 思って いたよ」']},
       {text:['「下層にだけ 湧くそうだ。理由は 分かるだろう」']}]},
     {at:'7,13', spr:'villagerB', name:'中層の 職人', lines:[
+      {when:{flag:'ch1_pipeTold'}, text:[
+        '「石畳かい。中層は 三年に 一度 敷き直す 決まりでね」',
+        '「下層は……二十年 前が 最後だと 聞いた」',
+        '「割れた ところに 板を あてて 使ってる そうだ」']},
       {when:{flag:'ch1_sawBreach'}, text:[
         '「旧管路に 入ったのか。あそこは 十年 前に 塞がれた」',
         '「塞いだ ときの 立ち会いが、下層の 鍛冶屋だった そうだ」']},
@@ -410,7 +418,10 @@ const NPCS = {
       {text:['主人「泊まりかね。合同任務の 方は 割引だよ」']}]},
     {at:'16,13', spr:'elderWoman', name:'花売りの 女', lines:[
       {text:['「上層の 庭園から 来る 花よ。中層じゃ 咲かないの」',
-             '「光が 足りないんですって」']}]},
+             '「光が 足りないんですって」',
+             '',
+             '「それでも 花壇は 置くの。あると ないとで 違うから」',
+             '「下層？　……あちらは 灯りを 置くだけで 精一杯でしょう」']}]},
     {at:'2,11', spr:'guardA', name:'石段の 衛兵', lines:[
       {text:['「上層へは 通せん。許可証は 中層までだ」',
              '「……お嬢様の お名前でも な」']}]},
@@ -2968,6 +2979,43 @@ function buildAtlas(){
     else { R(g,3,10,10,3,P16.skD1); R(g,3,10,1,3,P16.sk3); }
   });
 
+  // ---------- 街の くらしむき（IVから）----------
+  // ★下層と 中層の ちがいを 地面で 見せる。
+  //   , ＝ 割れた 白石（継ぎ当て。下層）
+  //   % ＝ 花壇（中層）
+  //   ; ＝ 磨かれた 白石（中層の 広場）
+  atlas.crackstone = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.skJ);
+    const brick=(bx,by)=>{
+      R(g,bx,by,7,7,P16.sk1);              // 中層より くすんだ 石
+      R(g,bx,by,7,1,P16.sk2);
+      R(g,bx,by+6,7,1,P16.sk0);
+    };
+    brick(0,0); brick(8,0); brick(-4,8); brick(4,8); brick(12,8);
+    // ひび・継ぎ当て
+    const cr=[[3,1],[4,2],[5,3],[5,4],[11,9],[12,10],[13,11],[2,12],[3,13]];
+    cr.forEach(([x,y],i)=>{ if((i+v)%4!==3) P(g,x,y,'#6f86ab'); });
+    if(v%3===0){ R(g,9,2,4,3,'#9aacc6'); R(g,9,2,4,1,'#b8c8de'); }   // あて板
+    if(v%3===1){ R(g,2,9,3,3,'#8a9cb8'); }
+  });
+  atlas.plaza = tile((g,s)=>{
+    R(g,0,0,s,s,'#c9d8ee');
+    R(g,0,0,s,1,'#eef4fc'); R(g,0,0,1,s,'#eef4fc');
+    R(g,0,s-1,s,1,'#a9bcd8'); R(g,s-1,0,1,s,'#a9bcd8');
+    // みがいた てり
+    R(g,2,2,5,1,'#ffffff'); R(g,9,10,5,1,'#ffffff');
+    R(g,2,3,3,1,'#e6eefa');
+  });
+  atlas.flowerbed = tile((g,s)=>{
+    R(g,0,0,s,s,'#8ea6c8');                       // 石の ふち
+    R(g,1,1,14,14,'#4e7566');                     // 土と 草
+    R(g,1,1,14,1,'#7fa992');
+    const put=(x,y,c)=>{ P(g,x,y,c); P(g,x+1,y,c); P(g,x,y+1,c); P(g,x+1,y+1,c); };
+    put(3,4,'#e8f0ff'); put(9,3,'#cfe2ff'); put(6,8,'#e8f0ff');
+    put(11,9,'#a8d4ff'); put(4,11,'#cfe2ff');
+    P(g,3,3,'#ffffff'); P(g,10,4,'#ffffff');
+  });
+
   // ---------- 屋内（IVから）----------
   // 板の 床：たてに ながい 板を ならべる。石の 床と まちがえない ように。
   atlas.woodfloor = tile((g,s)=>{
@@ -3504,7 +3552,7 @@ function tileArt(ch, theme){
     // ---- ワールドマップ ----
     case '~': return sky?atlas.cloudedge : atlas.sea;
     case '_': return atlas.beach;
-    case ',': return atlas.woods;
+    case ',': return sky ? atlas.crackstone : atlas.woods;
     case '^': return atlas.mount;
     case 'A': return atlas.mCastle;
     case 'V': return atlas.mVillage;
@@ -3517,6 +3565,8 @@ function tileArt(ch, theme){
     case 'o': return ice?atlas.icicle : atlas.rock;
     case 'O': return atlas.rockPush;      // ★動かせる岩
     case 'x': return atlas.pit;           // ★穴
+    case '%': return atlas.flowerbed;     // ★花壇（中層）
+    case ';': return atlas.plaza;         // ★磨かれた 白石（中層の 広場）
     case 'p': return atlas.pipeH;         // ★光珠管（よこ）
     case 'q': return atlas.pipeV;         // ★光珠管（たて）
     case 'L': return atlas.lampOff;       // ★光珠灯（消）
@@ -4773,21 +4823,23 @@ const MAPS = {
     }},
 
   // ============ 第1章：中層区（技師と 職人の 街。上層への 関所）============
+  // ★中層区：磨いた 白石の 大通り、噴水、花壇、灯りが 多い。
+  //   下層区（割れた 石・灯りが まばら）と くらべて 暮らしむきが 上と 分かる ように。
   mid_dist:{name:'中層区', theme:'sky', enc:false, tiles:[
     "##########Q##########",
-    "#.........r.........#",
-    "#.#####...r...#####.#",
-    "#.#####...r...#####.#",
-    "#.##I##...r...##S##.#",
-    "#..n.n..t.r.t.n.....#",
-    "#rrrrrrrrrrrrrrrrrrr#",
-    "#..t......r......t..#",
-    "#.##P##...r...#####.#",
-    "#.#####...r.D.#####.#",
-    "#.#####...r...#####.#",
-    "#.n.......r.D.#####.#",
-    "#rrrrrrrrrrrrrrrrrrr#",
-    "#......nt.r.t...n.C.#",
+    "#........t;t........#",
+    "#.#####...;...#####.#",
+    "#.#####...;...#####.#",
+    "#.##I##...;...##S##.#",
+    "#.en.n..%.;.%.n..ee.#",
+    "#;;;;;;;;;;;;;;;;;;;#",
+    "#..tt...%F;%....tt..#",
+    "#.##P##...;.D.#####.#",
+    "#.#####...;...#####.#",
+    "#.#####...;.D.#####.#",
+    "#.n.t.....;...#####.#",
+    "#;;;;;;;;;;;;;;;;;;;#",
+    "#.....%ntt;tt.%.n.C.#",
     "##########G##########"],
     warpsXY:{
       '10,14':{to:'world', x:22, y:17},
@@ -4854,21 +4906,23 @@ const MAPS = {
   // ============ 序章：下層区（地上生まれの移民と労働者の街） ============
   // ★でぐちは かならず 見て わかる ように する：
   //   G＝北の門／D＝イオの家の とびら／r＝道。ただの ゆかに ワープを おかない。
+  // ★下層区：割れた 白石（,）の 継ぎ当てが 多く、灯り（t）は まばら。
+  //   中層区（磨き石・噴水・花壇・灯りが 多い）と くらべて 暮らしむきが 下と 分かる ように。
   lower_dist:{name:'下層区', theme:'sky', enc:false, tiles:[
     "##########G##########",
-    "#.........r.........#",
-    "#.#####...r...#####.#",
-    "#.#####...r...#####.#",
-    "#.##I##...r...##S##.#",
-    "#....n.t..r..t....n.#",
+    "#......,..r.,,,..,..#",
+    "#.#####.,,r.,,#####,#",
+    "#,#####...r...#####.#",
+    "#.##I##,..r..,##S##,#",
+    "#,,.,n.t..r,,.t.,,n.#",
     "#rrrrrrrrrrrrrrrrrrrg",
-    "#.....o..tr...o.....#",
-    "#.#P##....r....####.#",
-    "#.####....r.n..####.#",
-    "#.####....r....####.#",
+    "#.,,,.o.,,r,,.o,..,.#",
+    "#,#P##.,.,r,..,####.#",
+    "#,####,..,r.n,,####.#",
+    "#,####,,,.r,.,.####.#",
     "#rrrrrrrrrrrrrrrrrrr#",
-    "#.#D#..tn.r..t.####.#",
-    "#....r....r.n....C..#",
+    "#.#D#..,n,r..,,####.#",
+    "#.,..r..t,r,n.,.,C..#",
     "##########r##########"],
     warpsXY:{
       '3,12' :{to:'home_forge', x:7, y:9},
@@ -5068,7 +5122,7 @@ const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
-                       'O','x','L','l','p','q']);   // p/q＝光珠管（かべ あつかい）
+                       'O','x','L','l','p','q','%']);   // p/q＝光珠管、%＝花壇（かべ あつかい）
 // ★しかけ用の タイル（IVから）
 //   O 動かせる岩（押せる）／x 穴（岩で 埋まる）／L 消えた光珠灯／l ついた光珠灯
 //   K 施錠された扉（かぎで あく）
