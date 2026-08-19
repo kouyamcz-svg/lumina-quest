@@ -528,7 +528,7 @@ const CH = {
                 '＊ かんむれ が 現れた！ ＊'],
         after: ['管の 切れはしが 床に 散っている。'],
       },
-      'old_pipe:10,2': {
+      'old_pipe:10,5': {
         key: 'oboro',
         clearedFlag: 'ch1_oboroDown',
         intro: ['破れた 管の 前に、それは わだかまっていた。',
@@ -580,13 +580,13 @@ const CH = {
     lampGates: {
       old_pipe: {
         flag:'ch1_deepLit',
-        open:[{x:10, y:4, ch:'.'}],
+        open:[{x:10, y:7, ch:'.'}],
         msg:['両脇の 光珠灯が ともった。',
              '管の 圧が 上がり、最奥の 隔壁が 持ちあがった。'],
       },
     },
     locks: {
-      'old_pipe:10,4': {
+      'old_pipe:10,7': {
         lockMsg:['最奥への 隔壁。分厚い 白石で 塞がれている。',
                  'セレン「圧が 足りないと 上がらない 造りね」',
                  'セレン「……両脇の 灯りを 入れて みたら？」'],

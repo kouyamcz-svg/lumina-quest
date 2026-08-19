@@ -188,11 +188,11 @@ const NPCS = {
 
   // ============ 第1章：旧管路 ============
   old_pipe: [
-    {at:'19,22', spr:'villagerA', name:'たおれた 見習い', lines:[
+    {at:'19,25', spr:'villagerA', name:'たおれた 見習い', lines:[
       {when:{flag:'ch1_sonFound'}, text:[
         '見習いが いた あたり。工具袋が 落ちている。']},
       {text:['壁ぎわに 人が うずくまっている。']}]},
-    {at:'13,3', spr:'pipeobj', name:'管の 底', lines:[
+    {at:'13,6', spr:'pipeobj', name:'管の 底', lines:[
       {when:{flag:'ch1_foundShard'}, text:[
         '割れた 光珠の あった ところ。床に 黒い すじが 残っている。']},
       {when:{flag:'ch1_oboroDown'}, text:[
@@ -200,7 +200,7 @@ const NPCS = {
       // ★倒す 前に 「いた」と 過去形で 言って いた
       {text:['床に 黒い すじが 走っている。',
              'すじは 破れた 管の ほうへ、まっすぐ 伸びていた。']}]},
-    {at:'1,13', spr:'pipeobj', name:'破れた 管', lines:[
+    {at:'1,16', spr:'pipeobj', name:'破れた 管', lines:[
       {when:{flag:'ch1_sawBreach'}, text:[
         '裂け目は 内側から 溶けている。',
         '十年 塞がれていた 管の 中で、何が 育ったのか。']},

@@ -358,6 +358,28 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★ボスの 絵は タイル なんこぶんも 上へ のびる。
+//   ★地図の 上ばしに 置くと 頭が 画面の 外に 出て 切れた。
+//     絵の たかさ ぶんの 空きが ますの 上に ある こと。
+{
+  const TS=16, ts=48;                       // 3ばい表示の とき
+  const sc = Math.max(1, Math.round(ts/TS*0.6));
+  Object.keys(CHD.CH).forEach(no=>{
+    const bs = CHD.CH[no].bosses || {};
+    Object.keys(bs).forEach(k=>{
+      if(k.indexOf(':')<0) return;
+      const mp = k.split(':')[0];
+      const [x,y] = k.split(':')[1].split(',').map(Number);
+      const e = C.MIDBOSS[bs[k].key];
+      const a = e && e.art && MOND[e.art];
+      if(!a) return;
+      const need = Math.ceil((a.h*sc)/ts) - 1;   // ますの 上に いる 空き
+      T('ボスの 絵が 上に はみ出ない '+k+'（'+need+'ます いる）', y >= need,
+        'いまの y='+y);
+    });
+  });
+}
+
 // ★扉（D）は 建物の かべに つける。通りの 上に 浮かせない。
 //   ★かべから 1ます はなれて いると、扉だけ 飛び出して 見えた。
 Object.keys(C.MAPS).forEach(mp=>{

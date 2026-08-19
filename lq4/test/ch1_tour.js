@@ -179,7 +179,7 @@ C.G.tactic='manual';
 // ★倒す 前の 「管の 底」は 過去形で 言わない
 {
   clearLog();
-  stand('old_pipe', 13, 2, 'front'); C.interact();
+  stand('old_pipe', 13, 5, 'front'); C.interact();
   T('倒す前は 過去形で 言わない', !said('いた あたり'), log.join(' / ').slice(0,60));
   T('倒す前の 手がかりが 出る', said('黒い すじが 走っている'));
 }
@@ -191,45 +191,45 @@ T('旧管路へ 入れる', C.P.map==='old_pipe', C.P.map+' '+C.P.x+','+C.P.y);
 T('旧管路の めじるしが たつ', C.G.flags.ch1_enteredPipe===true);
 
 // ===== 8. 亀裂は 岩で 埋める =====
-T('はじめは 亀裂が ある', C.tileAt('old_pipe',1,16)==='x', C.tileAt('old_pipe',1,16));
+T('はじめは 亀裂が ある', C.tileAt('old_pipe',1,19)==='x', C.tileAt('old_pipe',1,19));
 {
   // ★亀裂を 埋める まえは 北へ 行けない
   const walk=(x,y)=>C.walkable('old_pipe',x,y);
-  const seen=new Set(['10,24']); const q=[[10,24]];
+  const seen=new Set(['10,27']); const q=[[10,27]];
   while(q.length){ const [x,y]=q.shift();
     for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ const k=(x+dx)+','+(y+dy);
       if(!seen.has(k)&&walk(x+dx,y+dy)){ seen.add(k); q.push([x+dx,y+dy]); } } }
   T('亀裂の 北へは そのままでは 行けない', ![...seen].some(k=>Number(k.split(',')[1])<16));
   T('岩が 4つ ある', C.MAPS.old_pipe.tiles.join('').split('O').length-1===4);
 }
-stand('old_pipe', 1, 18, 'back');
+stand('old_pipe', 1, 21, 'back');
 C.stepField(0,-1);                       // 岩(1,17)を 北へ おす → 亀裂(1,16)に はまる
-T('亀裂が うまる', C.tileAt('old_pipe',1,16)==='.', C.tileAt('old_pipe',1,16));
+T('亀裂が うまる', C.tileAt('old_pipe',1,19)==='.', C.tileAt('old_pipe',1,19));
 for(let i=0;i<3;i++){ C.G.mode='field'; C.stepField(0,-1); }
-T('むこうへ わたれる', C.P.y<=15, 'y='+C.P.y);
+T('むこうへ わたれる', C.P.y<=18, 'y='+C.P.y);
 
 // ===== 8.7 見習いを 見つける =====
 C.party.forEach(p=>{ p.hp=1; });
-talk('old_pipe', 19, 21, 'front');
+talk('old_pipe', 19, 24, 'front');
 T('見習いを 見つける', C.G.flags.ch1_sonFound===true);
 T('奥から 声が した と 言う', said('人の 声みたいな'), log.join(' / ').slice(0,90));
 T('知らない 名を 呼ばれた', said('名前を 呼ばれた'));
 T('手当てで 全快', C.party.every(p=>p.hp===p.maxhp));
 
 // ===== 9. 破れた 管を 見る =====
-talk('old_pipe', 1, 14, 'back');
+talk('old_pipe', 1, 17, 'back');
 T('破れ目を 見る', C.G.flags.ch1_sawBreach===true);
 T('内側から 溶けている', said('中から'), log.join(' / ').slice(0,80));
 T('十年 閉じこめた 話', said('閉じこめた'));
 
 // ===== 10. 灯り 2つで 最奥が ひらく =====
-T('はじめは 隔壁が しまっている', C.tileAt('old_pipe',10,4)==='K', C.tileAt('old_pipe',10,4));
-talk('old_pipe', 10, 5, 'back');
+T('はじめは 隔壁が しまっている', C.tileAt('old_pipe',10,7)==='K', C.tileAt('old_pipe',10,7));
+talk('old_pipe', 10, 8, 'back');
 T('あけかたの ヒントが でる', said('両脇の 灯り'), log.join(' / ').slice(0,70));
-stand('old_pipe', 4, 7, 'left'); C.interact();
-T('灯り ひとつでは まだ ひらかない', C.tileAt('old_pipe',10,4)==='K');
-stand('old_pipe', 20, 14, 'back'); C.interact();
-T('灯り ふたつで ひらく', C.tileAt('old_pipe',10,4)==='.', C.tileAt('old_pipe',10,4));
+stand('old_pipe', 4, 10, 'left'); C.interact();
+T('灯り ひとつでは まだ ひらかない', C.tileAt('old_pipe',10,7)==='K');
+stand('old_pipe', 20, 17, 'back'); C.interact();
+T('灯り ふたつで ひらく', C.tileAt('old_pipe',10,7)==='.', C.tileAt('old_pipe',10,7));
 
 // ===== 11. オボロ =====
 clearLog();
@@ -240,7 +240,7 @@ C.party.push(C.mkMember('io',13)); C.party.push(C.mkMember('seren',13));
 C.party[0].weapon={kind:'w',name:'剣',v:9}; C.party[0].armor={kind:'a',name:'胴',v:8};
 C.party[1].weapon={kind:'w',name:'槍',v:11};C.party[1].armor={kind:'a',name:'胸当',v:9};
 C.P.herbs=8;
-stand('old_pipe', 10, 3, 'back');
+stand('old_pipe', 10, 6, 'back');
 C.interact();
 T('オボロの 名が 出る', said('オボロ'), log.join(' / ').slice(0,90));
 T('申請書の 文言を 口に する', said('シュウゼン'), log.join(' / ').slice(0,200));
@@ -273,7 +273,7 @@ T('綴りの 名が 消える 理由', said('書いても 意味が ない'), lo
 T('セレンが 自分の 家を 言う', said('わたしの 家は、その'));
 
 // ===== 11.5 管の 底：濁った 光珠の かけら =====
-talk('old_pipe', 13, 2, 'front');
+talk('old_pipe', 13, 5, 'front');
 T('かけらを 拾う', C.G.flags.ch1_foundShard===true);
 T('炉から 来た 珠だと わかる', said('炉から 来た 珠'), log.join(' / ').slice(0,80));
 
@@ -302,7 +302,7 @@ C.freshState();
 T('ロードできる', C.loadGame(0)===true);
 T('ロード：章が もどる', C.G.chapter===2);
 T('ロード：なかまが もどる', C.party.length===2);
-T('ロード：しかけが もどる', C.tileAt('old_pipe',1,16)==='.' && C.tileAt('old_pipe',10,4)==='.');
+T('ロード：しかけが もどる', C.tileAt('old_pipe',1,19)==='.' && C.tileAt('old_pipe',10,7)==='.');
 T('ロード：おかねが もどる', C.P.gold===g);
 T('ロード：Lvが もどる', C.party[0].lv===lv);
 
