@@ -102,6 +102,14 @@ function kill(k){
   // ★けっかいは 章ごと。その 章に なって いないと 閉じない。
   Object.keys(C.WARDS).forEach(mp=>{
     const wd = C.WARDS[mp];
+    // ★その 章より 前は、めじるしが 立って いても 通さない
+    if(wd.chapter > 1){
+      C.G.chapter = wd.chapter - 1;
+      C.G.flags[wd.flag] = true;
+      T('けっかい '+mp+' は 前の 章では 通さない', C.wardBlocks(mp));
+      T('けっかい '+mp+' に 前の 章むけの ことばが ある', !!wd.msgEarly);
+      C.G.flags[wd.flag] = false;
+    }
     C.G.chapter = wd.chapter;
     C.G.flags[wd.flag] = false;
     T('けっかい '+mp+' は はじめ 閉じている（第'+wd.chapter+'章）', C.wardBlocks(mp));

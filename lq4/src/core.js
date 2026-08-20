@@ -861,12 +861,22 @@ function areaName(map,x,y){
 //   はんていは ここ 1か所。よそで 見おとしても かならず ここで 止まる。
 function wardBlocks(to){
   const wd = WARDS[to];
-  return !!(wd && (G.chapter||1)===wd.chapter && !G.flags[wd.flag]);
+  if(!wd) return false;
+  const now = G.chapter||1;
+  // ★その 章より 前でも 通して いた。序章の うちに 旧管路へ 下りられた。
+  if(now < wd.chapter) return true;                 // まだ その 章に なって いない
+  if(now > wd.chapter) return false;                // もう 済んだ 章
+  return !G.flags[wd.flag];
+}
+function wardMsg(to){
+  const wd = WARDS[to];
+  if(!wd) return null;
+  return ((G.chapter||1) < wd.chapter && wd.msgEarly) ? wd.msgEarly : wd.msg;
 }
 function doWarp(w){
   if(w && wardBlocks(w.to)){
     G.mode='msg';
-    U.msg(WARDS[w.to].msg, ()=>{ G.mode='field'; });
+    U.msg(wardMsg(w.to), ()=>{ G.mode='field'; });
     return;
   }
   G.busy=true;
@@ -2126,6 +2136,10 @@ const WARDS = {
   // ★第1章：点検路の 群れを 散らすまで 旧管路へは 下りない。
   //   さきに 下りられると、かんむれの 場面を とばして しまう。
   old_pipe: {chapter:2, flag:'ch1_swarmDown',
+    // ★第1章より 前は そもそも 塞がって いる
+    msgEarly:['床に 四角い 蓋。ぶあつい 板が 打ちつけてある。',
+              '「三の管　封鎖　立入禁止」と 書いた 札が 下がっている。',
+              'イオ「……開けかたが 分からない」'],
     msg:['昇降口の 前に 技師が 立って いる。',
          '技師「待て。まず 点検路だ」',
          '技師「あそこが 詰まった ままだと、下りても 光が 戻らん」',
@@ -2588,7 +2602,7 @@ return {
   MAPS, ENEMIES, MIDBOSS, CLASSES, SPELL_DEFS, SHOPS, INN_PRICE, byMap, byMapCh, TACTICS, LV_CAP,
   // ★しかけ（IVから）
   setTile, applyTileEdits, restoreMaps, snapshotMaps, allLampsLit, GIMMICK_TILES,
-  WARDS, wardBlocks,
+  WARDS, wardBlocks, wardMsg,
   pushRock, toggleLamp, gimmickRescue,
   // ★LQ4：けんしょうよう（テストから 戦闘を 1てずつ たたく）
   memberAct, enemyAct, endBattle, buffMul, eEffAgi, inflictHit,

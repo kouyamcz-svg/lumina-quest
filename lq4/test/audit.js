@@ -358,6 +358,45 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★その 章で 行ける マップの しかけが、その 章に 書いて あるか。
+//   ★章が 変わると まえの 章の 章データは 見に いかない。
+//     点検路を 第1章で 再訪する のに 仕掛けを 書き忘れ、
+//     灯りを 2つ 点けても 点検口が 開かなかった。
+{
+  Object.keys(CHD.CH).forEach(no=>{
+    const cd = CHD.CH[no];
+    if(!cd.start) return;
+    // その 章の はじまりから、ワープを たどって 行ける マップ
+    const seen = new Set([cd.start.map]); const q=[cd.start.map];
+    while(q.length){
+      const mp = q.shift();
+      const w = (C.MAPS[mp]||{}).warpsXY || {};
+      Object.keys(w).forEach(k=>{
+        const to = w[k].to;
+        if(!seen.has(to) && C.MAPS[to]){ seen.add(to); q.push(to); }
+      });
+    }
+    // 章の はじめに ならす ます（setTiles）は 「かたづけた」と みなす
+    const fixed = new Set(((cd.setTiles)||[]).map(o=>o.map+':'+o.x+','+o.y));
+    const lg = cd.lampGates||{}, lk = cd.locks||{};
+    // ★その 章では まだ 入れない ばしょ（けっかい）は のぞく
+    Object.keys(C.WARDS||{}).forEach(mp=>{
+      if(Number(no) < C.WARDS[mp].chapter) seen.delete(mp);
+    });
+    seen.forEach(mp=>{
+      const t = C.MAPS[mp].tiles;
+      let hasL=false, ks=[];
+      for(let y=0;y<t.length;y++) for(let x=0;x<t[y].length;x++){
+        const ch=t[y][x];
+        if((ch==='L'||ch==='l') && !fixed.has(mp+':'+x+','+y)) hasL=true;
+        if(ch==='K' && !fixed.has(mp+':'+x+','+y)) ks.push(x+','+y);
+      }
+      if(hasL) T('第'+(no-1)+'章：灯りに 開く さきが ある '+mp, !!lg[mp], '章データに lampGates が ない');
+      ks.forEach(k=>T('第'+(no-1)+'章：扉に 説明が ある '+mp+' '+k, !!lk[mp+':'+k], '章データに locks が ない'));
+    });
+  });
+}
+
 // ★とおせんぼの ますは、見た目でも 止まって いると 分かる こと。
 //   ★隔壁(K)に 城門の 絵を あてて いて、通れる 門に 見えた。
 {

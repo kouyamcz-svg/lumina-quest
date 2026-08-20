@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-19 22:40 JST", "build":"29cb51d3","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 374, "chapters": 970, "bgm": 979, "view2d": 2020, "core": 2620, "view": 1394, "ui": 1129}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-20 19:42 JST", "build":"0eb03078","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 374, "chapters": 994, "bgm": 979, "view2d": 2020, "core": 2634, "view": 1394, "ui": 1129}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -1213,6 +1213,16 @@ const CH = {
       {map:'rift_yard',  x:10, y:3, ch:'.'},  // ウンブラ（討った）
       {map:'rift_yard',  x:9,  y:5, ch:'.'},  // かげの あぎと（討った）
       {map:'pipe_path',  x:8,  y:7, ch:'.'},  // 序章の あぎと（逃げた あと）
+      // ★点検路の しかけを もとに もどす。序章で 点けた ままだと
+      //   第1章で 点検口が はじめから 開いて いる ことに なる。
+      {map:'pipe_path',  x:3,  y:6, ch:'L'},  // 光珠灯（消）
+      {map:'pipe_path',  x:13, y:8, ch:'L'},  // 光珠灯（消）
+      {map:'pipe_path',  x:9,  y:5, ch:'K'},  // 点検口（閉）
+      // ★裂け目の広場は 序章で 片づいた。しかけを のこすと
+      //   灯りを 点けても 何も 起きない「宙ぶらりん」に なる。
+      {map:'rift_yard',  x:5,  y:6,  ch:'.'},  // 光珠灯（撤去）
+      {map:'rift_yard',  x:12, y:6,  ch:'.'},  // 光珠灯（撤去）
+      {map:'rift_yard',  x:16, y:5,  ch:'.'},  // 扉（開いた まま）
     ],
 
     onEnter: {
@@ -1223,6 +1233,15 @@ const CH = {
 
     // ★灯り 2つで 最奥の 扉が ひらく
     lampGates: {
+      // ★点検路は 序章でも つかった 場所。章が 変わると 序章の 章データは
+      //   見に いかない ので、第1章にも 同じ しかけを 書いて おく。
+      //   これが 抜けて いて、灯りを 2つ 点けても 点検口が 開かなかった。
+      pipe_path: {
+        flag:'ch1_pipeLit',
+        open:[{x:9, y:5, ch:'.'}],
+        msg:['光珠灯が ふたつとも ともった。',
+             '管を 流れる 光が 太く なり、点検口の 錠が 外れた。'],
+      },
       old_pipe: {
         flag:'ch1_deepLit',
         open:[{x:10, y:7, ch:'.'}],
@@ -1231,6 +1250,11 @@ const CH = {
       },
     },
     locks: {
+      'pipe_path:9,5': {
+        lockMsg:['管の 点検口。金具で 固く 締めてある。',
+                 '「灯り 二基 点火の うえ 開放の こと」と 彫ってある。',
+                 'セレン「……両脇の 光珠灯ね」'],
+      },
       'old_pipe:10,7': {
         lockMsg:['最奥への 隔壁。分厚い 白石で 塞がれている。',
                  'セレン「圧が 足りないと 上がらない 造りね」',
@@ -5475,12 +5499,22 @@ function areaName(map,x,y){
 //   はんていは ここ 1か所。よそで 見おとしても かならず ここで 止まる。
 function wardBlocks(to){
   const wd = WARDS[to];
-  return !!(wd && (G.chapter||1)===wd.chapter && !G.flags[wd.flag]);
+  if(!wd) return false;
+  const now = G.chapter||1;
+  // ★その 章より 前でも 通して いた。序章の うちに 旧管路へ 下りられた。
+  if(now < wd.chapter) return true;                 // まだ その 章に なって いない
+  if(now > wd.chapter) return false;                // もう 済んだ 章
+  return !G.flags[wd.flag];
+}
+function wardMsg(to){
+  const wd = WARDS[to];
+  if(!wd) return null;
+  return ((G.chapter||1) < wd.chapter && wd.msgEarly) ? wd.msgEarly : wd.msg;
 }
 function doWarp(w){
   if(w && wardBlocks(w.to)){
     G.mode='msg';
-    U.msg(WARDS[w.to].msg, ()=>{ G.mode='field'; });
+    U.msg(wardMsg(w.to), ()=>{ G.mode='field'; });
     return;
   }
   G.busy=true;
@@ -6740,6 +6774,10 @@ const WARDS = {
   // ★第1章：点検路の 群れを 散らすまで 旧管路へは 下りない。
   //   さきに 下りられると、かんむれの 場面を とばして しまう。
   old_pipe: {chapter:2, flag:'ch1_swarmDown',
+    // ★第1章より 前は そもそも 塞がって いる
+    msgEarly:['床に 四角い 蓋。ぶあつい 板が 打ちつけてある。',
+              '「三の管　封鎖　立入禁止」と 書いた 札が 下がっている。',
+              'イオ「……開けかたが 分からない」'],
     msg:['昇降口の 前に 技師が 立って いる。',
          '技師「待て。まず 点検路だ」',
          '技師「あそこが 詰まった ままだと、下りても 光が 戻らん」',
@@ -7202,7 +7240,7 @@ return {
   MAPS, ENEMIES, MIDBOSS, CLASSES, SPELL_DEFS, SHOPS, INN_PRICE, byMap, byMapCh, TACTICS, LV_CAP,
   // ★しかけ（IVから）
   setTile, applyTileEdits, restoreMaps, snapshotMaps, allLampsLit, GIMMICK_TILES,
-  WARDS, wardBlocks,
+  WARDS, wardBlocks, wardMsg,
   pushRock, toggleLamp, gimmickRescue,
   // ★LQ4：けんしょうよう（テストから 戦闘を 1てずつ たたく）
   memberAct, enemyAct, endBattle, buffMul, eEffAgi, inflictHit,

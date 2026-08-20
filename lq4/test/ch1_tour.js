@@ -142,6 +142,16 @@ T('点検路の 詰まりを 告げられる', C.G.flags.ch1_swarmTold===true);
 T('半年前の あぎとに つながる', said('口だけの、あれ'), log.join(' / ').slice(0,120));
 T('クエストが たつ', C.G.quests.ch1_q5_swarm==='active');
 T('点検路に 群れが 置かれる', C.tileAt('pipe_path',8,7)==='B', C.tileAt('pipe_path',8,7));
+// ★第1章でも 点検路の しかけが 効く（序章の 章データは 見に いかない）
+T('点検口は しまって いる', C.tileAt('pipe_path',9,5)==='K', C.tileAt('pipe_path',9,5));
+T('灯りは 消えて いる', C.tileAt('pipe_path',3,6)==='L' && C.tileAt('pipe_path',13,8)==='L');
+clearLog();
+stand('pipe_path', 9, 6, 'back'); C.interact();
+T('点検口に 説明が 出る', said('灯り 二基'), log.join(' / ').slice(0,60));
+stand('pipe_path', 2, 6, 'right'); C.interact();
+T('灯り ひとつでは 開かない', C.tileAt('pipe_path',9,5)==='K');
+stand('pipe_path', 14, 8, 'left'); C.interact();
+T('灯り ふたつで 開く', C.tileAt('pipe_path',9,5)==='.', C.tileAt('pipe_path',9,5));
 
 // ★群れを 散らす まえは 旧管路に 下りられない
 stand('lower_dist', 2, 13, 'left');
