@@ -358,6 +358,22 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★章の おわりに つながる みちすじが、クエストに 出て いるか。
+//   ★オボロを 討った あと 何を すれば よいか どこにも 出て おらず、
+//     プレイヤーが 迷子に なった。
+{
+  Object.keys(CHD.CH).forEach(no=>{
+    const cd = CHD.CH[no];
+    if(!cd.ending || !cd.ending.trigger) return;
+    const trig = cd.ending.trigger;
+    // その めじるしが クエストの 手順に 出て いる か
+    const inStep = Object.values(NPCD.QUESTS||{}).some(q=>
+      q.chapter===Number(no) && (q.steps||[]).some(st=>st.flag===trig));
+    T('第'+(no-1)+'章：章末に つながる 手順が クエストに 出る（'+trig+'）', inStep,
+      'どの クエストにも 出て いない');
+  });
+}
+
 // ★「めじるしを 立てる 会話」が どこかに ある か。
 //   ★章データを 書きかえた ときに 会話を まるごと 落として しまい、
 //     その めじるしが 永久に 立たなく なって いた。

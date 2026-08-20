@@ -55,9 +55,13 @@ const NPCS = {
       {text:['「下層区は 地上生まれの 街だ」',
              '「上の 連中は おれたちを 重い者と 呼ぶ」']}]},
     {at:'5,5', spr:'villagerB', name:'光珠管の 技師', lines:[
-      {when:{flag:'ch1_oboroDown'}, text:[
+      {when:{flag:'ch1_reported'}, text:[
         '技師「管の 光が 戻った。二十年で 初めてだ」',
         '技師「……お前の 父さんに 見せたかったな」']},
+      {when:{flag:'ch1_oboroDown'}, text:[
+        '技師「管の 光が 戻った。二十年で 初めてだ」',
+        '技師「報告は 中層の 詰所だ。早く 出してこい」',
+        '技師「こういうのは、熱いうちに 出さんと 通らん」']},
       {when:{flag:'ch1_pipeTold'}, text:[
         '技師「三の 管だ。気を つけろ」',
         '技師「十年 誰も 入って いない」']},
@@ -162,8 +166,12 @@ const NPCS = {
       {when:{flag:'ch1_reported'}, text:[
         '副長「書類は 上げた。返事は 期待するな」',
         '副長「……だが 綴りには 残る」']},
+      {when:{flag:'ch1_foundShard'}, text:[
+        '副長「討ったか。報告書を 出せ。書式は こちらで 整える」']},
       {when:{flag:'ch1_oboroDown'}, text:[
-        '副長「討ったなら 報告に 来い。書式は こちらで 整える」']},
+        '副長「討ったなら 報告に 来い」',
+        '副長「……その 前に、現場で 拾える ものは 拾って おけ」',
+        '副長「物が ないと、書類は ただの 作文だ」']},
       {text:['副長「団長は 上層だ。まだ 戻らん」']}]},
     {at:'5,6', spr:'guardA', name:'非番の 騎士', lines:[
       {when:{flag:'ch1_oboroDown'}, text:[
@@ -304,8 +312,11 @@ const QUESTS = {
     giver:'光珠管の 技師',
     desc:'下層区の 西はずれから 旧管路へ。破れ目の もとを 断つ。',
     steps:[
-      {id:'breach', desc:'破れた 管を 見る',   flag:'ch1_sawBreach'},
-      {id:'boss',   desc:'オボロを 討ち取る', flag:'ch1_oboroDown'},
+      {id:'breach', desc:'破れた 管を 見る',       flag:'ch1_sawBreach'},
+      {id:'boss',   desc:'オボロを 討ち取る',     flag:'ch1_oboroDown'},
+      // ★討った あと 何を すれば よいか、ここにも 出す
+      {id:'shard',  desc:'オボロが いた あたりを 調べる', flag:'ch1_foundShard'},
+      {id:'report', desc:'中層の 詰所で 副長に 報告する', flag:'ch1_reported'},
     ],
     reward:{}, next:null,
   },
