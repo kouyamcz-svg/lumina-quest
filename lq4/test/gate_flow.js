@@ -96,6 +96,22 @@ function kill(k){
   T('仲間は そのまま', C.party.length===2 && C.party[1].cls==='seren');
 }
 
+// ============ 「行けと 言われた 先」が その 時点で できて いるか ============
+//   ★2つの 会話に 分けて いた ため、1回 話した だけでは
+//     点検路に 群れが 置かれず、行っても 誰も いなかった。
+{
+  C.freshState(); C.G.chapters={}; C.switchChapter(2);
+  C.G.flags.ch1_taskTaken = true;
+  log.length=0;
+  C.G.mode='field'; C.P.map='lower_dist'; C.P.x=5; C.P.y=6; C.P.dir='back';
+  C.interact();
+  T('技師の 話は 一度で 済む', C.G.flags.ch1_pipeTold && C.G.flags.ch1_swarmTold,
+    JSON.stringify({pipe:C.G.flags.ch1_pipeTold, swarm:C.G.flags.ch1_swarmTold}));
+  T('言われた 先に 群れが いる', C.tileAt('pipe_path',8,7)==='B', C.tileAt('pipe_path',8,7));
+  T('言われた 先の 昇降口が 開く', C.tileAt('lower_dist',1,13)==='D', C.tileAt('lower_dist',1,13));
+  T('点検路の クエストが たつ', C.G.quests.ch1_q5_swarm==='active');
+}
+
 // ============ すべての けっかいが いつか 開くか ============
 {
   C.freshState();

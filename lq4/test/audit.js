@@ -358,6 +358,41 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★「めじるしを 立てる 会話」が どこかに ある か。
+//   ★章データを 書きかえた ときに 会話を まるごと 落として しまい、
+//     その めじるしが 永久に 立たなく なって いた。
+{
+  Object.keys(CHD.CH).forEach(no=>{
+    const cd = CHD.CH[no];
+    const raised = new Set();
+    (cd.talkEvents||[]).forEach(e=>(e.set||[]).forEach(f=>raised.add(f)));
+    Object.keys(cd.bossReward||{}).forEach(k=>(cd.bossReward[k].set||[]).forEach(f=>raised.add(f)));
+    Object.keys(cd.bosses||{}).forEach(k=>{ if(cd.bosses[k].clearedFlag) raised.add(cd.bosses[k].clearedFlag); });
+    Object.keys(cd.onEnter||{}).forEach(k=>raised.add(cd.onEnter[k]));
+    Object.keys(cd.lampGates||{}).forEach(k=>{ if(cd.lampGates[k].flag) raised.add(cd.lampGates[k].flag); });
+    if(cd.ending) (cd.ending.set||[]).forEach(f=>raised.add(f));
+    // ★ノルマ（startQuota）で 立つ めじるしも かぞえる
+    (cd.talkEvents||[]).forEach(e=>{
+      if(e.startQuota && e.startQuota.flag) raised.add(e.startQuota.flag);
+    });
+    // 会話の 前提（cond／unless）に 出てくる めじるしは、どこかで 立つ こと
+    const need = new Set();
+    (cd.talkEvents||[]).forEach(e=>{
+      (e.cond||[]).forEach(f=>need.add(f));
+      if(e.unless) need.add(e.unless);
+    });
+    Object.keys(cd.bosses||{}).forEach(k=>{ if(cd.bosses[k].needFlag) need.add(cd.bosses[k].needFlag); });
+    if(cd.ending && cd.ending.trigger) need.add(cd.ending.trigger);
+    need.forEach(f=>{
+      if(!/^ch\d/.test(f)) return;
+      const own = f.indexOf('ch'+(Number(no)-1)+'_')===0;
+      if(!own) return;                         // よその 章の めじるしは 見ない
+      T('第'+(no-1)+'章：めじるし '+f+' を 立てる 会話が ある', raised.has(f),
+        'どこでも 立たない（会話を 落とした？）');
+    });
+  });
+}
+
 // ★その 章で 行ける マップの しかけが、その 章に 書いて あるか。
 //   ★章が 変わると まえの 章の 章データは 見に いかない。
 //     点検路を 第1章で 再訪する のに 仕掛けを 書き忘れ、

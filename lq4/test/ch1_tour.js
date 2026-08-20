@@ -128,7 +128,7 @@ talk('lower_dist', 5, 6, 'back');
 T('技師が 三の 管を 教える', said('三の 管'), log.join(' / ').slice(0,80));
 T('十年 前に 塞いだ 話', said('直す 金が 下りなかった'));
 T('昇降口が ひらく', C.tileAt('lower_dist',1,13)==='D', C.tileAt('lower_dist',1,13));
-T('クエストが すすむ', C.G.quests.ch1_q1_survey==='clear' && C.G.quests.ch1_q2_pipe==='active');
+T('クエストが すすむ', C.G.quests.ch1_q1_survey==='clear' && C.G.quests.ch1_q5_swarm==='active');
 
 // ===== 6.5 下層区：行方不明の 見習い =====
 talk('lower_dist', 12, 12, 'front');
@@ -137,10 +137,8 @@ T('西の 昇降口と 言われる', said('西の 昇降口'), log.join(' / ').
 T('クエストが たつ', C.G.quests.ch1_q4_son==='active');
 
 // ===== 6.7 点検路の 群れ：かんむれ（旧管路の 前）=====
-talk('lower_dist', 5, 6, 'back');
-T('点検路の 詰まりを 告げられる', C.G.flags.ch1_swarmTold===true);
-T('半年前の あぎとに つながる', said('口だけの、あれ'), log.join(' / ').slice(0,120));
-T('クエストが たつ', C.G.quests.ch1_q5_swarm==='active');
+//   ★技師の 話は 6の 一度で 済む（分けると 行っても 誰も いない）
+T('点検路の 詰まりを 告げられた', C.G.flags.ch1_swarmTold===true);
 T('点検路に 群れが 置かれる', C.tileAt('pipe_path',8,7)==='B', C.tileAt('pipe_path',8,7));
 // ★第1章でも 点検路の しかけが 効く（序章の 章データは 見に いかない）
 T('点検口は しまって いる', C.tileAt('pipe_path',9,5)==='K', C.tileAt('pipe_path',9,5));
@@ -163,7 +161,7 @@ clearLog();
 C.G.tactic='gungan';
 // ★ものがたりの たしかめが 目当て。つよさの つりあいは test/tune_ch1.js で 別に はかる。
 C.party.length=0;
-C.party.push(C.mkMember('io',12)); C.party.push(C.mkMember('seren',12));
+C.party.push(C.mkMember('io',16)); C.party.push(C.mkMember('seren',16));
 C.party[0].weapon={kind:'w',name:'剣',v:9}; C.party[0].armor={kind:'a',name:'胴',v:8};
 C.party[1].weapon={kind:'w',name:'槍',v:11};C.party[1].armor={kind:'a',name:'胸当',v:9};
 C.P.herbs=8;
@@ -246,7 +244,7 @@ clearLog();
 C.G.tactic='gungan';
 // ★ものがたりの たしかめが 目当て。つよさの つりあいは test/tune_ch1.js で 別に はかる。
 C.party.length=0;
-C.party.push(C.mkMember('io',13)); C.party.push(C.mkMember('seren',13));
+C.party.push(C.mkMember('io',18)); C.party.push(C.mkMember('seren',18));
 C.party[0].weapon={kind:'w',name:'剣',v:9}; C.party[0].armor={kind:'a',name:'胴',v:8};
 C.party[1].weapon={kind:'w',name:'槍',v:11};C.party[1].armor={kind:'a',name:'胸当',v:9};
 C.P.herbs=8;
@@ -261,6 +259,7 @@ T('千年ぶん 溜めている と 言う', said('千年ぶん 溜めてる'));
 T('クエストが 片づく', C.G.quests.ch1_q2_pipe==='clear');
 
 // ===== 11.2 上層の 使いに 結果を つきつける =====
+C.G.flags.ch1_slurAnswered = false;      // ★11.2 の 場面を たしかめる ため
 talk('mid_dist', 14, 6, 'back');
 T('使いに 結果を 言う', C.G.flags.ch1_slurAnswered===true);
 T('読む 者が いるかは 別、と 言われる', said('読む 者が いるかは'), log.join(' / ').slice(0,90));
