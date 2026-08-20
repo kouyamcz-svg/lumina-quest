@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-20 20:52 JST", "build":"3276773f","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 385, "chapters": 1004, "bgm": 979, "view2d": 2020, "core": 2634, "view": 1394, "ui": 1129}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-20 21:05 JST", "build":"2dd359b9","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 385, "chapters": 1008, "bgm": 979, "view2d": 2020, "core": 2634, "view": 1394, "ui": 1129}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -471,7 +471,7 @@ const NPCS = {
       {when:{flag:'ch1_sonFound'}, text:[
         '見習いが いた あたり。工具袋が 落ちている。']},
       {text:['壁ぎわに 人が うずくまっている。']}]},
-    {at:'13,6', spr:'pipeobj', name:'管の 底', lines:[
+    {at:'10,5', spr:'pipeobj', name:'管の 底', lines:[
       {when:{flag:'ch1_foundShard'}, text:[
         '割れた 光珠の あった ところ。床に 黒い すじが 残っている。']},
       {when:{flag:'ch1_oboroDown'}, text:[
@@ -1550,6 +1550,10 @@ const CH = {
     bossReward: {
       oboro: {
         set:['ch1_oboroDown'],
+        // ★倒した ますを そのまま しらべられる ように する。
+        //   まえは 3ます 右に 置いて いて、「いた あたり」と 案内しても
+        //   見つけられなかった。
+        setTiles:[{map:'old_pipe', x:10, y:5, ch:'n'}],
         quest:{ch1_q2_pipe:'clear'},
         msg:['', 'オボロは 束を ほどかれ、ただの 紙片の 山に なった。',
              '風も ないのに、紙片は ひとつ ずつ 消えていく。',
@@ -4992,7 +4996,7 @@ const MAPS = {
     "#p#p##p##p##p##p##p###",
     "######..........######",
     "######....B.....######",
-    "######.......n..######",
+    "######..........######",
     "#########pKp##########",
     "#....................#",
     "q.##.#.###.#.##.#.##.q",

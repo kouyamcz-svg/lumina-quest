@@ -200,7 +200,7 @@ const NPCS = {
       {when:{flag:'ch1_sonFound'}, text:[
         '見習いが いた あたり。工具袋が 落ちている。']},
       {text:['壁ぎわに 人が うずくまっている。']}]},
-    {at:'13,6', spr:'pipeobj', name:'管の 底', lines:[
+    {at:'10,5', spr:'pipeobj', name:'管の 底', lines:[
       {when:{flag:'ch1_foundShard'}, text:[
         '割れた 光珠の あった ところ。床に 黒い すじが 残っている。']},
       {when:{flag:'ch1_oboroDown'}, text:[

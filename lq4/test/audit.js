@@ -358,6 +358,34 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★「そこを 調べよう」と 案内した ばしょが、ほんとうに そこに あるか。
+//   ★オボロを 倒した ますと、かけらの ある ますが 3ます ずれて いて、
+//     「いた あたりを 調べよう」と 言われても 見つからなかった。
+{
+  Object.keys(CHD.CH).forEach(no=>{
+    const cd = CHD.CH[no];
+    Object.keys(cd.bossReward||{}).forEach(key=>{
+      const rw = cd.bossReward[key];
+      const says = (rw.msg||[]).some(l=>/いた あたりを 調べ|足もとに 何か/.test(l));
+      if(!says) return;
+      // その ボスの ます
+      let at = null;
+      Object.keys(cd.bosses||{}).forEach(k=>{ if(cd.bosses[k].key===key) at=k; });
+      T('倒した あとに 調べる 先が ある '+key, !!at);
+      if(!at) return;
+      const mp = at.split(':')[0];
+      const [x,y] = at.split(':')[1].split(',').map(Number);
+      // 倒した ますが そのまま しらべられる ように なる こと
+      const turns = (rw.setTiles ? (Array.isArray(rw.setTiles)?rw.setTiles:[rw.setTiles]) : [])
+        .some(o=>o.map===mp && o.x===x && o.y===y && o.ch==='n');
+      T('倒した ますを その場で しらべられる '+key, turns,
+        '別の ますに 置くと 見つからない');
+      const npc = (NPCD.NPCS[mp]||[]).some(e=>e.at===x+','+y);
+      T('倒した ますに しらべる 人／物が いる '+key, npc);
+    });
+  });
+}
+
 // ★章の おわりに つながる みちすじが、クエストに 出て いるか。
 //   ★オボロを 討った あと 何を すれば よいか どこにも 出て おらず、
 //     プレイヤーが 迷子に なった。
