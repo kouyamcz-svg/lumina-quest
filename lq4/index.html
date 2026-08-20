@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-20 21:05 JST", "build":"2dd359b9","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 385, "chapters": 1008, "bgm": 979, "view2d": 2020, "core": 2634, "view": 1394, "ui": 1129}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 00:19 JST", "build":"2fd9ca8f","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 385, "chapters": 1008, "bgm": 979, "view2d": 2020, "core": 2674, "view": 1394, "ui": 1129}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -4672,26 +4672,35 @@ const LQ4 = (function(){
 const LV_CAP = 60;   // §5 CAP60（やり込み）
 const SPELL_DEFS = {
   // ============ イオ（剣・主人公）：単体火力と光の継承 ============
+  // ★序盤の 手（打撃だけに ならない ように）
+  ikkiuchi:   {name:'一騎打ち',    mp:2, type:'dmg', min:3,  max:7,  pw:0.95},
+  migamae:    {name:'見構え',      mp:2, type:'buff', stat:'def', mul:1.6, turns:3},
+  kabaidachi: {name:'かばい立ち',  mp:4, type:'buff', stat:'def', mul:1.5, turns:3, all:true},
+  toushin:    {name:'闘身',        mp:5, type:'buff', stat:'atk', mul:1.4, turns:3},
   kabutowari: {name:'兜割り',      mp:3, type:'defdown', cut:8},
-  renzan:     {name:'連斬',        mp:5, type:'dmg', min:26, max:34},
+  renzan:     {name:'連斬',        mp:5, type:'dmg', min:5,  max:11, pw:1.05},
   yoroikudaki:{name:'鎧砕き',      mp:8, type:'defdown', cut:16},
-  tenkuuken:  {name:'天空剣',      mp:9, type:'dmg', min:44, max:58},
-  kenpunagi:  {name:'剣風・薙ぎ',  mp:12,type:'dmgall', min:30, max:42},
-  seikousen:  {name:'星鋼閃',      mp:16,type:'dmg', min:84, max:108},
-  amagakeken: {name:'天翔剣',      mp:22,type:'dmg', min:118,max:150},
-  seikou_kiwa:{name:'星鋼閃・極',  mp:40,type:'dmgall', min:110,max:145},
+  tenkuuken:  {name:'天空剣',      mp:9, type:'dmg', min:8,  max:16, pw:1.30},
+  kenpunagi:  {name:'剣風・薙ぎ',  mp:12,type:'dmgall', min:5, max:11, pw:0.80},
+  seikousen:  {name:'星鋼閃',      mp:16,type:'dmg', min:12, max:22, pw:1.55},
+  amagakeken: {name:'天翔剣',      mp:22,type:'dmg', min:16, max:28, pw:1.85},
+  seikou_kiwa:{name:'星鋼閃・極',  mp:40,type:'dmgall', min:14, max:26, pw:1.25},
 
   // ============ セレン（槍）：速攻と貫通 ============
-  shippuutsuki:{name:'疾風突き',   mp:2, type:'dmg', min:14, max:20},
+  // ★序盤の 手（速さを 生かす ゆさぶり）
+  ashibarai:  {name:'足払い',      mp:3, type:'inflict', st:'slow', p:0.55},
+  mikiri:     {name:'見切り',      mp:3, type:'buff', stat:'agi', mul:1.5, turns:3},
+  kagerou:    {name:'陽炎突き',    mp:4, type:'dmg', min:4, max:10, pw:1.10, inflict:{type:'slow', p:0.25}},
+  shippuutsuki:{name:'疾風突き',   mp:2, type:'dmg', min:3,  max:8,  pw:1.00},
   yoroidooshi:{name:'鎧通し',      mp:4, type:'defdown', cut:10},
-  nidantsuki: {name:'二段突き',    mp:6, type:'dmg', min:30, max:40},
-  nagiharai:  {name:'薙ぎ払い',    mp:8, type:'dmgall', min:22, max:32},
-  ryuuseitsuki:{name:'流星突き',   mp:10,type:'dmg', min:52, max:68},
-  kansen:     {name:'貫閃',        mp:14,type:'dmg', min:78, max:100},
-  amatsuranuki:{name:'天貫き',     mp:18,type:'dmg', min:100,max:128},
-  ginu:       {name:'銀雨',        mp:20,type:'dmgall', min:60, max:80},
-  ryuuseigun: {name:'流星群',      mp:30,type:'dmgall', min:92, max:120},
-  kansen_kiwa:{name:'極・貫閃',    mp:36,type:'dmg', min:160,max:200},
+  nidantsuki: {name:'二段突き',    mp:6, type:'dmg', min:6,  max:12, pw:1.20},
+  nagiharai:  {name:'薙ぎ払い',    mp:8, type:'dmgall', min:4, max:10, pw:0.75},
+  ryuuseitsuki:{name:'流星突き',   mp:10,type:'dmg', min:9,  max:17, pw:1.40},
+  kansen:     {name:'貫閃',        mp:14,type:'dmg', min:12, max:22, pw:1.60},
+  amatsuranuki:{name:'天貫き',     mp:18,type:'dmg', min:15, max:27, pw:1.80},
+  ginu:       {name:'銀雨',        mp:20,type:'dmgall', min:8, max:16, pw:0.95},
+  ryuuseigun: {name:'流星群',      mp:30,type:'dmgall', min:11, max:21, pw:1.15},
+  kansen_kiwa:{name:'極・貫閃',    mp:36,type:'dmg', min:20, max:36, pw:2.15},
 
   // ============ ノエ（夢術）：回復と弱体 ============
   heal:       {name:'ヒール',      mp:3, type:'heal', min:20, max:28},
@@ -4729,14 +4738,18 @@ const SPELL_DEFS = {
 };
 const CLASSES = {
   // イオ（16・主人公／地上生まれの見習い騎士）剣
-  io:   {name:'イオ',  hp:18,mp:4, atk:6,def:4,agi:5, g:{hp:6,mp:2,atk:3,def:2,agi:2},
-         learns:[{lv:5,key:'kabutowari'},{lv:9,key:'renzan'},{lv:15,key:'yoroikudaki'},
+  io:   {name:'イオ',  hp:18,mp:6, atk:6,def:4,agi:5, g:{hp:6,mp:3,atk:3,def:2,agi:2},
+         learns:[{lv:2,key:'ikkiuchi'},{lv:4,key:'migamae'},
+                 {lv:5,key:'kabutowari'},{lv:7,key:'kabaidachi'},
+                 {lv:9,key:'renzan'},{lv:11,key:'toushin'},{lv:15,key:'yoroikudaki'},
                  {lv:20,key:'tenkuuken'},{lv:26,key:'kenpunagi'},{lv:32,key:'seikousen'},
                  {lv:40,key:'holyray'},{lv:46,key:'amagakeken'},
                  {lv:52,key:'judgment'},{lv:58,key:'seikou_kiwa'}]},
   // セレン（16・上層貴族の首席）槍：最速・単体特化
-  seren:{name:'セレン',hp:16,mp:6, atk:5,def:3,agi:9, g:{hp:5,mp:3,atk:3,def:2,agi:3},
-         learns:[{lv:3,key:'shippuutsuki'},{lv:8,key:'yoroidooshi'},{lv:12,key:'nidantsuki'},
+  seren:{name:'セレン',hp:16,mp:8, atk:5,def:3,agi:9, g:{hp:5,mp:4,atk:3,def:2,agi:3},
+         learns:[{lv:3,key:'shippuutsuki'},{lv:5,key:'ashibarai'},
+                 {lv:7,key:'mikiri'},{lv:8,key:'yoroidooshi'},
+                 {lv:10,key:'kagerou'},{lv:12,key:'nidantsuki'},
                  {lv:18,key:'nagiharai'},{lv:23,key:'ryuuseitsuki'},{lv:29,key:'kansen'},
                  {lv:37,key:'amatsuranuki'},{lv:44,key:'ginu'},
                  {lv:50,key:'ryuuseigun'},{lv:57,key:'kansen_kiwa'}]},
@@ -4780,14 +4793,14 @@ const MIDBOSS = {
     exp:100, gold:0, art:'trialdummy',
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第1章 中ボス：かんむれ（管に 巣くう 群れ）----
-  kanmure:{key:'kanmure', name:'かんむれ', hp:310, atk:25, def:14, agi:14, acts:2,
+  kanmure:{key:'kanmure', name:'かんむれ', hp:360, atk:27, def:15, agi:14, acts:2,
     exp:220, gold:150, art:'kanmure', scale:1.10,
     skill:{p:0.30, mul:1.15, name:'つぎめ くだき'},
     inflict:{type:'confuse', p:0.14}},
 
   // ---- 第1章ボス：あくむじゅう オボロ（朧の座）----
   //   下層に 巣くった 親玉。管の 破れ目から 湧く ものを 束ねている。
-  oboro:{key:'oboro', name:'あくむじゅう オボロ', hp:560, atk:32, def:17, agi:12, acts:1,
+  oboro:{key:'oboro', name:'あくむじゅう オボロ', hp:680, atk:35, def:19, agi:12, acts:1,
     exp:520, gold:340, art:'oboro', scale:1.15,
     skill:{p:0.28, mul:1.30, name:'にじみの つめ'},
     aoe:{p:0.20, lo:14, hi:22, name:'よどんだ ながれ'},
@@ -4807,7 +4820,7 @@ const MIDBOSS = {
     skill:{p:0.26, mul:1.20, name:'噛みくだき'},
     inflict:{type:'confuse', p:0.14}},
   // ---- 序章ボス：悪夢獣 ウンブラ（影の座）----
-  umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:320, atk:19, def:10, agi:10, acts:1,
+  umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:390, atk:21, def:11, agi:10, acts:1,
     exp:140, gold:90, art:'umbra', scale:1.15,
     skill:{p:0.28, mul:1.25, name:'かげの つめ'},
     aoe:{p:0.16, lo:6, hi:10, name:'くらやみの さざなみ'},
@@ -5209,6 +5222,17 @@ function buffMul(m, stat){
   const b = m && m.buffs && m.buffs[stat];
   if(!b) return 1;
   return b.mul || 1;
+}
+// ★技の いりょく。
+//   まえは min〜max の 固定値だった ため、レベルと 装備で のびる
+//   通常こうげきに 追いこされ、MPを 払って 弱く なって いた。
+//   いまは 「固定ぶん ＋ 攻撃力の わりあい」。剣・槍の 技は 攻撃力が よく のる。
+//   pw：攻撃力に かける わりあい（書いて なければ 0＝むかしどおりの 固定値）
+function skillDamage(m, sp){
+  const base = sp.min + Math.floor(Math.random()*(sp.max - sp.min + 1));
+  const pw   = sp.pw || 0;
+  if(!pw) return base;
+  return Math.max(1, Math.round(base + mAtk(m) * pw));
 }
 function mAtk(m){ return Math.round((m.batk + (m.weapon?m.weapon.v:0)) * buffMul(m,'atk')); }
 function mDef(m){ return Math.round((m.bdef + (m.armor?m.armor.v:0)) * buffMul(m,'def')); }
@@ -6172,13 +6196,21 @@ function autoCommand(m){
   const alive = b.enemies.filter(e=>e.hp>0);
   const dmg = sp.filter(s=>s.type==='dmg'||s.type==='dmgall');
   if(dmg.length && alive.length>=2){
-    const all = dmg.find(s=>s.type==='dmgall');
+    const all = dmg.filter(s=>s.type==='dmgall')
+                   .sort((a,c)=>(((c.min+c.max)/2)+mAtk(m)*(c.pw||0))
+                               -(((a.min+a.max)/2)+mAtk(m)*(a.pw||0)))[0];
     if(all && m.mp >= all.mp*2) return {actor:m, type:'spell', sp:all};
   }
-  const single = dmg.filter(s=>s.type==='dmg').sort((a,c)=>c.max-a.max)[0];
-  if(single && m.mp > single.mp*3 && mAtk(m) < single.max)
+  // ★技の いりょくは 攻撃力に つれて のびる ように なった。
+  //   まえは 「攻撃力 ＜ 技の 最大値」で くらべて いた ため、
+  //   剣・槍の 技を いつまでも つかわなかった。
+  //   いまは 「その 技の 見こみダメージ」と 「通常こうげき」を くらべる。
+  const expect = (s)=>((s.min + s.max)/2) + mAtk(m) * (s.pw || 0);
+  const single = dmg.filter(s=>s.type==='dmg')
+                    .sort((a,c)=>expect(c)-expect(a))[0];
+  if(single && m.mp > single.mp*3 && expect(single) > mAtk(m)*1.05)
     return {actor:m, type:'spell', sp:single,
-            tgt:alive.slice().sort((x,y)=>x.hp-y.hp)[0]};   // ぶつりが よわい なかまは 技
+            tgt:alive.slice().sort((x,y)=>x.hp-y.hp)[0]};
   const weakest = alive.slice().sort((x,y)=>x.hp-y.hp)[0];
   return {actor:m, type:'attack', tgt:weakest};
 }
@@ -6304,7 +6336,7 @@ function memberAct(a, done){
       A.hit();
       V.fx('spellall',{}, ()=>{
         alive.forEach(e=>{
-          const d = sp.min+Math.floor(Math.random()*(sp.max-sp.min+1));
+          const d = skillDamage(m, sp);
           e.hp-=d; V.pop({enemy:e, text:d, kind:'dmg'});
           lines.push(e.dispName+'に '+d+'の ダメージ！');
           if(e.hp<=0){ e.hp=0; lines.push(e.dispName+'を 倒した！'); killed(e); }
@@ -6385,13 +6417,21 @@ function memberAct(a, done){
     // dmg（単体）：えらんだ あいてが たおれていたら ほかへ
     const t = (a.tgt && a.tgt.hp>0) ? a.tgt : alive[0];
     if(!t){ done(); return; }
-    const d = sp.min+Math.floor(Math.random()*(sp.max-sp.min+1));
+    const d = skillDamage(m, sp);
     A.hit();
     V.fx('spell',{target:t}, ()=>{
       V.pop({enemy:t, text:d, kind:'dmg'});
       t.hp-=d;
       const lines=[m.name+'は '+sp.name+castVerb(m), t.dispName+'に '+d+'の ダメージ！'];
       if(t.hp<=0){ t.hp=0; lines.push(t.dispName+'を 倒した！'); killed(t); }
+      // ★ダメージ技に そえた 追加こうか（陽炎突き など）。
+      //   書いて あるのに 何も 起きて いなかった。
+      else if(sp.inflict && !t.status && inflictHit(t, sp.inflict.type, sp.inflict.p)){
+        t.status = sp.inflict.type;
+        V.pop({enemy:t, text:(STATUS_JP[t.status]||t.status)+'！', kind:'status'});
+        lines.push(t.dispName + (ESTATUS_MSG[t.status]||'の 状態が かわった！'));
+        V.refresh();
+      }
       U.msg(lines, done);
     });
     return;
