@@ -590,6 +590,24 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★門から 門への 大通りが、まっすぐ 通れる こと。
+//   ★噴水を 大通りの 上に 置いて しまい、遠回りに なって いた。
+//     置きものは 通りを ふさがない こと。
+Object.keys(C.MAPS).forEach(mp=>{
+  const t = C.MAPS[mp].tiles, H=t.length, W=t[0].length;
+  // 上下の 門（G/Q/D/g）を さがす
+  const gate = (x,y)=>'GQDg'.indexOf(tileAt(mp,x,y))>=0;
+  let top=null, bot=null;
+  for(let x=0;x<W;x++){ if(gate(x,0)) top=x; if(gate(x,H-1)) bot=x; }
+  if(top===null || bot===null || top!==bot) return;      // たての 大通りが ない
+  // その 列が 上から 下まで 通れるか
+  let clear = true, blocked = [];
+  for(let y=1;y<H-1;y++){
+    if(!C.walkable(mp, top, y)){ clear=false; blocked.push(top+','+y); }
+  }
+  T('たての 大通りが まっすぐ 通れる '+mp+'（x='+top+'）', clear, 'ふさいで いる：'+blocked.join(' '));
+});
+
 // ★門の むき：G＝よこに ながれる かべ（南北の 出入口）、g＝たての かべ（東西）。
 //   ★同じ 絵を つかうと、東の 門が かべに 埋もれて 向きが おかしく 見えた。
 Object.keys(C.MAPS).forEach(mp=>{
