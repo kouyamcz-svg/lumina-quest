@@ -199,7 +199,7 @@ const NPCS = {
       {when:{flag:'ch2_wifeSeen'}, text:[
         '女は 花壇を 見ている。まばたきが、ゆっくり。']},
       {text:['ベンチに 女が ひとり 座っている。']}]},
-    {at:'13,5', spr:'childA', name:'夢守りの ノエ', lines:[
+    {at:'13,5', spr:'noe', name:'夢守りの ノエ', lines:[
       {when:{flag:'ch2_noeJoined'}, text:['ノエ「行こう。炉の 扉は ぼくが 開ける」']},
       {text:['外套の 少年が 花の 影を 見ている。']}]},
     {at:'5,12', spr:'villagerA', name:'庭番', lines:[
