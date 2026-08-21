@@ -558,17 +558,34 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
-// ★2×2の 噴水は 4ますが そろって いる こと。
-//   ★1ますでも 欠けると 絵が 切れて 見える。
+// ★噴水は 「F を ならべた 四角」で 形が きまる。
+//   四角に なって いない（でこぼこ）と、絵が 切れて 見える。
 Object.keys(C.MAPS).forEach(mp=>{
+  const th = C.MAPS[mp].theme;
+  if(th!=='sky' && th!=='skygarden') return;
   const t = C.MAPS[mp].tiles;
+  const done = new Set();
   for(let y=0;y<t.length;y++){
     for(let x=0;x<t[y].length;x++){
-      if(tileAt(mp,x,y)!=='F') continue;
-      if(!(C.MAPS[mp].theme==='sky' || C.MAPS[mp].theme==='skygarden')) continue;
-      T('大きな 噴水が そろって いる '+mp+' ('+x+','+y+')',
-        tileAt(mp,x+1,y)==='1' && tileAt(mp,x,y+1)==='2' && tileAt(mp,x+1,y+1)==='3',
-        [tileAt(mp,x+1,y),tileAt(mp,x,y+1),tileAt(mp,x+1,y+1)].join(' '));
+      if(tileAt(mp,x,y)!=='F' || done.has(x+','+y)) continue;
+      // 左上を さがす
+      if(tileAt(mp,x-1,y)==='F' || tileAt(mp,x,y-1)==='F') continue;
+      let w=0; while(tileAt(mp,x+w,y)==='F') w++;
+      let h=0; while(tileAt(mp,x,y+h)==='F') h++;
+      let ok = true;
+      for(let j=0;j<h;j++) for(let i=0;i<w;i++){
+        if(tileAt(mp,x+i,y+j)!=='F') ok=false;
+        done.add((x+i)+','+(y+j));
+      }
+      // まわりに はみ出した F が ない こと
+      for(let j=-1;j<=h;j++){
+        if(tileAt(mp,x-1,y+j)==='F' || tileAt(mp,x+w,y+j)==='F') ok=false;
+      }
+      for(let i=-1;i<=w;i++){
+        if(tileAt(mp,x+i,y-1)==='F' || tileAt(mp,x+i,y+h)==='F') ok=false;
+      }
+      T('噴水が 四角に ならんで いる '+mp+' ('+x+','+y+') '+w+'×'+h, ok);
+      T('噴水が 2ます いじょう '+mp+' ('+x+','+y+')', w>=2 && h>=2, w+'×'+h);
     }
   }
 });

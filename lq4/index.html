@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 21:18 JST", "build":"487467a6","assets_sha": "65ab82c7", "lines": {"world": 107, "npc": 477, "chapters": 1298, "bgm": 985, "view2d": 2223, "core": 2809, "view": 1394, "ui": 1141}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 21:37 JST", "build":"6740a0b9","assets_sha": "65ab82c7", "lines": {"world": 107, "npc": 477, "chapters": 1298, "bgm": 985, "view2d": 2257, "core": 2809, "view": 1394, "ui": 1141}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -3474,56 +3474,8 @@ function buildAtlas(){
     R(g,7,14,1,2,P16.sk0); R(g,8,14,1,2,P16.sk3);
   });
 
-  // ★大きな 噴水（2×2ます）。
-  //   1ますの 噴水は 小さくて 何か わからなかった。
-  //   32×32の 絵を 考えて、それを 4つに 切って 4ますに はめる。
-  //   F＝左上、1＝右上、2＝左下、3＝右下。
-  function bigFount(qx, qy){
-    return tile((g,s)=>{
-      const OX = qx*16, OY = qy*16;
-      const B = (x,y,w,h,col)=>{
-        const x0 = x-OX, y0 = y-OY;
-        if(x0+w<=0 || y0+h<=0 || x0>=16 || y0>=16) return;
-        R(g, Math.max(0,x0), Math.max(0,y0),
-             Math.min(16,x0+w)-Math.max(0,x0),
-             Math.min(16,y0+h)-Math.max(0,y0), col);
-      };
-      const ST0='#7f95c0', ST1='#a9bcd8', ST2='#d9e3f0', ST3='#f2f6fc';
-      R(g,0,0,s,s,'#c9d8ee');
-      // 台座（いちばん 下・八角）
-      B(4,24,24,4,ST0);
-      B(6,26,20,3,'#6f86ab');
-      // 水盤の 外がわ（八角に 見える ように 角を おとす）
-      B(4,8,24,16,ST1);  B(8,4,16,24,ST1);  B(6,6,20,20,ST1);
-      B(4,8,24,1,ST3);   B(8,4,16,1,ST3);          // うえの ふち：光
-      B(4,23,24,1,ST0);  B(8,27,16,1,ST0);         // したの ふち：影
-      B(4,8,1,16,ST2);   B(27,8,1,16,ST0);         // 左は 明、右は 暗
-      // 内がわ（水を うける くぼみ）
-      B(7,11,18,10,ST0); B(11,7,10,18,ST0); B(9,9,14,14,ST0);
-      // 水
-      B(8,12,16,8,'#2f6ea8'); B(12,8,8,16,'#2f6ea8'); B(10,10,12,12,'#2f6ea8');
-      B(9,13,14,6,'#5fb4ee'); B(13,9,6,14,'#5fb4ee'); B(11,11,10,10,'#5fb4ee');
-      B(13,13,6,5,'#a8e2ff');
-      // 中央の 柱
-      B(14,10,4,6,ST1);
-      B(14,10,1,6,ST2); B(17,10,1,6,ST0);
-      // 噴きあがる 水
-      B(14,0,4,10,'#d9e3f0');
-      B(15,0,2,10,'#eafaff');
-      B(13,2,1,4,'#a8e2ff'); B(18,2,1,4,'#a8e2ff');
-      B(12,5,1,3,'#cfe2ff'); B(19,5,1,3,'#cfe2ff');
-      // 落ちる しぶき
-      B(11,9,1,2,'#eafaff'); B(20,9,1,2,'#eafaff');
-      B(10,14,1,1,'#ffffff'); B(21,15,1,1,'#ffffff');
-      B(15,19,1,1,'#ffffff'); B(18,17,1,1,'#ffffff');
-    });
-  }
-  atlas.fountTL = bigFount(0,0);
-  atlas.fountTR = bigFount(1,0);
-  atlas.fountBL = bigFount(0,1);
-  atlas.fountBR = bigFount(1,1);
+  // ★上の 建物：みがいた 白石に 金の 帯、青い ガラス窓。
 
-  // ★上層の 建物：みがいた 白石に 金の 帯、青い ガラス窓。
   //   下層の 割れた 石、中層の 磨き石、上層の 白亜、と 三段で 差が つく。
   atlas.richwall = tileSet((g,s,v)=>{
     R(g,0,0,s,s,P16.up1);
@@ -4122,7 +4074,91 @@ function drawBuilding(rows,x,y,dx,dy,ts){
   }
 }
 // ---------------- タイル → え の わりあて ----------------
-function tileArt(ch, theme){
+// ★大きな 噴水。
+//   ますごとに 文字を 増やすと、大きさを 変える たびに 増えて いく。
+//   かわりに 「F を ならべた 四角の 大きさ」で 形が きまる ように する。
+//   2×2 なら F を 4つ、3×3 なら F を 9つ ならべる だけ。
+const fountCache = {};
+function fountPart(tw, th, cx, cy){
+  const key = tw+'x'+th+':'+cx+','+cy;
+  if(fountCache[key]) return fountCache[key];
+  const PW = tw*16, PH = th*16;
+  const OX = cx*16, OY = cy*16;
+  const t = tile((g,s)=>{
+    // この ますに 入る ぶんだけ うつす
+    const B = (x,y,w,h,col)=>{
+      x=Math.round(x); y=Math.round(y); w=Math.round(w); h=Math.round(h);
+      const x0=x-OX, y0=y-OY;
+      if(x0+w<=0||y0+h<=0||x0>=16||y0>=16) return;
+      R(g, Math.max(0,x0), Math.max(0,y0),
+           Math.min(16,x0+w)-Math.max(0,x0),
+           Math.min(16,y0+h)-Math.max(0,y0), col);
+    };
+    // 楕円を よこ線の つみかさねで かく（角が 丸く なる）
+    const ellip = (cx0, cy0, rx, ry, col)=>{
+      for(let dy=-ry; dy<=ry; dy++){
+        const k = 1 - (dy*dy)/(ry*ry);
+        if(k<=0) continue;
+        const w = Math.round(rx*Math.sqrt(k));
+        B(cx0-w, cy0+dy, w*2, 1, col);
+      }
+    };
+    const ST0='#7f95c0', ST1='#a9bcd8', ST2='#d9e3f0', ST3='#f2f6fc';
+    R(g,0,0,s,s,'#c9d8ee');
+    const CX = PW/2;
+    const bowlY = PH*0.56;                 // 水盤の 中心（たて）
+    const rx    = PW*0.42, ry = PH*0.24;   // 水盤の 大きさ
+    // 台座（下ほど 細い 三だん）
+    ellip(CX, bowlY+ry*1.15, rx*0.52, ry*0.22, ST0);
+    ellip(CX, bowlY+ry*1.55, rx*0.34, ry*0.20, '#6f86ab');
+    ellip(CX, bowlY+ry*1.95, rx*0.70, ry*0.22, ST0);
+    // 水盤の 外（下の ふくらみ → うえの ふち の 順に かさねる）
+    ellip(CX, bowlY+ry*0.30, rx, ry*0.86, ST0);
+    ellip(CX, bowlY,          rx, ry,      ST1);
+    ellip(CX, bowlY-ry*0.10,  rx, ry*0.94, ST2);
+    ellip(CX, bowlY-ry*0.16,  rx*0.97, ry*0.88, ST1);
+    // 水
+    ellip(CX, bowlY-ry*0.18, rx*0.80, ry*0.70, ST0);
+    ellip(CX, bowlY-ry*0.22, rx*0.76, ry*0.64, '#2f6ea8');
+    ellip(CX, bowlY-ry*0.30, rx*0.66, ry*0.50, '#5fb4ee');
+    ellip(CX, bowlY-ry*0.38, rx*0.40, ry*0.30, '#a8e2ff');
+    // 中央の 柱
+    const pw = Math.max(3, PW*0.10);
+    B(CX-pw/2, bowlY-ry*1.05, pw, ry*1.0, ST1);
+    B(CX-pw/2, bowlY-ry*1.05, 1, ry*1.0, ST2);
+    B(CX+pw/2-1, bowlY-ry*1.05, 1, ry*1.0, ST0);
+    ellip(CX, bowlY-ry*1.05, pw*0.9, Math.max(2,ry*0.16), ST2);
+    // 噴きあがる 水
+    B(CX-pw*0.34, 0, Math.max(2,pw*0.68), bowlY-ry*0.95, '#eafaff');
+    B(CX-pw*0.60, PH*0.04, Math.max(1,pw*0.26), bowlY-ry*1.1, '#d9e3f0');
+    B(CX+pw*0.34, PH*0.04, Math.max(1,pw*0.26), bowlY-ry*1.1, '#d9e3f0');
+    // 左右へ こぼれる すじ
+    B(CX-pw*1.5, PH*0.10, 1, PH*0.16, '#a8e2ff');
+    B(CX+pw*1.5, PH*0.10, 1, PH*0.16, '#a8e2ff');
+    B(CX-pw*2.2, PH*0.16, 1, PH*0.10, '#cfe2ff');
+    B(CX+pw*2.2, PH*0.16, 1, PH*0.10, '#cfe2ff');
+    // しぶき
+    [[0.34,0.52],[0.68,0.55],[0.46,0.64],[0.58,0.60],[0.40,0.58]]
+      .forEach(([fx,fy])=>B(PW*fx, PH*fy, 1, 1, '#ffffff'));
+  });
+  fountCache[key] = t;
+  return t;
+}
+
+// ★この ますが 噴水の どこかを、まわりの F を 見て きめる
+function fountAt(x, y){
+  const m = C.MAPS && C.MAPS[curMap];
+  if(!m) return fountPart(1,1,0,0);
+  const at = (xx,yy)=>((m.tiles[yy]||'')[xx]) || '#';
+  let x0=x; while(at(x0-1,y)==='F') x0--;
+  let y0=y; while(at(x,y0-1)==='F') y0--;
+  let tw=0; while(at(x0+tw,y0)==='F') tw++;
+  let th=0; while(at(x0,y0+th)==='F') th++;
+  return fountPart(tw, th, x-x0, y-y0);
+}
+
+
+function tileArt(ch, theme, tx, ty){
   const ice = theme==='ice', snowT = theme==='snow', cave = theme==='cave';
   const sky = (theme==='sky' || theme==='skygarden');
   switch(ch){
@@ -4159,10 +4195,8 @@ function tileArt(ch, theme){
     case 'y': return atlas.signpost;
 
     case 'K': return sky ? atlas.bulkhead : atlas.castgate;
-    case 'F': return sky ? atlas.fountTL : atlas.fountain;   // ★大きな 噴水（左上）
-    case '1': return atlas.fountTR;       // ★大きな 噴水（右上）
-    case '2': return atlas.fountBL;       // ★大きな 噴水（左下）
-    case '3': return atlas.fountBR;       // ★大きな 噴水（右下）
+    // ★噴水は 「F を ならべた 四角の 大きさ」で 形が きまる
+    case 'F': return sky ? fountAt(tx, ty) : atlas.fountain;
     case 'G': return atlas.gate;       // よこの かべの 門（南北）
     case 'g': return atlas.gateSide;   // たての かべの 門（東西）
     case 'T': return atlas.tower;
@@ -4967,7 +5001,7 @@ function draw(dt, time, actors){
       // ★天空大陸では 木・岩山も 寒色の 天空版に する
       let art = (theme==='world' && isSkyWorld() && ch===',') ? atlas.skywoods
               : (theme==='world' && isSkyWorld() && ch==='^') ? atlas.skymount
-              : tileArt(ch, theme);
+              : tileArt(ch, theme, x, y);
       if(Array.isArray(art)) art = hashPick(x,y,art);
       if(art) cx.drawImage(art, ox+x*ts, oy+y*ts, ts, ts);
     }
@@ -5572,8 +5606,8 @@ const MAPS = {
     "#.#####...;...#####.#",
     "#.##I##...;...##S##.#",
     "#.en.n..%.;.%.n..ee.#",
-    "#;;;;;;;;F1;;;;;;;;;#",
-    "#..tt....23.....tt..#",
+    "#;;;;;;;;FF;;;;;;;;;#",
+    "#..tt....FF.....tt..#",
     "#.##P##...;...#####.#",
     "#.#####...;...D####.#",
     "#.#####...;...#####.#",
@@ -5598,9 +5632,9 @@ const MAPS = {
     "#RRRRR;;t;;;t;;RRRRR#",
     "#RRIRR;;;n;n;;;RRSRR#",
     "#;;;;;;;;;;;;;;;;;;;#",
-    "#R;;;;;%;F1;%;;;;;;R#",
-    "g;;;t;;;;23;;;;;t;;;#",
-    "#R;;;;;%;;;%;;;;;;;R#",
+    "#R;;;;;;FFF;;;;;;;;R#",
+    "g;;;t;;;FFF;;;;;t;;;#",
+    "#R;;;;;;FFF;;;;;;;;R#",
     "#;;;n;;;;;;;;;;;;;;;#",
     "#RRPRR;;;;;;;;;RRDRR#",
     "#RRRRR;;n;;;;;;RRRRR#",
@@ -5967,8 +6001,8 @@ const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
-                       'O','x','L','l','p','q','%','R',
-                       '1','2','3']);   // p/q＝光珠管、%＝花壇、R＝上層の 壁、F123＝大きな 噴水
+                       'O','x','L','l','p','q','%','R']);
+                       // p/q＝光珠管、%＝花壇、R＝上層の 壁、F＝噴水（ならべた 大きさで 形が きまる）
 // ★しかけ用の タイル（IVから）
 //   O 動かせる岩（押せる）／x 穴（岩で 埋まる）／L 消えた光珠灯／l ついた光珠灯
 //   K 施錠された扉（かぎで あく）

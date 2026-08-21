@@ -99,8 +99,7 @@ Object.keys(atlas).forEach(k=>{
 
 // ---- 2. 天空様式の タイルが そろっている ----
 ['skystone','skyroad','skywall','cloudedge','skygrass','orblamp','skyrail','pipeH','pipeV',
- 'bulkhead','skyfountain','flowerbed','plaza','crackstone','richwall',
- 'fountTL','fountTR','fountBL','fountBR'].forEach(k=>{
+ 'bulkhead','skyfountain','flowerbed','plaza','crackstone','richwall'].forEach(k=>{
   T('天空様式 '+k+' が ある', !!atlas[k]);
 });
 
@@ -127,13 +126,32 @@ TERRAINS.forEach(t=>{
   const C = vm.runInContext('LQ4', c2);
   // 文字→絵 の わりあては tileArt が もつ。ここでは 「絵の ない 文字」が
   // マップに 出て いないかを、しられている 文字の ひょうで しらべる。
-  const KNOWN = new Set([...'.#rowft^,:=_~welnCBIPSWMQAVXjZFGgDOxLlKpq%;R123<>*t'].concat(['G','D','O','x','L','l']));
+  const KNOWN = new Set([...'.#rowft^,:=_~welnCBIPSWMQAVXjZFGgDOxLlKpq%;R<>*t'].concat(['G','D','O','x','L','l']));
   Object.keys(C.MAPS).forEach(mp=>{
     const used = new Set();
     C.MAPS[mp].tiles.forEach(row=>{ for(const ch of row) used.add(ch); });
     const unknown = [...used].filter(ch=>!KNOWN.has(ch));
     T('マップ '+mp+' に しらない 文字が ない', unknown.length===0, unknown.join(' '));
   });
+}
+
+
+// ★噴水は 「F を ならべた 大きさ」で 形が きまる。
+//   えを かく しくみが tileArt から よべる ところに ある こと。
+//   ★いちど buildAtlas の 中に 書いて しまい、外から よべなかった。
+{
+  const src2 = fs.readFileSync('src/view2d.js','utf8');
+  const iPart = src2.indexOf('\nfunction fountPart');
+  const iAt   = src2.indexOf('\nfunction fountAt');
+  const iArt  = src2.indexOf('\nfunction tileArt');
+  T('噴水の えが 外から よべる（fountPart）', iPart>=0, '中に 入って いる');
+  T('噴水の わりふりが 外から よべる（fountAt）', iAt>=0, '中に 入って いる');
+  T('tileArt より 先に かかれて いる', iPart>=0 && iAt>=0 && iAt<iArt);
+  T('tileArt が ますの ざひょうを うけとる',
+    /function tileArt\(ch, theme, tx, ty\)/.test(src2));
+  T('噴水に ざひょうを わたして いる', /fountAt\(tx, ty\)/.test(src2));
+  T('大きさから わりふりを きめて いる',
+    /fountPart\(tw, th, x-x0, y-y0\)/.test(src2));
 }
 
 console.log('\n--- tiles: ' + (n-ng) + '/' + n + ' 通過 ---');
