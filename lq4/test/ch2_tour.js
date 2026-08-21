@@ -97,6 +97,52 @@ T('三年 前から だと わかる', said('三年 前から'), log.join(' / ')
 T('毎日 来て 帰ると わかる', said('何も 言わずに 帰られる'));
 T('ノエが 起きて いないと 言う', said('この 人、起きてない'));
 
+// ===== 7.5 わき道：雲見の 塔 =====
+talk('garden', 5, 13, 'back');
+T('雲が 薄れて いると 聞く', C.G.flags.ch2_towerTold===true);
+T('雲は 減らない はずだと 言う', said('炉の 光が 冷えて できる'), log.join(' / ').slice(0,140));
+T('クエストが たつ', C.G.quests.ch2_q3_tower==='active');
+T('塔への 入口が ひらく', C.tileAt('garden',1,13)==='D', C.tileAt('garden',1,13));
+
+stand('garden', 2, 13, 'left');
+C.stepField(-1,0);
+T('塔へ 入れる', C.P.map==='watchtower', C.P.map+' '+C.P.x+','+C.P.y);
+T('塔の めじるしが たつ', C.G.flags.ch2_enteredTower===true);
+
+talk('watchtower', 2, 15, 'back');
+T('見張りの 話を 聞く', C.G.flags.ch2_watchHeard===true);
+T('十年前に 炉を 止めた 話', said('十年 前に 一度'), log.join(' / ').slice(0,180));
+T('黒い 海が 見えた 話', said('黒い 海'));
+
+T('はじめは 仕切りが しまっている', C.tileAt('watchtower',7,11)==='K', C.tileAt('watchtower',7,11));
+talk('watchtower', 7, 12, 'back');
+T('あけかたが 出る', said('灯を 二基'), log.join(' / ').slice(0,60));
+stand('watchtower', 3, 9, 'left'); C.interact();
+T('灯り ひとつでは 開かない', C.tileAt('watchtower',7,11)==='K');
+stand('watchtower', 11, 9, 'right'); C.interact();
+T('灯り ふたつで 開く', C.tileAt('watchtower',7,11)==='.', C.tileAt('watchtower',7,11));
+
+clearLog(); strong(24);
+stand('watchtower', 7, 5, 'back');
+C.interact();
+T('そらくらいの 名が 出る', said('そらくらい'), log.join(' / ').slice(0,150));
+T('雲を 食べて いると 言う', said('雲を 食べてる'));
+T('炉の ものと 同じ たぐいだと 言う', said('同じ 腹から 出た'));
+T('そらくらいに かてる', C.G.flags.ch2_skyeaterDown===true);
+T('食べられた ぶんは 戻らない', said('食べられた ものは 戻らないんだ'));
+
+{
+  const g=C.P.gold;
+  C.party.forEach(p=>{ p.hp=1; });
+  talk('watchtower', 2, 15, 'back');
+  T('見張りに 報せる', C.G.flags.ch2_towerPaid===true);
+  T('礼を もらえる', C.P.gold===g+800, C.P.gold+' ← '+g);
+  T('手当てで 全快', C.party.every(p=>p.hp===p.maxhp));
+  T('クエストが 片づく', C.G.quests.ch2_q3_tower==='clear');
+}
+stand('watchtower', 7, 18, 'front'); C.stepField(0,1);
+T('庭園へ もどる', C.P.map==='garden', C.P.map);
+
 // ===== 8. 炉の 外郭へ =====
 stand('garden', 9, 13, 'front'); C.stepField(0,1);
 T('上層区へ もどる', C.P.map==='upper_dist', C.P.map);
@@ -110,14 +156,6 @@ talk('furnace', 12, 6, 'back');
 T('寝息を 聞く', C.G.flags.ch2_heardBreath===true);
 T('子供の 寝息だと 言う', said('子供の 寝息'), log.join(' / ').slice(0,90));
 T('ノエが 話せないと 言う', said('ぼくの 家が 消される'));
-
-// ===== 10. 中ボス：ひばしら =====
-clearLog(); strong(24);
-stand('furnace', 16, 17, 'right');
-C.interact();
-T('ひばしらに かてる', C.G.flags.ch2_pillarDown===true);
-T('灰では ないと 言う', said('燃えかす じゃ ないよ'), log.join(' / ').slice(-70));
-T('倒すと 道が あく', C.tileAt('furnace',17,17)==='.', C.tileAt('furnace',17,17));
 
 // ===== 11. 灯り 2つで 隔壁が 上がる =====
 T('はじめは 隔壁が しまっている', C.tileAt('furnace',10,6)==='K', C.tileAt('furnace',10,6));

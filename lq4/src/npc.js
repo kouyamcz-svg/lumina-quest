@@ -208,12 +208,37 @@ const NPCS = {
       {when:{flag:'ch2_noeJoined'}, text:['ノエ「行こう。炉の 扉は ぼくが 開ける」']},
       {text:['外套の 少年が 花の 影を 見ている。']}]},
     {at:'5,12', spr:'villagerA', name:'庭番', lines:[
+      {when:{flag:'ch2_skyeaterDown'}, text:[
+        '庭番「雲が 戻りました。花も 持ち直します」',
+        '庭番「……ありがとう ございます」']},
+      {when:{flag:'ch2_towerTold'}, text:[
+        '庭番「塔は 西の はしです。段を 下りて すぐ」']},
       {when:{flag:'ch2_wifeSeen'}, text:[
         '庭番「団長は 毎日 来られます」',
         '庭番「隣に 座って、何も 言わずに 帰られる」',
         '庭番「……三年、一度も 欠かさず」']},
       {text:['庭番「上層の 庭です。花は 光を たっぷり 吸って 育つ」',
              '庭番「下層じゃ 咲きません。光が 足りませんから」']}]},
+  ],
+
+  // ============ 第2章：雲見の 塔 ============
+  watchtower: [
+    {at:'2,14', spr:'elderWoman', name:'塔の 見張り', lines:[
+      {when:{flag:'ch2_towerPaid'}, text:[
+        '見張り「雲は 戻った。だが 前より 薄い」',
+        '見張り「食われた ぶんは 戻らんのだろうな」']},
+      {when:{flag:'ch2_skyeaterDown'}, text:[
+        '見張り「雲が 戻っとる。……話を 聞かせてくれ」']},
+      {when:{flag:'ch2_watchHeard'}, text:[
+        '見張り「上には 行くなと 言ったが……行くんだろうな」',
+        '見張り「灯を 二基 入れんと 仕切りは 上がらんぞ」']},
+      {text:['見張り「客か。……上には 行くなよ」']}]},
+    {at:'12,14', spr:'villagerA', name:'雲の 記録係', lines:[
+      {when:{flag:'ch2_skyeaterDown'}, text:[
+        '「記録に 書きました。『雲、戻る』と」',
+        '「……『前より 薄し』とも」']},
+      {text:['「毎朝 雲の 高さを 測って 綴じて います」',
+             '「三日 前から 目盛りが 下がりっぱなしで」']}]},
   ],
 
   // ============ 第2章：光珠炉の 外郭 ============
@@ -359,6 +384,17 @@ const QUESTS = {
       {id:'guide', desc:'空中庭園で 案内の 者に 会う', flag:'ch2_noeJoined'},
     ],
     reward:{}, next:'ch2_q2_core',
+  },
+  ch2_q3_tower: {
+    id:'ch2_q3_tower', chapter:3, title:'薄れる 雲',
+    giver:'庭番',
+    desc:'庭園の 西はしの 塔へ。雲が 薄れる わけを 突きとめる。',
+    steps:[
+      {id:'watch', desc:'塔の 見張りに 話を 聞く', flag:'ch2_watchHeard'},
+      {id:'boss',  desc:'そらくらいを 討ち取る',   flag:'ch2_skyeaterDown'},
+      {id:'tell',  desc:'見張りに 報せる',         flag:'ch2_towerPaid'},
+    ],
+    reward:{}, next:null,
   },
   ch2_q2_core: {
     id:'ch2_q2_core', chapter:3, title:'炉の 外郭',

@@ -563,6 +563,29 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★ボスの 絵は よこにも 広い。地図の はしに 置くと 左右が 見切れる。
+//   ★そらくらい（2.8タイルぶん）を 右はしに 置いて、左が 切れて いた。
+{
+  const TS=16, ts=48;
+  const sc = Math.max(1, Math.round(ts/TS*0.6));
+  Object.keys(CHD.CH).forEach(no=>{
+    const bs = CHD.CH[no].bosses || {};
+    Object.keys(bs).forEach(k=>{
+      if(k.indexOf(':')<0) return;
+      const mp = k.split(':')[0];
+      const [x,y] = k.split(':')[1].split(',').map(Number);
+      const e = C.MIDBOSS[bs[k].key];
+      const a = e && e.art && MOND[e.art];
+      if(!a || !C.MAPS[mp]) return;
+      const side = Math.ceil(((a.w*sc)/ts - 1)/2);      // 左右に いる 空き
+      const W = C.MAPS[mp].tiles[0].length;
+      T('ボスの 絵が 左に はみ出ない '+k+'（'+side+'ます いる）', x-side >= 0, 'いまの x='+x);
+      T('ボスの 絵が 右に はみ出ない '+k+'（'+side+'ます いる）', x+side <= W-1,
+        'いまの x='+x+' / はば='+W);
+    });
+  });
+}
+
 // ★扉（D）は 建物の かべに つける。通りの 上に 浮かせない。
 //   ★かべから 1ます はなれて いると、扉だけ 飛び出して 見えた。
 Object.keys(C.MAPS).forEach(mp=>{
