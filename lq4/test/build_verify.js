@@ -113,6 +113,55 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
     ['io','seren','noe'].every(k=>dirs[k+'.side']===dirs[k+'.sideW']), JSON.stringify(dirs));
 }
 
+// ★えの ふちに 中身が びっしり ある＝切り出しで 体が 落ちて いる うたがい。
+//   ★空喰らいの 左の 翼を 落として いて、画面で 見切れて 見えた。
+{
+  const zlib = require('zlib');
+  const src = fs.readFileSync('assets.js','utf8');
+  const unpack = (buf)=>{
+    let p=8, w=0, h=0; const idat=[];
+    while(p<buf.length){
+      const len=buf.readUInt32BE(p), typ=buf.toString('ascii',p+4,p+8);
+      if(typ==='IHDR'){ w=buf.readUInt32BE(p+8); h=buf.readUInt32BE(p+12); }
+      if(typ==='IDAT') idat.push(buf.slice(p+8,p+8+len));
+      p += 12+len;
+    }
+    const raw = zlib.inflateSync(Buffer.concat(idat));
+    const bpp=4, stride=w*bpp+1, out=Buffer.alloc(w*h*bpp);
+    const cur=Buffer.alloc(w*bpp), prev=Buffer.alloc(w*bpp);
+    for(let y=0;y<h;y++){
+      const ft=raw[y*stride];
+      raw.copy(cur, 0, y*stride+1, y*stride+1+w*bpp);
+      for(let i=0;i<w*bpp;i++){
+        const a=i>=bpp?cur[i-bpp]:0, b=prev[i], cc=i>=bpp?prev[i-bpp]:0;
+        if(ft===1) cur[i]=(cur[i]+a)&255;
+        else if(ft===2) cur[i]=(cur[i]+b)&255;
+        else if(ft===3) cur[i]=(cur[i]+((a+b)>>1))&255;
+        else if(ft===4){ const pa=Math.abs(b-cc),pb=Math.abs(a-cc),pc=Math.abs(a+b-2*cc);
+          cur[i]=(cur[i]+(pa<=pb&&pa<=pc?a:pb<=pc?b:cc))&255; }
+      }
+      cur.copy(out, y*w*bpp); cur.copy(prev);
+    }
+    return {w,h,px:out};
+  };
+  const MONS = ['kamikishi','hikarikui','kamigarasu','kudamukade','wasuremono',
+                'susurichou','nukegara','sorakurai','fornax','oboro','kanmure',
+                'umbra','shadowmaw'];
+  MONS.forEach(k=>{
+    const m2 = new RegExp('  '+k+":\\{w:\\d+,h:\\d+,src:'data:image/png;base64,([^']*)'").exec(src);
+    if(!m2){ T('えが ある '+k, false); return; }
+    const {w,h,px} = unpack(Buffer.from(m2[1],'base64'));
+    const at=(x,y)=>px[(y*w+x)*4+3]>100;
+    let L=0,R=0,TP=0;
+    for(let y=0;y<h;y++){ if(at(0,y)) L++; if(at(w-1,y)) R++; }
+    for(let x=0;x<w;x++){ if(at(x,0)) TP++; }
+    // 左右・上の ふちに 5わり いじょう 中身が あれば 切れて いる
+    T('えが 左で 切れて いない '+k, L/h < 0.5, Math.round(L/h*100)+'%');
+    T('えが 右で 切れて いない '+k, R/h < 0.5, Math.round(R/h*100)+'%');
+    T('えが 上で 切れて いない '+k, TP/w < 0.5, Math.round(TP/w*100)+'%');
+  });
+}
+
 // ★サービスワーカーの キャッシュ名が この ビルドの ものに なっている こと
 //   （固定の ままだと、なおしても 端末に ふるい ものが のこる）
 {

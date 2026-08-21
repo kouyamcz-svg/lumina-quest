@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 00:24 JST", "build":"a22ba39c","assets_sha": "4da4ea70", "lines": {"world": 108, "npc": 518, "chapters": 1422, "bgm": 985, "view2d": 2282, "core": 2870, "view": 1394, "ui": 1141}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 00:49 JST", "build":"bf41c4da","assets_sha": "632130cd", "lines": {"world": 108, "npc": 518, "chapters": 1422, "bgm": 985, "view2d": 2282, "core": 2878, "view": 1394, "ui": 1141}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -157,7 +157,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=4da4ea70"></script>
+<script src="assets.js?v=632130cd"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -5688,6 +5688,7 @@ const byMap = {
   pipe_path: ['kagekakera','shihenchu','akumuga','yamiinu'],
   old_pipe:  ['kansuiki','shokudai','hakoyami','yamiinu','sumibami'],
   furnace:   ['kamikishi','hikarikui','kamigarasu','kudamukade','susurichou','wasuremono','nukegara'],
+  watchtower:['kamigarasu','hikarikui','susurichou','kamikishi','nukegara'],
 };
 
 // ---------------- データ：マップ ----------------
@@ -6919,6 +6920,13 @@ function inflictP(e){
   return party.length===1 ? e.inflict.p*0.6 : e.inflict.p;
 }
 function makeEnemy(def){
+  // ★出現表を 書き忘れた マップだと def が ない まま ここへ 来て、
+  //   JSON.stringify(undefined) が 文字れつに ならず 赤い おびが 出た。
+  //   落ちる かわりに 弱い 敵で しのぐ。
+  if(!def){
+    console.warn('[LQ4] 出す 敵が いない：', P && P.map);
+    def = ENEMIES[0];
+  }
   const e = JSON.parse(JSON.stringify(def));
   e.maxhp = e.hp; e.dispName = e.name; e.status = null;
   return e;

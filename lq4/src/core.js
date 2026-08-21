@@ -206,6 +206,7 @@ const byMap = {
   pipe_path: ['kagekakera','shihenchu','akumuga','yamiinu'],
   old_pipe:  ['kansuiki','shokudai','hakoyami','yamiinu','sumibami'],
   furnace:   ['kamikishi','hikarikui','kamigarasu','kudamukade','susurichou','wasuremono','nukegara'],
+  watchtower:['kamigarasu','hikarikui','susurichou','kamikishi','nukegara'],
 };
 
 // ---------------- データ：マップ ----------------
@@ -1437,6 +1438,13 @@ function inflictP(e){
   return party.length===1 ? e.inflict.p*0.6 : e.inflict.p;
 }
 function makeEnemy(def){
+  // ★出現表を 書き忘れた マップだと def が ない まま ここへ 来て、
+  //   JSON.stringify(undefined) が 文字れつに ならず 赤い おびが 出た。
+  //   落ちる かわりに 弱い 敵で しのぐ。
+  if(!def){
+    console.warn('[LQ4] 出す 敵が いない：', P && P.map);
+    def = ENEMIES[0];
+  }
   const e = JSON.parse(JSON.stringify(def));
   e.maxhp = e.hp; e.dispName = e.name; e.status = null;
   return e;
