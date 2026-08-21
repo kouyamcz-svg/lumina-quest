@@ -1,0 +1,166 @@
+'use strict';
+// ルミナクエストIV / 第2章 通しテスト
+// 使い方： node test/ch2_tour.js
+//   上層区で 任務 → 庭園でノエ加入 → 炉の外郭（灯り・中ボス）→ フォルナクス → 章末
+const fs = require('fs'), vm = require('vm');
+const store = {};
+const fakeLS = {getItem:k=>(k in store?store[k]:null), setItem:(k,v)=>{store[k]=String(v);},
+                removeItem:k=>{delete store[k];}};
+const ctx = {console, window:{}, localStorage:fakeLS}; ctx.globalThis = ctx;
+vm.createContext(ctx);
+for (const f of ['world.js','npc.js','chapters.js','core.js'])
+  vm.runInContext(fs.readFileSync('src/'+f,'utf8'), ctx, {filename:f});
+const C = vm.runInContext('LQ4', ctx);
+
+const log=[];
+C.bind(C.NullView, {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); },
+                    menu(i,t,cb){ cb(t==='これから' ? 1 : 0); },
+                    hud(){}, label(){}, openTrade(){}}, C.NullAudio);
+
+let n=0, ng=0;
+function T(name, cond, detail){ n++; if(!cond){ ng++; console.log('NG', name, detail!==undefined?'  '+detail:''); } }
+function said(w){ return log.some(l=>l.indexOf(w)>=0); }
+function clearLog(){ log.length=0; }
+function stand(map,x,y,dir){ C.G.mode='field'; C.P.map=map; C.P.x=x; C.P.y=y; if(dir) C.P.dir=dir; }
+function talk(map,x,y,dir){ clearLog(); stand(map,x,y,dir); C.interact(); }
+function strong(lv){                       // ものがたりの たしかめ用（まぐれ負けを ふせぐ）
+  C.G.tactic='gungan'; C.party.length=0;
+  const io=C.mkMember('io',lv), se=C.mkMember('seren',lv), no=C.mkMember('noe',lv);
+  io.weapon={kind:'w',name:'剣',v:16}; io.armor={kind:'a',name:'胴',v:14};
+  se.weapon={kind:'w',name:'槍',v:18}; se.armor={kind:'a',name:'胸当',v:15};
+  no.weapon={kind:'w',name:'杖',v:9};  no.armor={kind:'a',name:'衣',v:11};
+  C.party.push(io,se,no); C.P.herbs=12;
+}
+
+// ===== 1. 第2章を はじめる =====
+C.freshState();
+C.party.length=0;
+C.party.push(C.mkMember('io',13)); C.party.push(C.mkMember('seren',13));
+C.G.flags.ch1_cleared = true;
+C.switchChapter(3);
+T('第2章に なる', C.G.chapter===3);
+T('はじまりは 中層区', C.P.map==='mid_dist', C.P.map+' '+C.P.x+','+C.P.y);
+T('章データが ひける', C.chData() && C.chData().id==='ch2_furnace');
+T('上層への 石段が 通る', !C.wardBlocks('upper_dist'));
+
+// ===== 2. 上層区へ =====
+stand('mid_dist', 10, 1, 'back');
+C.stepField(0,-1);
+T('上層区へ 入れる', C.P.map==='upper_dist', C.P.map+' '+C.P.x+','+C.P.y);
+T('上層区の めじるしが たつ', C.G.flags.ch2_enteredUpper===true);
+
+// ===== 3. 天空城へは まだ 行けない =====
+talk('upper_dist', 10, 1, 'back');
+T('天空城で 断られる', said('城へは 通せん'), log.join(' / ').slice(0,60));
+
+// ===== 4. 炉の 主任から 任務 =====
+talk('upper_dist', 8, 4, 'back');
+T('任務を うける', C.G.flags.ch2_taskTaken===true);
+T('「減っている」と 言う', said('減っている'), log.join(' / ').slice(0,90));
+T('クエストが たつ', C.G.quests.ch2_q1_dim==='active');
+
+// ===== 5. 案内が いないと 炉へ 入れない =====
+stand('upper_dist', 16, 10, 'back');
+C.stepField(0,-1);
+T('案内なしでは 炉へ 行けない', C.P.map==='upper_dist', C.P.map);
+T('庭園へ 行けと 言われる', said('庭園に いる'), log.join(' / ').slice(0,60));
+
+// ===== 6. 空中庭園：ノエが 仲間に =====
+stand('upper_dist', 2, 7, 'left');
+C.stepField(-1,0);
+T('庭園へ 入れる', C.P.map==='garden', C.P.map+' '+C.P.x+','+C.P.y);
+talk('garden', 13, 6, 'back');
+T('ノエが 仲間に なる', C.party.length===3 && C.party[2].cls==='noe',
+  C.party.map(p=>p.cls).join(','));
+T('夢守りの 家だと 名のる', said('夢守りの 家の 者'), log.join(' / ').slice(0,90));
+T('話せない ことが 多いと 言う', said('話せない ことが 多いんだ'));
+T('その場に 立ったまま 仲間に なる',
+  C.G.trail[0] && C.G.trail[0][0]===13 && C.G.trail[0][1]===5, JSON.stringify(C.G.trail[0]));
+
+// ===== 7. グランの 妻 =====
+talk('garden', 9, 3, 'back');
+T('妻の 場面が 出る', C.G.flags.ch2_wifeSeen===true);
+T('三年 前から だと わかる', said('三年 前から'), log.join(' / ').slice(0,80));
+T('毎日 来て 帰ると わかる', said('何も 言わずに 帰られる'));
+T('ノエが 起きて いないと 言う', said('この 人、起きてない'));
+
+// ===== 8. 炉の 外郭へ =====
+stand('garden', 9, 13, 'front'); C.stepField(0,1);
+T('上層区へ もどる', C.P.map==='upper_dist', C.P.map);
+stand('upper_dist', 16, 10, 'back');
+C.stepField(0,-1);
+T('炉の 外郭へ 入れる', C.P.map==='furnace', C.P.map+' '+C.P.x+','+C.P.y);
+T('炉の めじるしが たつ', C.G.flags.ch2_enteredFurnace===true);
+
+// ===== 9. 子供の 寝息 =====
+talk('furnace', 12, 6, 'back');
+T('寝息を 聞く', C.G.flags.ch2_heardBreath===true);
+T('子供の 寝息だと 言う', said('子供の 寝息'), log.join(' / ').slice(0,90));
+T('ノエが 話せないと 言う', said('ぼくの 家が 消される'));
+
+// ===== 10. 中ボス：ひばしら =====
+clearLog(); strong(24);
+stand('furnace', 16, 17, 'right');
+C.interact();
+T('ひばしらに かてる', C.G.flags.ch2_pillarDown===true);
+T('灰では ないと 言う', said('燃えかす じゃ ないよ'), log.join(' / ').slice(-70));
+T('倒すと 道が あく', C.tileAt('furnace',17,17)==='.', C.tileAt('furnace',17,17));
+
+// ===== 11. 灯り 2つで 隔壁が 上がる =====
+T('はじめは 隔壁が しまっている', C.tileAt('furnace',10,6)==='K', C.tileAt('furnace',10,6));
+talk('furnace', 10, 7, 'back');
+T('あけかたが 出る', said('火口 二基'), log.join(' / ').slice(0,70));
+stand('furnace', 4, 9, 'left'); C.interact();
+T('灯り ひとつでは 開かない', C.tileAt('furnace',10,6)==='K');
+stand('furnace', 20, 14, 'back'); C.interact();
+T('灯り ふたつで 開く', C.tileAt('furnace',10,6)==='.', C.tileAt('furnace',10,6));
+
+// ===== 12. フォルナクス =====
+clearLog(); strong(26);
+stand('furnace', 10, 5, 'back');
+C.interact();
+T('炉座の 名が 出る', said('フォルナクス'), log.join(' / ').slice(0,120));
+T('炉の 火を 食べて いると 言う', said('炉の 火を 食べてる'));
+T('フォルナクスに かてる', C.G.flags.ch2_fornaxDown===true);
+T('調べる 先が 示される', said('落ちた ものを 調べよう'));
+T('倒した ますが しらべられる', C.tileAt('furnace',10,4)==='n', C.tileAt('furnace',10,4));
+
+// ===== 13. 焦げていない 紙片 =====
+talk('furnace', 10, 5, 'back');
+T('紙片を 拾う', C.G.flags.ch2_gotScrap===true);
+T('焦げて いないと わかる', said('焦げても いない'), log.join(' / ').slice(0,80));
+T('つぎの 行き先が 出る', said('上層区の 主任に 報告しよう'));
+
+// ===== 14. 主任へ 報告 =====
+C.party.forEach(p=>{ p.hp=1; p.mp=0; });
+const g0=C.P.gold;
+talk('upper_dist', 8, 4, 'back');
+T('報告できる', C.G.flags.ch2_reported===true);
+T('炉心の ぶんが 足りないと 言う', said('炉心の ぶんが 足りん'), log.join(' / ').slice(-90));
+T('鍵は 城に あると 言う', said('鍵は 城に ある'));
+T('手当てで 全快', C.party.every(p=>p.hp===p.maxhp));
+T('礼を もらえる', C.P.gold===g0+600, C.P.gold+' ← '+g0);
+T('クエストが 片づく', C.G.quests.ch2_q2_core==='clear');
+
+// ===== 15. 章末：夢の 切れはし =====
+clearLog(); C.G.tactic='manual';
+C.triggerChapterEnd();
+T('章末が でる', said('夢の 切れはしだ'), log.join(' / ').slice(0,120));
+T('捨てられた 夢だと 言う', said('捨てられた ぶん'));
+T('千年 捨ててきたと 言う', said('千年'));
+T('下から 戻って きていると 言う', said('下から'));
+T('ch2_cleared が たつ', C.G.flags.ch2_cleared===true);
+
+// ===== 16. セーブ/ロード =====
+const gold=C.P.gold, lv=C.party[0].lv;
+T('セーブできる', C.saveGame(0)===true, C.lastSaveError);
+C.freshState();
+T('ロードできる', C.loadGame(0)===true);
+T('ロード：章が もどる', C.G.chapter===3);
+T('ロード：3人 いる', C.party.length===3);
+T('ロード：しかけが もどる', C.tileAt('furnace',10,6)==='.');
+T('ロード：おかねが もどる', C.P.gold===gold);
+T('ロード：Lvが もどる', C.party[0].lv===lv);
+
+console.log('\n--- ch2_tour: ' + (n-ng) + '/' + n + ' 通過 ---');
+process.exit(ng ? 1 : 0);

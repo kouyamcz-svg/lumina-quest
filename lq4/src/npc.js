@@ -160,6 +160,72 @@ const NPCS = {
              '「……お嬢様の お名前でも な」']}]},
   ],
 
+  // ============ 第2章：上層区 ============
+  upper_dist: [
+    {at:'8,3', spr:'butler', name:'炉の 主任', lines:[
+      {when:{flag:'ch2_reported'}, text:[
+        '主任「炉心の 鍵は 城に ある」',
+        '主任「わたしの 判では 開かん。……すまんな」']},
+      {when:{flag:'ch2_fornaxDown'}, text:[
+        '主任「外郭の 火が 戻った。報告を 聞かせてくれ」']},
+      {when:{flag:'ch2_taskTaken'}, text:[
+        '主任「案内は 庭園に いる。夢守りの 家の 子だ」',
+        '主任「口の 重い 子だが、扉は 開けられる」']},
+      {text:['主任「下層から 来た 騎士か。……炉の 話だと 聞いたが」']}]},
+    {at:'12,3', spr:'guardA', name:'上層の 衛兵', lines:[
+      {when:{flag:'ch2_fornaxDown'}, text:[
+        '「炉の 外郭で 何か 討ったそうだな」',
+        '「上では 誰も その 話を しない。……それが 答えだ」']},
+      {text:['「下層の 騎士が 上層を 歩くとはな」',
+             '「炉の 件でなければ 通さなかった」']}]},
+    {at:'8,11', spr:'elderWoman', name:'上層の 婦人', lines:[
+      {when:{flag:'ch2_wifeSeen'}, text:[
+        '「庭園の あの 方？　三年 前からよ」',
+        '「ある朝 起きてこなくて、それきり」',
+        '「……起きて いるのに、起きてこないの」']},
+      {text:['「庭園は お行きになった？　花が きれいよ」',
+             '「上層でしか 咲かないの。光が たっぷり いるから」']}]},
+    {at:'4,13', spr:'villagerB', name:'炉の 技師', lines:[
+      {when:{flag:'ch2_heardBreath'}, text:[
+        '「炉心の 音？　……あれは 火の 音だ」',
+        '「そう 思う ことに してる。二十年 な」']},
+      {text:['「炉は 三重だ。外郭、内郭、炉心」',
+             '「わたしらが 入れるのは 外郭まで」']}]},
+  ],
+
+  // ============ 第2章：空中庭園 ============
+  garden: [
+    {at:'9,2', spr:'priestess', name:'花を 見ている 女', lines:[
+      {when:{flag:'ch2_wifeSeen'}, text:[
+        '女は 花壇を 見ている。まばたきが、ゆっくり。']},
+      {text:['ベンチに 女が ひとり 座っている。']}]},
+    {at:'13,5', spr:'childA', name:'夢守りの ノエ', lines:[
+      {when:{flag:'ch2_noeJoined'}, text:['ノエ「行こう。炉の 扉は ぼくが 開ける」']},
+      {text:['外套の 少年が 花の 影を 見ている。']}]},
+    {at:'5,12', spr:'villagerA', name:'庭番', lines:[
+      {when:{flag:'ch2_wifeSeen'}, text:[
+        '庭番「団長は 毎日 来られます」',
+        '庭番「隣に 座って、何も 言わずに 帰られる」',
+        '庭番「……三年、一度も 欠かさず」']},
+      {text:['庭番「上層の 庭です。花は 光を たっぷり 吸って 育つ」',
+             '庭番「下層じゃ 咲きません。光が 足りませんから」']}]},
+  ],
+
+  // ============ 第2章：光珠炉の 外郭 ============
+  furnace: [
+    {at:'12,5', spr:'pipeobj', name:'炉心の 壁', lines:[
+      {when:{flag:'ch2_heardBreath'}, text:[
+        '隔壁の 向こうから、ゆっくりした 音が つづいている。']},
+      {text:['分厚い 隔壁。触れると 熱い。']}]},
+    {at:'10,4', spr:'pipeobj', name:'燃えかすの 山', lines:[
+      {when:{flag:'ch2_gotScrap'}, text:[
+        'フォルナクスが いた あたり。白い 灰が 残っている。']},
+      {text:['燃えかすの 山。何か 混じっている。']}]},
+    {at:'17,17', spr:'villagerB', name:'倒れた 炉番', lines:[
+      {text:['熱に あてられた 炉番が うずくまっている。',
+             '炉番「……外郭が 熱い。こんなの 初めてだ」']}]},
+  ],
+
   // ============ 第1章：中層詰所 ============
   mid_post: [
     {at:'6,3', spr:'guardB', name:'詰所の 副長', lines:[
@@ -278,6 +344,27 @@ const QUESTS = {
       {id:'ask', desc:'下層区の 技師に 話を 聞く', flag:'ch1_pipeTold'},
     ],
     reward:{}, next:'ch1_q2_pipe',
+  },
+  // ============ 第2章 ============
+  ch2_q1_dim: {
+    id:'ch2_q1_dim', chapter:3, title:'減っていく 光',
+    giver:'炉の 主任',
+    desc:'炉の 光が 減る 原因を 調べる。まず 案内の 者に 会う。',
+    steps:[
+      {id:'guide', desc:'空中庭園で 案内の 者に 会う', flag:'ch2_noeJoined'},
+    ],
+    reward:{}, next:'ch2_q2_core',
+  },
+  ch2_q2_core: {
+    id:'ch2_q2_core', chapter:3, title:'炉の 外郭',
+    giver:'夢守りの ノエ',
+    desc:'光珠炉の 外郭へ。光を 喰らう ものを 断つ。',
+    steps:[
+      {id:'boss',   desc:'フォルナクスを 討ち取る',   flag:'ch2_fornaxDown'},
+      {id:'scrap',  desc:'燃えかすの 山を 調べる',   flag:'ch2_gotScrap'},
+      {id:'report', desc:'上層区の 主任に 報告する', flag:'ch2_reported'},
+    ],
+    reward:{}, next:null,
   },
   ch1_q5_swarm: {
     id:'ch1_q5_swarm', chapter:2, title:'詰まった 点検路',

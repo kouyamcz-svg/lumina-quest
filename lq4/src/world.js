@@ -48,6 +48,9 @@ const MAP_IDS = {
   old_pipe:   {region:'sky', kind:'dgn',  name:'旧管路',        scene:'SCENE_SKY_TOWN'},
   mid_post:   {region:'sky', kind:'in',   name:'中層詰所',      scene:'SCENE_SKY_IN'},
   mid_arch:   {region:'sky', kind:'in',   name:'記録庫',        scene:'SCENE_SKY_IN'},
+  upper_dist: {region:'sky', kind:'town', name:'上層区',        scene:'SCENE_SKY_TOWN'},
+  garden:     {region:'sky', kind:'town', name:'空中庭園',      scene:'SCENE_SKY_TOWN'},
+  furnace:    {region:'sky', kind:'dgn',  name:'光珠炉の 外郭', scene:'SCENE_SKY_TOWN'},
   trial_yard: {region:'sky', kind:'town', name:'見習い試験場',    scene:'SCENE_SKY_TOWN'},
   rift_yard:  {region:'sky', kind:'dgn',  name:'裂け目の広場',    scene:'SCENE_SKY_RIFT'},
 };

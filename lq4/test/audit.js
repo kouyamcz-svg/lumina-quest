@@ -331,6 +331,7 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
     Object.keys(cd.onEnter||{}).forEach(k=>raised.add(cd.onEnter[k]));
     Object.keys(cd.lampGates||{}).forEach(k=>{ const g2=cd.lampGates[k]; if(g2.flag) raised.add(g2.flag); });
     if(cd.ending) (cd.ending.set||[]).forEach(f=>raised.add(f));
+    (cd.setFlags||[]).forEach(f=>raised.add(f));   // ★章の はじまりで 立つ もの
   });
   Object.keys(C.WARDS||{}).forEach(mp=>{
     const wd = C.WARDS[mp];
@@ -419,6 +420,8 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
     (cd.talkEvents||[]).forEach(e=>{
       if(e.startQuota && e.startQuota.flag) raised.add(e.startQuota.flag);
     });
+    // ★章に なった とたんに 立つ めじるし
+    (cd.setFlags||[]).forEach(f=>raised.add(f));
     // 会話の 前提（cond／unless）に 出てくる めじるしは、どこかで 立つ こと
     const need = new Set();
     (cd.talkEvents||[]).forEach(e=>{

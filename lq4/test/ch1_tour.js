@@ -13,7 +13,10 @@ for (const f of ['world.js','npc.js','chapters.js','core.js'])
 const C = vm.runInContext('LQ4', ctx);
 
 const log=[];
-C.bind(C.NullView, {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); }, menu(i,t,cb){cb(0);},
+// ★章末の「これから」では「この 章を 続ける」を えらぶ。
+//   0ばんを えらぶと 第2章へ すすんで しまい、第1章の たしかめが できない。
+C.bind(C.NullView, {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); },
+                    menu(i,t,cb){ cb(t==='これから' ? 1 : 0); },
                     hud(){}, label(){}, openTrade(){}}, C.NullAudio);
 
 let n=0, ng=0;
@@ -84,9 +87,10 @@ T('中層区へ 入れる', C.P.map==='mid_dist', C.P.map+' '+C.P.x+','+C.P.y);
 T('中層区の めじるしが たつ', C.G.flags.ch1_enteredMid===true);
 
 // ===== 3. 上層へは まだ 行けない =====
-talk('mid_dist', 10, 1, 'back');
+clearLog();
+stand('mid_dist', 10, 1, 'back'); C.stepField(0,-1);
 T('上層の 石段で 断られる', said('許可証は 中層までだ'), log.join(' / ').slice(0,60));
-T('中層区から 出て いない', C.P.map==='mid_dist');
+T('中層区から 出て いない', C.P.map==='mid_dist', C.P.map);
 
 // ===== 4. 任務を うける =====
 talk('mid_dist', 5, 6, 'back');
@@ -297,7 +301,7 @@ T('手当てで 全快', C.party.every(p=>p.hp===p.maxhp));
 clearLog();
 C.G.tactic='manual';
 C.triggerChapterEnd();
-T('章末が でる', said('炉の 光が、この十年'), log.join(' / ').slice(-90));
+T('章末が でる', said('炉の 光が、この十年'), log.join(' / ').slice(0,200));
 T('炉が もとだと ほのめかす', said('もとの 火が 弱ってる'));
 T('第2章へ つながる', said('今度は 上へ'));
 T('原因が 調査中に されて しまう', said('原因　調査中'));
