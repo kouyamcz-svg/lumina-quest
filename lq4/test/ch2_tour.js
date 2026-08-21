@@ -98,6 +98,7 @@ T('毎日 来て 帰ると わかる', said('何も 言わずに 帰られる'))
 T('ノエが 起きて いないと 言う', said('この 人、起きてない'));
 
 // ===== 7.5 わき道：雲見の 塔 =====
+//   ★庭番は 妻の 場面を 見てから 話す
 talk('garden', 5, 13, 'back');
 T('雲が 薄れて いると 聞く', C.G.flags.ch2_towerTold===true);
 T('雲は 減らない はずだと 言う', said('炉の 光が 冷えて できる'), log.join(' / ').slice(0,140));
@@ -143,6 +144,18 @@ T('食べられた ぶんは 戻らない', said('食べられた ものは 戻�
 stand('watchtower', 7, 18, 'front'); C.stepField(0,1);
 T('庭園へ もどる', C.P.map==='garden', C.P.map);
 
+// ===== 7.8 上層区で 買いものと 宿 =====
+{
+  C.P.gold = 9999;
+  const g0 = C.P.gold;
+  talk('upper_dist', 17, 5, 'back');
+  T('上層区に 道具屋が ある', C.P.gold < g0, '買えなかった');
+  C.party.forEach(p=>{ p.hp=1; p.mp=0; });
+  talk('upper_dist', 3, 5, 'back');
+  T('上層区に 宿が ある', C.party.every(p=>p.hp===p.maxhp), '泊まれなかった');
+  T('宿の ねだんが 出る', said('40ゴールド'), log.join(' / ').slice(0,50));
+}
+
 // ===== 8. 炉の 外郭へ =====
 stand('garden', 9, 13, 'front'); C.stepField(0,1);
 T('上層区へ もどる', C.P.map==='upper_dist', C.P.map);
@@ -167,6 +180,16 @@ stand('furnace', 20, 14, 'back'); C.interact();
 T('灯り ふたつで 開く', C.tileAt('furnace',10,6)==='.', C.tileAt('furnace',10,6));
 
 // ===== 12. フォルナクス =====
+//   ★炉心の 壁に さわって からで ないと 進めない
+{
+  const keep = C.G.flags.ch2_heardBreath;
+  C.G.flags.ch2_heardBreath = false;
+  clearLog(); strong(26);
+  stand('furnace', 10, 5, 'back'); C.interact();
+  T('寝息を 聞く 前は ボスに 進めない', C.G.flags.ch2_fornaxDown!==true);
+  T('先に 壁を さわれと 言われる', said('先に 壁に さわって'), log.join(' / ').slice(0,60));
+  C.G.flags.ch2_heardBreath = keep;
+}
 clearLog(); strong(26);
 stand('furnace', 10, 5, 'back');
 C.interact();
@@ -201,6 +224,8 @@ T('捨てられた 夢だと 言う', said('捨てられた ぶん'));
 T('千年 捨ててきたと 言う', said('千年'));
 T('下から 戻って きていると 言う', said('下から'));
 T('ch2_cleared が たつ', C.G.flags.ch2_cleared===true);
+T('つぎの 行き先（雲海港）が 出る', said('東の 雲海港へ 向かおう'), log.join(' / ').slice(-70));
+T('城では ない と はっきり する', said('城の 鍵は 下りない'));
 // ★章末に 一枚絵が 出て、おわると 消える
 T('章末に 一枚絵が 出る', scene.indexOf('show:scene_ch2_end')>=0, scene.join(' / '));
 T('章末の あと 一枚絵が 消える', scene.indexOf('hide')>scene.indexOf('show:scene_ch2_end'),

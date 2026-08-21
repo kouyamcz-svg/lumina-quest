@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 00:07 JST", "build":"44269c97","assets_sha": "4da4ea70", "lines": {"world": 108, "npc": 513, "chapters": 1397, "bgm": 985, "view2d": 2282, "core": 2860, "view": 1394, "ui": 1141}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 00:24 JST", "build":"a22ba39c","assets_sha": "4da4ea70", "lines": {"world": 108, "npc": 518, "chapters": 1422, "bgm": 985, "view2d": 2282, "core": 2870, "view": 1394, "ui": 1141}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -481,7 +481,11 @@ const NPCS = {
       {text:['ベンチに 女が ひとり 座っている。']}]},
     {at:'13,5', spr:'noe', name:'夢守りの ノエ', lines:[
       {when:{flag:'ch2_noeJoined'}, text:['ノエ「行こう。炉の 扉は ぼくが 開ける」']},
-      {text:['外套の 少年が 花の 影を 見ている。']}]},
+      // ★主任に 会う 前だと ここで 止まる。何を すれば よいか 言う。
+      {when:{flag:'ch2_taskTaken'}, text:['外套の 少年が 花の 影を 見ている。']},
+      {text:['外套の 少年が 花の 影を 見ている。',
+             'ノエ「案内の 話？　まだ 聞いてない けど」',
+             'ノエ「炉の 主任に 先に 会って きて。手続きが あるから」']}]},
     {at:'5,12', spr:'villagerA', name:'庭番', lines:[
       {when:{flag:'ch2_skyeaterDown'}, text:[
         '庭番「雲が 戻りました。花も 持ち直します」',
@@ -493,7 +497,8 @@ const NPCS = {
         '庭番「隣に 座って、何も 言わずに 帰られる」',
         '庭番「……三年、一度も 欠かさず」']},
       {text:['庭番「上層の 庭です。花は 光を たっぷり 吸って 育つ」',
-             '庭番「下層じゃ 咲きません。光が 足りませんから」']}]},
+             '庭番「下層じゃ 咲きません。光が 足りませんから」',
+             '庭番「……ご用でしたら、まず 炉の 主任さまへ」']}]},
   ],
 
   // ============ 第2章：雲見の 塔 ============
@@ -1881,6 +1886,13 @@ const CH = {
       'furnace:10,4': {
         key: 'fornax',
         clearedFlag: 'ch2_fornaxDown',
+        // ★炉心の 壁に 耳を あててから でないと 進めない。
+        //   章の 芯（子供の 寝息）を 見ずに 終われて いた。
+        needFlag: 'ch2_heardBreath',
+        lockMsg: ['炉心の 手前。熱が 壁を 伝ってくる。',
+                  'ノエ「……待って。先に 壁に さわって みて」',
+                  'イオ「壁に？」',
+                  'ノエ「うん。……たしかめて ほしいんだ」'],
         intro: ['炉心の 手前。壁という 壁に 管が 集まり、床まで 熱い。',
                 'その 中心に、白く 灼けた ものが うずくまって いた。',
                 '',
@@ -1932,6 +1944,10 @@ const CH = {
              '主任「……ただし、ひとり 案内を つける。庭園に いる」',
              'イオ「庭園は どちらに」',
              '主任「西の 門を 出て すぐだ。手すりの 切れ目が 門に なっている」',
+             '',
+             '主任「……庭に 女が ひとり 座っている。気に せんでくれ」',
+             'イオ「どなたですか」',
+             '主任「知らん。三年 前から あそこに いる」',
              '', '＊ クエスト「減っていく 光」＊',
              '＊ 上層区の 西の 門から 空中庭園へ ＊'] },
 
@@ -1984,7 +2000,7 @@ const CH = {
              'ノエ「……ごめん。これも 話せない」'] },
 
       // ---- 庭園：雲が 薄れて いる（雲見の 塔へ）----
-      { npc:'庭番', cond:['ch2_noeJoined'], unless:'ch2_towerTold',
+      { npc:'庭番', cond:['ch2_wifeSeen'], unless:'ch2_towerTold',
         set:['ch2_towerTold'],
         quest:{ch2_q3_tower:'active'},
         setTiles:[{map:'garden', x:1, y:13, ch:'D'}],
@@ -2158,7 +2174,21 @@ const CH = {
            'ノエ「うん。……下から」',
            '',
            'イオは 手すりの 向こうを 見た。雲海の ずっと 下。',
-           'まだ 見た ことの ない 地上が ある。'],
+           'まだ 見た ことの ない 地上が ある。',
+           '',
+           'セレン「城の 鍵は 下りないわ。今日 断られた ばかり」',
+           'イオ「なら 上では ない」',
+           '',
+           'ノエ「……下へ 行くの？」',
+           'イオ「戻ってきてる ものが 下から なら、下に 行くしかない」',
+           '',
+           'セレン「東の 雲海港。降下用の 舟が 繋いである」',
+           'セレン「千年 誰も 使って いない けれど、点検だけは 続けてる」',
+           '',
+           'ノエ「……ぼくの 家が、点検を してきたんだ」',
+           'ノエ「いつか 誰かが 下りる 日の ために、って」',
+           '',
+           '＊ 東の 雲海港へ 向かおう ＊'],
       card: {title:'第2章 完', sub:'空中庭園と炉の火'},
       next: 4,
     },
@@ -6036,6 +6066,16 @@ const MAPS = {
 
 // ---------------- データ：店・宿 ----------------
 const SHOPS = {
+  'upper_dist:S':[
+    {kind:'h',  name:'薬草',            v:20, price:10},
+    {kind:'wtr',name:'魔法の 聖水',     v:30, price:70},
+    {kind:'w',  name:'白銀の 長剣',     v:16, price:1500},
+    {kind:'w',  name:'鋼の 穂先',       v:18, price:1800},
+    {kind:'w',  name:'夢守りの 杖',     v:9,  price:900},
+    {kind:'a',  name:'正騎士の 胴',     v:14, price:1400},
+    {kind:'a',  name:'白銀の 胸当て',   v:15, price:1600},
+    {kind:'a',  name:'ぬくもりの 衣',   v:11, price:1000},
+  ],
   'mid_dist:S':[
     {kind:'h',  name:'薬草',            v:20, price:8},
     {kind:'wtr',name:'魔法の 聖水',     v:30, price:60},
@@ -6053,7 +6093,7 @@ const SHOPS = {
     {kind:'a',  name:'なめし革の 胴',    v:6,  price:200},
   ],
 };
-const INN_PRICE = {lower_dist:6, mid_dist:18};
+const INN_PRICE = {lower_dist:6, mid_dist:18, upper_dist:40};
 // ---------------- 状態 ----------------
 let G, P, party, reserve = [];
 function startChapter(no){

@@ -584,6 +584,16 @@ const MAPS = {
 
 // ---------------- データ：店・宿 ----------------
 const SHOPS = {
+  'upper_dist:S':[
+    {kind:'h',  name:'薬草',            v:20, price:10},
+    {kind:'wtr',name:'魔法の 聖水',     v:30, price:70},
+    {kind:'w',  name:'白銀の 長剣',     v:16, price:1500},
+    {kind:'w',  name:'鋼の 穂先',       v:18, price:1800},
+    {kind:'w',  name:'夢守りの 杖',     v:9,  price:900},
+    {kind:'a',  name:'正騎士の 胴',     v:14, price:1400},
+    {kind:'a',  name:'白銀の 胸当て',   v:15, price:1600},
+    {kind:'a',  name:'ぬくもりの 衣',   v:11, price:1000},
+  ],
   'mid_dist:S':[
     {kind:'h',  name:'薬草',            v:20, price:8},
     {kind:'wtr',name:'魔法の 聖水',     v:30, price:60},
@@ -601,7 +611,7 @@ const SHOPS = {
     {kind:'a',  name:'なめし革の 胴',    v:6,  price:200},
   ],
 };
-const INN_PRICE = {lower_dist:6, mid_dist:18};
+const INN_PRICE = {lower_dist:6, mid_dist:18, upper_dist:40};
 // ---------------- 状態 ----------------
 let G, P, party, reserve = [];
 function startChapter(no){
