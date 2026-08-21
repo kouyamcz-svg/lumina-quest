@@ -137,6 +137,40 @@ function kill(k){
     JSON.stringify(C.G.trail.slice(0,2)));
 }
 
+// ============ 世界地図から 早く 行けて しまわないか ============
+//   ★世界地図の ちてんを 実マップに つないだ とき、けっかいを 付け忘れると
+//     序章の うちに 第2章の ばしょへ 入れて しまう。
+{
+  // ★「どこは 何章から」を ここに 書いて おく。
+  //   けっかいを 消しても この 表と 合わなく なって 落ちる。
+  const FROM = {
+    lower_dist: 1,   // 序章から
+    pipe_path:  1,
+    mid_dist:   1,
+    world:      1,
+    garden:     3,   // 第2章から（上層区の 中）
+    furnace:    3,   // 第2章から（さらに 案内が いる）
+    watchtower: 3,
+    upper_dist: 3,
+    mid_post:   2, mid_arch: 2, old_pipe: 2,
+    trial_yard: 1, rift_yard: 1, home_forge: 1,
+  };
+  const W = C.MAPS.world.warpsXY || {};
+  Object.keys(W).forEach(k=>{
+    const to = W[k].to;
+    const need = FROM[to];
+    T('行き先の 章が きめて ある '+to, need!==undefined, '表に ない');
+    if(need===undefined || need<=1) return;
+    for(let no=1; no<need; no++){
+      C.freshState(); C.G.chapter = no;
+      const cd0 = vm.runInContext('CHAPTERS_DATA', ctx).CH[no];
+      ((cd0 && cd0.setFlags) || []).forEach(f=>C.G.flags[f]=true);
+      T('第'+(no-1)+'章では 世界地図から '+to+' へ 行けない', C.wardBlocks(to),
+        '早く 入れて しまう（'+k+'）／けっかいを 付け忘れて いない か');
+    }
+  });
+}
+
 // ============ すべての けっかいが いつか 開くか ============
 {
   C.freshState();
