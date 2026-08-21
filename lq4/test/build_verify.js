@@ -40,8 +40,10 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
 }
 
 // ★なかまの よこむきは みんな 同じ 向き（左むき）で ある こと。
-//   ★ノエだけ 右を むいて いて、歩く 向きと 体の 向きが 逆に なって いた。
-//   絵の 「重心が どちらに あるか」で しらべる。左むきなら 顔が 左に よる。
+//   ★ノエだけ 右を むいて いて、歩く 向きと 体の 向きが 逆に なった。
+//   ★はじめは 「暗い ドットの かたより」で しらべたが、外套が 全身 暗い
+//     ノエでは 当てに ならず、直った と かんちがい した。
+//     いまは 「顔（はだ・目）の いち」で しらべる。人は 顔が むいて いる 側に ある。
 {
   const zlib = require('zlib');
   const src = fs.readFileSync('assets.js','utf8');
@@ -50,9 +52,8 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
     const m = re.exec(src);
     return m ? Buffer.from(m[1],'base64') : null;
   };
-  // PNGを ほどいて 左半分／右半分の 「濃い ドット」の 数を くらべる
-  const weigh = (buf)=>{
-    let p=8, w=0, h=0, idat=[];
+  const unpack = (buf)=>{
+    let p=8, w=0, h=0; const idat=[];
     while(p<buf.length){
       const len=buf.readUInt32BE(p), typ=buf.toString('ascii',p+4,p+8);
       if(typ==='IHDR'){ w=buf.readUInt32BE(p+8); h=buf.readUInt32BE(p+12); }
@@ -60,8 +61,8 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
       p += 12+len;
     }
     const raw = zlib.inflateSync(Buffer.concat(idat));
-    let L=0, R=0, q=0;
     const bpp=4, stride=w*bpp+1;
+    const out=Buffer.alloc(w*h*bpp);
     const cur=Buffer.alloc(w*bpp), prev=Buffer.alloc(w*bpp);
     for(let y=0;y<h;y++){
       const ft=raw[y*stride];
@@ -74,27 +75,42 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
         else if(ft===4){ const pa=Math.abs(b-cc),pb=Math.abs(a-cc),pc=Math.abs(a+b-2*cc);
           cur[i]=(cur[i]+(pa<=pb&&pa<=pc?a:pb<=pc?b:cc))&255; }
       }
+      cur.copy(out, y*w*bpp); cur.copy(prev);
+    }
+    return {w,h,px:out};
+  };
+  // 顔の 高さ帯（上から 15〜50%）で、はだ色に ちかい ドットの かたよりを 見る
+  const faceSide = (buf)=>{
+    const {w,h,px} = unpack(buf);
+    let L=0, R=0;
+    for(let y=Math.floor(h*0.15); y<Math.floor(h*0.52); y++){
       for(let x=0;x<w;x++){
-        const o=x*bpp, al=cur[o+3];
-        if(al<100) continue;
-        const lum=(cur[o]+cur[o+1]+cur[o+2])/3;
-        if(lum>150) continue;                 // 明るい ところは かぞえない
+        const o=(y*w+x)*4, a=px[o+3];
+        if(a<100) continue;
+        const r=px[o], g=px[o+1], b=px[o+2];
+        // はだ／目の しろ：明るく、青みが 強すぎない
+        const lum=(r+g+b)/3;
+        if(lum<120) continue;
+        if(b > r+30) continue;                  // 青い ぬの は のぞく
         if(x < w/2) L++; else R++;
       }
-      cur.copy(prev);
     }
-    return {L,R};
+    if(L===0 && R===0) return '?';
+    return L>R ? 'left' : 'right';
   };
   const dirs = {};
   ['io','seren','noe'].forEach(k=>{
-    const b = grab(k,'side');
-    if(!b){ T('よこむきの 絵が ある '+k, false); return; }
-    const {L,R} = weigh(b);
-    dirs[k] = L>=R ? 'left' : 'right';
+    ['side','sideW'].forEach(f=>{
+      const b = grab(k,f);
+      if(!b){ T('よこむきの 絵が ある '+k+' '+f, false); return; }
+      dirs[k+'.'+f] = faceSide(b);
+    });
   });
   const vals = Object.values(dirs);
   T('なかまの よこむきが そろって いる', vals.every(v=>v===vals[0]), JSON.stringify(dirs));
   T('よこむきは 左むきが きじゅん', vals[0]==='left', JSON.stringify(dirs));
+  T('立ち絵と 歩く絵の 向きが おなじ',
+    ['io','seren','noe'].every(k=>dirs[k+'.side']===dirs[k+'.sideW']), JSON.stringify(dirs));
 }
 
 // ★サービスワーカーの キャッシュ名が この ビルドの ものに なっている こと
