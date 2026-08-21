@@ -586,6 +586,17 @@ Object.keys(C.MAPS).forEach(mp=>{
       }
       T('噴水が 四角に ならんで いる '+mp+' ('+x+','+y+') '+w+'×'+h, ok);
       T('噴水が 2ます いじょう '+mp+' ('+x+','+y+')', w>=2 && h>=2, w+'×'+h);
+      // ★建物に くっつくと めりこんで 見える。1ます あける こと。
+      const WALL = ['#','R'];
+      const stuck = [];
+      for(let j=0;j<h;j++) for(let i=0;i<w;i++){
+        [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{
+          if(WALL.indexOf(tileAt(mp,x+i+dx,y+j+dy))>=0)
+            stuck.push((x+i)+','+(y+j)+'→'+(x+i+dx)+','+(y+j+dy));
+        });
+      }
+      T('噴水が 建物に くっついて いない '+mp+' ('+x+','+y+')',
+        stuck.length===0, stuck.join(' '));
     }
   }
 });
