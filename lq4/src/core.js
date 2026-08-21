@@ -1671,7 +1671,7 @@ function memberAct(a, done){
     if(sp.type==='dmgall'){
       const lines=[m.name+'は '+sp.name+castVerb(m)];
       A.hit();
-      V.fx('spellall',{}, ()=>{
+      V.fx('spellall',{key:a.sp&&a.sp.key}, ()=>{
         alive.forEach(e=>{
           const d = skillDamage(m, sp);
           e.hp-=d; V.pop({enemy:e, text:d, kind:'dmg'});
@@ -1756,7 +1756,7 @@ function memberAct(a, done){
     if(!t){ done(); return; }
     const d = skillDamage(m, sp);
     A.hit();
-    V.fx('spell',{target:t}, ()=>{
+    V.fx('spell',{target:t, key:a.sp&&a.sp.key}, ()=>{
       V.pop({enemy:t, text:d, kind:'dmg'});
       t.hp-=d;
       const lines=[m.name+'は '+sp.name+castVerb(m), t.dispName+'に '+d+'の ダメージ！'];

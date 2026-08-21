@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 00:19 JST", "build":"2fd9ca8f","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 385, "chapters": 1008, "bgm": 979, "view2d": 2020, "core": 2674, "view": 1394, "ui": 1129}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 10:49 JST", "build":"b0884bd9","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 385, "chapters": 1008, "bgm": 979, "view2d": 2133, "core": 2674, "view": 1394, "ui": 1129}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -3971,12 +3971,14 @@ function battleEnter2D(enemies, mon, done){
            || null;
     return {enemy:e, art:d, idx:i, n:enemies.length, ph:nz(i,3,9)*6, fade:1, z:0};
   });
-  bParts = []; bShake = 0; bFlash = 0; bEnter = 0;
+  bParts = []; bShake = 0; bFlash = 0; bEnter = 0; bSlash = null;
   bFx = {kind:'enter', t:0, done};
 }
 function battleFx2D(kind, data, done){
   if(kind==='attack'||kind==='spell'||kind==='spellall'){
-    bFx = {kind:'pattack', t:0, done, target:data && data.target};
+    // ★どの 技かを うけとって、見た目を かえる
+    bFx = {kind:'pattack', t:0, done, target:data && data.target,
+           key:(data && data.key) || null};
   }else if(kind==='enemyattack'||kind==='enemyaoe'){
     const actor = data && data.from ? bFoes.find(f=>f.enemy===data.from) : null;
     bFx = {kind:'eattack', t:0, done, actor, wide:(kind==='enemyaoe')};
@@ -4040,13 +4042,77 @@ function drawPops(dt){
   }
 }
 
-function burst2D(target){
+// ★技ごとの 見た目。
+//   まえは 技も 通常こうげきも おなじ ひとつの えんしゅつ だった ため、
+//   何を したのか 画面から わからなかった。
+//   ここでは 「粒の 色・形・とび方」と「切りきずの 線」を 技ごとに かえる。
+const FX_STYLE = {
+  // 剣（イオ）：金と 白。たてに 走る 光
+  ikkiuchi:   {col:['#ffe6a8','#f0c058'], n:10, spread:200, up:200, slash:'v',  flash:0.45, shake:0.24},
+  kabutowari: {col:['#cfe0ff','#8fa6c8'], n:14, spread:120, up:70,  slash:'down',flash:0.5,  shake:0.34, ring:1},
+  renzan:     {col:['#ffffff','#ffe6a8'], n:16, spread:300, up:180, slash:'x',  flash:0.55, shake:0.30, hits:2},
+  yoroikudaki:{col:['#cfe0ff','#7f95c0'], n:18, spread:140, up:60,  slash:'down',flash:0.6,  shake:0.42, ring:1},
+  tenkuuken:  {col:['#eafaff','#a8e2ff'], n:20, spread:260, up:300, slash:'v',  flash:0.7,  shake:0.36, beam:1},
+  kenpunagi:  {col:['#ffffff','#cfe0ff'], n:22, spread:420, up:120, slash:'h',  flash:0.6,  shake:0.34, wide:1},
+  seikousen:  {col:['#ffffff','#ffd257'], n:26, spread:340, up:360, slash:'v',  flash:0.85, shake:0.5,  beam:1},
+  amagakeken: {col:['#eafaff','#ffffff'], n:30, spread:380, up:420, slash:'x',  flash:0.9,  shake:0.55, beam:1},
+  seikou_kiwa:{col:['#ffffff','#ffd257'], n:34, spread:520, up:300, slash:'x',  flash:1.0,  shake:0.6,  wide:1, beam:1},
+  // 槍（セレン）：銀と 水色。するどい 点
+  shippuutsuki:{col:['#dff0ff','#9ad0ff'], n:8,  spread:120, up:60,  slash:'stab', flash:0.4, shake:0.20},
+  yoroidooshi:{col:['#cfe0ff','#7f95c0'], n:12, spread:100, up:50,  slash:'stab', flash:0.5, shake:0.34, ring:1},
+  kagerou:    {col:['#c8a8ff','#9ad0ff'], n:14, spread:180, up:90,  slash:'stab', flash:0.45,shake:0.24, haze:1},
+  nidantsuki: {col:['#ffffff','#9ad0ff'], n:14, spread:160, up:80,  slash:'stab', flash:0.55,shake:0.28, hits:2},
+  nagiharai:  {col:['#dff0ff','#a8c8e8'], n:20, spread:420, up:90,  slash:'h',    flash:0.55,shake:0.32, wide:1},
+  ryuuseitsuki:{col:['#ffffff','#a8e2ff'],n:22, spread:200, up:260, slash:'stab', flash:0.7, shake:0.36, beam:1},
+  kansen:     {col:['#eafaff','#7fd4ff'], n:24, spread:180, up:300, slash:'stab', flash:0.8, shake:0.44, beam:1},
+  amatsuranuki:{col:['#ffffff','#7fd4ff'],n:28, spread:220, up:360, slash:'stab', flash:0.85,shake:0.5,  beam:1},
+  ginu:       {col:['#dff0ff','#ffffff'], n:26, spread:460, up:200, slash:'rain', flash:0.6, shake:0.34, wide:1},
+  ryuuseigun: {col:['#ffffff','#a8e2ff'], n:32, spread:520, up:320, slash:'rain', flash:0.8, shake:0.46, wide:1},
+  kansen_kiwa:{col:['#ffffff','#eafaff'], n:36, spread:260, up:440, slash:'stab', flash:1.0, shake:0.6,  beam:1},
+  // 術（ノエ・アマネ）
+  spark:      {col:['#fff2b0','#ffd257'], n:14, spread:220, up:200, slash:'none', flash:0.5, shake:0.22, ring:1},
+  spara:      {col:['#fff2b0','#ffd257'], n:20, spread:300, up:260, slash:'none', flash:0.65,shake:0.3,  ring:1},
+  sparga:     {col:['#ffffff','#ffd257'], n:26, spread:420, up:320, slash:'none', flash:0.8, shake:0.4,  ring:1, wide:1},
+  hiira:      {col:['#c8a8ff','#8f7fd0'], n:14, spread:200, up:160, slash:'none', flash:0.45,shake:0.2,  haze:1},
+  // 光の 大技（イオ・アマネで 共通）
+  holyray:    {col:['#ffffff','#ffe6a8'], n:30, spread:360, up:400, slash:'v',    flash:0.9, shake:0.5,  beam:1, ring:1},
+  judgment:   {col:['#ffffff','#a8e2ff'], n:36, spread:520, up:420, slash:'x',    flash:1.0, shake:0.62, beam:1, wide:1, ring:1},
+};
+const FX_DEFAULT = {col:['#f0c058','#e06038'], n:12, spread:260, up:220,
+                    slash:'none', flash:0.5, shake:0.26};
+function fxStyle(key){ return (key && FX_STYLE[key]) || FX_DEFAULT; }
+
+// 切りきず・突きの 線（技の 形を 見せる）
+let bSlash = null;
+function burst2D(target, key){
+  const st = fxStyle(key);
   const f = target ? bFoes.find(x=>x.enemy===target) : bFoes[0];
   const cx0 = f ? f._cx : W/2, cy0 = f ? f._cy : H/2;
-  for(let i=0;i<12;i++){
-    bParts.push({x:cx0, y:cy0,
-      vx:(nz(i,1,11)-0.5)*260, vy:-(60+nz(i,2,12)*220),
-      life:0.5, col: i%2 ? '#f0c058' : '#e06038'});
+  const wide = st.wide ? 1.6 : 1;
+  for(let i=0;i<st.n;i++){
+    const a = (nz(i,1,11)-0.5);
+    bParts.push({
+      x: cx0 + (st.wide ? a*W*0.35 : 0),
+      y: cy0 + (st.slash==='rain' ? -H*0.2*nz(i,4,7) : 0),
+      vx: a*st.spread*wide,
+      vy: -(40 + nz(i,2,12)*st.up),
+      life: st.beam ? 0.7 : 0.5,
+      col: i%2 ? st.col[0] : st.col[1],
+      sz: st.beam ? 3 : 2,
+    });
+  }
+  if(st.slash!=='none') bSlash = {t:0, kind:st.slash, x:cx0, y:cy0, col:st.col[0], wide:!!st.wide};
+  if(st.haze){
+    for(let i=0;i<10;i++)
+      bParts.push({x:cx0+(nz(i,5,3)-0.5)*90, y:cy0+(nz(i,6,4)-0.5)*70,
+                   vx:(nz(i,7,5)-0.5)*40, vy:-20, life:0.9, col:'#c8a8ff', sz:4});
+  }
+  if(st.ring){
+    for(let i=0;i<14;i++){
+      const th = i/14*6.283;
+      bParts.push({x:cx0, y:cy0, vx:Math.cos(th)*180, vy:Math.sin(th)*120,
+                   life:0.45, col:st.col[1], sz:2});
+    }
   }
 }
 
@@ -4062,9 +4128,20 @@ function drawBattle(dt, time){
       bEnter = Math.min(1, s.t/0.5);
       if(s.t>0.55){ const d=s.done; bFx=null; d&&d(); }
     }else if(s.kind==='pattack'){
+      const st = fxStyle(s.key);
+      const hits = st.hits || 1;
       if(s.t<0.16) zoom = 1 + s.t*0.5;
-      else if(s.t<0.24){ if(!s.hit){ s.hit=true; bShake=0.26; bFlash=0.5; burst2D(s.target); } zoom=1.08; }
-      else if(s.t<0.5) zoom = 1.08 - (s.t-0.24)*0.32;
+      else if(s.t<0.24){
+        if(!s.hit){ s.hit=1; bShake=st.shake; bFlash=st.flash; burst2D(s.target, s.key); }
+        zoom=1.08;
+      }
+      else if(s.t<0.5){
+        // ★2だん技は もう一度 きらめく
+        if(hits>1 && s.hit<2 && s.t>0.30){
+          s.hit=2; bShake=st.shake*0.8; bFlash=st.flash*0.7; burst2D(s.target, s.key);
+        }
+        zoom = 1.08 - (s.t-0.24)*0.32;
+      }
       else { const d=s.done; bFx=null; d&&d(); }
     }else if(s.kind==='eattack'){
       const reach = s.wide ? 8 : 14;
@@ -4128,13 +4205,49 @@ function drawBattle(dt, time){
     cx.globalAlpha = 1;
   });
 
+  // ---- 切りきず・突きの 線（技の 形）----
+  if(bSlash){
+    bSlash.t += dt;
+    const a = Math.max(0, 1 - bSlash.t/0.26);
+    if(a<=0) bSlash = null;
+    else{
+      const L = (bSlash.wide ? W*0.46 : W*0.20), th = Math.max(2, sc*3);
+      cx.save();
+      cx.globalAlpha = a;
+      cx.fillStyle = bSlash.col;
+      const X = bSlash.x, Y = bSlash.y - sc*14;
+      const bar = (dx,dy,len,w)=>{
+        cx.save(); cx.translate(X,Y); cx.rotate(Math.atan2(dy,dx));
+        cx.fillRect(-len/2, -w/2, len, w); cx.restore();
+      };
+      if(bSlash.kind==='v')      bar(0.3,1, L, th);              // たてに 振りおろす
+      else if(bSlash.kind==='h') bar(1,0, L*1.4, th);            // よこに 薙ぐ
+      else if(bSlash.kind==='down'){ bar(0.6,1, L, th*1.6); }    // 打ちおろし（太い）
+      else if(bSlash.kind==='x'){ bar(1,0.9, L, th); bar(1,-0.9, L, th); }
+      else if(bSlash.kind==='stab'){                             // 突き（点から 線）
+        cx.save(); cx.translate(X,Y);
+        cx.fillRect(-L*0.5, -th*0.5, L*(0.4+0.6*(1-a)), th);
+        cx.restore();
+      }
+      else if(bSlash.kind==='rain'){                             // ふりそそぐ
+        for(let i=0;i<7;i++){
+          const px = X + (nz(i,8,2)-0.5)*W*0.6;
+          cx.fillRect(Math.round(px), Math.round(Y-H*0.3+H*0.5*(1-a)), th, sc*10);
+        }
+      }
+      cx.restore();
+      cx.globalAlpha = 1;
+    }
+  }
+
   // ---- つぶ ----
   bParts = bParts.filter(p=>{
     p.life -= dt;
     if(p.life<=0) return false;
     p.vy += dt*900; p.x += p.vx*dt; p.y += p.vy*dt;
     cx.fillStyle = p.col;
-    cx.fillRect(Math.round(p.x), Math.round(p.y), sc*2, sc*2);
+    const z = sc*(p.sz||2);
+    cx.fillRect(Math.round(p.x), Math.round(p.y), z, z);
     return true;
   });
 
@@ -6334,7 +6447,7 @@ function memberAct(a, done){
     if(sp.type==='dmgall'){
       const lines=[m.name+'は '+sp.name+castVerb(m)];
       A.hit();
-      V.fx('spellall',{}, ()=>{
+      V.fx('spellall',{key:a.sp&&a.sp.key}, ()=>{
         alive.forEach(e=>{
           const d = skillDamage(m, sp);
           e.hp-=d; V.pop({enemy:e, text:d, kind:'dmg'});
@@ -6419,7 +6532,7 @@ function memberAct(a, done){
     if(!t){ done(); return; }
     const d = skillDamage(m, sp);
     A.hit();
-    V.fx('spell',{target:t}, ()=>{
+    V.fx('spell',{target:t, key:a.sp&&a.sp.key}, ()=>{
       V.pop({enemy:t, text:d, kind:'dmg'});
       t.hp-=d;
       const lines=[m.name+'は '+sp.name+castVerb(m), t.dispName+'に '+d+'の ダメージ！'];
