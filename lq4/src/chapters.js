@@ -1245,6 +1245,7 @@ const CH = {
     ending: {
       trigger: 'ch2_reported',
       set:['ch2_cleared'],
+      img: 'scene_ch2_end',          // ★手すりの 前で 紙片を かざす 場面
       msg:['',
            '── その夜　上層区 ──',
            '',

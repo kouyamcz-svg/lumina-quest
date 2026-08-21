@@ -387,6 +387,20 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★一枚絵の しるしが 実在するか。
+//   ★書いた しるしと 絵の 名前が ずれると、まっ黒な 画面に なる。
+{
+  Object.keys(CHD.CH).forEach(no=>{
+    const cd = CHD.CH[no];
+    const imgs = [];
+    if(cd.ending && cd.ending.img) imgs.push(['章末', cd.ending.img]);
+    (cd.talkEvents||[]).forEach(e=>{ if(e.img) imgs.push([e.npc, e.img]); });
+    Object.keys(cd.bosses||{}).forEach(k=>{ if(cd.bosses[k].img) imgs.push([k, cd.bosses[k].img]); });
+    imgs.forEach(([who,img])=>
+      T('第'+(no-1)+'章：一枚絵 '+img+' が ある（'+who+'）', !!MOND[img], '絵が ない'));
+  });
+}
+
 // ★章の おわりに つながる みちすじが、クエストに 出て いるか。
 //   ★オボロを 討った あと 何を すれば よいか どこにも 出て おらず、
 //     プレイヤーが 迷子に なった。

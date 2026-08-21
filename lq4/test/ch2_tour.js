@@ -13,7 +13,13 @@ for (const f of ['world.js','npc.js','chapters.js','core.js'])
 const C = vm.runInContext('LQ4', ctx);
 
 const log=[];
-C.bind(C.NullView, {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); },
+// ★一枚絵の 出し入れも 見る
+const scene=[];
+C.bind(Object.assign({}, C.NullView, {
+        showScene(k){ scene.push('show:'+k); },
+        hideScene(){ scene.push('hide'); },
+       }),
+       {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); },
                     menu(i,t,cb){ cb(t==='これから' ? 1 : 0); },
                     hud(){}, label(){}, openTrade(){}}, C.NullAudio);
 
@@ -150,6 +156,10 @@ T('捨てられた 夢だと 言う', said('捨てられた ぶん'));
 T('千年 捨ててきたと 言う', said('千年'));
 T('下から 戻って きていると 言う', said('下から'));
 T('ch2_cleared が たつ', C.G.flags.ch2_cleared===true);
+// ★章末に 一枚絵が 出て、おわると 消える
+T('章末に 一枚絵が 出る', scene.indexOf('show:scene_ch2_end')>=0, scene.join(' / '));
+T('章末の あと 一枚絵が 消える', scene.indexOf('hide')>scene.indexOf('show:scene_ch2_end'),
+  scene.join(' / '));
 
 // ===== 16. セーブ/ロード =====
 const gold=C.P.gold, lv=C.party[0].lv;
