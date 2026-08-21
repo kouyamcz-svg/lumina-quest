@@ -532,6 +532,30 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★ボスを 倒したら、その 章の 装備が すくなくとも ひとつ 買える こと。
+//   ★ボスの 金が すえおきで、章が すすむほど 割に あわなく なって いた。
+{
+  const SHOP_OF = {1:'lower_dist:S', 2:'mid_dist:S', 3:'upper_dist:S'};
+  Object.keys(CHD.CH).forEach(no=>{
+    const sh = C.SHOPS[SHOP_OF[no]];
+    if(!sh) return;
+    const prices = sh.filter(i=>i.kind==='w'||i.kind==='a').map(i=>i.price);
+    if(!prices.length) return;
+    const cheap = Math.min.apply(null, prices);
+    const bs = CHD.CH[no].bosses || {};
+    Object.keys(bs).forEach(k=>{
+      const e = C.MIDBOSS[bs[k].key];
+      if(!e) return;
+      // ★訓練の あいて（木人・模擬戦）は 金を くれなくて よい。
+      //   逃げる あいて（あぎと）も 山場では ない。
+      if(!e.gold) return;
+      if(bs[k].flee) return;
+      T('第'+(no-1)+'章：'+e.name+' の 金で 装備が 買える',
+        e.gold >= cheap, e.gold+'G ／ 最安 '+cheap+'G');
+    });
+  });
+}
+
 // ★とおせんぼの ますは、見た目でも 止まって いると 分かる こと。
 //   ★隔壁(K)に 城門の 絵を あてて いて、通れる 門に 見えた。
 {

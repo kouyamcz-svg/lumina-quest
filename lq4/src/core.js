@@ -147,7 +147,7 @@ const MIDBOSS = {
   // ---- 第2章ボス：あくむじゅう フォルナクス（炉座）----
   //   炉の 外郭に わき、光を 喰らう。倒すと 紙片が 残る。
   fornax:{key:'fornax', name:'あくむじゅう フォルナクス', hp:1380, atk:49, def:27, agi:16, acts:1,
-    exp:1100, gold:720, art:'fornax', scale:1.10,
+    exp:1100, gold:4000, art:'fornax', scale:1.10,
     skill:{p:0.30, mul:1.35, name:'ほのおの あぎと'},
     aoe:{p:0.24, lo:26, hi:38, name:'炉のいぶき'},
     inflict:{type:'confuse', p:0.20},
@@ -156,21 +156,21 @@ const MIDBOSS = {
 
   // ---- 第2章 中ボス：そらくらい（雲海を 喰う もの）----
   sorakurai:{key:'sorakurai', name:'そらくらい', hp:760, atk:42, def:24, agi:18, acts:2,
-    exp:520, gold:300, art:'sorakurai', scale:1.10,
+    exp:520, gold:2200, art:'sorakurai', scale:1.10,
     skill:{p:0.30, mul:1.20, name:'まきこむ 翼'},
     aoe:{p:0.26, lo:20, hi:30, name:'うずまく 雲'},
     inflict:{type:'slow', p:0.20}},
 
   // ---- 第1章 中ボス：かんむれ（管に 巣くう 群れ）----
   kanmure:{key:'kanmure', name:'かんむれ', hp:360, atk:27, def:15, agi:14, acts:2,
-    exp:220, gold:150, art:'kanmure', scale:1.10,
+    exp:220, gold:900, art:'kanmure', scale:1.10,
     skill:{p:0.30, mul:1.15, name:'つぎめ くだき'},
     inflict:{type:'confuse', p:0.14}},
 
   // ---- 第1章ボス：あくむじゅう オボロ（朧の座）----
   //   下層に 巣くった 親玉。管の 破れ目から 湧く ものを 束ねている。
   oboro:{key:'oboro', name:'あくむじゅう オボロ', hp:680, atk:35, def:19, agi:12, acts:1,
-    exp:520, gold:340, art:'oboro', scale:1.15,
+    exp:520, gold:1600, art:'oboro', scale:1.15,
     skill:{p:0.28, mul:1.30, name:'にじみの つめ'},
     aoe:{p:0.20, lo:14, hi:22, name:'よどんだ ながれ'},
     inflict:{type:'slow', p:0.20},
@@ -185,12 +185,12 @@ const MIDBOSS = {
     brace:{p:0.18, name:'槍を 立てて かまえた！'}},
   // ---- 序章：広場の 中ボス（影の あぎと）----
   shadowmaw:{key:'shadowmaw', name:'かげの あぎと', hp:120, atk:10, def:7, agi:8, acts:1,
-    exp:70, gold:40, art:'shadowmaw', scale:1.10,
+    exp:70, gold:120, art:'shadowmaw', scale:1.10,
     skill:{p:0.26, mul:1.20, name:'噛みくだき'},
     inflict:{type:'confuse', p:0.14}},
   // ---- 序章ボス：悪夢獣 ウンブラ（影の座）----
   umbra:{key:'umbra', name:'あくむじゅう ウンブラ', hp:390, atk:21, def:11, agi:10, acts:1,
-    exp:140, gold:90, art:'umbra', scale:1.15,
+    exp:140, gold:260, art:'umbra', scale:1.15,
     skill:{p:0.28, mul:1.25, name:'かげの つめ'},
     aoe:{p:0.16, lo:6, hi:10, name:'くらやみの さざなみ'},
     inflict:{type:'sleep', p:0.18},
@@ -1308,16 +1308,23 @@ function openChest(x,y){
   G.gotTreasure[key]=true;
   if(A.chest) A.chest();
   V.chest(x,y);
+  // ★中身は 章に つれて 大きく する。
+  //   まえは いつでも 30〜70ゴールド で、第2章では 装備の 5%ほどしか なく、
+  //   あけても うれしくない 箱に なって いた。
+  const ch = G.chapter || 1;
+  const mul = [1, 1, 6, 18][Math.min(ch, 3)] || 18;
   const r=Math.random();
   if(r<0.45){
-    const g=30+Math.floor(Math.random()*40); P.gold+=g;
+    const g=(30+Math.floor(Math.random()*40))*mul; P.gold+=g;
     U.msg(['宝箱を 開けた！', g+'ゴールドを てにいれた！'], ()=>{ U.hud(); G.mode='field'; });
   }else if(r<0.8){
-    P.herbs+=2;
-    U.msg(['宝箱を 開けた！','薬草を 2つ てにいれた！'], ()=>{ G.mode='field'; });
+    const n2 = 2 + Math.floor(ch/2);
+    P.herbs+=n2;
+    U.msg(['宝箱を 開けた！','薬草を '+n2+'つ てにいれた！'], ()=>{ G.mode='field'; });
   }else{
-    P.waters+=1;
-    U.msg(['宝箱を 開けた！','魔法の 聖水を てにいれた！'], ()=>{ G.mode='field'; });
+    const n3 = 1 + Math.floor((ch-1)/2);
+    P.waters+=n3;
+    U.msg(['宝箱を 開けた！','魔法の 聖水を '+n3+'つ てにいれた！'], ()=>{ G.mode='field'; });
   }
 }
 // ボスの ばしょ・とうじょうの ことば・倒した あとは 章データから ひく
