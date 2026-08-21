@@ -112,6 +112,31 @@ function kill(k){
   T('点検路の クエストが たつ', C.G.quests.ch1_q5_swarm==='active');
 }
 
+// ============ 仲間に なった 人は その場に のこる ============
+//   ★party[k] が 見るのは trail[k-1]。さきあたまに 入れると
+//     2人めが うけとって しまい、3人めが うしろへ ワープした。
+{
+  C.freshState(); C.G.chapters={}; C.switchChapter(3);
+  C.G.flags.ch2_taskTaken = true;
+  // じっさいに 庭園を あるいて ノエの となりへ
+  C.G.mode='field'; C.P.map='garden'; C.P.x=13; C.P.y=8; C.G.trail=[[13,9],[13,9]];
+  C.G.mode='field'; C.stepField(0,-1);
+  C.G.mode='field'; C.stepField(0,-1);
+  const before = C.G.trail[0].slice();
+  C.G.mode='field'; C.P.dir='back'; C.interact();
+  T('3人に なる', C.party.length===3 && C.party[2].cls==='noe', C.party.map(p=>p.cls).join(','));
+  T('あたらしい 人が その場に のこる',
+    C.G.trail[1] && C.G.trail[1][0]===13 && C.G.trail[1][1]===5,
+    JSON.stringify(C.G.trail.slice(0,2)));
+  T('もとから いた 人は うごかない',
+    C.G.trail[0][0]===before[0] && C.G.trail[0][1]===before[1],
+    JSON.stringify(C.G.trail[0])+' ← '+JSON.stringify(before));
+  C.G.mode='field'; C.stepField(0,1);
+  T('うごくと 順に ついてくる',
+    C.G.trail[0][0]===13 && C.G.trail[0][1]===6,
+    JSON.stringify(C.G.trail.slice(0,2)));
+}
+
 // ============ すべての けっかいが いつか 開くか ============
 {
   C.freshState();

@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 21:45 JST", "build":"eeb1df4c","assets_sha": "65ab82c7", "lines": {"world": 107, "npc": 477, "chapters": 1298, "bgm": 985, "view2d": 2257, "core": 2809, "view": 1394, "ui": 1141}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 21:55 JST", "build":"6831b516","assets_sha": "65ab82c7", "lines": {"world": 107, "npc": 477, "chapters": 1298, "bgm": 985, "view2d": 2257, "core": 2818, "view": 1394, "ui": 1141}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -6377,20 +6377,29 @@ function runTalkEvent(npcName){
   if(e.moor){ G.ship={x:e.moor[0], y:e.moor[1]}; G.aboard=false; }   // ★ふねを さずける
   if(e.heal){ party.concat(reserve).forEach(m=>{ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; }); U.hud(); }
   if(e.join){                                    // ★なかまが くわわる（'lead'＝せんとうと おなじLv）
+    const joined = [];
     (Array.isArray(e.join)?e.join:[e.join]).forEach(j=>{
       const lv = j.lv==='lead' ? (party[0]?party[0].lv:1) : (j.lv||1);
       const m = joinMember(j.cls, lv);
       if(m){                                     // そぶりの 装備を もって くる
         if(j.weapon) m.weapon = Object.assign({}, j.weapon);
         if(j.armor)  m.armor  = Object.assign({}, j.armor);
+        joined.push(m);
       }
     });
     // ★くわわった 人は「いま 立って いた ところ」から ついてくる。
-    //   たいれつの いちは 足あと（trail）で きまる。そろえないと、
-    //   話した とたんに 主人公の うしろへ ワープして 見える。
-    if(G._joinAt){
+    //   たいれつの いちは 足あと（trail）で きまる。
+    //   party[k] が 見るのは trail[k-1]。さきあたまに 入れると
+    //   2人めが うけとって しまい、3人めは うしろへ ワープした。
+    //   くわわった 本人の じゅんばんの ところへ 入れる。
+    if(G._joinAt && joined.length){
       G.trail = G.trail || [];
-      G.trail.unshift([G._joinAt[0], G._joinAt[1]]);
+      joined.forEach(m=>{
+        const k = party.indexOf(m);
+        if(k < 1) return;                        // 先頭は 主人公
+        while(G.trail.length < k-1) G.trail.push([P.x, P.y]);
+        G.trail.splice(k-1, 0, [G._joinAt[0], G._joinAt[1]]);
+      });
       while(G.trail.length > 8) G.trail.pop();
       V.setActors && V.setActors(true);
     }

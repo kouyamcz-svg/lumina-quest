@@ -81,8 +81,14 @@ T('ノエが 仲間に なる', C.party.length===3 && C.party[2].cls==='noe',
   C.party.map(p=>p.cls).join(','));
 T('夢守りの 家だと 名のる', said('夢守りの 家の 者'), log.join(' / ').slice(0,90));
 T('話せない ことが 多いと 言う', said('話せない ことが 多いんだ'));
-T('その場に 立ったまま 仲間に なる',
-  C.G.trail[0] && C.G.trail[0][0]===13 && C.G.trail[0][1]===5, JSON.stringify(C.G.trail[0]));
+// ★3人めは trail[1] を 見る。さきあたまに 入れると 2人めが うけとって しまい、
+//   あたらしい なかまが 主人公の うしろへ ワープした。
+T('ノエが その場に 立ったまま 仲間に なる',
+  C.G.trail[1] && C.G.trail[1][0]===13 && C.G.trail[1][1]===5,
+  JSON.stringify(C.G.trail.slice(0,2)));
+T('セレンの いちは 変わらない',
+  C.G.trail[0] && !(C.G.trail[0][0]===13 && C.G.trail[0][1]===5),
+  JSON.stringify(C.G.trail[0]));
 
 // ===== 7. グランの 妻 =====
 talk('garden', 9, 3, 'back');
