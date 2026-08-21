@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 22:20 JST", "build":"0c7c1ed5","assets_sha": "65ab82c7", "lines": {"world": 107, "npc": 477, "chapters": 1298, "bgm": 985, "view2d": 2282, "core": 2818, "view": 1394, "ui": 1141}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 22:47 JST", "build":"366654b1","assets_sha": "6580ef1f", "lines": {"world": 107, "npc": 477, "chapters": 1301, "bgm": 985, "view2d": 2282, "core": 2818, "view": 1394, "ui": 1141}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -157,7 +157,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=65ab82c7"></script>
+<script src="assets.js?v=6580ef1f"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -1882,6 +1882,9 @@ const CH = {
         join:[{cls:'noe', lv:'lead',
                weapon:{kind:'w', name:'夢守りの 杖',   v:9},
                armor: {kind:'a', name:'ぬくもりの 衣', v:11}}],
+        // ★仲間に なったら 地図の ノエを 消す。
+        //   消さないと 仲間の ノエと 地図の ノエで 2体に なる。
+        setTiles:[{map:'garden', x:13, y:5, ch:'.'}],
         msg:['花壇の あいだに、外套の 少年が しゃがんでいた。',
              '土を さわって いるのでは ない。花の 影を 見ている。',
              '',

@@ -39,6 +39,64 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
   T('ふつうの ときは ブラウザに まかせる', ui.includes("'ambient' : 'auto'"));
 }
 
+// ★なかまの よこむきは みんな 同じ 向き（左むき）で ある こと。
+//   ★ノエだけ 右を むいて いて、歩く 向きと 体の 向きが 逆に なって いた。
+//   絵の 「重心が どちらに あるか」で しらべる。左むきなら 顔が 左に よる。
+{
+  const zlib = require('zlib');
+  const src = fs.readFileSync('assets.js','utf8');
+  const grab = (key, face)=>{
+    const re = new RegExp('  '+key+':\\{[\\s\\S]*?'+face+":'data:image/png;base64,([^']*)'");
+    const m = re.exec(src);
+    return m ? Buffer.from(m[1],'base64') : null;
+  };
+  // PNGを ほどいて 左半分／右半分の 「濃い ドット」の 数を くらべる
+  const weigh = (buf)=>{
+    let p=8, w=0, h=0, idat=[];
+    while(p<buf.length){
+      const len=buf.readUInt32BE(p), typ=buf.toString('ascii',p+4,p+8);
+      if(typ==='IHDR'){ w=buf.readUInt32BE(p+8); h=buf.readUInt32BE(p+12); }
+      if(typ==='IDAT') idat.push(buf.slice(p+8,p+8+len));
+      p += 12+len;
+    }
+    const raw = zlib.inflateSync(Buffer.concat(idat));
+    let L=0, R=0, q=0;
+    const bpp=4, stride=w*bpp+1;
+    const cur=Buffer.alloc(w*bpp), prev=Buffer.alloc(w*bpp);
+    for(let y=0;y<h;y++){
+      const ft=raw[y*stride];
+      raw.copy(cur, 0, y*stride+1, y*stride+1+w*bpp);
+      for(let i=0;i<w*bpp;i++){
+        const a=i>=bpp?cur[i-bpp]:0, b=prev[i], cc=i>=bpp?prev[i-bpp]:0;
+        if(ft===1) cur[i]=(cur[i]+a)&255;
+        else if(ft===2) cur[i]=(cur[i]+b)&255;
+        else if(ft===3) cur[i]=(cur[i]+((a+b)>>1))&255;
+        else if(ft===4){ const pa=Math.abs(b-cc),pb=Math.abs(a-cc),pc=Math.abs(a+b-2*cc);
+          cur[i]=(cur[i]+(pa<=pb&&pa<=pc?a:pb<=pc?b:cc))&255; }
+      }
+      for(let x=0;x<w;x++){
+        const o=x*bpp, al=cur[o+3];
+        if(al<100) continue;
+        const lum=(cur[o]+cur[o+1]+cur[o+2])/3;
+        if(lum>150) continue;                 // 明るい ところは かぞえない
+        if(x < w/2) L++; else R++;
+      }
+      cur.copy(prev);
+    }
+    return {L,R};
+  };
+  const dirs = {};
+  ['io','seren','noe'].forEach(k=>{
+    const b = grab(k,'side');
+    if(!b){ T('よこむきの 絵が ある '+k, false); return; }
+    const {L,R} = weigh(b);
+    dirs[k] = L>=R ? 'left' : 'right';
+  });
+  const vals = Object.values(dirs);
+  T('なかまの よこむきが そろって いる', vals.every(v=>v===vals[0]), JSON.stringify(dirs));
+  T('よこむきは 左むきが きじゅん', vals[0]==='left', JSON.stringify(dirs));
+}
+
 // ★サービスワーカーの キャッシュ名が この ビルドの ものに なっている こと
 //   （固定の ままだと、なおしても 端末に ふるい ものが のこる）
 {

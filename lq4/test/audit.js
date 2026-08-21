@@ -404,6 +404,28 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★仲間に なる 会話は、地図の その人を 消す こと。
+//   ★消し忘れると 仲間の 本人と 地図の 本人で 2体に なる。
+{
+  Object.keys(CHD.CH).forEach(no=>{
+    const cd = CHD.CH[no];
+    (cd.talkEvents||[]).forEach(e=>{
+      if(!e.join || !e.npc) return;
+      // その 会話あいてが 地図の どこに いるか
+      const spots = [];
+      Object.keys(NPCD.NPCS).forEach(mp=>
+        (NPCD.NPCS[mp]||[]).forEach(x=>{ if(x.name===e.npc) spots.push([mp, x.at]); }));
+      const cleared = (e.setTiles ? (Array.isArray(e.setTiles)?e.setTiles:[e.setTiles]) : [])
+        .map(o=>o.map+':'+o.x+','+o.y);
+      spots.forEach(([mp,at])=>{
+        T('第'+(no-1)+'章：仲間に なると 地図から 消える '+e.npc,
+          cleared.indexOf(mp+':'+at)>=0,
+          '地図に のこる（'+mp+' '+at+'）／消して いる：'+(cleared.join(' ')||'なし'));
+      });
+    });
+  });
+}
+
 // ★一枚絵の しるしが 実在するか。
 //   ★書いた しるしと 絵の 名前が ずれると、まっ黒な 画面に なる。
 {
