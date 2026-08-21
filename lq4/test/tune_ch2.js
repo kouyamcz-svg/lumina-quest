@@ -52,7 +52,7 @@ for(let t=0;t<N;t++){
   route('furnace',3,9);
   route('furnace',20,13);
   route('furnace',17,17);
-  C.G.mode='field'; C.startBattle('hibashira');
+  C.G.mode='field'; C.startBattle('sorakurai');
   // 町へ もどって 回復（物語じょう 主任に 会いに 行ける）
   C.party.forEach(p=>{ p.hp=p.maxhp; p.mp=p.maxmp; p.status=null; });
   C.P.herbs=8;

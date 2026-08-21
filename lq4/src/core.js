@@ -147,7 +147,7 @@ const MIDBOSS = {
   // ---- 第2章ボス：あくむじゅう フォルナクス（炉座）----
   //   炉の 外郭に わき、光を 喰らう。倒すと 紙片が 残る。
   fornax:{key:'fornax', name:'あくむじゅう フォルナクス', hp:1380, atk:49, def:27, agi:16, acts:1,
-    exp:1100, gold:720, art:'oboro', scale:1.20,
+    exp:1100, gold:720, art:'fornax', scale:1.10,
     skill:{p:0.30, mul:1.35, name:'ほのおの あぎと'},
     aoe:{p:0.24, lo:26, hi:38, name:'炉のいぶき'},
     inflict:{type:'confuse', p:0.20},
@@ -155,8 +155,8 @@ const MIDBOSS = {
     enrage:{at:0.34, atk:1.16, name:'フォルナクスの 芯が 白く 灼けた！'}},
 
   // ---- 第2章 中ボス：そらくらい（雲海を 喰う もの）----
-  hibashira:{key:'hibashira', name:'そらくらい', hp:760, atk:42, def:24, agi:18, acts:2,
-    exp:520, gold:300, art:'soraKurai', scale:1.10,
+  sorakurai:{key:'sorakurai', name:'そらくらい', hp:760, atk:42, def:24, agi:18, acts:2,
+    exp:520, gold:300, art:'sorakurai', scale:1.10,
     skill:{p:0.30, mul:1.20, name:'まきこむ 翼'},
     aoe:{p:0.26, lo:20, hi:30, name:'うずまく 雲'},
     inflict:{type:'slow', p:0.20}},

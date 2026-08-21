@@ -1094,7 +1094,7 @@ const CH = {
         after: ['炉の 火が、まっすぐ 上へ 立ちのぼっている。'],
       },
       'furnace:17,17': {
-        key: 'hibashira',
+        key: 'sorakurai',
         clearedFlag: 'ch2_pillarDown',
         intro: ['管の 継ぎ目から、熱が 柱に なって 噴き出した。',
                 'セレン「……これ、生きてる」',
@@ -1222,7 +1222,7 @@ const CH = {
     ],
 
     bossReward: {
-      hibashira: {
+      sorakurai: {
         set:['ch2_pillarDown'],
         setTiles:[{map:'furnace', x:17, y:17, ch:'.'}],
         msg:['', '熱の 柱が ほどけ、床に 白い 灰が 残った。',
