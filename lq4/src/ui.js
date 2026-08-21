@@ -853,7 +853,8 @@ let audioUnlocked = false;
 const UNLOCK_EVENTS = ['touchstart','touchend','pointerdown','mousedown','click','keydown'];
 function unlockAudio(){
   const ac = ctx();
-  try{ if(ac && ac.state!=='running') ac.resume(); }catch(e){}
+  // ★やくそくの 拒否を のみこむ（try/catch では とれない）
+  try{ if(ac && ac.state!=='running'){ const p=ac.resume(); if(p&&p.catch) p.catch(()=>{}); } }catch(e){}
   if(typeof BGM!=='undefined'){
     if(BGM.attach) BGM.attach(ac);
     BGM.resume();

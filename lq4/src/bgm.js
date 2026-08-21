@@ -606,7 +606,7 @@ function pump(){
   // ★おとが まだ だせない あいだは よやくしない。まいかい さいかいを こころみ、
   //   きょくの あたまから はじめなおせるように しておく。
   if(AC.state !== 'running'){
-    try{ AC.resume(); }catch(e){}
+    try{ const _p=AC.resume(); if(_p&&_p.catch) _p.catch(()=>{}); }catch(e){}
     t0 = AC.currentTime + 0.10 - songStart; idx = idxStart; loopN = 0; lastNow = -1;
     return;
   }
@@ -616,7 +616,7 @@ function pump(){
     stall++;
     if(stall > 8){                       // やく0.5びょう すすまなければ たてなおす
       stall = 0;
-      try{ AC.resume(); }catch(e){}
+      try{ const _p=AC.resume(); if(_p&&_p.catch) _p.catch(()=>{}); }catch(e){}
       t0 = now + 0.10 - songStart; idx = idxStart; loopN = 0;
     }
     return;
@@ -665,7 +665,7 @@ function play(name){
   pending = null;
   // ★resume の やくそくは iOSでは かえってこない ことが ある。
   //   またずに はじめ、おとが だせるように なったら みはりが たてなおす。
-  try{ AC.resume(); }catch(e){}
+  try{ const _p=AC.resume(); if(_p&&_p.catch) _p.catch(()=>{}); }catch(e){}
   begin(name);
 }
 // おんりょうの よやくを かならず とりけしてから きめる。
@@ -703,7 +703,13 @@ function setVolume(v){
   vol = Math.max(0, Math.min(1, v));
   gainNow(vol);
 }
-function resume(){ const a=ctx(); if(a && a.state==='suspended') a.resume(); }
+// ★やくそくの 拒否を のみこむ（Safariが「音を はじめられない」と 返す ことが ある）
+function resume(){
+  const a=ctx();
+  if(a && a.state==='suspended'){
+    try{ const p=a.resume(); if(p&&p.catch) p.catch(()=>{}); }catch(e){}
+  }
+}
 
 /* ══ フィールドきょく（おんげんファイルを ながす）══ */
 // せんとうきょくは はっしんきで つくるが、フィールドきょくは
@@ -781,7 +787,7 @@ function playField(track){
   if(playing || batWant) return;
   cancelResume();                     // もどす しごとは もう いらない
   routeField();
-  try{ AC && AC.resume && AC.resume(); }catch(e){}
+  try{ const _p=AC && AC.resume && AC.resume(); if(_p&&_p.catch) _p.catch(()=>{}); }catch(e){}
   if(fieldGain){ try{ fieldGain.gain.value = volOf(fieldTrack); }catch(e){} }
   try{
     const p = el.play();
@@ -897,7 +903,7 @@ function playBattleFile(track){
   const slot = battleEl(track); if(!slot) return;
   const el = slot.el;
   routeBattle(track);
-  try{ AC && AC.resume && AC.resume(); }catch(e){}
+  try{ const _p=AC && AC.resume && AC.resume(); if(_p&&_p.catch) _p.catch(()=>{}); }catch(e){}
   if(slot.gain){ try{ slot.gain.gain.value = batVol; }catch(e){} }
   // ★まいかい あたまから。よみこめて いなければ よみこめてから。
   const startPlay = ()=>{

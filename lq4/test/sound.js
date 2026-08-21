@@ -57,5 +57,22 @@ T('きりかえも のこる', JSON.parse(stored.LQ4_SOUND).mix===true, stored.L
   T('しくみが なくても あてに いける', sb3.__api.applyAudioSession()===false);
 }
 
+// ---- やくそく（Promise）の 拒否を のみこんで いるか ----
+//   ★AudioContext.resume() は やくそくを かえす。try/catch では 拒否を
+//     うけとれず、赤い おびに [REJ] Failed to start the audio device が 出た。
+{
+  const files = ['src/bgm.js','src/ui.js'];
+  files.forEach(f=>{
+    const src = fs.readFileSync(f,'utf8').split('\n');
+    src.forEach((l,i)=>{
+      if(/^\s*(\/\/|\*)/.test(l)) return;                 // コメントは 見ない
+      if(!/\.(resume|play)\(\)/.test(l)) return;
+      if(/BGM\.resume\(\)/.test(l)) return;                // 中で のみこむ
+      const around = src.slice(i, i+7).join(' ');   // then(...).catch(...) は 数行 またぐ
+      T(f+':'+(i+1)+' の 拒否を のみこんで いる', /catch/.test(around), l.trim().slice(0,60));
+    });
+  });
+}
+
 console.log('\n--- sound: '+(n-ng)+'/'+n+' 通過 ---');
 process.exit(ng?1:0);
