@@ -558,6 +558,21 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★2×2の 噴水は 4ますが そろって いる こと。
+//   ★1ますでも 欠けると 絵が 切れて 見える。
+Object.keys(C.MAPS).forEach(mp=>{
+  const t = C.MAPS[mp].tiles;
+  for(let y=0;y<t.length;y++){
+    for(let x=0;x<t[y].length;x++){
+      if(tileAt(mp,x,y)!=='F') continue;
+      if(!(C.MAPS[mp].theme==='sky' || C.MAPS[mp].theme==='skygarden')) continue;
+      T('大きな 噴水が そろって いる '+mp+' ('+x+','+y+')',
+        tileAt(mp,x+1,y)==='1' && tileAt(mp,x,y+1)==='2' && tileAt(mp,x+1,y+1)==='3',
+        [tileAt(mp,x+1,y),tileAt(mp,x,y+1),tileAt(mp,x+1,y+1)].join(' '));
+    }
+  }
+});
+
 // ★門の むき：G＝よこに ながれる かべ（南北の 出入口）、g＝たての かべ（東西）。
 //   ★同じ 絵を つかうと、東の 門が かべに 埋もれて 向きが おかしく 見えた。
 Object.keys(C.MAPS).forEach(mp=>{

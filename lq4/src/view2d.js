@@ -440,6 +440,55 @@ function buildAtlas(){
     R(g,7,14,1,2,P16.sk0); R(g,8,14,1,2,P16.sk3);
   });
 
+  // ★大きな 噴水（2×2ます）。
+  //   1ますの 噴水は 小さくて 何か わからなかった。
+  //   32×32の 絵を 考えて、それを 4つに 切って 4ますに はめる。
+  //   F＝左上、1＝右上、2＝左下、3＝右下。
+  function bigFount(qx, qy){
+    return tile((g,s)=>{
+      const OX = qx*16, OY = qy*16;
+      const B = (x,y,w,h,col)=>{
+        const x0 = x-OX, y0 = y-OY;
+        if(x0+w<=0 || y0+h<=0 || x0>=16 || y0>=16) return;
+        R(g, Math.max(0,x0), Math.max(0,y0),
+             Math.min(16,x0+w)-Math.max(0,x0),
+             Math.min(16,y0+h)-Math.max(0,y0), col);
+      };
+      const ST0='#7f95c0', ST1='#a9bcd8', ST2='#d9e3f0', ST3='#f2f6fc';
+      R(g,0,0,s,s,'#c9d8ee');
+      // 台座（いちばん 下・八角）
+      B(4,24,24,4,ST0);
+      B(6,26,20,3,'#6f86ab');
+      // 水盤の 外がわ（八角に 見える ように 角を おとす）
+      B(4,8,24,16,ST1);  B(8,4,16,24,ST1);  B(6,6,20,20,ST1);
+      B(4,8,24,1,ST3);   B(8,4,16,1,ST3);          // うえの ふち：光
+      B(4,23,24,1,ST0);  B(8,27,16,1,ST0);         // したの ふち：影
+      B(4,8,1,16,ST2);   B(27,8,1,16,ST0);         // 左は 明、右は 暗
+      // 内がわ（水を うける くぼみ）
+      B(7,11,18,10,ST0); B(11,7,10,18,ST0); B(9,9,14,14,ST0);
+      // 水
+      B(8,12,16,8,'#2f6ea8'); B(12,8,8,16,'#2f6ea8'); B(10,10,12,12,'#2f6ea8');
+      B(9,13,14,6,'#5fb4ee'); B(13,9,6,14,'#5fb4ee'); B(11,11,10,10,'#5fb4ee');
+      B(13,13,6,5,'#a8e2ff');
+      // 中央の 柱
+      B(14,10,4,6,ST1);
+      B(14,10,1,6,ST2); B(17,10,1,6,ST0);
+      // 噴きあがる 水
+      B(14,0,4,10,'#d9e3f0');
+      B(15,0,2,10,'#eafaff');
+      B(13,2,1,4,'#a8e2ff'); B(18,2,1,4,'#a8e2ff');
+      B(12,5,1,3,'#cfe2ff'); B(19,5,1,3,'#cfe2ff');
+      // 落ちる しぶき
+      B(11,9,1,2,'#eafaff'); B(20,9,1,2,'#eafaff');
+      B(10,14,1,1,'#ffffff'); B(21,15,1,1,'#ffffff');
+      B(15,19,1,1,'#ffffff'); B(18,17,1,1,'#ffffff');
+    });
+  }
+  atlas.fountTL = bigFount(0,0);
+  atlas.fountTR = bigFount(1,0);
+  atlas.fountBL = bigFount(0,1);
+  atlas.fountBR = bigFount(1,1);
+
   // ★上層の 建物：みがいた 白石に 金の 帯、青い ガラス窓。
   //   下層の 割れた 石、中層の 磨き石、上層の 白亜、と 三段で 差が つく。
   atlas.richwall = tileSet((g,s,v)=>{
@@ -1076,7 +1125,10 @@ function tileArt(ch, theme){
     case 'y': return atlas.signpost;
 
     case 'K': return sky ? atlas.bulkhead : atlas.castgate;
-    case 'F': return sky ? atlas.skyfountain : atlas.fountain;
+    case 'F': return sky ? atlas.fountTL : atlas.fountain;   // ★大きな 噴水（左上）
+    case '1': return atlas.fountTR;       // ★大きな 噴水（右上）
+    case '2': return atlas.fountBL;       // ★大きな 噴水（左下）
+    case '3': return atlas.fountBR;       // ★大きな 噴水（右下）
     case 'G': return atlas.gate;       // よこの かべの 門（南北）
     case 'g': return atlas.gateSide;   // たての かべの 門（東西）
     case 'T': return atlas.tower;
