@@ -162,17 +162,22 @@ const NPCS = {
 
   // ============ 第2章：上層区 ============
   upper_dist: [
-    {at:'8,3', spr:'butler', name:'炉の 主任', lines:[
+    {at:'9,4', spr:'villagerB', name:'炉の 主任', lines:[
       {when:{flag:'ch2_reported'}, text:[
         '主任「炉心の 鍵は 城に ある」',
         '主任「わたしの 判では 開かん。……すまんな」']},
       {when:{flag:'ch2_fornaxDown'}, text:[
         '主任「外郭の 火が 戻った。報告を 聞かせてくれ」']},
+      {when:{flag:'ch2_noeJoined'}, text:[
+        '主任「案内は 見つかったな。昇降機は 東の 館だ」']},
       {when:{flag:'ch2_taskTaken'}, text:[
         '主任「案内は 庭園に いる。夢守りの 家の 子だ」',
-        '主任「口の 重い 子だが、扉は 開けられる」']},
+        '主任「西の 門を 出て すぐだ。口の 重い 子だが、扉は 開けられる」']},
       {text:['主任「下層から 来た 騎士か。……炉の 話だと 聞いたが」']}]},
-    {at:'12,3', spr:'guardA', name:'上層の 衛兵', lines:[
+    {at:'11,4', spr:'guardA', name:'上層の 衛兵', lines:[
+      {when:{flag:'ch2_taskTaken', notFlag:'ch2_noeJoined'}, text:[
+        '「庭園か。西の 門だ。手すりの 切れ目から 出られる」',
+        '「東の 館の 昇降機は 炉行きだ。案内なしでは 動かん」']},
       {when:{flag:'ch2_fornaxDown'}, text:[
         '「炉の 外郭で 何か 討ったそうだな」',
         '「上では 誰も その 話を しない。……それが 答えだ」']},
@@ -185,7 +190,7 @@ const NPCS = {
         '「……起きて いるのに、起きてこないの」']},
       {text:['「庭園は お行きになった？　花が きれいよ」',
              '「上層でしか 咲かないの。光が たっぷり いるから」']}]},
-    {at:'4,13', spr:'villagerB', name:'炉の 技師', lines:[
+    {at:'4,9', spr:'villagerA', name:'炉の 技師', lines:[
       {when:{flag:'ch2_heardBreath'}, text:[
         '「炉心の 音？　……あれは 火の 音だ」',
         '「そう 思う ことに してる。二十年 な」']},

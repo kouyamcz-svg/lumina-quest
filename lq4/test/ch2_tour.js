@@ -60,19 +60,20 @@ talk('upper_dist', 10, 1, 'back');
 T('天空城で 断られる', said('城へは 通せん'), log.join(' / ').slice(0,60));
 
 // ===== 4. 炉の 主任から 任務 =====
-talk('upper_dist', 8, 4, 'back');
+talk('upper_dist', 9, 5, 'back');
 T('任務を うける', C.G.flags.ch2_taskTaken===true);
 T('「減っている」と 言う', said('減っている'), log.join(' / ').slice(0,90));
 T('クエストが たつ', C.G.quests.ch2_q1_dim==='active');
+T('庭園への 道を 教えて くれる', said('西の 門'), log.join(' / ').slice(-80));
 
 // ===== 5. 案内が いないと 炉へ 入れない =====
-stand('upper_dist', 16, 10, 'back');
-C.stepField(0,-1);
+stand('upper_dist', 17, 9, 'front');
+C.stepField(0,1);
 T('案内なしでは 炉へ 行けない', C.P.map==='upper_dist', C.P.map);
 T('庭園へ 行けと 言われる', said('庭園に いる'), log.join(' / ').slice(0,60));
 
 // ===== 6. 空中庭園：ノエが 仲間に =====
-stand('upper_dist', 2, 7, 'left');
+stand('upper_dist', 1, 7, 'left');
 C.stepField(-1,0);
 T('庭園へ 入れる', C.P.map==='garden', C.P.map+' '+C.P.x+','+C.P.y);
 talk('garden', 13, 6, 'back');
@@ -93,8 +94,8 @@ T('ノエが 起きて いないと 言う', said('この 人、起きてない'
 // ===== 8. 炉の 外郭へ =====
 stand('garden', 9, 13, 'front'); C.stepField(0,1);
 T('上層区へ もどる', C.P.map==='upper_dist', C.P.map);
-stand('upper_dist', 16, 10, 'back');
-C.stepField(0,-1);
+stand('upper_dist', 17, 9, 'front');
+C.stepField(0,1);
 T('炉の 外郭へ 入れる', C.P.map==='furnace', C.P.map+' '+C.P.x+','+C.P.y);
 T('炉の めじるしが たつ', C.G.flags.ch2_enteredFurnace===true);
 
@@ -140,7 +141,7 @@ T('つぎの 行き先が 出る', said('上層区の 主任に 報告しよう'
 // ===== 14. 主任へ 報告 =====
 C.party.forEach(p=>{ p.hp=1; p.mp=0; });
 const g0=C.P.gold;
-talk('upper_dist', 8, 4, 'back');
+talk('upper_dist', 9, 5, 'back');
 T('報告できる', C.G.flags.ch2_reported===true);
 T('炉心の ぶんが 足りないと 言う', said('炉心の ぶんが 足りん'), log.join(' / ').slice(-90));
 T('鍵は 城に あると 言う', said('鍵は 城に ある'));

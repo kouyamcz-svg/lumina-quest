@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 18:21 JST", "build":"0dd8130e","assets_sha": "65ab82c7", "lines": {"world": 107, "npc": 472, "chapters": 1296, "bgm": 985, "view2d": 2133, "core": 2806, "view": 1394, "ui": 1141}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 21:08 JST", "build":"4ba68f89","assets_sha": "65ab82c7", "lines": {"world": 107, "npc": 477, "chapters": 1298, "bgm": 985, "view2d": 2171, "core": 2808, "view": 1394, "ui": 1141}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -436,17 +436,22 @@ const NPCS = {
 
   // ============ 第2章：上層区 ============
   upper_dist: [
-    {at:'8,3', spr:'butler', name:'炉の 主任', lines:[
+    {at:'9,4', spr:'villagerB', name:'炉の 主任', lines:[
       {when:{flag:'ch2_reported'}, text:[
         '主任「炉心の 鍵は 城に ある」',
         '主任「わたしの 判では 開かん。……すまんな」']},
       {when:{flag:'ch2_fornaxDown'}, text:[
         '主任「外郭の 火が 戻った。報告を 聞かせてくれ」']},
+      {when:{flag:'ch2_noeJoined'}, text:[
+        '主任「案内は 見つかったな。昇降機は 東の 館だ」']},
       {when:{flag:'ch2_taskTaken'}, text:[
         '主任「案内は 庭園に いる。夢守りの 家の 子だ」',
-        '主任「口の 重い 子だが、扉は 開けられる」']},
+        '主任「西の 門を 出て すぐだ。口の 重い 子だが、扉は 開けられる」']},
       {text:['主任「下層から 来た 騎士か。……炉の 話だと 聞いたが」']}]},
-    {at:'12,3', spr:'guardA', name:'上層の 衛兵', lines:[
+    {at:'11,4', spr:'guardA', name:'上層の 衛兵', lines:[
+      {when:{flag:'ch2_taskTaken', notFlag:'ch2_noeJoined'}, text:[
+        '「庭園か。西の 門だ。手すりの 切れ目から 出られる」',
+        '「東の 館の 昇降機は 炉行きだ。案内なしでは 動かん」']},
       {when:{flag:'ch2_fornaxDown'}, text:[
         '「炉の 外郭で 何か 討ったそうだな」',
         '「上では 誰も その 話を しない。……それが 答えだ」']},
@@ -459,7 +464,7 @@ const NPCS = {
         '「……起きて いるのに、起きてこないの」']},
       {text:['「庭園は お行きになった？　花が きれいよ」',
              '「上層でしか 咲かないの。光が たっぷり いるから」']}]},
-    {at:'4,13', spr:'villagerB', name:'炉の 技師', lines:[
+    {at:'4,9', spr:'villagerA', name:'炉の 技師', lines:[
       {when:{flag:'ch2_heardBreath'}, text:[
         '「炉心の 音？　……あれは 火の 音だ」',
         '「そう 思う ことに してる。二十年 な」']},
@@ -1865,8 +1870,10 @@ const CH = {
              '',
              '主任「外郭を 見てくれ。中へは 入れられんが、外郭までなら」',
              '主任「……ただし、ひとり 案内を つける。庭園に いる」',
+             'イオ「庭園は どちらに」',
+             '主任「西の 門を 出て すぐだ。手すりの 切れ目が 門に なっている」',
              '', '＊ クエスト「減っていく 光」＊',
-             '＊ 空中庭園で 案内の 者に 会おう ＊'] },
+             '＊ 上層区の 西の 門から 空中庭園へ ＊'] },
 
       // ---- 空中庭園：ノエが 加わる ----
       { npc:'夢守りの ノエ', cond:['ch2_taskTaken'], unless:'ch2_noeJoined',
@@ -3089,6 +3096,10 @@ const P16 = {
   sm0:'#6a7c9c', sm1:'#8fa0bd', sm2:'#b6c4dc', sm3:'#dee6f2',   // 天空の 岩山（白石）
   // ★かべは ゆかと はっきり 明暗を 分ける（同色で 見わけが つかなかった）
   skW0:'#48597d', skW1:'#63779e', skW2:'#8194b6', skW3:'#a3b3cd',
+  // ★上層の 白亜の 壁：みがいた 石に 金の 帯と 青い 窓
+  up0:'#7f8aa6', up1:'#b8c2d8', up2:'#dde4f0', up3:'#f4f7fc',
+  gold0:'#8a6f2a', gold1:'#c9a94e', gold2:'#efd98a',
+  win0:'#2a5c96', win1:'#5fb4ee', win2:'#a8e2ff',
 };
 
 function mk(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
@@ -3461,6 +3472,39 @@ function buildAtlas(){
     // 継ぎ目（開かない ことを 見せる 縦の 線）
     R(g,7,0,1,2,P16.sk0); R(g,8,0,1,2,P16.sk3);
     R(g,7,14,1,2,P16.sk0); R(g,8,14,1,2,P16.sk3);
+  });
+
+  // ★上層の 建物：みがいた 白石に 金の 帯、青い ガラス窓。
+  //   下層の 割れた 石、中層の 磨き石、上層の 白亜、と 三段で 差が つく。
+  atlas.richwall = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.up1);
+    // 大きめの 切石を たてに つむ
+    for(let j=0;j<2;j++){
+      const by=j*8;
+      R(g,0,by,s,7,P16.up2);
+      R(g,0,by,s,1,P16.up3);
+      R(g,0,by+6,s,1,P16.up0);
+      R(g,7,by,1,7,P16.up1);
+    }
+    // 金の 帯（1タイル おき）
+    if(v%2===0){
+      R(g,0,7,s,2,P16.gold1);
+      R(g,0,7,s,1,P16.gold2);
+      R(g,0,8,s,1,P16.gold0);
+    }
+    // 青い 窓（1タイル おき、ずらして）
+    if(v%3===1){
+      R(g,4,2,3,4,P16.win0);
+      R(g,5,3,2,2,P16.win1);
+      P(g,5,3,P16.win2);
+      R(g,4,1,3,1,P16.gold1);
+    }
+    if(v%3===2){
+      R(g,9,10,3,4,P16.win0);
+      R(g,10,11,2,2,P16.win1);
+      P(g,10,11,P16.win2);
+      R(g,9,9,3,1,P16.gold1);
+    }
   });
 
   // ---------- 街の くらしむき（IVから）----------
@@ -4049,6 +4093,7 @@ function tileArt(ch, theme){
     case 'o': return ice?atlas.icicle : atlas.rock;
     case 'O': return atlas.rockPush;      // ★動かせる岩
     case 'x': return atlas.pit;           // ★穴
+    case 'R': return atlas.richwall;      // ★上層の 白亜の 壁
     case '%': return atlas.flowerbed;     // ★花壇（中層）
     case ';': return atlas.plaza;         // ★磨かれた 白石（中層の 広場）
     case 'p': return atlas.pipeH;         // ★光珠管（よこ）
@@ -5492,26 +5537,28 @@ const MAPS = {
     }},
 
   // ============ 第2章：上層区（貴族の 街。光が あふれる）============
+  // ★上層区：白亜の 館（R）が ならぶ。金の 帯と 青い ガラス窓。
+  //   下層＝割れた 石、中層＝磨き石、上層＝白亜、と 三段で 差を つける。
   upper_dist:{name:'上層区', theme:'sky', enc:false, tiles:[
     "##########Q##########",
     "#;;;;;;;;;;;;;;;;;;;#",
-    "#;#####;;t;t;;#####;#",
-    "#;#####;n;;;n;#####;#",
-    "#;#####;;;;;;;#####;#",
-    "#;##I##;;;;;;;##S##;#",
-    "#;;;;;;;%;;;%;;;;;;;#",
-    "#;t%;;t;;F;;;;t;;%t;#",
-    "#;;;;;;;%;;;%;;;;;;;#",
-    "#;##P##;;;;;;;##D##;#",
-    "#;#####;;;;;;;#####;#",
-    "#;#####;n;;;;;#####;#",
-    "#;#####;;t;t;;#####;#",
-    "#;;;n;;;%;;;%;;;;;C;#",
+    "#RRRRR;;;;;;;;;RRRRR#",
+    "#RRRRR;;t;;;t;;RRRRR#",
+    "#RRIRR;;;n;n;;;RRSRR#",
+    "#;;;;;;;;;;;;;;;;;;;#",
+    "#R;;;;;%;;;%;;;;;;;R#",
+    "g;;;t;;;;F;;;;;;t;;;#",
+    "#R;;;;;%;;;%;;;;;;;R#",
+    "#;;;n;;;;;;;;;;;;;;;#",
+    "#RRPRR;;;;;;;;;RRDRR#",
+    "#RRRRR;;n;;;;;;RRRRR#",
+    "#RRRRR;;t;;;t;;RRRRR#",
+    "#;;;;;;;;;;;;;;;;;;C#",
     "##########G##########"],
     warpsXY:{
       '10,14':{to:'mid_dist',  x:10, y:1},
-      '16,9' :{to:'furnace',   x:10, y:19},
-      '1,7'  :{to:'garden',    x:9,  y:13}
+      '17,10':{to:'furnace',   x:10, y:19},
+      '0,7'  :{to:'garden',    x:9,  y:13}
     }},
 
   // ============ 第2章：空中庭園 ============
@@ -5560,7 +5607,7 @@ const MAPS = {
     "#....................#",
     "##########.###########"],
     warpsXY:{
-      '10,20':{to:'upper_dist', x:16, y:9}
+      '10,20':{to:'upper_dist', x:17, y:10}
     }},
 
   // ============ 第1章：騎士団 中層詰所 ============
@@ -5868,7 +5915,7 @@ const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
-                       'O','x','L','l','p','q','%']);   // p/q＝光珠管、%＝花壇（かべ あつかい）
+                       'O','x','L','l','p','q','%','R']);  // p/q＝光珠管、%＝花壇、R＝上層の 壁
 // ★しかけ用の タイル（IVから）
 //   O 動かせる岩（押せる）／x 穴（岩で 埋まる）／L 消えた光珠灯／l ついた光珠灯
 //   K 施錠された扉（かぎで あく）

@@ -62,6 +62,10 @@ const P16 = {
   sm0:'#6a7c9c', sm1:'#8fa0bd', sm2:'#b6c4dc', sm3:'#dee6f2',   // 天空の 岩山（白石）
   // ★かべは ゆかと はっきり 明暗を 分ける（同色で 見わけが つかなかった）
   skW0:'#48597d', skW1:'#63779e', skW2:'#8194b6', skW3:'#a3b3cd',
+  // ★上層の 白亜の 壁：みがいた 石に 金の 帯と 青い 窓
+  up0:'#7f8aa6', up1:'#b8c2d8', up2:'#dde4f0', up3:'#f4f7fc',
+  gold0:'#8a6f2a', gold1:'#c9a94e', gold2:'#efd98a',
+  win0:'#2a5c96', win1:'#5fb4ee', win2:'#a8e2ff',
 };
 
 function mk(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
@@ -434,6 +438,39 @@ function buildAtlas(){
     // 継ぎ目（開かない ことを 見せる 縦の 線）
     R(g,7,0,1,2,P16.sk0); R(g,8,0,1,2,P16.sk3);
     R(g,7,14,1,2,P16.sk0); R(g,8,14,1,2,P16.sk3);
+  });
+
+  // ★上層の 建物：みがいた 白石に 金の 帯、青い ガラス窓。
+  //   下層の 割れた 石、中層の 磨き石、上層の 白亜、と 三段で 差が つく。
+  atlas.richwall = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.up1);
+    // 大きめの 切石を たてに つむ
+    for(let j=0;j<2;j++){
+      const by=j*8;
+      R(g,0,by,s,7,P16.up2);
+      R(g,0,by,s,1,P16.up3);
+      R(g,0,by+6,s,1,P16.up0);
+      R(g,7,by,1,7,P16.up1);
+    }
+    // 金の 帯（1タイル おき）
+    if(v%2===0){
+      R(g,0,7,s,2,P16.gold1);
+      R(g,0,7,s,1,P16.gold2);
+      R(g,0,8,s,1,P16.gold0);
+    }
+    // 青い 窓（1タイル おき、ずらして）
+    if(v%3===1){
+      R(g,4,2,3,4,P16.win0);
+      R(g,5,3,2,2,P16.win1);
+      P(g,5,3,P16.win2);
+      R(g,4,1,3,1,P16.gold1);
+    }
+    if(v%3===2){
+      R(g,9,10,3,4,P16.win0);
+      R(g,10,11,2,2,P16.win1);
+      P(g,10,11,P16.win2);
+      R(g,9,9,3,1,P16.gold1);
+    }
   });
 
   // ---------- 街の くらしむき（IVから）----------
@@ -1022,6 +1059,7 @@ function tileArt(ch, theme){
     case 'o': return ice?atlas.icicle : atlas.rock;
     case 'O': return atlas.rockPush;      // ★動かせる岩
     case 'x': return atlas.pit;           // ★穴
+    case 'R': return atlas.richwall;      // ★上層の 白亜の 壁
     case '%': return atlas.flowerbed;     // ★花壇（中層）
     case ';': return atlas.plaza;         // ★磨かれた 白石（中層の 広場）
     case 'p': return atlas.pipeH;         // ★光珠管（よこ）

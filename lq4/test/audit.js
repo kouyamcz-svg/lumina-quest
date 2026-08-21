@@ -387,6 +387,23 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   });
 }
 
+// ★せりふの じょうけん（when）に、しくみの ない 書き方が まざって いないか。
+//   ★unlessFlag と 書いて いたが、しくみは notFlag しか 見ない。
+//     まちがえると その せりふが いつでも 出る（または 出ない）。
+{
+  const OK = ['ch','state','flag','notFlag'];
+  Object.keys(NPCD.NPCS).forEach(mp=>{
+    (NPCD.NPCS[mp]||[]).forEach(e=>{
+      (e.lines||[]).forEach(l=>{
+        if(!l.when) return;
+        Object.keys(l.when).forEach(k=>
+          T('せりふの じょうけんが 正しい '+mp+' '+e.name, OK.indexOf(k)>=0,
+            'しらない 書き方「'+k+'」'));
+      });
+    });
+  });
+}
+
 // ★一枚絵の しるしが 実在するか。
 //   ★書いた しるしと 絵の 名前が ずれると、まっ黒な 画面に なる。
 {
@@ -532,7 +549,10 @@ Object.keys(C.MAPS).forEach(mp=>{
     for(let x=0;x<t[y].length;x++){
       if(tileAt(mp,x,y)!=='D') continue;
       // となりの どこかが かべ（建物）である こと
-      const touch = [[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>tileAt(mp,x+dx,y+dy)==='#');
+      // ★上層の 白亜の 壁（R）も 建物。'#' だけ 見て いた。
+      const WALLS = ['#','R'];
+      const touch = [[1,0],[-1,0],[0,1],[0,-1]]
+        .some(([dx,dy])=>WALLS.indexOf(tileAt(mp,x+dx,y+dy))>=0);
       T('扉が 建物に ついて いる '+mp+' ('+x+','+y+')', touch);
     }
   }

@@ -126,7 +126,7 @@ TERRAINS.forEach(t=>{
   const C = vm.runInContext('LQ4', c2);
   // 文字→絵 の わりあては tileArt が もつ。ここでは 「絵の ない 文字」が
   // マップに 出て いないかを、しられている 文字の ひょうで しらべる。
-  const KNOWN = new Set([...'.#rowft^,:=_~welnCBIPSWMQAVXjZFGgDOxLlKpq%;<>*t'].concat(['G','D','O','x','L','l']));
+  const KNOWN = new Set([...'.#rowft^,:=_~welnCBIPSWMQAVXjZFGgDOxLlKpq%;R<>*t'].concat(['G','D','O','x','L','l']));
   Object.keys(C.MAPS).forEach(mp=>{
     const used = new Set();
     C.MAPS[mp].tiles.forEach(row=>{ for(const ch of row) used.add(ch); });
