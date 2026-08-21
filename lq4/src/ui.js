@@ -251,8 +251,17 @@ function msgVisible(){ const d=msgWin.style.display; return d!=='' && d!=='none'
 
 // ---------------- コマンドメニュー ----------------
 let menuState=null;
-function menu(items, title, onPick){
-  menuState={items:items.slice(), sel:0, onPick, title};
+// ★menu(items, title, onPick, opt)
+//   opt.cancel:
+//     'last'（きほん）… Bを おすと 末尾の 項目を えらんだ ことに する
+//                       （「戻る」「やめる」が 末尾に ある メニュー むけ）
+//     'none'          … Bを おしても 何も しない（えらぶまで 閉じない）
+//     'cancel'        … Bを おすと onPick(null) を よぶ
+//   ★せんとうの コマンドは 末尾が 「逃げる」。'last' の ままだと
+//     戻ろうと して Bを おした だけで 逃げて しまう。
+function menu(items, title, onPick, opt){
+  menuState={items:items.slice(), sel:0, onPick, title,
+             cancel:(opt && opt.cancel) || 'last'};
   renderMenu();
   cmdWin.style.display='block';
   A.cursor && A.cursor();               // ★メニューを ひらいた おと
@@ -279,10 +288,12 @@ function menuPick(){
 }
 function menuCancel(){
   if(!menuState) return;
-  const st=menuState; menuState=null;
+  const st=menuState;
+  if(st.cancel==='none'){ A.cancel && A.cancel(); return; }   // 閉じない
+  menuState=null;
   cmdWin.style.display='none';
   A.cancel && A.cancel();               // ★とりけしの おと
-  st.onPick(st.items.length-1);       // 末尾＝やめる／戻る
+  st.onPick(st.cancel==='cancel' ? null : st.items.length-1);
 }
 function menuVisible(){ return !!menuState; }
 
@@ -1080,7 +1091,7 @@ function titleMenu(){
                  'はじめから あそびます。'],()=>{ C.freshState(); startGame(false); });
     }else if(sel===2){ chapterSelect(); }
     else{ C.freshState(); startGame(false); }
-  });
+  }, {cancel:'none'});
 }
 // ---------------- 章を 選ぶ ----------------
 // つくりおえた しょうを えらんで はじめる（ためしに あそぶ ため）。

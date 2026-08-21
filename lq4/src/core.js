@@ -1052,6 +1052,8 @@ function offerNextChapter(next, title, isFinal){
   U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊',
          'つぎは 第' + next + '章「' + nc.title + '」。'], () => {
     G.mode = 'menu';
+    // ★Bを おしたら「この 章を 続ける」。末尾が それなので 'last' で よい
+    //   （うっかり 章が すすまない ように、ここは わざと 末尾を 続ける に して ある）
     U.menu(['第' + next + '章へ 進む', 'この 章を 続ける'], 'これから', (k) => {
       if(k === 0){
         switchChapter(next);
@@ -1412,7 +1414,14 @@ function collectCommands(i){
   if(G.tactic!=='manual'){ b.queue.push(autoCommand(m)); collectCommands(i+1); return; }
   G.menu={kind:'battle'};
   const items=['攻撃','技','道具','防御','逃げる'];
+  // ★Bは「戻る」。末尾の「逃げる」を えらんだ ことに しない。
+  //   ひとりめ なら えらび直し、ふたりめ いこう なら 前の 人の 指示を 取り消す。
   U.menu(items, m.name, (sel)=>{
+    if(sel===null){
+      if(i>0){ b.queue.pop(); collectCommands(i-1); }
+      else collectCommands(i);
+      return;
+    }
     if(sel===0){
       chooseTarget(m, (tgt)=>{
         if(tgt===null){ collectCommands(i); return; }        // 戻る
@@ -1466,7 +1475,7 @@ function collectCommands(i){
     }
     else if(sel===3){ b.queue.push({actor:m, type:'guard'}); collectCommands(i+1); }
     else { b.queue.push({actor:m, type:'flee'}); collectCommands(i+1); }
-  });
+  }, {cancel:'cancel'});
 }
 function bestHeal(m, need){
   const sp = knownSpells(m).filter(s=>s.type==='heal' && s.mp<=m.mp).sort((a,b)=>b.max-a.max);

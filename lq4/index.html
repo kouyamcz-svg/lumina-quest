@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 10:49 JST", "build":"b0884bd9","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 385, "chapters": 1008, "bgm": 979, "view2d": 2133, "core": 2674, "view": 1394, "ui": 1129}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-21 16:19 JST", "build":"bf9800dd","assets_sha": "9eccf937", "lines": {"world": 104, "npc": 385, "chapters": 1008, "bgm": 979, "view2d": 2133, "core": 2683, "view": 1394, "ui": 1140}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -5828,6 +5828,8 @@ function offerNextChapter(next, title, isFinal){
   U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊',
          'つぎは 第' + next + '章「' + nc.title + '」。'], () => {
     G.mode = 'menu';
+    // ★Bを おしたら「この 章を 続ける」。末尾が それなので 'last' で よい
+    //   （うっかり 章が すすまない ように、ここは わざと 末尾を 続ける に して ある）
     U.menu(['第' + next + '章へ 進む', 'この 章を 続ける'], 'これから', (k) => {
       if(k === 0){
         switchChapter(next);
@@ -6188,7 +6190,14 @@ function collectCommands(i){
   if(G.tactic!=='manual'){ b.queue.push(autoCommand(m)); collectCommands(i+1); return; }
   G.menu={kind:'battle'};
   const items=['攻撃','技','道具','防御','逃げる'];
+  // ★Bは「戻る」。末尾の「逃げる」を えらんだ ことに しない。
+  //   ひとりめ なら えらび直し、ふたりめ いこう なら 前の 人の 指示を 取り消す。
   U.menu(items, m.name, (sel)=>{
+    if(sel===null){
+      if(i>0){ b.queue.pop(); collectCommands(i-1); }
+      else collectCommands(i);
+      return;
+    }
     if(sel===0){
       chooseTarget(m, (tgt)=>{
         if(tgt===null){ collectCommands(i); return; }        // 戻る
@@ -6242,7 +6251,7 @@ function collectCommands(i){
     }
     else if(sel===3){ b.queue.push({actor:m, type:'guard'}); collectCommands(i+1); }
     else { b.queue.push({actor:m, type:'flee'}); collectCommands(i+1); }
-  });
+  }, {cancel:'cancel'});
 }
 function bestHeal(m, need){
   const sp = knownSpells(m).filter(s=>s.type==='heal' && s.mp<=m.mp).sort((a,b)=>b.max-a.max);
@@ -9095,8 +9104,17 @@ function msgVisible(){ const d=msgWin.style.display; return d!=='' && d!=='none'
 
 // ---------------- コマンドメニュー ----------------
 let menuState=null;
-function menu(items, title, onPick){
-  menuState={items:items.slice(), sel:0, onPick, title};
+// ★menu(items, title, onPick, opt)
+//   opt.cancel:
+//     'last'（きほん）… Bを おすと 末尾の 項目を えらんだ ことに する
+//                       （「戻る」「やめる」が 末尾に ある メニュー むけ）
+//     'none'          … Bを おしても 何も しない（えらぶまで 閉じない）
+//     'cancel'        … Bを おすと onPick(null) を よぶ
+//   ★せんとうの コマンドは 末尾が 「逃げる」。'last' の ままだと
+//     戻ろうと して Bを おした だけで 逃げて しまう。
+function menu(items, title, onPick, opt){
+  menuState={items:items.slice(), sel:0, onPick, title,
+             cancel:(opt && opt.cancel) || 'last'};
   renderMenu();
   cmdWin.style.display='block';
   A.cursor && A.cursor();               // ★メニューを ひらいた おと
@@ -9123,10 +9141,12 @@ function menuPick(){
 }
 function menuCancel(){
   if(!menuState) return;
-  const st=menuState; menuState=null;
+  const st=menuState;
+  if(st.cancel==='none'){ A.cancel && A.cancel(); return; }   // 閉じない
+  menuState=null;
   cmdWin.style.display='none';
   A.cancel && A.cancel();               // ★とりけしの おと
-  st.onPick(st.items.length-1);       // 末尾＝やめる／戻る
+  st.onPick(st.cancel==='cancel' ? null : st.items.length-1);
 }
 function menuVisible(){ return !!menuState; }
 
@@ -9924,7 +9944,7 @@ function titleMenu(){
                  'はじめから あそびます。'],()=>{ C.freshState(); startGame(false); });
     }else if(sel===2){ chapterSelect(); }
     else{ C.freshState(); startGame(false); }
-  });
+  }, {cancel:'none'});
 }
 // ---------------- 章を 選ぶ ----------------
 // つくりおえた しょうを えらんで はじめる（ためしに あそぶ ため）。
