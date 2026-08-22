@@ -170,6 +170,18 @@ T('庭園へ もどる', C.P.map==='garden', C.P.map);
   T('宿の ねだんが 出る', said('40ゴールド'), log.join(' / ').slice(0,50));
 }
 
+// ★塔を 片づける 前は 炉へ 入れない
+//   ★ボスの 強さを 塔を 通る 想定に した ため、とばせると 詰む。
+{
+  const keep = C.G.flags.ch2_towerPaid;
+  C.G.flags.ch2_towerPaid = false;
+  clearLog();
+  stand('upper_dist', 17, 9, 'front'); C.stepField(0,1);
+  T('塔の 記録が ないと 炉へ 入れない', C.P.map==='upper_dist', C.P.map);
+  T('雲の 記録が いると 言われる', said('雲見の 塔の 記録'), log.join(' / ').slice(0,70));
+  C.G.flags.ch2_towerPaid = keep;
+}
+
 // ===== 8. 炉の 外郭へ =====
 stand('garden', 9, 13, 'front'); C.stepField(0,1);
 T('上層区へ もどる', C.P.map==='upper_dist', C.P.map);

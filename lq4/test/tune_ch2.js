@@ -49,7 +49,7 @@ for(let t=0;t<N;t++){
 
   // ★わき道の 塔（5階）を のぼる。ここも 経験値に なる。
   //   物語では 庭番の 話を 聞いて から 行ける わき道。
-  if(process.env.SKIP_TOWER) ; else
+  // ★塔は 必ず 通る（炉に 入るには 塔の 記録が いる）
   [['tower1',7,10],['tower2',6,9],['tower3',6,9],['tower4',6,9]].forEach(([mp,sx,sy])=>{
     C.P.map=mp; C.P.x=sx; C.P.y=sy; C.G.mode='field';
     // 各階を 通りぬける あいだの たたかい（管を さがして 少し うろつく ぶん）
