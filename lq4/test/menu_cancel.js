@@ -104,7 +104,21 @@ T('せんとうで Bを おしたら えらび直し',
     C.party.push(C.mkMember('io',20)); C.party.push(C.mkMember('seren',20));
     C.P.map='furnace'; C.G.mode='field';
     let crashed = false;
-    try{ C.startBattle('fornax'); }catch(e){ crashed = e.message; }
+    // ★あいてが 2たい いじょうの ざこ戦を さがす（1たいでは
+    //   「誰を 狙う？」が 出ない ため）。
+    try{
+      let tries = 0;
+      do {
+        path.length = 0; step = 0;
+        C.freshState(); C.G.chapter=3; C.G.tactic='manual'; C.P.herbs=5;
+        C.party.length=0;
+        C.party.push(C.mkMember('io',20)); C.party.push(C.mkMember('seren',20));
+        C.P.map='furnace'; C.G.mode='field';
+        C.startBattle();
+        tries++;
+      } while(tries<40 && !path.some(x=>x.indexOf('誰を 狙う？')>=0)
+                       && !path.some(x=>x.indexOf('誰に')>=0));
+    }catch(e){ crashed = e.message; }
     return {path, crashed};
   };
 
@@ -158,7 +172,29 @@ T('せんとうで Bを おしたら えらび直し',
   }
 }
 
-// ---- ⑥ ui.js の つつみが とりけしの きめ方を 落として いない こと ----
+// ---- ⑥ あいてが 1たいの ときは えらばせない ----
+//   ★ボタンを おす 手間が むだ に なる。
+{
+  const path = []; let step = 0;
+  const UI3 = {
+    msg(l,d){ d&&d(); },
+    menu(items, title, onPick, opt){
+      path.push(String(title)); step++;
+      if(step>6){ onPick(items.length-1); return; }
+      onPick(String(title)==='イオ' ? 0 : items.length-1);   // 「攻撃」
+    },
+    hud(){}, label(){},
+  };
+  C.bind(C.NullView, UI3, C.NullAudio);
+  C.freshState(); C.G.chapter=3; C.G.tactic='manual';
+  C.party.length=0; C.party.push(C.mkMember('io',20));
+  C.P.map='furnace'; C.G.mode='field';
+  try{ C.startBattle('fornax'); }catch(e){}
+  T('あいてが 1たいなら えらぶ 画面を 出さない',
+    !path.some(x=>x.indexOf('誰を 狙う？')>=0), path.slice(0,4).join(' → '));
+}
+
+// ---- ⑦ ui.js の つつみが とりけしの きめ方を 落として いない こと ----
 //   ★UI.menu の つつみが 第4ひきすうを 捨てて いて、
 //     せんとうで Bを おすと 末尾の「逃げる」が えらばれて いた。
 //     しくみ側（core）は 正しくても、ここで 落ちると 意味が ない。

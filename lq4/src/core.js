@@ -1839,6 +1839,9 @@ function collectCommands(i){
         // ★誰に 使うかを えらぶ（1にんの ときは そのまま）
         const alive = party.filter(p=>p.hp>0);
         if(!alive.length){ again(i); return; }
+        if(alive.length===1){
+          b.queue.push({actor:m, type:kind, tgt:alive[0]}); collectCommands(i+1); return;
+        }
         const names = alive.map(p=> p.name+'　HP'+p.hp+'/'+p.maxhp+(kind==='water' ? '　MP'+p.mp+'/'+p.maxmp : ''));
         U.menu(names.concat(['戻る']), '誰に 使う？', (t)=>{
           if(t===null || t>=alive.length){ backToItems(); return; }   // ★道具の 一覧へ
@@ -1865,7 +1868,8 @@ const BUFF_JP   = {atk:'攻撃力', def:'守備力', agi:'素早さ'};
 function chooseMember(m, sp, done){
   const alive = (sp.type==='revive') ? party.filter(p=>p.hp<=0) : aliveMembers();
   if(!alive.length){ done(null); return; }
-  // ★ひとりでも えらぶ 画面を 出す（Bで 戻れる ように）
+  // ★ひとりの ときは えらばせない（手間が むだ）
+  if(alive.length===1){ done(alive[0]); return; }
   const label = alive.map(p=>{
     if(sp.type==='heal')  return p.name + '　HP' + p.hp + '/' + p.maxhp;
     if(sp.type==='cure')  return p.name + '　' + (p.status ? (STATUS_JP[p.status]||p.status) : 'そうかい');
@@ -1877,9 +1881,10 @@ function chooseMember(m, sp, done){
 }
 function chooseTarget(m, cb){
   const alive = G.battle.enemies.filter(e=>e.hp>0);
-  // ★あいてが 1たいでも えらぶ 画面を 出す。
-  //   だまって きめて しまうと、そこから Bで 戻れなかった。
   if(!alive.length){ cb(null); return; }
+  // ★あいてが 1たいの ときは えらばせない（ボタンを おす 手間が むだ）。
+  //   取り消したい ときは つぎの 人の ところで Bを おせば 戻れる。
+  if(alive.length===1){ cb(alive[0]); return; }
   U.menu(alive.map(e=>e.dispName).concat(['戻る']), '誰を 狙う？', (k)=>{
     cb(k===null || k>=alive.length ? null : alive[k]);
   }, {cancel:'cancel'});
