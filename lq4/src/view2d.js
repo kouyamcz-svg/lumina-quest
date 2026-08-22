@@ -2067,6 +2067,13 @@ function draw(dt, time, actors){
         }
         else drawCliffShadow(x, y, dx0, dy0, ts, terrainOf);
       }
+    }else if(isSkyWorld() && ch==='~'){
+      // ★塔の 最上階など、世界地図で ない ところでも 雲を 流す。
+      //   じっと した 青い 面だと 「うみ」に 見えて しまう。
+      const cl = atlas.cloudedge;
+      cx.drawImage(Array.isArray(cl)?hashPick(x,y,cl):cl, dx0, dy0, ts, ts);
+      drawCloudSea(x, y, dx0, dy0, ts, time, ()=>'sea');
+      drawFarIsle(x, y, dx0, dy0, ts, time);
     }else{
       let base = (ch==='r') ? road : floor;
       // ★NPC・たからばこ など「うえに のる」ものの あしもとは、

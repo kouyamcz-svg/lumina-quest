@@ -138,7 +138,7 @@ T('管が 足りないと 教わる', said('管が 足りんのだ'));
 }
 
 clearLog(); strong(24);
-stand('tower5', 6, 5, 'back');
+stand('tower5', 9, 7, 'back');
 C.interact();
 T('そらくらいの 名が 出る', said('そらくらい'), log.join(' / ').slice(0,150));
 T('雲を 食べて いると 言う', said('雲を 食べてる'));

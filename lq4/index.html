@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 20:05 JST", "build":"4fc09f4b","assets_sha": "632130cd", "lines": {"world": 112, "npc": 518, "chapters": 1462, "bgm": 985, "view2d": 2416, "core": 3043, "view": 1394, "ui": 1141}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 20:12 JST", "build":"9833adf8","assets_sha": "632130cd", "lines": {"world": 112, "npc": 518, "chapters": 1462, "bgm": 985, "view2d": 2423, "core": 3048, "view": 1394, "ui": 1141}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -1943,7 +1943,7 @@ const CH = {
         after: ['炉の 火が、まっすぐ 上へ 立ちのぼっている。'],
       },
       // ★雲見の 塔（わき道）の ぬし
-      'tower5:6,4': {
+      'tower5:9,6': {
         key: 'sorakurai',
         clearedFlag: 'ch2_skyeaterDown',
         intro: ['最上階。壁が なく、雲海が そのまま 広がって いた。',
@@ -5311,6 +5311,13 @@ function draw(dt, time, actors){
         }
         else drawCliffShadow(x, y, dx0, dy0, ts, terrainOf);
       }
+    }else if(isSkyWorld() && ch==='~'){
+      // ★塔の 最上階など、世界地図で ない ところでも 雲を 流す。
+      //   じっと した 青い 面だと 「うみ」に 見えて しまう。
+      const cl = atlas.cloudedge;
+      cx.drawImage(Array.isArray(cl)?hashPick(x,y,cl):cl, dx0, dy0, ts, ts);
+      drawCloudSea(x, y, dx0, dy0, ts, time, ()=>'sea');
+      drawFarIsle(x, y, dx0, dy0, ts, time);
     }else{
       let base = (ch==='r') ? road : floor;
       // ★NPC・たからばこ など「うえに のる」ものの あしもとは、
@@ -6115,24 +6122,29 @@ const MAPS = {
     "###############"],
     warpsXY:{
       '6,9':{to:'tower3', x:6, y:1},
-      '6,1':{to:'tower5', x:7, y:8}
+      '6,1':{to:'tower5', x:10, y:14}
     }},
 
   // ★最上階：かべが なく、雲海が そのまま 見わたせる
   tower5:{name:'雲見の 塔 最上階', theme:'sky', skyWorld:true, enc:false, tiles:[
-    "~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~~~",
-    "~~~.........~~~",
-    "~~....B......~~",
-    "~~...........~~",
-    "~~~.........~~~",
-    "~~~~~.....~~~~~",
-    "~~~~~~.>.~~~~~~",
-    "~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~~~"],
+    "~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~.......~~~~~~",
+    "~~~~.............~~",
+    "~~~...............~",
+    "~~.......B.........",
+    "~~.................",
+    "~~~...............~",
+    "~~~~.............~~",
+    "~~~~~...........~~~",
+    "~~~~~~.........~~~~",
+    "~~~~~~~.......~~~~~",
+    "~~~~~~~~..~..~~~~~~",
+    "~~~~~~~~~.>.~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~"],
     warpsXY:{
-      '7,8':{to:'tower4', x:6, y:1}
+      '10,14':{to:'tower4', x:6, y:1}
     }},
 
   // ============ 第2章：光珠炉の 外郭 ============

@@ -682,6 +682,37 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★ボスの まわりに 立つ ゆとりが ある こと。
+//   ★せまい 部屋に おくと、入って すぐ ぶつかって しまう。
+//     入口から すこし 歩いて 向かう ほうが 山場らしい。
+{
+  Object.keys(CHD.CH).forEach(no=>{
+    const bs = CHD.CH[no].bosses || {};
+    Object.keys(bs).forEach(k=>{
+      if(k.indexOf(':')<0) return;
+      const mp = k.split(':')[0];
+      const [bx,by] = k.split(':')[1].split(',').map(Number);
+      const m = C.MAPS[mp]; if(!m) return;
+      // 入口（階段・門・ワープの 着地）から ボスまでの へだたり
+      const w = m.warpsXY || {};
+      let best = -1;
+      Object.keys(w).forEach(kk=>{
+        const [ex,ey] = kk.split(',').map(Number);
+        const d = Math.abs(bx-ex) + Math.abs(by-ey);
+        if(best<0 || d<best) best = d;
+      });
+      if(best>=0) T('ボスまで すこし 歩く '+k+'（'+best+'歩）', best>=3,
+        '入って すぐ ぶつかる');
+      // まわりに 立てる ますが 2つ いじょう
+      let around = 0;
+      [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{
+        if(C.walkable(mp,bx+dx,by+dy)) around++;
+      });
+      T('ボスの まわりに 立てる '+k+'（'+around+'ます）', around>=1, 'まわりが ふさがって いる');
+    });
+  });
+}
+
 // ★たたかいの ある マップには 出現表が ある こと。
 //   ★塔を 5階に 分けた とき 出現表の 名まえを 直さず、
 //     どの 階でも おなじ 敵しか 出なかった（保険が はたらいて いた）。

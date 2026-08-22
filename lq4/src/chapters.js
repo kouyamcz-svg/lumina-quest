@@ -1146,7 +1146,7 @@ const CH = {
         after: ['炉の 火が、まっすぐ 上へ 立ちのぼっている。'],
       },
       // ★雲見の 塔（わき道）の ぬし
-      'tower5:6,4': {
+      'tower5:9,6': {
         key: 'sorakurai',
         clearedFlag: 'ch2_skyeaterDown',
         intro: ['最上階。壁が なく、雲海が そのまま 広がって いた。',
