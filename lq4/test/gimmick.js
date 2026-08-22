@@ -117,12 +117,12 @@ T('もう 押せる なら もどさない', C.gimmickRescue('rift_yard')===fals
   T('継ぎ目に さすと 減る', C.G.pipes===0, '本数 '+C.G.pipes);
   T('さした 継ぎ目は かたちが かわる', C.tileAt('tower2',1,7)==='J', C.tileAt('tower2',1,7));
   T('さすと 灯りが ともる', C.tileAt('tower2',3,3)==='l', C.tileAt('tower2',3,3));
-  T('灯りが そろうと 仕切りが あく', C.tileAt('tower2',7,1)==='.', C.tileAt('tower2',7,1));
+  T('灯りが そろうと 仕切りが あく', C.tileAt('tower2',6,2)==='.', C.tileAt('tower2',6,2));
   // 抜くと 灯りは 消えるが、あいた 仕切りは 閉じない
   touch('tower2',1,7);
   T('抜くと もどってくる', C.G.pipes===1, '本数 '+C.G.pipes);
   T('抜くと 灯りが 消える', C.tileAt('tower2',3,3)==='L', C.tileAt('tower2',3,3));
-  T('あいた 仕切りは 閉じない', C.tileAt('tower2',7,1)==='.', '閉じると 行き止まりに なる');
+  T('あいた 仕切りは 閉じない', C.tileAt('tower2',6,2)==='.', '閉じると 行き止まりに なる');
   // 管が ない ときは させない
   C.G.pipes = 0;
   touch('tower3',1,7);
@@ -141,10 +141,35 @@ T('もう 押せる なら もどさない', C.gimmickRescue('rift_yard')===fals
   touch('tower3',1,7); touch('tower3',13,7);
   touch('tower3',1,7); touch('tower3',13,7);
   touch('tower4',1,7); touch('tower4',12,7); touch('tower4',3,9);
-  T('管 3本で 4階まで あく', C.tileAt('tower4',7,1)==='.', '足りない');
+  T('管 3本で 4階まで あく', C.tileAt('tower4',6,2)==='.', '足りない');
   T('つかいきる（あまらない）', C.G.pipes===0, 'のこり '+C.G.pipes);
-  C.G.mode='field'; C.P.map='tower4'; C.P.x=7; C.P.y=7; C.stepField(0,1);
+  C.G.mode='field'; C.P.map='tower4'; C.P.x=6; C.P.y=2; C.stepField(0,-1);
   T('最上階へ 行ける', C.P.map==='tower5', C.P.map);
+}
+
+// ============ 8. 仕切りを あけずに 上へ 行けない ============
+//   ★仕切りと 階段が はなれて いて、何も しなくても 上れて しまった。
+//     仕切りが 上への ただ ひとつの 通り道で ある こと。
+{
+  C.freshState(); C.G.chapter = 3;
+  const reach=(mp,sx,sy)=>{
+    const seen=new Set([sx+','+sy]); const q=[[sx,sy]];
+    while(q.length){ const [x,y]=q.shift();
+      for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+        const k=(x+dx)+','+(y+dy);
+        if(!seen.has(k) && C.walkable(mp,x+dx,y+dy)){ seen.add(k); q.push([x+dx,y+dy]); }
+      } }
+    return seen;
+  };
+  [['tower2',6,9,6,1],['tower3',6,9,6,1],['tower4',6,9,6,1]].forEach(([mp,sx,sy,ux,uy])=>{
+    T(mp+'：仕切りを あけずに 上り階段へ 行けない',
+      !reach(mp,sx,sy).has(ux+','+uy), '素通りで 上れて しまう');
+  });
+  // あけたら 行ける
+  [['tower2',6,2],['tower3',6,2],['tower4',6,2]].forEach(([mp,kx,ky])=>{
+    C.setTile(mp,kx,ky,'.');
+    T(mp+'：あけたら 上り階段へ 行ける', reach(mp,6,9).has('6,1'));
+  });
 }
 
 console.log('\n--- gimmick: ' + (n-ng) + '/' + n + ' 通過 ---');

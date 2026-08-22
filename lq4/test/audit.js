@@ -682,6 +682,45 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★仕切り(K)を あけないと 先へ 行けない こと。
+//   ★仕切りと 階段が はなれて いて、あけずに 上れて しまった。
+//     しかけが 意味を なさない。
+{
+  Object.keys(CHD.CH).forEach(no=>{
+    const cd = CHD.CH[no];
+    Object.keys(cd.lampGates||{}).forEach(mp=>{
+      const m = C.MAPS[mp]; if(!m) return;
+      const opens = cd.lampGates[mp].open || [];
+      // 入口（下り階段／出口）を さがす
+      const t = m.tiles, W=t[0].length, H=t.length;
+      let st=null, goal=null;
+      for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+        const ch=t[y][x];
+        if(ch==='<'||ch==='G') st=[x,y];
+        if(ch==='>') goal=[x,y];
+      }
+      if(!st || !goal) return;
+      const reach=(blockGate)=>{
+        const seen=new Set([st.join(',')]); const q=[st.slice()];
+        while(q.length){ const [x,y]=q.shift();
+          for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+            const nx=x+dx, ny=y+dy, k=nx+','+ny;
+            if(seen.has(k)) continue;
+            const isGate = opens.some(o=>o.x===nx && o.y===ny);
+            if(blockGate && isGate) continue;
+            if(!isGate && !C.walkable(mp,nx,ny)) continue;
+            seen.add(k); q.push([nx,ny]);
+          } }
+        return seen;
+      };
+      T('第'+(no-1)+'章：'+mp+' は 仕切りを あけないと 先へ 行けない',
+        !reach(true).has(goal.join(',')), 'あけずに 通れる（しかけが 意味を なさない）');
+      T('第'+(no-1)+'章：'+mp+' は あければ 先へ 行ける',
+        reach(false).has(goal.join(',')), 'あけても 行けない');
+    });
+  });
+}
+
 // ★「しらべて 手に 入れる もの」は 通れない こと。
 //   ★管の きれはし(u)が 通れて しまい、上に 乗れた。
 //     宝箱と おなじく、となりから しらべる もの。

@@ -123,17 +123,17 @@ T('管が 足りないと 教わる', said('管が 足りんのだ'));
   T('はじめは 管を 持って いない', (C.G.pipes||0)===0);
   touch('tower1',3,2); touch('tower2',11,3);
   touch('tower2',1,7);
-  T('二階の 仕切りが あく', C.tileAt('tower2',7,1)==='.', C.tileAt('tower2',7,1));
+  T('二階の 仕切りが あく', C.tileAt('tower2',6,2)==='.', C.tileAt('tower2',6,2));
   touch('tower3',7,7);
   touch('tower2',1,7);
-  T('抜いても 二階の 仕切りは 閉じない', C.tileAt('tower2',7,1)==='.');
+  T('抜いても 二階の 仕切りは 閉じない', C.tileAt('tower2',6,2)==='.');
   touch('tower3',1,7); touch('tower3',13,7);
-  T('三階の 仕切りが あく', C.tileAt('tower3',7,1)==='.', C.tileAt('tower3',7,1));
+  T('三階の 仕切りが あく', C.tileAt('tower3',6,2)==='.', C.tileAt('tower3',6,2));
   touch('tower3',1,7); touch('tower3',13,7);
   touch('tower4',1,7); touch('tower4',12,7); touch('tower4',3,9);
-  T('四階の 仕切りが あく', C.tileAt('tower4',7,1)==='.', C.tileAt('tower4',7,1));
+  T('四階の 仕切りが あく', C.tileAt('tower4',6,2)==='.', C.tileAt('tower4',6,2));
   T('管を つかいきる', C.G.pipes===0, 'のこり '+C.G.pipes);
-  C.G.mode='field'; C.P.map='tower4'; C.P.x=7; C.P.y=7; C.stepField(0,1);
+  C.G.mode='field'; C.P.map='tower4'; C.P.x=6; C.P.y=2; C.stepField(0,-1);
   T('最上階へ のぼれる', C.P.map==='tower5', C.P.map);
 }
 
