@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 23:33 JST", "build":"373fa8e6","assets_sha": "632130cd", "lines": {"world": 112, "npc": 538, "chapters": 1585, "bgm": 985, "view2d": 2467, "core": 3106, "view": 1394, "ui": 1144}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-23 00:27 JST", "build":"cbe5e567","assets_sha": "632130cd", "lines": {"world": 112, "npc": 538, "chapters": 1585, "bgm": 985, "view2d": 2467, "core": 3106, "view": 1394, "ui": 1144}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -5990,19 +5990,19 @@ const ENEMIES = [
   {key:'shokudai',   name:'燭台の 亡霊',  hp:58, atk:13, def:11, agi:10, exp:140, gold:50, minLv:7,
    art:'lampghost', inflict:{type:'sleep', p:0.16}},
   // ---- 第2章：捨てられた ものが 形を もった もの ----
-  {key:'kamikishi',  name:'くずれ紙の 騎士', hp:96, atk:21, def:20, agi:11, exp:560, gold:320, minLv:12,
+  {key:'kamikishi',  name:'くずれ紙の 騎士', hp:96, atk:21, def:20, agi:11, exp:430, gold:320, minLv:12,
    art:'kamikishi'},
-  {key:'hikarikui',  name:'光喰いバク',   hp:88, atk:18, def:18, agi:10, exp:520, gold:300, minLv:12,
+  {key:'hikarikui',  name:'光喰いバク',   hp:88, atk:18, def:18, agi:10, exp:400, gold:300, minLv:12,
    art:'hikarikui', drain:{mp:true, p:0.35}},
-  {key:'kamigarasu', name:'紙羽の カラス', hp:74, atk:19, def:15, agi:26, exp:540, gold:310, minLv:12,
+  {key:'kamigarasu', name:'紙羽の カラス', hp:74, atk:19, def:15, agi:26, exp:420, gold:310, minLv:12,
    art:'kamigarasu'},
-  {key:'kudamukade', name:'管這い ムカデ', hp:110,atk:23, def:22, agi:16, exp:680, gold:380, minLv:14,
+  {key:'kudamukade', name:'管這い ムカデ', hp:110,atk:23, def:22, agi:16, exp:520, gold:380, minLv:14,
    art:'kudamukade', inflict:{type:'slow', p:0.24}},
-  {key:'wasuremono', name:'忘れものの 番人', hp:150,atk:25, def:32, agi:8, exp:790, gold:460, minLv:14,
+  {key:'wasuremono', name:'忘れものの 番人', hp:150,atk:25, def:32, agi:8, exp:610, gold:460, minLv:14,
    art:'wasuremono'},
-  {key:'susurichou', name:'すすり泣く 帳面', hp:82, atk:18, def:17, agi:14, exp:610, gold:340, minLv:13,
+  {key:'susurichou', name:'すすり泣く 帳面', hp:82, atk:18, def:17, agi:14, exp:470, gold:340, minLv:13,
    art:'susurichou', inflict:{type:'confuse', p:0.26}},
-  {key:'nukegara',   name:'光珠の 抜け殻', hp:126,atk:22, def:28, agi:12, exp:730, gold:420, minLv:15,
+  {key:'nukegara',   name:'光珠の 抜け殻', hp:126,atk:22, def:28, agi:12, exp:560, gold:420, minLv:15,
    art:'nukegara'},
   {key:'hakoyami',   name:'箱闇',         hp:66, atk:14, def:14, agi:6,  exp:170, gold:60, minLv:8, art:'hakoyami',
    brace:{p:0.20, name:'ふたを とじた！'}},
@@ -6015,7 +6015,7 @@ const MIDBOSS = {
   // ---- 第2章ボス：あくむじゅう フォルナクス（炉座）----
   //   炉の 外郭に わき、光を 喰らう。倒すと 紙片が 残る。
   fornax:{key:'fornax', name:'あくむじゅう フォルナクス', hp:1700, atk:52, def:29, agi:16, acts:1,
-    exp:1100, gold:4000, art:'fornax', scale:1.10,
+    exp:3800, gold:4000, art:'fornax', scale:1.10,
     skill:{p:0.30, mul:1.35, name:'ほのおの あぎと'},
     aoe:{p:0.24, lo:26, hi:38, name:'炉のいぶき'},
     inflict:{type:'confuse', p:0.20},
@@ -6024,7 +6024,7 @@ const MIDBOSS = {
 
   // ---- 第2章 中ボス：そらくらい（雲海を 喰う もの）----
   sorakurai:{key:'sorakurai', name:'そらくらい', hp:760, atk:42, def:24, agi:18, acts:2,
-    exp:520, gold:2200, art:'sorakurai', scale:1.10,
+    exp:2600, gold:2200, art:'sorakurai', scale:1.10,
     skill:{p:0.30, mul:1.20, name:'まきこむ 翼'},
     aoe:{p:0.26, lo:20, hi:30, name:'うずまく 雲'},
     inflict:{type:'slow', p:0.20}},
