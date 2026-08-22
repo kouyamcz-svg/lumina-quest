@@ -47,6 +47,18 @@ for(let t=0;t<N;t++){
   no.weapon={kind:'w',name:'w',v:9};  no.armor={kind:'a',name:'a',v:11};
   C.party.push(io,se,no); C.P.herbs=8; lost=false;
 
+  // ★わき道の 塔（5階）を のぼる。ここも 経験値に なる。
+  //   物語では 庭番の 話を 聞いて から 行ける わき道。
+  if(process.env.SKIP_TOWER) ; else
+  [['tower1',7,10],['tower2',6,9],['tower3',6,9],['tower4',6,9]].forEach(([mp,sx,sy])=>{
+    C.P.map=mp; C.P.x=sx; C.P.y=sy; C.G.mode='field';
+    // 各階を 通りぬける あいだの たたかい（管を さがして 少し うろつく ぶん）
+    // 管を さがして 各階を ひとまわり する ぶん（2戦くらい）
+    for(let k=0;k<2;k++){ C.G.mode='field'; C.startBattle(); if(lost) return; }
+  });
+  C.party.forEach(p=>{ p.hp=p.maxhp; p.mp=p.maxmp; p.status=null; });
+  C.P.herbs=8; lost=false;
+
   // 炉の 外郭を ひとまわり（入口 → 灯りA → 灯りB → 隔壁 → ボス前）
   C.P.map='furnace'; C.P.x=10; C.P.y=19; C.G.mode='field';
   route('furnace',3,9);

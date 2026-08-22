@@ -129,26 +129,26 @@ const ENEMIES = [
    inflict:{type:'sleep', p:0.16}},
   {key:'yamiinu',    name:'闇犬',         hp:28, atk:9,  def:5,  agi:9,  exp:96, gold:22,  minLv:2, art:'yamiinu',
    skill:{p:0.24, mul:1.20, name:'かみつき'}},
-  {key:'sumibami',   name:'すすばみ',     hp:34, atk:11, def:7,  agi:7,  exp:128, gold:30, minLv:4, art:'sumibami'},
+  {key:'sumibami',   name:'すすばみ',     hp:34, atk:11, def:7,  agi:7,  exp:80, gold:30, minLv:4, art:'sumibami'},
   // ---- 第1章 下層区の亀裂（Lv8〜11）※M1で ふやす ----
   {key:'kansuiki',   name:'管漏れの影',   hp:52, atk:12, def:10, agi:8,  exp:120, gold:44, minLv:7, art:'kansuiki',
    skill:{p:0.26, mul:1.25, name:'にじみだし'}},
   {key:'shokudai',   name:'燭台の 亡霊',  hp:58, atk:13, def:11, agi:10, exp:140, gold:50, minLv:7,
    art:'lampghost', inflict:{type:'sleep', p:0.16}},
   // ---- 第2章：捨てられた ものが 形を もった もの ----
-  {key:'kamikishi',  name:'くずれ紙の 騎士', hp:96, atk:21, def:20, agi:11, exp:1900, gold:320, minLv:12,
+  {key:'kamikishi',  name:'くずれ紙の 騎士', hp:96, atk:21, def:20, agi:11, exp:560, gold:320, minLv:12,
    art:'kamikishi'},
-  {key:'hikarikui',  name:'光喰いバク',   hp:88, atk:18, def:18, agi:10, exp:1750, gold:300, minLv:12,
+  {key:'hikarikui',  name:'光喰いバク',   hp:88, atk:18, def:18, agi:10, exp:520, gold:300, minLv:12,
    art:'hikarikui', drain:{mp:true, p:0.35}},
-  {key:'kamigarasu', name:'紙羽の カラス', hp:74, atk:19, def:15, agi:26, exp:1800, gold:310, minLv:12,
+  {key:'kamigarasu', name:'紙羽の カラス', hp:74, atk:19, def:15, agi:26, exp:540, gold:310, minLv:12,
    art:'kamigarasu'},
-  {key:'kudamukade', name:'管這い ムカデ', hp:110,atk:23, def:22, agi:16, exp:2200, gold:380, minLv:14,
+  {key:'kudamukade', name:'管這い ムカデ', hp:110,atk:23, def:22, agi:16, exp:680, gold:380, minLv:14,
    art:'kudamukade', inflict:{type:'slow', p:0.24}},
-  {key:'wasuremono', name:'忘れものの 番人', hp:150,atk:25, def:32, agi:8, exp:2600, gold:460, minLv:14,
+  {key:'wasuremono', name:'忘れものの 番人', hp:150,atk:25, def:32, agi:8, exp:790, gold:460, minLv:14,
    art:'wasuremono'},
-  {key:'susurichou', name:'すすり泣く 帳面', hp:82, atk:18, def:17, agi:14, exp:2000, gold:340, minLv:13,
+  {key:'susurichou', name:'すすり泣く 帳面', hp:82, atk:18, def:17, agi:14, exp:610, gold:340, minLv:13,
    art:'susurichou', inflict:{type:'confuse', p:0.26}},
-  {key:'nukegara',   name:'光珠の 抜け殻', hp:126,atk:22, def:28, agi:12, exp:2400, gold:420, minLv:15,
+  {key:'nukegara',   name:'光珠の 抜け殻', hp:126,atk:22, def:28, agi:12, exp:730, gold:420, minLv:15,
    art:'nukegara'},
   {key:'hakoyami',   name:'箱闇',         hp:66, atk:14, def:14, agi:6,  exp:170, gold:60, minLv:8, art:'hakoyami',
    brace:{p:0.20, name:'ふたを とじた！'}},
@@ -160,7 +160,7 @@ const MIDBOSS = {
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第2章ボス：あくむじゅう フォルナクス（炉座）----
   //   炉の 外郭に わき、光を 喰らう。倒すと 紙片が 残る。
-  fornax:{key:'fornax', name:'あくむじゅう フォルナクス', hp:1400, atk:48, def:27, agi:16, acts:1,
+  fornax:{key:'fornax', name:'あくむじゅう フォルナクス', hp:1180, atk:43, def:25, agi:16, acts:1,
     exp:1100, gold:4000, art:'fornax', scale:1.10,
     skill:{p:0.30, mul:1.35, name:'ほのおの あぎと'},
     aoe:{p:0.24, lo:26, hi:38, name:'炉のいぶき'},
@@ -221,11 +221,11 @@ const byMap = {
   old_pipe:  ['kansuiki','shokudai','hakoyami','yamiinu','sumibami'],
   furnace:   ['kamikishi','hikarikui','kamigarasu','kudamukade','susurichou','wasuremono','nukegara'],
   // ★塔は 5階だて。上へ 行くほど 手ごわく なる。
-  tower1:    ['kamigarasu','hikarikui','susurichou'],
-  tower2:    ['kamigarasu','hikarikui','susurichou','kamikishi'],
-  tower3:    ['kamikishi','susurichou','kamigarasu','kudamukade'],
-  tower4:    ['kudamukade','nukegara','kamikishi','wasuremono'],
-  tower5:    ['nukegara','wasuremono','kudamukade'],
+  tower1:    ['kamigarasu','hikarikui'],
+  tower2:    ['kamigarasu','hikarikui','susurichou'],
+  tower3:    ['kamigarasu','susurichou','kamikishi'],
+  tower4:    ['kamikishi','susurichou','kudamukade'],
+  tower5:    ['kamikishi','kudamukade'],
 };
 
 // ---------------- データ：マップ ----------------
@@ -1175,6 +1175,16 @@ function lampsFromPipes(lines){
 }
 
 function toggleLamp(nx,ny){
+  // ★管で 光を 送る しかけの ある 階では、灯りを 直に 点けられない。
+  //   直に 点けられると 管を 差す いみが なくなる（じっさい そうなって いた）。
+  const cd0 = chData();
+  if(cd0 && cd0.pipeLamps && cd0.pipeLamps[P.map]){
+    G.mode='msg';
+    U.msg(['光珠灯。芯は かわいて いる。',
+           'ノエ「油では 灯らないよ。管から 光を 送るんだ」',
+           'ノエ「壁の 継ぎ目に 管を さして みて」'], ()=>{ G.mode='field'; });
+    return;
+  }
   const cur = tileAt(P.map,nx,ny);
   setTile(P.map,nx,ny, cur==='L' ? 'l' : 'L');
   A.item && A.item();

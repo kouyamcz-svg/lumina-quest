@@ -682,6 +682,78 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★経験値が 章に 見あって いる こと。
+//   ★第2章の ざこが 1体 1800〜2600 で、1戦で 1.5レベル 上がって いた。
+//     めやすは「つぎの Lvまでの 経験値 ÷ ざこ1体」が 2〜6戦。
+{
+  const expNeed = (lv)=> lv*lv*6;
+  const CH_LV = {1:5, 2:10, 3:15};        // その章の およその Lv
+  Object.keys(CH_LV).forEach(no=>{
+    const lv = CH_LV[no];
+    const need = expNeed(lv);
+    C.ENEMIES.forEach(e=>{
+      // その章あたりの 敵だけ 見る
+      const near = (no==='1' && e.minLv<=4) || (no==='2' && e.minLv>=7 && e.minLv<=9)
+                || (no==='3' && e.minLv>=12);
+      if(!near) return;
+      const fights = need / e.exp;
+      T('第'+(no-1)+'章：'+e.name+' の 経験値が 高すぎない', fights >= 1.5,
+        '1戦で '+(1/fights).toFixed(1)+'レベル 上がる（exp'+e.exp+'）');
+      T('第'+(no-1)+'章：'+e.name+' の 経験値が 低すぎない', fights <= 12,
+        (fights).toFixed(0)+'戦で やっと 1レベル');
+    });
+  });
+}
+
+// ★管の しかけ（pipeLamps）が 地図と 合って いる こと。
+//   ★灯りを 直に 点けられると 管が 要らなく なる。
+//   ★継ぎ目・灯り・管の 数が 合わないと 解けない／解けすぎる。
+{
+  Object.keys(CHD.CH).forEach(no=>{
+    const cd = CHD.CH[no];
+    const pl = cd.pipeLamps || {};
+    let totalPipes = 0, need = 0;
+    // その 章で ひろえる 管の 数（u の 数）
+    Object.keys(C.MAPS).forEach(mp=>{
+      C.MAPS[mp].tiles.forEach(r=>{ for(const ch of r) if(ch==='u') totalPipes++; });
+    });
+    Object.keys(pl).forEach(mp=>{
+      const m = C.MAPS[mp];
+      T('管の しかけの マップが ある '+mp, !!m, 'マップが ない');
+      if(!m) return;
+      // 継ぎ目の ざひょうが 地図に ある か
+      Object.keys(pl[mp]).forEach(k=>{
+        const [x,y] = k.split(',').map(Number);
+        T('継ぎ目が 地図に ある '+mp+' '+k, tileAt(mp,x,y)==='h',
+          'いまは「'+tileAt(mp,x,y)+'」');
+        // その 継ぎ目が 点ける 灯りが ある か
+        (pl[mp][k]||[]).forEach(o=>{
+          T('灯りが 地図に ある '+mp+' ('+o.x+','+o.y+')',
+            tileAt(mp,o.x,o.y)==='L' || tileAt(mp,o.x,o.y)==='l',
+            'いまは「'+tileAt(mp,o.x,o.y)+'」');
+        });
+      });
+      // 地図の 継ぎ目が ぜんぶ 表に ある か（差しても 何も 起きない を ふせぐ）
+      const rows = m.tiles;
+      for(let y=0;y<rows.length;y++) for(let x=0;x<rows[y].length;x++){
+        if(rows[y][x] !== 'h') continue;
+        T('継ぎ目が 表に ある '+mp+' ('+x+','+y+')', !!pl[mp][x+','+y],
+          'さしても 何も 起きない');
+      }
+      // 灯りの 数 ＝ その階で いる 管の 数
+      let lamps = 0;
+      rows.forEach(r=>{ for(const ch of r) if(ch==='L'||ch==='l') lamps++; });
+      const joints = Object.keys(pl[mp]).length;
+      T('灯りと 継ぎ目の 数が 合う '+mp, lamps===joints, '灯り'+lamps+' / 継ぎ目'+joints);
+      need = Math.max(need, joints);
+    });
+    if(Object.keys(pl).length){
+      T('第'+(no-1)+'章：管の 数が 足りる', totalPipes >= need,
+        '管'+totalPipes+'本 / いちばん いる 階は '+need+'本');
+    }
+  });
+}
+
 // ★ボスの まわりに 立つ ゆとりが ある こと。
 //   ★せまい 部屋に おくと、入って すぐ ぶつかって しまう。
 //     入口から すこし 歩いて 向かう ほうが 山場らしい。
