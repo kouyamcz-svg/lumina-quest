@@ -1301,11 +1301,40 @@ function matchEvent(e){
   if(e.needQuota && !(G.quota && G.quota.n >= G.quota.need)) return false;  // ★いらいが おわって いない
   return true;
 }
+// ★えんしゅつ：だれかが 走って くる。
+//   まっすぐ 近づく みちすじを つくって、絵を うごかす。
+//   ★「衛兵が 走ってくる」を 文字だけで すませて いた。
+function runRunIn(o, done){
+  if(!V.runner){ done && done(); return; }        // 2Dで ない ときは とばす
+  const path = [];
+  let x = o.from[0], y = o.from[1];
+  const tx = o.to[0], ty = o.to[1];
+  let guard = 0;
+  while((x!==tx || y!==ty) && guard++ < 60){
+    if(y!==ty) y += (ty>y ? 1 : -1);
+    else if(x!==tx) x += (tx>x ? 1 : -1);
+    path.push([x,y]);
+  }
+  V.runner({spr:o.spr, from:o.from, path, speed:o.speed||0.11, done});
+}
+
 function runTalkEvent(npcName){
   const cd = chData();
   if(!cd || !cd.talkEvents) return false;
   const e = cd.talkEvents.find(ev => ev.npc === npcName && matchEvent(ev));
   if(!e) return false;
+
+  // ★会話の 前に 走って くる 人（衛兵など）。
+  //   おわったら もう一度 同じ 会話に 入る ので、
+  //   「もう 走った」を おぼえて おかないと くり返す。
+  G._ranIn = G._ranIn || {};
+  const runKey = npcName + ':' + (e.unless || '');
+  if(e.runIn && !G._ranIn[runKey]){
+    G._ranIn[runKey] = true;
+    G.mode = 'msg';
+    runRunIn(e.runIn, ()=>{ runTalkEvent(npcName); });
+    return true;
+  }
 
   (e.set || []).forEach(f => { G.flags[f] = true; });
   if(e.setState && WORLD.TOWN_STATES[e.setState]) G.townState = e.setState;

@@ -2201,6 +2201,9 @@ function draw(dt, time, actors){
   });
   _mkQ.length=0;
   _bossQ.forEach(([bx,by,bts,tx,ty])=>drawBoss(bx,by,bts,tx,ty));
+  // ★かけつける 人（えんしゅつ）
+  updateRunner(dt);
+  drawRunner(ox, oy, ts, time);
   _bossQ.length=0;
   // ★もやって ある ふね（ワールドのみ）
   if(theme==='world' && C.G && C.G.ship && !C.G.aboard){
@@ -2233,6 +2236,53 @@ function draw(dt, time, actors){
 }
 let NPCREF = null;
 function setNpcData(n){ NPCREF = n; }
+// ★かけつける 人（えんしゅつ用）。
+//   地図の ますでは なく、ますとますの あいだを うごく。
+//   「衛兵が 走ってくる」を 文字だけで すませず 目で 見せる ため。
+let runner = null;      // {spr, x, y, tx, ty, t, dur, done}
+function startRunner(o){
+  runner = {spr:o.spr||'guardA', x:o.from[0], y:o.from[1],
+            path:o.path||[], step:0, t:0,
+            dur:(o.speed||0.16), done:o.done||null, flip:false};
+}
+function updateRunner(dt){
+  if(!runner) return;
+  const r = runner;
+  if(r.step >= r.path.length){
+    const d = r.done; runner = null; d && d();
+    return;
+  }
+  r.t += dt;
+  const k = Math.min(1, r.t / r.dur);
+  const from = r.step===0 ? [r.x, r.y] : r.path[r.step-1];
+  const to   = r.path[r.step];
+  r.cx = from[0] + (to[0]-from[0])*k;
+  r.cy = from[1] + (to[1]-from[1])*k;
+  if(to[0] !== from[0]) r.flip = to[0] < from[0];
+  if(k>=1){ r.step++; r.t = 0; }
+}
+function drawRunner(ox, oy, ts, time){
+  if(!runner || runner.cx===undefined) return;
+  const r = runner;
+  const d = (CHRREF && CHRREF[r.spr]) || (CHRREF && CHRREF.guardA);
+  if(!d) return;
+  const img = getImg(d.side || d.front);
+  if(!(img.complete && img.naturalWidth)) return;
+  const sc = chrDrawScale(ts);
+  const w = Math.round(d.w*sc), h = Math.round(d.h*sc);
+  const dx = ox + r.cx*ts + ts/2, dy = oy + r.cy*ts + ts*0.95;
+  // かげ
+  cx.fillStyle='rgba(16,20,34,0.30)';
+  cx.beginPath(); cx.ellipse(dx, dy-2, ts*0.24, ts*0.09, 0, 0, Math.PI*2); cx.fill();
+  // ★はしって いる ので すこし はねる
+  const bob = Math.abs(Math.sin(time*14)) * ts*0.06;
+  cx.save();
+  cx.translate(dx, dy - bob);
+  if(r.flip) cx.scale(-1,1);
+  cx.drawImage(img, Math.round(-w/2), Math.round(-h), w, h);
+  cx.restore();
+}
+
 function drawNPC(dx,dy,ts,x,y){
   const s=ts;
   cx.fillStyle='rgba(16,20,34,0.30)';
@@ -2461,6 +2511,8 @@ return {init, resize, buildMap, draw, noteStep, setFade, setDream,
         showScene, hideScene, drawSceneOverlay, get sceneOn(){return !!sceneKey;},
         battleEnter:battleEnter2D, battleFx:battleFx2D, battleLeave:battleLeave2D, drawBattle,
         pop:pop2D,
+        runner:startRunner,           // ★かけつける 人の えんしゅつ
+        get runnerOn(){ return !!runner; },
         get TS(){return TS;}};
 })();
 

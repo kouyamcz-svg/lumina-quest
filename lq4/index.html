@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-23 00:27 JST", "build":"cbe5e567","assets_sha": "632130cd", "lines": {"world": 112, "npc": 538, "chapters": 1585, "bgm": 985, "view2d": 2467, "core": 3106, "view": 1394, "ui": 1144}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-23 00:39 JST", "build":"b1dcc638","assets_sha": "632130cd", "lines": {"world": 112, "npc": 538, "chapters": 1588, "bgm": 985, "view2d": 2519, "core": 3135, "view": 1394, "ui": 1144}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -1988,6 +1988,8 @@ const CH = {
       // ---- 事件：外郭の 閉じこめ（記録を 持って 主任に 会った あと）----
       { npc:'炉の 主任', cond:['ch2_towerPaid'], unless:'ch2_accident',
         set:['ch2_accident'],
+        // ★衛兵が 南門から 走って くる（文字だけで すませない）
+        runIn:{spr:'guardA', from:[10,13], to:[10,6], speed:0.10},
         quest:{ch2_q2_core:'active'},
         msg:['主任は 綴りを 受け取り、判を 押した。',
              '主任「これで 通る。……昇降機は 東の 館だ」',
@@ -1995,7 +1997,8 @@ const CH = {
              'そこへ 鐘が 鳴った。低く、二度。',
              '',
              '主任「……外郭の 鐘だ」',
-             '衛兵が 走ってくる。',
+             '',
+             '衛兵は 息を 整える 間も おかずに 言った。',
              '衛兵「外郭で 熱が 上がりました。炉番が 三人、戻って いません」',
              '',
              'イオ「救助は」',
@@ -5588,6 +5591,9 @@ function draw(dt, time, actors){
   });
   _mkQ.length=0;
   _bossQ.forEach(([bx,by,bts,tx,ty])=>drawBoss(bx,by,bts,tx,ty));
+  // ★かけつける 人（えんしゅつ）
+  updateRunner(dt);
+  drawRunner(ox, oy, ts, time);
   _bossQ.length=0;
   // ★もやって ある ふね（ワールドのみ）
   if(theme==='world' && C.G && C.G.ship && !C.G.aboard){
@@ -5620,6 +5626,53 @@ function draw(dt, time, actors){
 }
 let NPCREF = null;
 function setNpcData(n){ NPCREF = n; }
+// ★かけつける 人（えんしゅつ用）。
+//   地図の ますでは なく、ますとますの あいだを うごく。
+//   「衛兵が 走ってくる」を 文字だけで すませず 目で 見せる ため。
+let runner = null;      // {spr, x, y, tx, ty, t, dur, done}
+function startRunner(o){
+  runner = {spr:o.spr||'guardA', x:o.from[0], y:o.from[1],
+            path:o.path||[], step:0, t:0,
+            dur:(o.speed||0.16), done:o.done||null, flip:false};
+}
+function updateRunner(dt){
+  if(!runner) return;
+  const r = runner;
+  if(r.step >= r.path.length){
+    const d = r.done; runner = null; d && d();
+    return;
+  }
+  r.t += dt;
+  const k = Math.min(1, r.t / r.dur);
+  const from = r.step===0 ? [r.x, r.y] : r.path[r.step-1];
+  const to   = r.path[r.step];
+  r.cx = from[0] + (to[0]-from[0])*k;
+  r.cy = from[1] + (to[1]-from[1])*k;
+  if(to[0] !== from[0]) r.flip = to[0] < from[0];
+  if(k>=1){ r.step++; r.t = 0; }
+}
+function drawRunner(ox, oy, ts, time){
+  if(!runner || runner.cx===undefined) return;
+  const r = runner;
+  const d = (CHRREF && CHRREF[r.spr]) || (CHRREF && CHRREF.guardA);
+  if(!d) return;
+  const img = getImg(d.side || d.front);
+  if(!(img.complete && img.naturalWidth)) return;
+  const sc = chrDrawScale(ts);
+  const w = Math.round(d.w*sc), h = Math.round(d.h*sc);
+  const dx = ox + r.cx*ts + ts/2, dy = oy + r.cy*ts + ts*0.95;
+  // かげ
+  cx.fillStyle='rgba(16,20,34,0.30)';
+  cx.beginPath(); cx.ellipse(dx, dy-2, ts*0.24, ts*0.09, 0, 0, Math.PI*2); cx.fill();
+  // ★はしって いる ので すこし はねる
+  const bob = Math.abs(Math.sin(time*14)) * ts*0.06;
+  cx.save();
+  cx.translate(dx, dy - bob);
+  if(r.flip) cx.scale(-1,1);
+  cx.drawImage(img, Math.round(-w/2), Math.round(-h), w, h);
+  cx.restore();
+}
+
 function drawNPC(dx,dy,ts,x,y){
   const s=ts;
   cx.fillStyle='rgba(16,20,34,0.30)';
@@ -5848,6 +5901,8 @@ return {init, resize, buildMap, draw, noteStep, setFade, setDream,
         showScene, hideScene, drawSceneOverlay, get sceneOn(){return !!sceneKey;},
         battleEnter:battleEnter2D, battleFx:battleFx2D, battleLeave:battleLeave2D, drawBattle,
         pop:pop2D,
+        runner:startRunner,           // ★かけつける 人の えんしゅつ
+        get runnerOn(){ return !!runner; },
         get TS(){return TS;}};
 })();
 
@@ -7155,11 +7210,40 @@ function matchEvent(e){
   if(e.needQuota && !(G.quota && G.quota.n >= G.quota.need)) return false;  // ★いらいが おわって いない
   return true;
 }
+// ★えんしゅつ：だれかが 走って くる。
+//   まっすぐ 近づく みちすじを つくって、絵を うごかす。
+//   ★「衛兵が 走ってくる」を 文字だけで すませて いた。
+function runRunIn(o, done){
+  if(!V.runner){ done && done(); return; }        // 2Dで ない ときは とばす
+  const path = [];
+  let x = o.from[0], y = o.from[1];
+  const tx = o.to[0], ty = o.to[1];
+  let guard = 0;
+  while((x!==tx || y!==ty) && guard++ < 60){
+    if(y!==ty) y += (ty>y ? 1 : -1);
+    else if(x!==tx) x += (tx>x ? 1 : -1);
+    path.push([x,y]);
+  }
+  V.runner({spr:o.spr, from:o.from, path, speed:o.speed||0.11, done});
+}
+
 function runTalkEvent(npcName){
   const cd = chData();
   if(!cd || !cd.talkEvents) return false;
   const e = cd.talkEvents.find(ev => ev.npc === npcName && matchEvent(ev));
   if(!e) return false;
+
+  // ★会話の 前に 走って くる 人（衛兵など）。
+  //   おわったら もう一度 同じ 会話に 入る ので、
+  //   「もう 走った」を おぼえて おかないと くり返す。
+  G._ranIn = G._ranIn || {};
+  const runKey = npcName + ':' + (e.unless || '');
+  if(e.runIn && !G._ranIn[runKey]){
+    G._ranIn[runKey] = true;
+    G.mode = 'msg';
+    runRunIn(e.runIn, ()=>{ runTalkEvent(npcName); });
+    return true;
+  }
 
   (e.set || []).forEach(f => { G.flags[f] = true; });
   if(e.setState && WORLD.TOWN_STATES[e.setState]) G.townState = e.setState;

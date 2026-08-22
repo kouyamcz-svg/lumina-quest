@@ -186,7 +186,20 @@ T('庭園へ もどる', C.P.map==='garden', C.P.map);
 }
 
 // ===== 7.9 事件：外郭の 閉じこめ =====
+// ★衛兵が 走って くる（えんしゅつ）
+let ranIn = null;
+C.bind(Object.assign({}, C.NullView, {
+        showScene(k){ scene.push('show:'+k); },
+        hideScene(){ scene.push('hide'); },
+        runner(o){ ranIn = o; o.done && o.done(); },
+       }),
+       {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); },
+        menu(i,t,cb){ cb(t==='これから' ? 1 : 0); },
+        hud(){}, label(){}, openTrade(){}}, C.NullAudio);
 talk('upper_dist', 9, 5, 'back');
+T('衛兵が 走って くる', !!ranIn, 'えんしゅつが ない');
+T('南門から 主任の 前まで 走る',
+  ranIn && ranIn.path.length>=5, ranIn ? ranIn.path.length+'ます' : '-');
 T('鐘が 鳴る', C.G.flags.ch2_accident===true);
 T('三人 戻って いないと 分かる', said('炉番が 三人、戻って いません'), log.join(' / ').slice(0,150));
 T('上は「点検中」と 記録した', said('外郭 点検中'));

@@ -682,6 +682,33 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★走って くる えんしゅつ（runIn）が、かべを 通りぬけない こと。
+//   ★みちすじは たてから よこの 順に まっすぐ すすむ。
+{
+  Object.keys(CHD.CH).forEach(no=>{
+    (CHD.CH[no].talkEvents||[]).forEach(e=>{
+      if(!e.runIn) return;
+      // その 会話は どの マップで 起きるか（あいての いる ところ）
+      let mp = null;
+      Object.keys(NPCD.NPCS).forEach(k=>
+        (NPCD.NPCS[k]||[]).forEach(x=>{ if(x.name===e.npc) mp = k; }));
+      T('走って くる 会話の マップが ある '+e.npc, !!mp, 'あいてが 地図に いない');
+      if(!mp) return;
+      const [fx,fy] = e.runIn.from, [tx,ty] = e.runIn.to;
+      T('走りだしの ますが 通れる '+e.npc+'（'+fx+','+fy+'）', C.walkable(mp,fx,fy));
+      // みちすじを たどって、ぜんぶ 通れる か
+      let x=fx, y=fy, ok=true, guard=0;
+      while((x!==tx || y!==ty) && guard++<60){
+        if(y!==ty) y += (ty>y?1:-1); else if(x!==tx) x += (tx>x?1:-1);
+        if(!C.walkable(mp,x,y)) ok=false;
+      }
+      T('走る みちすじに かべが ない '+e.npc, ok, 'かべを 通りぬける');
+      T('走りついた さきが 会話の あいての そば '+e.npc,
+        Math.abs(tx-x)+Math.abs(ty-y)===0, 'たどりつけない');
+    });
+  });
+}
+
 // ★けっかいの ことばが、いまの 進み具合に あって いる こと。
 //   ★そらくらいを 倒したのに「書類が いる」とだけ 出て、
 //     どこへ 行けば よいか 分からなかった。
