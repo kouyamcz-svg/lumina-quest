@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 20:50 JST", "build":"c3570c24","assets_sha": "632130cd", "lines": {"world": 112, "npc": 522, "chapters": 1475, "bgm": 985, "view2d": 2423, "core": 3090, "view": 1394, "ui": 1141}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 21:15 JST", "build":"5f03750a","assets_sha": "632130cd", "lines": {"world": 112, "npc": 522, "chapters": 1475, "bgm": 985, "view2d": 2466, "core": 3090, "view": 1394, "ui": 1141}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -4458,64 +4458,107 @@ function gatePart(tw, th, cx, cy){
     const U0='#7f8aa6', U1='#b8c2d8', U2='#dde4f0', U3='#f4f7fc';
     const G0='#8a6f2a', G1='#c9a94e', G2='#efd98a';
     R(g,0,0,s,s,'#c9d8ee');
+
+    const tw2 = Math.round(PW*0.26);        // 塔の はば
+    const roofH = Math.round(PH*0.13);      // 屋根の たかさ
+    const top   = roofH;                    // 石づみの はじまり
+
     // ---- 左右の 塔 ----
-    const tw2 = PW*0.24;                       // 塔の はば
-    [0, PW-tw2].forEach((tx,i)=>{
-      B(tx, PH*0.10, tw2, PH*0.90, U1);
-      B(tx, PH*0.10, tw2, 1, U3);
-      B(tx, PH*0.10, 1, PH*0.90, U2);
-      B(tx+tw2-1, PH*0.10, 1, PH*0.90, U0);
-      // 石づみ
-      for(let by=PH*0.16; by<PH; by+=7){
-        B(tx+1, by, tw2-2, 1, U0);
-        B(tx+1, by+1, tw2-2, 1, U2);
+    [0, PW-tw2].forEach((tx)=>{
+      B(tx, top, tw2, PH-top, U1);
+      // 石づみ（ずらして つむ。よこ縞に 見えない ように）
+      let row=0;
+      for(let by=top+1; by<PH-1; by+=6){
+        const off = (row%2)*4;
+        for(let bx=tx-4+off; bx<tx+tw2; bx+=8){
+          const x1=Math.max(tx, bx), x2=Math.min(tx+tw2, bx+8);
+          if(x2-x1<=0) continue;
+          B(x1, by, x2-x1, 5, U2);
+          B(x1, by, x2-x1, 1, U3);
+          B(x1, by+4, x2-x1, 1, U0);
+          B(x2-1, by, 1, 5, U0);
+        }
+        row++;
       }
-      // 塔の 屋根（とがった）。上ばしで 切れない ように 中へ 入れる
-      const rw = tw2+4;
-      for(let k=0;k<5;k++)
-        B(tx-2+k*(rw/10), PH*0.10-2-k*1.6, rw-k*(rw/5), 2, k<2?G1:G2);
-      // 窓
-      B(tx+tw2*0.30, PH*0.30, tw2*0.40, PH*0.10, '#2a5c96');
-      B(tx+tw2*0.30, PH*0.55, tw2*0.40, PH*0.10, '#2a5c96');
+      B(tx, top, 1, PH-top, U3);
+      B(tx+tw2-1, top, 1, PH-top, U0);
+      // 青い 窓（たてに 2つ）
+      [0.30, 0.58].forEach(f=>{
+        const wx=tx+Math.round(tw2*0.28), wy=Math.round(top+(PH-top)*f);
+        const ww=Math.round(tw2*0.44), wh=Math.round(PH*0.11);
+        B(wx-1, wy-1, ww+2, wh+2, U0);
+        B(wx, wy, ww, wh, '#2a5c96');
+        B(wx, wy, ww, 1, '#1b3f6b');
+        B(wx+1, wy+1, 2, Math.max(2,wh-3), '#5fb4ee');
+        B(wx-1, wy-2, ww+2, 1, G1);
+      });
     });
-    // ---- 上の はり（まぐさ）----
-    B(tw2-2, PH*0.10, PW-tw2*2+4, PH*0.12, U1);
-    B(tw2-2, PH*0.10, PW-tw2*2+4, 1, U3);
-    B(tw2-2, PH*0.20, PW-tw2*2+4, 1, G1);
-    B(tw2-2, PH*0.21, PW-tw2*2+4, 1, G0);
+
+    // ---- 屋根（左右の 塔の 上）----
+    //   ★まえは 端から はみ出して 浮いて 見えた。
+    //     塔の はばの 中に おさめ、下ほど 広い 台形に する。
+    [0, PW-tw2].forEach((tx)=>{
+      const rows = Math.max(3, roofH);
+      for(let k=0;k<rows;k++){
+        // k=0 が てっぺん（せまい）、k=rows-1 が いちばん 下（塔の はば）
+        const f = k/(rows-1);
+        const w = Math.round(tw2*(0.34 + 0.66*f));
+        const x = tx + Math.round((tw2-w)/2);
+        B(x, roofH-rows+k, w, 1, k<rows*0.45 ? G2 : G1);
+      }
+      // 軒（のき）：屋根の 下だけ。塔の はば ぜんぶに 引くと 平らに 見える。
+      B(tx+Math.round(tw2*0.10), roofH-1, Math.round(tw2*0.80), 1, G0);
+    });
+
+    // ---- まん中の はり（まぐさ）----
+    const lx = tw2-1, lw = PW-tw2*2+2;
+    const ly = Math.round(PH*0.16), lh = Math.round(PH*0.10);
+    B(lx, ly, lw, lh, U1);
+    B(lx, ly, lw, 1, U3);
+    B(lx, ly+lh-2, lw, 1, G1);
+    B(lx, ly+lh-1, lw, 1, G0);
     // 紋章（光珠）
-    const mx=PW/2, my=PH*0.16;
-    B(mx-3, my-3, 6, 6, G1);
-    B(mx-2, my-2, 4, 4, '#a8e2ff');
-    B(mx-1, my-1, 2, 2, '#eafaff');
-    // ---- 門の 扉（二枚・とじて いる）----
-    const dx0 = tw2, dw = PW-tw2*2, dy0 = PH*0.22, dh = PH*0.78;
+    const mx = Math.round(PW/2), my = ly+Math.round(lh/2);
+    B(mx-4, my-4, 8, 8, G1);
+    B(mx-3, my-3, 6, 6, G2);
+    B(mx-2, my-2, 4, 4, '#2a5c96');
+    B(mx-2, my-2, 4, 2, '#5fb4ee');
+    B(mx-1, my-2, 2, 1, '#eafaff');
+
+    // ---- 門の 扉（二枚）----
+    const dx0 = tw2, dw = PW-tw2*2, dy0 = ly+lh, dh = PH-dy0-Math.round(PH*0.05);
     B(dx0, dy0, dw, dh, '#4a3b22');
-    B(dx0, dy0, dw, 1, G2);
-    B(dx0, dy0+dh-1, dw, 1, '#2b2213');
-    // たての 板目
-    for(let vx=dx0+2; vx<dx0+dw-1; vx+=4){
-      B(vx, dy0+1, 1, dh-2, '#5d4a2b');
-      B(vx+1, dy0+1, 1, dh-2, '#3b2f1b');
+    B(dx0, dy0, dw, 1, '#2b2213');
+    // たての 板目（扉の 中だけに おさめる）
+    for(let vx=dx0+2; vx+4<=dx0+dw-2; vx+=5){
+      B(vx, dy0+1, 3, dh-2, '#5d4a2b');
+      B(vx+3, dy0+1, 1, dh-2, '#33291a');
     }
-    // 金の 帯 3本
-    [0.18, 0.48, 0.78].forEach(f=>{
-      B(dx0+1, dy0+dh*f, dw-2, 3, G1);
-      B(dx0+1, dy0+dh*f, dw-2, 1, G2);
-      B(dx0+1, dy0+dh*f+2, dw-2, 1, G0);
+    // 金の 帯（うすく 3本）
+    [0.16, 0.46, 0.76].forEach(f=>{
+      const by = dy0+Math.round(dh*f);
+      B(dx0+1, by, dw-2, 2, G1);
+      B(dx0+1, by, dw-2, 1, G2);
     });
     // まん中の 合わせ目と 取っ手
     B(mx-1, dy0, 2, dh, '#2b2213');
-    B(mx-4, dy0+dh*0.46, 3, 3, G2);
-    B(mx+1, dy0+dh*0.46, 3, 3, G2);
+    B(mx-5, dy0+Math.round(dh*0.46), 3, 3, G2);
+    B(mx+2, dy0+Math.round(dh*0.46), 3, 3, G2);
+    // 扉の わく（石の 柱。壁と つながって 見える ように）
+    B(dx0-1, dy0-1, 2, dh+1, U1);
+    B(dx0-1, dy0-1, 1, dh+1, U2);
+    B(dx0+dw-1, dy0-1, 2, dh+1, U1);
+    B(dx0+dw, dy0-1, 1, dh+1, U0);
+
     // ---- 石段 ----
-    B(dx0-3, PH-3, dw+6, 3, U2);
-    B(dx0-3, PH-3, dw+6, 1, U3);
-    B(dx0-6, PH-1, dw+12, 1, U0);
+    B(dx0-2, PH-Math.round(PH*0.05), dw+4, Math.round(PH*0.03), U2);
+    B(dx0-2, PH-Math.round(PH*0.05), dw+4, 1, U3);
+    B(dx0-4, PH-2, dw+8, 2, U0);
   });
   gateCache[key] = t;
   return t;
 }
+
 function gateAt(x, y){
   const m = C.MAPS && C.MAPS[curMap];
   if(!m) return gatePart(1,1,0,0);
