@@ -185,6 +185,13 @@ T('庭園へ もどる', C.P.map==='garden', C.P.map);
   C.G.flags.ch2_towerPaid = keep;
 }
 
+// ===== 7.9 事件：外郭の 閉じこめ =====
+talk('upper_dist', 9, 5, 'back');
+T('鐘が 鳴る', C.G.flags.ch2_accident===true);
+T('三人 戻って いないと 分かる', said('炉番が 三人、戻って いません'), log.join(' / ').slice(0,150));
+T('上は「点検中」と 記録した', said('外郭 点検中'));
+T('救助を 出さないと 言う', said('事故に すると 責任者が 要る'));
+
 // ===== 8. 炉の 外郭へ =====
 stand('garden', 9, 13, 'front'); C.stepField(0,1);
 T('上層区へ もどる', C.P.map==='upper_dist', C.P.map);
@@ -192,6 +199,17 @@ stand('upper_dist', 17, 9, 'front');
 C.stepField(0,1);
 T('炉の 外郭へ 入れる', C.P.map==='furnace', C.P.map+' '+C.P.x+','+C.P.y);
 T('炉の めじるしが たつ', C.G.flags.ch2_enteredFurnace===true);
+
+// ===== 8.5 炉番 三人を 助ける =====
+talk('furnace', 17, 18, 'back');
+T('炉番 ひとりめを 助ける', C.G.flags.ch2_saved1===true);
+T('鐘を 鳴らしたのは 本人', said('鳴らしたのは わしだ'), log.join(' / ').slice(0,90));
+talk('furnace', 2, 11, 'back');
+T('炉番 ふたりめを 助ける', C.G.flags.ch2_saved2===true);
+T('ノエが 術を つかう', said('もう 熱くない'));
+talk('furnace', 13, 16, 'back');
+T('炉番 三人めを 助ける', C.G.flags.ch2_saved3===true);
+T('奥から 息が すると 言う', said('息だ。誰かの'), log.join(' / ').slice(0,140));
 
 // ===== 9. 子供の 寝息 =====
 talk('furnace', 12, 6, 'back');
@@ -241,6 +259,9 @@ talk('upper_dist', 9, 5, 'back');
 T('報告できる', C.G.flags.ch2_reported===true);
 T('炉心の ぶんが 足りないと 言う', said('炉心の ぶんが 足りん'), log.join(' / ').slice(-90));
 T('鍵は 城に あると 言う', said('鍵は 城に ある'));
+T('三人 助けた ことに ふれる', said('三人 とも 出ました'), log.join(' / ').slice(-140));
+T('記録は 直せないと 言う', said('『点検中』の ままだ'));
+T('手控えには 書くと 言う', said('救助者 なし'));
 T('手当てで 全快', C.party.every(p=>p.hp===p.maxhp));
 T('礼を もらえる', C.P.gold===g0+600, C.P.gold+' ← '+g0);
 T('クエストが 片づく', C.G.quests.ch2_q2_core==='clear');
