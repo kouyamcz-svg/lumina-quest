@@ -140,9 +140,9 @@ T('もう 押せる なら もどさない', C.gimmickRescue('rift_yard')===fals
   touch('tower2',1,7);
   touch('tower3',1,7); touch('tower3',13,7);
   touch('tower3',1,7); touch('tower3',13,7);
+  touch('tower4',4,7); touch('tower4',7,7);
   touch('tower4',1,7); touch('tower4',12,7); touch('tower4',3,9);
-  T('管 3本で 4階まで あく', C.tileAt('tower4',6,2)==='.', '足りない');
-  T('つかいきる（あまらない）', C.G.pipes===0, 'のこり '+C.G.pipes);
+  T('4階まで あく', C.tileAt('tower4',6,2)==='.', '足りない');
   C.G.mode='field'; C.P.map='tower4'; C.P.x=6; C.P.y=2; C.stepField(0,-1);
   T('最上階へ 行ける', C.P.map==='tower5', C.P.map);
 }
@@ -170,6 +170,39 @@ T('もう 押せる なら もどさない', C.gimmickRescue('rift_yard')===fals
     C.setTile(mp,kx,ky,'.');
     T(mp+'：あけたら 上り階段へ 行ける', reach(mp,6,9).has('6,1'));
   });
+}
+
+// ============ 9. どの 順に 拾っても 解ける ============
+//   ★2階の 管を 拾い忘れると 4階で 1本 足りず、
+//     どこで つまづいたか 分からない ままに なって いた。
+{
+  const touch = (mp,x,y)=>{ C.G.mode='field'; C.P.map=mp; C.P.x=x; C.P.y=y+1;
+                            C.P.dir='back'; C.interact(); };
+  const play = (take2F)=>{
+    C.freshState(); C.G.chapter = 3;
+    touch('tower1',3,2);
+    if(take2F) touch('tower2',11,3);
+    touch('tower2',1,7);
+    touch('tower3',7,7); touch('tower2',1,7);
+    touch('tower3',1,7); touch('tower3',13,7);
+    touch('tower3',1,7); touch('tower3',13,7);
+    touch('tower4',4,7); touch('tower4',7,7);
+    touch('tower4',1,7); touch('tower4',12,7); touch('tower4',3,9);
+    return C.tileAt('tower4',6,2);
+  };
+  T('2階の 管を 拾い忘れても 解ける', play(false)==='.', '4階で 足りなく なる');
+  T('ぜんぶ 拾っても 解ける',        play(true)==='.',  '解けない');
+
+  // ★かんたんに なりすぎて いない こと（抜く 手間は のこす）
+  C.freshState(); C.G.chapter = 3;
+  touch('tower1',3,2); touch('tower2',11,3);
+  touch('tower2',1,7);
+  touch('tower3',7,7);
+  touch('tower3',1,7); touch('tower3',13,7);
+  touch('tower4',4,7); touch('tower4',7,7);
+  touch('tower4',1,7); touch('tower4',12,7); touch('tower4',3,9);
+  T('下の 階から 抜かないと 4階は あかない', C.tileAt('tower4',6,2)==='K',
+    '抜く 手間が なく なって いる');
 }
 
 console.log('\n--- gimmick: ' + (n-ng) + '/' + n + ' 通過 ---');
