@@ -338,9 +338,9 @@ const MAPS = {
   // ★上層区：白亜の 館（R）が ならぶ。金の 帯と 青い ガラス窓。
   //   下層＝割れた 石、中層＝磨き石、上層＝白亜、と 三段で 差を つける。
   upper_dist:{name:'上層区', theme:'sky', enc:false, tiles:[
-    "##########Q##########",
-    "#;;;;;;;;;;;;;;;;;;;#",
-    "#RRRRR;;;;;;;;;RRRRR#",
+    "#########AAA#########",
+    "#;;;;;;;;AAA;;;;;;;;#",
+    "#RRRRR;;;AAA;;;RRRRR#",
     "#RRRRR;;t;;;t;;RRRRR#",
     "#RRIRR;;;n;n;;;RRSRR#",
     "#;;;;;;;;;;;;;;;;;;;#",
@@ -814,7 +814,8 @@ const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
-                       'O','x','L','l','p','q','%','R','j','J']);
+                       'O','x','L','l','p','q','%','R','j','J','A']);
+                       // A＝天空城の 大門（3×3）
                        // j/J＝かべの 継ぎ目（管を さす ところ）
                        // p/q＝光珠管、%＝花壇、R＝上層の 壁、F＝噴水（ならべた 大きさで 形が きまる）
 // ★しかけ用の タイル（IVから）
@@ -946,6 +947,19 @@ function interact(){
   if(ch==='O'){
     G.mode='msg';
     U.msg(['大きな 岩だ。押せば 動きそうだ。'], ()=>{ G.mode='field'; });
+    return;
+  }
+  if(ch==='A'){                                 // ★天空城の 大門
+    const cd = chData();
+    // 3×3の どこを しらべても おなじ。左上を さがして 見に いく
+    let gx=nx, gy=ny;
+    while(tileAt(P.map,gx-1,gy)==='A') gx--;
+    while(tileAt(P.map,gx,gy-1)==='A') gy--;
+    const lines = (cd && cd.gates && (cd.gates[P.map+':'+gx+','+gy]
+                                   || cd.gates[P.map+':'+nx+','+ny]))
+                || ['閉ざされた 大門。白石の 壁が 雲まで 続いている。'];
+    G.mode='msg';
+    U.msg(lines, ()=>{ G.mode='field'; });
     return;
   }
   if(ch==='u'){ takePipe(nx,ny); return; }

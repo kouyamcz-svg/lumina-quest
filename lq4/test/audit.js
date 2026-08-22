@@ -682,6 +682,34 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★天空城の 大門（A）は 四角に ならべる。でこぼこだと 絵が 切れる。
+//   ★噴水と 同じ しくみ。ならべた 大きさで 形が きまる。
+Object.keys(C.MAPS).forEach(mp=>{
+  const t = C.MAPS[mp].tiles;
+  const done = new Set();
+  for(let y=0;y<t.length;y++){
+    for(let x=0;x<t[y].length;x++){
+      if(tileAt(mp,x,y)!=='A' || done.has(x+','+y)) continue;
+      if(tileAt(mp,x-1,y)==='A' || tileAt(mp,x,y-1)==='A') continue;
+      let w=0; while(tileAt(mp,x+w,y)==='A') w++;
+      let h=0; while(tileAt(mp,x,y+h)==='A') h++;
+      let ok = true;
+      for(let j=0;j<h;j++) for(let i=0;i<w;i++){
+        if(tileAt(mp,x+i,y+j)!=='A') ok=false;
+        done.add((x+i)+','+(y+j));
+      }
+      for(let j=-1;j<=h;j++) if(tileAt(mp,x-1,y+j)==='A'||tileAt(mp,x+w,y+j)==='A') ok=false;
+      for(let i=-1;i<=w;i++) if(tileAt(mp,x+i,y-1)==='A'||tileAt(mp,x+i,y+h)==='A') ok=false;
+      T('大門が 四角に ならんで いる '+mp+' ('+x+','+y+') '+w+'×'+h, ok);
+      T('大門が 3ます いじょう '+mp+' ('+x+','+y+')', w>=3 && h>=3, w+'×'+h);
+      // 前に 立てる ます が ある こと
+      let stand = false;
+      for(let i=0;i<w;i++) if(C.walkable(mp, x+i, y+h)) stand = true;
+      T('大門の 前に 立てる '+mp+' ('+x+','+y+')', stand, '前が ふさがって いる');
+    }
+  }
+});
+
 // ★門から 門への 大通りが、まっすぐ 通れる こと。
 //   ★噴水を 大通りの 上に 置いて しまい、遠回りに なって いた。
 //     置きものは 通りを ふさがない こと。

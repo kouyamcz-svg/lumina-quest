@@ -1177,6 +1177,95 @@ function fountPart(tw, th, cx, cy){
   return t;
 }
 
+// ★天空城の 大門。W を ならべた 四角の 大きさで 形が きまる（噴水と 同じ やり方）。
+//   1ますの 案内じるし だった ため、天空城の いりぐちに 見えなかった。
+const gateCache = {};
+function gatePart(tw, th, cx, cy){
+  const key = tw+'x'+th+':'+cx+','+cy;
+  if(gateCache[key]) return gateCache[key];
+  const PW = tw*16, PH = th*16;
+  const OX = cx*16, OY = cy*16;
+  const t = tile((g,s)=>{
+    const B = (x,y,w,h,col)=>{
+      x=Math.round(x); y=Math.round(y); w=Math.round(w); h=Math.round(h);
+      const x0=x-OX, y0=y-OY;
+      if(x0+w<=0||y0+h<=0||x0>=16||y0>=16) return;
+      R(g, Math.max(0,x0), Math.max(0,y0),
+           Math.min(16,x0+w)-Math.max(0,x0),
+           Math.min(16,y0+h)-Math.max(0,y0), col);
+    };
+    const U0='#7f8aa6', U1='#b8c2d8', U2='#dde4f0', U3='#f4f7fc';
+    const G0='#8a6f2a', G1='#c9a94e', G2='#efd98a';
+    R(g,0,0,s,s,'#c9d8ee');
+    // ---- 左右の 塔 ----
+    const tw2 = PW*0.24;                       // 塔の はば
+    [0, PW-tw2].forEach((tx,i)=>{
+      B(tx, PH*0.10, tw2, PH*0.90, U1);
+      B(tx, PH*0.10, tw2, 1, U3);
+      B(tx, PH*0.10, 1, PH*0.90, U2);
+      B(tx+tw2-1, PH*0.10, 1, PH*0.90, U0);
+      // 石づみ
+      for(let by=PH*0.16; by<PH; by+=7){
+        B(tx+1, by, tw2-2, 1, U0);
+        B(tx+1, by+1, tw2-2, 1, U2);
+      }
+      // 塔の 屋根（とがった）。上ばしで 切れない ように 中へ 入れる
+      const rw = tw2+4;
+      for(let k=0;k<5;k++)
+        B(tx-2+k*(rw/10), PH*0.10-2-k*1.6, rw-k*(rw/5), 2, k<2?G1:G2);
+      // 窓
+      B(tx+tw2*0.30, PH*0.30, tw2*0.40, PH*0.10, '#2a5c96');
+      B(tx+tw2*0.30, PH*0.55, tw2*0.40, PH*0.10, '#2a5c96');
+    });
+    // ---- 上の はり（まぐさ）----
+    B(tw2-2, PH*0.10, PW-tw2*2+4, PH*0.12, U1);
+    B(tw2-2, PH*0.10, PW-tw2*2+4, 1, U3);
+    B(tw2-2, PH*0.20, PW-tw2*2+4, 1, G1);
+    B(tw2-2, PH*0.21, PW-tw2*2+4, 1, G0);
+    // 紋章（光珠）
+    const mx=PW/2, my=PH*0.16;
+    B(mx-3, my-3, 6, 6, G1);
+    B(mx-2, my-2, 4, 4, '#a8e2ff');
+    B(mx-1, my-1, 2, 2, '#eafaff');
+    // ---- 門の 扉（二枚・とじて いる）----
+    const dx0 = tw2, dw = PW-tw2*2, dy0 = PH*0.22, dh = PH*0.78;
+    B(dx0, dy0, dw, dh, '#4a3b22');
+    B(dx0, dy0, dw, 1, G2);
+    B(dx0, dy0+dh-1, dw, 1, '#2b2213');
+    // たての 板目
+    for(let vx=dx0+2; vx<dx0+dw-1; vx+=4){
+      B(vx, dy0+1, 1, dh-2, '#5d4a2b');
+      B(vx+1, dy0+1, 1, dh-2, '#3b2f1b');
+    }
+    // 金の 帯 3本
+    [0.18, 0.48, 0.78].forEach(f=>{
+      B(dx0+1, dy0+dh*f, dw-2, 3, G1);
+      B(dx0+1, dy0+dh*f, dw-2, 1, G2);
+      B(dx0+1, dy0+dh*f+2, dw-2, 1, G0);
+    });
+    // まん中の 合わせ目と 取っ手
+    B(mx-1, dy0, 2, dh, '#2b2213');
+    B(mx-4, dy0+dh*0.46, 3, 3, G2);
+    B(mx+1, dy0+dh*0.46, 3, 3, G2);
+    // ---- 石段 ----
+    B(dx0-3, PH-3, dw+6, 3, U2);
+    B(dx0-3, PH-3, dw+6, 1, U3);
+    B(dx0-6, PH-1, dw+12, 1, U0);
+  });
+  gateCache[key] = t;
+  return t;
+}
+function gateAt(x, y){
+  const m = C.MAPS && C.MAPS[curMap];
+  if(!m) return gatePart(1,1,0,0);
+  const at = (xx,yy)=>((m.tiles[yy]||'')[xx]) || '#';
+  let x0=x; while(at(x0-1,y)==='A') x0--;
+  let y0=y; while(at(x,y0-1)==='A') y0--;
+  let tw=0; while(at(x0+tw,y0)==='A') tw++;
+  let th=0; while(at(x0,y0+th)==='A') th++;
+  return gatePart(tw, th, x-x0, y-y0);
+}
+
 // ★この ますが 噴水の どこかを、まわりの F を 見て きめる
 function fountAt(x, y){
   const m = C.MAPS && C.MAPS[curMap];
@@ -1232,6 +1321,7 @@ function tileArt(ch, theme, tx, ty){
     case 'K': return sky ? atlas.bulkhead : atlas.castgate;
     // ★噴水は 「F を ならべた 四角の 大きさ」で 形が きまる
     case 'F': return sky ? fountAt(tx, ty) : atlas.fountain;
+    case 'A': return gateAt(tx, ty);      // ★天空城の 大門（ならべた 大きさで きまる）
     case 'G': return atlas.gate;       // よこの かべの 門（南北）
     case 'g': return atlas.gateSide;   // たての かべの 門（東西）
     case 'T': return atlas.tower;
