@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 19:39 JST", "build":"27f4460e","assets_sha": "632130cd", "lines": {"world": 112, "npc": 518, "chapters": 1462, "bgm": 985, "view2d": 2416, "core": 3031, "view": 1394, "ui": 1141}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 19:47 JST", "build":"0d3f1f48","assets_sha": "632130cd", "lines": {"world": 112, "npc": 518, "chapters": 1462, "bgm": 985, "view2d": 2416, "core": 3032, "view": 1394, "ui": 1141}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -6474,7 +6474,8 @@ const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
-                       'O','x','L','l','p','q','%','R','j','J','A']);
+                       'O','x','L','l','p','q','%','R','j','J','A','u']);
+                       // u＝ゆかの 管の きれはし（しらべる もの。宝箱と おなじく 通れない）
                        // A＝天空城の 大門（3×3）
                        // j/J＝かべの 継ぎ目（管を さす ところ）
                        // p/q＝光珠管、%＝花壇、R＝上層の 壁、F＝噴水（ならべた 大きさで 形が きまる）

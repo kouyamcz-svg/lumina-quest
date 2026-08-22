@@ -814,7 +814,8 @@ const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
-                       'O','x','L','l','p','q','%','R','j','J','A']);
+                       'O','x','L','l','p','q','%','R','j','J','A','u']);
+                       // u＝ゆかの 管の きれはし（しらべる もの。宝箱と おなじく 通れない）
                        // A＝天空城の 大門（3×3）
                        // j/J＝かべの 継ぎ目（管を さす ところ）
                        // p/q＝光珠管、%＝花壇、R＝上層の 壁、F＝噴水（ならべた 大きさで 形が きまる）
