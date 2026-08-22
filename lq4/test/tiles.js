@@ -127,7 +127,7 @@ TERRAINS.forEach(t=>{
   const C = vm.runInContext('LQ4', c2);
   // 文字→絵 の わりあては tileArt が もつ。ここでは 「絵の ない 文字」が
   // マップに 出て いないかを、しられている 文字の ひょうで しらべる。
-  const KNOWN = new Set([...'.#rowft^,:=_~welnCBIPSWMQAVXjZFGgDOxLlKpq%;RuhHA<>*t'].concat(['G','D','O','x','L','l']));
+  const KNOWN = new Set([...'.#rowft^,:=_~welnCBIPSWMQAVXjZFGgDOxLlKpq%;RuhHE<>*t'].concat(['G','D','O','x','L','l']));
   Object.keys(C.MAPS).forEach(mp=>{
     const used = new Set();
     C.MAPS[mp].tiles.forEach(row=>{ for(const ch of row) used.add(ch); });
@@ -185,6 +185,24 @@ TERRAINS.forEach(t=>{
   });
   T('船と ぶつかる 文字が ない', ![...inUse].some(ch=>over.has(ch)),
     [...inUse].filter(ch=>over.has(ch)).join(' '));
+}
+
+
+// ★おなじ 文字を ふたつ 書くと、先の ほうしか つかわれない。
+//   ★大門に A を つかったが、A は 世界地図の「城の アイコン」と かぶって いて、
+//     門の 絵が 一度も 出て いなかった。
+{
+  const src4 = fs.readFileSync('src/view2d.js','utf8');
+  const i0 = src4.indexOf('function tileArt');
+  const i1 = src4.indexOf('\nfunction ', i0+10);
+  const body4 = src4.slice(i0, i1<0 ? src4.length : i1);
+  const seen4 = {};
+  let mm4; const re4 = /case '(.)':/g;
+  while((mm4 = re4.exec(body4))) seen4[mm4[1]] = (seen4[mm4[1]]||0) + 1;
+  Object.keys(seen4).forEach(ch=>{
+    T('文字「'+ch+'」の わりあてが ひとつ', seen4[ch]===1,
+      seen4[ch]+'かしょ ある（先の ほうしか つかわれない）');
+  });
 }
 
 console.log('\n--- tiles: ' + (n-ng) + '/' + n + ' 通過 ---');

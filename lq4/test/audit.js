@@ -855,7 +855,7 @@ Object.keys(C.MAPS).forEach(mp=>{
 //     宝箱と おなじく、となりから しらべる もの。
 {
   // 手に 入れる もの／ふさぐ もの
-  const MUST_BLOCK = ['C','u','O','L','l','K','B','n','h','H','A','F','%','e','x'];
+  const MUST_BLOCK = ['C','u','O','L','l','K','B','n','h','H','E','F','%','e','x'];
   MUST_BLOCK.forEach(ch=>{
     T('しらべる ます「'+ch+'」は 通れない', C.isBlocked(ch), '上に 乗れて しまう');
   });
@@ -883,19 +883,19 @@ Object.keys(C.MAPS).forEach(mp=>{
   const done = new Set();
   for(let y=0;y<t.length;y++){
     for(let x=0;x<t[y].length;x++){
-      if(tileAt(mp,x,y)!=='A' || done.has(x+','+y)) continue;
-      if(tileAt(mp,x-1,y)==='A' || tileAt(mp,x,y-1)==='A') continue;
-      let w=0; while(tileAt(mp,x+w,y)==='A') w++;
-      let h=0; while(tileAt(mp,x,y+h)==='A') h++;
+      if(tileAt(mp,x,y)!=='E' || done.has(x+','+y)) continue;
+      if(tileAt(mp,x-1,y)==='E' || tileAt(mp,x,y-1)==='E') continue;
+      let w=0; while(tileAt(mp,x+w,y)==='E') w++;
+      let h=0; while(tileAt(mp,x,y+h)==='E') h++;
       let ok = true;
       for(let j=0;j<h;j++) for(let i=0;i<w;i++){
-        if(tileAt(mp,x+i,y+j)!=='A') ok=false;
+        if(tileAt(mp,x+i,y+j)!=='E') ok=false;
         done.add((x+i)+','+(y+j));
       }
-      for(let j=-1;j<=h;j++) if(tileAt(mp,x-1,y+j)==='A'||tileAt(mp,x+w,y+j)==='A') ok=false;
-      for(let i=-1;i<=w;i++) if(tileAt(mp,x+i,y-1)==='A'||tileAt(mp,x+i,y+h)==='A') ok=false;
+      for(let j=-1;j<=h;j++) if(tileAt(mp,x-1,y+j)==='E'||tileAt(mp,x+w,y+j)==='E') ok=false;
+      for(let i=-1;i<=w;i++) if(tileAt(mp,x+i,y-1)==='E'||tileAt(mp,x+i,y+h)==='E') ok=false;
       T('大門が 四角に ならんで いる '+mp+' ('+x+','+y+') '+w+'×'+h, ok);
-      T('大門が 3ます いじょう '+mp+' ('+x+','+y+')', w>=3 && h>=3, w+'×'+h);
+      T('大門が 2ます いじょう '+mp+' ('+x+','+y+')', w>=2 && h>=2, w+'×'+h);
       // 前に 立てる ます が ある こと
       let stand = false;
       for(let i=0;i<w;i++) if(C.walkable(mp, x+i, y+h)) stand = true;

@@ -1302,10 +1302,10 @@ function gateAt(x, y){
   const m = C.MAPS && C.MAPS[curMap];
   if(!m) return gatePart(1,1,0,0);
   const at = (xx,yy)=>((m.tiles[yy]||'')[xx]) || '#';
-  let x0=x; while(at(x0-1,y)==='A') x0--;
-  let y0=y; while(at(x,y0-1)==='A') y0--;
-  let tw=0; while(at(x0+tw,y0)==='A') tw++;
-  let th=0; while(at(x0,y0+th)==='A') th++;
+  let x0=x; while(at(x0-1,y)==='E') x0--;
+  let y0=y; while(at(x,y0-1)==='E') y0--;
+  let tw=0; while(at(x0+tw,y0)==='E') tw++;
+  let th=0; while(at(x0,y0+th)==='E') th++;
   return gatePart(tw, th, x-x0, y-y0);
 }
 
@@ -1337,7 +1337,8 @@ function tileArt(ch, theme, tx, ty){
     case 'Q': return atlas.mFuture;
     case '#': return theme==='indoor' ? atlas.indoorwall
             : sky?atlas.skywall : (ice?atlas.icewall : (cave?atlas.rockwall : atlas.wall));
-    case 'w': return atlas.water;
+    // ★w は 下の「井戸」で あつかう。ここに 書くと 井戸が 一度も 出ない。
+    //   ワールドの みずうみは floor で しょり ずみ。
     case 'f': return snowT?atlas.tree : atlas.tree_g;
     case 'o': return ice?atlas.icicle : atlas.rock;
     case 'O': return atlas.rockPush;      // ★動かせる岩
@@ -1364,7 +1365,7 @@ function tileArt(ch, theme, tx, ty){
     case 'K': return sky ? atlas.bulkhead : atlas.castgate;
     // ★噴水は 「F を ならべた 四角の 大きさ」で 形が きまる
     case 'F': return sky ? fountAt(tx, ty) : atlas.fountain;
-    case 'A': return gateAt(tx, ty);      // ★天空城の 大門（ならべた 大きさで きまる）
+    case 'E': return gateAt(tx, ty);      // ★天空城の 大門（ならべた 大きさで きまる）
     case 'G': return atlas.gate;       // よこの かべの 門（南北）
     case 'g': return atlas.gateSide;   // たての かべの 門（東西）
     case 'T': return atlas.tower;

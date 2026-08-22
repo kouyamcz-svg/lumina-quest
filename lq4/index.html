@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 21:15 JST", "build":"5f03750a","assets_sha": "632130cd", "lines": {"world": 112, "npc": 522, "chapters": 1475, "bgm": 985, "view2d": 2466, "core": 3090, "view": 1394, "ui": 1141}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 21:40 JST", "build":"5aaf044a","assets_sha": "632130cd", "lines": {"world": 112, "npc": 522, "chapters": 1475, "bgm": 985, "view2d": 2467, "core": 3090, "view": 1394, "ui": 1141}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -4563,10 +4563,10 @@ function gateAt(x, y){
   const m = C.MAPS && C.MAPS[curMap];
   if(!m) return gatePart(1,1,0,0);
   const at = (xx,yy)=>((m.tiles[yy]||'')[xx]) || '#';
-  let x0=x; while(at(x0-1,y)==='A') x0--;
-  let y0=y; while(at(x,y0-1)==='A') y0--;
-  let tw=0; while(at(x0+tw,y0)==='A') tw++;
-  let th=0; while(at(x0,y0+th)==='A') th++;
+  let x0=x; while(at(x0-1,y)==='E') x0--;
+  let y0=y; while(at(x,y0-1)==='E') y0--;
+  let tw=0; while(at(x0+tw,y0)==='E') tw++;
+  let th=0; while(at(x0,y0+th)==='E') th++;
   return gatePart(tw, th, x-x0, y-y0);
 }
 
@@ -4598,7 +4598,8 @@ function tileArt(ch, theme, tx, ty){
     case 'Q': return atlas.mFuture;
     case '#': return theme==='indoor' ? atlas.indoorwall
             : sky?atlas.skywall : (ice?atlas.icewall : (cave?atlas.rockwall : atlas.wall));
-    case 'w': return atlas.water;
+    // ★w は 下の「井戸」で あつかう。ここに 書くと 井戸が 一度も 出ない。
+    //   ワールドの みずうみは floor で しょり ずみ。
     case 'f': return snowT?atlas.tree : atlas.tree_g;
     case 'o': return ice?atlas.icicle : atlas.rock;
     case 'O': return atlas.rockPush;      // ★動かせる岩
@@ -4625,7 +4626,7 @@ function tileArt(ch, theme, tx, ty){
     case 'K': return sky ? atlas.bulkhead : atlas.castgate;
     // ★噴水は 「F を ならべた 四角の 大きさ」で 形が きまる
     case 'F': return sky ? fountAt(tx, ty) : atlas.fountain;
-    case 'A': return gateAt(tx, ty);      // ★天空城の 大門（ならべた 大きさで きまる）
+    case 'E': return gateAt(tx, ty);      // ★天空城の 大門（ならべた 大きさで きまる）
     case 'G': return atlas.gate;       // よこの かべの 門（南北）
     case 'g': return atlas.gateSide;   // たての かべの 門（東西）
     case 'T': return atlas.tower;
@@ -6084,9 +6085,9 @@ const MAPS = {
   // ★上層区：白亜の 館（R）が ならぶ。金の 帯と 青い ガラス窓。
   //   下層＝割れた 石、中層＝磨き石、上層＝白亜、と 三段で 差を つける。
   upper_dist:{name:'上層区', theme:'sky', enc:false, tiles:[
-    "#########AAA#########",
-    "#;;;;;;;;AAA;;;;;;;;#",
-    "#RRRRR;;;AAA;;;RRRRR#",
+    "#########EE##########",
+    "#;;;;;;;;EE;;;;;;;;;#",
+    "#RRRRR;;;;;;;;;RRRRR#",
     "#RRRRR;;t;;;t;;RRRRR#",
     "#RRIRR;;;n;n;;;RRSRR#",
     "#;;;;;;;;;;;;;;;;;;;#",
@@ -6565,7 +6566,7 @@ const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
-                       'O','x','L','l','p','q','%','R','h','H','A','u']);
+                       'O','x','L','l','p','q','%','R','h','H','E','u']);
                        // u＝ゆかの 管の きれはし（しらべる もの。宝箱と おなじく 通れない）
                        // A＝天空城の 大門（3×3）
                        // j/J＝かべの 継ぎ目（管を さす ところ）
@@ -6701,12 +6702,12 @@ function interact(){
     U.msg(['大きな 岩だ。押せば 動きそうだ。'], ()=>{ G.mode='field'; });
     return;
   }
-  if(ch==='A'){                                 // ★天空城の 大門
+  if(ch==='E'){                                 // ★天空城の 大門
     const cd = chData();
     // 3×3の どこを しらべても おなじ。左上を さがして 見に いく
     let gx=nx, gy=ny;
-    while(tileAt(P.map,gx-1,gy)==='A') gx--;
-    while(tileAt(P.map,gx,gy-1)==='A') gy--;
+    while(tileAt(P.map,gx-1,gy)==='E') gx--;
+    while(tileAt(P.map,gx,gy-1)==='E') gy--;
     const lines = (cd && cd.gates && (cd.gates[P.map+':'+gx+','+gy]
                                    || cd.gates[P.map+':'+nx+','+ny]))
                 || ['閉ざされた 大門。白石の 壁が 雲まで 続いている。'];
