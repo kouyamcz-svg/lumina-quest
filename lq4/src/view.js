@@ -1347,6 +1347,12 @@ function spawnBurst(target){
 window.LQ4View = {
   pop,
   init, loop, buildMap, setActors, fx, battleEnter, battleLeave, refresh, chest, fade, chapterCard,
+  // ★かけつける 人の えんしゅつ（2Dへ 中つぎ）。
+  //   ★ここに 中つぎを 書き忘れて いて、衛兵が 走って こなかった。
+  runner(o){
+    if(!(V2 && V2.runner)){ o && o.done && o.done(); return; }
+    V2.runner(o);
+  },
   showScene(k){
     if(!(V2&&V2.showScene)) return;
     if(!is2D && mode!=='battle'){

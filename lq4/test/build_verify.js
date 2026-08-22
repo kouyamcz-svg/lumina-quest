@@ -162,6 +162,29 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
   });
 }
 
+
+// ★エンジンが よぶ のは view.js の V。2Dに 作った きのうは
+//   view.js で 中つぎ しないと 何も 起きない。
+//   ★runner（かけつける 人）の 中つぎを 書き忘れ、衛兵が 走って こなかった。
+{
+  const v1 = fs.readFileSync('src/view.js','utf8');
+  const core1 = fs.readFileSync('src/core.js','utf8');
+  const m1 = /window\.LQ4View = \{[\s\S]*?\n\};/.exec(v1);
+  T('view.js が きのうを まとめて 出して いる', !!m1);
+  if(m1){
+    const body1 = m1[0];
+    // core が V.xxx( で よんで いる きのうを ひろう
+    const used = new Set();
+    let mm; const re = /\bV\.(\w+)\s*(?:&&|\()/g;
+    while((mm = re.exec(core1))) used.add(mm[1]);
+    used.forEach(k=>{
+      const has = new RegExp('(^|[\\s,{])' + k + '\\s*[,:(]').test(body1);
+      T('view.js が V.' + k + ' を 出して いる', has,
+        'エンジンが よんでも 何も 起きない');
+    });
+  }
+}
+
 // ★サービスワーカーの キャッシュ名が この ビルドの ものに なっている こと
 //   （固定の ままだと、なおしても 端末に ふるい ものが のこる）
 {

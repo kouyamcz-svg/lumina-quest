@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-23 00:39 JST", "build":"b1dcc638","assets_sha": "632130cd", "lines": {"world": 112, "npc": 538, "chapters": 1588, "bgm": 985, "view2d": 2519, "core": 3135, "view": 1394, "ui": 1144}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-23 01:00 JST", "build":"ad556214","assets_sha": "632130cd", "lines": {"world": 112, "npc": 538, "chapters": 1588, "bgm": 985, "view2d": 2519, "core": 3135, "view": 1400, "ui": 1144}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -10391,6 +10391,12 @@ function spawnBurst(target){
 window.LQ4View = {
   pop,
   init, loop, buildMap, setActors, fx, battleEnter, battleLeave, refresh, chest, fade, chapterCard,
+  // ★かけつける 人の えんしゅつ（2Dへ 中つぎ）。
+  //   ★ここに 中つぎを 書き忘れて いて、衛兵が 走って こなかった。
+  runner(o){
+    if(!(V2 && V2.runner)){ o && o.done && o.done(); return; }
+    V2.runner(o);
+  },
   showScene(k){
     if(!(V2&&V2.showScene)) return;
     if(!is2D && mode!=='battle'){
