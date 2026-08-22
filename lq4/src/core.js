@@ -206,7 +206,12 @@ const byMap = {
   pipe_path: ['kagekakera','shihenchu','akumuga','yamiinu'],
   old_pipe:  ['kansuiki','shokudai','hakoyami','yamiinu','sumibami'],
   furnace:   ['kamikishi','hikarikui','kamigarasu','kudamukade','susurichou','wasuremono','nukegara'],
-  watchtower:['kamigarasu','hikarikui','susurichou','kamikishi','nukegara'],
+  // ★塔は 5階だて。上へ 行くほど 手ごわく なる。
+  tower1:    ['kamigarasu','hikarikui','susurichou'],
+  tower2:    ['kamigarasu','hikarikui','susurichou','kamikishi'],
+  tower3:    ['kamikishi','susurichou','kamigarasu','kudamukade'],
+  tower4:    ['kudamukade','nukegara','kamikishi','wasuremono'],
+  tower5:    ['nukegara','wasuremono','kudamukade'],
 };
 
 // ---------------- データ：マップ ----------------
@@ -1596,7 +1601,11 @@ function makeEnemy(def){
   //   JSON.stringify(undefined) が 文字れつに ならず 赤い おびが 出た。
   //   落ちる かわりに 弱い 敵で しのぐ。
   if(!def){
-    console.warn('[LQ4] 出す 敵が いない：', P && P.map);
+    // ★出現表の 書き忘れ・名まえの まちがい。
+    //   だまって 弱い 敵を 出すと 気づけない ので、画面にも 出す。
+    const where = (P && P.map) || '?';
+    console.warn('[LQ4] 出す 敵が いない：', where);
+    if(U && U.msg) G._encWarn = '（出現表が ない：'+where+'）';
     def = ENEMIES[0];
   }
   const e = JSON.parse(JSON.stringify(def));
@@ -1666,7 +1675,9 @@ function startBattle(kind){
   V.battleEnter(enemies, ()=>{
     const cnt={}; enemies.forEach(e=>{ cnt[e.name]=(cnt[e.name]||0)+1; });
     const intro = Object.keys(cnt).map(n=>cnt[n]>1?n+' '+cnt[n]+'たい':n).join('と ')+'が 現れた！';
-    U.msg([intro], ()=>beginRound());
+    // ★出現表が ない ときは 画面にも 出す（だまって 弱い 敵に なるのを ふせぐ）
+    const warn = G._encWarn; G._encWarn = null;
+    U.msg(warn ? [intro, warn] : [intro], ()=>beginRound());
   });
 }
 function beginRound(){

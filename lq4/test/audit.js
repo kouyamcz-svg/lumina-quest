@@ -682,6 +682,32 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★たたかいの ある マップには 出現表が ある こと。
+//   ★塔を 5階に 分けた とき 出現表の 名まえを 直さず、
+//     どの 階でも おなじ 敵しか 出なかった（保険が はたらいて いた）。
+{
+  const src4 = fs.readFileSync('src/core.js','utf8');
+  const mm = src4.match(/const byMap = \{([\s\S]*?)\n\};/);
+  const byMap = {};
+  if(mm) mm[1].split('\n').forEach(l=>{
+    const g = /^\s*([a-z_0-9]+):\s*\[(.*)\],/.exec(l);
+    if(g) byMap[g[1]] = g[2].split(',').map(x=>x.trim().replace(/'/g,'')).filter(Boolean);
+  });
+  const keys = new Set(C.ENEMIES.map(e=>e.key));
+  Object.keys(C.MAPS).forEach(mp=>{
+    if(!C.MAPS[mp].enc) return;
+    T('たたかいの ある マップに 出現表が ある '+mp, !!byMap[mp], '出現表が ない');
+    if(!byMap[mp]) return;
+    T('出現表に 2しゅるい いじょう '+mp, byMap[mp].length>=2, byMap[mp].length+'しゅるい');
+    byMap[mp].forEach(k=>
+      T('出現表の 敵が 実在する '+mp+' '+k, keys.has(k), 'そんな 敵は いない'));
+  });
+  // 出現表に あるのに マップが ない（名まえの 直し忘れ）
+  Object.keys(byMap).forEach(mp=>{
+    T('出現表の マップが 実在する '+mp, !!C.MAPS[mp], 'マップが ない（名まえを 直し忘れて いる）');
+  });
+}
+
 // ★仕切り(K)を あけないと 先へ 行けない こと。
 //   ★仕切りと 階段が はなれて いて、あけずに 上れて しまった。
 //     しかけが 意味を なさない。
