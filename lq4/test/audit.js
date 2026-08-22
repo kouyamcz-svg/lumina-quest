@@ -682,6 +682,17 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★どの マップにも 日本語の 地名が ある こと。
+//   ★塔を 5階に 分けた とき 登録を 忘れ、画面の 左上に「tower1」と 出た。
+{
+  const W2 = vm.runInContext('WORLD', ctx);
+  Object.keys(C.MAPS).forEach(mp=>{
+    const nm = W2.mapName(mp);
+    T('地名が ある '+mp, !!nm && nm!==mp, 'いまは「'+nm+'」');
+    T('地名が 日本語 '+mp, !/^[a-z0-9_]+$/i.test(nm||''), 'いまは「'+nm+'」');
+  });
+}
+
 // ★天空城の 大門（A）は 四角に ならべる。でこぼこだと 絵が 切れる。
 //   ★噴水と 同じ しくみ。ならべた 大きさで 形が きまる。
 Object.keys(C.MAPS).forEach(mp=>{

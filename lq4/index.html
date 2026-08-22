@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 18:14 JST", "build":"bdd164b8","assets_sha": "632130cd", "lines": {"world": 108, "npc": 518, "chapters": 1462, "bgm": 985, "view2d": 2416, "core": 3031, "view": 1394, "ui": 1141}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 19:39 JST", "build":"27f4460e","assets_sha": "632130cd", "lines": {"world": 112, "npc": 518, "chapters": 1462, "bgm": 985, "view2d": 2416, "core": 3031, "view": 1394, "ui": 1141}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -218,7 +218,11 @@ const MAP_IDS = {
   upper_dist: {region:'sky', kind:'town', name:'上層区',        scene:'SCENE_SKY_TOWN'},
   garden:     {region:'sky', kind:'town', name:'空中庭園',      scene:'SCENE_SKY_TOWN'},
   furnace:    {region:'sky', kind:'dgn',  name:'光珠炉の 外郭', scene:'SCENE_SKY_TOWN'},
-  watchtower: {region:'sky', kind:'dgn',  name:'雲見の 塔',    scene:'SCENE_SKY_TOWN'},
+  tower1:     {region:'sky', kind:'dgn',  name:'雲見の 塔 一階',   scene:'SCENE_SKY_TOWN'},
+  tower2:     {region:'sky', kind:'dgn',  name:'雲見の 塔 二階',   scene:'SCENE_SKY_TOWN'},
+  tower3:     {region:'sky', kind:'dgn',  name:'雲見の 塔 三階',   scene:'SCENE_SKY_TOWN'},
+  tower4:     {region:'sky', kind:'dgn',  name:'雲見の 塔 四階',   scene:'SCENE_SKY_TOWN'},
+  tower5:     {region:'sky', kind:'dgn',  name:'雲見の 塔 最上階', scene:'SCENE_SKY_TOWN'},
   trial_yard: {region:'sky', kind:'town', name:'見習い試験場',    scene:'SCENE_SKY_TOWN'},
   rift_yard:  {region:'sky', kind:'dgn',  name:'裂け目の広場',    scene:'SCENE_SKY_RIFT'},
 };
@@ -503,7 +507,7 @@ const NPCS = {
 
   // ============ 第2章：雲見の 塔 ============
   tower1: [
-    {at:'11,2', spr:'elderWoman', name:'塔の 見張り', lines:[
+    {at:'11,2', spr:'elder', name:'塔の 見張り', lines:[
       {when:{flag:'ch2_towerPaid'}, text:[
         '見張り「雲は 戻った。だが 前より 薄い」',
         '見張り「食われた ぶんは 戻らんのだろうな」']},

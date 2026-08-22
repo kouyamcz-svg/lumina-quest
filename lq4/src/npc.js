@@ -228,7 +228,7 @@ const NPCS = {
 
   // ============ 第2章：雲見の 塔 ============
   tower1: [
-    {at:'11,2', spr:'elderWoman', name:'塔の 見張り', lines:[
+    {at:'11,2', spr:'elder', name:'塔の 見張り', lines:[
       {when:{flag:'ch2_towerPaid'}, text:[
         '見張り「雲は 戻った。だが 前より 薄い」',
         '見張り「食われた ぶんは 戻らんのだろうな」']},
