@@ -82,5 +82,81 @@ T('せんとうで Bを おしたら えらび直し',
     lastOpt && lastOpt.cancel==='cancel', JSON.stringify(lastOpt));
 }
 
+// ---- ⑤ せんとうの どの だんかいでも Bで ひとつ 前へ もどる ----
+//   ★あいてを えらぶ ところで Bを おすと、技の 一覧では なく
+//     いちばん さいしょの コマンドまで もどって いた。
+//   ★1人めで Bを おすと 自分を よび直して つみあがり、固まって いた。
+{
+  const run = (plan, cap)=>{
+    const path = []; let step = 0;
+    const UI2 = {
+      msg(l,d){ d&&d(); },
+      menu(items, title, onPick, opt){
+        path.push(String(title)); step++;
+        if(step > cap){ onPick(items.length-1); return; }   // 打ちきり
+        onPick(plan(String(title), items));
+      },
+      hud(){}, label(){}, openTrade(){},
+    };
+    C.bind(C.NullView, UI2, C.NullAudio);
+    C.freshState(); C.G.chapter=3; C.G.tactic='manual'; C.P.herbs=5;
+    C.party.length=0;
+    C.party.push(C.mkMember('io',20)); C.party.push(C.mkMember('seren',20));
+    C.P.map='furnace'; C.G.mode='field';
+    let crashed = false;
+    try{ C.startBattle('fornax'); }catch(e){ crashed = e.message; }
+    return {path, crashed};
+  };
+
+  // 技 → あいて → B → 技の 一覧に もどる
+  {
+    const r = run((t,items)=>{
+      if(t==='イオ') return 1;
+      if(t.indexOf('技')>=0) return 0;
+      if(t==='誰を 狙う？') return null;
+      return items.length-1;
+    }, 8);
+    T('技の あいてえらびで Bを おすと 技の 一覧へ',
+      r.path[3] && r.path[3].indexOf('技')>=0, r.path.slice(0,5).join(' → '));
+    T('つみあがって 固まらない（技）', !r.crashed, r.crashed);
+  }
+  // 道具 → 誰に → B → 道具の 一覧に もどる
+  {
+    const r = run((t,items)=>{
+      if(t==='イオ') return 2;
+      if(t==='道具') return 0;
+      if(t==='誰に 使う？') return null;
+      return items.length-1;
+    }, 8);
+    T('道具の あいてえらびで Bを おすと 道具の 一覧へ',
+      r.path[3]==='道具', r.path.slice(0,5).join(' → '));
+  }
+  // 攻撃 → 誰を → B → コマンドに もどる
+  {
+    const r = run((t,items)=>{
+      if(t==='イオ') return 0;
+      if(t==='誰を 狙う？') return null;
+      return items.length-1;
+    }, 8);
+    T('攻撃の あいてえらびで Bを おすと コマンドへ',
+      r.path[2]==='イオ', r.path.slice(0,4).join(' → '));
+  }
+  // 1人めで Bを おしても 固まらない
+  {
+    const r = run((t,items)=> t==='イオ' ? null : items.length-1, 12);
+    T('1人めで Bを おしても 固まらない', !r.crashed, r.crashed);
+  }
+  // 2人めで Bを おすと 1人めへ もどる
+  {
+    const r = run((t,items)=>{
+      if(t==='イオ') return 3;                 // 防御
+      if(t==='セレン') return null;             // ★B
+      return items.length-1;
+    }, 8);
+    T('2人めで Bを おすと 1人めへ もどる',
+      r.path[2]==='イオ', r.path.slice(0,4).join(' → '));
+  }
+}
+
 console.log('\n--- menu_cancel: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

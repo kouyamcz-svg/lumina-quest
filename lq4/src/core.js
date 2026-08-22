@@ -1764,6 +1764,12 @@ function beginRound(){
   }
   collectCommands(0);
 }
+// ★メニューの 中から 自分を よび直すと、よびだしが つみあがる。
+//   ひとこま おいて から よぶ ための つつみ。
+function again(i){
+  if(typeof setTimeout==='function') setTimeout(()=>collectCommands(i), 0);
+  else collectCommands(i);
+}
 function collectCommands(i){
   const b=G.battle; if(!b) return;
   const list = party.filter(p=>p.hp>0);
@@ -1779,26 +1785,31 @@ function collectCommands(i){
   //   ひとりめ なら えらび直し、ふたりめ いこう なら 前の 人の 指示を 取り消す。
   U.menu(items, m.name, (sel)=>{
     if(sel===null){
-      if(i>0){ b.queue.pop(); collectCommands(i-1); }
-      else collectCommands(i);
+      // ★Bは「戻る」。ふたりめ いこうは 前の 人の 指示を 取り消す。
+      //   ひとりめは えらび直し。ここで じかに よび直すと つみあがって
+      //   固まる ので、ひとこま おいて から よぶ。
+      if(i>0){ b.queue.pop(); again(i-1); }
+      else again(i);
       return;
     }
     if(sel===0){
       chooseTarget(m, (tgt)=>{
-        if(tgt===null){ collectCommands(i); return; }        // 戻る
+        if(tgt===null){ again(i); return; }        // 戻る
         b.queue.push({actor:m, type:'attack', tgt}); collectCommands(i+1);
       });
     }
     else if(sel===1){
       const sp = knownSpells(m).filter(s=>s.mp<=m.mp);
-      if(!sp.length){ G.mode='msg'; U.msg(['つかえる 技が ない！'], ()=>{ G.mode='battle'; collectCommands(i); }); return; }
+      if(!sp.length){ G.mode='msg'; U.msg(['つかえる 技が ない！'], ()=>{ G.mode='battle'; again(i); }); return; }
+      const backToSkills = ()=>{ if(typeof setTimeout==='function') setTimeout(pickSkill,0); else pickSkill(); };
+      const pickSkill = ()=>
       U.menu(sp.map(spellLabel).concat(['戻る']), m.name+'　技', (k)=>{
-        if(k>=sp.length){ collectCommands(i); return; }
+        if(k===null || k>=sp.length){ again(i); return; }
         const chosen=sp[k];
         if(chosen.type==='dmg' || chosen.type==='defdown'
            || (chosen.type==='inflict' && !chosen.all)){      // あいてを えらぶ 技
           chooseTarget(m, (tgt)=>{
-            if(tgt===null){ collectCommands(i); return; }
+            if(tgt===null){ backToSkills(); return; }      // ★技の 一覧へ もどる
             b.queue.push({actor:m, type:'spell', sp:chosen, tgt}); collectCommands(i+1);
           });
           return;
@@ -1806,33 +1817,35 @@ function collectCommands(i){
         // ★回復・状態回復・そせいは 「誰に 使うか」を えらぶ
         if(spellNeedsTarget(chosen)){
           chooseMember(m, chosen, (tgt)=>{
-            if(tgt===null){ collectCommands(i); return; }
+            if(tgt===null){ backToSkills(); return; }      // ★技の 一覧へ もどる
             b.queue.push({actor:m, type:'spell', sp:chosen, tgt}); collectCommands(i+1);
           });
           return;
         }
         b.queue.push({actor:m, type:'spell', sp:chosen}); collectCommands(i+1);
-      });
+      }, {cancel:'cancel'});
+      pickSkill();
     }
     else if(sel===2){
       const opts=[];
       if(P.herbs>0) opts.push('薬草 '+P.herbs);
       if(P.waters>0) opts.push('魔法の 聖水 '+P.waters);
-      if(!opts.length){ G.mode='msg'; U.msg(['道具が ない！'], ()=>{ G.mode='battle'; collectCommands(i); }); return; }
+      if(!opts.length){ G.mode='msg'; U.msg(['道具が ない！'], ()=>{ G.mode='battle'; again(i); }); return; }
+      const backToItems = ()=>{ if(typeof setTimeout==='function') setTimeout(pickItem,0); else pickItem(); };
+      const pickItem = ()=>
       U.menu(opts.concat(['戻る']), '道具', (k)=>{
-        if(k>=opts.length){ collectCommands(i); return; }
+        if(k===null || k>=opts.length){ again(i); return; }
         const kind = opts[k].startsWith('薬草') ? 'herb' : 'water';
         // ★誰に 使うかを えらぶ（1にんの ときは そのまま）
         const alive = party.filter(p=>p.hp>0);
-        if(alive.length<=1){
-          b.queue.push({actor:m, type:kind, tgt:alive[0]}); collectCommands(i+1); return;
-        }
+        if(!alive.length){ again(i); return; }
         const names = alive.map(p=> p.name+'　HP'+p.hp+'/'+p.maxhp+(kind==='water' ? '　MP'+p.mp+'/'+p.maxmp : ''));
         U.menu(names.concat(['戻る']), '誰に 使う？', (t)=>{
-          if(t>=alive.length){ collectCommands(i); return; }
+          if(t===null || t>=alive.length){ backToItems(); return; }   // ★道具の 一覧へ
           b.queue.push({actor:m, type:kind, tgt:alive[t]}); collectCommands(i+1);
-        });
-      });
+        }, {cancel:'cancel'});
+      }, {cancel:'cancel'});
+      pickItem();
     }
     else if(sel===3){ b.queue.push({actor:m, type:'guard'}); collectCommands(i+1); }
     else { b.queue.push({actor:m, type:'flee'}); collectCommands(i+1); }
@@ -1852,22 +1865,24 @@ const BUFF_JP   = {atk:'攻撃力', def:'守備力', agi:'素早さ'};
 function chooseMember(m, sp, done){
   const alive = (sp.type==='revive') ? party.filter(p=>p.hp<=0) : aliveMembers();
   if(!alive.length){ done(null); return; }
-  if(alive.length===1){ done(alive[0]); return; }
+  // ★ひとりでも えらぶ 画面を 出す（Bで 戻れる ように）
   const label = alive.map(p=>{
     if(sp.type==='heal')  return p.name + '　HP' + p.hp + '/' + p.maxhp;
     if(sp.type==='cure')  return p.name + '　' + (p.status ? (STATUS_JP[p.status]||p.status) : 'そうかい');
     return p.name;
   });
   U.menu(label.concat(['戻る']), sp.name + '　誰に？', (k)=>{
-    done(k >= alive.length ? null : alive[k]);
-  });
+    done(k===null || k >= alive.length ? null : alive[k]);
+  }, {cancel:'cancel'});
 }
 function chooseTarget(m, cb){
   const alive = G.battle.enemies.filter(e=>e.hp>0);
-  if(alive.length<=1){ cb(alive[0]||null); return; }
+  // ★あいてが 1たいでも えらぶ 画面を 出す。
+  //   だまって きめて しまうと、そこから Bで 戻れなかった。
+  if(!alive.length){ cb(null); return; }
   U.menu(alive.map(e=>e.dispName).concat(['戻る']), '誰を 狙う？', (k)=>{
-    cb(k>=alive.length ? null : alive[k]);
-  });
+    cb(k===null || k>=alive.length ? null : alive[k]);
+  }, {cancel:'cancel'});
 }
 function autoCommand(m){
   const b=G.battle;
