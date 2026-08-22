@@ -410,7 +410,7 @@ const MAPS = {
     "#.............#",
     "#####.....#####",
     "#.............#",
-    "#j...#...#....#",
+    "#h...#...#....#",
     "#....#...#....#",
     "#.....<.......#",
     "###############"],
@@ -427,7 +427,7 @@ const MAPS = {
     "#.............#",
     "#####.....#####",
     "#.............#",
-    "#j...#.u.#...j#",
+    "#h...#.u.#...h#",
     "#....#...#....#",
     "#.....<.......#",
     "###############"],
@@ -444,9 +444,9 @@ const MAPS = {
     "#.............#",
     "#####.....#####",
     "#.............#",
-    "#j...#...#..j.#",
+    "#h...#...#..h.#",
     "#....#...#....#",
-    "#..j..<.......#",
+    "#..h..<.......#",
     "###############"],
     warpsXY:{
       '6,9':{to:'tower3', x:6, y:1},
@@ -814,7 +814,7 @@ const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
-                       'O','x','L','l','p','q','%','R','j','J','A','u']);
+                       'O','x','L','l','p','q','%','R','h','H','A','u']);
                        // u＝ゆかの 管の きれはし（しらべる もの。宝箱と おなじく 通れない）
                        // A＝天空城の 大門（3×3）
                        // j/J＝かべの 継ぎ目（管を さす ところ）
@@ -964,7 +964,7 @@ function interact(){
     return;
   }
   if(ch==='u'){ takePipe(nx,ny); return; }
-  if(ch==='j' || ch==='J'){ fitPipe(nx,ny); return; }
+  if(ch==='h' || ch==='H'){ fitPipe(nx,ny); return; }
   if(ch==='K'){ openLockedDoor(nx,ny); return; }
   // なにも なければ
   G.mode='msg';
@@ -1098,8 +1098,8 @@ function takePipe(nx,ny){
 function fitPipe(nx,ny){
   const cur = tileAt(P.map,nx,ny);
   G.mode='msg';
-  if(cur==='J'){                                   // 抜く
-    setTile(P.map,nx,ny,'j');
+  if(cur==='H'){                                   // 抜く
+    setTile(P.map,nx,ny,'h');
     G.pipes = (G.pipes||0) + 1;
     A.item && A.item();
     V.refresh && V.refresh();
@@ -1116,7 +1116,7 @@ function fitPipe(nx,ny){
     return;
   }
   G.pipes--;
-  setTile(P.map,nx,ny,'J');
+  setTile(P.map,nx,ny,'H');
   A.item && A.item();
   V.refresh && V.refresh();
   const lines = ['継ぎ目に 管を さしこんだ。',
@@ -1133,7 +1133,7 @@ function lampsFromPipes(lines){
   // つぎめ ごとに 「どの 灯りが つくか」
   Object.keys(rule).forEach(k=>{
     const [jx,jy] = k.split(',').map(Number);
-    const on = tileAt(P.map,jx,jy)==='J';
+    const on = tileAt(P.map,jx,jy)==='H';
     rule[k].forEach(o=>{
       const now = tileAt(P.map,o.x,o.y);
       if(now!=='L' && now!=='l') return;

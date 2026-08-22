@@ -726,7 +726,7 @@ Object.keys(C.MAPS).forEach(mp=>{
 //     宝箱と おなじく、となりから しらべる もの。
 {
   // 手に 入れる もの／ふさぐ もの
-  const MUST_BLOCK = ['C','u','O','L','l','K','B','n','j','J','A','F','%','e','x'];
+  const MUST_BLOCK = ['C','u','O','L','l','K','B','n','h','H','A','F','%','e','x'];
   MUST_BLOCK.forEach(ch=>{
     T('しらべる ます「'+ch+'」は 通れない', C.isBlocked(ch), '上に 乗れて しまう');
   });

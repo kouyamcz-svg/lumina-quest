@@ -127,7 +127,7 @@ TERRAINS.forEach(t=>{
   const C = vm.runInContext('LQ4', c2);
   // 文字→絵 の わりあては tileArt が もつ。ここでは 「絵の ない 文字」が
   // マップに 出て いないかを、しられている 文字の ひょうで しらべる。
-  const KNOWN = new Set([...'.#rowft^,:=_~welnCBIPSWMQAVXjZFGgDOxLlKpq%;RujJA<>*t'].concat(['G','D','O','x','L','l']));
+  const KNOWN = new Set([...'.#rowft^,:=_~welnCBIPSWMQAVXjZFGgDOxLlKpq%;RuhHA<>*t'].concat(['G','D','O','x','L','l']));
   Object.keys(C.MAPS).forEach(mp=>{
     const used = new Set();
     C.MAPS[mp].tiles.forEach(row=>{ for(const ch of row) used.add(ch); });
@@ -153,6 +153,38 @@ TERRAINS.forEach(t=>{
   T('噴水に ざひょうを わたして いる', /fountAt\(tx, ty\)/.test(src2));
   T('大きさから わりふりを きめて いる',
     /fountPart\(tw, th, x-x0, y-y0\)/.test(src2));
+}
+
+
+// ★えがく がわで うわがき される 文字を、しかけに つかって いない こと。
+//   ★継ぎ目に j を つかって いたが、j は LQ3の「船着き場」。
+//     えがく がわが 先に 船を うわがきして、管が 船に 見えた。
+{
+  const src3 = fs.readFileSync('src/view2d.js','utf8');
+  const over = new Set();
+  const re3 = /ch==='(\w)'\)\{[\s\S]{0,220}?atlas\.boat/g;
+  let mm;
+  while((mm = re3.exec(src3))) over.add(mm[1]);
+  // ★じっさいの 地図で つかって いる 文字を しらべる。
+  //   「つかう よてい」では なく「いま おいて ある」ものを 見る。
+  const fs2=require('fs'), vm2=require('vm');
+  const c4={console,window:{},localStorage:undefined}; c4.globalThis=c4;
+  vm2.createContext(c4);
+  for(const f of ['world.js','npc.js','chapters.js','core.js'])
+    vm2.runInContext(fs2.readFileSync('src/'+f,'utf8'), c4, {filename:f});
+  const C4 = vm2.runInContext('LQ4', c4);
+  const inUse = new Set();
+  Object.keys(C4.MAPS).forEach(mp=>{
+    if(C4.MAPS[mp].theme==='world') return;          // 世界地図は 船を つかう
+    [...C4.MAPS[mp].tiles.join('')].forEach(ch=>inUse.add(ch));
+  });
+  [...inUse].sort().forEach(ch=>{
+    if(!over.has(ch)) return;
+    T('地図の 文字「'+ch+'」が 船に 上書きされない', false,
+      'えがく がわが 船を かさねる（LQ3の 船着き場と ぶつかって いる）');
+  });
+  T('船と ぶつかる 文字が ない', ![...inUse].some(ch=>over.has(ch)),
+    [...inUse].filter(ch=>over.has(ch)).join(' '));
 }
 
 console.log('\n--- tiles: ' + (n-ng) + '/' + n + ' 通過 ---');

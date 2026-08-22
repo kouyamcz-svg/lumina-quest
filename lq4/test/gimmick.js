@@ -115,7 +115,7 @@ T('もう 押せる なら もどさない', C.gimmickRescue('rift_yard')===fals
   T('ひろうと ゆかから 消える', C.tileAt('tower1',3,2)==='.', C.tileAt('tower1',3,2));
   touch('tower2',1,7);
   T('継ぎ目に さすと 減る', C.G.pipes===0, '本数 '+C.G.pipes);
-  T('さした 継ぎ目は かたちが かわる', C.tileAt('tower2',1,7)==='J', C.tileAt('tower2',1,7));
+  T('さした 継ぎ目は かたちが かわる', C.tileAt('tower2',1,7)==='H', C.tileAt('tower2',1,7));
   T('さすと 灯りが ともる', C.tileAt('tower2',3,3)==='l', C.tileAt('tower2',3,3));
   T('灯りが そろうと 仕切りが あく', C.tileAt('tower2',6,2)==='.', C.tileAt('tower2',6,2));
   // 抜くと 灯りは 消えるが、あいた 仕切りは 閉じない
@@ -126,7 +126,7 @@ T('もう 押せる なら もどさない', C.gimmickRescue('rift_yard')===fals
   // 管が ない ときは させない
   C.G.pipes = 0;
   touch('tower3',1,7);
-  T('管が ないと させない', C.tileAt('tower3',1,7)==='j', C.tileAt('tower3',1,7));
+  T('管が ないと させない', C.tileAt('tower3',1,7)==='h', C.tileAt('tower3',1,7));
   T('させない ときは わけを 言う', log.join('').indexOf('はまる 管')>=0, log.join(' / ').slice(0,50));
 }
 

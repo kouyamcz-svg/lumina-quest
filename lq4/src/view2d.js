@@ -1300,8 +1300,8 @@ function tileArt(ch, theme, tx, ty){
     case 'O': return atlas.rockPush;      // ★動かせる岩
     case 'x': return atlas.pit;           // ★穴
     case 'u': return atlas.pipeItem;      // ★ゆかの 管の きれはし
-    case 'j': return atlas.jointOff;      // ★空の 継ぎ目
-    case 'J': return atlas.jointOn;       // ★管を さした 継ぎ目
+    case 'h': return atlas.jointOff;      // ★空の 継ぎ目
+    case 'H': return atlas.jointOn;       // ★管を さした 継ぎ目
     case 'R': return atlas.richwall;      // ★上層の 白亜の 壁
     case '%': return atlas.flowerbed;     // ★花壇（中層）
     case ';': return atlas.plaza;         // ★磨かれた 白石（中層の 広場）
