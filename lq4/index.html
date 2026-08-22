@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 20:12 JST", "build":"9833adf8","assets_sha": "632130cd", "lines": {"world": 112, "npc": 518, "chapters": 1462, "bgm": 985, "view2d": 2423, "core": 3048, "view": 1394, "ui": 1141}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-22 20:19 JST", "build":"7f2a4d6e","assets_sha": "632130cd", "lines": {"world": 112, "npc": 518, "chapters": 1462, "bgm": 985, "view2d": 2423, "core": 3062, "view": 1394, "ui": 1141}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -5706,7 +5706,20 @@ const SPELL_DEFS = {
   ryuuseigun: {name:'流星群',      mp:30,type:'dmgall', min:11, max:21, pw:1.15},
   kansen_kiwa:{name:'極・貫閃',    mp:36,type:'dmg', min:20, max:36, pw:2.15},
 
-  // ============ ノエ（夢術）：回復と弱体 ============
+  // ============ ノエ（夢術）：回復と弱体、そして せめ ============
+  //   ★アマネが 来るのは 第4章。それまで ノエは 攻撃手段が なく、
+  //     回復が いらない 場面で 手持ち無沙汰に なって いた。
+  //   ★光の 術（アマネ）と かぶらない よう、夢術は
+  //     「単体は ひかえめ／全体が とくい／状態いじょうを そえる」に する。
+  yumetsubute:{name:'ゆめつぶて',  mp:3, type:'dmg',    min:3,  max:7,  pw:0.55},
+  yumekasumi: {name:'ゆめがすみ',  mp:6, type:'dmgall', min:5,  max:11, pw:0.55,
+               inflict:{type:'slow', p:0.20}},
+  yumekui:    {name:'ゆめくい',    mp:9, type:'dmg',    min:6,  max:12, pw:0.70,
+               inflict:{type:'sleep', p:0.30}},
+  yumenowa:   {name:'ゆめの わ',   mp:14,type:'dmgall', min:7,  max:14, pw:0.60,
+               inflict:{type:'confuse', p:0.24}},
+  yumenoumi:  {name:'ゆめの うみ', mp:24,type:'dmgall', min:12, max:22, pw:0.80},
+
   heal:       {name:'ヒール',      mp:3, type:'heal', min:20, max:28},
   mezamashi:  {name:'目覚まし',    mp:2, type:'cure'},
   madoromi:   {name:'まどろみ',    mp:4, type:'inflict', st:'sleep',   p:0.65},
@@ -5759,10 +5772,11 @@ const CLASSES = {
                  {lv:50,key:'ryuuseigun'},{lv:57,key:'kansen_kiwa'}]},
   // ノエ（14・夢守りの少年）夢術：回復と弱体
   noe:  {name:'ノエ',  hp:13,mp:10,atk:3,def:3,agi:5, g:{hp:4,mp:5,atk:1,def:2,agi:2},
-         learns:[{lv:3,key:'heal'},{lv:6,key:'mezamashi'},{lv:9,key:'madoromi'},
+         learns:[{lv:3,key:'heal'},{lv:5,key:'yumetsubute'},{lv:6,key:'mezamashi'},
+                 {lv:9,key:'madoromi'},{lv:11,key:'yumekasumi'},{lv:13,key:'yumekui'},
                  {lv:14,key:'hiira'},{lv:17,key:'yumeomori'},{lv:21,key:'yumeutsutsu'},
-                 {lv:26,key:'hiiga'},{lv:31,key:'yumenotobari'},{lv:35,key:'healall'},
-                 {lv:42,key:'hiiraall'},{lv:47,key:'hiija'},{lv:55,key:'tokoyo'}]},
+                 {lv:26,key:'hiiga'},{lv:29,key:'yumenowa'},{lv:31,key:'yumenotobari'},{lv:35,key:'healall'},
+                 {lv:42,key:'hiiraall'},{lv:44,key:'yumenoumi'},{lv:47,key:'hiija'},{lv:55,key:'tokoyo'}]},
   // アマネ（15・白竜の声を聞く巫女）光術：攻撃と支援
   amane:{name:'アマネ',hp:14,mp:12,atk:3,def:3,agi:6, g:{hp:4,mp:5,atk:2,def:2,agi:2},
          learns:[{lv:5,key:'spark'},{lv:9,key:'hikari_tate'},{lv:12,key:'spara'},
@@ -5813,7 +5827,7 @@ const MIDBOSS = {
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第2章ボス：あくむじゅう フォルナクス（炉座）----
   //   炉の 外郭に わき、光を 喰らう。倒すと 紙片が 残る。
-  fornax:{key:'fornax', name:'あくむじゅう フォルナクス', hp:1380, atk:49, def:27, agi:16, acts:1,
+  fornax:{key:'fornax', name:'あくむじゅう フォルナクス', hp:1400, atk:48, def:27, agi:16, acts:1,
     exp:1100, gold:4000, art:'fornax', scale:1.10,
     skill:{p:0.30, mul:1.35, name:'ほのおの あぎと'},
     aoe:{p:0.24, lo:26, hi:38, name:'炉のいぶき'},

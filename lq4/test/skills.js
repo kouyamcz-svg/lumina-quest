@@ -75,5 +75,41 @@ const expect = (m,s)=> ((s.min+s.max)/2) + atkOf(m)*(s.pw||0);
   T('自動戦闘で 技を つかう', used.size>0, [...used].join(' '));
 }
 
+// ★なかまごとの 役わりが かぶって いない こと。
+//   ★ノエは 攻撃呪文を ひとつも 覚えず、回復が いらない 場面で
+//     手持ち無沙汰に なって いた。かと いって 光の術（アマネ）より
+//     強く すると、アマネの 立場が なくなる。
+{
+  const atkOf2 = (m)=> m.batk + (m.weapon ? m.weapon.v : 0);
+  const top = (cls, lv, ty)=>{
+    const m = C.mkMember(cls, lv);
+    m.weapon = {kind:'w', name:'w', v:9};
+    const ls = C.CLASSES[cls].learns.filter(l=>l.lv<=lv)
+                 .map(l=>D[l.key]).filter(x=>x && x.type===ty);
+    if(!ls.length) return 0;
+    return Math.max.apply(null,
+      ls.map(x=>((x.min+x.max)/2) + atkOf2(m)*(x.pw||0)));
+  };
+  // ① ノエは せめ手を もつ（第2章の ころには 使える）
+  T('ノエが 攻撃呪文を 覚える', top('noe',13,'dmg') > 0, '手が ない');
+  T('ノエの せめが 通常こうげきより 強い', (()=>{
+    const m = C.mkMember('noe',17); m.weapon={kind:'w',name:'w',v:9};
+    return top('noe',17,'dmg') > atkOf2(m)-7;
+  })(), 'つかう いみが ない');
+  // ② まっすぐな 火力は アマネの 役目
+  [25,40].forEach(lv=>{
+    T('Lv'+lv+'：単体の 火力は アマネが 上',
+      top('amane',lv,'dmg') >= top('noe',lv,'dmg'),
+      'ノエ '+Math.round(top('noe',lv,'dmg'))+' / アマネ '+Math.round(top('amane',lv,'dmg')));
+  });
+  // ③ ノエの せめには 状態いじょうが そえて ある（削り役）
+  {
+    const ls = C.CLASSES.noe.learns.map(l=>D[l.key])
+                 .filter(x=>x && (x.type==='dmg'||x.type==='dmgall'));
+    T('ノエの せめに 状態いじょうが そえて ある',
+      ls.some(x=>x.inflict), '削り役に なって いない');
+  }
+}
+
 console.log('\n--- skills: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);
