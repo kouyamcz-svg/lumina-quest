@@ -682,6 +682,37 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★ダンジョンに 入った ところから ボスが 見えない こと。
+//   ★炉の 外郭は 迷路の 上に ボスの 間が つながって いて、
+//     入った とたん ボスが 見えて いた。
+{
+  const TS2=16, ts2=48;
+  Object.keys(CHD.CH).forEach(no=>{
+    const bs = CHD.CH[no].bosses || {};
+    Object.keys(bs).forEach(k=>{
+      if(k.indexOf(':')<0) return;
+      const mp = k.split(':')[0];
+      const [bx,by] = k.split(':')[1].split(',').map(Number);
+      const m = C.MAPS[mp]; if(!m) return;
+      // 入口（ワープの ある ます）から ボスまで
+      // ★「ボスの 間」その ものは 近くて よい（入った 先が 山場）。
+      //   小さな 広場（点検路・裂け目の広場）も 見えて よい。
+      //   しらべるのは 迷路の ような 広い ダンジョン。
+      if(!m.enc) return;
+      const wide = m.tiles[0].length >= 20 && m.tiles.length >= 20;
+      if(!wide) return;
+      const w = m.warpsXY || {};
+      Object.keys(w).forEach(kk=>{
+        const [ex,ey] = kk.split(',').map(Number);
+        // 画面に 入る おおよその ます数（よこ9・たて6）
+        const near = Math.abs(bx-ex) <= 9 && Math.abs(by-ey) <= 6;
+        T('入口 '+mp+'('+ex+','+ey+') から ボスが 見えない',
+          !near, 'ボス('+bx+','+by+') が 近すぎる');
+      });
+    });
+  });
+}
+
 // ★走って くる えんしゅつ（runIn）が、かべを 通りぬけない こと。
 //   ★みちすじは たてから よこの 順に まっすぐ すすむ。
 {

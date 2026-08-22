@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-23 01:27 JST", "build":"2e4433c6","assets_sha": "632130cd", "lines": {"world": 112, "npc": 538, "chapters": 1588, "bgm": 985, "view2d": 2524, "core": 3140, "view": 1401, "ui": 1144}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-23 07:52 JST", "build":"fcdb42f5","assets_sha": "632130cd", "lines": {"world": 113, "npc": 562, "chapters": 1588, "bgm": 985, "view2d": 2524, "core": 3160, "view": 1401, "ui": 1144}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -218,6 +218,7 @@ const MAP_IDS = {
   upper_dist: {region:'sky', kind:'town', name:'上層区',        scene:'SCENE_SKY_TOWN'},
   garden:     {region:'sky', kind:'town', name:'空中庭園',      scene:'SCENE_SKY_TOWN'},
   furnace:    {region:'sky', kind:'dgn',  name:'光珠炉の 外郭', scene:'SCENE_SKY_TOWN'},
+  furnace_core:{region:'sky',kind:'dgn',  name:'炉心の 手前',   scene:'SCENE_SKY_TOWN'},
   tower1:     {region:'sky', kind:'dgn',  name:'雲見の 塔 一階',   scene:'SCENE_SKY_TOWN'},
   tower2:     {region:'sky', kind:'dgn',  name:'雲見の 塔 二階',   scene:'SCENE_SKY_TOWN'},
   tower3:     {region:'sky', kind:'dgn',  name:'雲見の 塔 三階',   scene:'SCENE_SKY_TOWN'},
@@ -534,15 +535,39 @@ const NPCS = {
   ],
 
   // ============ 第2章：光珠炉の 外郭 ============
-  furnace: [
-    {at:'12,5', spr:'pipeobj', name:'炉心の 壁', lines:[
+  // ============ 第2章：炉心の 手前（ボスの 間）============
+  furnace_core: [
+    {at:'11,6', spr:'pipeobj', name:'炉心の 壁', lines:[
       {when:{flag:'ch2_heardBreath'}, text:[
         '隔壁の 向こうから、ゆっくりした 音が つづいている。']},
       {text:['分厚い 隔壁。触れると 熱い。']}]},
-    {at:'10,4', spr:'pipeobj', name:'燃えかすの 山', lines:[
+    {at:'7,4', spr:'pipeobj', name:'燃えかすの 山', lines:[
       {when:{flag:'ch2_gotScrap'}, text:[
         'フォルナクスが いた あたり。白い 灰が 残っている。']},
       {text:['燃えかすの 山。何か 混じっている。']}]},
+  ],
+
+  // ============ 第2章：光珠炉の 外郭 ============
+  furnace: [
+    {at:'17,17', spr:'villagerB', name:'倒れた 炉番', lines:[
+      {when:{flag:'ch2_saved1'}, text:[
+        '炉番「あと 二人 いる。……頼む」']},
+      {text:['熱に あてられた 炉番が うずくまっている。',
+             '炉番「……外郭が 熱い。こんなの 初めてだ」']}]},
+    {at:'2,10', spr:'villagerA', name:'熱に まかれた 炉番', lines:[
+      {when:{flag:'ch2_saved2'}, text:[
+        '炉番「……ありがとう。出口は 南だったな」']},
+      {text:['管の 陰に 若い 炉番が 座りこんでいる。',
+             '炉番「動くと 熱いんだ。……ずっと ここに いる」']}]},
+    {at:'13,15', spr:'villagerB', name:'隔壁の 前の 炉番', lines:[
+      {when:{flag:'ch2_saved3'}, text:[
+        '炉番「……あの 息、まだ 聞こえとる」']},
+      {text:['壁に 耳を つけた ままの 炉番が いる。',
+             '炉番「……しっ。聞こえるだろう。奥から」']}]},
+  ],
+
+
+  furnace: [
     {at:'17,17', spr:'villagerB', name:'倒れた 炉番', lines:[
       {when:{flag:'ch2_saved1'}, text:[
         '炉番「あと 二人 いる。……頼む」']},
@@ -1940,7 +1965,7 @@ const CH = {
     },
 
     bosses: {
-      'furnace:10,4': {
+      'furnace_core:7,4': {
         key: 'fornax',
         clearedFlag: 'ch2_fornaxDown',
         // ★炉心の 壁に 耳を あててから でないと 進めない。
@@ -2328,7 +2353,7 @@ const CH = {
       fornax: {
         set:['ch2_fornaxDown'],
         quest:{ch2_q2_core:'clear'},
-        setTiles:[{map:'furnace', x:10, y:4, ch:'n'}],
+        setTiles:[{map:'furnace_core', x:7, y:4, ch:'n'}],
         msg:['', 'フォルナクスは 白い 芯から 崩れ、床に 落ちた。',
              '燃えかすの 中に、焦げていない ものが 一枚 混じっている。',
              '',
@@ -6414,9 +6439,9 @@ const MAPS = {
     "######################",
     "######################",
     "######################",
-    "#####..........#######",
-    "#####.....B....#######",
-    "#####.......n..#######",
+    "######################",
+    "######################",
+    "##########D###########",
     "##########K###########",
     "#....................#",
     "#.####.####.####.###.#",
@@ -6433,7 +6458,27 @@ const MAPS = {
     "#....................#",
     "##########.###########"],
     warpsXY:{
-      '10,20':{to:'upper_dist', x:17, y:10}
+      '10,20':{to:'upper_dist', x:17, y:10},
+      '10,5' :{to:'furnace_core', x:7, y:7}
+    }},
+
+  // ============ 第2章：炉心の 手前（ボスの 間）============
+  //   ★迷路から 直に 見えて いた ため、別の 間に した。
+  //     隔壁を あけて はじめて 入れる。
+  furnace_core:{name:'炉心の 手前', theme:'sky', enc:false, tiles:[
+    "###############",
+    "###############",
+    "###############",
+    "#.............#",
+    "#......B......#",
+    "#.............#",
+    "#..........n..#",
+    "#.............#",
+    "######.#.######",
+    "######...######",
+    "###############"],
+    warpsXY:{
+      '7,9':{to:'furnace', x:10, y:7}
     }},
 
   // ============ 第1章：騎士団 中層詰所 ============

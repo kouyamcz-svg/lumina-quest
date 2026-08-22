@@ -51,6 +51,7 @@ const MAP_IDS = {
   upper_dist: {region:'sky', kind:'town', name:'上層区',        scene:'SCENE_SKY_TOWN'},
   garden:     {region:'sky', kind:'town', name:'空中庭園',      scene:'SCENE_SKY_TOWN'},
   furnace:    {region:'sky', kind:'dgn',  name:'光珠炉の 外郭', scene:'SCENE_SKY_TOWN'},
+  furnace_core:{region:'sky',kind:'dgn',  name:'炉心の 手前',   scene:'SCENE_SKY_TOWN'},
   tower1:     {region:'sky', kind:'dgn',  name:'雲見の 塔 一階',   scene:'SCENE_SKY_TOWN'},
   tower2:     {region:'sky', kind:'dgn',  name:'雲見の 塔 二階',   scene:'SCENE_SKY_TOWN'},
   tower3:     {region:'sky', kind:'dgn',  name:'雲見の 塔 三階',   scene:'SCENE_SKY_TOWN'},

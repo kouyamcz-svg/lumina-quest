@@ -228,7 +228,7 @@ T('炉番 三人めを 助ける', C.G.flags.ch2_saved3===true);
 T('奥から 息が すると 言う', said('息だ。誰かの'), log.join(' / ').slice(0,140));
 
 // ===== 9. 子供の 寝息 =====
-talk('furnace', 12, 6, 'back');
+talk('furnace_core', 11, 7, 'back');
 T('寝息を 聞く', C.G.flags.ch2_heardBreath===true);
 T('子供の 寝息だと 言う', said('子供の 寝息'), log.join(' / ').slice(0,90));
 T('ノエが 話せないと 言う', said('ぼくの 家が 消される'));
@@ -248,22 +248,22 @@ T('灯り ふたつで 開く', C.tileAt('furnace',10,6)==='.', C.tileAt('furnac
   const keep = C.G.flags.ch2_heardBreath;
   C.G.flags.ch2_heardBreath = false;
   clearLog(); strong(26);
-  stand('furnace', 10, 5, 'back'); C.interact();
+  stand('furnace_core', 7, 5, 'back'); C.interact();
   T('寝息を 聞く 前は ボスに 進めない', C.G.flags.ch2_fornaxDown!==true);
   T('先に 壁を さわれと 言われる', said('先に 壁に さわって'), log.join(' / ').slice(0,60));
   C.G.flags.ch2_heardBreath = keep;
 }
 clearLog(); strong(26);
-stand('furnace', 10, 5, 'back');
+stand('furnace_core', 7, 5, 'back');
 C.interact();
 T('炉座の 名が 出る', said('フォルナクス'), log.join(' / ').slice(0,120));
 T('炉の 火を 食べて いると 言う', said('炉の 火を 食べてる'));
 T('フォルナクスに かてる', C.G.flags.ch2_fornaxDown===true);
 T('調べる 先が 示される', said('落ちた ものを 調べよう'));
-T('倒した ますが しらべられる', C.tileAt('furnace',10,4)==='n', C.tileAt('furnace',10,4));
+T('倒した ますが しらべられる', C.tileAt('furnace_core',7,4)==='n', C.tileAt('furnace_core',7,4));
 
 // ===== 13. 焦げていない 紙片 =====
-talk('furnace', 10, 5, 'back');
+talk('furnace_core', 7, 5, 'back');
 T('紙片を 拾う', C.G.flags.ch2_gotScrap===true);
 T('焦げて いないと わかる', said('焦げても いない'), log.join(' / ').slice(0,80));
 T('つぎの 行き先が 出る', said('上層区の 主任に 報告しよう'));

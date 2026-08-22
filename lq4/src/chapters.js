@@ -1123,7 +1123,7 @@ const CH = {
     },
 
     bosses: {
-      'furnace:10,4': {
+      'furnace_core:7,4': {
         key: 'fornax',
         clearedFlag: 'ch2_fornaxDown',
         // ★炉心の 壁に 耳を あててから でないと 進めない。
@@ -1511,7 +1511,7 @@ const CH = {
       fornax: {
         set:['ch2_fornaxDown'],
         quest:{ch2_q2_core:'clear'},
-        setTiles:[{map:'furnace', x:10, y:4, ch:'n'}],
+        setTiles:[{map:'furnace_core', x:7, y:4, ch:'n'}],
         msg:['', 'フォルナクスは 白い 芯から 崩れ、床に 落ちた。',
              '燃えかすの 中に、焦げていない ものが 一枚 混じっている。',
              '',

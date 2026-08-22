@@ -255,15 +255,39 @@ const NPCS = {
   ],
 
   // ============ 第2章：光珠炉の 外郭 ============
-  furnace: [
-    {at:'12,5', spr:'pipeobj', name:'炉心の 壁', lines:[
+  // ============ 第2章：炉心の 手前（ボスの 間）============
+  furnace_core: [
+    {at:'11,6', spr:'pipeobj', name:'炉心の 壁', lines:[
       {when:{flag:'ch2_heardBreath'}, text:[
         '隔壁の 向こうから、ゆっくりした 音が つづいている。']},
       {text:['分厚い 隔壁。触れると 熱い。']}]},
-    {at:'10,4', spr:'pipeobj', name:'燃えかすの 山', lines:[
+    {at:'7,4', spr:'pipeobj', name:'燃えかすの 山', lines:[
       {when:{flag:'ch2_gotScrap'}, text:[
         'フォルナクスが いた あたり。白い 灰が 残っている。']},
       {text:['燃えかすの 山。何か 混じっている。']}]},
+  ],
+
+  // ============ 第2章：光珠炉の 外郭 ============
+  furnace: [
+    {at:'17,17', spr:'villagerB', name:'倒れた 炉番', lines:[
+      {when:{flag:'ch2_saved1'}, text:[
+        '炉番「あと 二人 いる。……頼む」']},
+      {text:['熱に あてられた 炉番が うずくまっている。',
+             '炉番「……外郭が 熱い。こんなの 初めてだ」']}]},
+    {at:'2,10', spr:'villagerA', name:'熱に まかれた 炉番', lines:[
+      {when:{flag:'ch2_saved2'}, text:[
+        '炉番「……ありがとう。出口は 南だったな」']},
+      {text:['管の 陰に 若い 炉番が 座りこんでいる。',
+             '炉番「動くと 熱いんだ。……ずっと ここに いる」']}]},
+    {at:'13,15', spr:'villagerB', name:'隔壁の 前の 炉番', lines:[
+      {when:{flag:'ch2_saved3'}, text:[
+        '炉番「……あの 息、まだ 聞こえとる」']},
+      {text:['壁に 耳を つけた ままの 炉番が いる。',
+             '炉番「……しっ。聞こえるだろう。奥から」']}]},
+  ],
+
+
+  furnace: [
     {at:'17,17', spr:'villagerB', name:'倒れた 炉番', lines:[
       {when:{flag:'ch2_saved1'}, text:[
         '炉番「あと 二人 いる。……頼む」']},
