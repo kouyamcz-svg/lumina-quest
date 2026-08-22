@@ -158,5 +158,20 @@ T('せんとうで Bを おしたら えらび直し',
   }
 }
 
+// ---- ⑥ ui.js の つつみが とりけしの きめ方を 落として いない こと ----
+//   ★UI.menu の つつみが 第4ひきすうを 捨てて いて、
+//     せんとうで Bを おすと 末尾の「逃げる」が えらばれて いた。
+//     しくみ側（core）は 正しくても、ここで 落ちると 意味が ない。
+{
+  const ui = fs.readFileSync('src/ui.js','utf8');
+  T('つつみが opt を うけとる',
+    /menu = function\(items, title, cb, opt\)/.test(ui), 'ひきすうが たりない');
+  T('つつみが opt を わたす',
+    /_menuOrig\(items, title,[\s\S]{0,60}?, opt\)/.test(ui), 'わたして いない');
+  // menu を つつむ ところが ほかに ないか
+  const wraps = (ui.match(/menu\s*=\s*function\(/g)||[]).length;
+  T('menu の つつみは ひとつだけ', wraps<=1, wraps+'かしょ ある');
+}
+
 console.log('\n--- menu_cancel: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

@@ -321,8 +321,11 @@ function label(t){ labelEl.textContent=t; }
 const UI = {msg:msg2, menu, hud, label, openTrade};
 // ★メニューの ひらけしめで ステータスの ひょうじも きりかえる
 const _menuOrig = menu;
-menu = function(items, title, cb){
-  _menuOrig(items, title, (k)=>{ cb(k); hud(); });
+menu = function(items, title, cb, opt){
+  // ★opt（とりけしの きめ方）を そのまま わたす。
+  //   ここで 落として いた ため、せんとうで Bを おすと
+  //   末尾の「逃げる」が えらばれて いた。
+  _menuOrig(items, title, (k)=>{ cb(k); hud(); }, opt);
   hud();
 };
 UI.menu = menu;
