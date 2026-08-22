@@ -200,6 +200,9 @@ talk('upper_dist', 9, 5, 'back');
 T('衛兵が 走って くる', !!ranIn, 'えんしゅつが ない');
 T('南門から 主任の 前まで 走る',
   ranIn && ranIn.path.length>=5, ranIn ? ranIn.path.length+'ます' : '-');
+// ★判を 押して 鐘が 鳴って から 走って くる
+T('判を 押す ぶんが 先に 出る', said('判を 押した'), log.join(' / ').slice(0,60));
+T('鐘の ぶんも 先に 出る', said('鐘が 鳴った'));
 T('鐘が 鳴る', C.G.flags.ch2_accident===true);
 T('三人 戻って いないと 分かる', said('炉番が 三人、戻って いません'), log.join(' / ').slice(0,150));
 T('上は「点検中」と 記録した', said('外郭 点検中'));

@@ -703,6 +703,10 @@ Object.keys(C.MAPS).forEach(mp=>{
         if(!C.walkable(mp,x,y)) ok=false;
       }
       T('走る みちすじに かべが ない '+e.npc, ok, 'かべを 通りぬける');
+      // ★走る 前に 出す ぶん（preMsg）が ある こと。
+      //   いきなり かけこんで くると、話の 順が おかしい。
+      T('走る 前に 出す ぶんが ある '+e.npc, !!(e.preMsg && e.preMsg.length),
+        'いきなり 走って くる');
       T('走りついた さきが 会話の あいての そば '+e.npc,
         Math.abs(tx-x)+Math.abs(ty-y)===0, 'たどりつけない');
     });

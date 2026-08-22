@@ -1353,6 +1353,7 @@ window.LQ4View = {
     if(!(V2 && V2.runner)){ o && o.done && o.done(); return; }
     V2.runner(o);
   },
+  runnerClear(){ if(V2 && V2.runnerClear) V2.runnerClear(); },
   showScene(k){
     if(!(V2&&V2.showScene)) return;
     if(!is2D && mode!=='battle'){

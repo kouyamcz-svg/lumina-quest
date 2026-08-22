@@ -2248,8 +2248,12 @@ function startRunner(o){
 function updateRunner(dt){
   if(!runner) return;
   const r = runner;
+  if(r.arrived) return;                       // ★ついた あとは その場に 立つ
   if(r.step >= r.path.length){
-    const d = r.done; runner = null; d && d();
+    r.arrived = true;                         // 消さない（会話が おわるまで いる）
+    const last = r.path[r.path.length-1] || [r.x, r.y];
+    r.cx = last[0]; r.cy = last[1];
+    const d = r.done; d && d();
     return;
   }
   r.t += dt;
@@ -2274,8 +2278,8 @@ function drawRunner(ox, oy, ts, time){
   // かげ
   cx.fillStyle='rgba(16,20,34,0.30)';
   cx.beginPath(); cx.ellipse(dx, dy-2, ts*0.24, ts*0.09, 0, 0, Math.PI*2); cx.fill();
-  // ★はしって いる ので すこし はねる
-  const bob = Math.abs(Math.sin(time*14)) * ts*0.06;
+  // ★はしって いる あいだ だけ はねる（ついたら 立ちどまる）
+  const bob = r.arrived ? 0 : Math.abs(Math.sin(time*14)) * ts*0.06;
   cx.save();
   cx.translate(dx, dy - bob);
   if(r.flip) cx.scale(-1,1);
@@ -2512,6 +2516,7 @@ return {init, resize, buildMap, draw, noteStep, setFade, setDream,
         battleEnter:battleEnter2D, battleFx:battleFx2D, battleLeave:battleLeave2D, drawBattle,
         pop:pop2D,
         runner:startRunner,           // ★かけつける 人の えんしゅつ
+        runnerClear(){ runner = null; },
         get runnerOn(){ return !!runner; },
         get TS(){return TS;}};
 })();

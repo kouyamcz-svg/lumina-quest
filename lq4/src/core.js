@@ -1324,15 +1324,18 @@ function runTalkEvent(npcName){
   const e = cd.talkEvents.find(ev => ev.npc === npcName && matchEvent(ev));
   if(!e) return false;
 
-  // ★会話の 前に 走って くる 人（衛兵など）。
-  //   おわったら もう一度 同じ 会話に 入る ので、
-  //   「もう 走った」を おぼえて おかないと くり返す。
+  // ★話の とちゅうで 走って くる 人（衛兵など）。
+  //   preMsg（さきに 出す ぶん）→ 走る → msg（のこり）の 順。
+  //   ★はじめは 会話の 前に 走らせて いたが、
+  //     判を 押す 前に かけこんで きて 順が おかしかった。
   G._ranIn = G._ranIn || {};
   const runKey = npcName + ':' + (e.unless || '');
   if(e.runIn && !G._ranIn[runKey]){
     G._ranIn[runKey] = true;
     G.mode = 'msg';
-    runRunIn(e.runIn, ()=>{ runTalkEvent(npcName); });
+    const go = ()=> runRunIn(e.runIn, ()=>{ runTalkEvent(npcName); });
+    if(e.preMsg && e.preMsg.length) U.msg(e.preMsg, go);
+    else go();
     return true;
   }
 
@@ -1387,6 +1390,8 @@ function runTalkEvent(npcName){
     if(e.img && V.hideScene) V.hideScene();
     // ★ますの 書きかえは 会話が おわってから。
     //   さきに やると、「逃げた」と 読む まえに 姿が 消えて しまう。
+    // ★走って きた 人は 会話が おわるまで 立って いる。ここで かたづける。
+    if(e.runIn && V.runnerClear) V.runnerClear();
     if(e.setTiles){
       (Array.isArray(e.setTiles)?e.setTiles:[e.setTiles]).forEach(o=>{
         setTile(o.map||P.map, o.x, o.y, o.ch||'.');
