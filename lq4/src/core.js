@@ -378,35 +378,96 @@ const MAPS = {
     "#########G#########"],
     warpsXY:{
       '9,14':{to:'upper_dist', x:2, y:7},
-      '1,13':{to:'watchtower', x:7, y:19}
+      '1,13':{to:'tower1', x:7, y:10}
     }},
 
-  // ============ 第2章：雲見の 塔（わき道）============
-  //   雲海に せり出した 見張り塔。雲が 薄れる わけを 追う。
-  watchtower:{name:'雲見の 塔', theme:'sky', enc:true, encRate:0.08, encGrace:4, tiles:[
+  // ============ 第2章：雲見の 塔（わき道・5階だて）============
+  //   ★管の つけかえ：ゆかの きれはし(u)を ひろい、かべの 継ぎ目(j)に さす。
+  //     管は 3本しか なく、上の 階へ 行くには 下の 階から 抜いて くる。
+  //     いちど 開いた 隔壁は 閉じない ので、行き止まりには ならない。
+  tower1:{name:'雲見の 塔 一階', theme:'sky', enc:true, encRate:0.07, encGrace:5, tiles:[
     "###############",
-    "###############",
-    "###############",
-    "##...........##",
-    "##.....B.....##",
-    "##...........##",
-    "####.......####",
+    "#.............#",
+    "#..u.......n..#",
+    "#.............#",
     "#####.....#####",
     "#.............#",
-    "#.L.#.....#.L.#",
-    "#...#.....#...#",
-    "#####..K..#####",
-    "####.......####",
-    "#...#.........#",
-    "#.n.......#.n.#",
-    "#...#.....#...#",
-    "####...C...####",
-    "##...........##",
-    "##...........##",
-    "##.....G.....##",
+    "#.C..#...#..n.#",
+    "#....#...#....#",
+    "#....#.<.#....#",
+    "#.............#",
+    "#######G#######"],
+    warpsXY:{
+      '7,10':{to:'garden', x:2, y:13},
+      '7,8' :{to:'tower2', x:6, y:9}
+    }},
+
+  tower2:{name:'雲見の 塔 二階', theme:'sky', enc:true, encRate:0.07, encGrace:5, tiles:[
+    "###############",
+    "#......K......#",
+    "#.....###.....#",
+    "#..L.......u..#",
+    "#.............#",
+    "#####.....#####",
+    "#.............#",
+    "#j...#...#....#",
+    "#....#.>.#....#",
+    "#.....<.......#",
     "###############"],
     warpsXY:{
-      '7,19':{to:'garden', x:2, y:13}
+      '6,9':{to:'tower1', x:7, y:8},
+      '7,8':{to:'tower3', x:6, y:9}
+    }},
+
+  tower3:{name:'雲見の 塔 三階', theme:'sky', enc:true, encRate:0.07, encGrace:5, tiles:[
+    "###############",
+    "#......K......#",
+    "#.....###.....#",
+    "#.L.........L.#",
+    "#.............#",
+    "#####.....#####",
+    "#.............#",
+    "#j...#.u.#...j#",
+    "#....#.>.#....#",
+    "#.....<.......#",
+    "###############"],
+    warpsXY:{
+      '6,9':{to:'tower2', x:7, y:8},
+      '7,8':{to:'tower4', x:6, y:9}
+    }},
+
+  tower4:{name:'雲見の 塔 四階', theme:'sky', enc:true, encRate:0.07, encGrace:5, tiles:[
+    "###############",
+    "#......K......#",
+    "#.....###.....#",
+    "#.L....L....L.#",
+    "#.............#",
+    "#####.....#####",
+    "#.............#",
+    "#j...#...#..j.#",
+    "#....#.>.#....#",
+    "#..j..<.......#",
+    "###############"],
+    warpsXY:{
+      '6,9':{to:'tower3', x:7, y:8},
+      '7,8':{to:'tower5', x:7, y:8}
+    }},
+
+  // ★最上階：かべが なく、雲海が そのまま 見わたせる
+  tower5:{name:'雲見の 塔 最上階', theme:'sky', skyWorld:true, enc:false, tiles:[
+    "~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~",
+    "~~~.........~~~",
+    "~~....B......~~",
+    "~~...........~~",
+    "~~~.........~~~",
+    "~~~~~.....~~~~~",
+    "~~~~~~.>.~~~~~~",
+    "~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~"],
+    warpsXY:{
+      '7,8':{to:'tower4', x:7, y:8}
     }},
 
   // ============ 第2章：光珠炉の 外郭 ============
@@ -623,6 +684,7 @@ function startChapter(no){
 function freshState(){
   G = {mode:'field', menu:null, battle:null, flags:{}, visited:{}, gotTreasure:{},
        tactic:'manual', dex:{}, trail:[], stepFlip:false, cleared:false,
+       pipes:0,                                   // ★持って いる 管の 本数
        chapter:1, chapters:{}, townState:'NORMAL', night:false, quests:{}, steps:0,
        ship:null, aboard:false, tileEdits:{}};      // ★しかけで 書きかえた ます
   if(!MAPS_ORIG) snapshotMaps();
@@ -752,7 +814,8 @@ const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
-                       'O','x','L','l','p','q','%','R']);
+                       'O','x','L','l','p','q','%','R','j','J']);
+                       // j/J＝かべの 継ぎ目（管を さす ところ）
                        // p/q＝光珠管、%＝花壇、R＝上層の 壁、F＝噴水（ならべた 大きさで 形が きまる）
 // ★しかけ用の タイル（IVから）
 //   O 動かせる岩（押せる）／x 穴（岩で 埋まる）／L 消えた光珠灯／l ついた光珠灯
@@ -885,6 +948,8 @@ function interact(){
     U.msg(['大きな 岩だ。押せば 動きそうだ。'], ()=>{ G.mode='field'; });
     return;
   }
+  if(ch==='u'){ takePipe(nx,ny); return; }
+  if(ch==='j' || ch==='J'){ fitPipe(nx,ny); return; }
   if(ch==='K'){ openLockedDoor(nx,ny); return; }
   // なにも なければ
   G.mode='msg';
@@ -1003,6 +1068,73 @@ function gimmickRescue(map){
 }
 
 // ★光珠灯：しらべると つく／消える。ぜんぶ つくと 章データの lampGate が ひらく。
+// ★管の つけかえ。
+//   ひろった 管は かぎりが あり、さしなおして 光の 行き先を えらぶ。
+//   さした 数だけ その 場の 灯りが ともり、ぜんぶ ともると 隔壁が あく。
+function takePipe(nx,ny){
+  G.pipes = (G.pipes||0) + 1;
+  setTile(P.map,nx,ny,'.');
+  A.item && A.item();
+  V.refresh && V.refresh();
+  G.mode='msg';
+  U.msg(['光珠管の きれはしを ひろった。',
+         '（持っている 管：'+G.pipes+'本）'], ()=>{ G.mode='field'; });
+}
+function fitPipe(nx,ny){
+  const cur = tileAt(P.map,nx,ny);
+  G.mode='msg';
+  if(cur==='J'){                                   // 抜く
+    setTile(P.map,nx,ny,'j');
+    G.pipes = (G.pipes||0) + 1;
+    A.item && A.item();
+    V.refresh && V.refresh();
+    const lines = ['管を 抜いた。光が 止まった。',
+                   '（持っている 管：'+G.pipes+'本）'];
+    lampsFromPipes(lines);
+    U.msg(lines, ()=>{ G.mode='field'; });
+    return;
+  }
+  if(!(G.pipes>0)){
+    U.msg(['かべの 継ぎ目が 欠けている。',
+           'ここに はまる 管が あれば、光が 通りそうだ。'],
+          ()=>{ G.mode='field'; });
+    return;
+  }
+  G.pipes--;
+  setTile(P.map,nx,ny,'J');
+  A.item && A.item();
+  V.refresh && V.refresh();
+  const lines = ['継ぎ目に 管を さしこんだ。',
+                 '青白い 光が 音も なく 流れていく。',
+                 '（残りの 管：'+G.pipes+'本）'];
+  lampsFromPipes(lines);
+  U.msg(lines, ()=>{ G.mode='field'; });
+}
+// ★管を さすと、その 章データが きめた 灯りが ともる／消える
+function lampsFromPipes(lines){
+  const cd = chData(); if(!cd) return;
+  const rule = cd.pipeLamps && cd.pipeLamps[P.map];
+  if(!rule) return;
+  // つぎめ ごとに 「どの 灯りが つくか」
+  Object.keys(rule).forEach(k=>{
+    const [jx,jy] = k.split(',').map(Number);
+    const on = tileAt(P.map,jx,jy)==='J';
+    rule[k].forEach(o=>{
+      const now = tileAt(P.map,o.x,o.y);
+      if(now!=='L' && now!=='l') return;
+      setTile(P.map,o.x,o.y, on ? 'l' : 'L');
+    });
+  });
+  V.refresh && V.refresh();
+  const gate = cd.lampGates && cd.lampGates[P.map];
+  if(gate && allLampsLit(P.map)){
+    gate.open.forEach(o=>setTile(P.map,o.x,o.y,o.ch||'.'));
+    if(gate.flag) G.flags[gate.flag]=true;
+    lines.push('', ...(gate.msg||['どこかで 石の きしむ 音が した。']));
+    V.refresh && V.refresh();
+  }
+}
+
 function toggleLamp(nx,ny){
   const cur = tileAt(P.map,nx,ny);
   setTile(P.map,nx,ny, cur==='L' ? 'l' : 'L');
@@ -2370,7 +2502,7 @@ const WARDS = {
               'イオ「……まだ 持って いません」'],
     msg:['石段の 上から 花の 匂いが 落ちてくる。']},
   // ★第2章：雲見の 塔は 庭番の 話を 聞いてから。
-  watchtower: {chapter:3, flag:'ch2_towerTold',
+  tower1: {chapter:3, flag:'ch2_towerTold',
     msgEarly:['雲海へ せり出した 塔。段の 途中に 縄が 張ってある。',
               'イオ「……勝手には 入れないな」'],
     msg:['塔へ 下りる 段。庭番の 話を 聞いて からに しよう。']},

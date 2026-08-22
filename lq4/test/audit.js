@@ -514,9 +514,21 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
     // 章の はじめに ならす ます（setTiles）は 「かたづけた」と みなす
     const fixed = new Set(((cd.setTiles)||[]).map(o=>o.map+':'+o.x+','+o.y));
     const lg = cd.lampGates||{}, lk = cd.locks||{};
-    // ★その 章では まだ 入れない ばしょ（けっかい）は のぞく
+    // ★その 章では まだ 入れない ばしょ（けっかい）は のぞく。
+    //   けっかいの むこうから さらに 先へ つながる ぶんも のぞく。
+    const cut = (mp)=>{
+      if(!seen.has(mp)) return;
+      seen.delete(mp);
+      const w2 = (C.MAPS[mp]||{}).warpsXY || {};
+      Object.keys(w2).forEach(k2=>{
+        const nx = w2[k2].to;
+        // 入口（けっかいの 手前）へ もどる ぶんは 切らない
+        if(nx===cd.start.map) return;
+        cut(nx);
+      });
+    };
     Object.keys(C.WARDS||{}).forEach(mp=>{
-      if(Number(no) < C.WARDS[mp].chapter) seen.delete(mp);
+      if(Number(no) < C.WARDS[mp].chapter) cut(mp);
     });
     seen.forEach(mp=>{
       const t = C.MAPS[mp].tiles;
@@ -774,7 +786,9 @@ Object.keys(C.MAPS).forEach(mp=>{
       const g2 = CHD.CH[no].lampGates && CHD.CH[no].lampGates[mp];
       if(g2) gate = g2;
     });
-    if(gate) T('灯りの しかけに 灯りが 2つ いじょう '+mp+'（'+lamps.length+'）', lamps.length>=2);
+    // ★灯りが 1つでも よい ばあいが ある（管の つけかえの ように、
+    //   ほかに 手ごたえの もとが ある とき）。0こ だけを だめに する。
+    if(gate) T('灯りの しかけに 灯りが ある '+mp+'（'+lamps.length+'）', lamps.length>=1);
   }
 });
 

@@ -416,6 +416,47 @@ function buildAtlas(){
     R(g,2,13,12,1,'#8ea6c8');
   });
 
+  // ★管の つけかえ：u＝ゆかの きれはし、j＝空の 継ぎ目、J＝さした 継ぎ目
+  atlas.pipeItem = tile((g,s)=>{
+    R(g,0,0,s,s,P16.sk2);                       // ゆか
+    // ころがった 管（ななめ）
+    R(g,3,9,10,4,'#d9e3f0');
+    R(g,3,9,10,1,'#ffffff');
+    R(g,3,12,10,1,'#8ea6c8');
+    R(g,3,9,1,4,'#a9bcd8'); R(g,12,9,1,4,'#7f95c0');
+    R(g,5,10,1,2,'#7f95c0'); R(g,9,10,1,2,'#7f95c0');   // 留め金
+    P(g,13,10,'#a8e2ff'); P(g,13,11,'#5fb4ee');          // 切り口の 光
+    P(g,2,14,'#8ea6c8'); P(g,14,13,'#8ea6c8');           // かけら
+  });
+  atlas.jointOff = tile((g,s)=>{
+    R(g,0,0,s,s,P16.skW1);                      // かべ
+    R(g,0,0,s,1,P16.skW2);
+    // 欠けた 継ぎ目（黒い あな）
+    R(g,4,4,8,8,P16.skW0);
+    R(g,5,5,6,6,'#141c2c');
+    R(g,5,5,6,1,'#0d1420');
+    // ふちの 金具（さびて いる）
+    R(g,4,3,8,1,'#6f5a3a'); R(g,4,12,8,1,'#6f5a3a');
+    P(g,4,4,'#8a6f2a'); P(g,11,4,'#8a6f2a');
+    P(g,4,11,'#8a6f2a'); P(g,11,11,'#8a6f2a');
+  });
+  atlas.jointOn = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.skW1);
+    R(g,0,0,s,1,P16.skW2);
+    // さしこんだ 管
+    R(g,3,4,10,8,'#d9e3f0');
+    R(g,3,4,10,1,'#ffffff');
+    R(g,3,11,10,1,'#8ea6c8');
+    R(g,3,4,1,8,'#a9bcd8'); R(g,12,4,1,8,'#7f95c0');
+    R(g,6,4,1,8,'#b8c2d8'); R(g,9,4,1,8,'#b8c2d8');    // 留め金
+    // 中を ながれる 光（ちらつく）
+    const t=(v%3);
+    R(g,4,6,8,3,'#2f6ea8');
+    R(g,4+t,7,4,1,'#a8e2ff');
+    P(g,4+((t+2)%8),7,'#eafaff');
+    R(g,3,3,10,1,'#c9a94e');  R(g,3,12,10,1,'#8a6f2a');
+  });
+
   // ★閉じた 隔壁（K）。城門の 絵だと 「通れる 門」に 見えて、
   //   ふさがって いる ことが 伝わらなかった。
   atlas.bulkhead = tile((g,s)=>{
@@ -1169,6 +1210,9 @@ function tileArt(ch, theme, tx, ty){
     case 'o': return ice?atlas.icicle : atlas.rock;
     case 'O': return atlas.rockPush;      // ★動かせる岩
     case 'x': return atlas.pit;           // ★穴
+    case 'u': return atlas.pipeItem;      // ★ゆかの 管の きれはし
+    case 'j': return atlas.jointOff;      // ★空の 継ぎ目
+    case 'J': return atlas.jointOn;       // ★管を さした 継ぎ目
     case 'R': return atlas.richwall;      // ★上層の 白亜の 壁
     case '%': return atlas.flowerbed;     // ★花壇（中層）
     case ';': return atlas.plaza;         // ★磨かれた 白石（中層の 広場）

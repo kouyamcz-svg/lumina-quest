@@ -107,24 +107,38 @@ T('塔への 入口が ひらく', C.tileAt('garden',1,13)==='D', C.tileAt('gard
 
 stand('garden', 2, 13, 'left');
 C.stepField(-1,0);
-T('塔へ 入れる', C.P.map==='watchtower', C.P.map+' '+C.P.x+','+C.P.y);
+T('塔へ 入れる', C.P.map==='tower1', C.P.map+' '+C.P.x+','+C.P.y);
 T('塔の めじるしが たつ', C.G.flags.ch2_enteredTower===true);
 
-talk('watchtower', 2, 15, 'back');
+talk('tower1', 11, 3, 'back');
 T('見張りの 話を 聞く', C.G.flags.ch2_watchHeard===true);
 T('十年前に 炉を 止めた 話', said('十年 前に 一度'), log.join(' / ').slice(0,180));
 T('黒い 海が 見えた 話', said('黒い 海'));
+T('五階だてだと 教わる', said('五階だて'));
+T('管が 足りないと 教わる', said('管が 足りんのだ'));
 
-T('はじめは 仕切りが しまっている', C.tileAt('watchtower',7,11)==='K', C.tileAt('watchtower',7,11));
-talk('watchtower', 7, 12, 'back');
-T('あけかたが 出る', said('灯を 二基'), log.join(' / ').slice(0,60));
-stand('watchtower', 3, 9, 'left'); C.interact();
-T('灯り ひとつでは 開かない', C.tileAt('watchtower',7,11)==='K');
-stand('watchtower', 11, 9, 'right'); C.interact();
-T('灯り ふたつで 開く', C.tileAt('watchtower',7,11)==='.', C.tileAt('watchtower',7,11));
+// ★管の つけかえで 五階まで のぼる
+{
+  const touch=(mp,x,y)=>{ C.G.mode='field'; C.P.map=mp; C.P.x=x; C.P.y=y+1; C.P.dir='back'; C.interact(); };
+  T('はじめは 管を 持って いない', (C.G.pipes||0)===0);
+  touch('tower1',3,2); touch('tower2',11,3);
+  touch('tower2',1,7);
+  T('二階の 仕切りが あく', C.tileAt('tower2',7,1)==='.', C.tileAt('tower2',7,1));
+  touch('tower3',7,7);
+  touch('tower2',1,7);
+  T('抜いても 二階の 仕切りは 閉じない', C.tileAt('tower2',7,1)==='.');
+  touch('tower3',1,7); touch('tower3',13,7);
+  T('三階の 仕切りが あく', C.tileAt('tower3',7,1)==='.', C.tileAt('tower3',7,1));
+  touch('tower3',1,7); touch('tower3',13,7);
+  touch('tower4',1,7); touch('tower4',12,7); touch('tower4',3,9);
+  T('四階の 仕切りが あく', C.tileAt('tower4',7,1)==='.', C.tileAt('tower4',7,1));
+  T('管を つかいきる', C.G.pipes===0, 'のこり '+C.G.pipes);
+  C.G.mode='field'; C.P.map='tower4'; C.P.x=7; C.P.y=7; C.stepField(0,1);
+  T('最上階へ のぼれる', C.P.map==='tower5', C.P.map);
+}
 
 clearLog(); strong(24);
-stand('watchtower', 7, 5, 'back');
+stand('tower5', 6, 5, 'back');
 C.interact();
 T('そらくらいの 名が 出る', said('そらくらい'), log.join(' / ').slice(0,150));
 T('雲を 食べて いると 言う', said('雲を 食べてる'));
@@ -135,13 +149,13 @@ T('食べられた ぶんは 戻らない', said('食べられた ものは 戻�
 {
   const g=C.P.gold;
   C.party.forEach(p=>{ p.hp=1; });
-  talk('watchtower', 2, 15, 'back');
+  talk('tower1', 11, 3, 'back');
   T('見張りに 報せる', C.G.flags.ch2_towerPaid===true);
   T('礼を もらえる', C.P.gold===g+800, C.P.gold+' ← '+g);
   T('手当てで 全快', C.party.every(p=>p.hp===p.maxhp));
   T('クエストが 片づく', C.G.quests.ch2_q3_tower==='clear');
 }
-stand('watchtower', 7, 18, 'front'); C.stepField(0,1);
+stand('tower1', 7, 9, 'front'); C.stepField(0,1);
 T('庭園へ もどる', C.P.map==='garden', C.P.map);
 
 // ===== 7.8 上層区で 買いものと 宿 =====

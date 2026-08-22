@@ -102,5 +102,50 @@ T('岩が もどる', C.tileAt('rift_yard',5,12)==='O', C.tileAt('rift_yard',5,1
 T('穴も もどる', C.tileAt('rift_yard',5,10)==='x');
 T('もう 押せる なら もどさない', C.gimmickRescue('rift_yard')===false);
 
+// ============ 6. 管の つけかえ ============
+//   ★ゆかの きれはし(u)を ひろい、かべの 継ぎ目(j)に さす。
+//     管は かぎりが あり、上の 階へ 行くには 下の 階から 抜いて くる。
+{
+  C.freshState(); C.G.chapter = 3;
+  const touch = (mp,x,y)=>{ C.G.mode='field'; C.P.map=mp; C.P.x=x; C.P.y=y+1; C.P.dir='back';
+                            log.length=0; C.interact(); };
+  T('はじめは 管を 持って いない', (C.G.pipes||0)===0);
+  touch('tower1',3,2);
+  T('ゆかの 管を ひろえる', C.G.pipes===1, '本数 '+C.G.pipes);
+  T('ひろうと ゆかから 消える', C.tileAt('tower1',3,2)==='.', C.tileAt('tower1',3,2));
+  touch('tower2',1,7);
+  T('継ぎ目に さすと 減る', C.G.pipes===0, '本数 '+C.G.pipes);
+  T('さした 継ぎ目は かたちが かわる', C.tileAt('tower2',1,7)==='J', C.tileAt('tower2',1,7));
+  T('さすと 灯りが ともる', C.tileAt('tower2',3,3)==='l', C.tileAt('tower2',3,3));
+  T('灯りが そろうと 仕切りが あく', C.tileAt('tower2',7,1)==='.', C.tileAt('tower2',7,1));
+  // 抜くと 灯りは 消えるが、あいた 仕切りは 閉じない
+  touch('tower2',1,7);
+  T('抜くと もどってくる', C.G.pipes===1, '本数 '+C.G.pipes);
+  T('抜くと 灯りが 消える', C.tileAt('tower2',3,3)==='L', C.tileAt('tower2',3,3));
+  T('あいた 仕切りは 閉じない', C.tileAt('tower2',7,1)==='.', '閉じると 行き止まりに なる');
+  // 管が ない ときは させない
+  C.G.pipes = 0;
+  touch('tower3',1,7);
+  T('管が ないと させない', C.tileAt('tower3',1,7)==='j', C.tileAt('tower3',1,7));
+  T('させない ときは わけを 言う', log.join('').indexOf('はまる 管')>=0, log.join(' / ').slice(0,50));
+}
+
+// ============ 7. 管 3本で 最上階まで 行けるか ============
+{
+  C.freshState(); C.G.chapter = 3;
+  const touch = (mp,x,y)=>{ C.G.mode='field'; C.P.map=mp; C.P.x=x; C.P.y=y+1; C.P.dir='back'; C.interact(); };
+  touch('tower1',3,2); touch('tower2',11,3);
+  touch('tower2',1,7);
+  touch('tower3',7,7);
+  touch('tower2',1,7);
+  touch('tower3',1,7); touch('tower3',13,7);
+  touch('tower3',1,7); touch('tower3',13,7);
+  touch('tower4',1,7); touch('tower4',12,7); touch('tower4',3,9);
+  T('管 3本で 4階まで あく', C.tileAt('tower4',7,1)==='.', '足りない');
+  T('つかいきる（あまらない）', C.G.pipes===0, 'のこり '+C.G.pipes);
+  C.G.mode='field'; C.P.map='tower4'; C.P.x=7; C.P.y=7; C.stepField(0,1);
+  T('最上階へ 行ける', C.P.map==='tower5', C.P.map);
+}
+
 console.log('\n--- gimmick: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

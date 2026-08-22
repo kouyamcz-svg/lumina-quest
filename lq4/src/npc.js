@@ -227,8 +227,8 @@ const NPCS = {
   ],
 
   // ============ 第2章：雲見の 塔 ============
-  watchtower: [
-    {at:'2,14', spr:'elderWoman', name:'塔の 見張り', lines:[
+  tower1: [
+    {at:'11,2', spr:'elderWoman', name:'塔の 見張り', lines:[
       {when:{flag:'ch2_towerPaid'}, text:[
         '見張り「雲は 戻った。だが 前より 薄い」',
         '見張り「食われた ぶんは 戻らんのだろうな」']},
@@ -238,7 +238,7 @@ const NPCS = {
         '見張り「上には 行くなと 言ったが……行くんだろうな」',
         '見張り「灯を 二基 入れんと 仕切りは 上がらんぞ」']},
       {text:['見張り「客か。……上には 行くなよ」']}]},
-    {at:'12,14', spr:'villagerA', name:'雲の 記録係', lines:[
+    {at:'12,6', spr:'villagerA', name:'雲の 記録係', lines:[
       {when:{flag:'ch2_skyeaterDown'}, text:[
         '「記録に 書きました。『雲、戻る』と」',
         '「……『前より 薄し』とも」']},
