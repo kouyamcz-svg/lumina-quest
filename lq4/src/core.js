@@ -1227,7 +1227,12 @@ function wardBlocks(to){
 function wardMsg(to){
   const wd = WARDS[to];
   if(!wd) return null;
-  return ((G.chapter||1) < wd.chapter && wd.msgEarly) ? wd.msgEarly : wd.msg;
+  if((G.chapter||1) < wd.chapter && wd.msgEarly) return wd.msgEarly;
+  // ★やる ことは 済ませた が、まだ ひと手 のこって いる とき。
+  //   ★そらくらいを 倒したのに「書類が いる」とだけ 出て、
+  //     どこへ 行けば よいか 分からなかった。
+  if(wd.doneFlag && G.flags[wd.doneFlag] && wd.msgDone) return wd.msgDone;
+  return wd.msg;
 }
 function doWarp(w){
   if(w && wardBlocks(w.to)){
@@ -2590,7 +2595,13 @@ const WARDS = {
          '主任「雲見の 塔の 記録を 持ってこい。雲が 引いた 証だ」',
          '主任「あれが あれば『炉に 異常あり』で 通る」',
          'セレン「……書類が いる のね」',
-         '主任「ここは 上層だ。物より 紙が 先に 立つ」']},
+         '主任「ここは 上層だ。物より 紙が 先に 立つ」'],
+    // ★そらくらいは 倒した が まだ 報せて いない とき
+    msgDone:['昇降機の 前に 錠が おりている。',
+             'セレン「討っただけでは 通らないわ」',
+             'セレン「塔の 一階へ 下りて、見張りに 報せましょう」',
+             'セレン「綴りを 受け取って からよ」'],
+    doneFlag:'ch2_skyeaterDown'},
 
   // ★第1章：点検路の 群れを 散らすまで 旧管路へは 下りない。
   //   さきに 下りられると、かんむれの 場面を とばして しまう。

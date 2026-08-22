@@ -144,6 +144,7 @@ T('そらくらいの 名が 出る', said('そらくらい'), log.join(' / ').s
 T('雲を 食べて いると 言う', said('雲を 食べてる'));
 T('炉の ものと 同じ たぐいだと 言う', said('同じ 腹から 出た'));
 T('そらくらいに かてる', C.G.flags.ch2_skyeaterDown===true);
+T('一階へ 下りろと 言われる', said('塔の 一階へ 下りて'), log.join(' / ').slice(-90));
 T('食べられた ぶんは 戻らない', said('食べられた ものは 戻らないんだ'));
 
 {
@@ -178,7 +179,9 @@ T('庭園へ もどる', C.P.map==='garden', C.P.map);
   clearLog();
   stand('upper_dist', 17, 9, 'front'); C.stepField(0,1);
   T('塔の 記録が ないと 炉へ 入れない', C.P.map==='upper_dist', C.P.map);
-  T('雲の 記録が いると 言われる', said('雲見の 塔の 記録'), log.join(' / ').slice(0,70));
+  // ★倒した あとは「どこへ 行けば よいか」を 言う
+  T('討った あとは 一階へ 下りろと 言われる', said('塔の 一階へ 下りて'),
+    log.join(' / ').slice(0,80));
   C.G.flags.ch2_towerPaid = keep;
 }
 
