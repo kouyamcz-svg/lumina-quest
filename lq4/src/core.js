@@ -1012,7 +1012,7 @@ let G, P, party, reserve = [];
 function startChapter(no){
   const ch=(WORLD.CHAPTERS||[]).find(x=>x.no===no);
   if(!ch) return;
-  V.chapterCard('第'+no+'章', ch.title);
+  V.chapterCard(chapterLabel(no), ch.title);
 }
 function freshState(){
   G = {mode:'field', menu:null, battle:null, flags:{}, visited:{}, gotTreasure:{},
@@ -1144,6 +1144,11 @@ function actableMembers(){ return party.filter(p=>p.hp>0 && p.status!=='sleep');
 // 章ごとの きまりごとは src/chapters.js に まとめてある。
 const CHD = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA
           : (typeof require!=='undefined' ? require('./chapters.js') : null);
+function chapterLabel(no){
+  const n = Number(no);
+  if(!n || n<=1) return '序章';
+  return '第' + (n-1) + '章';
+}
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
@@ -1750,11 +1755,11 @@ function offerNextChapter(next, title, isFinal){
   }
   const nc = CHD.get(next);
   U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊',
-         'つぎは 第' + next + '章「' + nc.title + '」。'], () => {
+         'つぎは ' + chapterLabel(next) + '「' + nc.title + '」。'], () => {
     G.mode = 'menu';
     // ★Bを おしたら「この 章を 続ける」。末尾が それなので 'last' で よい
     //   （うっかり 章が すすまない ように、ここは わざと 末尾を 続ける に して ある）
-    U.menu(['第' + next + '章へ 進む', 'この 章を 続ける'], 'これから', (k) => {
+    U.menu([chapterLabel(next) + 'へ 進む', 'この 章を 続ける'], 'これから', (k) => {
       if(k === 0){
         switchChapter(next);
         G.mode = 'msg';
@@ -1764,7 +1769,7 @@ function offerNextChapter(next, title, isFinal){
         // ★しょうの はじまりの せつめい（opening）を ここでも だす。
         //   まえは ニューゲームで その しょうから はじめた とき しか でて おらず、
         //   ふつうに すすめると ぜんしょうで せつめいが とんで いた。
-        V.chapterCard('第' + next + '章', nc.title, () => {
+        V.chapterCard(chapterLabel(next), nc.title, () => {
           const open = nc.opening;
           if(open && open.length) U.msg(open.slice(), () => { G.mode = 'field'; });
           else G.mode = 'field';
@@ -3448,6 +3453,7 @@ return {
   itemList, useItemField, equipCandidates, equipFromBag, unequip, equipSummary, slotOf,
   fieldSpells, castField, spellNeedsTarget,
   returnDestinations, canReturnHere, castReturn, allReturnSpots, bossInfoAt, chData,
+  chapterLabel,                    // ★章の 名まえ（序章ぶん ずらす）
   KEY_ITEMS, hasKey, giveKey, takeKey, keyItemList,
   TRADE_GOODS, TRADE_MARKET, tradeTowns, tradePrice, sellPrice,
   goodsCount, goodsTotal, buyGood, sellGood, GOODS_LIMIT,

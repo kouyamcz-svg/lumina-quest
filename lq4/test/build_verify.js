@@ -190,6 +190,29 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
   }
 }
 
+
+// ★章の 名まえは chapterLabel を つかう こと。
+//   内部の 番号は 1から だが 序章が ある ので、そのまま 出すと ひとつ ずれる。
+//   ★第3章が「第4章」と 出て いた。
+{
+  const files = ['src/core.js','src/ui.js','src/chapters.js','src/view.js','src/view2d.js'];
+  files.forEach(f=>{
+    const src5 = fs.readFileSync(f,'utf8');
+    const bad = [];
+    const re5 = /'第'\s*\+\s*(\w+)|'第'\+(\w+)/g;
+    let m5;
+    while((m5 = re5.exec(src5))){
+      const v = m5[1] || m5[2];
+      if(v==='(' ) continue;
+      bad.push(v);
+    }
+    T(f + ' が 章の 番号を そのまま 出して いない', bad.length===0,
+      '「第'+bad.join('／第')+'」— chapterLabel を つかう');
+  });
+  T('chapterLabel が ある',
+    /function chapterLabel\(no\)/.test(fs.readFileSync('src/core.js','utf8')));
+}
+
 // ★サービスワーカーの キャッシュ名が この ビルドの ものに なっている こと
 //   （固定の ままだと、なおしても 端末に ふるい ものが のこる）
 {

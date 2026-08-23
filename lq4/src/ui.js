@@ -1105,7 +1105,7 @@ function chapterSelect(){
     const c = CHAPTERS_DATA.get(no);
     const nm = (c.party||[]).map(k=>(C.CLASSES[k]||{}).name||k);
     const who = nm.length>2 ? nm[0]+'たち' : nm.join('・');   // ★ながい れつは みきれる ため
-    return '第'+no+'章　'+c.title+'（'+who+'）';
+    return C.chapterLabel(no)+'　'+c.title+'（'+who+'）';
   }).concat(['戻る']);
   menu(items, '章を 選ぶ', (k)=>{
     if(k>=nos.length){ titleScreen(); return; }
@@ -1128,7 +1128,7 @@ function startGame(loaded){
     //   ここを かためがきに していた ため、第3章でも「ヴェルサ」と でていた。
     const no = C.G.chapter || 1;
     const cd = (typeof CHAPTERS_DATA!=='undefined') ? CHAPTERS_DATA.get(no) : null;
-    const title = '第' + no + '章';
+    const title = C.chapterLabel(no);
     const sub = cd ? cd.title : '';
     const open = (cd && cd.opening) ? cd.opening
                : ['（Aボタン：しらべる・はなす　Bボタン：メニュー）'];
