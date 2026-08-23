@@ -99,7 +99,7 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
     return L>R ? 'left' : 'right';
   };
   const dirs = {};
-  ['io','seren','noe'].forEach(k=>{
+  ['io','seren','noe','amane'].forEach(k=>{
     ['side','sideW'].forEach(f=>{
       const b = grab(k,f);
       if(!b){ T('よこむきの 絵が ある '+k+' '+f, false); return; }
@@ -110,7 +110,7 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
   T('なかまの よこむきが そろって いる', vals.every(v=>v===vals[0]), JSON.stringify(dirs));
   T('よこむきは 左むきが きじゅん', vals[0]==='left', JSON.stringify(dirs));
   T('立ち絵と 歩く絵の 向きが おなじ',
-    ['io','seren','noe'].every(k=>dirs[k+'.side']===dirs[k+'.sideW']), JSON.stringify(dirs));
+    ['io','seren','noe','amane'].every(k=>dirs[k+'.side']===dirs[k+'.sideW']), JSON.stringify(dirs));
 }
 
 // ★えの ふちに 中身が びっしり ある＝切り出しで 体が 落ちて いる うたがい。
