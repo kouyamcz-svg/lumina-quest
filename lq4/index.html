@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-23 20:50 JST", "build":"c4650fe1","assets_sha": "6a362f94", "lines": {"world": 119, "npc": 657, "chapters": 1977, "bgm": 985, "view2d": 2524, "core": 3385, "view": 1401, "ui": 1144}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-23 23:47 JST", "build":"b36dcb51","assets_sha": "8b65b09c", "lines": {"world": 119, "npc": 657, "chapters": 1977, "bgm": 985, "view2d": 2524, "core": 3391, "view": 1401, "ui": 1144}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -157,7 +157,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=6a362f94"></script>
+<script src="assets.js?v=8b65b09c"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -6566,16 +6566,22 @@ const ENEMIES = [
    art:'lampghost', inflict:{type:'sleep', p:0.16}},
   // ---- 第2章：捨てられた ものが 形を もった もの ----
   // ---- 第3章：地上の いきもの（土・根・獣の 骨）----
-  {key:'nemurishika', name:'ねむり鹿',  hp:150,atk:34, def:26, agi:16, exp:620, gold:520, minLv:18,
-   art:'yamiinu'},
-  {key:'doronote',    name:'どろの手',  hp:170,atk:38, def:30, agi:10, exp:690, gold:580, minLv:18,
-   art:'kagekakera', inflict:{type:'slow', p:0.16}},
-  {key:'hainene',     name:'這い根',    hp:200,atk:41, def:34, agi:12, exp:830, gold:660, minLv:20,
-   art:'kudamukade'},
-  {key:'sennengoke',  name:'千年苔',    hp:230,atk:36, def:40, agi:8,  exp:900, gold:720, minLv:20,
-   art:'nukegara'},
-  {key:'kareedano',   name:'枯れ枝の 獣', hp:185,atk:44, def:28, agi:24, exp:790, gold:640, minLv:19,
-   art:'kamigarasu'},
+  {key:'nemurishika', name:'ねむり鹿',  hp:150,atk:34, def:26, agi:16, exp:430, gold:520, minLv:18,
+   art:'nemurishika'},
+  {key:'doronote',    name:'どろの手',  hp:170,atk:38, def:30, agi:10, exp:480, gold:580, minLv:18,
+   art:'doronote', inflict:{type:'slow', p:0.16}},
+  {key:'hainene',     name:'這い根',    hp:200,atk:41, def:34, agi:12, exp:580, gold:660, minLv:20,
+   art:'hainene'},
+  {key:'sennengoke',  name:'千年苔',    hp:230,atk:36, def:40, agi:8,  exp:630, gold:720, minLv:20,
+   art:'sennengoke'},
+  {key:'kareedano',   name:'枯れ枝の 獣', hp:185,atk:44, def:28, agi:24, exp:550, gold:640, minLv:19,
+   art:'kareedano'},
+  {key:'ishikui',     name:'石喰い',    hp:245,atk:39, def:44, agi:7,  exp:660, gold:700, minLv:19,
+   art:'ishikui'},
+  {key:'kirimatoi',   name:'霧まとい',  hp:160,atk:43, def:24, agi:28, exp:600, gold:600, minLv:19,
+   art:'kirimatoi', inflict:{type:'confuse', p:0.18}},
+  {key:'honetori',    name:'骨鳥',      hp:175,atk:46, def:27, agi:26, exp:640, gold:660, minLv:20,
+   art:'honetori'},
   {key:'kamikishi',  name:'くずれ紙の 騎士', hp:96, atk:21, def:20, agi:11, exp:430, gold:320, minLv:12,
    art:'kamikishi'},
   {key:'hikarikui',  name:'光喰いバク',   hp:88, atk:18, def:18, agi:10, exp:400, gold:300, minLv:12,
@@ -6688,9 +6694,9 @@ const byMap = {
   tower4:    ['kamikishi','susurichou','kudamukade'],
   tower5:    ['kamikishi','kudamukade'],
   // ---- 第3章：地上 ----
-  ground:    ['nemurishika','doronote','kareedano','hainene'],
-  ice_cave:  ['nemurishika','doronote','kareedano','sennengoke','hainene'],
-  well_cave: ['doronote','hainene','sennengoke','kareedano'],
+  ground:    ['nemurishika','doronote','kareedano','kirimatoi','honetori'],
+  ice_cave:  ['nemurishika','kirimatoi','kareedano','sennengoke','honetori'],
+  well_cave: ['doronote','hainene','sennengoke','ishikui','honetori'],
 };
 
 // ---------------- データ：マップ ----------------

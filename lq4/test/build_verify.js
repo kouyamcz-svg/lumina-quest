@@ -146,7 +146,10 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
   };
   const MONS = ['kamikishi','hikarikui','kamigarasu','kudamukade','wasuremono',
                 'susurichou','nukegara','sorakurai','fornax','oboro','kanmure',
-                'umbra','shadowmaw'];
+                'umbra','shadowmaw',
+                // ★第3章：地上
+                'nemurishika','doronote','hainene','sennengoke',
+                'kareedano','ishikui','kirimatoi','honetori'];
   MONS.forEach(k=>{
     const m2 = new RegExp('  '+k+":\\{w:\\d+,h:\\d+,src:'data:image/png;base64,([^']*)'").exec(src);
     if(!m2){ T('えが ある '+k, false); return; }
