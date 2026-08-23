@@ -192,7 +192,16 @@ function kill(k){
     }
     C.G.chapter = wd.chapter;
     C.G.flags[wd.flag] = false;
-    T('けっかい '+mp+' は はじめ 閉じている（第'+wd.chapter+'章）', C.wardBlocks(mp));
+    // ★めじるしの ない けっかいは「その 章に なれば 通る」だけ。
+    //   前の 章で 止まる ことを たしかめる。
+    if(!wd.flag){
+      C.G.chapter = wd.chapter - 1;
+      T('けっかい '+mp+' は 前の 章では 閉じている', C.wardBlocks(mp));
+      C.G.chapter = wd.chapter;
+      T('けっかい '+mp+' は その 章で 開く', !C.wardBlocks(mp));
+      return;
+    }
+    T('けっかい '+mp+' は はじめ 閉じている（'+C.chapterLabel(wd.chapter)+'）', C.wardBlocks(mp));
     C.G.flags[wd.flag] = true;
     T('けっかい '+mp+' は めじるしで 開く', !C.wardBlocks(mp));
   });

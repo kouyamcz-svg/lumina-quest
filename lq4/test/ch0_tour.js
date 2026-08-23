@@ -255,7 +255,9 @@ T('広場へ はいれる', C.P.map==='rift_yard');
   clearLog();
   C.P.map='world'; C.P.x=35; C.P.y=17; C.P.dir='left'; C.G.mode='field';
   C.interact();
-  T('まだ 入れない ちてんは 物語で 断られる', said('船頭'), log.join(' / ').slice(0,50));
+  // ★雲海港は 第3章で 実マップに なった。序章では 衛兵が 断る。
+  T('まだ 入れない ちてんは 物語で 断られる',
+    said('衛兵') || said('船頭'), log.join(' / ').slice(0,60));
   T('中の 人の ことばが 画面に 出ない', !said('作られます') && !said('未実装'));
   walkTo('lower_dist', 10, 13);
 }

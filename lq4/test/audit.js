@@ -341,7 +341,9 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   Object.keys(C.WARDS||{}).forEach(mp=>{
     const wd = C.WARDS[mp];
     T('けっかいの さき '+mp+' が 実在する', !!C.MAPS[mp]);
-    T('けっかいの めじるし '+wd.flag+' は どこかで 立つ', raised.has(wd.flag), 'どこでも 立たない');
+    // ★章だけで あく けっかい（めじるし なし）も ある
+    if(wd.flag)
+      T('けっかいの めじるし '+wd.flag+' は どこかで 立つ', raised.has(wd.flag), 'どこでも 立たない');
     T('けっかいに ことわりの ことばが ある '+mp, !!(wd.msg && wd.msg.length));
   });
 }

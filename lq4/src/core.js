@@ -1560,6 +1560,10 @@ function wardBlocks(to){
   // ★その 章より 前でも 通して いた。序章の うちに 旧管路へ 下りられた。
   if(now < wd.chapter) return true;                 // まだ その 章に なって いない
   if(now > wd.chapter) return false;                // もう 済んだ 章
+  // ★めじるしが ない けっかいは「その 章に なれば 通る」だけ。
+  //   ★flag を 書かない と G.flags[undefined] が いつも 偽に なり、
+  //     章に なっても ずっと 止まって いた。
+  if(!wd.flag) return false;
   return !G.flags[wd.flag];
 }
 function wardMsg(to){

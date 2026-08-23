@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 00:58 JST", "build":"964b7fe6","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3509, "view": 1401, "ui": 1144}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 01:01 JST", "build":"07a99e8f","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3513, "view": 1401, "ui": 1144}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -8280,6 +8280,10 @@ function wardBlocks(to){
   // ★その 章より 前でも 通して いた。序章の うちに 旧管路へ 下りられた。
   if(now < wd.chapter) return true;                 // まだ その 章に なって いない
   if(now > wd.chapter) return false;                // もう 済んだ 章
+  // ★めじるしが ない けっかいは「その 章に なれば 通る」だけ。
+  //   ★flag を 書かない と G.flags[undefined] が いつも 偽に なり、
+  //     章に なっても ずっと 止まって いた。
+  if(!wd.flag) return false;
   return !G.flags[wd.flag];
 }
 function wardMsg(to){
