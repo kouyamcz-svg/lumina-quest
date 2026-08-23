@@ -52,6 +52,7 @@ const MAP_IDS = {
   garden:     {region:'sky', kind:'town', name:'空中庭園',      scene:'SCENE_SKY_TOWN'},
   furnace:    {region:'sky', kind:'dgn',  name:'光珠炉の 外郭', scene:'SCENE_SKY_TOWN'},
   furnace_core:{region:'sky',kind:'dgn',  name:'炉心の 手前',   scene:'SCENE_SKY_TOWN'},
+  sky_port:   {region:'sky', kind:'town', name:'雲海港',      scene:'SCENE_SKY_TOWN'},
   // ---- 第3章：地上 ----
   ground:     {region:'land',kind:'world',name:'地上',        scene:'SCENE_FIELD'},
   ice_camp:   {region:'land',kind:'town', name:'氷の谷',      scene:'SCENE_FIELD'},

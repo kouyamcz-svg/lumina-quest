@@ -46,9 +46,27 @@ C.party.length=0;
 C.G.flags.ch2_cleared = true;
 C.switchChapter(4);
 T('第3章に なる', C.G.chapter===4);
-T('はじまりは 地上', C.P.map==='ground', C.P.map+' '+C.P.x+','+C.P.y);
+// ★天空から はじまり、港の 舟で 地上へ 降りる
+T('はじまりは 天空（上層区）', C.P.map==='upper_dist', C.P.map+' '+C.P.x+','+C.P.y);
 T('章データが ひける', C.chData() && C.chData().id==='ch3_ground');
 T('ノエが いる', C.party.length===3 && C.party[2].cls==='noe');
+T('まだ 地上に 降りて いない', !C.G.flags.ch3_landed);
+
+// ===== 1.5 天空 → 雲海港 → 地上 =====
+stand('upper_dist', 10, 13, 'front'); C.stepField(0,1);
+T('上層区から 中層区へ', C.P.map==='mid_dist', C.P.map);
+stand('mid_dist', 10, 13, 'front'); C.stepField(0,1);
+T('中層区から 世界地図へ', C.P.map==='world', C.P.map+' '+C.P.x+','+C.P.y);
+stand('world', 34, 18, 'back'); C.stepField(0,-1);
+T('雲海港へ 入れる', C.P.map==='sky_port', C.P.map+' '+C.P.x+','+C.P.y);
+T('港の めじるしが たつ', C.G.flags.ch3_atPort===true);
+
+talk('sky_port', 9, 12, 'front');
+T('舟を しらべると 降下する', C.G.flags.ch3_landed===true);
+T('番人が 四十年 磨いたと 言う', said('四十年 この 舟を 磨いてきた'), log.join(' / ').slice(0,140));
+T('戻ってきた 者は いないと 言う', said('戻ってきた 者も おらんからな'));
+T('地上は 重いと 言う', said('ここは 上より 重い'));
+T('地上に 着いて いる', C.P.map==='ground', C.P.map+' '+C.P.x+','+C.P.y);
 
 // ===== 2. 氷の谷へ =====
 stand('ground', 48, 9, 'back');
