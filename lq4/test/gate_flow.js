@@ -153,6 +153,11 @@ function kill(k){
     watchtower: 3,
     upper_dist: 3,
     mid_post:   2, mid_arch: 2, old_pipe: 2,
+    // ---- 第3章：雲海港と 地上 ----
+    sky_port:   4,   // 第3章から（降下の 出発点）
+    ground:     4, ice_camp: 4, ice_cave: 4,
+    well_town:  4, well_cave: 4, coral_bay: 4, sea_cave: 4,
+    furnace_core: 3,
     trial_yard: 1, rift_yard: 1, home_forge: 1,
   };
   const W = C.MAPS.world.warpsXY || {};

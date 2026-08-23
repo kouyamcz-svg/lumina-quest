@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 00:56 JST", "build":"fee2d4d7","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3501, "view": 1401, "ui": 1144}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 00:58 JST", "build":"964b7fe6","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3509, "view": 1401, "ui": 1144}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -9689,6 +9689,14 @@ const WARDS = {
               'セレン「わたしの 家の 名でも 通らないの」',
               '衛兵「……お嬢様。今は そういう ご時世で」'],
     msg:['衛兵「炉の 件だな。通れ」']},
+  // ★第3章：雲海港は 降下の 出発点。第3章に なってから。
+  sky_port: {chapter:4,
+    msgEarly:['雲海港。荷を 積んだ 舟が 何隻も 繋がれている。',
+              '衛兵「降下の 舟は 動かん。……千年 動いた ことが ない」',
+              'イオ「乗る 用が できたら」',
+              '衛兵「そのときは 上から 沙汰が くる。今は 帰りな」'],
+    msg:['降下用の 舟が 繋いで ある。']},
+
   // ★第2章：空中庭園は 上層区の 中。上へ 上がれる ように なってから。
   garden: {chapter:3, flag:'ch2_taskOpen',
     msgEarly:['空中庭園へ 昇る 石段。上から 花の 匂いが 落ちてくる。',
