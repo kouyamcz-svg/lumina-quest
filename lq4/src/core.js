@@ -147,6 +147,21 @@ const ENEMIES = [
    art:'sennengoke'},
   {key:'kareedano',   name:'枯れ枝の 獣', hp:185,atk:44, def:28, agi:24, exp:550, gold:640, minLv:19,
    art:'kareedano'},
+  // ---- 地方ごとの 固有種 ----
+  {key:'koorinezumi', name:'氷ねずみ',  hp:140,atk:40, def:25, agi:30, exp:520, gold:560, minLv:18,
+   art:'koorinezumi'},
+  {key:'yukikogori',  name:'雪こごり',  hp:255,atk:42, def:42, agi:9,  exp:700, gold:760, minLv:20,
+   art:'yukikogori', inflict:{type:'freeze', p:0.18}},
+  {key:'mizusumashi', name:'水すまし',  hp:150,atk:38, def:26, agi:32, exp:530, gold:570, minLv:18,
+   art:'mizusumashi'},
+  {key:'dorokaburi',  name:'泥かぶり',  hp:215,atk:44, def:33, agi:14, exp:640, gold:700, minLv:19,
+   art:'dorokaburi', inflict:{type:'slow', p:0.20}},
+  {key:'sangobito',   name:'珊瑚びと',  hp:230,atk:46, def:36, agi:16, exp:690, gold:740, minLv:20,
+   art:'sangobito'},
+  {key:'namiyobi',    name:'波よび',    hp:205,atk:48, def:30, agi:20, exp:670, gold:720, minLv:20,
+   art:'namiyobi', inflict:{type:'confuse', p:0.20}},
+  {key:'iwafukurou',  name:'岩ふくろう',hp:265,atk:50, def:44, agi:18, exp:780, gold:840, minLv:21,
+   art:'iwafukurou'},
   {key:'ishikui',     name:'石喰い',    hp:245,atk:39, def:44, agi:7,  exp:660, gold:700, minLv:19,
    art:'ishikui'},
   {key:'kirimatoi',   name:'霧まとい',  hp:160,atk:43, def:24, agi:28, exp:600, gold:600, minLv:19,
@@ -177,8 +192,8 @@ const MIDBOSS = {
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第3章ボス：あくむじゅう ルプス（狼座）----
   //   大陸から 落ちた 悪夢の かけらが 地上の 狼に 憑いた もの。
-  lupus:{key:'lupus', name:'あくむじゅう ルプス', hp:2600, atk:74, def:38, agi:22, acts:2,
-    exp:6200, gold:6800, art:'oboro', scale:1.15,
+  lupus:{key:'lupus', name:'あくむじゅう ルプス', hp:3200, atk:68, def:37, agi:22, acts:1,
+    exp:6200, gold:6800, art:'lupus', scale:1.25,
     skill:{p:0.30, mul:1.30, name:'かみくだき'},
     aoe:{p:0.24, lo:34, hi:50, name:'とおぼえ'},
     inflict:{type:'slow', p:0.22},
@@ -266,8 +281,8 @@ const byMap = {
   tower5:    ['kamikishi','kudamukade'],
   // ---- 第3章：地上 ----
   ground:    ['nemurishika','doronote','kareedano','kirimatoi','honetori'],
-  ice_cave:  ['nemurishika','kirimatoi','kareedano','sennengoke','honetori'],
-  well_cave: ['doronote','hainene','sennengoke','ishikui','honetori'],
+  ice_cave:  ['koorinezumi','yukikogori','kirimatoi','sennengoke','honetori'],
+  well_cave: ['mizusumashi','dorokaburi','doronote','hainene','ishikui'],
 };
 
 // ---------------- データ：マップ ----------------
