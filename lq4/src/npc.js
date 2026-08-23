@@ -271,7 +271,7 @@ const NPCS = {
   furnace: [
     {at:'17,17', spr:'villagerB', name:'倒れた 炉番', lines:[
       {when:{flag:'ch2_saved1'}, text:[
-        '炉番「あと 二人 いる。……頼む」']},
+        '炉番「ほかにも いる。……頼む」']},
       {text:['熱に あてられた 炉番が うずくまっている。',
              '炉番「……外郭が 熱い。こんなの 初めてだ」']}]},
     {at:'2,10', spr:'villagerA', name:'熱に まかれた 炉番', lines:[
@@ -290,7 +290,7 @@ const NPCS = {
   furnace: [
     {at:'17,17', spr:'villagerB', name:'倒れた 炉番', lines:[
       {when:{flag:'ch2_saved1'}, text:[
-        '炉番「あと 二人 いる。……頼む」']},
+        '炉番「ほかにも いる。……頼む」']},
       {text:['熱に あてられた 炉番が うずくまっている。',
              '炉番「……外郭が 熱い。こんなの 初めてだ」']}]},
     {at:'2,10', spr:'villagerA', name:'熱に まかれた 炉番', lines:[

@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-23 07:52 JST", "build":"fcdb42f5","assets_sha": "632130cd", "lines": {"world": 113, "npc": 562, "chapters": 1588, "bgm": 985, "view2d": 2524, "core": 3160, "view": 1401, "ui": 1144}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-23 12:41 JST", "build":"a8830842","assets_sha": "632130cd", "lines": {"world": 113, "npc": 562, "chapters": 1590, "bgm": 985, "view2d": 2524, "core": 3171, "view": 1401, "ui": 1144}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -551,7 +551,7 @@ const NPCS = {
   furnace: [
     {at:'17,17', spr:'villagerB', name:'倒れた 炉番', lines:[
       {when:{flag:'ch2_saved1'}, text:[
-        '炉番「あと 二人 いる。……頼む」']},
+        '炉番「ほかにも いる。……頼む」']},
       {text:['熱に あてられた 炉番が うずくまっている。',
              '炉番「……外郭が 熱い。こんなの 初めてだ」']}]},
     {at:'2,10', spr:'villagerA', name:'熱に まかれた 炉番', lines:[
@@ -570,7 +570,7 @@ const NPCS = {
   furnace: [
     {at:'17,17', spr:'villagerB', name:'倒れた 炉番', lines:[
       {when:{flag:'ch2_saved1'}, text:[
-        '炉番「あと 二人 いる。……頼む」']},
+        '炉番「ほかにも いる。……頼む」']},
       {text:['熱に あてられた 炉番が うずくまっている。',
              '炉番「……外郭が 熱い。こんなの 初めてだ」']}]},
     {at:'2,10', spr:'villagerA', name:'熱に まかれた 炉番', lines:[
@@ -2172,6 +2172,9 @@ const CH = {
       // ---- 炉番 三人 ----
       { npc:'倒れた 炉番', cond:['ch2_accident'], unless:'ch2_saved1',
         set:['ch2_saved1'],
+        countFlags:['ch2_saved1','ch2_saved2','ch2_saved3'],
+        countName:'炉番',
+        countAll:'＊ 三人 とも 助けた ＊',
         msg:['熱に あてられた 炉番が うずくまっている。',
              '炉番「……来た のか。誰か 来たのか」',
              'イオ「立てますか」',
@@ -2184,12 +2187,13 @@ const CH = {
              '',
              '炉番は 笑おうとして、咳きこんだ。',
              'イオ「出口は まっすぐ 南です。歩けますね」',
-             '炉番「行ける。……あと 二人 いる。頼む」',
-             '',
-             '＊ 炉番 ひとりめを 助けた（あと 二人）＊'] },
+             '炉番「行ける。……ほかにも いる。頼む」'] },
 
       { npc:'熱に まかれた 炉番', cond:['ch2_accident'], unless:'ch2_saved2',
         set:['ch2_saved2'],
+        countFlags:['ch2_saved1','ch2_saved2','ch2_saved3'],
+        countName:'炉番',
+        countAll:'＊ 三人 とも 助けた ＊',
         msg:['管の 陰に 若い 炉番が 座りこんでいた。',
              '炉番「動くと 熱いんだ。……ずっと ここに いる」',
              '',
@@ -2201,13 +2205,14 @@ const CH = {
              '炉番「あんた、夢守りの」',
              'ノエ「……うん」',
              '炉番「うちの 親父が 言ってた。夢守りは 炉に 近づかんて」',
-             'ノエ「……近づかない ことに なってる だけ」',
-             '',
-             '＊ 炉番 ふたりめを 助けた ＊'] },
+             'ノエ「……近づかない ことに なってる だけ」'] },
 
       { npc:'隔壁の 前の 炉番', cond:['ch2_accident'], unless:'ch2_saved3',
         set:['ch2_saved3'],
-        msg:['隔壁の すぐ 手前に、三人めが 座っていた。',
+        countFlags:['ch2_saved1','ch2_saved2','ch2_saved3'],
+        countName:'炉番',
+        countAll:'＊ 三人 とも 助けた ＊',
+        msg:['隔壁の すぐ 手前に、炉番が ひとり 座っていた。',
              '壁に 耳を つけたまま、こちらを 見ようとしない。',
              '',
              'イオ「助けに 来ました」',
@@ -2224,10 +2229,7 @@ const CH = {
              'ノエは 隔壁を 見ていた。何も 言わなかった。',
              '',
              '炉番「わしは 出る。……だが あんたら、開けるなら 気を つけろ」',
-             '炉番「開けた とたんに 静かに なった ものを、わしは 一度 見た」',
-             '',
-             '＊ 炉番 三人めを 助けた ＊',
-             '＊ 三人 とも 助けた ＊'] },
+             '炉番「開けた とたんに 静かに なった ものを、わしは 一度 見た」'] },
 
       // ---- 炉の外郭：子供の 寝息 ----
       { npc:'炉心の 壁', cond:['ch2_enteredFurnace'], unless:'ch2_heardBreath',
@@ -7344,6 +7346,17 @@ function runTalkEvent(npcName){
   Object.keys(e.quest || {}).forEach(q => questAdvance(q, e.quest[q]));
 
   const lines = (e.msg || []).slice();
+  // ★「何人めか」は 助けた 順で 変わる。書き置きの 文だと
+  //   さきに 三人めを 助けても「ひとりめ」と 出て しまう。
+  //   いま いくつ 立って いるかを かぞえて 足す。
+  if(e.countFlags && e.countFlags.length){
+    const total = e.countFlags.length;
+    const n = e.countFlags.filter(f=>G.flags[f]).length;
+    const KANJI = ['','ひとり','ふたり','三人','四人','五人'];
+    lines.push('');
+    if(n >= total) lines.push(e.countAll || ('＊ '+KANJI[total]+' とも 助けた ＊'));
+    else lines.push('＊ '+(e.countName||'')+'を 助けた（あと '+KANJI[total-n]+'）＊');
+  }
   if(e.img && V.showScene) V.showScene(e.img);   // ★いちまいえ を せなかに ひょうじ
   U.msg(lines, () => {
     if(e.img && V.hideScene) V.hideScene();

@@ -1405,6 +1405,17 @@ function runTalkEvent(npcName){
   Object.keys(e.quest || {}).forEach(q => questAdvance(q, e.quest[q]));
 
   const lines = (e.msg || []).slice();
+  // ★「何人めか」は 助けた 順で 変わる。書き置きの 文だと
+  //   さきに 三人めを 助けても「ひとりめ」と 出て しまう。
+  //   いま いくつ 立って いるかを かぞえて 足す。
+  if(e.countFlags && e.countFlags.length){
+    const total = e.countFlags.length;
+    const n = e.countFlags.filter(f=>G.flags[f]).length;
+    const KANJI = ['','ひとり','ふたり','三人','四人','五人'];
+    lines.push('');
+    if(n >= total) lines.push(e.countAll || ('＊ '+KANJI[total]+' とも 助けた ＊'));
+    else lines.push('＊ '+(e.countName||'')+'を 助けた（あと '+KANJI[total-n]+'）＊');
+  }
   if(e.img && V.showScene) V.showScene(e.img);   // ★いちまいえ を せなかに ひょうじ
   U.msg(lines, () => {
     if(e.img && V.hideScene) V.hideScene();

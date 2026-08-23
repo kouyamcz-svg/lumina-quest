@@ -227,6 +227,30 @@ talk('furnace', 13, 16, 'back');
 T('炉番 三人めを 助ける', C.G.flags.ch2_saved3===true);
 T('奥から 息が すると 言う', said('息だ。誰かの'), log.join(' / ').slice(0,140));
 
+// ★どの 順に 助けても 数が 合う
+{
+  const pos = {1:[17,17], 2:[2,10], 3:[13,15]};
+  const tail = (order)=>{
+    const out = [];
+    C.G.flags.ch2_saved1 = false;
+    C.G.flags.ch2_saved2 = false;
+    C.G.flags.ch2_saved3 = false;
+    order.forEach(k=>{
+      const [x,y] = pos[k];
+      talk('furnace', x, y+1, 'back');
+      out.push(log.filter(l=>String(l).indexOf('＊')===0).join(''));
+    });
+    return out;
+  };
+  const a = tail([3,1,2]);
+  T('三人めから 助けても「あと ふたり」', a[0].indexOf('あと ふたり')>=0, a[0]);
+  T('つぎは「あと ひとり」',              a[1].indexOf('あと ひとり')>=0, a[1]);
+  T('さいごに「三人 とも」',              a[2].indexOf('三人 とも')>=0, a[2]);
+  const b = tail([2,3,1]);
+  T('べつの 順でも 数が 合う',
+    b[0].indexOf('あと ふたり')>=0 && b[2].indexOf('三人 とも')>=0, b.join(' / '));
+}
+
 // ===== 9. 子供の 寝息 =====
 talk('furnace_core', 11, 7, 'back');
 T('寝息を 聞く', C.G.flags.ch2_heardBreath===true);

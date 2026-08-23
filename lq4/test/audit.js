@@ -682,6 +682,34 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★「何人めか」を 数える 会話は、書き置きの 順番を つかわない こと。
+//   ★さきに 三人めを 助けても「ひとりめ」と 出て いた。
+{
+  const NG = /ひとりめ|ふたりめ|三人め|あと 二人|あと 一人|あと 三人/;
+  Object.keys(CHD.CH).forEach(no=>{
+    const evs = CHD.CH[no].talkEvents || [];
+    // おなじ かたまりの めじるしを つかう 会話（saved1,2,3 など）
+    const groups = {};
+    evs.forEach(e=>{
+      (e.set||[]).forEach(f=>{
+        const g = f.replace(/\d+$/,'');
+        if(g!==f){ (groups[g]=groups[g]||[]).push(e); }
+      });
+    });
+    Object.keys(groups).forEach(g=>{
+      const list = groups[g];
+      if(list.length < 2) return;
+      list.forEach(e=>{
+        T('第'+(no-1)+'章：'+e.npc+' が 人数を 数えて いる', !!(e.countFlags && e.countFlags.length),
+          '書き置きの 順番に なって いる');
+        (e.msg||[]).forEach(l=>{
+          T('第'+(no-1)+'章：'+e.npc+' の せりふが 順番に よらない', !NG.test(l), l.slice(0,36));
+        });
+      });
+    });
+  });
+}
+
 // ★ダンジョンに 入った ところから ボスが 見えない こと。
 //   ★炉の 外郭は 迷路の 上に ボスの 間が つながって いて、
 //     入った とたん ボスが 見えて いた。
