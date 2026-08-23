@@ -118,6 +118,52 @@ T('セレンが 槍を 教える', C.G.flags.ch3_serenTaught===true);
 T('「重い者」の 話が 出る', said('重い者'), log.join(' / ').slice(0,140));
 T('重いのは わたしの ほうだったと 言う', said('重いのは、たぶん わたしの ほうだった'));
 
+// ===== 9.5 湧き水の町（西）=====
+stand('ground', 9, 30, 'back');
+C.stepField(0,-1);
+T('湧き水の町へ 入れる', C.P.map==='well_town', C.P.map+' '+C.P.x+','+C.P.y);
+
+talk('well_town', 3, 6, 'back');
+T('東の 長の 話を 聞く', C.G.flags.ch3_wellTold===true);
+T('どちらかが 嘘だと 言う', said('どちらかが 嘘を ついとる'), log.join(' / ').slice(0,120));
+T('どちらも 本当かもと 返す', said('どちらも 本当かも しれません'));
+T('クエストが たつ', C.G.quests.ch3_q2_well==='active');
+
+stand('well_town', 12, 8, 'back');
+C.stepField(0,-1);
+T('地下水路へ 入れる', C.P.map==='well_cave', C.P.map);
+
+T('はじめは 土の 壁', C.tileAt('well_cave',10,6)==='K', C.tileAt('well_cave',10,6));
+talk('well_cave', 10, 7, 'back');
+T('三の 水脈の 話が 出る', said('三の 水脈'), log.join(' / ').slice(0,70));
+stand('well_cave', 3, 10, 'back'); C.interact();
+T('ひとつでは 開かない', C.tileAt('well_cave',10,6)==='K');
+stand('well_cave', 20, 14, 'back'); C.interact();
+T('ふたつで 開く', C.tileAt('well_cave',10,6)==='.', C.tileAt('well_cave',10,6));
+
+clearLog(); strong(26);
+stand('well_cave', 10, 5, 'back');
+C.interact();
+T('水脈の ぬしに かてる', C.G.flags.ch3_veinFound===true);
+T('吸って いたと 言う', said('吸って いたんだ'), log.join(' / ').slice(0,120));
+T('報せに 行けと 出る', said('集落長に 報せよう'));
+
+{
+  const g0 = C.P.gold;
+  C.party.forEach(p=>{ p.hp=1; });
+  talk('well_town', 3, 6, 'back');
+  T('集落長に 報せる', C.G.flags.ch3_wellSolved===true);
+  T('真ん中の 井戸だと 言う', said('真ん中だ。どちらの ものでも ない'), log.join(' / ').slice(0,140));
+  T('両方の ものだと 言う', said('両方の ものだろう'));
+  T('礼を もらえる', C.P.gold===g0+2400, C.P.gold+' ← '+g0);
+  T('クエストが 片づく', C.G.quests.ch3_q2_well==='clear');
+}
+
+talk('well_town', 11, 11, 'back');
+T('はじまりの 隊商', C.G.flags.ch3_caravan===true);
+T('動いた ものに 名が つくと 言う', said('動いた ものに、あとから 名が つく'), log.join(' / ').slice(0,140));
+T('余所者どうしが 組むと 道が できる', said('余所者どうしが 組むと、道が できる'));
+
 // ===== 10. 章末 =====
 clearLog(); C.G.tactic='manual';
 C.triggerChapterEnd();

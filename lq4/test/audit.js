@@ -180,7 +180,9 @@ Object.keys(C.MAPS).forEach(mp=>{
   T('しらべるます到達 '+mp+'（'+unreach.length+'）', unreach.length===0, unreach.slice(0,6).join(' '));
   // 出口（ワープ発地）が すべて つながっているか
   Object.keys(m.warpsXY||{}).forEach(k=>{
-    T('出口到達 '+mp+' '+k, seen.has(k));
+    // ★世界地図は 島や 岬に 分かれて いる（船・降下で 行き来する）。
+    //   歩いて つながって いなくて よい。
+    if(C.MAPS[mp].theme!=='world') T('出口到達 '+mp+' '+k, seen.has(k));
   });
 });
 

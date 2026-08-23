@@ -255,6 +255,40 @@ const NPCS = {
   ],
 
   // ============ 第2章：光珠炉の 外郭 ============
+  // ============ 第3章：湧き水の町 ============
+  well_town: [
+    {at:'3,5', spr:'captain', name:'東の 集落長', lines:[
+      {when:{flag:'ch3_caravan'}, text:[
+        '東の 長「荷が 東西 いっしょに 出る ように なった」',
+        '東の 長「……水ひとつで、こうも 変わる ものか」']},
+      {when:{flag:'ch3_wellSolved'}, text:[
+        '東の 長「真ん中の 井戸だ。どちらの ものでも ない」']},
+      {when:{flag:'ch3_wellTold'}, text:[
+        '東の 長「水路図だ。町の まん中の 井戸から 下りられる」']},
+      {text:['東の 長「空の 者か。……悪いが 今は それどころでは ない」']}]},
+    {at:'21,5', spr:'guardB', name:'西の 集落長', lines:[
+      {when:{flag:'ch3_wellSolved'}, text:[
+        '西の 長「両方の ものだろう。……そう 言うしか ない」']},
+      {text:['西の 長「東の 連中が 下流で 汲みすぎとる」',
+             '西の 長「こっちが せき止めた などと 言いおって」']}]},
+    {at:'11,10', spr:'villagerA', name:'両集落の 若者', lines:[
+      {when:{flag:'ch3_caravan'}, text:[
+        '若者「動いた ものに、あとから 名が つくんだ」']},
+      {when:{flag:'ch3_wellSolved'}, text:[
+        '若者「水は 共同に なった。なら 荷も 共同で いいだろう」']},
+      {text:['若者「東と 西で 顔を 合わせるのは、水汲みの ときだけだ」',
+             '若者「……にらみあう ために 会っとる ような ものさ」']}]},
+    {at:'13,10', spr:'villagerB', name:'水汲みの 女', lines:[
+      {when:{flag:'ch3_veinFound'}, text:[
+        '女「水が すこし 澄んだ。……気の せいかね」']},
+      {text:['女「湧き水が 半分に なったのは 去年から」',
+             '女「上流も 下流も 減っとる。おかしな 話さ」']}]},
+    {at:'3,12', spr:'elderWoman', name:'町の 古老', lines:[
+      {text:['古老「塔の 水路図か。……あれは 空の 者の 字で 書いてある」',
+             '古老「わしらには 読めん。だから 誰も 見に 行かん」']}]},
+  ],
+
+
   // ============ 第3章：氷の谷 ============
   ice_camp: [
     {at:'9,5', spr:'captain', name:'氏族の 長', lines:[
@@ -473,6 +507,17 @@ const QUESTS = {
     reward:{}, next:'ch2_q2_core',
   },
   // ============ 第3章：氷の谷 ============
+  ch3_q2_well: {
+    id:'ch3_q2_well', chapter:4, title:'三の 水脈',
+    giver:'東の 集落長',
+    desc:'町の 井戸から 地下水路へ。第三の 水脈を さがす。',
+    steps:[
+      {id:'vein',  desc:'水脈を ふさぐ ものを 討つ', flag:'ch3_veinFound'},
+      {id:'told',  desc:'集落長に 報せる',           flag:'ch3_wellSolved'},
+      {id:'cara',  desc:'井戸の 若者たちに 会う',   flag:'ch3_caravan'},
+    ],
+    reward:{}, next:null,
+  },
   ch3_q1_rieze: {
     id:'ch3_q1_rieze', chapter:4, title:'氷窟の リーゼ',
     giver:'氏族の 長',
