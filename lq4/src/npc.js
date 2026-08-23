@@ -255,6 +255,42 @@ const NPCS = {
   ],
 
   // ============ 第2章：光珠炉の 外郭 ============
+  // ============ 第3章：珊瑚の入り江 ============
+  coral_bay: [
+    {at:'11,9', spr:'priestess', name:'海の 民の 少女', lines:[
+      {when:{flag:'ch3_twoHouses'}, text:[
+        'ナミ「力の 使い方は 選べる、か」',
+        'ナミ「……そう 言って くれた 人は 初めて」']},
+      {when:{flag:'ch3_namiTold'}, text:[
+        'ナミ「あなたの 力は 呪いじゃ ない、って」',
+        'ナミ「……あの 言葉、ずっと 覚えてる」']},
+      {when:{flag:'ch3_namiMet'}, text:[
+        'ナミ「洞は 浜の 北。潮が 引く ときしか 入れない」']},
+      {text:['浜に 少女が ひとり 座っている。村の 者は 遠巻きに している。']}]},
+    {at:'3,5', spr:'villagerA', name:'浜の 村人', lines:[
+      {when:{flag:'ch3_namiSaved'}, text:[
+        '村人「ナミの 言った とおり だったのか」',
+        '村人「……わしらは 何を 見とったんだろうな」']},
+      {text:['村人「あの 子は 昔から 妙な ことを 言う」',
+             '村人「見えん ものが 見える というのは、こわい ことさ」']}]},
+    {at:'17,5', spr:'elderWoman', name:'浜の 老女', lines:[
+      {when:{flag:'ch3_twoHouses'}, text:[
+        '老女「あの 子の 母も、祖母も、同じ ものを 見とった」',
+        '老女「……代々 だよ。呪いだと 言われてな」']},
+      {text:['老女「ナミの 家は 代々 そうさ」',
+             '老女「見える 女が 生まれる。……理由は 誰も 知らん」']}]},
+    {at:'9,12', spr:'villagerB', name:'舟の 漁師', lines:[
+      {when:{flag:'ch3_namiSaved'}, text:[
+        '漁師「洞の あたりで 魚が 戻った」',
+        '漁師「三年 ほど、あそこだけ 死んどったんだ」']},
+      {text:['漁師「北の 洞には 近づかん」',
+             '漁師「潮が 引く ときだけ 入れるが、入っても 何も おらん」']}]},
+    {at:'13,12', spr:'childA', name:'浜の 子ども', lines:[
+      {text:['子ども「ナミねえは うそつきって、みんな 言う」',
+             '子ども「でも ぼくは、ナミねえの 話 すきだよ」']}]},
+  ],
+
+
   // ============ 第3章：湧き水の町 ============
   well_town: [
     {at:'3,5', spr:'captain', name:'東の 集落長', lines:[
@@ -507,6 +543,17 @@ const QUESTS = {
     reward:{}, next:'ch2_q2_core',
   },
   // ============ 第3章：氷の谷 ============
+  ch3_q3_nami: {
+    id:'ch3_q3_nami', chapter:4, title:'海の 底の 洞',
+    giver:'海の 民の 少女',
+    desc:'ナミが 夢で 視た 洞へ。黒い ものを 断つ。',
+    steps:[
+      {id:'boss',  desc:'洞の 黒い ものを 討つ', flag:'ch3_namiSaved'},
+      {id:'told',  desc:'浜へ 戻って ナミに 会う', flag:'ch3_namiTold'},
+      {id:'two',   desc:'夜の 浜で ナミと 話す',   flag:'ch3_twoHouses'},
+    ],
+    reward:{}, next:null,
+  },
   ch3_q2_well: {
     id:'ch3_q2_well', chapter:4, title:'三の 水脈',
     giver:'東の 集落長',

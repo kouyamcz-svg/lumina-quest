@@ -164,6 +164,53 @@ T('はじまりの 隊商', C.G.flags.ch3_caravan===true);
 T('動いた ものに 名が つくと 言う', said('動いた ものに、あとから 名が つく'), log.join(' / ').slice(0,140));
 T('余所者どうしが 組むと 道が できる', said('余所者どうしが 組むと、道が できる'));
 
+// ===== 9.7 珊瑚の入り江（南）=====
+stand('ground', 54, 59, 'back');
+C.stepField(0,-1);
+T('珊瑚の入り江へ 入れる', C.P.map==='coral_bay', C.P.map+' '+C.P.x+','+C.P.y);
+
+talk('coral_bay', 11, 10, 'back');
+T('ナミに 会う', C.G.flags.ch3_namiMet===true);
+T('上層区を 夢で 見たと 言う', said('白い 石の 街'), log.join(' / ').slice(0,140));
+T('セレンが 上層区だと 気づく', said('上層区だわ'));
+T('ノエが 夢視だと 見抜く', said('夢視だ'));
+T('逆の 家だと 言う', said('逆の 家だ'));
+T('クエストが たつ', C.G.quests.ch3_q3_nami==='active');
+
+stand('coral_bay', 11, 8, 'back');
+C.stepField(0,-1);
+T('海蝕洞へ 入れる', C.P.map==='sea_cave', C.P.map);
+
+T('はじめは 潮が 満ちて いる', C.tileAt('sea_cave',10,6)==='K', C.tileAt('sea_cave',10,6));
+stand('sea_cave', 3, 10, 'back'); C.interact();
+T('ひとつでは 引かない', C.tileAt('sea_cave',10,6)==='K');
+stand('sea_cave', 20, 14, 'back'); C.interact();
+T('ふたつで 潮が 引く', C.tileAt('sea_cave',10,6)==='.', C.tileAt('sea_cave',10,6));
+
+clearLog(); strong(28);
+stand('sea_cave', 10, 5, 'back');
+C.interact();
+T('洞の ぬしに かてる', C.G.flags.ch3_namiSaved===true);
+T('まだ 見て ない だけと 言う', said('まだ 見て ない だけの ものだ'), log.join(' / ').slice(0,140));
+T('見た から 見つかったと 言う', said('見た から 見つかった'));
+
+{
+  const g0 = C.P.gold;
+  C.party.forEach(p=>{ p.hp=1; });
+  talk('coral_bay', 11, 10, 'back');
+  T('浜に 報せる', C.G.flags.ch3_namiTold===true);
+  T('先に 見ただけだと 言う', said('先に 見ただけだ'), log.join(' / ').slice(0,140));
+  T('呪いじゃ ないと 言う', said('あなたの 力は 呪いじゃ ない'));
+  T('礼を もらえる', C.P.gold===g0+2800, C.P.gold+' ← '+g0);
+  T('クエストが 片づく', C.G.quests.ch3_q3_nami==='clear');
+}
+
+talk('coral_bay', 11, 10, 'back');
+T('ふたつの 家が 話す', C.G.flags.ch3_twoHouses===true);
+T('捨てる さきが 下だと 言う', said('……下に'), log.join(' / ').slice(0,160));
+T('返して ほしいのかもと 言う', said('返して ほしいって ことかな'));
+T('力の 使い方は 選べる', said('力の 使い方は、選べる のかも しれない'));
+
 // ===== 10. 章末 =====
 clearLog(); C.G.tactic='manual';
 C.triggerChapterEnd();
