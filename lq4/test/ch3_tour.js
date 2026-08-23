@@ -67,9 +67,12 @@ T('イオが 行くと 言う', said('こちらの 領分だ'));
 T('クエストが たつ', C.G.quests.ch3_q1_rieze==='active');
 
 // ===== 4. 氷窟へ =====
-stand('ice_camp', 8, 8, 'back');
-C.stepField(0,-1);
-T('氷窟へ 入れる', C.P.map==='ice_cave', C.P.map+' '+C.P.x+','+C.P.y);
+// ★氷窟は 集落の 外（東へ 5歩）
+stand('ice_camp', 10, 13, 'front');
+C.stepField(0,1);
+T('集落を 出られる', C.P.map==='ground', C.P.map+' '+C.P.x+','+C.P.y);
+for(let k=0;k<5;k++){ C.G.mode='field'; C.stepField(1,0); if(C.P.map!=='ground') break; }
+T('東へ 歩くと 氷窟', C.P.map==='ice_cave', C.P.map+' '+C.P.x+','+C.P.y);
 T('氷窟の めじるしが たつ', C.G.flags.ch3_enteredCave===true);
 
 // ===== 5. 氷灯 2つで 氷が ゆるむ =====
