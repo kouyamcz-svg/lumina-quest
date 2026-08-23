@@ -89,7 +89,8 @@ T('クエストが たつ', C.G.quests.ch3_q1_rieze==='active');
 stand('ice_camp', 10, 13, 'front');
 C.stepField(0,1);
 T('集落を 出られる', C.P.map==='ground', C.P.map+' '+C.P.x+','+C.P.y);
-for(let k=0;k<5;k++){ C.G.mode='field'; C.stepField(1,0); if(C.P.map!=='ground') break; }
+// ★氷窟は 集落の 東（53,9）。手前(52,9)から 東へ ふむ。
+stand('ground', 52, 9, 'right'); C.stepField(1,0);
 T('東へ 歩くと 氷窟', C.P.map==='ice_cave', C.P.map+' '+C.P.x+','+C.P.y);
 T('氷窟の めじるしが たつ', C.G.flags.ch3_enteredCave===true);
 

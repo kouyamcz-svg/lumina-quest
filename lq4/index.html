@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 01:01 JST", "build":"07a99e8f","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3513, "view": 1401, "ui": 1144}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 08:51 JST", "build":"103bc972","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3523, "view": 1401, "ui": 1144}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -8302,13 +8302,23 @@ function doWarp(w){
     U.msg(wardMsg(w.to), ()=>{ G.mode='field'; });
     return;
   }
+  // ★どこから 入ったかを おぼえる（出口が ひとつしか ない ダンジョンで、
+  //   別の 入口から 来ても 元の ところへ 返す ため）。
+  G.entry = G.entry || {};
+  G.entry[w.to] = {map:P.map, x:P.x, y:P.y};
   G.busy=true;
   if(A.door) A.door();
   V.fade(1, ()=>{
-    P.map=w.to; P.x=w.x; P.y=w.y; P.dir='front';
-    if(gimmickRescue(w.to)) G._rescued = true;      // ★岩づまりを もとに もどした
-    G.trail=[[w.x,w.y],[w.x,w.y]];
-    G.visited[w.to]=true;
+    // ★おぼえて いた 入口へ 返す（帰り道の とき だけ）
+    let dest = w;
+    const back = G.entry && G.entry[P.map];
+    if(back && back.map===w.to && (back.x!==w.x || back.y!==w.y)){
+      dest = {to:w.to, x:back.x, y:back.y};
+    }
+    P.map=dest.to; P.x=dest.x; P.y=dest.y; P.dir='front';
+    if(gimmickRescue(dest.to)) G._rescued = true;   // ★岩づまりを もとに もどした
+    G.trail=[[P.x,P.y],[P.x,P.y]];
+    G.visited[dest.to]=true;
     // ★章データの onEnter / onEnterState
     {
       const cd = chData();

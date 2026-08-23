@@ -176,6 +176,29 @@ function kill(k){
   });
 }
 
+// ============ 入口が ふたつ ある ダンジョンは 来た ほうへ 返す ============
+//   ★炉の 外郭は 世界地図と 上層区の 両方から 入れるのに、
+//     出口が 上層区 かためがき で、外から 入っても 上層区に 出て いた。
+{
+  const enter = (fromMap, fx, fy, dx, dy)=>{
+    C.freshState(); C.G.chapter = 3; C.G.flags.ch2_towerPaid = true;
+    C.party.length = 0; C.party.push(C.mkMember('io',20));
+    C.G.mode='field'; C.P.map=fromMap; C.P.x=fx; C.P.y=fy;
+    C.stepField(dx,dy);
+    return C.P.map;
+  };
+  // 上層区から
+  T('上層区から 炉へ 入れる', enter('upper_dist',17,9,0,1)==='furnace');
+  T('上層区から 入ると そこを おぼえる',
+    C.G.entry && C.G.entry.furnace && C.G.entry.furnace.map==='upper_dist',
+    JSON.stringify(C.G.entry && C.G.entry.furnace));
+  // 世界地図から
+  T('世界地図から 炉へ 入れる', enter('world',9,15,0,-1)==='furnace');
+  T('世界地図から 入ると そこを おぼえる',
+    C.G.entry && C.G.entry.furnace && C.G.entry.furnace.map==='world',
+    JSON.stringify(C.G.entry && C.G.entry.furnace));
+}
+
 // ============ すべての けっかいが いつか 開くか ============
 {
   C.freshState();

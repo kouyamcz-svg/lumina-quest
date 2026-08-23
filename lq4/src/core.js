@@ -1582,13 +1582,23 @@ function doWarp(w){
     U.msg(wardMsg(w.to), ()=>{ G.mode='field'; });
     return;
   }
+  // ★どこから 入ったかを おぼえる（出口が ひとつしか ない ダンジョンで、
+  //   別の 入口から 来ても 元の ところへ 返す ため）。
+  G.entry = G.entry || {};
+  G.entry[w.to] = {map:P.map, x:P.x, y:P.y};
   G.busy=true;
   if(A.door) A.door();
   V.fade(1, ()=>{
-    P.map=w.to; P.x=w.x; P.y=w.y; P.dir='front';
-    if(gimmickRescue(w.to)) G._rescued = true;      // ★岩づまりを もとに もどした
-    G.trail=[[w.x,w.y],[w.x,w.y]];
-    G.visited[w.to]=true;
+    // ★おぼえて いた 入口へ 返す（帰り道の とき だけ）
+    let dest = w;
+    const back = G.entry && G.entry[P.map];
+    if(back && back.map===w.to && (back.x!==w.x || back.y!==w.y)){
+      dest = {to:w.to, x:back.x, y:back.y};
+    }
+    P.map=dest.to; P.x=dest.x; P.y=dest.y; P.dir='front';
+    if(gimmickRescue(dest.to)) G._rescued = true;   // ★岩づまりを もとに もどした
+    G.trail=[[P.x,P.y],[P.x,P.y]];
+    G.visited[dest.to]=true;
     // ★章データの onEnter / onEnterState
     {
       const cd = chData();
