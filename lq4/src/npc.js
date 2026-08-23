@@ -255,6 +255,44 @@ const NPCS = {
   ],
 
   // ============ 第2章：光珠炉の 外郭 ============
+  // ============ 第3章：氷の谷 ============
+  ice_camp: [
+    {at:'9,5', spr:'captain', name:'氏族の 長', lines:[
+      {when:{flag:'ch3_lullaby'}, text:[
+        '長「グルドだ。……次に 来る とき、そう 呼べ」']},
+      {when:{flag:'ch3_riezeReturned'}, text:[
+        '長「リーゼは 眠っとる。だが 息は ある」',
+        '長「……礼は 言った。二度は 言わん」']},
+      {when:{flag:'ch3_taskTaken'}, text:[
+        '長「氷窟は 谷の 北だ。氷灯を 点けんと 奥へは 入れん」']},
+      {text:['毛皮を 巻いた 大男が 立っている。',
+             '長「……空の 者か」']}]},
+    {at:'17,5', spr:'elderWoman', name:'谷の 老婆', lines:[
+      {when:{flag:'ch3_lullaby'}, text:[
+        '老婆「同じ 節で、逆の ことを して きたんだねえ」']},
+      {when:{flag:'ch3_riezeReturned'}, text:[
+        '老婆「あの 子が 助かったのは 唄の おかげさ」']},
+      {text:['老婆「空の 者は 灯りを 置いて 帰る」',
+             '老婆「唄は 置いていかん。……あれは こっちの ものだ」']}]},
+    {at:'13,9', spr:'childA', name:'谷の 子ども', lines:[
+      {when:{flag:'ch3_serenTaught'}, text:[
+        '子ども「ねえ、また 教えて！」']},
+      {when:{flag:'ch3_riezeReturned'}, text:[
+        '子ども「ねえ、その 棒 なに」']},
+      {text:['子ども「空から 落ちてきたの？」',
+             '子ども「みんな そう 言ってる」']}]},
+    {at:'9,13', spr:'villagerA', name:'谷の 猟師', lines:[
+      {when:{flag:'ch3_riezeSaved'}, text:[
+        '猟師「氷窟の 奥、静かに なったな」',
+        '猟師「三年 まえから 変な 音が しとった。……あれが 元か」']},
+      {text:['猟師「北の 氷窟には 近づくな」',
+             '猟師「去年から 獣が 逃げてくる。中に 何か おる」']}]},
+    {at:'13,5', spr:'villagerB', name:'谷の 鍛冶', lines:[
+      {text:['鍛冶「空の 鋼か。……見たことは ある」',
+             '鍛冶「二十年ほど 前、若い 男が 持っとった」',
+             '鍛冶「打ちに 空へ 行くと 言うて、それきりだ」']}]},
+  ],
+
   // ============ 第2章：炉心の 手前（ボスの 間）============
   furnace_core: [
     {at:'11,6', spr:'pipeobj', name:'炉心の 壁', lines:[
@@ -433,6 +471,18 @@ const QUESTS = {
       {id:'guide', desc:'空中庭園で 案内の 者に 会う', flag:'ch2_noeJoined'},
     ],
     reward:{}, next:'ch2_q2_core',
+  },
+  // ============ 第3章：氷の谷 ============
+  ch3_q1_rieze: {
+    id:'ch3_q1_rieze', chapter:4, title:'氷窟の リーゼ',
+    giver:'氏族の 長',
+    desc:'谷の 北の 氷窟へ。攫われた 娘を 助ける。',
+    steps:[
+      {id:'boss',   desc:'黒い かけらを 討つ',       flag:'ch3_riezeSaved'},
+      {id:'back',   desc:'長に 連れて 帰る',         flag:'ch3_riezeReturned'},
+      {id:'song',   desc:'谷の 老婆に 唄を 聞く',   flag:'ch3_lullaby'},
+    ],
+    reward:{}, next:null,
   },
   ch2_q3_tower: {
     id:'ch2_q3_tower', chapter:3, title:'薄れる 雲',

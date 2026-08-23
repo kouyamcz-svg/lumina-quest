@@ -166,7 +166,10 @@ Object.keys(C.MAPS).forEach(mp=>{
   const orphans = [];
   for(let y=0;y<H;y++) for(let x=0;x<Wd;x++)
     if(walk(x,y) && !seen.has(x+','+y)) orphans.push(x+','+y);
-  T('孤立床ゼロ '+mp+'（'+orphans.length+'）', orphans.length===0, orphans.slice(0,6).join(' '));
+  // ★世界地図は 島や 岬が あるので、歩いて つながって いなくて よい
+  //   （船・降下で 行き来する）。
+  if(C.MAPS[mp].theme!=='world')
+    T('孤立床ゼロ '+mp+'（'+orphans.length+'）', orphans.length===0, orphans.slice(0,6).join(' '));
   // しらべるます：となりに 立てるか
   const unreach = [];
   for(let y=0;y<H;y++) for(let x=0;x<Wd;x++){
@@ -793,14 +796,16 @@ Object.keys(C.MAPS).forEach(mp=>{
 //     めやすは「つぎの Lvまでの 経験値 ÷ ざこ1体」が 2〜6戦。
 {
   const expNeed = (lv)=> lv*lv*6;
-  const CH_LV = {1:5, 2:10, 3:15};        // その章の およその Lv
+  const CH_LV = {1:5, 2:10, 3:15, 4:21};   // その章の およその Lv
   Object.keys(CH_LV).forEach(no=>{
     const lv = CH_LV[no];
     const need = expNeed(lv);
     C.ENEMIES.forEach(e=>{
       // その章あたりの 敵だけ 見る
-      const near = (no==='1' && e.minLv<=4) || (no==='2' && e.minLv>=7 && e.minLv<=9)
-                || (no==='3' && e.minLv>=12);
+      const near = (no==='1' && e.minLv<=4)
+                || (no==='2' && e.minLv>=7 && e.minLv<=9)
+                || (no==='3' && e.minLv>=12 && e.minLv<=15)
+                || (no==='4' && e.minLv>=18);
       if(!near) return;
       const fights = need / e.exp;
       T('第'+(no-1)+'章：'+e.name+' の 経験値が 高すぎない', fights >= 1.5,
