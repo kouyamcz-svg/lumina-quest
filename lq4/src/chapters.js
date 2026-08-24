@@ -2168,6 +2168,7 @@ const CH = {
     ending: {
       trigger: 'ch3_lullaby',
       set:['ch3_iceDone'],
+      img: 'scene_ch3_ice',        // ★雪の 谷で 三人が 空を 見あげる 場面
       msg:['',
            '── 氷の谷　夜 ──',
            '',

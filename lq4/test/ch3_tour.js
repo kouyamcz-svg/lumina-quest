@@ -255,6 +255,9 @@ T('リーゼが 目を 覚ます', said('リーゼが 目を 覚ましたわ'));
 T('唄で 起きたと 分かる', said('唄を 歌ったら'));
 T('つぎの 行き先が 出る', said('巡回降下 第二区'));
 T('ch3_iceDone が たつ', C.G.flags.ch3_iceDone===true);
+// ★章末の 一枚絵
+T('章末に 一枚絵が 出る', scene.some(x=>x==='show:scene_ch3_ice'), scene.join(' '));
+T('一枚絵は あとで しまう', scene.indexOf('hide') > scene.indexOf('show:scene_ch3_ice'), scene.join(' '));
 
 // ===== 11. セーブ/ロード =====
 const gold=C.P.gold, lv=C.party[0].lv;
