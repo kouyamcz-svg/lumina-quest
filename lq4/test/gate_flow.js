@@ -200,6 +200,24 @@ function kill(k){
     roundTrip('upper_dist',17,9,0,1)==='upper_dist', C.P.map);
   T('世界地図から 入ったら 世界地図に 出る',
     roundTrip('world',9,15,0,-1)==='world', C.P.map);
+
+  // ★おく の 部屋（炉心）を 通っても 入口を 忘れない こと。
+  //   ★戻る ときに 入口の おぼえを 上書きして いて、
+  //     外へ 出ようと すると おくの 部屋に 返されて いた。
+  const viaCore = (fromMap, fx, fy, dx, dy)=>{
+    if(enter(fromMap,fx,fy,dx,dy)!=='furnace') return '入れず';
+    C.G.flags.ch2_heardBreath = true;
+    C.setTile('furnace',10,6,'.');
+    C.G.mode='field'; C.G.busy=false; C.P.x=10; C.P.y=6; C.stepField(0,-1);
+    C.G.mode='field'; C.G.busy=false; C.P.x=7;  C.P.y=8;  C.stepField(0,1);
+    C.G.mode='field'; C.G.busy=false; C.P.map='furnace';
+    C.P.x=10; C.P.y=19; C.P.dir='front'; C.stepField(0,1);
+    return C.P.map;
+  };
+  T('炉心を 通っても 上層区に 出る',
+    viaCore('upper_dist',17,9,0,1)==='upper_dist', C.P.map);
+  T('炉心を 通っても 世界地図に 出る',
+    viaCore('world',9,15,0,-1)==='world', C.P.map);
 }
 
 // ============ すべての けっかいが いつか 開くか ============

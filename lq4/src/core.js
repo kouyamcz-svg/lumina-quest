@@ -1582,10 +1582,19 @@ function doWarp(w){
     U.msg(wardMsg(w.to), ()=>{ G.mode='field'; });
     return;
   }
-  // ★どこから 入ったかを おぼえる（出口が ひとつしか ない ダンジョンで、
-  //   別の 入口から 来ても 元の ところへ 返す ため）。
+  // ★どこから 入ったかを おぼえる。
+  //   ★おく の 部屋から 戻る ときにも 上書きして いた ため、
+  //     外へ 出ようと すると おくの 部屋に 返されて いた。
+  //     「外から 入った とき」だけ おぼえる。
+  //     ＝ その ワープが back:true で ない こと（back は 帰り道）。
+  //   おく の 部屋から 戻る ときは 上書きしない。
+  //   ＝ 行き先を すでに おぼえて いて、いま いる ところが
+  //      その 行き先から 入った 部屋（＝奥）なら さわらない。
   G.entry = G.entry || {};
-  G.entry[w.to] = {map:P.map, x:P.x, y:P.y};
+  const cameFromInside = G.entry[P.map] && G.entry[P.map].map === w.to;
+  if(!w.back && !cameFromInside){
+    G.entry[w.to] = {map:P.map, x:P.x, y:P.y};
+  }
   G.busy=true;
   if(A.door) A.door();
   V.fade(1, ()=>{
