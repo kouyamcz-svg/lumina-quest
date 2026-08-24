@@ -151,7 +151,8 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
                 'nemurishika','doronote','hainene','sennengoke',
                 'kareedano','ishikui','kirimatoi','honetori',
                 'koorinezumi','yukikogori','mizusumashi','dorokaburi',
-                'sangobito','namiyobi','iwafukurou','lupus'];
+                'sangobito','namiyobi','iwafukurou','lupus',
+                'akumuhen','akumuhen2','akumuhen3'];
   MONS.forEach(k=>{
     const m2 = new RegExp('  '+k+":\\{w:\\d+,h:\\d+,src:'data:image/png;base64,([^']*)'").exec(src);
     if(!m2){ T('えが ある '+k, false); return; }

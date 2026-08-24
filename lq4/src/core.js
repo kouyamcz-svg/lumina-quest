@@ -202,17 +202,17 @@ const MIDBOSS = {
 
   // ---- 第3章 中ボス：あくむへん（氷窟）----
   akumuhen3:{key:'akumuhen3', name:'あくむへん', hp:2100, atk:62, def:34, agi:22, acts:1,
-    exp:2400, gold:2600, art:'shadowmaw', scale:1.05,
+    exp:2400, gold:2600, art:'akumuhen3', scale:1.05,
     skill:{p:0.28, mul:1.25, name:'しおの 爪'},
     inflict:{type:'confuse', p:0.20}},
 
   akumuhen2:{key:'akumuhen2', name:'あくむへん', hp:2100, atk:62, def:34, agi:22, acts:1,
-    exp:2400, gold:2600, art:'shadowmaw', scale:1.05,
+    exp:2400, gold:2600, art:'akumuhen2', scale:1.05,
     skill:{p:0.28, mul:1.25, name:'つめたい 爪'},
     inflict:{type:'slow', p:0.20}},
 
   akumuhen:{key:'akumuhen', name:'あくむへん', hp:2100, atk:62, def:34, agi:22, acts:1,
-    exp:2400, gold:2600, art:'shadowmaw', scale:1.05,
+    exp:2400, gold:2600, art:'akumuhen', scale:1.05,
     skill:{p:0.28, mul:1.25, name:'つめたい 爪'},
     inflict:{type:'freeze', p:0.20}},
 
