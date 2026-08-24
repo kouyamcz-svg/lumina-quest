@@ -1587,14 +1587,13 @@ function doWarp(w){
   //     外へ 出ようと すると おくの 部屋に 返されて いた。
   //     「外から 入った とき」だけ おぼえる。
   //     ＝ その ワープが back:true で ない こと（back は 帰り道）。
-  //   おく の 部屋から 戻る ときは 上書きしない。
-  //   ＝ 行き先を すでに おぼえて いて、いま いる ところが
-  //      その 行き先から 入った 部屋（＝奥）なら さわらない。
+  //   おぼえるのは「外から その ばしょへ 入る」ときだけ。
+  //   ・back:true（帰り道）では おぼえない
+  //   ・おく の 部屋から 手前へ 戻る ときも おぼえない
+  //     （＝ いま いる ところが 行き先から 入った 部屋の とき）
   G.entry = G.entry || {};
-  const cameFromInside = G.entry[P.map] && G.entry[P.map].map === w.to;
-  if(!w.back && !cameFromInside){
-    G.entry[w.to] = {map:P.map, x:P.x, y:P.y};
-  }
+  const fromInner = G.entry[P.map] && G.entry[P.map].map === w.to;
+  if(!w.back && !fromInner) G.entry[w.to] = {map:P.map, x:P.x, y:P.y};
   G.busy=true;
   if(A.door) A.door();
   V.fade(1, ()=>{

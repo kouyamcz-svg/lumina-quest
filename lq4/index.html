@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 09:21 JST", "build":"336fc342","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3549, "view": 1401, "ui": 1144}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 09:27 JST", "build":"7ff6405c","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3548, "view": 1401, "ui": 1144}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -8307,14 +8307,13 @@ function doWarp(w){
   //     外へ 出ようと すると おくの 部屋に 返されて いた。
   //     「外から 入った とき」だけ おぼえる。
   //     ＝ その ワープが back:true で ない こと（back は 帰り道）。
-  //   おく の 部屋から 戻る ときは 上書きしない。
-  //   ＝ 行き先を すでに おぼえて いて、いま いる ところが
-  //      その 行き先から 入った 部屋（＝奥）なら さわらない。
+  //   おぼえるのは「外から その ばしょへ 入る」ときだけ。
+  //   ・back:true（帰り道）では おぼえない
+  //   ・おく の 部屋から 手前へ 戻る ときも おぼえない
+  //     （＝ いま いる ところが 行き先から 入った 部屋の とき）
   G.entry = G.entry || {};
-  const cameFromInside = G.entry[P.map] && G.entry[P.map].map === w.to;
-  if(!w.back && !cameFromInside){
-    G.entry[w.to] = {map:P.map, x:P.x, y:P.y};
-  }
+  const fromInner = G.entry[P.map] && G.entry[P.map].map === w.to;
+  if(!w.back && !fromInner) G.entry[w.to] = {map:P.map, x:P.x, y:P.y};
   G.busy=true;
   if(A.door) A.door();
   V.fade(1, ()=>{

@@ -241,6 +241,35 @@ function kill(k){
       T('ロード後も 世界地図に 出る', C.P.map==='world', C.P.map+' '+C.P.x+','+C.P.y);
     }
   }
+  // ★どの 順に 出入りしても 入った ほうへ 返る こと
+  {
+    const fresh = ()=>{
+      C.freshState(); C.G.chapter = 3;
+      Object.assign(C.G.flags,{ch2_taskOpen:1, ch2_towerPaid:1, ch2_heardBreath:1});
+      C.party.length = 0; C.party.push(C.mkMember('io',22));
+      C.setTile('furnace',10,6,'.');
+    };
+    const step = (mp,x,y,dx,dy)=>{
+      C.G.mode='field'; C.G.busy=false; C.P.map=mp; C.P.x=x; C.P.y=y;
+      C.P.dir = dy>0?'front' : dy<0?'back' : (dx<0?'left':'right');
+      C.stepField(dx,dy); return C.P.map;
+    };
+    // 上層区で 一度 往復した あと、世界地図から 入る
+    fresh();
+    step('upper_dist',17,9,0,1);
+    step('furnace',10,19,0,1);
+    step('world',9,15,0,-1);
+    T('一度 上層区を つかっても 世界地図に 返る',
+      step('furnace',10,19,0,1)==='world', C.P.map);
+    // ぎゃくの 順
+    fresh();
+    step('world',9,15,0,-1);
+    step('furnace',10,19,0,1);
+    step('upper_dist',17,9,0,1);
+    T('一度 世界地図を つかっても 上層区に 返る',
+      step('furnace',10,19,0,1)==='upper_dist', C.P.map);
+  }
+
   // ★おぼえが ない ときでも かべの 中に 出ない こと
   {
     C.freshState(); C.G.chapter = 3;
