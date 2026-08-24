@@ -416,6 +416,25 @@ function buildAtlas(){
     R(g,2,13,12,1,'#8ea6c8');
   });
 
+  // ★桟橋の 板。舟へ つづく 道だと 目で 分かる ように する。
+  atlas.pier = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.sk2);                        // ゆか
+    // よこに ならんだ 板
+    for(let by=1; by<16; by+=5){
+      R(g,0,by,16,4,'#8a6f45');
+      R(g,0,by,16,1,'#a98a58');
+      R(g,0,by+3,16,1,'#5d4a2b');
+      // 木目
+      for(let bx=(v%2)*3; bx<16; bx+=6) R(g,bx,by+1,1,2,'#7a6039');
+    }
+    // 板を とめる 金具
+    R(g,2,0,1,16,'#6b7a92');
+    R(g,13,0,1,16,'#6b7a92');
+    P(g,2,3,'#9fb0c8'); P(g,13,3,'#9fb0c8');
+    P(g,2,8,'#9fb0c8'); P(g,13,8,'#9fb0c8');
+    P(g,2,13,'#9fb0c8'); P(g,13,13,'#9fb0c8');
+  });
+
   // ★管の つけかえ：u＝ゆかの きれはし、j＝空の 継ぎ目、J＝さした 継ぎ目
   atlas.pipeItem = tile((g,s)=>{
     R(g,0,0,s,s,P16.sk2);                       // ゆか
@@ -1343,6 +1362,7 @@ function tileArt(ch, theme, tx, ty){
     case 'o': return ice?atlas.icicle : atlas.rock;
     case 'O': return atlas.rockPush;      // ★動かせる岩
     case 'x': return atlas.pit;           // ★穴
+    case 'b': return hashPick(tx, ty, atlas.pier);   // ★桟橋の 板
     case 'u': return atlas.pipeItem;      // ★ゆかの 管の きれはし
     case 'h': return atlas.jointOff;      // ★空の 継ぎ目
     case 'H': return atlas.jointOn;       // ★管を さした 継ぎ目

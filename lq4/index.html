@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 09:56 JST", "build":"b99955c8","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3566, "view": 1401, "ui": 1145}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 12:55 JST", "build":"19a7d2c3","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2544, "core": 3566, "view": 1401, "ui": 1145}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -2621,10 +2621,10 @@ const CH = {
       '',
       '＊ 東の 雲海港へ 向かおう ＊'],
 
-    home: {map:'sky_port', x:10, y:9, name:'雲海港の 宿'},
+    home: {map:'sky_port', x:4, y:4, name:'雲海港の 宿'},
 
     returnSpots: [
-      {map:'sky_port', x:10, y:9},
+      {map:'sky_port', x:4, y:4},
       {map:'ice_camp', x:10, y:8},
     ],
 
@@ -4612,6 +4612,25 @@ function buildAtlas(){
     R(g,2,13,12,1,'#8ea6c8');
   });
 
+  // ★桟橋の 板。舟へ つづく 道だと 目で 分かる ように する。
+  atlas.pier = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,P16.sk2);                        // ゆか
+    // よこに ならんだ 板
+    for(let by=1; by<16; by+=5){
+      R(g,0,by,16,4,'#8a6f45');
+      R(g,0,by,16,1,'#a98a58');
+      R(g,0,by+3,16,1,'#5d4a2b');
+      // 木目
+      for(let bx=(v%2)*3; bx<16; bx+=6) R(g,bx,by+1,1,2,'#7a6039');
+    }
+    // 板を とめる 金具
+    R(g,2,0,1,16,'#6b7a92');
+    R(g,13,0,1,16,'#6b7a92');
+    P(g,2,3,'#9fb0c8'); P(g,13,3,'#9fb0c8');
+    P(g,2,8,'#9fb0c8'); P(g,13,8,'#9fb0c8');
+    P(g,2,13,'#9fb0c8'); P(g,13,13,'#9fb0c8');
+  });
+
   // ★管の つけかえ：u＝ゆかの きれはし、j＝空の 継ぎ目、J＝さした 継ぎ目
   atlas.pipeItem = tile((g,s)=>{
     R(g,0,0,s,s,P16.sk2);                       // ゆか
@@ -5539,6 +5558,7 @@ function tileArt(ch, theme, tx, ty){
     case 'o': return ice?atlas.icicle : atlas.rock;
     case 'O': return atlas.rockPush;      // ★動かせる岩
     case 'x': return atlas.pit;           // ★穴
+    case 'b': return hashPick(tx, ty, atlas.pier);   // ★桟橋の 板
     case 'u': return atlas.pipeItem;      // ★ゆかの 管の きれはし
     case 'h': return atlas.jointOff;      // ★空の 継ぎ目
     case 'H': return atlas.jointOn;       // ★管を さした 継ぎ目
@@ -7064,7 +7084,7 @@ const MAPS = {
       '12,24':{to:'lower_dist', x:19, y:6},
       '14,24':{to:'pipe_path',  x:13, y:13},
       '22,16':{to:'mid_dist',   x:10, y:13},
-      '34,17':{to:'sky_port',   x:10, y:12},
+      '34,17':{to:'sky_port',   x:1,  y:6},
       '9,14' :{to:'furnace',    x:10, y:19},
       '30,8' :{to:'garden',     x:9,  y:13}
     }},
@@ -7146,18 +7166,18 @@ const MAPS = {
     "#..I..S.......H..P..#",
     "#...................#",
     "#..n.....t.t.....n..#",
-    "#...................#",
+    "g...................#",
     "####.............####",
     "#...................#",
     "#....n.......n......#",
     "#...................#",
-    "#..t...........t..C.#",
-    "#...................#",
+    "#..t.....b.....t..C.#",
+    "#........b..........#",
     "~~~~~~~~#n#~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~"],
     warpsXY:{
-      '10,12':{to:'world', x:34, y:18}
+      '0,6':{to:'world', x:33, y:17}
     }},
 
   // ============ 第3章：地上（千年前）============

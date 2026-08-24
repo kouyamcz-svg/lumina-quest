@@ -1605,10 +1605,10 @@ const CH = {
       '',
       '＊ 東の 雲海港へ 向かおう ＊'],
 
-    home: {map:'sky_port', x:10, y:9, name:'雲海港の 宿'},
+    home: {map:'sky_port', x:4, y:4, name:'雲海港の 宿'},
 
     returnSpots: [
-      {map:'sky_port', x:10, y:9},
+      {map:'sky_port', x:4, y:4},
       {map:'ice_camp', x:10, y:8},
     ],
 
