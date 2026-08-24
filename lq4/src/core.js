@@ -709,7 +709,7 @@ const MAPS = {
     "#D.......;......C.#",
     "#########G#########"],
     warpsXY:{
-      '9,14':{to:'upper_dist', x:2, y:7},
+      '9,14':{to:'world', x:30, y:9, back:true},
       '1,13':{to:'tower1', x:7, y:10}
     }},
 

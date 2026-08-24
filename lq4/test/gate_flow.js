@@ -181,6 +181,32 @@ function kill(k){
   });
 }
 
+// ============ 入口が ふたつ ある ばしょは 出口に back を つける ============
+//   ★炉の 外郭・空中庭園は 世界地図と 上層区の 両方から 入れるのに、
+//     出口が かためがき で、外から 入っても 上層区に 出て いた。
+{
+  // どの マップへ どこから 入れるか
+  const inTo = {};
+  Object.keys(C.MAPS).forEach(mp=>{
+    const w = C.MAPS[mp].warpsXY || {};
+    Object.keys(w).forEach(k=>{ (inTo[w[k].to] = inTo[w[k].to] || []).push(mp); });
+  });
+  Object.keys(inTo).forEach(mp=>{
+    const froms = [...new Set(inTo[mp])];
+    if(froms.length < 2) return;
+    const m = C.MAPS[mp]; if(!m || m.theme==='world') return;
+    // ★行き来が 対に なって いる ところ（町どうし・塔の 階）は のぞく。
+    //   ＝ 入って きた ぜんぶの さきへ、この マップから 出口が ある なら よい。
+    const w = m.warpsXY || {};
+    const outs = Object.keys(w).map(k=>w[k].to);
+    const paired = froms.every(f=>outs.includes(f));
+    if(paired) return;
+    const hasBack = Object.keys(w).some(k=>w[k].back);
+    T('入口が ふたつ ある '+mp+' の 出口に back が ある', hasBack,
+      '入口='+froms.join(',')+' / 出口='+outs.join(','));
+  });
+}
+
 // ============ 出口の 既定は かならず 屋外 ============
 //   ★炉の 出口の 既定が 上層区の 昇降機（建物の 中）で、
 //     おぼえが ない ときに「かべの 中」に 出て いた。
