@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 09:27 JST", "build":"7ff6405c","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3548, "view": 1401, "ui": 1144}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 09:38 JST", "build":"fe43d144","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3566, "view": 1401, "ui": 1144}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -8323,7 +8323,25 @@ function doWarp(w){
     let dest = w;
     if(w.back){
       const back = G.entry && G.entry[P.map];
-      if(back) dest = {to:back.map, x:back.x, y:back.y};
+      if(back){
+        dest = {to:back.map, x:back.x, y:back.y};
+      }else{
+        // ★おぼえが ない（古い セーブ など）とき。
+        //   かためがきの 行き先が 建物の 中だと「かべの 中」に 出る ので、
+        //   その ダンジョンへ 入れる 入口を さがして、外の ものを えらぶ。
+        const outs = [];
+        Object.keys(MAPS).forEach(mp=>{
+          const ws = MAPS[mp].warpsXY || {};
+          Object.keys(ws).forEach(k=>{
+            if(ws[k].to !== P.map) return;
+            const [ex,ey] = k.split(',').map(Number);
+            outs.push({to:mp, x:ex, y:ey, world:(MAPS[mp].theme==='world')});
+          });
+        });
+        // 世界地図の 入口が あれば それ、なければ さいしょの もの
+        const pick = outs.find(o=>o.world) || outs[0];
+        if(pick) dest = {to:pick.to, x:pick.x, y:pick.y};
+      }
     }
     // ★行き先が 通れない ます（かべの 中）なら、まわりの 通れる ますへ ずらす。
     //   ★上層区の 昇降機は 建物の 中に あり、そこへ 返すと かべに はまって いた。

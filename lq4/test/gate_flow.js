@@ -270,16 +270,31 @@ function kill(k){
       step('furnace',10,19,0,1)==='upper_dist', C.P.map);
   }
 
-  // ★おぼえが ない ときでも かべの 中に 出ない こと
+  // ★おぼえが ない（古い セーブ）ときでも、建物の 中に 出ない こと。
+  //   ★炉の 既定の 出口は 上層区の 昇降機で、まわりが 壁。
+  //     そこへ 出ると「かべの 中」に 見えて いた。
   {
-    C.freshState(); C.G.chapter = 3;
-    C.G.flags.ch2_taskOpen = true; C.G.flags.ch2_towerPaid = true;
-    C.party.length = 0; C.party.push(C.mkMember('io',22));
-    C.G.entry = {};
-    C.G.mode='field'; C.P.map='furnace'; C.P.x=10; C.P.y=19; C.P.dir='front';
-    C.stepField(0,1);
+    const noMemory = (ch, mp, ex, ey)=>{
+      C.freshState(); C.G.chapter = ch;
+      Object.assign(C.G.flags,{ch2_taskOpen:1, ch2_towerPaid:1, ch2_towerTold:1,
+                               ch3_landed:1, ch3_iceDone:1, ch3_caravan:1});
+      C.party.length = 0; C.party.push(C.mkMember('io',22));
+      C.G.entry = {};
+      C.G.mode='field'; C.P.map=mp; C.P.x=ex; C.P.y=ey; C.P.dir='front';
+      C.stepField(0,1);
+      return C.P.map;
+    };
+    T('おぼえが なくても 炉から 外（世界地図）へ 出る',
+      noMemory(3,'furnace',10,19)==='world', C.P.map+' '+C.P.x+','+C.P.y);
     T('おぼえが なくても 通れる ますに 出る',
       C.walkable(C.P.map, C.P.x, C.P.y), C.P.map+' '+C.P.x+','+C.P.y);
+    // ほかの ダンジョンも
+    [[3,'tower1',7,9],[4,'ice_cave',10,19],[4,'well_cave',10,17],[4,'sea_cave',10,17]]
+      .forEach(([ch,mp,ex,ey])=>{
+        noMemory(ch,mp,ex,ey);
+        T('おぼえが なくても '+mp+' から 通れる ますに 出る',
+          C.walkable(C.P.map, C.P.x, C.P.y), C.P.map+' '+C.P.x+','+C.P.y);
+      });
   }
 }
 
