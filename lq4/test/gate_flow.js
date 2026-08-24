@@ -181,22 +181,25 @@ function kill(k){
 //     出口が 上層区 かためがき で、外から 入っても 上層区に 出て いた。
 {
   const enter = (fromMap, fx, fy, dx, dy)=>{
-    C.freshState(); C.G.chapter = 3; C.G.flags.ch2_towerPaid = true;
+    C.freshState(); C.G.chapter = 3;
+    C.G.flags.ch2_towerPaid = true; C.G.flags.ch2_taskOpen = true;
     C.party.length = 0; C.party.push(C.mkMember('io',20));
     C.G.mode='field'; C.P.map=fromMap; C.P.x=fx; C.P.y=fy;
     C.stepField(dx,dy);
     return C.P.map;
   };
-  // 上層区から
-  T('上層区から 炉へ 入れる', enter('upper_dist',17,9,0,1)==='furnace');
-  T('上層区から 入ると そこを おぼえる',
-    C.G.entry && C.G.entry.furnace && C.G.entry.furnace.map==='upper_dist',
-    JSON.stringify(C.G.entry && C.G.entry.furnace));
-  // 世界地図から
-  T('世界地図から 炉へ 入れる', enter('world',9,15,0,-1)==='furnace');
-  T('世界地図から 入ると そこを おぼえる',
-    C.G.entry && C.G.entry.furnace && C.G.entry.furnace.map==='world',
-    JSON.stringify(C.G.entry && C.G.entry.furnace));
+  // ★入って、出口を ふんで、どこに 出るかを 見る
+  const roundTrip = (fromMap, fx, fy, dx, dy)=>{
+    if(enter(fromMap,fx,fy,dx,dy)!=='furnace') return '入れず';
+    C.G.mode='field'; C.G.busy=false;
+    C.P.x=10; C.P.y=19; C.P.dir='front';
+    C.stepField(0,1);
+    return C.P.map;
+  };
+  T('上層区から 入ったら 上層区に 出る',
+    roundTrip('upper_dist',17,9,0,1)==='upper_dist', C.P.map);
+  T('世界地図から 入ったら 世界地図に 出る',
+    roundTrip('world',9,15,0,-1)==='world', C.P.map);
 }
 
 // ============ すべての けっかいが いつか 開くか ============

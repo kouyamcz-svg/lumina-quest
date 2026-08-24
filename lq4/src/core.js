@@ -569,7 +569,7 @@ const MAPS = {
     "#....................#",
     "##########.###########"],
     warpsXY:{
-      '10,20':{to:'ground', x:53, y:10}
+      '10,20':{to:'ground', x:53, y:10, back:true}
     }},
 
   // ============ 第3章：湧き水の町（後の ザール）============
@@ -616,7 +616,7 @@ const MAPS = {
     "#....................#",
     "##########.###########"],
     warpsXY:{
-      '10,18':{to:'well_town', x:12, y:7}
+      '10,18':{to:'well_town', x:12, y:7, back:true}
     }},
 
   // ============ 第3章：珊瑚の入り江（後の ミナモ）============
@@ -663,7 +663,7 @@ const MAPS = {
     "#....................#",
     "##########.###########"],
     warpsXY:{
-      '10,18':{to:'coral_bay', x:11, y:7}
+      '10,18':{to:'coral_bay', x:11, y:7, back:true}
     }},
 
   // ============ 第2章：上層区（貴族の 街。光が あふれる）============
@@ -730,7 +730,7 @@ const MAPS = {
     "#.............#",
     "#######G#######"],
     warpsXY:{
-      '7,10':{to:'garden', x:2, y:13},
+      '7,10':{to:'garden', x:2, y:13, back:true},
       '7,8' :{to:'tower2', x:6, y:9}
     }},
 
@@ -832,7 +832,7 @@ const MAPS = {
     "#....................#",
     "##########.###########"],
     warpsXY:{
-      '10,20':{to:'upper_dist', x:17, y:10},
+      '10,20':{to:'upper_dist', x:17, y:10, back:true},
       '10,5' :{to:'furnace_core', x:7, y:7}
     }},
 
@@ -1589,11 +1589,13 @@ function doWarp(w){
   G.busy=true;
   if(A.door) A.door();
   V.fade(1, ()=>{
-    // ★おぼえて いた 入口へ 返す（帰り道の とき だけ）
+    // ★「外へ 出る」ワープ（back:true）は、入って きた ところへ 返す。
+    //   ★まえは 行き先が 一致する ときだけ 返して いた ので、
+    //     世界地図から 入っても 上層区に 出て いた。
     let dest = w;
-    const back = G.entry && G.entry[P.map];
-    if(back && back.map===w.to && (back.x!==w.x || back.y!==w.y)){
-      dest = {to:w.to, x:back.x, y:back.y};
+    if(w.back){
+      const back = G.entry && G.entry[P.map];
+      if(back) dest = {to:back.map, x:back.x, y:back.y};
     }
     P.map=dest.to; P.x=dest.x; P.y=dest.y; P.dir='front';
     if(gimmickRescue(dest.to)) G._rescued = true;   // ★岩づまりを もとに もどした
