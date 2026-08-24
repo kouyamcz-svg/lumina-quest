@@ -370,7 +370,7 @@ const NPCS = {
         '長「氷窟は 谷を 出て 東だ。氷灯を 点けんと 奥へは 入れん」']},
       {text:['毛皮を 巻いた 大男が 立っている。',
              '長「……空の 者か」']}]},
-    {at:'17,5', spr:'elderWoman', name:'谷の 老婆', lines:[
+    {at:'17,5', spr:'valeElder', name:'谷の 老婆', lines:[
       {when:{flag:'ch3_lullaby'}, text:[
         '老婆「同じ 節で、逆の ことを して きたんだねえ」']},
       {when:{flag:'ch3_riezeReturned'}, text:[
