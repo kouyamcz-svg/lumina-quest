@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-25 08:05 JST", "build":"a703a774","assets_sha": "57df7146", "lines": {"world": 122, "npc": 737, "chapters": 2217, "bgm": 985, "view2d": 2544, "core": 3566, "view": 1401, "ui": 1145}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-25 08:18 JST", "build":"c605fbbd","assets_sha": "57df7146", "lines": {"world": 122, "npc": 743, "chapters": 2220, "bgm": 985, "view2d": 2544, "core": 3566, "view": 1401, "ui": 1145}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -674,7 +674,13 @@ const NPCS = {
       {text:['子ども「空から 落ちてきたの？」',
              '子ども「みんな そう 言ってる」']}]},
     {at:'9,13', spr:'villagerA', name:'谷の 猟師', lines:[
+      {when:{flag:'ch3_riezeReturned'}, text:[
+        '猟師「氷窟の 奥、静かに なったな」',
+        '猟師「三年 まえから 変な 音が しとった。……あれが 元か」']},
       {when:{flag:'ch3_riezeSaved'}, text:[
+        '猟師「その子……リーゼか！」',
+        '猟師「長は 天幕の 前だ。早く 連れて いってやれ」']},
+      {text:[
         '猟師「氷窟の 奥、静かに なったな」',
         '猟師「三年 まえから 変な 音が しとった。……あれが 元か」']},
       {text:['猟師「東の 氷窟には 近づくな」',
@@ -893,8 +899,8 @@ const QUESTS = {
     desc:'谷の 北の 氷窟へ。攫われた 娘を 助ける。',
     steps:[
       {id:'boss',   desc:'黒い かけらを 討つ',       flag:'ch3_riezeSaved'},
-      {id:'back',   desc:'長に 連れて 帰る',         flag:'ch3_riezeReturned'},
-      {id:'song',   desc:'谷の 老婆に 唄を 聞く',   flag:'ch3_lullaby'},
+      {id:'back',   desc:'氷窟を 出て 西へ。氏族の 長に 連れて 帰る', flag:'ch3_riezeReturned'},
+      {id:'song',   desc:'谷の 老婆に 唄を 聞く（天幕の 東）',   flag:'ch3_lullaby'},
     ],
     reward:{}, next:null,
   },
@@ -3183,8 +3189,11 @@ const CH = {
              'セレンは 少女を 背負った。',
              'セレン「連れて 帰りましょう。ここは 寒い」',
              '',
+             'イオ「谷は 西です。出て すぐ」',
+             'セレン「長に 渡しましょう。天幕の 前に いたわ」',
+             '',
              '＊ リーゼを 助けた ＊',
-             '＊ 氷の谷へ 連れて 帰ろう ＊'],
+             '＊ 氷窟を 出て 西へ。氏族の 長に 連れて 帰ろう ＊'],
       },
     },
 

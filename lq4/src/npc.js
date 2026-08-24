@@ -385,7 +385,13 @@ const NPCS = {
       {text:['子ども「空から 落ちてきたの？」',
              '子ども「みんな そう 言ってる」']}]},
     {at:'9,13', spr:'villagerA', name:'谷の 猟師', lines:[
+      {when:{flag:'ch3_riezeReturned'}, text:[
+        '猟師「氷窟の 奥、静かに なったな」',
+        '猟師「三年 まえから 変な 音が しとった。……あれが 元か」']},
       {when:{flag:'ch3_riezeSaved'}, text:[
+        '猟師「その子……リーゼか！」',
+        '猟師「長は 天幕の 前だ。早く 連れて いってやれ」']},
+      {text:[
         '猟師「氷窟の 奥、静かに なったな」',
         '猟師「三年 まえから 変な 音が しとった。……あれが 元か」']},
       {text:['猟師「東の 氷窟には 近づくな」',
@@ -604,8 +610,8 @@ const QUESTS = {
     desc:'谷の 北の 氷窟へ。攫われた 娘を 助ける。',
     steps:[
       {id:'boss',   desc:'黒い かけらを 討つ',       flag:'ch3_riezeSaved'},
-      {id:'back',   desc:'長に 連れて 帰る',         flag:'ch3_riezeReturned'},
-      {id:'song',   desc:'谷の 老婆に 唄を 聞く',   flag:'ch3_lullaby'},
+      {id:'back',   desc:'氷窟を 出て 西へ。氏族の 長に 連れて 帰る', flag:'ch3_riezeReturned'},
+      {id:'song',   desc:'谷の 老婆に 唄を 聞く（天幕の 東）',   flag:'ch3_lullaby'},
     ],
     reward:{}, next:null,
   },
