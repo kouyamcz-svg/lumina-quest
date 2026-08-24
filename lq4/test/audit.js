@@ -779,6 +779,41 @@ Object.keys(C.MAPS).forEach(mp=>{
   });
 }
 
+// ★空と 地上の 行き来の 年数が くいちがって いない こと。
+//   ★「毎年 来る」と「千年 誰も 乗って いない」が 同じ 章に あった。
+//   きまり：
+//     毎年      ＝ 荷を 置いて すぐ 帰る 便
+//     四十年ぶり ＝ 人が 五地方を 巡る「巡回降下」
+//     千年      ＝ 舟その ものの 古さ（つかった 年数では ない）
+{
+  const lines = [];
+  Object.keys(CHD.CH).forEach(no=>{
+    const cd = CHD.CH[no];
+    (cd.talkEvents||[]).forEach(e=>{
+      (e.msg||[]).concat(e.preMsg||[]).forEach(l=>lines.push(String(l)));
+    });
+    ((cd.ending&&cd.ending.msg)||[]).forEach(l=>lines.push(String(l)));
+    (cd.opening||[]).forEach(l=>lines.push(String(l)));
+  });
+  Object.keys(NPCD.NPCS).forEach(mp=>(NPCD.NPCS[mp]||[]).forEach(e=>
+    (e.lines||[]).forEach(l=>(l.text||[]).forEach(t=>lines.push(String(t))))));
+
+  // 「千年」と「舟／降下」を いっしょに 言う ときは、
+  // 「つかって いない 年数」では なく「舟の 古さ」で ある こと
+  lines.forEach(l=>{
+    if(!/千年/.test(l)) return;
+    if(!/舟|降下|巡/.test(l)) return;
+    const bad = /千年[^。]{0,8}(誰も|使って|動いて|乗って)/.test(l);
+    T('「千年」を つかって いない 年数に しない', !bad, l.slice(0,44));
+  });
+  // 巡回降下の 年数は 四十年で そろえる
+  lines.forEach(l=>{
+    if(!/巡回|五地方を 巡/.test(l)) return;
+    if(!/年/.test(l)) return;
+    T('巡回降下の 年数は 四十年', /四十年/.test(l), l.slice(0,44));
+  });
+}
+
 // ★けっかいの ことばが、いまの 進み具合に あって いる こと。
 //   ★そらくらいを 倒したのに「書類が いる」とだけ 出て、
 //     どこへ 行けば よいか 分からなかった。
