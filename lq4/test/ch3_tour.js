@@ -61,6 +61,17 @@ stand('world', 34, 18, 'back'); C.stepField(0,-1);
 T('雲海港へ 入れる', C.P.map==='sky_port', C.P.map+' '+C.P.x+','+C.P.y);
 T('港の めじるしが たつ', C.G.flags.ch3_atPort===true);
 
+// ★桟橋の どこに 立っても 舟に とどく こと
+//   ★1ますしか なくて、どこに 立てば よいか 分からなかった。
+{
+  const keep = C.G.flags.ch3_landed;
+  [8,9,10].forEach(x=>{
+    C.G.flags.ch3_landed = false;
+    talk('sky_port', x, 12, 'front');
+    T('桟橋('+x+',12)から 舟に とどく', said('桟橋の 先に'), log.join(' / ').slice(0,40));
+  });
+  C.G.flags.ch3_landed = keep;
+}
 talk('sky_port', 9, 12, 'front');
 T('舟を しらべると 降下する', C.G.flags.ch3_landed===true);
 T('番人が 四十年 磨いたと 言う', said('四十年 この 舟を 磨いてきた'), log.join(' / ').slice(0,140));
