@@ -7,7 +7,12 @@
 //   試験場の 門が 開かない ことが あった。
 //   遊ぶ 手順を そのまま なぞって、どの 道すじでも 詰まらない ことを たしかめる。
 const fs = require('fs'), vm = require('vm');
-const ctx = {console, window:{}, localStorage:undefined}; ctx.globalThis = ctx;
+// ★セーブ／ロードも ためす ので、記憶を 用意する
+const __store = {};
+const __ls = {getItem:k=>(k in __store?__store[k]:null),
+              setItem:(k,v)=>{__store[k]=String(v);},
+              removeItem:k=>{delete __store[k];}};
+const ctx = {console, window:{}, localStorage:__ls}; ctx.globalThis = ctx;
 vm.createContext(ctx);
 for (const f of ['world.js','npc.js','chapters.js','core.js'])
   vm.runInContext(fs.readFileSync('src/'+f,'utf8'), ctx, {filename:f});
@@ -218,6 +223,35 @@ function kill(k){
     viaCore('upper_dist',17,9,0,1)==='upper_dist', C.P.map);
   T('炉心を 通っても 世界地図に 出る',
     viaCore('world',9,15,0,-1)==='world', C.P.map);
+
+  // ★セーブ／ロードを はさんでも 入口を おぼえて いる こと。
+  //   ★おぼえを セーブに 入れて いなかった ため、
+  //     ロード後は 上層区の 建物の 中に 出て いた。
+  {
+    if(enter('world',9,15,0,-1)==='furnace'){
+      C.saveGame(0);
+      C.freshState();
+      C.loadGame(0);
+      T('ロードしても 入口を おぼえて いる',
+        C.G.entry && C.G.entry.furnace && C.G.entry.furnace.map==='world',
+        JSON.stringify(C.G.entry && C.G.entry.furnace));
+      C.G.mode='field'; C.G.busy=false;
+      C.P.map='furnace'; C.P.x=10; C.P.y=19; C.P.dir='front';
+      C.stepField(0,1);
+      T('ロード後も 世界地図に 出る', C.P.map==='world', C.P.map+' '+C.P.x+','+C.P.y);
+    }
+  }
+  // ★おぼえが ない ときでも かべの 中に 出ない こと
+  {
+    C.freshState(); C.G.chapter = 3;
+    C.G.flags.ch2_taskOpen = true; C.G.flags.ch2_towerPaid = true;
+    C.party.length = 0; C.party.push(C.mkMember('io',22));
+    C.G.entry = {};
+    C.G.mode='field'; C.P.map='furnace'; C.P.x=10; C.P.y=19; C.P.dir='front';
+    C.stepField(0,1);
+    T('おぼえが なくても 通れる ますに 出る',
+      C.walkable(C.P.map, C.P.x, C.P.y), C.P.map+' '+C.P.x+','+C.P.y);
+  }
 }
 
 // ============ すべての けっかいが いつか 開くか ============

@@ -1606,6 +1606,17 @@ function doWarp(w){
       const back = G.entry && G.entry[P.map];
       if(back) dest = {to:back.map, x:back.x, y:back.y};
     }
+    // ★行き先が 通れない ます（かべの 中）なら、まわりの 通れる ますへ ずらす。
+    //   ★上層区の 昇降機は 建物の 中に あり、そこへ 返すと かべに はまって いた。
+    if(!walkable(dest.to, dest.x, dest.y)){
+      const around = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]];
+      for(const [ax,ay] of around){
+        if(walkable(dest.to, dest.x+ax, dest.y+ay)){
+          dest = {to:dest.to, x:dest.x+ax, y:dest.y+ay};
+          break;
+        }
+      }
+    }
     P.map=dest.to; P.x=dest.x; P.y=dest.y; P.dir='front';
     if(gimmickRescue(dest.to)) G._rescued = true;   // ★岩づまりを もとに もどした
     G.trail=[[P.x,P.y],[P.x,P.y]];
@@ -3236,6 +3247,7 @@ function snapshotChapter(){          // いまの 章の 状態を あずける
     gold: P.gold, herbs: P.herbs, waters: P.waters,
     map: P.map, x: P.x, y: P.y, dir: P.dir,
     flags: JSON.parse(JSON.stringify(G.flags||{})),
+    entry: JSON.parse(JSON.stringify(G.entry||{})),   // ★どこから 入ったか
     visited: JSON.parse(JSON.stringify(G.visited||{})),   // ★しょうごとの あしあと
   };
 }
@@ -3281,6 +3293,7 @@ function saveGame(s, slot){
       ship:G.ship, aboard:G.aboard,
       chapter:G.chapter, chapters:G.chapters,
       flags:G.flags, quests:G.quests,
+      entry:G.entry,                     // ★どこから ダンジョンに 入ったか
       world:{visited:G.visited, gotTreasure:G.gotTreasure, dex:G.dex},
       tactic:G.tactic, cleared:G.cleared, townState:G.townState, night:G.night,
       tileEdits:G.tileEdits,                    // ★しかけの じょうたい
@@ -3332,6 +3345,7 @@ function loadGame(s, slot){
     G.chapter   = d.chapter || 1;
     G.chapters  = d.chapters || {};
     G.flags     = Object.assign({}, d.flags||{});
+    G.entry     = Object.assign({}, d.entry||{});   // ★どこから 入ったか
     G.quests    = d.quests || {};
     const w     = d.world || {};
     G.visited   = w.visited || d.visited || {};
@@ -3383,6 +3397,7 @@ function switchChapter(no, newParty){
       P.map=land.map; P.x=land.x; P.y=land.y; P.dir=saved.dir||'front';
     }
     G.flags = Object.assign({}, saved.flags||{});
+    G.entry = Object.assign({}, saved.entry||{});
     G.visited = Object.assign({}, saved.visited||{});
     G.visited[P.map] = true;
   }else{
