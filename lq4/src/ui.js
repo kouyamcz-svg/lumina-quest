@@ -991,6 +991,7 @@ const Title = (function(){
         g.textAlign='right';
         // ★どの ばんが 動いて いるか。時こくと あわせて みじかい 印も 出す。
         g.fillText(b.at + (b.build ? '  #'+b.build : ''), w-sc*0.03, h-sc*0.02);
+
         g.textAlign='center';
       }
     }catch(e){}

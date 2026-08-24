@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 09:38 JST", "build":"fe43d144","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3566, "view": 1401, "ui": 1144}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-24 09:56 JST", "build":"b99955c8","assets_sha": "602d929b", "lines": {"world": 122, "npc": 727, "chapters": 2195, "bgm": 985, "view2d": 2524, "core": 3566, "view": 1401, "ui": 1145}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -7552,7 +7552,7 @@ const MAPS = {
     "#....................#",
     "##########.###########"],
     warpsXY:{
-      '10,20':{to:'upper_dist', x:17, y:10, back:true},
+      '10,20':{to:'world', x:9, y:14, back:true},
       '10,5' :{to:'furnace_core', x:7, y:7}
     }},
 
@@ -12678,6 +12678,7 @@ const Title = (function(){
         g.textAlign='right';
         // ★どの ばんが 動いて いるか。時こくと あわせて みじかい 印も 出す。
         g.fillText(b.at + (b.build ? '  #'+b.build : ''), w-sc*0.03, h-sc*0.02);
+
         g.textAlign='center';
       }
     }catch(e){}

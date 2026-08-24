@@ -832,7 +832,7 @@ const MAPS = {
     "#....................#",
     "##########.###########"],
     warpsXY:{
-      '10,20':{to:'upper_dist', x:17, y:10, back:true},
+      '10,20':{to:'world', x:9, y:14, back:true},
       '10,5' :{to:'furnace_core', x:7, y:7}
     }},
 
