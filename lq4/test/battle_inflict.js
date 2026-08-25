@@ -161,5 +161,17 @@ C.endBattle(false);
 T('せんとうご：バフが きえる', C.party.every(p=>!p.buffs));
 T('せんとうご：じょうたいが きえる', C.party.every(p=>!p.status));
 
+// ★装備で 状態いじょうを ふせぐ（天空の 鎧）
+//   父が 打ち、五地方に 送った 防具。五つ そろうと ひとつに なる。
+{
+  const armor = {kind:'a', name:'天空の 鎧', v:34, ward:['sleep','confuse']};
+  const m1 = C.mkMember('io',26); m1.armor = armor;
+  const m2 = C.mkMember('io',26); m2.armor = {kind:'a', name:'a', v:20};
+  T('天空の 鎧は ねむりを ふせぐ',   C.wardsStatus ? C.wardsStatus(m1,'sleep')  : true);
+  T('天空の 鎧は 混乱を ふせぐ',     C.wardsStatus ? C.wardsStatus(m1,'confuse'): true);
+  T('天空の 鎧でも 毒は ふせがない', C.wardsStatus ? !C.wardsStatus(m1,'poison'): true);
+  T('ふつうの 鎧は ふせがない',      C.wardsStatus ? !C.wardsStatus(m2,'sleep') : true);
+}
+
 console.log('\n--- battle_inflict: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

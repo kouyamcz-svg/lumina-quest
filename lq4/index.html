@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-25 08:57 JST", "build":"679cec1b","assets_sha": "93d9f9d5", "lines": {"world": 122, "npc": 743, "chapters": 2221, "bgm": 985, "view2d": 2544, "core": 3566, "view": 1401, "ui": 1145}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-25 12:19 JST", "build":"eb4f5993","assets_sha": "93d9f9d5", "lines": {"world": 122, "npc": 743, "chapters": 2268, "bgm": 985, "view2d": 2544, "core": 3613, "view": 1401, "ui": 1145}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -2866,7 +2866,7 @@ const CH = {
 
       // ---- 洞から 戻った あと ----
       { npc:'海の 民の 少女', cond:['ch3_namiSaved'], unless:'ch3_namiTold',
-        set:['ch3_namiTold'],
+        set:['ch3_namiTold'], skyPart:'sky_leg',
         quest:{ch3_q3_nami:'clear'},
         heal:true,
         gold:2800, herbs:6,
@@ -2891,6 +2891,20 @@ const CH = {
              'ノエは しゃがんで 目線を 合わせた。',
              'ノエ「あなたの 力は 呪いじゃ ない」',
              '',
+             'ナミが 何かを 抱えて 戻ってきた。',
+             'ナミ「これ、あげる」',
+             '',
+             '白い 鋼の 脚当て。潮で 少し 曇っている。',
+             'ナミ「浜に 流れついてた。ずっと 前に」',
+             '村人「荷が ひとつ 落ちたんだ。二十年 前の 便でな」',
+             '',
+             'イオ「……字が ある」',
+             'ナミ「読めなかったの。うちの 誰も」',
+             '',
+             'イオ「父の 名です」',
+             'ナミ「じゃあ、待ってた のは あなただ」',
+             '',
+             '＊ 天空の 脚当て を 手に 入れた ＊',
              '＊ 2800ゴールドと 薬草6つを 受け取った ＊',
              '＊ 手当てを 受けた ＊'] },
 
@@ -2963,7 +2977,7 @@ const CH = {
 
       // ---- 水脈を 見つけた あと ----
       { npc:'東の 集落長', cond:['ch3_veinFound'], unless:'ch3_wellSolved',
-        set:['ch3_wellSolved'],
+        set:['ch3_wellSolved'], skyPart:'sky_arm',
         quest:{ch3_q2_well:'clear'},
         heal:true,
         gold:2400, herbs:6,
@@ -2983,6 +2997,20 @@ const CH = {
              '東の 長「どちらの ものでも ない、なら」',
              '西の 長「両方の ものだろう」',
              '',
+             '東の 長「……ところで 空の 者。ひとつ 訊きたい」',
+             '東の 長「二十年 前、荷に 白い 篭手が まじって いた」',
+             '東の 長「どちらの 集落の ものか 決められず、蔵に しまってある」',
+             '',
+             'セレン「白い 鋼」',
+             '東の 長「見るか」',
+             '',
+             '出てきた 篭手には、氷の谷で 見たのと 同じ 字が あった。',
+             '',
+             'イオ「父の ものです」',
+             '西の 長「なら 話は 早い。持ち主の 子が 来た」',
+             '東の 長「二十年 かかったな」',
+             '',
+             '＊ 天空の 篭手 を 手に 入れた ＊',
              '＊ 2400ゴールドと 薬草6つを 受け取った ＊',
              '＊ 手当てを 受けた ＊'] },
 
@@ -3050,7 +3078,7 @@ const CH = {
 
       // ---- 救出の あと ----
       { npc:'氏族の 長', cond:['ch3_riezeSaved'], unless:'ch3_riezeReturned',
-        set:['ch3_riezeReturned'],
+        set:['ch3_riezeReturned'], skyPart:'sky_body',
         quest:{ch3_q1_rieze:'clear'},
         heal:true,
         gold:2000, herbs:6,
@@ -3068,6 +3096,25 @@ const CH = {
              '長「わしは グルド。この 谷の 長だ」',
              '長「覚えて おけ。次に 来る とき、呼べる ように」',
              '',
+             '長は 天幕の 奥から、布に 包んだ ものを 持ってきた。',
+             '長「これを 持っていけ」',
+             '',
+             '布の 中は 胸当てだった。白い 鋼。見た ことの ない 色。',
+             'イオ「……これは」',
+             '長「二十年 前、荷に まじって 届いた」',
+             '長「送り主の 名が 書いてあった。空の 者で 名を 書いたのは それきりだ」',
+             '',
+             'イオは 布の 端を 見た。小さく 字が ある。',
+             '',
+             'イオ「……父さんの 字だ」',
+             '',
+             '長「知り合いか」',
+             'イオ「父です。二十年 前に 空へ 行って、そのまま」',
+             '',
+             '長「そうか」',
+             '長「……ならば 尚さら 持っていけ。ずっと 待って いたんだろう」',
+             '',
+             '＊ 天空の 胴当て を 手に 入れた ＊',
              '＊ 2000ゴールドと 薬草6つを 受け取った ＊',
              '＊ 手当てを 受けた ＊'] },
 
@@ -8491,6 +8538,34 @@ function runRunIn(o, done){
   V.runner({spr:o.spr, from:o.from, path, speed:o.speed||0.11, done});
 }
 
+// ★天空シリーズ：五つ そろうと ひとつの 鎧に なる
+const SKY_PARTS = [
+  {flag:'sky_body',  name:'天空の 胴当て'},
+  {flag:'sky_arm',   name:'天空の 篭手'},
+  {flag:'sky_leg',   name:'天空の 脚当て'},
+  {flag:'sky_helm',  name:'天空の 兜'},
+  {flag:'sky_cloak', name:'天空の 外套'},
+];
+const SKY_ARMOR = {kind:'a', name:'天空の 鎧', v:34, ward:['sleep','confuse']};
+function skyPartsGot(){ return SKY_PARTS.filter(p=>G.flags[p.flag]).length; }
+// ★部品を 受け取る。そろったら 鎧に する。
+function giveSkyPart(flag, lines){
+  if(G.flags[flag]) return;
+  G.flags[flag] = true;
+  const n = skyPartsGot(), total = SKY_PARTS.length;
+  if(n < total){
+    lines.push('＊ 天空の 鋼　'+n+'／'+total+' ＊');
+    return;
+  }
+  // ★五つ そろった
+  const io = party.find(m=>m.cls==='io');
+  if(io){ io.armor = Object.assign({}, SKY_ARMOR); }
+  G.flags.sky_armor = true;
+  lines.push('', '五つの 鋼が ひとつに なった。',
+             'イオ「……父さん、ぜんぶ 地上に 送って いたのか」',
+             '＊ イオが 天空の 鎧 を 身に つけた ＊');
+}
+
 function runTalkEvent(npcName){
   const cd = chData();
   if(!cd || !cd.talkEvents) return false;
@@ -8518,6 +8593,9 @@ function runTalkEvent(npcName){
   if(e.giveKey) giveKey(e.giveKey);
   if(e.moor){ G.ship={x:e.moor[0], y:e.moor[1]}; G.aboard=false; }   // ★ふねを さずける
   if(e.heal){ party.concat(reserve).forEach(m=>{ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; }); U.hud(); }
+  // ★天空シリーズの 部品
+  const skyLines = [];
+  if(e.skyPart) giveSkyPart(e.skyPart, skyLines);
   if(e.join){                                    // ★なかまが くわわる（'lead'＝せんとうと おなじLv）
     const joined = [];
     (Array.isArray(e.join)?e.join:[e.join]).forEach(j=>{
@@ -8558,6 +8636,7 @@ function runTalkEvent(npcName){
   Object.keys(e.quest || {}).forEach(q => questAdvance(q, e.quest[q]));
 
   const lines = (e.msg || []).slice();
+  if(skyLines.length) lines.push(...skyLines);
   // ★「何人めか」は 助けた 順で 変わる。書き置きの 文だと
   //   さきに 三人めを 助けても「ひとりめ」と 出て しまう。
   //   いま いくつ 立って いるかを かぞえて 足す。
@@ -8854,6 +8933,12 @@ function inflictHit(e, st, p){
   if(e.immuneSt && e.immuneSt.indexOf(st)>=0) return false;
   const q = e.boss ? p*0.5 : p;
   return Math.random() < q;
+}
+// ★装備で ふせぐ 状態いじょう（天空の 鎧など）
+function wardsStatus(m, st){
+  if(!m) return false;
+  const eq = [m.weapon, m.armor];
+  return eq.some(o => o && Array.isArray(o.ward) && o.ward.indexOf(st) >= 0);
 }
 function inflictP(e){
   if(!e.inflict) return 0;
@@ -9546,8 +9631,12 @@ function enemyAct(e, done){
       }
       if(ts.hp<=0){ ts.hp=0; ts.status=null; lines.push(ts.name+'は 倒れた…'); }
       else if(e.inflict && Math.random()<inflictP(e) && !ts.status){
-        ts.status=e.inflict.type;
-        lines.push(ts.name+'は '+statusText(e.inflict.type));
+        if(wardsStatus(ts, e.inflict.type)){
+          lines.push(ts.name+'の 鎧が 光った！');
+        }else{
+          ts.status=e.inflict.type;
+          lines.push(ts.name+'は '+statusText(e.inflict.type));
+        }
       }
       U.hud(); U.msg(lines, done);
     });
@@ -9617,8 +9706,12 @@ function enemyAct(e, done){
     }
     if(t.hp<=0){ t.hp=0; t.status=null; lines.push(t.name+'は 倒れた…'); }
     else if(e.inflict && Math.random()<inflictP(e) && !t.status){
-      t.status=e.inflict.type;
-      lines.push(t.name+'は '+statusText(e.inflict.type));
+      if(wardsStatus(t, e.inflict.type)){
+        lines.push(t.name+'の 鎧が 光った！');
+      }else{
+        t.status=e.inflict.type;
+        lines.push(t.name+'は '+statusText(e.inflict.type));
+      }
     }
     U.hud(); U.msg(lines, done);
   });
@@ -10336,6 +10429,7 @@ return {
   fieldSpells, castField, spellNeedsTarget,
   returnDestinations, canReturnHere, castReturn, allReturnSpots, bossInfoAt, chData,
   chapterLabel,                    // ★章の 名まえ（序章ぶん ずらす）
+  wardsStatus, skyPartsGot,        // ★天空シリーズ
   KEY_ITEMS, hasKey, giveKey, takeKey, keyItemList,
   TRADE_GOODS, TRADE_MARKET, tradeTowns, tradePrice, sellPrice,
   goodsCount, goodsTotal, buyGood, sellGood, GOODS_LIMIT,

@@ -138,6 +138,10 @@ T('行き先（西）を 言う', said('氷窟を 出て 西へ'));
   T('礼を もらえる', C.P.gold===g0+2000, C.P.gold+' ← '+g0);
   T('手当てで 全快', C.party.every(p=>p.hp===p.maxhp));
   T('クエストが 片づく', C.G.quests.ch3_q1_rieze==='clear');
+  // ★父の 防具（天空シリーズ）
+  T('天空の 胴当てを もらう', C.G.flags.sky_body===true);
+  T('父の 字だと 気づく', said('父さんの 字だ'), log.join(' / ').slice(0,160));
+  T('のこりの 数が 出る', said('天空の 鋼　1／5'));
 }
 
 // ===== 8. サブ：眠らない 子守唄 =====
@@ -192,6 +196,8 @@ T('報せに 行けと 出る', said('集落長に 報せよう'));
   T('両方の ものだと 言う', said('両方の ものだろう'));
   T('礼を もらえる', C.P.gold===g0+2400, C.P.gold+' ← '+g0);
   T('クエストが 片づく', C.G.quests.ch3_q2_well==='clear');
+  T('天空の 篭手を もらう', C.G.flags.sky_arm===true);
+  T('二十年 かかったと 言う', said('二十年 かかったな'), log.join(' / ').slice(0,140));
 }
 
 talk('well_town', 11, 11, 'back');
@@ -238,6 +244,9 @@ T('見た から 見つかったと 言う', said('見た から 見つかった
   T('呪いじゃ ないと 言う', said('あなたの 力は 呪いじゃ ない'));
   T('礼を もらえる', C.P.gold===g0+2800, C.P.gold+' ← '+g0);
   T('クエストが 片づく', C.G.quests.ch3_q3_nami==='clear');
+  T('天空の 脚当てを もらう', C.G.flags.sky_leg===true);
+  T('待って いたのは あなただ', said('待ってた のは あなただ'), log.join(' / ').slice(0,140));
+  T('三つ 集まった', C.skyPartsGot()===3, C.skyPartsGot()+'／5');
 }
 
 talk('coral_bay', 11, 10, 'back');

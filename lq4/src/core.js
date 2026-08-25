@@ -1709,6 +1709,34 @@ function runRunIn(o, done){
   V.runner({spr:o.spr, from:o.from, path, speed:o.speed||0.11, done});
 }
 
+// ★天空シリーズ：五つ そろうと ひとつの 鎧に なる
+const SKY_PARTS = [
+  {flag:'sky_body',  name:'天空の 胴当て'},
+  {flag:'sky_arm',   name:'天空の 篭手'},
+  {flag:'sky_leg',   name:'天空の 脚当て'},
+  {flag:'sky_helm',  name:'天空の 兜'},
+  {flag:'sky_cloak', name:'天空の 外套'},
+];
+const SKY_ARMOR = {kind:'a', name:'天空の 鎧', v:34, ward:['sleep','confuse']};
+function skyPartsGot(){ return SKY_PARTS.filter(p=>G.flags[p.flag]).length; }
+// ★部品を 受け取る。そろったら 鎧に する。
+function giveSkyPart(flag, lines){
+  if(G.flags[flag]) return;
+  G.flags[flag] = true;
+  const n = skyPartsGot(), total = SKY_PARTS.length;
+  if(n < total){
+    lines.push('＊ 天空の 鋼　'+n+'／'+total+' ＊');
+    return;
+  }
+  // ★五つ そろった
+  const io = party.find(m=>m.cls==='io');
+  if(io){ io.armor = Object.assign({}, SKY_ARMOR); }
+  G.flags.sky_armor = true;
+  lines.push('', '五つの 鋼が ひとつに なった。',
+             'イオ「……父さん、ぜんぶ 地上に 送って いたのか」',
+             '＊ イオが 天空の 鎧 を 身に つけた ＊');
+}
+
 function runTalkEvent(npcName){
   const cd = chData();
   if(!cd || !cd.talkEvents) return false;
@@ -1736,6 +1764,9 @@ function runTalkEvent(npcName){
   if(e.giveKey) giveKey(e.giveKey);
   if(e.moor){ G.ship={x:e.moor[0], y:e.moor[1]}; G.aboard=false; }   // ★ふねを さずける
   if(e.heal){ party.concat(reserve).forEach(m=>{ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; }); U.hud(); }
+  // ★天空シリーズの 部品
+  const skyLines = [];
+  if(e.skyPart) giveSkyPart(e.skyPart, skyLines);
   if(e.join){                                    // ★なかまが くわわる（'lead'＝せんとうと おなじLv）
     const joined = [];
     (Array.isArray(e.join)?e.join:[e.join]).forEach(j=>{
@@ -1776,6 +1807,7 @@ function runTalkEvent(npcName){
   Object.keys(e.quest || {}).forEach(q => questAdvance(q, e.quest[q]));
 
   const lines = (e.msg || []).slice();
+  if(skyLines.length) lines.push(...skyLines);
   // ★「何人めか」は 助けた 順で 変わる。書き置きの 文だと
   //   さきに 三人めを 助けても「ひとりめ」と 出て しまう。
   //   いま いくつ 立って いるかを かぞえて 足す。
@@ -2072,6 +2104,12 @@ function inflictHit(e, st, p){
   if(e.immuneSt && e.immuneSt.indexOf(st)>=0) return false;
   const q = e.boss ? p*0.5 : p;
   return Math.random() < q;
+}
+// ★装備で ふせぐ 状態いじょう（天空の 鎧など）
+function wardsStatus(m, st){
+  if(!m) return false;
+  const eq = [m.weapon, m.armor];
+  return eq.some(o => o && Array.isArray(o.ward) && o.ward.indexOf(st) >= 0);
 }
 function inflictP(e){
   if(!e.inflict) return 0;
@@ -2764,8 +2802,12 @@ function enemyAct(e, done){
       }
       if(ts.hp<=0){ ts.hp=0; ts.status=null; lines.push(ts.name+'は 倒れた…'); }
       else if(e.inflict && Math.random()<inflictP(e) && !ts.status){
-        ts.status=e.inflict.type;
-        lines.push(ts.name+'は '+statusText(e.inflict.type));
+        if(wardsStatus(ts, e.inflict.type)){
+          lines.push(ts.name+'の 鎧が 光った！');
+        }else{
+          ts.status=e.inflict.type;
+          lines.push(ts.name+'は '+statusText(e.inflict.type));
+        }
       }
       U.hud(); U.msg(lines, done);
     });
@@ -2835,8 +2877,12 @@ function enemyAct(e, done){
     }
     if(t.hp<=0){ t.hp=0; t.status=null; lines.push(t.name+'は 倒れた…'); }
     else if(e.inflict && Math.random()<inflictP(e) && !t.status){
-      t.status=e.inflict.type;
-      lines.push(t.name+'は '+statusText(e.inflict.type));
+      if(wardsStatus(t, e.inflict.type)){
+        lines.push(t.name+'の 鎧が 光った！');
+      }else{
+        t.status=e.inflict.type;
+        lines.push(t.name+'は '+statusText(e.inflict.type));
+      }
     }
     U.hud(); U.msg(lines, done);
   });
@@ -3554,6 +3600,7 @@ return {
   fieldSpells, castField, spellNeedsTarget,
   returnDestinations, canReturnHere, castReturn, allReturnSpots, bossInfoAt, chData,
   chapterLabel,                    // ★章の 名まえ（序章ぶん ずらす）
+  wardsStatus, skyPartsGot,        // ★天空シリーズ
   KEY_ITEMS, hasKey, giveKey, takeKey, keyItemList,
   TRADE_GOODS, TRADE_MARKET, tradeTowns, tradePrice, sellPrice,
   goodsCount, goodsTotal, buyGood, sellGood, GOODS_LIMIT,
