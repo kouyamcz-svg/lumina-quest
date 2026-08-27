@@ -209,5 +209,44 @@ T('せんとうで Bを おしたら えらび直し',
   T('menu の つつみは ひとつだけ', wraps<=1, wraps+'かしょ ある');
 }
 
+// ---- ⑧ 逃げるは その場で 動く ----
+//   ★逃げると 決めたのに、のこりの 人の コマンドを えらばされて いた。
+//   ★ボス戦は 逃げられない。えらんだ とたんに つたえる。
+{
+  const run = (boss)=>{
+    const asked = [], log2 = [];
+    C.bind(C.NullView,
+      {msg(l,d){ l.forEach(x=>log2.push(String(x))); d&&d(); },
+       menu(items, title, cb){
+         asked.push(String(title));
+         const t = String(title);
+         if(t==='イオ'||t==='セレン'||t==='ノエ'){ cb(4); return; }  // 逃げる
+         cb(0);
+       },
+       hud(){}, label(){}, openTrade(){}}, C.NullAudio);
+    C.freshState(); C.G.chapter=4; C.G.tactic='manual'; C.party.length=0;
+    ['io','seren','noe'].forEach(k=>C.party.push(C.mkMember(k,26)));
+    C.P.map='ice_cave'; C.G.mode='field';
+    try{ boss ? C.startBattle('akumuhen') : C.startBattle(); }catch(e){}
+    return {asked, log2};
+  };
+  // ざこ戦：ひとりめだけ 聞かれる
+  {
+    const r = run(false);
+    // ★まわりこまれると つぎの ラウンドで また 聞かれる。
+    //   だいじなのは「セレン・ノエには 聞かない」こと。
+    const others = r.asked.filter(t=>t==='セレン'||t==='ノエ');
+    T('逃げると ほかの 人には 聞かない', others.length===0, r.asked.join(' '));
+    T('その場で 逃げる', r.log2.some(l=>l.indexOf('にげ')>=0), r.log2.slice(0,3).join(' / '));
+  }
+  // ボス戦：逃げられないと すぐ 出る
+  {
+    const r = run(true);
+    T('ボス戦は 逃げられないと 言う',
+      r.log2.some(l=>l.indexOf('逃げられない')>=0), r.log2.slice(0,3).join(' / '));
+    T('ボス戦で 逃げても 戦いは つづく', C.G.battle ? !C.G.battle.fled : true);
+  }
+}
+
 console.log('\n--- menu_cancel: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

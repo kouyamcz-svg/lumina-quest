@@ -2367,7 +2367,18 @@ function collectCommands(i){
       pickItem();
     }
     else if(sel===3){ b.queue.push({actor:m, type:'guard'}); collectCommands(i+1); }
-    else { b.queue.push({actor:m, type:'flee'}); collectCommands(i+1); }
+    else {
+      // ★ボス戦では 逃げられない。えらぶ 前に つたえる。
+      if(b.named){
+        G.mode='msg';
+        U.msg(['逃げられない！'], ()=>{ G.mode='battle'; again(i); });
+        return;
+      }
+      // ★逃げるは その場で 判定する。ほかの 人の 指示は いらない。
+      b.queue.length = 0;
+      b.queue.push({actor:m, type:'flee'});
+      resolveRound();
+    }
   }, {cancel:'cancel'});
 }
 function bestHeal(m, need){
