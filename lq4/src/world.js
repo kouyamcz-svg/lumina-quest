@@ -57,6 +57,7 @@ const MAP_IDS = {
   ground:     {region:'land',kind:'world',name:'地上',        scene:'SCENE_FIELD'},
   ice_camp:   {region:'land',kind:'town', name:'氷の谷',      scene:'SCENE_FIELD'},
   ice_cave:   {region:'land',kind:'dgn',  name:'氷窟',        scene:'SCENE_CAVE'},
+  ice_core:   {region:'land',kind:'dgn',  name:'氷の 奥',     scene:'SCENE_CAVE'},
   well_town:  {region:'land',kind:'town', name:'湧き水の町',  scene:'SCENE_FIELD'},
   well_cave:  {region:'land',kind:'dgn',  name:'地下水路',    scene:'SCENE_CAVE'},
   coral_bay:  {region:'land',kind:'town', name:'珊瑚の入り江',scene:'SCENE_FIELD'},

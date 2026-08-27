@@ -106,17 +106,19 @@ T('東へ 歩くと 氷窟', C.P.map==='ice_cave', C.P.map+' '+C.P.x+','+C.P.y);
 T('氷窟の めじるしが たつ', C.G.flags.ch3_enteredCave===true);
 
 // ===== 5. 氷灯 2つで 氷が ゆるむ =====
-T('はじめは 氷が 塞いで いる', C.tileAt('ice_cave',10,6)==='K', C.tileAt('ice_cave',10,6));
-talk('ice_cave', 10, 7, 'back');
+T('はじめは 氷が 塞いで いる', C.tileAt('ice_cave',11,3)==='K', C.tileAt('ice_cave',11,3));
+talk('ice_cave', 11, 4, 'back');
 T('あけかたが 出る', said('氷灯'), log.join(' / ').slice(0,80));
-stand('ice_cave', 3, 10, 'back'); C.interact();
-T('ひとつでは 開かない', C.tileAt('ice_cave',10,6)==='K');
-stand('ice_cave', 20, 18, 'back'); C.interact();
-T('ふたつで 開く', C.tileAt('ice_cave',10,6)==='.', C.tileAt('ice_cave',10,6));
+stand('ice_cave', 3, 7, 'back'); C.interact();
+T('ひとつでは 開かない', C.tileAt('ice_cave',11,3)==='K');
+stand('ice_cave', 19, 7, 'back'); C.interact();
+T('ふたつで 開く', C.tileAt('ice_cave',11,3)==='.', C.tileAt('ice_cave',11,3));
+// ★ボスは 別の 間。入口からは 見えない
+T('ボスは 別の 間に いる', C.MAPS.ice_core && C.tileAt('ice_core',9,5)==='B');
 
 // ===== 6. あくむへん =====
 clearLog(); strong(26);
-stand('ice_cave', 10, 5, 'back');
+stand('ice_core', 9, 6, 'back');
 C.interact();
 T('少女が 眠って いる', said('少女が 横たわっていた'), log.join(' / ').slice(0,120));
 T('上から 落ちた ものだと 言う', said('天空大陸から'));
