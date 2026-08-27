@@ -184,7 +184,11 @@ const A = {
             noise(0.5,0.03,0.9,120,900); },               // ぜんめつ
   bgm(mapId){                      // ★ばしょの しゅべつで きょくを えらぶ
     if(typeof BGM==='undefined') return;
-    BGM.stop();                    // せんとうきょくは とめる
+    // ★せんとうきょくを かならず とめる。
+    //   ★BGM.stop() は ごうせいの ぶんしか とまらず、
+    //     ファイルで ながす 第3章の せんとうきょくが 鳴りっぱなしに なって いた。
+    if(BGM.stopBattleAll) BGM.stopBattleAll();
+    else BGM.stop();
     BGM.playField(trackFor(mapId));
     sndApply();          // ★かけなおす たびに せっていを あてる
   },

@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-27 21:07 JST", "build":"91fe991c","assets_sha": "93d9f9d5", "lines": {"world": 123, "npc": 743, "chapters": 2268, "bgm": 985, "view2d": 2544, "core": 3650, "view": 1401, "ui": 1145}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-27 21:28 JST", "build":"5a8388fb","assets_sha": "93d9f9d5", "lines": {"world": 123, "npc": 743, "chapters": 2268, "bgm": 985, "view2d": 2544, "core": 3650, "view": 1401, "ui": 1149}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -12065,7 +12065,11 @@ const A = {
             noise(0.5,0.03,0.9,120,900); },               // ぜんめつ
   bgm(mapId){                      // ★ばしょの しゅべつで きょくを えらぶ
     if(typeof BGM==='undefined') return;
-    BGM.stop();                    // せんとうきょくは とめる
+    // ★せんとうきょくを かならず とめる。
+    //   ★BGM.stop() は ごうせいの ぶんしか とまらず、
+    //     ファイルで ながす 第3章の せんとうきょくが 鳴りっぱなしに なって いた。
+    if(BGM.stopBattleAll) BGM.stopBattleAll();
+    else BGM.stop();
     BGM.playField(trackFor(mapId));
     sndApply();          // ★かけなおす たびに せっていを あてる
   },

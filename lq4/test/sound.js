@@ -74,5 +74,26 @@ T('きりかえも のこる', JSON.parse(stored.LQ4_SOUND).mix===true, stored.L
   });
 }
 
+// ★フィールドの きょくに もどす とき、せんとうきょくを かならず とめる。
+//   ★第3章の せんとうきょくは ファイルで ながす。
+//     BGM.stop() は ごうせいの ぶんしか とめず、鳴りっぱなしに なって いた。
+{
+  const ui = fs.readFileSync('src/ui.js','utf8');
+  const m = /bgm\(mapId\)\{[\s\S]*?\n  \},/.exec(ui);
+  T('bgm() が ある', !!m);
+  if(m){
+    const body = m[0];
+    T('bgm() が せんとうきょくを ぜんぶ とめる',
+      /stopBattleAll/.test(body), 'BGM.stop() だけでは ファイルが 止まらない');
+    T('bgm() が フィールドの きょくを かける',
+      /playField/.test(body));
+  }
+  // bgm.js に 両方 とめる 手が ある こと
+  const bg = fs.readFileSync('src/bgm.js','utf8');
+  T('stopBattleAll が ごうせいも ファイルも とめる',
+    /function stopBattleAll\(\)[\s\S]{0,120}?stop\(\);[\s\S]{0,60}?stopBattleFile\(\);/.test(bg));
+  T('stopBattleAll が そとに 出て いる', /stopBattleAll,/.test(bg));
+}
+
 console.log('\n--- sound: '+(n-ng)+'/'+n+' 通過 ---');
 process.exit(ng?1:0);
