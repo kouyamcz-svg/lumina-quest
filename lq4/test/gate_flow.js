@@ -337,7 +337,7 @@ function kill(k){
     T('おぼえが なくても 通れる ますに 出る',
       C.walkable(C.P.map, C.P.x, C.P.y), C.P.map+' '+C.P.x+','+C.P.y);
     // ほかの ダンジョンも
-    [[3,'tower1',7,9],[4,'ice_cave',10,19],[4,'well_cave',10,17],[4,'sea_cave',10,17]]
+    [[3,'tower1',7,9],[4,'ice_cave',10,26],[4,'well_cave',10,17],[4,'sea_cave',10,17]]
       .forEach(([ch,mp,ex,ey])=>{
         noMemory(ch,mp,ex,ey);
         T('おぼえが なくても '+mp+' から 通れる ますに 出る',
