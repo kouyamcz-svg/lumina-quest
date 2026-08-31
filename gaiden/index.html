@@ -9671,7 +9671,7 @@ function dgGen(){
  DG.stairs={x:sr.x+drnd(sr.w),y:sr.y+drnd(sr.h)};
  DG.enemies=[];
  const pool=D.pool.filter(p=>p[1]<=DG.floor).map(p=>p[0]);
- const n=2+drnd(2)+Math.floor(DG.floor/2);
+ const n=2+drnd(2)+Math.floor(DG.floor/2);DG.turn=0;DG.nextSpawn=20+drnd(16);DG.spawnCap=n+2;
  for(let i=0;i<n;i++){const r=rooms[1+drnd(rooms.length-1)];const x=r.x+drnd(r.w),y=r.y+drnd(r.h);if(dgOcc(x,y))continue;
   const proto=enemyProto(pool[drnd(pool.length)]);if(proto)DG.enemies.push(mkDgEnemy(proto,x,y,false));}
  DG.items=[];
@@ -9759,9 +9759,21 @@ function dgDescend(){
  DSE.stairs();DG.floor++;dgGen();dlog('B'+DG.floor+'Fに おりた。');dgCard(DUNGEONS[DG.dun].name+'  B'+DG.floor+'F');
 }
 function dgWait(){if(G.mode!=='dungeon'||DG.busy)return;dgEndTurn();}
+function dgSpawn(){
+ const D=DUNGEONS[DG.dun];if(!D||DG.stairs.x<0)return; // ボス階では わかない
+ const pool=D.pool.filter(p=>p[1]<=DG.floor).map(p=>p[0]);if(!pool.length)return;
+ const cap=DG.spawnCap||6;if(DG.enemies.length>=cap)return;
+ const rooms=DG.rooms.filter(r=>r!==dgRoom(DG.px,DG.py));if(!rooms.length)return;
+ for(let t=0;t<10;t++){const r=rooms[drnd(rooms.length)];const x=r.x+drnd(r.w),y=r.y+drnd(r.h);
+  if(dgOcc(x,y)||dgVis(x,y))continue;
+  const proto=enemyProto(pool[drnd(pool.length)]);if(!proto)return;
+  DG.enemies.push(mkDgEnemy(proto,x,y,false));return;}
+}
 function dgEndTurn(){
  DG.busy=true;setTimeout(()=>{DG.busy=false;},110);
  const m=party[0];
+ DG.turn=(DG.turn||0)+1;
+ if(DG.turn>=DG.nextSpawn){DG.nextSpawn=DG.turn+20+drnd(16);dgSpawn();}
  DG.foodTick++;if(DG.foodTick>=10){DG.foodTick=0;if(DG.food>0)DG.food--;}
  if(DG.poison>0){DG.poison--;m.hp-=2;if(DG.poison===0)dlog('どくが きれた。');}
  if(DG.food<=0){m.hp--;if(m.hp%5===0)dlog('おなかが すいて ちからが でない…');}
