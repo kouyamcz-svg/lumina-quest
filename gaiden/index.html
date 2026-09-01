@@ -9599,12 +9599,12 @@ if(P.breads==null)P.breads=0;
 
 // ---- ダンジョン定義（敵はLQ2のENEMIES/MIDBOSSをそのまま使う）----
 const DUNGEONS={
- cave:{name:'もりのどうくつ',floors:5,boss:'spider',pool:[['puyo',1],['bat',1],['goblin',2],['thief',4],['flower',4]],
+ cave:{name:'もりのどうくつ',floors:5,boss:'spider',bossMul:{hp:1.5,atk:1.1,def:1},pool:[['puyo',1],['bat',1],['goblin',2],['thief',4],['flower',4]],
   exit:{map:'field2',x:30,y:4},
   bossIntro:['どうくつの さいしんぶ。くうきが ねばついている。','オオグモ「……また おまえか、ゆうしゃ。','あのときの いたみ、わすれては いないぞ」','アルト「なぜ もどってきた」','オオグモ「じめんの したで だれかが よんだ。','われらは みな、よびもどされたのだ」'],
   bossWin:['オオグモは くずれおち、くろい もやになって きえた。','アルト「じめんの した……だれかが よんだ、か」','（じめんの おくから、かすかに なにかが うごく けはいが した）'],
  },
- grave:{name:'くちたはかば',floors:8,boss:'dknight',pool:[['bat',1],['skel',1],['wisp',2],['thief',3],['wraith',4],['shadow',6]],
+ grave:{name:'くちたはかば',floors:8,boss:'dknight',bossMul:{hp:4.3,atk:1.25,def:2},bossHeavy:true,pool:[['bat',1],['skel',1],['wisp',2],['thief',3],['wraith',4],['shadow',6]],
   exit:{map:'field2',x:24,y:25},
   bossIntro:['はかばの さいかそう。','ならんだ ひつぎの おくに、くろい よろいが たっている。','デスナイト「……ゆうしゃ。おまえの けはいは、','あの おとこに よく にている」','アルト「あの おとこ？」','デスナイト「30ねんまえ、われを ほうむった けん。','だが われは よばれた。ふかい ふかい ところから」','アルト「だれが よんでいる」','デスナイト「こたえは……おまえの けんで きけ」'],
   bossWin:['デスナイトの よろいが くずれ、なかは からっぽだった。','（よろいの おくから、ひくい こえが した）','「……つぎは みずの ふかみで まっている」','アルト「みず……ハルナの ぬま、か」'],
@@ -9693,8 +9693,9 @@ function dgGen(){
 }
 function mkDgEnemy(p,x,y,boss){const dx=G.dex[p.key]=G.dex[p.key]||{seen:0,kill:0};dx.seen=(dx.seen||0)+1;
  // ダンジョン用バランス：HP2倍・こうげき1.4倍、階ごとに+8%
- const fs=boss?1:1+0.05*(DG.floor-1+(DG_DEPTH[DG.dun]||0));const hp=Math.round(p.hp*(boss?1.5:1.6)*fs),atk=Math.round(p.atk*(boss?1.1:1.2)*fs);
- return {key:p.key,name:p.name,hp,mhp:hp,atk,def:p.def,exp:p.exp,gold:p.gold||0,poison:p.inflict&&p.inflict.type==='poison'?p.inflict.p:0,art:p.art,pal:p.pal,x,y,rx:x,ry:y,awake:boss,boss,hitT:0,lunge:null,erratic:p.key==='bat'};}
+ const BM=(boss&&DUNGEONS[DG.dun].bossMul)||{hp:1.5,atk:1.1,def:1};
+ const fs=boss?1:1+0.05*(DG.floor-1+(DG_DEPTH[DG.dun]||0));const hp=Math.round(p.hp*(boss?BM.hp:1.6)*fs),atk=Math.round(p.atk*(boss?BM.atk:1.2)*fs);
+ return {key:p.key,name:p.name,hp,mhp:hp,atk,def:Math.round(p.def*(boss?BM.def:1)),heavy:boss&&DUNGEONS[DG.dun].bossHeavy,charge:0,exp:p.exp,gold:p.gold||0,poison:p.inflict&&p.inflict.type==='poison'?p.inflict.p:0,art:p.art,pal:p.pal,x,y,rx:x,ry:y,awake:boss,boss,hitT:0,lunge:null,erratic:p.key==='bat'};}
 function dgOcc(x,y){return (DG.px===x&&DG.py===y)||DG.enemies.some(e=>e.x===x&&e.y===y);}
 function dgWalk(x,y){return x>=0&&y>=0&&x<DW&&y<DH&&DG.map[y][x]>0;}
 function dgRoom(x,y){return DG.rooms.find(r=>x>=r.x&&x<r.x+r.w&&y>=r.y&&y<r.y+r.h);}
@@ -9806,6 +9807,10 @@ function dgEnemyAct(e){
  const dist=Math.max(Math.abs(e.x-DG.px),Math.abs(e.y-DG.py));
  e.awake=true;
  if(dist===1&&!(e.x!==DG.px&&e.y!==DG.py&&(!dgWalk(DG.px,e.y)||!dgWalk(e.x,DG.py)))){
+  if(e.heavy){e.charge=(e.charge||0)+1;
+   if(e.charge===3){dlog(e.name+'は おおきく けんを ふりかぶった！');AU.ecue&&AU.ecue();return;}
+   if(e.charge>=4){e.charge=0;const v=Math.round(dmg(e.atk,mDef(m))*1.8);m.hp-=v;dlog(e.name+'の おおぶり！ '+v+'の ダメージ！');AU.ehit&&AU.ehit();
+    e.lunge={dx:DG.px-e.x,dy:DG.py-e.y,t0:performance.now()};DG.hitT=performance.now();dpop(DG.px,DG.py,v,'#ff3050');return;}}
   const v=dmg(e.atk,mDef(m));m.hp-=v;dlog(e.name+'の こうげき！ '+v+'の ダメージ。');
   e.lunge={dx:DG.px-e.x,dy:DG.py-e.y,t0:performance.now()};DG.hitT=performance.now();dpop(DG.px,DG.py,v,'#ff6a7a');
   if(e.poison&&!DG.poison&&Math.random()<e.poison){DG.poison=10;dlog('アルトは どくに おかされた！');}return;}
