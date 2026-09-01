@@ -9934,6 +9934,28 @@ function dgFaceEnemy(){
  const i=adj.indexOf(DG.dir);DG.dir=adj[(i+1)%adj.length];
  const [dx,dy]=D8[DG.dir];const e=DG.enemies.find(e=>e.x===DG.px+dx&&e.y===DG.py+dy);dlog(e.name+'の ほうを むいた。');return true;
 }
+// ---- ごうせい：おなじ そうびを かさねて つよくする ----
+function eqBase(n){return n.replace(/\+\d+$/,'');}
+function eqPlus(n){const m=n.match(/\+(\d+)$/);return m?+m[1]:0;}
+function dgMergeTarget(b,bi){
+ const p=party[0];const base=eqBase(b.name);
+ const cur=b.kind==='w'?p.weapon:p.armor;
+ if(cur&&eqBase(cur.name)===base)return {kind:'equipped',label:'そうびちゅうの '+cur.name};
+ const j=P.equipBag.findIndex((o,i)=>i!==bi&&o.kind===b.kind&&eqBase(o.name)===base);
+ if(j>=0)return {kind:'bag',idx:j,label:'ふくろの '+P.equipBag[j].name};
+ return null;
+}
+function dgMerge(b,bi){
+ const p=party[0];const base=eqBase(b.name);const t=dgMergeTarget(b,bi);if(!t)return;
+ const baseDef=DG_EQUIP.find(e=>e.name===base);
+ const other=t.kind==='equipped'?(b.kind==='w'?p.weapon:p.armor):P.equipBag[t.idx];
+ const plus=eqPlus(b.name)+eqPlus(other.name)+1;
+ const v=(baseDef?baseDef.v:Math.max(b.v,other.v))+plus*2;
+ const merged={name:base+'+'+plus,v};
+ if(t.kind==='equipped'){if(b.kind==='w')p.weapon=merged;else p.armor=merged;P.equipBag.splice(bi,1);}
+ else{P.equipBag[t.idx]={kind:b.kind,name:merged.name,v:merged.v};P.equipBag.splice(bi,1);}
+ dlog(merged.name+'（+'+v+'）に なった！');DSE.equip();
+}
 function dgEquipMenu(sel){
  const p=party[0];
  const items=['Ｅ ぶき：'+(p.weapon?p.weapon.name+'（+'+p.weapon.v+'）':'なし'),'Ｅ よろい：'+(p.armor?p.armor.name+'（+'+p.armor.v+'）':'なし'),'── ふくろ（'+P.equipBag.length+'/12）──'];
@@ -9979,9 +10001,21 @@ function dgMenuConfirm(){
    P.equipBag.push({kind:m.sel===0?'w':'a',name:cur.name,v:cur.v});if(m.sel===0)p.weapon=null;else p.armor=null;
    dlog(cur.name+'を はずした。');dgCloseMenu();dgEndTurn();return;}
   const bi=m.sel-3;const b=P.equipBag[bi];if(!b){dgEquipMenu(m.sel);return;}
-  if(b.kind==='w'){if(p.weapon)P.equipBag.push({kind:'w',name:p.weapon.name,v:p.weapon.v});p.weapon={name:b.name,v:b.v};}
-  else{if(p.armor)P.equipBag.push({kind:'a',name:p.armor.name,v:p.armor.v});p.armor={name:b.name,v:b.v};}
-  P.equipBag.splice(bi,1);dlog(b.name+'を そうびした。');dgCloseMenu();dgEndTurn();return;}
+  const items=['そうびする'];const tgt=dgMergeTarget(b,bi);if(tgt)items.push('ごうせい → '+tgt.label);items.push('すてる','もどる');
+  G.menu={kind:'deqact',sel:0,items,bi,back:m.sel};renderCmd(G.menu,b.name+'（+'+b.v+'）');return;}
+ if(m.kind==='deqact'){
+  const p=party[0];const b=P.equipBag[m.bi];
+  if(it==='もどる'||!b){dgEquipMenu(m.back);return;}
+  if(it==='そうびする'){
+   if(b.kind==='w'){if(p.weapon)P.equipBag.push({kind:'w',name:p.weapon.name,v:p.weapon.v});p.weapon={name:b.name,v:b.v};}
+   else{if(p.armor)P.equipBag.push({kind:'a',name:p.armor.name,v:p.armor.v});p.armor={name:b.name,v:b.v};}
+   P.equipBag.splice(m.bi,1);dlog(b.name+'を そうびした。');dgCloseMenu();dgEndTurn();return;}
+  if(it.startsWith('ごうせい')){dgMerge(b,m.bi);dgCloseMenu();dgEndTurn();return;}
+  if(it==='すてる'){P.equipBag.splice(m.bi,1);
+   if(!DG.items.some(x=>x.x===DG.px&&x.y===DG.py)&&DG.stairs.x!==DG.px){DG.items.push({k:'equip',eq:{kind:b.kind,name:b.name,v:b.v},x:DG.px,y:DG.py});dlog(b.name+'を あしもとに おいた。');}
+   else dlog(b.name+'を すてた。');
+   dgCloseMenu();dgEndTurn();return;}
+ }
  if(m.kind==='dspell'){
   if(it.startsWith('もどる')||it.startsWith('（')){G.menu={kind:'dmain',sel:2,items:['どうぐ','そうび','じゅもん','つよさ','ちず','むき','まつ','とじる']};renderCmd(G.menu,'メニュー');return;}
   const sp=m.sps[m.sel];dgCloseMenu();if(dgCast(sp))dgEndTurn();return;}
