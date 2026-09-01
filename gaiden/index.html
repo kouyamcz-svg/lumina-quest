@@ -9709,9 +9709,9 @@ function dgRoom(x,y){return DG.rooms.find(r=>x>=r.x&&x<r.x+r.w&&y>=r.y&&y<r.y+r.
 function dgReveal(){
  const r=dgRoom(DG.px,DG.py);
  if(r){for(let j=r.y-1;j<=r.y+r.h;j++)for(let i=r.x-1;i<=r.x+r.w;i++)if(DG.seen[j]&&DG.seen[j][i]!==undefined)DG.seen[j][i]=true;}
- for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const y=DG.py+j,x=DG.px+i;if(DG.seen[y]&&DG.seen[y][x]!==undefined)DG.seen[y][x]=true;}
+ for(let j=-2;j<=2;j++)for(let i=-2;i<=2;i++){const y=DG.py+j,x=DG.px+i;if(DG.seen[y]&&DG.seen[y][x]!==undefined)DG.seen[y][x]=true;}
 }
-function dgVis(x,y){const r=dgRoom(DG.px,DG.py);if(r&&x>=r.x-1&&x<r.x+r.w+1&&y>=r.y-1&&y<r.y+r.h+1)return true;return Math.abs(x-DG.px)<=1&&Math.abs(y-DG.py)<=1;}
+function dgVis(x,y){const r=dgRoom(DG.px,DG.py);if(r&&x>=r.x-1&&x<r.x+r.w+1&&y>=r.y-1&&y<r.y+r.h+1)return true;return Math.abs(x-DG.px)<=2&&Math.abs(y-DG.py)<=2;}
 function dlog(t){DG.log.push(t);if(DG.log.length>3)DG.log.shift();}
 function dpop(x,y,text,color){DG.pops.push({x,y,text,color,t0:performance.now()});}
 function dfx(x,y,color){DG.fx.push({x,y,color,t0:performance.now()});}
