@@ -9913,6 +9913,14 @@ function dgFaceEnemy(){
  const i=adj.indexOf(DG.dir);DG.dir=adj[(i+1)%adj.length];
  const [dx,dy]=D8[DG.dir];const e=DG.enemies.find(e=>e.x===DG.px+dx&&e.y===DG.py+dy);dlog(e.name+'の ほうを むいた。');return true;
 }
+function dgEquipMenu(sel){
+ const p=party[0];
+ const items=['Ｅ ぶき：'+(p.weapon?p.weapon.name+'（+'+p.weapon.v+'）':'なし'),'Ｅ よろい：'+(p.armor?p.armor.name+'（+'+p.armor.v+'）':'なし'),'── ふくろ（'+P.equipBag.length+'/12）──'];
+ P.equipBag.forEach(b=>items.push((b.kind==='w'?'剣 ':'鎧 ')+b.name+'（+'+b.v+'）'));
+ if(!P.equipBag.length)items.push('（ふくろは からっぽ）');
+ items.push('もどる');
+ G.menu={kind:'dequip',sel:sel||0,items};renderCmd(G.menu,'そうび（えらぶと つけかえ／はずす）');
+}
 function dgOpenMenu(){
  if(G.mode!=='dungeon')return;
  G.mode='dmenu';G.menu={kind:'dmain',sel:0,items:['どうぐ','そうび','じゅもん','つよさ','ちず','むき','まつ','とじる']};renderCmd(G.menu,'メニュー');
@@ -9930,7 +9938,7 @@ function dgMenuConfirm(){
    subWin.style.display='block';G.menu={kind:'dsub',sel:0,items:['もどる']};return;}
   if(it==='どうぐ'){const items=[];if(P.herbs>0)items.push('やくそう ×'+P.herbs);if(P.breads>0)items.push('パン ×'+P.breads);if(P.waters>0)items.push('まほうのせいすい ×'+P.waters);
    if(!items.length)items.push('（なにも もっていない）');items.push('もどる');G.menu={kind:'ditem',sel:0,items};renderCmd(G.menu,'どうぐ');return;}
-  if(it==='そうび'){const items=P.equipBag.map(b=>(b.kind==='w'?'剣':'鎧')+' '+b.name+'+'+b.v);if(!items.length)items.push('（そうびぶくろは からっぽ）');items.push('もどる');G.menu={kind:'dequip',sel:0,items};renderCmd(G.menu,'そうびする');return;}
+  if(it==='そうび'){dgEquipMenu(0);return;}
   if(it==='じゅもん'){const sps=knownSpells(party[0]);const items=sps.map(s=>s.name+' MP'+s.mp);if(!items.length)items.push('（まだ おぼえていない）');items.push('もどる');G.menu={kind:'dspell',sel:0,items,sps};renderCmd(G.menu,'じゅもん');return;}
  }
  if(m.kind==='dsub'){subWin.style.display='none';G.menu={kind:'dmain',sel:3,items:['どうぐ','そうび','じゅもん','つよさ','ちず','むき','まつ','とじる']};renderCmd(G.menu,'メニュー');return;}
@@ -9942,11 +9950,17 @@ function dgMenuConfirm(){
   else if(it.startsWith('まほうのせいすい')){P.waters--;p.mp=Math.min(p.maxmp,p.mp+30);dlog('まほうのせいすいで MPが かいふくした。');}
   dgCloseMenu();dgEndTurn();return;}
  if(m.kind==='dequip'){
-  if(it.startsWith('もどる')||it.startsWith('（')){G.menu={kind:'dmain',sel:1,items:['どうぐ','そうび','じゅもん','つよさ','ちず','むき','まつ','とじる']};renderCmd(G.menu,'メニュー');return;}
-  const b=P.equipBag[m.sel];const p=party[0];
+  const p=party[0];
+  if(it.startsWith('もどる')){G.menu={kind:'dmain',sel:1,items:['どうぐ','そうび','じゅもん','つよさ','ちず','むき','まつ','とじる']};renderCmd(G.menu,'メニュー');return;}
+  if(m.sel===0||m.sel===1){ // そうびちゅうの ぶき／よろい → はずす
+   const cur=m.sel===0?p.weapon:p.armor;if(!cur){dgEquipMenu(m.sel);return;}
+   if(P.equipBag.length>=12){dlog('そうびぶくろが いっぱいで はずせない。');dgEquipMenu(m.sel);return;}
+   P.equipBag.push({kind:m.sel===0?'w':'a',name:cur.name,v:cur.v});if(m.sel===0)p.weapon=null;else p.armor=null;
+   dlog(cur.name+'を はずした。');dgCloseMenu();dgEndTurn();return;}
+  const bi=m.sel-3;const b=P.equipBag[bi];if(!b){dgEquipMenu(m.sel);return;}
   if(b.kind==='w'){if(p.weapon)P.equipBag.push({kind:'w',name:p.weapon.name,v:p.weapon.v});p.weapon={name:b.name,v:b.v};}
   else{if(p.armor)P.equipBag.push({kind:'a',name:p.armor.name,v:p.armor.v});p.armor={name:b.name,v:b.v};}
-  P.equipBag.splice(m.sel,1);dlog(b.name+'を そうびした。');dgCloseMenu();dgEndTurn();return;}
+  P.equipBag.splice(bi,1);dlog(b.name+'を そうびした。');dgCloseMenu();dgEndTurn();return;}
  if(m.kind==='dspell'){
   if(it.startsWith('もどる')||it.startsWith('（')){G.menu={kind:'dmain',sel:2,items:['どうぐ','そうび','じゅもん','つよさ','ちず','むき','まつ','とじる']};renderCmd(G.menu,'メニュー');return;}
   const sp=m.sps[m.sel];dgCloseMenu();if(dgCast(sp))dgEndTurn();return;}
