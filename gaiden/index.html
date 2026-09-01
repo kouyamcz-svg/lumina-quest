@@ -9660,12 +9660,15 @@ function dgGen(){
  DG.seen=[];for(let y=0;y<DH;y++)DG.seen.push(new Array(DW).fill(false));
  const isBoss=DG.floor===D.floors&&!G.flags['dg_'+DG.dun];
  if(isBoss){
-  const bw=14,bh=10,bx=Math.floor((DW-bw)/2),by=Math.floor((DH-bh)/2);
+  // 縦長の ボスのま：した の いりぐち から、おく（うえ）の ボスへ あるいていく
+  const bw=9,bh=22,bx=Math.floor((DW-bw)/2),by=Math.floor((DH-bh)/2);
   for(let j=by;j<by+bh;j++)for(let i=bx;i<bx+bw;i++)map[j][i]=1;
+  // いりぐしの みじかい つうろ
+  for(let j=by+bh;j<Math.min(DH-1,by+bh+3);j++)map[j][bx+Math.floor(bw/2)]=2;
   rooms.push({x:bx,y:by,w:bw,h:bh});
-  DG.map=map;DG.rooms=rooms;DG.px=bx+1;DG.py=by+Math.floor(bh/2);DG.rx=DG.px;DG.ry=DG.py;DG.dir=6;DG.stairs={x:-1,y:-1};
+  DG.map=map;DG.rooms=rooms;DG.px=bx+Math.floor(bw/2);DG.py=Math.min(DH-2,by+bh+2);DG.rx=DG.px;DG.ry=DG.py;DG.dir=8;DG.stairs={x:-1,y:-1};
   const proto=enemyProto(D.boss);
-  DG.enemies=[mkDgEnemy(proto,bx+bw-3,by+Math.floor(bh/2),true)];DG.items=[];dgReveal();try{BGM.play('boss');}catch(e){}
+  DG.enemies=[mkDgEnemy(proto,bx+Math.floor(bw/2),by+2,true)];DG.enemies[0].wait=true;DG.items=[];dgReveal();try{BGM.play('boss');}catch(e){}
   DG.busy=true;setTimeout(()=>{G.mode='msg';showMsg(D.bossIntro,()=>{G.mode='dungeon';DG.busy=false;});},1400);
   return;
  }
@@ -9813,6 +9816,7 @@ function dgEnemyAct(e){
  const m=party[0];
  const dist=Math.max(Math.abs(e.x-DG.px),Math.abs(e.y-DG.py));
  e.awake=true;
+ if(e.wait){if(dist<=8||dgRoom(DG.px,DG.py)===dgRoom(e.x,e.y)&&dist<=10){e.wait=false;dlog(e.name+'が こちらに きづいた！');}else return;}
  if(dist===1&&!(e.x!==DG.px&&e.y!==DG.py&&(!dgWalk(DG.px,e.y)||!dgWalk(e.x,DG.py)))){
   if(e.heavy){e.charge=(e.charge||0)+1;
    if(e.charge===3){dlog(e.name+'は おおきく けんを ふりかぶった！');AU.ecue&&AU.ecue();return;}
