@@ -9758,7 +9758,7 @@ function dgGainExp(exp){
  while(mem.exp>=expNext(mem)){
   mem.exp-=expNext(mem);mem.lv++;const g=CLASSES[mem.cls].g;
   mem.maxhp+=g.hp;mem.maxmp+=g.mp;mem.batk+=g.atk;mem.bdef+=g.def;if(mem.lv%2===0)mem.agi=(mem.agi||5)+(g.agi||1);
-  mem.hp=Math.min(mem.maxhp,mem.hp+g.hp);mem.mp=Math.min(mem.maxmp,mem.mp+g.mp);
+  mem.hp=Math.min(mem.maxhp,mem.hp+g.hp);mem.mp=mem.maxmp; // レベルアップで MP全回復
   dlog('レベル'+mem.lv+'に あがった！');AU.lvup&&AU.lvup();
   const ns=CLASSES[mem.cls].learns.find(l=>l.lv===mem.lv);if(ns)dlog(SPELL_DEFS[ns.key].name+'を おぼえた！');
  }
@@ -9984,6 +9984,9 @@ cv.addEventListener('pointerdown',ev=>{
  const dirs={0:6,1:3,2:2,3:1,4:4,'-4':4,'-3':7,'-2':8,'-1':9};
  DG.dir=dirs[oct]||6;DSE.turn();
 });
+// ---- 外伝：アルトの MP成長を 3→5 に（既存データも補正）----
+CLASSES.hero.g.mp=5;
+function gdFixMp(){const m=party&&party[0];if(!m||m.cls!=='hero')return;const want=CLASSES.hero.mp+5*(m.lv-1);if(m.maxmp<want){m.mp+=want-m.maxmp;m.maxmp=want;}}
 // ---- 外伝：アルトの じゅもん（追加）----
 Object.assign(SPELL_DEFS,{
  saintnova:{name:'セイントノヴァ',mp:26,type:'dmgall',min:90,max:115,light:true},
@@ -10119,6 +10122,10 @@ function gdShowObjective(){
  cmdWin.style.display='none';statusWin.style.display='none';subWin.style.display='none';G.menu=null;
  G.mode='msg';showMsg(gdObjective(),()=>{G.mode='field';render();});
 }
+
+// ロード・新規開始時に MP成長の補正を当てる
+const _titleConfirm=titleConfirm;titleConfirm=function(){_titleConfirm();try{gdFixMp();}catch(e){}};
+const _loadGame2=loadGame;loadGame=function(k){const r=_loadGame2(k);if(r)try{gdFixMp();}catch(e){}return r;};
 
 // ---------------- 開始 ----------------
 renderTitle();
