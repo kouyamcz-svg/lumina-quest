@@ -9597,7 +9597,7 @@ const DSE={
  full(){AU.tone(220,0.1,'square',0.05);AU.tone(196,0.14,'square',0.05,0.1);},
  turn(){AU.tone(660,0.03,'square',0.03);},
 };
-if(P.breads==null)P.breads=0;
+if(P.breads==null)P.breads=0;if(P.herbs2==null)P.herbs2=0;if(P.waters2==null)P.waters2=0;
 
 // ---- ダンジョン定義（敵はLQ2のENEMIES/MIDBOSSをそのまま使う）----
 const DUNGEONS={
@@ -9695,7 +9695,10 @@ function dgGen(){
  DG.items=[];
  const m=3+drnd(3);
  for(let i=0;i<m;i++){const r=rooms[drnd(rooms.length)];const x=r.x+drnd(r.w),y=r.y+drnd(r.h);if(DG.items.some(it=>it.x===x&&it.y===y))continue;
-  const ks=['herb','herb','bread','bread','water'];DG.items.push({k:ks[drnd(ks.length)],x,y});}
+  const ef2=DG.floor+(DG_DEPTH[DG.dun]||0);
+  let ks=['herb','herb','bread','bread','water'];
+  if(ef2>=4)ks=ks.concat(['herb2']);if(ef2>=6)ks=ks.concat(['herb2','water2']);
+  DG.items.push({k:ks[drnd(ks.length)],x,y});}
  for(let i=0;i<2;i++){const r=rooms[drnd(rooms.length)];const x=r.x+drnd(r.w),y=r.y+drnd(r.h);if(!DG.items.some(it=>it.x===x&&it.y===y))DG.items.push({k:'gold',x,y,v:5+drnd(10)*DG.floor});}
  const ef=DG.floor+(DG_DEPTH[DG.dun]||0);const eq=DG_EQUIP.filter(e=>e.minF<=ef&&e.minF>=ef-3);
  if(eq.length&&(Math.random()<0.6||DG.floor%2===0)){const r=rooms[drnd(rooms.length)];const x=r.x+drnd(r.w),y=r.y+drnd(r.h);if(!DG.items.some(it=>it.x===x&&it.y===y))DG.items.push({k:'equip',eq:eq[drnd(eq.length)],x,y});}
@@ -9731,6 +9734,8 @@ function dgMove(dx,dy){
  if(ii>=0){const it=DG.items[ii];let ok=true;
   if(it.k==='gold'){P.gold+=it.v;dlog(it.v+'ゴールドを ひろった。');DSE.gold();}
   else if(it.k==='herb'){P.herbs++;dlog('やくそうを ひろった。');DSE.pick();}
+  else if(it.k==='herb2'){P.herbs2++;dlog('いやしそうを ひろった。');DSE.pick();}
+  else if(it.k==='water2'){P.waters2++;dlog('けんじゃのせいすいを ひろった。');DSE.pick();}
   else if(it.k==='water'){P.waters++;dlog('まほうのせいすいを ひろった。');DSE.pick();}
   else if(it.k==='bread'){P.breads++;dlog('パンを ひろった。');DSE.pick();}
   else if(it.k==='equip'){if(P.equipBag.length>=12){ok=false;dlog('そうびぶくろが いっぱいだ。');DSE.full();}else{P.equipBag.push({kind:it.eq.kind,name:it.eq.name,v:it.eq.v});dlog(it.eq.name+'を ひろった。');DSE.equip();}}
@@ -9797,7 +9802,7 @@ function dgEndTurn(){
  DG.foodTick++;if(DG.foodTick>=10){DG.foodTick=0;if(DG.food>0)DG.food--;}
  if(DG.poison>0){DG.poison--;m.hp-=2;if(DG.poison===0)dlog('どくが きれた。');}
  if(DG.food<=0){m.hp--;if(m.hp%5===0)dlog('おなかが すいて ちからが でない…');}
- else if(m.hp<m.maxhp&&Math.random()<0.15)m.hp++;
+ else if(m.hp<m.maxhp)m.hp=Math.min(m.maxhp,m.hp+1+Math.floor(m.maxhp/120));
  for(const e of DG.enemies){dgEnemyAct(e);if(m.hp<=0)break;}
  if(m.hp<=0){m.hp=0;dgDie();}
 }
@@ -9914,6 +9919,8 @@ function drawDgItem(it,px,py){
  const c=T/2;
  if(it.k==='gold'){ctx.fillStyle='#ffd76a';ctx.beginPath();ctx.arc(px+c,py+c,5,0,7);ctx.fill();ctx.fillStyle='#b08a20';ctx.fillRect(px+c-1,py+c-3,2,6);}
  else if(it.k==='herb'){ctx.fillStyle='#2f8f3f';ctx.fillRect(px+c-1,py+5,2,14);ctx.fillStyle='#4fd36a';ctx.fillRect(px+c-6,py+8,5,4);ctx.fillRect(px+c+1,py+11,5,4);}
+ else if(it.k==='herb2'){ctx.fillStyle='#2f8f3f';ctx.fillRect(px+c-1,py+4,2,15);ctx.fillStyle='#7affc0';ctx.fillRect(px+c-7,py+6,6,5);ctx.fillRect(px+c+1,py+9,6,5);ctx.fillStyle='#fff';ctx.fillRect(px+c-5,py+7,2,2);}
+ else if(it.k==='water2'){ctx.fillStyle='#ffe480';ctx.fillRect(px+c-2,py+3,4,3);ctx.fillStyle='#8040c0';ctx.fillRect(px+c-4,py+6,8,12);ctx.fillStyle='#c090ff';ctx.fillRect(px+c-3,py+8,2,7);ctx.fillStyle='#fff';ctx.fillRect(px+c+1,py+7,1,3);}
  else if(it.k==='bread'){ctx.fillStyle='#c98a4a';ctx.fillRect(px+5,py+9,14,8);ctx.fillStyle='#e0a860';ctx.fillRect(px+6,py+8,12,2);ctx.fillStyle='#f0cc90';ctx.fillRect(px+8,py+11,2,1);ctx.fillRect(px+13,py+12,2,1);}
  else if(it.k==='water'){ctx.fillStyle='#cfd3ff';ctx.fillRect(px+c-2,py+4,4,3);ctx.fillStyle='#3a60c0';ctx.fillRect(px+c-4,py+7,8,11);ctx.fillStyle='#8ab0ff';ctx.fillRect(px+c-3,py+9,2,6);}
  else if(it.k==='equip'){if(it.eq.kind==='w'){ctx.fillStyle='#dfe4f0';ctx.fillRect(px+c-1,py+3,2,12);ctx.fillStyle='#c98a4a';ctx.fillRect(px+c-5,py+15,10,2);ctx.fillStyle='#6a4a26';ctx.fillRect(px+c-1,py+17,2,4);}
@@ -9983,7 +9990,7 @@ function dgMenuConfirm(){
   if(it==='つよさ'){const p=party[0];subWin.innerHTML='<div class="_hd">アルト Lv'+p.lv+'</div>'+
     ['HP '+p.hp+'/'+p.maxhp,'MP '+p.mp+'/'+p.maxmp,'こうげき '+mAtk(p)+'（'+p.batk+'+'+(p.weapon?p.weapon.v:0)+'）','しゅび '+mDef(p)+'（'+p.bdef+'+'+(p.armor?p.armor.v:0)+'）','ぶき '+(p.weapon?p.weapon.name:'なし'),'よろい '+(p.armor?p.armor.name:'なし'),'けいけんち '+p.exp+'（つぎまで '+(expNext(p)-p.exp)+'）','おなか '+DG.food+'%','ゴールド '+P.gold].map(x=>'<div>'+x+'</div>').join('');
    subWin.style.display='block';G.menu={kind:'dsub',sel:0,items:['もどる']};return;}
-  if(it==='どうぐ'){const items=[];if(P.herbs>0)items.push('やくそう ×'+P.herbs);if(P.breads>0)items.push('パン ×'+P.breads);if(P.waters>0)items.push('まほうのせいすい ×'+P.waters);
+  if(it==='どうぐ'){const items=[];if(P.herbs>0)items.push('やくそう ×'+P.herbs);if(P.herbs2>0)items.push('いやしそう ×'+P.herbs2);if(P.breads>0)items.push('パン ×'+P.breads);if(P.waters>0)items.push('まほうのせいすい ×'+P.waters);if(P.waters2>0)items.push('けんじゃのせいすい ×'+P.waters2);
    if(!items.length)items.push('（なにも もっていない）');items.push('もどる');G.menu={kind:'ditem',sel:0,items};renderCmd(G.menu,'どうぐ');return;}
   if(it==='そうび'){dgEquipMenu(0);return;}
   if(it==='じゅもん'){const sps=knownSpells(party[0]);const items=sps.map(s=>s.name+' MP'+s.mp);if(!items.length)items.push('（まだ おぼえていない）');items.push('もどる');G.menu={kind:'dspell',sel:0,items,sps};renderCmd(G.menu,'じゅもん');return;}
@@ -9993,6 +10000,8 @@ function dgMenuConfirm(){
   if(it.startsWith('もどる')||it.startsWith('（')){G.menu={kind:'dmain',sel:0,items:['どうぐ','そうび','じゅもん','つよさ','ちず','むき','まつ','とじる']};renderCmd(G.menu,'メニュー');return;}
   const p=party[0];
   if(it.startsWith('やくそう')){P.herbs--;p.hp=Math.min(p.maxhp,p.hp+20);dlog('やくそうで HPが 20 かいふくした。');if(DG.poison>0){DG.poison=0;dlog('どくも ぬけた。');}}
+  else if(it.startsWith('いやしそう')){P.herbs2--;const v=Math.max(60,Math.floor(p.maxhp/2));p.hp=Math.min(p.maxhp,p.hp+v);dlog('いやしそうで HPが '+v+' かいふくした。');if(DG.poison>0){DG.poison=0;dlog('どくも ぬけた。');}}
+  else if(it.startsWith('けんじゃのせいすい')){P.waters2--;p.mp=p.maxmp;dlog('けんじゃのせいすいで MPが すべて かいふくした。');}
   else if(it.startsWith('パン')){P.breads--;DG.food=Math.min(100,DG.food+50);dlog('パンを たべた。');}
   else if(it.startsWith('まほうのせいすい')){P.waters--;p.mp=Math.min(p.maxmp,p.mp+30);dlog('まほうのせいすいで MPが かいふくした。');}
   dgCloseMenu();dgEndTurn();return;}
@@ -10093,8 +10102,8 @@ pressB=function(){
 render=function(){if(DG.active){renderDungeon();return;}_render();};
 // コマンド窓のタップ選択（LQ2のrenderCmdはbattle/menu/shop用の分岐なので、dmenuでも決定できるよう補う）
 // セーブにパンを含める
-const _saveGame=saveGame;saveGame=function(k){const r=_saveGame(k);try{if(r){const key=k||SAVE_SLOTS[0];const d=JSON.parse(localStorage.getItem(key));d.breads=P.breads||0;localStorage.setItem(key,JSON.stringify(d));}}catch(e){}return r;};
-const _loadGame=loadGame;loadGame=function(k){const r=_loadGame(k);if(r){try{const key=k||SAVE_SLOTS.find(s=>localStorage.getItem(s));const d=JSON.parse(localStorage.getItem(key));P.breads=d.breads||0;}catch(e){P.breads=0;}}return r;};
+const _saveGame=saveGame;saveGame=function(k){const r=_saveGame(k);try{if(r){const key=k||SAVE_SLOTS[0];const d=JSON.parse(localStorage.getItem(key));d.breads=P.breads||0;d.herbs2=P.herbs2||0;d.waters2=P.waters2||0;localStorage.setItem(key,JSON.stringify(d));}}catch(e){}return r;};
+const _loadGame=loadGame;loadGame=function(k){const r=_loadGame(k);if(r){try{const key=k||SAVE_SLOTS.find(s=>localStorage.getItem(s));const d=JSON.parse(localStorage.getItem(key));P.breads=d.breads||0;P.herbs2=d.herbs2||0;P.waters2=d.waters2||0;}catch(e){P.breads=0;}}return r;};
 
 // ================= 外伝：会話と目的表示 =================
 function gdObjective(){
@@ -10184,9 +10193,15 @@ confirmCmd=function(){
  const m=G.menu;
  if(m&&m.kind==='fmenu'&&m.items[m.sel]==='どうぐ'){
   statusWin.style.display='none';
-  G.menu={kind:'fitem',sel:0,items:['やくそう ×'+P.herbs,'まほうのせいすい ×'+P.waters,'パン ×'+(P.breads||0),'もどる']};renderCmd(G.menu,'どうぐ');return;}
- if(m&&m.kind==='fitem'&&m.sel===2){fieldInfo(['パンは ダンジョンの なかで たべる。','おなかが へると HPが へっていく。']);return;}
- if(m&&m.kind==='fitem'&&m.sel===3){G.menu={kind:'fmenu',sel:1,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','もくてき','とじる']};renderCmd(G.menu,'メニュー');return;}
+  G.menu={kind:'fitem',sel:0,items:['やくそう ×'+P.herbs,'いやしそう ×'+(P.herbs2||0),'まほうのせいすい ×'+P.waters,'けんじゃのせいすい ×'+(P.waters2||0),'パン ×'+(P.breads||0),'もどる']};renderCmd(G.menu,'どうぐ');return;}
+ if(m&&m.kind==='fitem'){
+  const p0=party[0];const back=()=>{G.menu={kind:'fitem',sel:m.sel,items:['やくそう ×'+P.herbs,'いやしそう ×'+(P.herbs2||0),'まほうのせいすい ×'+P.waters,'けんじゃのせいすい ×'+(P.waters2||0),'パン ×'+(P.breads||0),'もどる']};renderCmd(G.menu,'どうぐ');};
+  if(m.sel===0){if(P.herbs<1){fieldInfo('やくそうを もっていない。');return;}P.herbs--;p0.hp=Math.min(p0.maxhp,p0.hp+20);AU.heal();fieldInfo('やくそうで HPが 20 かいふくした。');back();return;}
+  if(m.sel===1){if(!(P.herbs2>0)){fieldInfo('いやしそうを もっていない。');return;}P.herbs2--;const v=Math.max(60,Math.floor(p0.maxhp/2));p0.hp=Math.min(p0.maxhp,p0.hp+v);AU.heal();fieldInfo('いやしそうで HPが '+v+' かいふくした。');back();return;}
+  if(m.sel===2){if(P.waters<1){fieldInfo('まほうのせいすいを もっていない。');return;}P.waters--;p0.mp=Math.min(p0.maxmp,p0.mp+30);AU.heal();fieldInfo('まほうのせいすいで MPが 30 かいふくした。');back();return;}
+  if(m.sel===3){if(!(P.waters2>0)){fieldInfo('けんじゃのせいすいを もっていない。');return;}P.waters2--;p0.mp=p0.maxmp;AU.heal();fieldInfo('けんじゃのせいすいで MPが すべて かいふくした。');back();return;}
+  if(m.sel===4){fieldInfo(['パンは ダンジョンの なかで たべる。','おなかが へると HPが へっていく。']);return;}
+  G.menu={kind:'fmenu',sel:1,items:['つよさ','どうぐ','そうび','じゅもん','ちず','ずかん','だいじなもの','もくてき','とじる']};renderCmd(G.menu,'メニュー');return;}
  _confirmCmd();
 };
 // もくてき：窓を閉じてから読む
