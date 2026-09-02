@@ -10061,8 +10061,14 @@ tryMove=function(dx,dy){
  if(DG.active){if(G.mode==='dungeon')dgMove(dx,dy);return;}
  _tryMove(dx,dy);
  if(G.mode==='field'&&P.map==='dun_cave')enterDungeon('cave');
- if(G.mode==='field'&&P.map==='dun_grave')enterDungeon('grave');
- if(G.mode==='field'&&P.map==='dun_swamp')enterDungeon('swamp');
+ if(G.mode==='field'&&P.map==='dun_grave'){
+  if(G.flags.dg_cave)enterDungeon('grave');
+  else{P.map='field2';P.x=24;P.y=25;G.mode='msg';render();showMsg(['はかいしの あいだに、ふるい かいだんが ある。','……いまは しずかだ。','（まずは トロスむらの ガルドに はなそう）'],()=>{G.mode='field';render();});}
+ }
+ if(G.mode==='field'&&P.map==='dun_swamp'){
+  if(G.flags.dg_grave)enterDungeon('swamp');
+  else{P.map='field5';P.x=5;P.y=11;G.mode='msg';render();showMsg(['あしの おくに、ふかい ぬまが みえる。','みずは しずかで、なにも おこる けはいは ない。','（さきに リベリオン ひがしの「くちたはかば」を','　しらべよう）'],()=>{G.mode='field';render();});}
+ }
 };
 const _moveSel=moveSel;
 moveSel=function(d){if(G.mode==='dmenu'&&G.menu){const m=G.menu;m.sel=(m.sel+d+m.items.length)%m.items.length;if(m.kind==='dsub')return;renderCmd(m);AU.blip&&AU.blip();return;}_moveSel(d);};
