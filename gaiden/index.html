@@ -10057,6 +10057,7 @@ MAPS.dun_cave={name:'もりのどうくつ',enc:false,tiles:["###","#_#","###"],
  const f5=MAPS.field5.tiles;f5[10]=f5[10].substring(0,5)+'§'+f5[10].substring(6);MAPS.field5.warpsXY['5,10']={to:'dun_swamp',x:1,y:1};
  const hr=MAPS.haruna.tiles;
  hr[0]=hr[0].substring(0,9)+'£'+hr[0].substring(10);           // まちの おく ちゅうおうに もん
+ hr[3]=hr[3].substring(0,16)+'P'+hr[3].substring(17);          // みぎおくに しんぷ（きろく）
  delete MAPS.haruna.warpsXY['9,7'];MAPS.haruna.warpsXY['9,0']={to:'field5',x:2,y:5};
  MAPS.field5.warpsXY['1,5']={to:'haruna',x:9,y:1};             // かいどうから はいると もんの まえ
  })();
