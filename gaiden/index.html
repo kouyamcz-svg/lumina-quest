@@ -10144,7 +10144,7 @@ interact=function(){
 const _renderF=render;
 render=function(){
  _renderF();
- const GD_LABELS={field2:[[30,3,'▼もりのどうくつ'],[24,24,'▼くちたはかば']],field5:[[5,10,'▼かわのぬしのぬま']]};
+ const GD_LABELS={field2:[[30,3,'▼もりのどうくつ'],[24,24,'▼くちたはかば']],field5:[[5,10,'▼かわのぬしのぬま']],haruna:[[9,7,'▼でぐち（かいどうへ）']]};
  if(!DG.active&&GD_LABELS[P.map]&&(G.mode==='field'||G.mode==='menu'||G.mode==='msg')){
   const m=MAPS[P.map],mw=m.tiles[0].length,mh=m.tiles.length;
   let camX=Math.max(0,Math.min(mw-VW,P.x-Math.floor(VW/2))),camY=Math.max(0,Math.min(mh-VH,P.y-Math.floor(VH/2)));
