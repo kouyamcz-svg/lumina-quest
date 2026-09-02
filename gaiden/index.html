@@ -10055,7 +10055,11 @@ MAPS.dun_cave={name:'もりのどうくつ',enc:false,tiles:["###","#_#","###"],
  const tt=MAPS.toros.tiles;tt[9]=tt[9].substring(0,22)+'P'+tt[9].substring(23);
  t[24]=t[24].substring(0,24)+'¥'+t[24].substring(25);MAPS.field2.warpsXY['24,24']={to:'dun_grave',x:1,y:1};
  const f5=MAPS.field5.tiles;f5[10]=f5[10].substring(0,5)+'§'+f5[10].substring(6);MAPS.field5.warpsXY['5,10']={to:'dun_swamp',x:1,y:1};
- const hr=MAPS.haruna.tiles;hr[7]=hr[7].substring(0,9)+'£'+hr[7].substring(10);})();
+ const hr=MAPS.haruna.tiles;
+ hr[0]=hr[0].substring(0,9)+'£'+hr[0].substring(10);           // まちの おく ちゅうおうに もん
+ delete MAPS.haruna.warpsXY['9,7'];MAPS.haruna.warpsXY['9,0']={to:'field5',x:2,y:5};
+ MAPS.field5.warpsXY['1,5']={to:'haruna',x:9,y:1};             // かいどうから はいると もんの まえ
+ })();
 MAPS.dun_swamp={name:'かわのぬしの ぬま',enc:false,tiles:["###","#_#","###"],warps:{},warpsXY:{}};
 MAPS.dun_grave={name:'くちたはかば',enc:false,tiles:["###","#_#","###"],warps:{},warpsXY:{}};
 const _tryMove=tryMove;
