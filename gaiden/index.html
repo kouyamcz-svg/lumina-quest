@@ -9779,13 +9779,26 @@ function dgMove(dx,dy){
  dgReveal();dgEndTurn();
 }
 function dgTrap(tr){
- const m=party[0];AU.tone(160,0.08,'square',0.07);AU.tone(120,0.12,'square',0.07,0.07);
- if(tr.t==='poison'){dlog('どくばりの わなだ！');if(!DG.poison){DG.poison=10;dlog('アルトは どくに おかされた！');}}
- else if(tr.t==='rust'){const p=party[0];const eq=Math.random()<0.5?p.weapon:p.armor;
-  if(eq&&eq.v>0){eq.v--;dlog('サビの わなだ！ '+eq.name+'が さびた…（+'+eq.v+'）');}else dlog('サビの わなだ！ …なにも おこらなかった。');}
- else if(tr.t==='warp'){dlog('ワープの わなだ！');for(let t=0;t<200;t++){const r=DG.rooms[drnd(DG.rooms.length)];const x=r.x+drnd(r.w),y=r.y+drnd(r.h);if(!dgOcc(x,y)){DG.px=x;DG.py=y;DG.rx=x;DG.ry=y;break;}}dgReveal();dgHouseCheck();}
- else if(tr.t==='pit'){dlog('おとしあなだ！');m.hp=Math.max(1,m.hp-5);
-  setTimeout(()=>{if(DG.active){DSE.stairs();DG.floor++;dgGen();dlog('B'+DG.floor+'Fに おちた！');dgCard(DUNGEONS[DG.dun].name+'  B'+DG.floor+'F');}},250);}
+ const m=party[0];
+ // ワンクッション：カチッ→「！」→ひと呼吸おいて発動
+ DG.busy=true;
+ AU.tone(2000,0.03,'square',0.06);AU.tone(1500,0.05,'square',0.06,0.04); // ふむ音
+ DG.pops.push({x:tr.x,y:tr.y,text:'！',color:'#ff5a6a',t0:performance.now()});
+ dlog('なにかを ふんだ！');
+ setTimeout(()=>{
+  if(!DG.active)return;
+  AU.tone(160,0.08,'square',0.08);AU.tone(120,0.14,'square',0.08,0.07);
+  DG.flash={color:{poison:'#a040d0',rust:'#d08a30',warp:'#40c0d0',pit:'#202020'}[tr.t],t0:performance.now()};
+  if(tr.t==='pit')DG.shakeT=performance.now();
+  if(tr.t==='poison'){dlog('どくばりの わなだ！');if(!DG.poison){DG.poison=10;dlog('アルトは どくに おかされた！');}DG.hitT=performance.now();}
+  else if(tr.t==='rust'){const eq=Math.random()<0.5?m.weapon:m.armor;
+   if(eq&&eq.v>0){eq.v--;dlog('サビの わなだ！ '+eq.name+'が さびた…（+'+eq.v+'）');}else dlog('サビの わなだ！ …なにも おこらなかった。');}
+  else if(tr.t==='warp'){dlog('ワープの わなだ！');
+   setTimeout(()=>{if(!DG.active)return;for(let t=0;t<200;t++){const r=DG.rooms[drnd(DG.rooms.length)];const x=r.x+drnd(r.w),y=r.y+drnd(r.h);if(!dgOcc(x,y)){DG.px=x;DG.py=y;DG.rx=x;DG.ry=y;break;}}dgReveal();dgHouseCheck();},350);}
+  else if(tr.t==='pit'){dlog('おとしあなだ！');m.hp=Math.max(1,m.hp-5);DG.hitT=performance.now();
+   setTimeout(()=>{if(DG.active){DSE.stairs();DG.floor++;dgGen();dlog('B'+DG.floor+'Fに おちた！');dgCard(DUNGEONS[DG.dun].name+'  B'+DG.floor+'F');}},450);}
+  setTimeout(()=>{DG.busy=false;},450);
+ },550);
 }
 function dgHouseCheck(){
  const r=DG.houseRoom;if(!r)return;
@@ -9955,7 +9968,8 @@ function lungeOff(l,now){if(!l)return [0,0];const p=(now-l.t0)/160;if(p>=1)retur
 function renderDungeon(now){
  now=now||performance.now();const m=party[0];
  ctx.fillStyle='#000';ctx.fillRect(0,0,CW,CH);
- const ox=CW/2-DG.rx*T-T/2,oy=CH/2-DG.ry*T-T/2;
+ let shx=0,shy=0;if(DG.shakeT){const a=now-DG.shakeT;if(a>380)DG.shakeT=0;else{shx=Math.sin(a/16)*4*(1-a/380);shy=Math.cos(a/13)*3*(1-a/380);}}
+ const ox=CW/2-DG.rx*T-T/2+shx,oy=CH/2-DG.ry*T-T/2+shy;
  const x0=Math.max(0,Math.floor(-ox/T)),y0=Math.max(0,Math.floor(-oy/T));
  for(let y=y0;y<Math.min(DH,y0+VH+2);y++)for(let x=x0;x<Math.min(DW,x0+VW+2);x++){
   if(!DG.seen[y][x])continue;const v=DG.map[y][x],vis=dgVis(x,y);const px=ox+x*T,py=oy+y*T;
@@ -9988,6 +10002,7 @@ function renderDungeon(now){
  ctx.fillStyle='#333';ctx.fillRect(CW-120,5,110,8);ctx.fillStyle=DG.poison>0?'#b060e0':m.hp/m.maxhp<0.3?'#e05060':m.hp/m.maxhp<0.6?'#e0b040':'#4fd36a';ctx.fillRect(CW-120,5,110*Math.max(0,m.hp)/m.maxhp,8);
  // ログ
  if(DG.log.length){ctx.fillStyle='rgba(0,0,0,0.65)';ctx.fillRect(0,CH-16*DG.log.length-6,CW,16*DG.log.length+6);ctx.fillStyle='#fff';ctx.font='12px monospace';DG.log.forEach((l,i)=>ctx.fillText(l,8,CH-16*(DG.log.length-i)+8));}
+ if(DG.flash){const a=now-DG.flash.t0;if(a>320)DG.flash=null;else{ctx.globalAlpha=0.45*(1-a/320);ctx.fillStyle=DG.flash.color;ctx.fillRect(0,0,CW,CH);ctx.globalAlpha=1;}}
  if(DG.showMap)drawDgMap();
  drawDgCard(now);
 }
