@@ -10069,7 +10069,7 @@ function dgEquipMenu(sel){
 }
 function dgOpenMenu(){
  if(G.mode!=='dungeon')return;
- G.mode='dmenu';G.menu={kind:'dmain',sel:1,items:['じゅもん','どうぐ','つえ','そうび','つよさ','ちず','むき','まつ','とじる']};renderCmd(G.menu,'メニュー');
+ G.mode='dmenu';G.menu={kind:'dmain',sel:0,items:['じゅもん','どうぐ','つえ','そうび','つよさ','ちず','むき','まつ','とじる']};renderCmd(G.menu,'メニュー');
 }
 function dgCloseMenu(){cmdWin.style.display='none';subWin.style.display='none';G.menu=null;G.mode='dungeon';}
 function dgMenuConfirm(){
