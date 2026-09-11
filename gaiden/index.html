@@ -9617,13 +9617,19 @@ const DUNGEONS={
   bossIntro:['ぬまの さいかそう。あしもとまで みずが きている。','みずが もりあがり、きょだいな かげが あらわれた。','かわのぬし グラード「……また にんげんか。','この みずは われの もの。','しずめ。みずの そこで、ながく ながく ねむれ」','アルト「おまえも よばれたのか」','グラード「よぶ こえは、みずの さらに したから きこえる。','われは こたえた。それだけだ」'],
   bossWin:['グラードは みずの なかへ しずんでいった。','（ぬまの みずが、しずかに ひいていく）','（そこの どろの なかから、こえが した）','「……けんじゃの とうの ちかで、まっている」','アルト「けんじゃの とう……ノルドか」'],
  },
+ tower:{name:'けんじゃのとう',floors:12,boss:'zefphantom',up:true,bossMul:{hp:1,atk:1.9,def:2.5},bossHeavy:true,
+  pool:[['books',1],['flask',1],['zcat',2],['aeye',3],['statue',5],['shadow',7],['madohei',9]],
+  exit:{map:'field',x:30,y:4},
+  bossIntro:['とうの ちょうじょう。ほしぞらが ちかい。','ほんだなの あいだに、ろうじんの すがたが うかびあがる。','けんじゃの まぼろし「……この とうに なにようだ、わかき けんよ」','アルト「じめんの したから こえが する。','おまえも よばれたのか」','まぼろし「われは ゼフが のこした ばんにん。','こえの ぬしを とうの ちかに とじこめて いた。','……だが ふういんは やぶられ、こえは にげた」','アルト「どこへ」','まぼろし「それを しりたければ──われを こえてゆけ」'],
+  bossWin:['まぼろしは しずかに ほどけ、ほしあかりに とけた。','「……こえは みなみへ。せいなる ちの したへ にげた。','イオナの サンクトゥム。その ちかだ。','わかき けんよ、ゼフの かわりに たのむ──」','アルト「イオナ……サンクトゥムの ちか、か」'],
+ },
 };
 const DG_EQUIP=[
- {kind:'w',name:'こんぼう',v:2,minF:1},{kind:'w',name:'どうのつるぎ',v:5,minF:1},{kind:'w',name:'てつのつるぎ',v:8,minF:2},{kind:'w',name:'はがねのけん',v:12,minF:5},{kind:'w',name:'ひかりのつるぎ',v:15,minF:7},{kind:'w',name:'せいなるけん',v:19,minF:10},{kind:'w',name:'りゅうのけん',v:23,minF:13},
- {kind:'a',name:'ぬののふく',v:1,minF:1},{kind:'a',name:'かわのよろい',v:4,minF:1},{kind:'a',name:'くさりかたびら',v:8,minF:2},{kind:'a',name:'まもりのよろい',v:12,minF:5},{kind:'a',name:'ぎんのよろい',v:16,minF:7},{kind:'a',name:'ドラゴンメイル',v:20,minF:10},{kind:'a',name:'せいなるよろい',v:24,minF:13},
+ {kind:'w',name:'こんぼう',v:2,minF:1},{kind:'w',name:'どうのつるぎ',v:5,minF:1},{kind:'w',name:'てつのつるぎ',v:8,minF:2},{kind:'w',name:'はがねのけん',v:12,minF:5},{kind:'w',name:'ひかりのつるぎ',v:15,minF:7},{kind:'w',name:'せいなるけん',v:19,minF:10},{kind:'w',name:'りゅうのけん',v:23,minF:13},{kind:'w',name:'おうじゃのけん',v:28,minF:16},
+ {kind:'a',name:'ぬののふく',v:1,minF:1},{kind:'a',name:'かわのよろい',v:4,minF:1},{kind:'a',name:'くさりかたびら',v:8,minF:2},{kind:'a',name:'まもりのよろい',v:12,minF:5},{kind:'a',name:'ぎんのよろい',v:16,minF:7},{kind:'a',name:'ドラゴンメイル',v:20,minF:10},{kind:'a',name:'せいなるよろい',v:24,minF:13},{kind:'a',name:'しんぴのよろい',v:29,minF:16},
 ];
 // ダンジョンごとの「深さ」補正：2つめ以降は装備テーブルの参照階を進める
-const DG_DEPTH={cave:0,grave:2,swamp:4};
+const DG_DEPTH={cave:0,grave:2,swamp:4,tower:6};
 const WANDS={
  blast:{name:'ふきとばしのつえ',desc:'まえの てきを かべまで ふきとばす'},
  bind:{name:'かなしばりのつえ',desc:'まえの てきを しばらく うごけなくする'},
@@ -9644,7 +9650,7 @@ function enterDungeon(id){
  const D=DUNGEONS[id];if(!D)return;
  DG.active=true;DG.dun=id;DG.floor=1;DG.food=100;DG.foodTick=0;DG.poison=0;DG.log=[];DG.pops=[];DG.fx=[];DG.showMap=false;DG.busy=false;
  G.mode='dungeon';G.trail=[];
- dgGen();dlog(D.name+'に はいった。');dgCard(D.name);
+ dgGen();dlog(D.name+'に はいった。');dgCard(D.name);if(D.up)dlog('うえへ うえへと のぼっていく。');
  try{BGM.play('dungeon');}catch(e){}
 }
 function exitDungeon(msgs,cb){
@@ -9660,6 +9666,7 @@ function dgDie(){
 }
 
 // ---- フロア生成 ----
+function dgFloorLabel(){return DUNGEONS[DG.dun].up?DG.floor+'F':'B'+DG.floor+'F';}
 function dgGen(){
  const D=DUNGEONS[DG.dun];
  const map=[];for(let y=0;y<DH;y++)map.push(new Array(DW).fill(0));
@@ -9771,7 +9778,7 @@ function dgMove(dx,dy){
   else if(it.k==='wand'){if(P.wands.length>=6){ok=false;dlog('つえは 6ぽんまでしか もてない。');DSE.full();}else{P.wands.push({key:it.w.key,ch:it.w.ch});dlog(WANDS[it.w.key].name+'を ひろった。');DSE.equip();}}
   else if(it.k==='equip'){if(P.equipBag.length>=12){ok=false;dlog('そうびぶくろが いっぱいだ。');DSE.full();}else{P.equipBag.push({kind:it.eq.kind,name:it.eq.name,v:it.eq.v});dlog(it.eq.name+'を ひろった。');DSE.equip();}}
   if(ok)DG.items.splice(ii,1);}
- if(DG.stairs.x===nx&&DG.stairs.y===ny)dlog('かいだんが ある。Aボタンで おりる。');
+ if(DG.stairs.x===nx&&DG.stairs.y===ny)dlog('かいだんが ある。Aボタンで '+(DUNGEONS[DG.dun].up?'のぼる。':'おりる。'));
  const tr=DG.traps.find(t=>t.x===nx&&t.y===ny);
  if(tr&&(!tr.seen?Math.random()<0.75:Math.random()<0.4)){tr.seen=true;dgTrap(tr);}
  else if(tr)tr.seen=true;
@@ -9796,7 +9803,7 @@ function dgTrap(tr){
   else if(tr.t==='warp'){dlog('ワープの わなだ！');
    setTimeout(()=>{if(!DG.active)return;for(let t=0;t<200;t++){const r=DG.rooms[drnd(DG.rooms.length)];const x=r.x+drnd(r.w),y=r.y+drnd(r.h);if(!dgOcc(x,y)){DG.px=x;DG.py=y;DG.rx=x;DG.ry=y;break;}}dgReveal();dgHouseCheck();},350);}
   else if(tr.t==='pit'){dlog('おとしあなだ！');m.hp=Math.max(1,m.hp-5);DG.hitT=performance.now();
-   setTimeout(()=>{if(DG.active){DSE.stairs();DG.floor++;dgGen();dlog('B'+DG.floor+'Fに おちた！');dgCard(DUNGEONS[DG.dun].name+'  B'+DG.floor+'F');}},450);}
+   setTimeout(()=>{if(DG.active){DSE.stairs();DG.floor=DUNGEONS[DG.dun].up?Math.max(1,DG.floor-1):DG.floor+1;dgGen();dlog(dgFloorLabel()+'に おちた！');dgCard(DUNGEONS[DG.dun].name+'  '+dgFloorLabel());}},450);}
   setTimeout(()=>{DG.busy=false;},450);
  },550);
 }
@@ -9810,6 +9817,8 @@ function dgHouseCheck(){
 function dgA(){
  if(G.mode!=='dungeon'||DG.busy)return;
  let [dx,dy]=D8[DG.dir];let e=DG.enemies.find(e=>e.x===DG.px+dx&&e.y===DG.py+dy);
+ // かいだんの うえでは、しょうめんに てきが いなければ かいだん优先
+ if(DG.stairs.x===DG.px&&DG.stairs.y===DG.py&&!e){dgDescend();return;}
  if(!e){const order=[8,9,6,3,2,1,4,7];const k=order.find(k=>{const [ax,ay]=D8[k];return DG.enemies.some(o=>o.x===DG.px+ax&&o.y===DG.py+ay);});
   if(k){DG.dir=k;[dx,dy]=D8[k];e=DG.enemies.find(o=>o.x===DG.px+dx&&o.y===DG.py+dy);}}
  if(e){dgAttack(e);dgEndTurn();return;}
@@ -9864,8 +9873,8 @@ function dgGainExp(exp){
  }
 }
 function dgDescend(){
- if(G.flags['dg_'+DG.dun]&&DG.floor>=DUNGEONS[DG.dun].floors){exitDungeon(['さいかそうまで おりた。 どうくつを でる。']);return;}
- DSE.stairs();DG.floor++;dgGen();dlog('B'+DG.floor+'Fに おりた。');dgCard(DUNGEONS[DG.dun].name+'  B'+DG.floor+'F');
+ if(G.flags['dg_'+DG.dun]&&DG.floor>=DUNGEONS[DG.dun].floors){exitDungeon([DUNGEONS[DG.dun].up?'ちょうじょうに ついた。とうを でる。':'さいかそうまで おりた。 そとへ でる。']);return;}
+ DSE.stairs();DG.floor++;dgGen();dlog(dgFloorLabel()+(DUNGEONS[DG.dun].up?'に のぼった。':'に おりた。'));dgCard(DUNGEONS[DG.dun].name+'  '+dgFloorLabel());
 }
 function dgWait(){if(G.mode!=='dungeon'||DG.busy)return;dgEndTurn();}
 function dgSpawn(){
@@ -10189,6 +10198,7 @@ MAPS.dun_cave={name:'もりのどうくつ',enc:false,tiles:["###","#_#","###"],
  const tt=MAPS.toros.tiles;tt[9]=tt[9].substring(0,22)+'P'+tt[9].substring(23);
  t[24]=t[24].substring(0,24)+'¥'+t[24].substring(25);MAPS.field2.warpsXY['24,24']={to:'dun_grave',x:1,y:1};
  const f5=MAPS.field5.tiles;f5[10]=f5[10].substring(0,5)+'§'+f5[10].substring(6);MAPS.field5.warpsXY['5,10']={to:'dun_swamp',x:1,y:1};
+ const fl=MAPS.field.tiles;fl[13]=fl[13].substring(0,19)+')'+fl[13].substring(20);
  const hr=MAPS.haruna.tiles;
  hr[0]=hr[0].substring(0,9)+'£'+hr[0].substring(10);           // まちの おく ちゅうおうに もん
  hr[3]=hr[3].substring(0,16)+'P'+hr[3].substring(17);          // みぎおくに しんぷ（きろく）
@@ -10209,6 +10219,10 @@ tryMove=function(dx,dy){
  if(G.mode==='field'&&P.map==='dun_swamp'){
   if(G.flags.dg_grave)enterDungeon('swamp');
   else{P.map='field5';P.x=5;P.y=11;G.mode='msg';render();showMsg(['あしの おくに、ふかい ぬまが みえる。','みずは しずかで、なにも おこる けはいは ない。','（さきに リベリオン ひがしの「くちたはかば」を','　しらべよう）'],()=>{G.mode='field';render();});}
+ }
+ if(G.mode==='field'&&P.map==='tower'){
+  if(G.flags.dg_swamp)enterDungeon('tower');
+  else{P.map='field';P.x=30;P.y=4;G.mode='msg';render();showMsg(['ふるい とうが そびえている。','とびらは かたく とざされ、びくとも しない。'],()=>{G.mode='field';render();});}
  }
 };
 const _moveSel=moveSel;
@@ -10237,7 +10251,8 @@ function gdObjective(){
  if(!F.gd_report)return ['トロスむらに もどり、','ひろばの ガルドに ほうこくする。'];
  if(!F.dg_grave)return ['みなみかいどうを みなみへ くだり、','おうと リベリオンを でて すこし ひがし。','はかいしの ならぶ「くちたはかば」に もぐる（B8F）。','（リベリオンには やどや・どうぐや・しんぷが ある）'];
  if(!F.dg_swamp)return ['リベリオンの にしもんから にしのかいどうへ。','みなとまち ハルナの てまえ、みちの みなみに','あしの しげる「かわのぬしの ぬま」が ある（B10F）。','（ハルナには やどや・どうぐやが ある）'];
- return ['つぎの いきさき：','ノルドのまちの けんじゃの とう。','（じゅんびちゅう）'];
+ if(!F.dg_tower)return ['ハルナの さんばしの ふねに はなしかけ、','うみを わたって ルミナたいりくへ。','さんばしから きたが ノルドのまち、','かいどうを ひがしに すすんだ おかの うえが','「けんじゃのとう」（12Fまで のぼる）。'];
+ return ['つぎの いきさき：','じゅんれいの むら イオナの サンクトゥムちか。','（じゅんびちゅう）'];
 }
 function gdStage(){const F=G.flags;return F.dg_swamp?3:F.dg_grave?2:F.dg_cave?1:0;}
 const GD_TALK={
@@ -10247,7 +10262,26 @@ const GD_TALK={
   if(!F.gd_report){F.gd_report=true;return ['ガルド「……かえったか。かおを みりゃ わかる。','オオグモを やったな」','アルト「じいさん。あいつは いった。','＜じめんの したで だれかが よんだ＞と」','ガルド「……よぶ、か。','おうと リベリオンの ちかくに、ふるい はかばが ある。','あそこでも しんだ ものが うごきだした、と','つかいが いってきた。','いくなら、みなみの かいどうを くだれ。','リベリオンは かいどうの みなみの はて、','はかばは まちを でて すこし ひがしだ」'];}
   if(!F.dg_grave)return ['ガルド「リベリオンの ひがしの はかばだ。','……むりは するなよ。','おまえが たおれたら、この むらに とどけられる。','それだけは わすれるな」'];
   if(!F.dg_swamp)return ['ガルド「デスナイトを……そうか。','あいつは 30ねんまえ、おれと ロイドが ほうむった。','＜みずの ふかみ＞……ハルナの ぬまだな。','かわの ぬしも、あそこに いた」'];
-  return ['ガルド「かわのぬしまで……。','＜けんじゃの とう＞。ノルドだな。','あそこは ゼフの とうだ。いやな よかんが する。','……きを つけろよ」'];},
+  if(!F.dg_tower)return ['ガルド「かわのぬしまで……ノルドの とうか。','あそこは ゼフの とうだ。いやな よかんが する。','うみを わたるなら ハルナの せんちょうに たのめ。','30ねんまえ、おれは ふなよいで しにかけたがな」'];
+  return ['ガルド「ゼフの まぼろしと あったのか……。','こえの ぬしは イオナの ちかに にげた、か。','サンクトゥムは せいなる ばしょだ。','その したに なにかが いるなんてな……」'];},
+'haruna)':()=>{
+  if(!G.flags.dg_swamp)return ['せんちょう「わるいが いまは ふねを だせねえ。','ぬまの ぬしが あばれてから、うみが しけてるんだ」'];
+  G.mode='msg';
+  showMsg(['せんちょう「よう、ゆうしゃさんかい。','うみの むこう、ルミナたいりくへ？','けんじゃの とうを たずねるって？ ……いい どきょうだ。','のんな！ しゅっこうだ！」'],()=>{
+   ctx.fillStyle='#0a0e1c';ctx.fillRect(0,0,CW,CH);
+   showMsg(['──よる。かんぱんの うえ。','アルトは ひとり、ほしを みあげていた。','（じめんの したで、だれかが よんだ──）','（よぶ こえは、いったい どこまで つづいている）','とおくに、ふるい たいりくの かげが みえてきた──。'],()=>{
+    P.map='field';P.x=19;P.y=12;G.trail=[];updateBGM();G.mode='msg';render();
+    showMsg(['ルミナたいりくの きたの さんばしに とうちゃくした。','ここから きたへ あるけば ノルドのまち。','ひがしの おかの うえに、けんじゃのとうが みえる。','（かえりは さんばしの ふねから）'],()=>{G.mode='field';render();});
+   });
+  });return null;},
+ 'field)':()=>{
+  G.mode='msg';
+  showMsg(['せんちょう「ハルナに もどるかい？ のんな！」'],()=>{
+   ctx.fillStyle='#0a0e1c';ctx.fillRect(0,0,CW,CH);
+   showMsg(['ふねは しずかな うみを わたっていく──。'],()=>{
+    P.map='haruna';P.x=9;P.y=6;G.trail=[];updateBGM();G.mode='field';render();
+   });
+  });return null;},
  'toros%':()=>{const st=gdStage();if(st>=3)return ['もんばん「かわのぬしまで……たいしたもんだ。','ゆっくり やすんでいけよ」'];if(st>=1)return ['もんばん「どうくつの けん、きいたぜ。','みなみへ くだれば おうと リベリオンだ」'];return ['もんばん「もんは あけてあるよ。','ひがしへ ゆけば もりの どうくつ、','みなみへ くだれば おうと リベリオンだ」'];},
  'torosn':()=>{const F=G.flags;const pre=[['むらびと「もりの ほうから へんな おとが するんだ。','じめんの したで、なにかが うごいてる みたいな」'],['おかみさん「アルト、また いくのかい。','ひとりで だいじょうぶ なのかい？」'],['こども「ゆうしゃさま！ ぼくも つれてって！」','アルト「……こんどな」'],['おじいさん「ダンジョンじゃ おなかが へるぞ。','パンを もっていけ。','はらが へると HPが へっていくからな」']];
   const post=[['むらびと「どうくつの まものが きえたって？','さすが アルトだ！」'],['おかみさん「なかまに しらせなくて いいのかい？」','アルト「みんな やっと じぶんの くらしに もどれたんだ。','まきこみたくない」'],['こども「オオグモを たおしたの！？ すごい！」'],['おじいさん「どうくつで ひろった そうびは','ぶくろに はいる。メニューの＜そうび＞で つけかえろ」']];
@@ -10273,7 +10307,8 @@ const GD_TALK={
  'haruna_h1n':()=>gdStage()>=3?['「ゆうべは ひさしぶりに ぬまの ほうが しずかで、','ぐっすり ねむれたよ」']:['「ぬまは 10かい ある らしい。','パンを きらすと かえって こられないよ」'],
  'haruna_h2n':()=>gdStage()>=3?['「グラードは わるい ぬしじゃ なかったんだ。','よばれて、こたえた だけ……か。','よんでいるのは いったい なんなんだろうね」']:['「かわのぬしは 30ねんまえも あそこに いた。','ガルドさんたちが しずめたって きいたよ」'],
  'ionan':()=>['「サンクトゥムの おくで、また あかりが ともった って……」'],
- 'nordn':()=>['「けんじゃの とうに、ひとが はいった あとが ある。','なかで なにが おきているのか、だれも しらない」'],
+ 'nordn':()=>{if(G.flags.dg_tower)return ['「とうの あかりが きえて、まちが しずかに なった。','ありがとう、たびの ひと」'];
+  const L=[['「とうの まどに、よなよな あかりが ともるんだ。','ゼフさまは もう いないのに……」'],['「とうは まちの ひがし、かいどうの つきあたりの おかだ。','12かいまで あるぞ。のぼるなら かくごしな」']];return L[(P.x+P.y)%2];},
  'alban':()=>['「じめんの したから、うなり ごえが する……」'],
  'villagen':()=>['「まものが もどってきたって ほんとうかい」'],
  'rivern':()=>['「かわの みずが、また にごりはじめた」'],
