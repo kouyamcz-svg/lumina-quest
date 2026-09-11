@@ -10329,9 +10329,11 @@ interact=function(){
  if(f){const lines=f();if(lines===null)return;G.mode='msg';showMsg(lines,()=>{G.mode='field';render();});return;}
  _interact();
 };
+const GD_VER='v0901b';
 const _renderF=render;
 render=function(){
  _renderF();
+ if(G.mode==='title'){ctx.font='10px monospace';ctx.fillStyle='#8a8a9a';ctx.textAlign='right';ctx.fillText(GD_VER,CW-8,CH-8);ctx.textAlign='left';}
  const GD_LABELS={field2:[[30,3,'▼もりのどうくつ'],[24,24,'▼くちたはかば']],field5:[[5,10,'▼かわのぬしのぬま']]};
  if(!DG.active&&GD_LABELS[P.map]&&(G.mode==='field'||G.mode==='menu'||G.mode==='msg')){
   const m=MAPS[P.map],mw=m.tiles[0].length,mh=m.tiles.length;
