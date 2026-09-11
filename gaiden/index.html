@@ -9648,7 +9648,7 @@ function enterDungeon(id){
  try{BGM.play('dungeon');}catch(e){}
 }
 function exitDungeon(msgs,cb){
- const D=DUNGEONS[DG.dun];DG.active=false;DG.enemies=[];DG.items=[];
+ const D=DUNGEONS[DG.dun];DG.active=false;DG.enemies=[];DG.items=[];DG.dying=null;DG.fadeOut=0;DG.busy=false;
  P.map=D.exit.map;P.x=D.exit.x;P.y=D.exit.y;P.dir=0;G.trail=[];
  G.mode='msg';render();
  showMsg(msgs&&msgs.length?msgs:['どうくつを でた。'],()=>{G.mode='field';updateBGM();render();if(cb)cb();});
@@ -9830,7 +9830,27 @@ function dgKill(e){
  dlog(e.name+'を たおした！ けいけんち '+Math.round(e.exp*3.5)+'。');
  if(!e.boss&&Math.random()<0.35&&!DG.items.some(it=>it.x===e.x&&it.y===e.y))DG.items.push({k:'gold',x:e.x,y:e.y,v:e.gold||1});
  dgGainExp(e.exp);
- if(e.boss){P.gold+=(e.gold||0);G.flags['dg_'+DG.dun]=true;AU.win&&AU.win();setTimeout(()=>exitDungeon(DUNGEONS[DG.dun].bossWin),700);}
+ if(e.boss){P.gold+=(e.gold||0);G.flags['dg_'+DG.dun]=true;dgBossAfter(e);}
+}
+// ボス撃破後の よいん：BGMが やみ、ボスが くずれ、しずけさの あとに かちどき→かいわ
+function dgBossAfter(e){
+ DG.busy=true;
+ try{BGM.stop&&BGM.stop();}catch(x){}
+ DG.dying={e,t0:performance.now()};
+ // くずれる音
+ [200,170,140,110].forEach((f,i)=>AU.tone(f,0.22,'square',0.06,i*0.22));
+ setTimeout(()=>{if(!DG.active)return;
+  // しずけさ（1.2びょう）→ かちどき
+  setTimeout(()=>{if(!DG.active)return;
+   [523,659,784,1047].forEach((f,i)=>AU.tone(f,i===3?0.5:0.14,'triangle',0.08,i*0.15));
+   setTimeout(()=>{if(!DG.active)return;
+    G.mode='msg';showMsg(DUNGEONS[DG.dun].bossWin,()=>{
+     DG.fadeOut=performance.now();
+     setTimeout(()=>exitDungeon([]),900);
+    });
+   },900);
+  },1200);
+ },1100);
 }
 function dgGainExp(exp){
  exp=Math.round(exp*3.5); // ダンジョン内は 3.5ばい
@@ -9986,6 +10006,14 @@ function renderDungeon(now){
   ctx.drawImage(im,ex+(T-sz)/2,ey+T-sz-1,sz,sz);
   if(hit){ctx.globalCompositeOperation='source-atop';ctx.fillStyle='rgba(255,255,255,'+(0.75*(1-(now-e.hitT)/220))+')';ctx.fillRect(ex-T,ey-T,T*3,T*2);ctx.globalCompositeOperation='source-over';}
   if(e.hp<e.mhp){ctx.fillStyle='#000';ctx.fillRect(ex+3,ey+T-3,T-6,2);ctx.fillStyle='#e04040';ctx.fillRect(ex+3,ey+T-3,(T-6)*Math.max(0,e.hp)/e.mhp,2);}}
+ if(DG.dying){const d=DG.dying;const a=now-d.t0;const L=1100;
+  if(a<L){const e=d.e;const im=enemyArt(e);const sz=T*2;const ex=ox+e.rx*T,ey=oy+e.ry*T;
+   ctx.save();ctx.globalAlpha=1-a/L;
+   const cut=Math.floor((sz)*(a/L));
+   ctx.drawImage(im,0,0,im.width,im.height*(1-a/L),ex+(T-sz)/2+Math.sin(a/40)*2,ey+T-sz-1+cut,sz,sz*(1-a/L));
+   ctx.restore();
+   for(let i=0;i<3;i++){ctx.globalAlpha=0.5*(1-a/L);ctx.fillStyle='#332244';ctx.fillRect(ex+(i*9)%T,ey+T-6-(a/28+i*7)%38,3,3);}ctx.globalAlpha=1;}
+  else DG.dying=null;}
  const [plx,ply]=lungeOff(DG.lunge,now);const phit=now-DG.hitT<220;
  const px=ox+DG.rx*T+plx+(phit?Math.sin((now-DG.hitT)/18)*2:0),py=oy+DG.ry*T+ply;
  if(phit){ctx.fillStyle='rgba(255,80,100,.35)';ctx.fillRect(px+1,py+1,T-2,T-2);}
@@ -10003,6 +10031,7 @@ function renderDungeon(now){
  // ログ
  if(DG.log.length){ctx.fillStyle='rgba(0,0,0,0.65)';ctx.fillRect(0,CH-16*DG.log.length-6,CW,16*DG.log.length+6);ctx.fillStyle='#fff';ctx.font='12px monospace';DG.log.forEach((l,i)=>ctx.fillText(l,8,CH-16*(DG.log.length-i)+8));}
  if(DG.flash){const a=now-DG.flash.t0;if(a>320)DG.flash=null;else{ctx.globalAlpha=0.45*(1-a/320);ctx.fillStyle=DG.flash.color;ctx.fillRect(0,0,CW,CH);ctx.globalAlpha=1;}}
+ if(DG.fadeOut){const a=now-DG.fadeOut;ctx.globalAlpha=Math.min(1,a/800);ctx.fillStyle='#000';ctx.fillRect(0,0,CW,CH);ctx.globalAlpha=1;}
  if(DG.showMap)drawDgMap();
  drawDgCard(now);
 }
