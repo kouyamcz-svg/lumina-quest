@@ -1055,7 +1055,7 @@ function mkMember(cls,lv){
 function mAtk(m){return m.batk+(m.weapon?m.weapon.v:0);}
 function mDef(m){return m.bdef+(m.armor?m.armor.v:0);}
 const TACTICS={manual:'めいれいさせろ',gungan:'ガンガンいこうぜ',inochi:'いのちだいじに'};
-const LV_CAP=50;
+const LV_CAP=99;
 function expNext(m){return m.lv>=LV_CAP?Infinity:m.lv*m.lv*6;}
 function knownSpells(m){return CLASSES[m.cls].learns.filter(l=>m.lv>=l.lv).map(l=>Object.assign({key:l.key},SPELL_DEFS[l.key]));}
 function aliveMembers(){return party.filter(m=>m.hp>0);}
