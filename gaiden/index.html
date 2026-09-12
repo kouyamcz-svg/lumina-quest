@@ -9617,7 +9617,7 @@ const DUNGEONS={
   bossIntro:['ぬまの さいかそう。あしもとまで みずが きている。','みずが もりあがり、きょだいな かげが あらわれた。','かわのぬし グラード「……また にんげんか。','この みずは われの もの。','しずめ。みずの そこで、ながく ながく ねむれ」','アルト「おまえも よばれたのか」','グラード「よぶ こえは、みずの さらに したから きこえる。','われは こたえた。それだけだ」'],
   bossWin:['グラードは みずの なかへ しずんでいった。','（ぬまの みずが、しずかに ひいていく）','（そこの どろの なかから、こえが した）','「……けんじゃの とうの ちかで、まっている」','アルト「けんじゃの とう……ノルドか」'],
  },
- tower:{mono:'アルト「12かい……。うえで まってろ」',name:'けんじゃのとう',floors:12,boss:'zefphantom',up:true,bossMul:{hp:1,atk:1.9,def:2.5},bossHeavy:true,
+ tower:{introScene:'tower_top',mono:'アルト「12かい……。うえで まってろ」',name:'けんじゃのとう',floors:12,boss:'zefphantom',up:true,bossMul:{hp:1,atk:1.9,def:2.5},bossHeavy:true,
   pool:[['books',1],['flask',1],['zcat',2],['aeye',3],['statue',5],['shadow',7],['madohei',9]],
   exit:{map:'field',x:30,y:4},
   bossIntro:['とうの ちょうじょう。ほしぞらが ちかい。','ほんだなの あいだに、ろうじんの すがたが うかびあがる。','けんじゃの まぼろし「……この とうに なにようだ、わかき けんよ」','アルト「じめんの したから こえが する。','おまえも よばれたのか」','まぼろし「われは ゼフが のこした ばんにん。','こえの ぬしを とうの ちかに とじこめて いた。','……だが ふういんは やぶられ、こえは にげた」','アルト「どこへ」','まぼろし「それを しりたければ──われを こえてゆけ」'],
@@ -9635,7 +9635,7 @@ const DUNGEONS={
   bossIntro:['くずれた ぎょくざの ま。','てんじょうは ぬけおち、あかい つきが みえる。','がれきの やまが うごき──くろい つばさが ひろがった。','こくりゅう「グ ル ル……よく きた、にんげん」','アルト「おまえが こえの ぬしか」','こくりゅう「ちがう。われは ばんけんに すぎぬ。','こえは この した──とびらの まで、','うつわを つくりおえようと している」','アルト「うつわ……？」','こくりゅう「しりたくば とおれ。とおれるものなら な！」'],
   bossWin:['こくりゅうは てんに ほえ、くろい きりと なって ちった。','──そのとき、ぎょくざの あとの ゆかが おおきく くだけた。','したから、つめたい かぜと ささやきが ふきあげてくる。','「……モドッタ……ワレハ……モドル……」','アルト「この こえ……まさか、30ねんまえの……','まおう ゾルデア、なのか」','（あなの そこに、さいごの たたかいが まっている）'],
  },
- abyss:{mono:'アルト「……いこう。おわらせに」',name:'とびらのま',floors:13,boss:'boss',bossMul:{hp:8,atk:4,def:4},bossHeavy:true,
+ abyss:{introScene:'abyss_door',winScene:'abyss_calm',mono:'アルト「……いこう。おわらせに」',name:'とびらのま',floors:13,boss:'boss',bossMul:{hp:8,atk:4,def:4},bossHeavy:true,
   bossIntro2:['くろい とびらの あとに、ゾルデアの ざんえいが','ふたたび かたちを なしていく──','「シツコイ ニンゲンダ……！」'],
   bossWin2:['ざんえいは ちりぢりに きえた。','（とびらのまは しずけさを とりもどした）'],
   pool:[['dknight',1],['gargoyle',1],['troll',2],['madohei',3],['shadow',4],['statue',5],['wraith',6]],
@@ -9896,7 +9896,9 @@ function dgBossAfter(e,again){
    [523,659,784,1047].forEach((f,i)=>AU.tone(f,i===3?0.5:0.14,'triangle',0.08,i*0.15));
    setTimeout(()=>{if(!DG.active)return;
     const D2=DUNGEONS[DG.dun];const win=(again&&D2.bossWin2)?D2.bossWin2:D2.bossWin;
+    if(!again&&D2.winScene){G.scene=D2.winScene;render();}
     G.mode='msg';showMsg(win,()=>{
+     G.scene=null;
      DG.fadeOut=performance.now();
      setTimeout(()=>exitDungeon([]),900);
     });
@@ -9959,7 +9961,8 @@ function dgEnemyAct(e){
  if(e.para>0){e.para--;if(e.para===0)dlog(e.name+'の かなしばりが とけた。');return;}
  const dist=Math.max(Math.abs(e.x-DG.px),Math.abs(e.y-DG.py));
  e.awake=true;
- if(e.wait){if(dist<=7){e.wait=false;const D=DUNGEONS[DG.dun];const intro=(G.flags['dg_'+DG.dun]&&D.bossIntro2)?D.bossIntro2:D.bossIntro;DG.busy=true;const startFight=()=>{G.mode='dungeon';DG.busy=false;try{BGM.play('boss');}catch(x){}dlog(e.name+'が おそいかかってきた！');};
+ if(e.wait){if(dist<=7){e.wait=false;const D=DUNGEONS[DG.dun];const intro=(G.flags['dg_'+DG.dun]&&D.bossIntro2)?D.bossIntro2:D.bossIntro;DG.busy=true;const startFight=()=>{G.scene=null;G.mode='dungeon';DG.busy=false;try{BGM.play('boss');}catch(x){}dlog(e.name+'が おそいかかってきた！');};
+  if(D.introScene)G.scene=D.introScene;
   G.mode='msg';showMsg(intro,()=>{
    if(DG.dun==='abyss'&&intro===D.bossIntro){
     G.mode='dmenu';G.menu={kind:'gchoice',sel:0,items:['けんで こたえる','といかける']};renderCmd(G.menu,'どう こたえる？');G.menu.cb=startFight;
@@ -10353,18 +10356,18 @@ const GD_TALK={
   if(!G.flags.dg_swamp)return ['せんちょう「わるいが いまは ふねを だせねえ。','ぬまの ぬしが あばれてから、うみが しけてるんだ」'];
   G.mode='msg';
   showMsg(['せんちょう「よう、ゆうしゃさんかい。','うみの むこう、ルミナたいりくへ？','けんじゃの とうを たずねるって？ ……いい どきょうだ。','のんな！ しゅっこうだ！」'],()=>{
-   ctx.fillStyle='#0a0e1c';ctx.fillRect(0,0,CW,CH);
+   G.scene='boat_night';render();
    showMsg(['──よる。かんぱんの うえ。','アルトは ひとり、ほしを みあげていた。','（じめんの したで、だれかが よんだ──）','（よぶ こえは、いったい どこまで つづいている）','とおくに、ふるい たいりくの かげが みえてきた──。'],()=>{
-    P.map='field';P.x=19;P.y=12;G.trail=[];updateBGM();G.mode='msg';render();
+    G.scene=null;P.map='field';P.x=19;P.y=12;G.trail=[];updateBGM();G.mode='msg';render();
     showMsg(['ルミナたいりくの きたの さんばしに とうちゃくした。','ここから きたへ あるけば ノルドのまち。','ひがしの おかの うえに、けんじゃのとうが みえる。','（かえりは さんばしの ふねから）'],()=>{G.mode='field';render();});
    });
   });return null;},
  'field)':()=>{
   G.mode='msg';
   showMsg(['せんちょう「ハルナに もどるかい？ のんな！」'],()=>{
-   ctx.fillStyle='#0a0e1c';ctx.fillRect(0,0,CW,CH);
+   G.scene='boat_day';render();
    showMsg(['ふねは しずかな うみを わたっていく──。'],()=>{
-    P.map='haruna';P.x=9;P.y=6;G.trail=[];updateBGM();G.mode='field';render();
+    G.scene=null;P.map='haruna';P.x=9;P.y=6;G.trail=[];updateBGM();G.mode='field';render();
    });
   });return null;},
  'toros%':()=>{const st=gdStage();if(G.flags.dg_abyss)return ['もんばん「……えいゆうに けいれい、ってな。','にあわないから やめとくよ。おかえり、アルト」'];if(st>=3)return ['もんばん「かわのぬしまで……たいしたもんだ。','ゆっくり やすんでいけよ」'];if(st>=1)return ['もんばん「どうくつの けん、きいたぜ。','みなみへ くだれば おうと リベリオンだ」'];return ['もんばん「もんは あけてあるよ。','ひがしへ ゆけば もりの どうくつ、','みなみへ くだれば おうと リベリオンだ」'];},
@@ -10446,9 +10449,71 @@ interact=function(){
  if(f){const lines=f();if(lines===null)return;G.mode='msg';showMsg(lines,()=>{G.mode='field';render();});return;}
  _interact();
 };
-const GD_VER='v0901b';
+const GD_VER='v0901c';
+function drawStars(n,hmax){for(let i=0;i<n;i++){const x=(i*97+13)%CW,y=(i*57+29)%hmax;const tw=(i%3===0)&&(Math.floor(performance.now()/400+i)%2===0);ctx.fillStyle=tw?'#fff':'#c8d0ff';ctx.fillRect(x,y,i%4===0?2:1,i%4===0?2:1);}}
+function drawShip(cx,cy,dark){
+ ctx.fillStyle=dark?'#1a1420':'#5a4630';ctx.fillRect(cx-70,cy,140,26);
+ ctx.beginPath();ctx.moveTo(cx-70,cy);ctx.lineTo(cx-92,cy+4);ctx.lineTo(cx-70,cy+26);ctx.fill();
+ ctx.beginPath();ctx.moveTo(cx+70,cy);ctx.lineTo(cx+92,cy+4);ctx.lineTo(cx+70,cy+26);ctx.fill();
+ ctx.fillRect(cx-4,cy-92,8,92);
+ ctx.fillStyle=dark?'#241c30':'#e8dcc0';ctx.beginPath();ctx.moveTo(cx+6,cy-88);ctx.lineTo(cx+52,cy-30);ctx.lineTo(cx+6,cy-30);ctx.fill();
+ ctx.beginPath();ctx.moveTo(cx-6,cy-80);ctx.lineTo(cx-44,cy-30);ctx.lineTo(cx-6,cy-30);ctx.fill();
+}
+function drawAlto(x,y,scale){const s2=scale||1;
+ ctx.fillStyle='#101018';ctx.fillRect(x-3*s2,y-14*s2,6*s2,8*s2);ctx.fillRect(x-4*s2,y-6*s2,8*s2,10*s2);
+ ctx.fillRect(x-4*s2,y+4*s2,3*s2,6*s2);ctx.fillRect(x+1*s2,y+4*s2,3*s2,6*s2);
+ ctx.fillRect(x+4*s2,y-4*s2,2*s2,10*s2);}
+const SCENES={
+ boat_night(){
+  const g=ctx.createLinearGradient(0,0,0,CH);g.addColorStop(0,'#050514');g.addColorStop(0.62,'#141033');g.addColorStop(0.63,'#0a1230');g.addColorStop(1,'#050a1c');
+  ctx.fillStyle=g;ctx.fillRect(0,0,CW,CH);
+  drawStars(70,CH*0.58);
+  ctx.fillStyle='#f4eecb';ctx.beginPath();ctx.arc(CW-110,78,30,0,7);ctx.fill();ctx.fillStyle='#e2dcb2';ctx.beginPath();ctx.arc(CW-118,72,7,0,7);ctx.arc(CW-100,86,5,0,7);ctx.fill();
+  for(let i=0;i<26;i++){ctx.fillStyle='rgba(244,238,203,'+(0.16-i*0.005)+')';ctx.fillRect(CW-120+((i*37)%22)-10,CH*0.63+i*6,26+(i*13)%20,2);}
+  ctx.fillStyle='rgba(255,255,255,0.05)';for(let i=0;i<12;i++)ctx.fillRect((i*83)%CW,CH*0.65+(i*31)%(CH*0.3),40,1);
+  drawShip(CW/2-40,CH*0.62,true);
+  drawAlto(CW/2+40,CH*0.62-8,1.4);
+ },
+ boat_day(){
+  const g=ctx.createLinearGradient(0,0,0,CH);g.addColorStop(0,'#7ec2e8');g.addColorStop(0.6,'#bfe2f2');g.addColorStop(0.62,'#2a6aa8');g.addColorStop(1,'#1c4a80');
+  ctx.fillStyle=g;ctx.fillRect(0,0,CW,CH);
+  ctx.fillStyle='#fff';[[70,60,60],[200,40,80],[360,90,70]].forEach(([x,y,w])=>{ctx.fillRect(x,y,w,10);ctx.fillRect(x+12,y-8,w-24,10);});
+  ctx.fillStyle='rgba(255,255,255,0.5)';for(let i=0;i<16;i++)ctx.fillRect((i*67)%CW,CH*0.64+(i*29)%(CH*0.3),34,2);
+  drawShip(CW/2,CH*0.6,false);
+  drawAlto(CW/2+52,CH*0.6-8,1.4);
+  ctx.fillStyle='#dff2ff';ctx.beginPath();ctx.arc(60,50,18,0,7);ctx.fill();
+ },
+ tower_top(){
+  const g=ctx.createLinearGradient(0,0,0,CH);g.addColorStop(0,'#04040f');g.addColorStop(1,'#141030');
+  ctx.fillStyle=g;ctx.fillRect(0,0,CW,CH);
+  drawStars(110,CH*0.8);
+  ctx.fillStyle='#f4eecb';ctx.beginPath();ctx.arc(90,80,22,0,7);ctx.fill();
+  ctx.fillStyle='#0c0a18';ctx.fillRect(0,CH-70,CW,70);
+  for(let x=0;x<CW;x+=28)ctx.fillRect(x,CH-86,16,16);
+  ctx.fillStyle='#181430';ctx.fillRect(CW/2-8,CH-110,16,24);
+  drawAlto(CW/2-70,CH-84,1.6);
+ },
+ abyss_door(){
+  ctx.fillStyle='#050308';ctx.fillRect(0,0,CW,CH);
+  for(let i=0;i<40;i++){ctx.fillStyle='rgba(120,60,180,'+(0.05+(i%5)*0.01)+')';const a=performance.now()/900+i;ctx.fillRect(CW/2+Math.cos(a)*(60+i*4)-2,CH/2+Math.sin(a)*(30+i*2)-2,3,3);}
+  const g=ctx.createRadialGradient(CW/2,CH/2,10,CW/2,CH/2,180);g.addColorStop(0,'rgba(140,80,200,0.25)');g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,CW,CH);
+  ctx.fillStyle='#0a0612';ctx.fillRect(CW/2-52,CH/2-90,104,180);
+  ctx.strokeStyle='#5a2a8a';ctx.lineWidth=3;ctx.strokeRect(CW/2-52,CH/2-90,104,180);
+  ctx.strokeStyle='#8a50c0';ctx.lineWidth=1;ctx.beginPath();ctx.arc(CW/2,CH/2-20,26,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(CW/2,CH/2-90);ctx.lineTo(CW/2,CH/2+90);ctx.stroke();
+  drawAlto(CW/2-110,CH/2+70,1.8);
+ },
+ abyss_calm(){
+  ctx.fillStyle='#08060c';ctx.fillRect(0,0,CW,CH);
+  for(let i=0;i<8;i++){ctx.fillStyle='rgba(255,246,214,'+(0.05+i*0.008)+')';const x=CW/2-120+i*34;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+50,0);ctx.lineTo(x+120,CH);ctx.lineTo(x+40,CH);ctx.fill();}
+  for(let i=0;i<30;i++){ctx.fillStyle='rgba(255,246,214,0.5)';ctx.fillRect((i*89)%CW,(performance.now()/24+i*47)%CH,1,4);}
+  drawAlto(CW/2,CH*0.72,2);
+ },
+};
+function drawScene(k){const f=SCENES[k];if(f){f();ctx.font='10px monospace';}}
 const _renderF=render;
 render=function(){
+ if(G.scene){drawScene(G.scene);return;}
  _renderF();
  if(G.mode==='title'){ctx.font='10px monospace';ctx.fillStyle='#8a8a9a';ctx.textAlign='right';ctx.fillText(GD_VER,CW-8,CH-8);ctx.textAlign='left';}
  const GD_LABELS={field2:[[30,3,'▼もりのどうくつ'],[24,24,'▼くちたはかば']],field5:[[5,10,'▼かわのぬしのぬま']]};
