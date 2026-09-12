@@ -9636,6 +9636,8 @@ const DUNGEONS={
   bossWin:['こくりゅうは てんに ほえ、くろい きりと なって ちった。','──そのとき、ぎょくざの あとの ゆかが おおきく くだけた。','したから、つめたい かぜと ささやきが ふきあげてくる。','「……モドッタ……ワレハ……モドル……」','アルト「この こえ……まさか、30ねんまえの……','まおう ゾルデア、なのか」','（あなの そこに、さいごの たたかいが まっている）'],
  },
  abyss:{name:'とびらのま',floors:13,boss:'boss',bossMul:{hp:8,atk:4,def:4},bossHeavy:true,
+  bossIntro2:['くろい とびらの あとに、ゾルデアの ざんえいが','ふたたび かたちを なしていく──','「シツコイ ニンゲンダ……！」'],
+  bossWin2:['ざんえいは ちりぢりに きえた。','（とびらのまは しずけさを とりもどした）'],
   pool:[['dknight',1],['gargoyle',1],['troll',2],['madohei',3],['shadow',4],['statue',5],['wraith',6]],
   exit:{map:'field',x:20,y:2},
   bossIntro:['さいかそう。','くうかんの まんなかに、くろい とびらが ういている。','とびらの まえに、かげが こりかたまっていく──','つの。つばさ。30ねんまえの あくむの かたち。','まおうゾルデア「……ヒサシイナ、ニンゲン」','アルト「おまえが、ずっと よんでいたのか」','ゾルデア「ホロビテ ナオ、ワレハ コエ トシテ ノコッタ。','シモベヲ ヨビ、ウツワヲ ツクリ……イマ、ヨミガエル」','アルト「30ねんまえは ロイドさんたちが とめた。','こんどは、おれが とめる」','ゾルデア「デキルカナ？ ヒトリボッチノ ユウシャ ヨ！」'],
@@ -9675,7 +9677,7 @@ function exitDungeon(msgs,cb){
  const D=DUNGEONS[DG.dun];DG.active=false;DG.enemies=[];DG.items=[];DG.dying=null;DG.fadeOut=0;DG.busy=false;
  P.map=D.exit.map;P.x=D.exit.x;P.y=D.exit.y;P.dir=0;G.trail=[];
  G.mode='msg';render();
- showMsg(msgs&&msgs.length?msgs:['どうくつを でた。'],()=>{G.mode='field';updateBGM();render();if(cb)cb();});
+ showMsg(msgs&&msgs.length?msgs:['そとへ でた。'],()=>{G.mode='field';updateBGM();render();if(cb)cb();});
 }
 function dgDie(){
  DG.active=false;DG.enemies=[];DG.items=[];
@@ -9690,7 +9692,7 @@ function dgGen(){
  const map=[];for(let y=0;y<DH;y++)map.push(new Array(DW).fill(0));
  const rooms=[];
  DG.seen=[];for(let y=0;y<DH;y++)DG.seen.push(new Array(DW).fill(false));
- const isBoss=DG.floor===D.floors&&!G.flags['dg_'+DG.dun];
+ const isBoss=DG.floor===D.floors&&(!G.flags['dg_'+DG.dun]||DG.dun==='abyss');
  if(isBoss){
   // 縦長の ボスのま：した の いりぐち から、おく（うえ）の ボスへ あるいていく
   const bw=9,bh=22,bx=Math.floor((DW-bw)/2),by=Math.floor((DH-bh)/2);
@@ -9732,7 +9734,8 @@ function dgGen(){
   if(ef2>=4)ks=ks.concat(['herb2']);if(ef2>=6)ks=ks.concat(['herb2','water2']);
   DG.items.push({k:ks[drnd(ks.length)],x,y});}
  for(let i=0;i<2;i++){const r=rooms[drnd(rooms.length)];const x=r.x+drnd(r.w),y=r.y+drnd(r.h);if(!DG.items.some(it=>it.x===x&&it.y===y))DG.items.push({k:'gold',x,y,v:5+drnd(10)*DG.floor});}
- const ef=DG.floor+(DG_DEPTH[DG.dun]||0);const eq=DG_EQUIP.filter(e=>e.minF<=ef&&e.minF>=ef-3);
+ const ef=DG.floor+(DG_DEPTH[DG.dun]||0);let eq=DG_EQUIP.filter(e=>e.minF<=ef&&e.minF>=ef-3);
+ if(!eq.length){const mx=Math.max(...DG_EQUIP.filter(e=>e.minF<=ef).map(e=>e.minF));eq=DG_EQUIP.filter(e=>e.minF===mx);}
  if(eq.length&&(Math.random()<0.6||DG.floor%2===0)){const r=rooms[drnd(rooms.length)];const x=r.x+drnd(r.w),y=r.y+drnd(r.h);if(!DG.items.some(it=>it.x===x&&it.y===y))DG.items.push({k:'equip',eq:eq[drnd(eq.length)],x,y});}
 
  // わな：2〜4こ（かくれている）
@@ -9857,10 +9860,10 @@ function dgKill(e){
  dlog(e.name+'を たおした！ けいけんち '+Math.round(e.exp*3.5)+'。');
  if(!e.boss&&Math.random()<0.35&&!DG.items.some(it=>it.x===e.x&&it.y===e.y))DG.items.push({k:'gold',x:e.x,y:e.y,v:e.gold||1});
  dgGainExp(e.exp);
- if(e.boss){P.gold+=(e.gold||0);G.flags['dg_'+DG.dun]=true;dgBossAfter(e);}
+ if(e.boss){P.gold+=(e.gold||0);const again=!!G.flags['dg_'+DG.dun];G.flags['dg_'+DG.dun]=true;dgBossAfter(e,again);}
 }
 // ボス撃破後の よいん：BGMが やみ、ボスが くずれ、しずけさの あとに かちどき→かいわ
-function dgBossAfter(e){
+function dgBossAfter(e,again){
  DG.busy=true;
  try{BGM.stop&&BGM.stop();}catch(x){}
  DG.dying={e,t0:performance.now()};
@@ -9871,7 +9874,8 @@ function dgBossAfter(e){
   setTimeout(()=>{if(!DG.active)return;
    [523,659,784,1047].forEach((f,i)=>AU.tone(f,i===3?0.5:0.14,'triangle',0.08,i*0.15));
    setTimeout(()=>{if(!DG.active)return;
-    G.mode='msg';showMsg(DUNGEONS[DG.dun].bossWin,()=>{
+    const D2=DUNGEONS[DG.dun];const win=(again&&D2.bossWin2)?D2.bossWin2:D2.bossWin;
+    G.mode='msg';showMsg(win,()=>{
      DG.fadeOut=performance.now();
      setTimeout(()=>exitDungeon([]),900);
     });
@@ -9934,7 +9938,7 @@ function dgEnemyAct(e){
  if(e.para>0){e.para--;if(e.para===0)dlog(e.name+'の かなしばりが とけた。');return;}
  const dist=Math.max(Math.abs(e.x-DG.px),Math.abs(e.y-DG.py));
  e.awake=true;
- if(e.wait){if(dist<=7){e.wait=false;const D=DUNGEONS[DG.dun];DG.busy=true;G.mode='msg';showMsg(D.bossIntro,()=>{G.mode='dungeon';DG.busy=false;try{BGM.play('boss');}catch(x){}dlog(e.name+'が おそいかかってきた！');});}return;}
+ if(e.wait){if(dist<=7){e.wait=false;const D=DUNGEONS[DG.dun];const intro=(G.flags['dg_'+DG.dun]&&D.bossIntro2)?D.bossIntro2:D.bossIntro;DG.busy=true;G.mode='msg';showMsg(intro,()=>{G.mode='dungeon';DG.busy=false;try{BGM.play('boss');}catch(x){}dlog(e.name+'が おそいかかってきた！');});}return;}
  if(dist===1&&!(e.x!==DG.px&&e.y!==DG.py&&(!dgWalk(DG.px,e.y)||!dgWalk(e.x,DG.py)))){
   if(e.heavy){e.charge=(e.charge||0)+1;
    if(e.charge===3){dlog(e.name+'は おおきく けんを ふりかぶった！');AU.ecue&&AU.ecue();return;}
