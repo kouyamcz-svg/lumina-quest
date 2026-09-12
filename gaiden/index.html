@@ -9637,11 +9637,11 @@ const DUNGEONS={
  },
  abyss:{introScene:'abyss_door',winScene:'abyss_calm',mono:'アルト「……いこう。おわらせに」',name:'とびらのま',floors:13,boss:'boss',bossMul:{hp:8,atk:4,def:4},bossHeavy:true,
   bossIntro2:['くろい とびらの あとに、ゾルデアの ざんえいが','ふたたび かたちを なしていく──','「シツコイ ニンゲンダ……！」'],
-  bossWin2:['ざんえいは ちりぢりに きえた。','（とびらのまは しずけさを とりもどした）'],
+  bossWin2:['しろい かげは ちりぢりに きえた。','（とびらのまは しずけさを とりもどした）'],
   pool:[['dknight',1],['gargoyle',1],['troll',2],['madohei',3],['shadow',4],['statue',5],['wraith',6]],
   exit:{map:'field',x:20,y:2},
   bossIntro:['さいかそう。','くうかんの まんなかに、くろい とびらが ういている。','とびらの まえに、かげが こりかたまっていく──','つの。つばさ。30ねんまえの あくむの かたち。','まおうゾルデア「……ヒサシイナ、ニンゲン」','アルト「おまえが、ずっと よんでいたのか」','ゾルデア「ホロビテ ナオ、ワレハ コエ トシテ ノコッタ。','シモベヲ ヨビ、ウツワヲ ツクリ……イマ、ヨミガエル」','アルト「30ねんまえは ロイドさんたちが とめた。','こんどは、おれが とめる」','ゾルデア「デキルカナ？ ヒトリボッチノ ユウシャ ヨ！」'],
-  bossWin:['ゾルデアの からだが ひかりに つらぬかれ、','とびらも ろとも、おとも なく くずれさった。','ささやきは──もう、どこからも きこえない。','.','しずけさの なか、アルトは けんを おさめた。','アルト「……おわった。こんどこそ、ほんとうに」','.','とおく トロスむらでは、ガルドが そらを みあげていた。','ガルド「……やったな、アルト」','.','こうして、ちいさな むらの わかき ゆうしゃの','ながい ひとりたびは おわりを つげた。','だが──ダンジョンの おくには、まだ','だれも しらない やみが ねむっている という。','.','　　　～ ルミナクエスト外伝　完 ～','.','（クリアありがとう！ つよさは そのまま。','　かくしダンジョンは じゅんびちゅうです）'],
+  bossWin:['よぶものは、こなごなの ひかりに なって ちった。','くろい とびらも ともに、おとも なく くずれさった。','ささやきは──もう、どこからも きこえない。','（ゾルデアも、デスナイトも、グラードも、ダルガも──','　もう だれにも よばれず、しずかに ねむれる）','.','しずけさの なか、アルトは けんを おさめた。','アルト「……おわった。こんどこそ、ほんとうに」','.','とおく トロスむらでは、ガルドが そらを みあげていた。','ガルド「……やったな、アルト」','.','こうして、ちいさな むらの わかき ゆうしゃの','ながい ひとりたびは おわりを つげた。','だが──ダンジョンの おくには、まだ','だれも しらない やみが ねむっている という。','.','　　　～ ルミナクエスト外伝　完 ～','.','（クリアありがとう！ つよさは そのまま。','　かくしダンジョンは じゅんびちゅうです）'],
  },
 };
 const DG_EQUIP=[
@@ -9666,7 +9666,9 @@ const WANDS={
  swap:{name:'ばしょがえのつえ',desc:'まえの てきと ばしょを いれかわる'},
  bolt:{name:'いかずちのつえ',desc:'まえの てきに いかずちを おとす（40）'},
 };
-function enemyProto(k){if(k==='boss'&&typeof BOSS!=='undefined')return BOSS;return ENEMIES.find(e=>e.key===k)||(typeof MIDBOSS!=='undefined'&&MIDBOSS[k])||null;}
+const CALLER={key:'caller',name:'よぶもの',hp:200,atk:30,def:10,agi:10,exp:0,gold:0,
+ get art(){return BOSS.art;},pal:['#e8e4d8','#cfc8b0','#b0a888','#6a5a30','#fff6c8','#2a2438']};
+function enemyProto(k){if(k==='caller')return CALLER;if(k==='boss'&&typeof BOSS!=='undefined')return BOSS;return ENEMIES.find(e=>e.key===k)||(typeof MIDBOSS!=='undefined'&&MIDBOSS[k])||null;}
 const ART_CACHE={};
 function enemyArt(e){
  if(ART_CACHE[e.key])return ART_CACHE[e.key];
@@ -9881,9 +9883,39 @@ function dgKill(e){
  dlog(e.name+'を たおした！ けいけんち '+Math.round(e.exp*3.5)+'。');
  if(!e.boss&&Math.random()<0.35&&!DG.items.some(it=>it.x===e.x&&it.y===e.y))DG.items.push({k:'gold',x:e.x,y:e.y,v:e.gold||1});
  dgGainExp(e.exp);
- if(e.boss){P.gold+=(e.gold||0);const again=!!G.flags['dg_'+DG.dun];G.flags['dg_'+DG.dun]=true;dgBossAfter(e,again);}
+ if(e.boss){
+  if(DG.dun==='abyss'&&e.key==='boss'){dgZoldeaFall(e);return;}
+  // 'caller' は ここを とおって けっちゃく
+  P.gold+=(e.gold||0);const again=!!G.flags['dg_'+DG.dun];G.flags['dg_'+DG.dun]=true;dgBossAfter(e,again);}
 }
 // ボス撃破後の よいん：BGMが やみ、ボスが くずれ、しずけさの あとに かちどき→かいわ
+// ゾルデアは くろまくでは なかった──とびらが ひらき、真のぬしが あらわれる
+function dgZoldeaFall(e){
+ const again=!!G.flags.dg_abyss;
+ DG.busy=true;
+ try{BGM.stop&&BGM.stop();}catch(x){}
+ DG.dying={e,t0:performance.now()};
+ [200,170,140,110].forEach((f,i)=>AU.tone(f,0.22,'square',0.06,i*0.22));
+ const truth=again?['ゾルデア「マタ ワレヲ タオスカ……ヨカロウ。','──キヲツケヨ。ホンモノハ、トビラノ ムコウダ」']
+  :['ゾルデアの ひざが くだけ、くろい きりが ほどけていく。','ゾルデア「……ミゴトダ。ダガ、キケ」','「ワレハ……うつわに なる つもりだった。','こえを、うちがわから おさえこむ ために」','アルト「──なに？」','ゾルデア「30ねんまえも、こんども……','よんでいたのは ワレでは ナイ。','つよがりを ゆるせ。まおうにも、ほこりが ある……」','「とびらが ひらく──にげ……いや。','たのむ、にんげん。アレを……とめて くれ……」','ゾルデアの すがたは、しずかに きえた。'];
+ setTimeout(()=>{if(!DG.active)return;
+  G.mode='msg';G.scene='abyss_door';showMsg(truth,()=>{
+   G.scene=null;G.mode='dungeon';
+   // とびらが ひらく
+   DG.shakeT=performance.now();DG.flash={color:'#8a50c0',t0:performance.now()};
+   [80,95,80,60].forEach((f,i)=>AU.tone(f,0.4,'square',0.08,i*0.35));
+   dlog('くろい とびらが──ひらいていく！');
+   setTimeout(()=>{if(!DG.active)return;
+    const proto=enemyProto('caller');
+    const c=mkDgEnemy(proto,e.x,e.y,true);c.heavy=true;c.wait=false;DG.enemies.push(c);
+    DG.flash={color:'#fff6c8',t0:performance.now()};
+    const intro=again?['とびらの おくから、しろい かげが あふれだした！']
+     :['とびらの おくから、ひかりとも やみとも つかない','しろい なにかが あふれだし──かたちを なした。','ゾルデアと おなじ すがた。だが、いろの ない ぬけがら。','よぶもの「……ヨウヤク……アエタネ……」','よぶもの「ヨンダ……ミンナ コタエタ……','デモ ミンナ……コワレテ……キエタ……」','よぶもの「アナタハ コワレナイデ……','ズット……ズット……イッショ……」','アルト「……おまえは、ずっと ひとりで よんでいたのか。','──だが、みんなを こわした つみは きえない。','ここで おわりだ！」'];
+    G.mode='msg';showMsg(intro,()=>{G.mode='dungeon';DG.busy=false;try{BGM.play('boss');}catch(x){}dlog('よぶものが おそいかかってきた！');});
+   },1200);
+  });
+ },1300);
+}
 function dgBossAfter(e,again){
  DG.busy=true;
  try{BGM.stop&&BGM.stop();}catch(x){}
@@ -10449,7 +10481,7 @@ interact=function(){
  if(f){const lines=f();if(lines===null)return;G.mode='msg';showMsg(lines,()=>{G.mode='field';render();});return;}
  _interact();
 };
-const GD_VER='v0901d';
+const GD_VER='v0901e';
 function drawStars(n,hmax){for(let i=0;i<n;i++){const x=(i*97+13)%CW,y=(i*57+29)%hmax;const tw=(i%3===0)&&(Math.floor(performance.now()/400+i)%2===0);ctx.fillStyle=tw?'#fff':'#c8d0ff';ctx.fillRect(x,y,i%4===0?2:1,i%4===0?2:1);}}
 function drawShip(cx,cy,dark){
  ctx.fillStyle=dark?'#1a1420':'#5a4630';ctx.fillRect(cx-70,cy,140,26);
