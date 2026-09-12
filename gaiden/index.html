@@ -10039,10 +10039,12 @@ function renderDungeon(now){
  for(const p of DG.pops){const a=now-p.t0;const yy=oy+p.y*T-a*0.03;const x=ox+p.x*T+T/2;ctx.globalAlpha=a<450?1:1-(a-450)/250;ctx.strokeStyle='#000';ctx.strokeText(p.text,x,yy);ctx.fillStyle=p.color;ctx.fillText(p.text,x,yy);}
  ctx.globalAlpha=1;ctx.textAlign='left';
  // HUD
- ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,CW,20);
+ ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,CW,36);
  ctx.fillStyle='#fff';ctx.font='11px monospace';
- ctx.fillText(DUNGEONS[DG.dun].name+' B'+DG.floor+'F  Lv'+m.lv+'  HP'+m.hp+'/'+m.maxhp+'  MP'+m.mp+'/'+m.maxmp+'  おなか'+DG.food+'%  '+P.gold+'G'+(DG.poison>0?'  [どく]':''),6,14);
+ ctx.fillText(DUNGEONS[DG.dun].name+' '+dgFloorLabel()+'  Lv'+m.lv+'  '+P.gold+'G'+(DG.poison>0?'  [どく]':''),6,14);
+ ctx.fillText('HP '+m.hp+'/'+m.maxhp+'  MP '+m.mp+'/'+m.maxmp+'  おなか '+DG.food+'%',6,30);
  ctx.fillStyle='#333';ctx.fillRect(CW-120,5,110,8);ctx.fillStyle=DG.poison>0?'#b060e0':m.hp/m.maxhp<0.3?'#e05060':m.hp/m.maxhp<0.6?'#e0b040':'#4fd36a';ctx.fillRect(CW-120,5,110*Math.max(0,m.hp)/m.maxhp,8);
+ ctx.fillStyle='#333';ctx.fillRect(CW-120,21,110,6);ctx.fillStyle=DG.food<=20?'#e05060':'#d0a040';ctx.fillRect(CW-120,21,Math.round(110*Math.max(0,DG.food)/100),6);
  // ログ
  if(DG.log.length){ctx.fillStyle='rgba(0,0,0,0.65)';ctx.fillRect(0,CH-16*DG.log.length-6,CW,16*DG.log.length+6);ctx.fillStyle='#fff';ctx.font='12px monospace';DG.log.forEach((l,i)=>ctx.fillText(l,8,CH-16*(DG.log.length-i)+8));}
  if(DG.flash){const a=now-DG.flash.t0;if(a>320)DG.flash=null;else{ctx.globalAlpha=0.45*(1-a/320);ctx.fillStyle=DG.flash.color;ctx.fillRect(0,0,CW,CH);ctx.globalAlpha=1;}}
