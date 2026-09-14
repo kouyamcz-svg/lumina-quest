@@ -10515,7 +10515,7 @@ interact=function(){
  if(f){const lines=f();if(lines===null)return;G.mode='msg';showMsg(lines,()=>{G.mode='field';render();});return;}
  _interact();
 };
-const GD_VER='v0901g';
+const GD_VER='v0901h';
 function drawStars(n,hmax){for(let i=0;i<n;i++){const x=(i*97+13)%CW,y=(i*57+29)%hmax;const tw=(i%3===0)&&(Math.floor(performance.now()/400+i)%2===0);ctx.fillStyle=tw?'#fff':'#c8d0ff';ctx.fillRect(x,y,i%4===0?2:1,i%4===0?2:1);}}
 function drawShip(cx,cy,dark){
  ctx.fillStyle=dark?'#1a1420':'#5a4630';ctx.fillRect(cx-70,cy,140,26);
@@ -10589,12 +10589,16 @@ SCENES.caller_appear=SCENES.abyss_door;
 const GD_SCENE_CACHE={};
 function sceneImg(k){
  if(!GD_SCENE_IMG[k])return null;
- if(!GD_SCENE_CACHE[k]){const im=new Image();im.src=GD_SCENE_IMG[k];GD_SCENE_CACHE[k]=im;}
+ if(!GD_SCENE_CACHE[k]){const im=new Image();im.onload=()=>{try{if(G&&G.scene)render();}catch(e){}};im.src=GD_SCENE_IMG[k];GD_SCENE_CACHE[k]=im;}
  return GD_SCENE_CACHE[k];
 }
+// 起動時に先読み（表示の瞬間に読み込み待ちを発生させない）
+setTimeout(()=>{try{for(const k in GD_SCENE_IMG)sceneImg(k);callerImg&&callerImg();}catch(e){}},400);
 function drawScene(k){
  const im=sceneImg(k);
  if(im&&im.complete&&im.naturalWidth){ctx.drawImage(im,0,0,CW,CH);return;}
+ // まだ読み込み中：コード絵を出しつつ、少し後に再描画を試みる
+ setTimeout(()=>{try{if(G.scene===k)render();}catch(e){}},120);
  const f=SCENES[k];if(f){f();ctx.font='10px monospace';}
 }
 const _renderF=render;
