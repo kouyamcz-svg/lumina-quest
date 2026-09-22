@@ -10364,6 +10364,7 @@ MAPS.dun_naraku={name:'はてなきならく',enc:false,tiles:["###","#_#","###"
 (function(){const t=MAPS.field2.tiles;t[3]=t[3].substring(0,30)+'$'+t[3].substring(31);MAPS.field2.warpsXY['30,3']={to:'dun_cave',x:1,y:1};
  t[3]=t[3].substring(0,5)+'Ω'+t[3].substring(6);MAPS.field2.warpsXY['5,3']={to:'dun_naraku',x:1,y:1};
  const fl2=MAPS.field.tiles;fl2[14]=fl2[14].substring(0,13)+')'+fl2[14].substring(14);fl2[16]=fl2[16].substring(0,13)+')'+fl2[16].substring(14);
+ const vg=MAPS.village.tiles;vg[1]=vg[1].replace('G','_');
  // トロス村：ひろばの みぎしたに しんぷ（いのる・きろく）
  const tt=MAPS.toros.tiles;tt[9]=tt[9].substring(0,22)+'P'+tt[9].substring(23);
  t[24]=t[24].substring(0,24)+'¥'+t[24].substring(25);MAPS.field2.warpsXY['24,24']={to:'dun_grave',x:1,y:1};
@@ -10570,9 +10571,11 @@ const GD_TALK={
   return ['きょうだんの もんしょうが きざまれた おおとびら。','かたく とざされ、おす ことも ひく ことも できない。','（とびらの むこうは、ふるい しろ……','　いまの アルトに ようは ない）'];},
  'alban':()=>G.flags.dg_naraku?['「ならくの やみを しずめた ゆうしゃさま だって？','この まちに よってくれて こうえいだよ」']:['「きたの うみが しずかに なったと おもったら、','こんどは この たいりくの みずべが さわがしい。','かわの いせきから、こだまが きこえるんだ」'],
  'albaK':()=>['おうさま らしき ひと「よくぞ まいった、たびの けんしよ。','ちかごろ みなみの ちが ざわついておる。','たのめるか、と いいたいところだが──','そなた、もう いきさきは きまっておるようじゃな」'],
- 'villagen':()=>['「ミストむらへ ようこそ。','むかし ここに ゆうめいな せんしが いたんだよ」'],
+ 'villagen':()=>{
+  if(G.flags.dg_naraku)return ['「トロスの わかい けんしが ならくを しずめたって！','ガルドさんの そだてた こだって うわさだよ。','この むらの ほこりが また ふえたね」'];
+  return ['「ここは せんし ガルドの うまれた むらさ。','30ねんまえの えいゆうの ひとりだよ。','いまは トロスむらに いるんだって？','げんきに してるかねえ」'];},
  'villageG':()=>['せんし「おれは ここで むらを まもる。','ならくへ いくなんて、あんた そうとうの つわものだな」'],
- 'villages':()=>['「この むらの ちかくにも、むかしは','おおきな クモが でたらしいよ。こわいねえ」'],
+ 'villages':()=>['ろうふじん「わたしは マリン。ガルドの いもうとよ。','30ねんまえ、もりの どうくつの オオグモに','さらわれた わたしを、あにさんと なかまが たすけてくれたの。','……あなたが たおした オオグモは、あのこの まごすじね。','ふふ。えんが あるのねえ、あなたと うちの きょうだいは」'],
  'sanctum1?':()=>['ふるい しょけんだいに、いしの いたが のこされている。','＜ひかりの うつわ──はくりゅうの ざんこうより うまれし もの。','ねむりの ふかきにて、ばんにん これを まもる＞','アルト「ひかりの うつわ……ばんにん……。','けんじゃの とうの、あの まぼろしの ことか」'],
  'ionan':()=>{
   const dx=[0,-1,1,0][P.dir],dy=[1,0,0,-1][P.dir];const tx=P.x+dx,ty=P.y+dy;
@@ -10602,7 +10605,7 @@ interact=function(){
  if(f){const lines=f();if(lines===null)return;G.mode='msg';showMsg(lines,()=>{G.mode='field';render();});return;}
  _interact();
 };
-const GD_VER='v0901q';
+const GD_VER='v0901r';
 function drawStars(n,hmax){for(let i=0;i<n;i++){const x=(i*97+13)%CW,y=(i*57+29)%hmax;const tw=(i%3===0)&&(Math.floor(performance.now()/400+i)%2===0);ctx.fillStyle=tw?'#fff':'#c8d0ff';ctx.fillRect(x,y,i%4===0?2:1,i%4===0?2:1);}}
 function drawShip(cx,cy,dark){
  ctx.fillStyle=dark?'#1a1420':'#5a4630';ctx.fillRect(cx-70,cy,140,26);
