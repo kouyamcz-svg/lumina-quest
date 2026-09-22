@@ -10092,7 +10092,7 @@ function dgTick(now){
  if(DG.active){const sp=dt*9;DG.rx=approach(DG.rx,DG.px,sp);DG.ry=approach(DG.ry,DG.py,sp);
   for(const e of DG.enemies){e.rx=approach(e.rx,e.x,sp);e.ry=approach(e.ry,e.y,sp);}
   DG.pops=DG.pops.filter(p=>now-p.t0<700);DG.fx=DG.fx.filter(f=>now-f.t0<260);
-  try{renderDungeon(now);}catch(err){console.error(err);}}
+  try{if(typeof G!=='undefined'&&G.scene)drawScene(G.scene);else renderDungeon(now);}catch(err){console.error(err);}}
  requestAnimationFrame(dgTick);
 }
 requestAnimationFrame(dgTick);
@@ -10525,7 +10525,7 @@ interact=function(){
  if(f){const lines=f();if(lines===null)return;G.mode='msg';showMsg(lines,()=>{G.mode='field';render();});return;}
  _interact();
 };
-const GD_VER='v0901k';
+const GD_VER='v0901l';
 function drawStars(n,hmax){for(let i=0;i<n;i++){const x=(i*97+13)%CW,y=(i*57+29)%hmax;const tw=(i%3===0)&&(Math.floor(performance.now()/400+i)%2===0);ctx.fillStyle=tw?'#fff':'#c8d0ff';ctx.fillRect(x,y,i%4===0?2:1,i%4===0?2:1);}}
 function drawShip(cx,cy,dark){
  ctx.fillStyle=dark?'#1a1420':'#5a4630';ctx.fillRect(cx-70,cy,140,26);
