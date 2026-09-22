@@ -9608,41 +9608,41 @@ if(P.breads==null)P.breads=0;if(P.herbs2==null)P.herbs2=0;if(P.waters2==null)P.w
 
 // ---- ダンジョン定義（敵はLQ2のENEMIES/MIDBOSSをそのまま使う）----
 const DUNGEONS={
- cave:{mono:'アルト「……よし。いくか」',name:'もりのどうくつ',floors:5,boss:'spider',bossMul:{hp:2.2,atk:1.4,def:1.5},pool:[['puyo',1],['bat',1],['goblin',2],['thief',4],['flower',4]],
+ cave:{mono:'アルト「……よし。いくか」',name:'もりのどうくつ',floors:5,boss:'spider',bossExp:200,bossMul:{hp:2.2,atk:1.4,def:1.5},pool:[['puyo',1],['bat',1],['goblin',2],['thief',4],['flower',4]],
   exit:{map:'field2',x:30,y:4},
   bossIntro:['どうくつの さいしんぶ。くうきが ねばついている。','オオグモ「……また おまえか、ゆうしゃ。','あのときの いたみ、わすれては いないぞ」','アルト「なぜ もどってきた」','オオグモ「じめんの したで だれかが よんだ。','われらは みな、よびもどされたのだ」'],
   bossWin:['オオグモは くずれおち、くろい もやになって きえた。','アルト「じめんの した……だれかが よんだ、か」','（じめんの おくから、かすかに なにかが うごく けはいが した）'],
  },
- grave:{mono:'アルト「しんだ ものまで よびおこすのか……」',name:'くちたはかば',floors:8,boss:'dknight',bossMul:{hp:6,atk:1.6,def:2.5},bossHeavy:true,pool:[['bat',1],['skel',1],['wisp',2],['thief',3],['wraith',4],['shadow',6]],
+ grave:{mono:'アルト「しんだ ものまで よびおこすのか……」',name:'くちたはかば',floors:8,boss:'dknight',bossExp:500,bossMul:{hp:6,atk:1.6,def:2.5},bossHeavy:true,pool:[['bat',1],['skel',1],['wisp',2],['thief',3],['wraith',4],['shadow',6]],
   exit:{map:'field2',x:24,y:25},
   bossIntro:['はかばの さいかそう。','ならんだ ひつぎの おくに、くろい よろいが たっている。','デスナイト「……ゆうしゃ。おまえの けはいは、','あの おとこに よく にている」','アルト「あの おとこ？」','デスナイト「30ねんまえ、われを ほうむった けん。','だが われは よばれた。ふかい ふかい ところから」','アルト「だれが よんでいる」','デスナイト「こたえは……おまえの けんで きけ」'],
   bossWin:['デスナイトの よろいが くずれ、なかは からっぽだった。','（よろいの おくから、ひくい こえが した）','「……つぎは みずの ふかみで まっている」','アルト「みず……ハルナの ぬま、か」'],
  },
- swamp:{mono:'アルト「みずの そこ、か。……いやな しずけさだ」',name:'かわのぬしの ぬま',floors:10,boss:'nushi',bossMul:{hp:3.8,atk:2.3,def:3},bossHeavy:true,
+ swamp:{mono:'アルト「みずの そこ、か。……いやな しずけさだ」',name:'かわのぬしの ぬま',floors:10,boss:'nushi',bossExp:900,bossMul:{hp:3.8,atk:2.3,def:3},bossHeavy:true,
   pool:[['flower',1],['bat',1],['lizard',2],['wisp',3],['aeye',4],['ogre',6],['troll',8]],
   exit:{map:'field5',x:5,y:11},
   bossIntro:['ぬまの さいかそう。あしもとまで みずが きている。','みずが もりあがり、きょだいな かげが あらわれた。','かわのぬし グラード「……その かお。','こえが ねごとの ように くりかえす かおだ。','……また にんげんか。','この みずは われの もの。','しずめ。みずの そこで、ながく ながく ねむれ」','アルト「おまえも よばれたのか」','グラード「よぶ こえは、みずの さらに したから きこえる。','われは こたえた。それだけだ」'],
   bossWin:['グラードは みずの なかへ しずんでいった。','（ぬまの みずが、しずかに ひいていく）','（そこの どろの なかから、こえが した）','「……けんじゃの とうの ちかで、まっている」','アルト「けんじゃの とう……ノルドか」'],
  },
- tower:{introScene:'tower_top',mono:'アルト「12かい……。うえで まってろ」',name:'けんじゃのとう',floors:12,boss:'zefphantom',up:true,bossMul:{hp:1,atk:1.9,def:2.5},bossHeavy:true,
+ tower:{introScene:'tower_top',mono:'アルト「12かい……。うえで まってろ」',name:'けんじゃのとう',floors:12,boss:'zefphantom',bossExp:1500,up:true,bossMul:{hp:1,atk:1.9,def:2.5},bossHeavy:true,
   pool:[['books',1],['flask',1],['zcat',2],['aeye',3],['statue',5],['shadow',7],['madohei',9]],
   exit:{map:'field',x:30,y:4},
   bossIntro:['とうの ちょうじょう。ほしぞらが ちかい。','ほんだなの あいだに、ろうじんの すがたが うかびあがる。','けんじゃの まぼろし「……この とうに なにようだ、わかき けんよ」','アルト「じめんの したから こえが する。','おまえも よばれたのか」','まぼろし「われは ゼフが のこした ばんにん。','こえの ぬしを とうの ちかに とじこめて いた。','……だが ふういんは やぶられ、こえは にげた」','アルト「どこへ」','まぼろし「それを しりたければ──われを こえてゆけ」'],
   bossWin:['まぼろしは しずかに ほどけ、ほしあかりに とけた。','「……こえは みなみへ。せいなる ちの したへ にげた。','イオナの サンクトゥム。その ちかだ。','わかき けんよ、ゼフの かわりに たのむ──」','アルト「イオナ……サンクトゥムの ちか、か」'],
  },
- sanctum:{mono:'アルト「せいなる ちの したに、なにが いる」',name:'サンクトゥムちか',floors:14,boss:'darga',bossMul:{hp:2.2,atk:2.4,def:2},bossHeavy:true,
+ sanctum:{mono:'アルト「せいなる ちの したに、なにが いる」',name:'サンクトゥムちか',floors:14,boss:'darga',bossExp:2400,bossMul:{hp:2.2,atk:2.4,def:2},bossHeavy:true,
   pool:[['wraith',1],['books',1],['statue',2],['madohei',4],['ogre',5],['lizard',6],['shadow',8],['troll',10]],
   exit:{map:'sanctum1',x:18,y:2},
   bossIntro:['ちかの さいしんぶ。','こわれた さいだんの まえに、よろいの きょかんが ひざまずいている。','やみのしょうぐん ダルガ「……きたか、けんし よ」','アルト「おまえも、よばれたのか」','ダルガ「30ねんまえ、われは まおうと ともに ほろんだ。','だが こえが われを よびもどした。','──たたかえ、と。それだけを ささやきつづける」','「こえは こうも いった。＜つよく そだてよ＞と。','……われらは、といしに すぎぬのか？','なにを とぐための といしなのか──」','アルト「こえの ぬしは どこだ」','ダルガ「しりたくば、われを たおしてゆけ。','それが ぶしの ならい……！」'],
   bossWin:['ダルガの よろいが くだけ、ひかりの つぶに なって きえた。','「……みごと。けんし よ、きけ。','こえは まおうじょうの あとに あつまりつつある。','あるじなき たまが、あたらしい うつわを もとめて──」','ことばは とちゅうで かききえた。','アルト「まおうじょう あと……いそがないと」'],
  },
- castle:{mono:'アルト「ここが すべての はじまりの しろ……」',name:'まおうじょうあと',floors:15,boss:'kokuryu',up:true,bossMul:{hp:3.6,atk:3.2,def:3},bossHeavy:true,
+ castle:{mono:'アルト「ここが すべての はじまりの しろ……」',name:'まおうじょうあと',floors:15,boss:'kokuryu',bossExp:3400,up:true,bossMul:{hp:3.6,atk:3.2,def:3},bossHeavy:true,
   pool:[['shadow',1],['statue',1],['wraith',2],['ogre',3],['madohei',5],['troll',7],['gargoyle',9],['dknight',11]],
   exit:{map:'field',x:20,y:2},
   bossIntro:['くずれた ぎょくざの ま。','てんじょうは ぬけおち、あかい つきが みえる。','がれきの やまが うごき──くろい つばさが ひろがった。','こくりゅう「グ ル ル……よく きた、にんげん」','アルト「おまえが こえの ぬしか」','こくりゅう「ちがう。われは ばんけん──','とおすのは、＜まねかれた きゃく＞だけだ」','アルト「まねかれた……？」','こくりゅう「グ ル ル……まだ きづかぬのか。','デスナイトも、ぬしも、しょうぐんも──','すべては おまえを きたえる といしよ。','こえは 30ねん、まちつづけた。','こわれない うつわを。きずなの ない、ひとりの けんしを」','アルト「──おれ、だと？」','こくりゅう「ゆめで なんど よばれた？','その なは、だれの なだ？」','アルト「……！　ゆめの こえは、おれの なまえを──」','こくりゅう「そうだ。よばれていたのは──おまえだ。','こえは この した、とびらの まで','うつわの かんせいを まっている。','とおりたくば、われを たおせ。','それも また、こえの のぞみ どおりに な！」'],
   bossWin:['こくりゅうは てんに ほえ、くろい きりと なって ちった。','──そのとき、ぎょくざの あとの ゆかが おおきく くだけた。','したから、つめたい かぜと ささやきが ふきあげてくる。','「……モドッタ……ワレハ……モドル……」','アルト「この こえ……まさか、30ねんまえの……','まおう ゾルデア、なのか」','（あなの そこに、さいごの たたかいが まっている）'],
  },
- abyss:{introScene:'abyss_door',winScene:'abyss_calm',mono:'アルト「……いこう。おわらせに」',name:'とびらのま',floors:13,boss:'boss',bossMul:{hp:8,atk:4,def:4},bossHeavy:true,
+ abyss:{introScene:'abyss_door',winScene:'abyss_calm',mono:'アルト「……いこう。おわらせに」',name:'とびらのま',floors:13,boss:'boss',bossExp:4000,bossMul:{hp:8,atk:4,def:4},bossHeavy:true,
   bossIntro2:['くろい とびらの あとに、ゾルデアの ざんえいが','ふたたび かたちを なしていく──','「シツコイ ニンゲンダ……！」'],
   bossWin2:['しろい かげは ちりぢりに きえた。','（とびらのまは しずけさを とりもどした）'],
   pool:[['dknight',1],['gargoyle',1],['troll',2],['madohei',3],['shadow',4],['statue',5],['wraith',6]],
@@ -9650,7 +9650,7 @@ const DUNGEONS={
   bossIntro:['さいかそう。','くうかんの まんなかに、くろい とびらが ういている。','とびらの まえに、かげが こりかたまっていく──','つの。つばさ。30ねんまえの あくむの かたち。','まおうゾルデア「……ヒサシイナ、ニンゲン」','アルト「おまえが、ずっと よんでいたのか」','ゾルデア「ホロビテ ナオ、ワレハ コエ トシテ ノコッタ。','シモベヲ ヨビ、ウツワヲ ツクリ……イマ、ヨミガエル」','アルト「30ねんまえは ロイドさんたちが とめた。','こんどは、おれが とめる」','ゾルデア「デキルカナ？ ヒトリボッチノ ユウシャ ヨ！」'],
   bossWin:['よぶものは、こなごなの ひかりに なって ちった。','くろい とびらも ともに、おとも なく くずれさった。','ささやきは──もう、どこからも きこえない。','（ゾルデアも、デスナイトも、グラードも、ダルガも──','　もう だれにも よばれず、しずかに ねむれる）','.','しずけさの なか、アルトは けんを おさめた。','アルト「……おわった。こんどこそ、ほんとうに」','.','とおく トロスむらでは、ガルドが そらを みあげていた。','ガルド「……やったな、アルト」','.','こうして、ちいさな むらの わかき ゆうしゃの','ながい ひとりたびは おわりを つげた。','だが──ダンジョンの おくには、まだ','だれも しらない やみが ねむっている という。','.','　　　～ ルミナクエスト外伝　完 ～','.','（クリアありがとう！ つよさは そのまま）','（──とおい みなみの みずべで、','　なにかが こだまして いる……）'],
  },
- naraku:{introScene:'naraku_lord',name:'はてなきならく',floors:50,boss:'kaos',bossName:'ならくのぬし',bossMul:{hp:6.3,atk:5.3,def:5.7},bossHeavy:true,
+ naraku:{introScene:'naraku_lord',name:'はてなきならく',floors:50,boss:'kaos',bossExp:15000,bossName:'ならくのぬし',bossMul:{hp:6.3,atk:5.3,def:5.7},bossHeavy:true,
   mono:'アルト「そこの みえない あなだ……。ここが さいごの たびに なりそうだな」',
   pool:[['madohei',1],['troll',1],['shadow',1],['ogre',3],['lizard',5],['wraith',8],['statue',8],['dknight',10],['gargoyle',14]],
   exit:{map:'field2',x:5,y:4},
@@ -9659,14 +9659,14 @@ const DUNGEONS={
   bossIntro2:['ならくの そこで、やみが ふたたび かたちを むすぶ。','ならくのぬし「……また ひかりが とどいたか。よかろう」'],
   bossWin2:['ならくのぬしは しずかに ほどけ、ねむりに ついた。'],
  },
- echo:{name:'こだまのすいてい',floors:20,boss:'caller',bossName:'よぶもののこだま',bossMul:{hp:11,atk:4.6,def:5},bossHeavy:true,
+ echo:{name:'こだまのすいてい',floors:20,boss:'caller',bossExp:5000,bossName:'よぶもののこだま',bossMul:{hp:11,atk:4.6,def:5},bossHeavy:true,
   mono:'アルト「みずの そこから……まだ、なにか きこえる」',
   pool:[['aeye',1],['wraith',1],['lizard',1],['statue',4],['ogre',4],['madohei',7],['shadow',10],['troll',13],['dknight',16]],
   exit:{map:'field',x:27,y:21},
   bossIntro:['B20F──みずびたしの さいかそう。','みなもが ゆれ、しろい なにかが たちのぼった。','よぶものの すがた──だが、めは どこも みていない。','こだま「……アイタイ……アイタイ……」','アルト「……よぶものの、のこりかす か。','おまえの ぬしは もう いない。','こんな ところで、いつまでも ひびいてるな」','こだま「アイタイ……アイタイイイイ！」'],
   bossWin:['こだまは みずに とけ、しずかに きえていった。','みなもに、ひとすじの ながれが うまれている。','──ながれは、ちの そこへ すいこまれていく。','アルト「こだまが ながれて いった さき……。','この たいりくの にしの、ふるい どうくつの したか」','（にしの ふるい どうくつ「めいどうのあな」が ひらいた）'],
  },
- meido:{introScene:'meido_guardian',name:'めいどうのあな',floors:25,boss:'kokuryu',bossName:'めいどのばんにん',bossMul:{hp:8.6,atk:5.2,def:5.5},bossHeavy:true,
+ meido:{introScene:'meido_guardian',name:'めいどうのあな',floors:25,boss:'kokuryu',bossExp:7000,bossName:'めいどのばんにん',bossMul:{hp:8.6,atk:5.2,def:5.5},bossHeavy:true,
   mono:'アルト「ちの そこへの ながれ……。この さきに ならくが ある」',
   pool:[['statue',1],['ogre',1],['madohei',1],['wraith',4],['lizard',4],['shadow',7],['troll',9],['dknight',12],['gargoyle',15]],
   exit:{map:'field',x:6,y:20},
@@ -9846,7 +9846,7 @@ function mkDgEnemy(p,x,y,boss){const dx=G.dex[p.key]=G.dex[p.key]||{seen:0,kill:
  // ガーゴイルなど もとが かたい てきは べつばい率（エリートあつかい）
  const ADJ={gargoyle:{hp:0.5,atk:0.8},dknight:{hp:0.75,atk:0.9}};const aj=(!boss&&ADJ[p.key])||{hp:1,atk:1};
  const hp=Math.round(p.hp*(boss?BM.hp:2.2)*fs*aj.hp),atk=Math.round(p.atk*(boss?BM.atk:1.5)*fs*aj.atk);
- return {key:p.key,name:dispName,hp,mhp:hp,atk,def:Math.round(p.def*(boss?BM.def:1.3)),heavy:boss&&DUNGEONS[DG.dun].bossHeavy,charge:0,exp:p.exp,gold:p.gold||0,poison:p.inflict&&p.inflict.type==='poison'?p.inflict.p:0,art:p.art,pal:p.pal,x,y,rx:x,ry:y,awake:boss,boss,hitT:0,lunge:null,erratic:p.key==='bat'};}
+ return {key:p.key,name:dispName,hp,mhp:hp,atk,def:Math.round(p.def*(boss?BM.def:1.3)),heavy:boss&&DUNGEONS[DG.dun].bossHeavy,charge:0,exp:boss?(DUNGEONS[DG.dun].bossExp||p.exp||0):p.exp,gold:p.gold||0,poison:p.inflict&&p.inflict.type==='poison'?p.inflict.p:0,art:p.art,pal:p.pal,x,y,rx:x,ry:y,awake:boss,boss,hitT:0,lunge:null,erratic:p.key==='bat'};}
 function dgOcc(x,y){return (DG.px===x&&DG.py===y)||DG.enemies.some(e=>e.x===x&&e.y===y);}
 function dgWalk(x,y){return x>=0&&y>=0&&x<DW&&y<DH&&DG.map[y][x]>0;}
 function dgRoom(x,y){return DG.rooms.find(r=>x>=r.x&&x<r.x+r.w&&y>=r.y&&y<r.y+r.h);}
@@ -10274,7 +10274,7 @@ function dgMenuConfirm(){
   if(it==='むき'){dgCloseMenu();if(!dgFaceEnemy())dlog('となりに てきは いない。');return;}
   if(it==='ちず'){DG.showMap=!DG.showMap;dgCloseMenu();return;}
   if(it==='つよさ'){const p=party[0];subWin.innerHTML='<div class="_hd">アルト Lv'+p.lv+'</div>'+
-    ['HP '+p.hp+'/'+p.maxhp,'MP '+p.mp+'/'+p.maxmp,'こうげき '+mAtk(p)+'（'+p.batk+'+'+(p.weapon?p.weapon.v:0)+'）','しゅび '+mDef(p)+'（'+p.bdef+'+'+(p.armor?p.armor.v:0)+'）','ぶき '+(p.weapon?p.weapon.name:'なし'),'よろい '+(p.armor?p.armor.name:'なし'),'けいけんち '+p.exp+'（つぎまで '+(expNext(p)-p.exp)+'）','おなか '+DG.food+'%','ゴールド '+P.gold].map(x=>'<div>'+x+'</div>').join('');
+    ['HP '+p.hp+'/'+p.maxhp,'MP '+p.mp+'/'+p.maxmp,'こうげき '+mAtk(p)+'（'+p.batk+'+'+(p.weapon?p.weapon.v:0)+'）','しゅび '+mDef(p)+'（'+p.bdef+'+'+(p.armor?p.armor.v:0)+'）','ぶき '+(p.weapon?p.weapon.name:'なし'),'よろい '+(p.armor?p.armor.name:'なし'),(isFinite(expNext(p))?'けいけんち '+p.exp+' / '+expNext(p)+'（つぎまで あと'+(expNext(p)-p.exp)+'）':'けいけんち MAX（レベルさいだい）'),'おなか '+DG.food+'%','ゴールド '+P.gold].map(x=>'<div>'+x+'</div>').join('');
    subWin.style.display='block';G.menu={kind:'dsub',sel:0,items:['もどる']};return;}
   if(it==='どうぐ'){const items=[];if(P.herbs>0)items.push('やくそう ×'+P.herbs);if(P.herbs2>0)items.push('いやしそう ×'+P.herbs2);if(P.breads>0)items.push('パン ×'+P.breads);if(P.waters>0)items.push('まほうのせいすい ×'+P.waters);if(P.waters2>0)items.push('けんじゃのせいすい ×'+P.waters2);
    if(!items.length)items.push('（なにも もっていない）');items.push('もどる');G.menu={kind:'ditem',sel:0,items};renderCmd(G.menu,'どうぐ');return;}
@@ -10602,7 +10602,7 @@ interact=function(){
  if(f){const lines=f();if(lines===null)return;G.mode='msg';showMsg(lines,()=>{G.mode='field';render();});return;}
  _interact();
 };
-const GD_VER='v0901p';
+const GD_VER='v0901q';
 function drawStars(n,hmax){for(let i=0;i<n;i++){const x=(i*97+13)%CW,y=(i*57+29)%hmax;const tw=(i%3===0)&&(Math.floor(performance.now()/400+i)%2===0);ctx.fillStyle=tw?'#fff':'#c8d0ff';ctx.fillRect(x,y,i%4===0?2:1,i%4===0?2:1);}}
 function drawShip(cx,cy,dark){
  ctx.fillStyle=dark?'#1a1420':'#5a4630';ctx.fillRect(cx-70,cy,140,26);
