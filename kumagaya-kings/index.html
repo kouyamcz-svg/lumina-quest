@@ -1100,7 +1100,8 @@ const ST={humans:1,players:[],turn:0,rolling:false,busy:false,pickIndex:0,picked
 
 // CPUターンはゆっくり見せる。currentがCPUなら遅延を伸ばす
 function isCPUTurn(){const p=ST.players[ST.turn];return p&&p.isCPU;}
-function pace(ms){return isCPUTurn()?Math.round(ms*2.1):ms;}
+const CPU_WAIT=0.8; // CPU手番の待ち時間の倍率（旧2.1）。演出の表示時間はこれと無関係
+function pace(ms){return isCPUTurn()?Math.round(ms*CPU_WAIT):ms;}
 function laterTurn(ms){setTimeout(nextTurn,pace(ms));}
 
 // ============ セットアップ ============
@@ -1535,7 +1536,7 @@ function afterSpecial(p){
 }
 function continueTurn(p){
   const rollBtn=document.getElementById('roll-btn');
-  if(p.isCPU){document.getElementById('turn-hint').textContent='思考中…';rollBtn.disabled=true;hideItemBtn();cpuMaybeUseItem(p);setTimeout(doRoll,1400);}
+  if(p.isCPU){document.getElementById('turn-hint').textContent='思考中…';rollBtn.disabled=true;hideItemBtn();cpuMaybeUseItem(p);setTimeout(doRoll,500);}
   else{document.getElementById('turn-hint').textContent='サイコロを振れ';rollBtn.disabled=false;updateItemBtn(p);}
 }
 // 組員イベントの発生
@@ -1796,7 +1797,7 @@ function renderDice(v){const layouts={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2
 function movePlayer(p,steps){
   ST.busy=true;
   let remaining=steps;
-  const stepMs=()=>isCPUTurn()?420:260;
+  const stepMs=()=>isCPUTurn()?200:260;
   const step=()=>{
     if(remaining<=0){arriveTile(p);return;}
     const node=NODES[p.pos];
@@ -2619,7 +2620,7 @@ function showCharaPopup(ev,p,choiceLabel,done){
   modal.classList.add('active');
   log(`<span class="dim">${ev.icon} ${ev.title} ── ${p.name}は「${choiceLabel}」</span>`);
   // 少し見せてから自動で閉じる
-  setTimeout(()=>{modal.classList.remove('active');done&&done();},pace(1700));
+  setTimeout(()=>{modal.classList.remove('active');done&&done();},3570);
 }
 
 // 汎用モーダル
