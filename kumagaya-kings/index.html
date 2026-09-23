@@ -262,8 +262,10 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
         <span class="dim">🍸星川・筑波・弥生の歓楽街を巡り、🐷夜の街を仕切り、🏺裏ルートの骨董に賭けろ。国道17号の彼方、最北の頂点を目指せ。</span>
       </div>
     </div>
+    <div id="continue-box"></div>
     <button class="btn" style="width:100%;font-size:19px;padding:16px;" onclick="startGame()">夜の街へ繰り出す</button>
     <div class="spacer"></div>
+    <div id="records-box"></div>
     <div class="center"><button class="btn ghost sm" onclick="showRules()">ルール詳細</button></div>
   </div>
 
@@ -309,6 +311,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     </div>
     <div id="epilogue"></div>
     <div id="antique-reveal"></div>
+    <div id="record-box"></div>
     <div id="rank-list"></div>
     <div class="spacer"></div>
     <button class="btn gold" style="width:100%;font-size:18px;padding:15px;" onclick="location.reload()">もう一度 夜の街へ</button>
@@ -1128,7 +1131,7 @@ function startGame(){
   const all=[...ST.picked];while(all.length<4)all.push(avail.shift());
   ST.players=all.map((cid,i)=>{const ch=CHARS.find(c=>c.id===cid);return{id:i,name:ch.name,color:ch.color,ability:ch.ability,aName:ch.aName,money:100000,pos:0,isCPU:i>=ST.humans,skip:0,fin:false,estates:[],loot:[],cashedLoot:0,lootCollection:{},heat:0,items:[],antiques:[],finishRank:0,
     earned:{heist:0,estate:0,gamble:0,antique:0,versus:0,money:0,kumi:0},rivalry:{},debts:[],motive:null,
-    members:3,kumiName:ch.name+pick(KUMI_SUFFIX),peakMembers:3,territories:0,roles:{},_rankLv:1,_specialCooldown:0};});
+    members:3,kumiName:ch.name+pick(KUMI_SUFFIX),peakMembers:3,territories:0,roles:{},_rankLv:1,_specialCooldown:0,rel:{},_relFlags:{}};});
   // ① 動機カードを配る（重複しないように）
   const motivePool=[...MOTIVES].sort(()=>Math.random()-0.5);
   ST.players.forEach((p,i)=>{p.motive=motivePool[i%motivePool.length];});
@@ -1464,13 +1467,14 @@ function burstConfetti(n){
     setTimeout(()=>c.remove(),3800);
   }
 }
-function gain(p,amt,reason){if(p._charaBonus&&p._charaBonus>1){amt=Math.round(amt*p._charaBonus/1000)*1000;}p.money+=amt;if(p._lastGamble){p.earned.gamble+=amt;p._lastGamble=false;}log(`<b style="color:${p.color}">${p.name}</b> ${reason} <span class="g">+¥${fmt(amt)}</span>`);toast('+¥'+fmt(amt),'pos');floatMoney(p,amt,true);renderHUD();}
+function gain(p,amt,reason){if(p._doubleNext&&amt>0){p._doubleNext=false;amt=amt*2;log(`🕶️ <span class="y">サングラスの効果で稼ぎが2倍！</span>`);}if(p._charaBonus&&p._charaBonus>1){amt=Math.round(amt*p._charaBonus/1000)*1000;}p.money+=amt;if(p._lastGamble){p.earned.gamble+=amt;p._lastGamble=false;}log(`<b style="color:${p.color}">${p.name}</b> ${reason} <span class="g">+¥${fmt(amt)}</span>`);toast('+¥'+fmt(amt),'pos');floatMoney(p,amt,true);renderHUD();}
 function lose(p,amt,reason){p.money-=amt;if(p._lastGamble)p._lastGamble=false;log(`<b style="color:${p.color}">${p.name}</b> ${reason} <span class="r">-¥${fmt(amt)}</span>`);toast('-¥'+fmt(amt),'neg');floatMoney(p,amt,false);renderHUD();}
 function stealAll(actor,amt){ST.players.forEach(p=>{if(p!==actor){p.money-=amt;actor.money+=amt;}});log(`<b style="color:${actor.color}">${actor.name}</b> が全員から <span class="y">¥${fmt(amt)}</span> ずつ奪った`);renderHUD();}
 let toastTimer=null;function toast(t,c){const e=document.getElementById('toast');e.textContent=t;e.className='toast show '+c;clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.className='toast '+c,1100);}
 
 // ============ ターン ============
 function beginTurn(){
+  saveProgress(); // ① 手番の頭で自動保存（途中で閉じてもここから再開）
   const p=ST.players[ST.turn];renderHUD();
   document.getElementById('turn-name').textContent=p.name+(p.isCPU?'（CPU）':'（あなた）');
   if(p.fin){laterTurn(150);return;}
@@ -1600,12 +1604,25 @@ function useItem(p,key){
   else if(key==='boost'){p._extraRoll=true;log(`🚀 <b style="color:${p.color}">${p.name}</b> はニトロを使った（このターン後もう一度動ける）`);toast('🚀 追加移動','info');}
   else if(key==='bribe'){p.bribeActive=true;log(`💼 <b style="color:${p.color}">${p.name}</b> は賄賂を用意した（次の損失/ガサ入れを無効化）`);toast('💼 賄賂を準備','info');}
   else if(key==='gun'){p.gunActive=true;log(`🔫 <b style="color:${p.color}">${p.name}</b> は拳銃を懐に（次のカツアゲ確定成功）`);toast('🔫 拳銃を準備','info');}
+  else if(key==='sakazuki'){p.members+=2;p.peakMembers=Math.max(p.peakMembers,p.members);log(`🏮 <b style="color:${p.color}">${p.name}</b> はマンザイの盃を掲げた。<span class="y">組員+2</span>`);toast('🏮 組員+2','info');checkPromotion(p);}
+  else if(key==='isshobin'){const tg=[...ST.players].filter(o=>o!==p&&!o.fin).sort((a,b)=>totalAssets(b)-totalAssets(a))[0];
+    if(tg){tg.skip=(tg.skip||0)+1;log(`🍶 <b style="color:${p.color}">${p.name}</b> が魔キョーの一升瓶で <b style="color:${tg.color}">${tg.name}</b> を酔い潰した（1回休み）`);toast('🍶 '+tg.name+' 1回休み','info');}
+    else log('<span class="dim">🍶 振る舞う相手がいなかった。</span>');}
+  else if(key==='jidan'){const os=ST.players.filter(o=>o!==p&&!o.fin);os.forEach(o=>{o.money-=15000;p.money+=15000;});log(`📄 <b style="color:${p.color}">${p.name}</b> はモーリーの示談書を突きつけ、${os.length}人から示談金 <span class="y">¥${fmt(15000*os.length)}</span> を取り立てた`);toast('📄 +¥'+fmt(15000*os.length),'pos');}
+  else if(key==='omamori'){p.charmActive=true;log(`🧿 <b style="color:${p.color}">${p.name}</b> はヒロシのお守りを握りしめた（次の損失が半分）`);toast('🧿 お守り','info');}
+  else if(key==='shades'){p._doubleNext=true;log(`🕶️ <b style="color:${p.color}">${p.name}</b> はスュンのサングラスをかけた（次の稼ぎが2倍）`);toast('🕶️ 次の稼ぎ2倍','info');}
+  else if(key==='meishi'){const tg=[...ST.players].filter(o=>o!==p&&!o.fin&&o.members>0).sort((a,b)=>b.members-a.members)[0];
+    if(tg){tg.members--;p.members++;p.peakMembers=Math.max(p.peakMembers,p.members);log(`📇 タクミの名刺で <b style="color:${tg.color}">${tg.kumiName}</b> から組員を1人引き抜いた`);toast('📇 組員+1','info');checkPromotion(p);}
+    else log('<span class="dim">📇 引き抜ける相手がいなかった。</span>');}
   else if(key==='id'){const before=p.heat;p.heat=0;p.loot=p.loot;log(`🪪 <b style="color:${p.color}">${p.name}</b> は偽造身分証で足がつかなくなった（ヒート${before}→0）`);toast('🪪 ヒート消去','info');}
   renderHUD();if(!p.isCPU)updateItemBtn(p);
 }
 // CPUのアイテム使用判断
 function cpuMaybeUseItem(p){
   if(p.items.length===0)return;
+  // 名物キャラの特別アイテムは手に入れたら使う（一升瓶は自分が首位でない時だけ）
+  for(const k of ['sakazuki','meishi','jidan','omamori','shades']){if(p.items.includes(k)){useItem(p,k);return;}}
+  if(p.items.includes('isshobin')){const top=[...ST.players].filter(o=>!o.fin).sort((a,b)=>totalAssets(b)-totalAssets(a))[0];if(top&&top!==p){useItem(p,'isshobin');return;}}
   // ヒートが高ければ偽造身分証/賄賂、ゴールが遠ければニトロ/ダイス
   if(p.heat>=3&&p.items.includes('id')){useItem(p,'id');return;}
   if(p.heat>=2&&p.items.includes('bribe')){useItem(p,'bribe');return;}
@@ -1875,7 +1892,7 @@ function afterArrive(p,n){
     case 'money': {let amt=Math.round(n.amt*chapterMul()/1000)*1000;SFX.money();gain(p,amt,n.text||n.name);p.earned.money+=amt;if(Math.random()<0.22)giveItem(p,randomItemKey());laterTurn(950);return;}
     case 'loss':
       if(p.bribeActive){p.bribeActive=false;SFX.useItem();log(`💼 <b style="color:${p.color}">${p.name}</b> は賄賂で <b>${n.name}</b> を揉み消した`);toast('💼 賄賂で回避','info');laterTurn(900);return;}
-      {let dmg=Math.round(Math.abs(n.amt)*chapterMul()/1000)*1000;if(hasAbility(p,'survivor')){dmg=Math.round(dmg*0.6/1000)*1000;}if(p.motive&&p.motive.key==='debt'){dmg=Math.round(dmg*0.85/1000)*1000;}SFX.loss();lose(p,dmg,n.text||n.name);}laterTurn(850);return;
+      {let dmg=Math.round(Math.abs(n.amt)*chapterMul()/1000)*1000;if(p.charmActive){p.charmActive=false;dmg=Math.round(dmg*0.5/1000)*1000;log(`🧿 <b style="color:${p.color}">${p.name}</b> はヒロシのお守りに守られた（損失半減）`);}if(hasAbility(p,'survivor')){dmg=Math.round(dmg*0.6/1000)*1000;}if(p.motive&&p.motive.key==='debt'){dmg=Math.round(dmg*0.85/1000)*1000;}SFX.loss();lose(p,dmg,n.text||n.name);}laterTurn(850);return;
     case 'event':
       // ネイチャーは自然体で街に溶け込み、イベントマスでも名物キャラに出くわしやすい
       if(hasAbility(p,'nature')&&Math.random()<0.45){handleChoice(p,CHAR_EVENTS[Math.floor(Math.random()*CHAR_EVENTS.length)]);return;}
@@ -1972,10 +1989,17 @@ const ITEMS=[
   {key:'gun',  icon:'🔫',name:'拳銃',desc:'次のカツアゲが必ず成功し、奪う額が増える',use:'passive'},
   {key:'id',   icon:'🪪',name:'偽造身分証',desc:'今すぐ警察ヒートを0にする',use:'instant'},
   {key:'boost',icon:'🚀',name:'ニトロ',desc:'使うともう一度サイコロを振れる（追加移動）',use:'roll'},
+  // ── 名物キャラとの絆で貰える特別アイテム（通常の入手プールには入らない）──
+  {key:'sakazuki',icon:'🏮',name:'マンザイの盃',desc:'使うと組員+2（THEマンザイの後ろ盾）',use:'instant',special:true},
+  {key:'isshobin',icon:'🍶',name:'魔キョーの一升瓶',desc:'首位の組に振る舞い酒。相手を1回休みにする',use:'instant',special:true},
+  {key:'jidan',   icon:'📄',name:'モーリーの示談書',desc:'他の全員から示談金¥15,000ずつ取り立てる',use:'instant',special:true},
+  {key:'omamori', icon:'🧿',name:'ヒロシのお守り',desc:'次の損失マスのダメージを半分にする',use:'passive',special:true},
+  {key:'shades',  icon:'🕶️',name:'スュンのサングラス',desc:'次に得る金額が2倍になる',use:'passive',special:true},
+  {key:'meishi',  icon:'📇',name:'タクミの名刺',desc:'組員が最も多い組から1人引き抜く',use:'instant',special:true},
 ];
 function itemDef(key){return ITEMS.find(i=>i.key===key);}
 function giveItem(p,key){p.items.push(key);const d=itemDef(key);SFX.item();log(`<b style="color:${p.color}">${p.name}</b> がアイテム <span class="y">${d.icon}${d.name}</span> を入手`);toast(d.icon+' '+d.name+' 入手','info');renderHUD();}
-function randomItemKey(){return ITEMS[Math.floor(Math.random()*ITEMS.length)].key;}
+function randomItemKey(){const pool=ITEMS.filter(i=>!i.special);return pool[Math.floor(Math.random()*pool.length)].key;}
 
 const VERSUS_ACTIONS=[
   {key:'rob',  icon:'🔫',label:'カツアゲする',note:'相手から現金を奪う（失敗で返り討ち）'},
@@ -2219,6 +2243,7 @@ function handleSyun(p){
     text:'高級車から降りてきた街の富豪・スュンさんが、上機嫌であんたに声をかけてきた。'};
   if(p.isCPU){
     // CPUは挨拶を選ぶ（無難）。機嫌に応じて結果
+    addRel(p,'スュンさん',1);
     showCharaPopup(ev,p,'丁寧に挨拶する',()=>{syunOutcome(p,mood);renderHUD();laterTurn(800);});
     return;
   }
@@ -2231,6 +2256,7 @@ function handleSyun(p){
       const charm=hasAbility(p,'charmer')||hasAbility(p,'hustler');
       m=Math.random()<(charm?0.6:0.4)?0.9:0.1; // 成功→ほぼアクセ / 失敗→自慢だけ
     }
+    addRel(p,'スュンさん',i===0?1:(m>=0.55?2:-1));
     syunOutcome(p,m);laterTurn(700);
   });
 }
@@ -2318,6 +2344,7 @@ function handleTakumi(p){
   if(p.members>=2&&others.length>0&&roll<0.45)kind='steal';   // 引き抜き
   else if(roll<0.80)kind='scout';                              // スカウト
   else kind='none';                                            // 気まぐれ
+  addRel(p,'タクミ',kind==='steal'?-1:kind==='scout'?1:0);
   let body='';
   if(kind==='steal'){
     const target=pick(others);
@@ -2472,6 +2499,71 @@ const FORESHADOW={
     2:'「そろそろ潮時かな。あの方が、自ら街に降りてくるそうだ。…俺はよ、ただの財布なのさ」',
   },
 };
+
+// ============ ⑥ 名物キャラとの関係値（絆／因縁）============
+// 名物イベントでの選択が積み重なり、明け方の大決戦で援軍・妨害として返ってくる
+const REL_CHARS=['THEマンザイ','魔キョー','モーリー','ヒロシ','スュンさん','タクミ'];
+const REL_ICON={'THEマンザイ':'🎤','魔キョー':'🍶','モーリー':'😡','ヒロシ':'😇','スュンさん':'🕶️','タクミ':'👦'};
+const REL_TH=2; // この値以上で「絆」、-この値以下で「因縁」
+// イベント名 → 選択肢ごとの関係値の増減（並びは選択肢の並び順）
+const REL_DELTA={
+  'THEマンザイの呼び出し':[1,2,-2],'THEマンザイの興行':[1,0],'THEマンザイのサービステキーラ':[2,1,-1],
+  'THEマンザイの査定':[1,-1],'THEマンザイの仲裁':[1,-1],
+  '魔キョーが酔って絡む':[1,-2,0],'魔キョーの泥酔事件':[2,-1],'魔キョーのタカリ':[1,-1],'魔キョーの喧嘩':[2,1,-1],
+  'モーリーが激昂':[1,-2,1],'モーリーの逆恨み':[2,-2],'モーリーの当たり屋':[1,-1],'モーリーの八つ当たり':[1,-2],
+  '善良な市民ヒロシ':[1,-2,0],'ヒロシの善行':[2,-2],'ヒロシの落とし物':[2,-2],'ヒロシの頼み事':[2,0,-1],
+};
+const REL_GIFT={'THEマンザイ':'sakazuki','魔キョー':'isshobin','モーリー':'jidan','ヒロシ':'omamori','スュンさん':'shades','タクミ':'meishi'};
+const REL_ALLY={
+  'THEマンザイ':{pow:3,txt:'🎤 THEマンザイの若い衆が加勢に駆けつけた'},
+  '魔キョー':  {pow:2,txt:'🍶 酔った魔キョーが乱入し、敵を蹴散らした'},
+  'モーリー':  {pow:2,txt:'😡 モーリーが当たり屋で敵の足を止めた'},
+  'ヒロシ':    {pow:2,txt:'😇 ヒロシが「困っている人は放っておけない」と参戦した'},
+  'スュンさん':{pow:2,txt:'🕶️ スュンさんの高級車が敵陣に突っ込んできた'},
+  'タクミ':    {pow:2,txt:'👦 タクミが引き抜いた連中を連れて戻ってきた'},
+};
+const REL_FOE={
+  'THEマンザイ':{pow:3,txt:'🎤 THEマンザイの差し金で寝返る者が出た'},
+  '魔キョー':  {pow:2,txt:'🍶 泥酔した魔キョーが味方を殴り倒した'},
+  'モーリー':  {pow:2,txt:'😡 逆恨みのモーリーが殴り込んできた'},
+  'ヒロシ':    {pow:1,txt:'😇 ヒロシの通報でサツの目が向いた'},
+  'スュンさん':{pow:1,txt:'🕶️ スュンさんは鼻で笑って見捨てた'},
+  'タクミ':    {pow:2,txt:'👦 タクミが組員を連れ去った'},
+};
+function addRel(p,ch,d){
+  if(!p||!d||REL_CHARS.indexOf(ch)<0)return;
+  p.rel=p.rel||{};p._relFlags=p._relFlags||{};
+  const before=p.rel[ch]||0;const v=Math.max(-5,Math.min(5,before+d));p.rel[ch]=v;
+  if(v>=REL_TH&&before<REL_TH&&!p._relFlags[ch+'+']){
+    p._relFlags[ch+'+']=1;
+    log(`🤝 <b style="color:${p.color}">${p.name}</b> と ${REL_ICON[ch]}${ch} の間に<span class="g">絆</span>が生まれた（決戦で力を貸してくれる）`);
+    toast('🤝 '+ch+'との絆','pos');
+    if(REL_GIFT[ch])giveItem(p,REL_GIFT[ch]);
+  }
+  if(v<=-REL_TH&&before>-REL_TH&&!p._relFlags[ch+'-']){
+    p._relFlags[ch+'-']=1;
+    log(`⚡ ${REL_ICON[ch]}${ch} は <b style="color:${p.color}">${p.name}</b> に<span class="r">恨み</span>を抱いた（決戦で牙をむくかもしれない）`);
+    toast('⚡ '+ch+'の恨み','neg');
+  }
+}
+function relFromChoice(p,ev,opt){
+  if(!ev||!ev.char||!opt)return;const tbl=REL_DELTA[ev.title];if(!tbl)return;
+  const i=ev.opts.findIndex(o=>o.label===opt.label);if(i<0)return;addRel(p,ev.char,tbl[i]||0);
+}
+function relKessen(p){
+  const out={pow:0,lines:[]};const rel=p.rel||{};
+  for(const ch of REL_CHARS){const v=rel[ch]||0;
+    if(v>=REL_TH){out.pow+=REL_ALLY[ch].pow;out.lines.push(`<span class="g">${REL_ALLY[ch].txt}</span>`);}
+    else if(v<=-REL_TH){out.pow-=REL_FOE[ch].pow;out.lines.push(`<span class="r">${REL_FOE[ch].txt}</span>`);}
+  }
+  return out;
+}
+function relSummaryHtml(p){
+  const rel=p.rel||{};const chips=REL_CHARS.filter(ch=>rel[ch]).map(ch=>{const v=rel[ch];
+    const col=v>=REL_TH?'#1fae7a':v<=-REL_TH?'#ff2d55':'#9a8e96';const mark=v>=REL_TH?'🤝':v<=-REL_TH?'⚡':'';
+    return `<span style="color:${col};margin-right:6px;white-space:nowrap;">${REL_ICON[ch]}${ch}${v>0?'+':''}${v}${mark}</span>`;});
+  return chips.length?chips.join(''):'<span class="dim">まだ縁はない</span>';
+}
 function withForeshadow(ev){
   const lines=ev.char&&FORESHADOW[ev.char];if(!lines)return ev;
   const line=lines[ST.chapter];if(!line)return ev;
@@ -2486,6 +2578,7 @@ function handleChoice(p,ev){
   if(ev.char&&hasAbility(p,'nature'))p._charaBonus=1.5;else p._charaBonus=0;
   if(p.isCPU){
     const choice=cpuPick(p,ev);
+    relFromChoice(p,ev,choice);
     // 名物キャラの場合は画像つきポップアップを見せてから処理
     if(ev.char&&typeof CHAR_IMAGES!=='undefined'&&CHAR_IMAGES[ev.char]){
       showCharaPopup(ev,p,choice.label,()=>{
@@ -2505,6 +2598,7 @@ function handleChoice(p,ev){
     return;
   }
   openModal(ev,ev.opts,(opt)=>{
+    relFromChoice(p,ev,opt);
     const chain=opt.act(p);
     if(chain&&chain.opts){handleChoice(p,chain);} // 人間も連鎖モーダル
     else{renderHUD();laterTurn(650);}
@@ -2603,6 +2697,7 @@ function showAssets(p){
       <div class="row"><span class="k">👥 組員</span><span class="v" style="color:#c89b3c">${p.members}人</span></div>
       ${p.territories?`<div class="row"><span class="k">🏙️ シマ（縄張り）</span><span class="v" style="color:#7fd4ad">${p.territories}ヶ所（+¥${fmt(p.territories*12000)}/ターン）</span></div>`:''}
       ${rolesSummary(p)?`<div class="row"><span class="k">🎖️ 役割持ち</span><span class="v" style="color:#e6c478;font-size:11px;">${rolesSummary(p)}</span></div>`:''}
+      <div class="row"><span class="k">🎭 名物との縁</span><span class="v" style="font-size:11px;text-align:right;">${relSummaryHtml(p)}</span></div>
       <div class="row"><span class="k">現金</span><span class="v" style="color:${p.money<0?'#ff2d55':'#1fae7a'}">¥${fmt(p.money)}</span></div>
       <div class="row"><span class="k">不動産</span><span class="v" style="color:#6ab0ff">¥${fmt(p.estates.reduce((s,ni)=>s+NODES[ni].estate.value,0))}</span></div>
       <div class="row"><span class="k">換金済み盗品</span><span class="v" style="color:#e8b33e">¥${fmt(p.cashedLoot)}</span></div>
@@ -2650,7 +2745,11 @@ function runKessen(done){
   const humanInvolved=fighters.some(p=>!p.isCPU);
   window._kessenAuto=!humanInvolved;
   // 各組の戦力＝組員数＋運（大きく振れて下克上もある）
-  fighters.forEach(p=>{p._kpow=p.members+Math.random()*8;});
+  const relLines=[];
+  fighters.forEach(p=>{p._kpow=p.members+Math.random()*8;
+    const r=relKessen(p);p._kpow+=r.pow;
+    r.lines.forEach(l=>{relLines.push(`<div style="font-size:11px;margin:2px 0;"><b style="color:${p.color}">${p.kumiName}</b>：${l}</div>`);log(`<b style="color:${p.color}">${p.name}</b> ${l}`);});
+  });
   const ranked=[...fighters].sort((a,b)=>b._kpow-a._kpow);
   const champ=ranked[0];
   // 演出：まず宣言モーダル → 結果モーダル
@@ -2660,6 +2759,7 @@ function runKessen(done){
       <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:10px 0;">
         ${fighters.map(p=>`<div style="text-align:center;"><div style="font-size:11px;color:${p.color};font-weight:700;font-family:'Shippori Mincho',serif;">${p.kumiName}</div><div style="font-size:10px;color:#9a8e96;">👥${p.members}人</div></div>`).join('')}
       </div>
+      ${relLines.length?`<div style="margin-top:8px;padding-top:6px;border-top:1px solid #2a2230;text-align:left;"><div style="font-size:11px;color:#c89b3c;text-align:center;margin-bottom:4px;">── 名物たちが動いた ──</div>${relLines.join('')}</div>`:''}
     </div>`;
   showKessenModal('🔥 明け方の大決戦','全組、激突',introHtml,'決戦の火蓋を切る',()=>{
     // 勝敗処理：champ が全員の組員の一部を吸収、敗者は失う
@@ -3018,9 +3118,113 @@ function endGame(){
       <div class="rank-money" style="color:${i===0?'#e8b33e':'#cfcfd8'}">¥${fmt(totalAssets(p))}</div>`;
     list.appendChild(row);
   });
+  clearProgress();
+  const rec=recordGame(ranked);renderRecordResult(rec);
   log('<span class="y">━━ 決着。熊谷の夜が更けていく。 ━━</span>');
 }
 
+
+// ============ ① 中断セーブ ============
+const SAVE_KEY='kk_save_v1';
+const NODE_META=['areas','dangRanges','dangStarts','features','fork','maxRow','safeStarts','totalRows'];
+function saveProgress(){
+  try{
+    if(!ST.players||!ST.players.length)return;
+    const meta={};NODE_META.forEach(k=>{if(NODES['_'+k]!==undefined)meta[k]=NODES['_'+k];});
+    const st=Object.assign({},ST,{rolling:false,busy:false});
+    localStorage.setItem(SAVE_KEY,JSON.stringify({v:1,ts:Date.now(),ST:st,NODES:Array.from(NODES),meta,LAYOUT}));
+  }catch(e){}
+}
+function loadProgress(){
+  try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return null;const d=JSON.parse(raw);
+    return (d&&d.v===1&&d.ST&&Array.isArray(d.ST.players)&&d.ST.players.length&&Array.isArray(d.NODES))?d:null;}catch(e){return null;}
+}
+function clearProgress(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
+function renderContinue(){
+  const box=document.getElementById('continue-box');if(!box)return;
+  const d=loadProgress();
+  if(!d){box.innerHTML='';return;}
+  const ch=CHAPTERS[d.ST.chapter]||CHAPTERS[0];const dt=new Date(d.ts);
+  const pad=n=>String(n).padStart(2,'0');
+  const when=`${dt.getMonth()+1}/${dt.getDate()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+  const me=d.ST.players.filter(p=>!p.isCPU).map(p=>p.name).join('・')||'CPU';
+  box.innerHTML=`<button class="btn gold" style="width:100%;font-size:17px;padding:14px;margin-bottom:10px;" onclick="resumeGame()">▶ つづきから<div class="opt-note">${me}／第${['一','二','三'][d.ST.chapter]||'一'}章「${ch.name}」・${(d.ST.roundCount||0)+1}巡目（${when}保存）</div></button>`;
+}
+function resumeGame(){
+  const d=loadProgress();if(!d){renderContinue();return;}
+  Object.assign(ST,d.ST);ST.rolling=false;ST.busy=false;
+  NODES=d.NODES;for(const k in d.meta)NODES['_'+k]=d.meta[k];
+  LAYOUT=d.LAYOUT||{};
+  ST.players.forEach(p=>{if(!p.rel)p.rel={};if(!p._relFlags)p._relFlags={};});
+  buildBoard();renderHUD();updateChapterUI();
+  document.getElementById('setup-screen').classList.remove('active');
+  document.getElementById('game-screen').classList.add('active');
+  const cur=ST.players[ST.turn];
+  setTimeout(()=>{if(cur&&typeof scrollToTile==='function')scrollToTile(cur.pos);},60);
+  const ch=CHAPTERS[ST.chapter]||CHAPTERS[0];
+  log(`<span class="y">━━ つづきから ── ${ch.icon} 第${['一','二','三'][ST.chapter]}章「${ch.name}」 ━━</span>`);
+  BGM.start();
+  beginTurn();
+}
+
+// ============ ⑦ 戦績の記録 ============
+const REC_KEY='kk_records_v1';
+function loadRecords(){try{const r=JSON.parse(localStorage.getItem(REC_KEY)||'{}');return (r&&typeof r==='object')?r:{};}catch(e){return {};}}
+function saveRecords(r){try{localStorage.setItem(REC_KEY,JSON.stringify(r));}catch(e){}}
+function titleKeyOf(t){return Object.keys(TITLES).find(k=>TITLES[k]===t)||null;}
+function recordGame(ranked){
+  const r=loadRecords();
+  r.games=(r.games||0)+1;r.wins=r.wins||0;r.best=r.best||0;r.titles=r.titles||{};r.bonds=r.bonds||{};
+  const humans=ranked.filter(p=>!p.isCPU);
+  const out={r,newTitles:[],newBest:false,newBonds:[],won:false,counted:humans.length>0};
+  if(!humans.length){saveRecords(r);return out;}
+  ranked.forEach((p,i)=>{
+    if(p.isCPU)return;
+    if(i===0){
+      r.wins++;out.won=true;
+      const k=titleKeyOf(decideTitle(p));
+      if(k){if(!r.titles[k])out.newTitles.push(TITLES[k]);r.titles[k]=(r.titles[k]||0)+1;}
+    }
+    const ta=totalAssets(p);if(ta>r.best){r.best=ta;out.newBest=true;}
+    REL_CHARS.forEach(ch=>{if(((p.rel||{})[ch]||0)>=REL_TH&&!r.bonds[ch]){r.bonds[ch]=1;out.newBonds.push(ch);}});
+  });
+  saveRecords(r);return out;
+}
+function titleGridHtml(r){
+  const keys=Object.keys(TITLES);
+  return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px;">${keys.map(k=>{const got=r.titles&&r.titles[k];const t=TITLES[k];
+    return `<div style="text-align:center;padding:6px 2px;border:1px solid ${got?'#8a6a2a':'#221d24'};border-radius:3px;background:${got?'rgba(200,155,60,0.08)':'#0a090c'};">
+      <div style="font-size:18px;${got?'':'filter:grayscale(1);opacity:0.25;'}">${t.icon}</div>
+      <div style="font-size:10px;color:${got?'#e6c478':'#4a4250'};">${got?t.name:'？？？'}</div></div>`;}).join('')}</div>`;
+}
+function bondRowHtml(r){
+  return `<div style="text-align:center;margin-top:8px;font-size:18px;letter-spacing:4px;">${REL_CHARS.map(ch=>`<span title="${ch}" style="${r.bonds&&r.bonds[ch]?'':'filter:grayscale(1);opacity:0.25;'}">${REL_ICON[ch]}</span>`).join('')}</div>`;
+}
+function renderRecords(){
+  const box=document.getElementById('records-box');if(!box)return;
+  const r=loadRecords();
+  if(!r.games){box.innerHTML='';return;}
+  const nT=Object.keys(r.titles||{}).length,allT=Object.keys(TITLES).length;
+  const nB=Object.keys(r.bonds||{}).length;
+  box.innerHTML=`<div class="panel"><div class="panel-label">戦績</div>
+    <div style="font-size:13px;color:#c8bcc2;text-align:center;">${r.games}戦 <b style="color:#c89b3c">${r.wins}勝</b>　最高資産 <b class="g">¥${fmt(r.best||0)}</b></div>
+    <div style="font-size:11px;color:#9a8e96;margin-top:8px;">👑 帝王の異名 ${nT}/${allT}</div>${titleGridHtml(r)}
+    <div style="font-size:11px;color:#9a8e96;margin-top:10px;">🤝 名物キャラとの絆 ${nB}/${REL_CHARS.length}</div>${bondRowHtml(r)}
+  </div>`;
+}
+function renderRecordResult(rec){
+  const box=document.getElementById('record-box');if(!box)return;
+  if(!rec||!rec.counted){box.innerHTML='';return;}
+  const r=rec.r;const news=[];
+  rec.newTitles.forEach(t=>news.push(`<div style="color:#ffd86b;font-size:13px;margin:3px 0;">★ 新しい異名を獲得！ ${t.icon}「${t.name}」</div>`));
+  if(rec.newBest)news.push(`<div style="color:#1fae7a;font-size:13px;margin:3px 0;">★ 最高資産を更新！ ¥${fmt(r.best)}</div>`);
+  rec.newBonds.forEach(ch=>news.push(`<div style="color:#7fd4ad;font-size:12px;margin:3px 0;">★ 初めての絆 ${REL_ICON[ch]}${ch}</div>`));
+  box.innerHTML=`<div class="panel"><div class="panel-label">戦績</div>
+    ${news.join('')}
+    <div style="font-size:12px;color:#c8bcc2;text-align:center;margin-top:4px;">通算 ${r.games}戦 <b style="color:#c89b3c">${r.wins}勝</b>／異名 ${Object.keys(r.titles||{}).length}/${Object.keys(TITLES).length}／絆 ${Object.keys(r.bonds||{}).length}/${REL_CHARS.length}</div>
+  </div>`;
+}
+renderContinue();renderRecords();
 function showRules(){
   openModal({icon:'📖',title:'熊谷の帝王への道',top:'ev',
     text:'',extra:`<div style="font-size:12.5px;color:#b8b8c4;line-height:1.7;text-align:left;">
