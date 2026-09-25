@@ -249,7 +249,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <h1>熊谷<span class="accent">の</span>帝王</h1>
     <div class="sub">KUMAGAYA NIGHTS</div>
     <div class="rule"></div>
-    <button id="mute-btn" onclick="BGM.toggle()" style="position:absolute;top:30px;right:0;background:transparent;border:1px solid #3a3038;color:#9a8e96;border-radius:50%;width:34px;height:34px;font-size:15px;cursor:pointer;z-index:6;">🎵</button>
+    <button id="mute-btn" class="snd-btn" data-short="1" onclick="BGM.toggle()" style="position:absolute;top:30px;right:0;background:transparent;border:1px solid #3a3038;color:#9a8e96;border-radius:50%;width:34px;height:34px;font-size:15px;cursor:pointer;z-index:6;">🎵</button>
   </div>
 
   <!-- セットアップ -->
@@ -287,6 +287,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 0 10px;">
       <div id="chapter-banner" style="text-align:center;font-family:'Shippori Mincho',serif;font-weight:700;font-size:12px;color:#a89aa0;letter-spacing:0.12em;"></div>
       <button onclick="showStandings()" style="background:transparent;border:1px solid #3a3038;color:#c89b3c;border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer;white-space:nowrap;">📊 順位</button>
+      <button class="snd-btn" onclick="BGM.toggle()" style="background:transparent;border:1px solid #3a3038;color:#9a8e96;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">🎵 BGM+効果音</button>
     </div>
     <div class="hud-players" id="hud-players"></div>
     <div class="board-shell">
@@ -3322,6 +3323,8 @@ const BGM={
   ctx:null,master:null,timer:null,step:0,started:false,muted:false,mode:'dark',beatMs:500,_edmTimeout:null,
   init(){
     if(this.ctx)return;
+    // 他アプリで再生中の音楽を止めず、重ねて鳴らす（Audio Session API対応ブラウザ）
+    try{if(navigator.audioSession)navigator.audioSession.type='ambient';}catch(e){}
     try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){return;}
     this.master=this.ctx.createGain();this.master.gain.value=0.0;this.master.connect(this.ctx.destination);
   },
@@ -3423,7 +3426,18 @@ const BGM={
   edmStab(t,f){[0,0.005].forEach(det=>{const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type='sawtooth';o.frequency.value=f*(1+det);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.07,t+0.008);g.gain.exponentialRampToValueAtTime(0.001,t+0.22);const flt=this.ctx.createBiquadFilter();flt.type='lowpass';flt.frequency.value=2600;o.connect(flt);flt.connect(g);g.connect(this.master);o.start(t);o.stop(t+0.25);});},
   riser(t){const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type='sawtooth';o.frequency.setValueAtTime(200,t);o.frequency.exponentialRampToValueAtTime(2000,t+1.0);g.gain.setValueAtTime(0.001,t);g.gain.linearRampToValueAtTime(0.05,t+0.9);g.gain.exponentialRampToValueAtTime(0.001,t+1.05);const hp=this.ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=400;o.connect(hp);hp.connect(g);g.connect(this.master);o.start(t);o.stop(t+1.1);},
   stab(t){[370,392].forEach(f=>{const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.06,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+0.7);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+0.75);});},
-  toggle(){this.muted=!this.muted;if(this.ctx&&this.master)this.master.gain.linearRampToValueAtTime(this.muted?0:0.5,this.ctx.currentTime+0.3);SFX.muted=this.muted;const b=document.getElementById('mute-btn');if(b)b.textContent=this.muted?'🔇':'🎵';return this.muted;}
+  soundMode:'all', // all=BGM+効果音 / se=効果音のみ（自分の音楽を聴きながら） / off=消音
+  applySound(mode){
+    this.soundMode=(mode==='se'||mode==='off')?mode:'all';
+    this.muted=this.soundMode!=='all';SFX.muted=this.soundMode==='off';
+    if(this.ctx&&this.master){const t=this.ctx.currentTime;this.master.gain.cancelScheduledValues(t);this.master.gain.setValueAtTime(this.master.gain.value,t);this.master.gain.linearRampToValueAtTime(this.muted?0:0.5,t+0.3);}
+    try{localStorage.setItem('kk_sound',this.soundMode);}catch(e){}
+    const lab={all:['🎵','🎵 BGM+効果音'],se:['🔔','🔔 効果音のみ'],off:['🔇','🔇 消音']}[this.soundMode];
+    document.querySelectorAll('.snd-btn').forEach(b=>{b.textContent=b.dataset.short?lab[0]:lab[1];});
+    return this.soundMode;
+  },
+  toggle(){const next={all:'se',se:'off',off:'all'}[this.soundMode];const m=this.applySound(next);
+    if(typeof toast==='function')toast({all:'🎵 BGM＋効果音',se:'🔔 効果音のみ（音楽を聴きながら遊べます）',off:'🔇 消音'}[m],'info');return m;}
 };
 
 // ============ 効果音（SFX） ============
@@ -3472,6 +3486,8 @@ const SFX={
   win(){[523,659,784,1047,1319,1568].forEach((f,i)=>this.tone(f,0.3,'triangle',0.18,i*0.12));this.tone(2093,0.4,'sine',0.1,0.72);},
   click(){this.tone(660,0.05,'sine',0.08);},
 };
+// 保存済みのサウンド設定を反映（BGM/SFX定義の後で実行）
+try{BGM.applySound(localStorage.getItem('kk_sound')||'all');}catch(e){}
 
 renderCharGrid();updateCharHint();renderDice(6);
 window.addEventListener('resize',()=>{if(document.getElementById('game-screen').classList.contains('active'))buildBoard();});
