@@ -1923,17 +1923,20 @@ function afterArrive(p,n){
       if(p.bribeActive){p.bribeActive=false;SFX.useItem();log(`💼 <b style="color:${p.color}">${p.name}</b> は賄賂で <b>${n.name}</b> を揉み消した`);toast('💼 賄賂で回避','info');laterTurn(900);return;}
       {let dmg=Math.round(Math.abs(n.amt)*chapterMul()/1000)*1000;if(p.charmActive){p.charmActive=false;dmg=Math.round(dmg*0.5/1000)*1000;log(`🧿 <b style="color:${p.color}">${p.name}</b> はヒロシのお守りに守られた（損失半減）`);}if(hasAbility(p,'survivor')){dmg=Math.round(dmg*0.6/1000)*1000;}if(p.motive&&p.motive.key==='debt'){dmg=Math.round(dmg*0.85/1000)*1000;}SFX.loss();lose(p,dmg,n.text||n.name);}laterTurn(850);return;
     case 'event':
+      if(tryCleaver(p,0.8))return;
       // ネイチャーは自然体で街に溶け込み、イベントマスでも名物キャラに出くわしやすい
       if(hasAbility(p,'nature')&&Math.random()<0.45){handleChoice(p,CHAR_EVENTS[Math.floor(Math.random()*CHAR_EVENTS.length)]);return;}
       handleChoice(p,EVENTS_ALL[Math.floor(Math.random()*EVENTS_ALL.length)]);return;
     case 'chara':
+      if(tryCleaver(p,0.4))return;
       // 稀に（12%）レアキャラ「スュンさん」が登場（ネイチャーはレア遭遇率UP）
       if(Math.random()<(hasAbility(p,'nature')?0.18:0.12)){handleSyun(p);return;}
       // 稀に（14%）つけまわしのタクミが登場（組員シャッフル）
       if(Math.random()<0.14){handleTakumi(p);return;}
       handleChoice(p,CHAR_EVENTS[Math.floor(Math.random()*CHAR_EVENTS.length)]);return;
     case 'recruit': handleRecruit(p);return;
-    case 'risk': handleChoice(p,(RISKS.find(r=>r.icon===n.icon)||RISKS[Math.floor(Math.random()*RISKS.length)]));return;
+    case 'risk': if(tryCleaver(p,0.4))return;
+      handleChoice(p,(RISKS.find(r=>r.icon===n.icon)||RISKS[Math.floor(Math.random()*RISKS.length)]));return;
     case 'estate': handleEstate(p,n);return;
     case 'heist': handleHeist(p,n);return;
     case 'fence': handleFence(p,n);return;
@@ -2593,6 +2596,39 @@ function relSummaryHtml(p){
     return `<span style="color:${col};margin-right:6px;white-space:nowrap;">${REL_ICON[ch]}${ch}${v>0?'+':''}${v}${mark}</span>`;});
   return chips.length?chips.join(''):'<span class="dim">まだ縁はない</span>';
 }
+
+// ============ 伏線：路地の中華包丁（ベニ龍＝紅龍會への布石）============
+// 街全体で1段ずつ進む物語。第1章で拾える／第2章で意味が見えてくる／ベニ龍登場で回収
+const CLEAVER_STAGES=[
+  {minCh:0,minRound:0,ev:(p)=>({icon:'🔪',char:'中華包丁',title:'路地の中華包丁',top:'risk',
+    text:'路地裏の壁に、中華包丁が一本突き立っている。刃には一滴の血もない。柄に、赤い龍の彫り物。',opts:[
+    {label:'抜いて持ち帰る',note:'何かの手がかりになるかもしれない（ガサ入れ注意）',act:(p)=>{p.cleaver=true;p.heat=(p.heat||0)+1;log(`🔪 <b style="color:${p.color}">${p.name}</b> は中華包丁を懐にしまった。<span class="dim">（柄に赤い龍の彫り物）</span>`);}},
+    {label:'見なかったことにする',note:'触らぬ神に祟りなし',act:(p)=>logp(p,'は包丁から目をそらして通り過ぎた。')},
+  ]})},
+  {minCh:0,minRound:3,ev:(p)=>({icon:'🔪',char:'中華包丁',title:'閉ざされた中華屋',top:'risk',
+    text:'馴染みの中華料理屋が、今夜も閉まっている。シャッターに、あの中華包丁が深々と刺さっていた。近所の噂——「この街の中華屋は、誰に守代を払ってると思う？」',opts:[
+    {label:'包丁を抜いて持ち去る',note:'手がかりになる（ガサ入れ注意）',act:(p)=>{p.cleaver=true;p.heat=(p.heat||0)+1;log(`🔪 <b style="color:${p.color}">${p.name}</b> はシャッターの包丁を抜いた。柄には、やはり赤い龍。`);}},
+    {label:'店主から話を聞く',note:'+¥20,000（口止め料をもらう）',act:(p)=>{gain(p,20000,'口止め料');log('<span class="dim">店主「……赤い服の連中だよ。それ以上は言えない」</span>');}},
+  ]})},
+  {minCh:1,minRound:5,ev:(p)=>({icon:'🔪',char:'中華包丁',title:'マンザイの事務所',top:'risk',
+    text:'THEマンザイの事務所のドアに、中華包丁が突き立っている。いつも豪快に笑うマンザイが、青ざめた顔で立ち尽くしていた。',opts:[
+    p.cleaver?
+    {label:'懐の包丁を見せる',note:'マンザイが口を開く（THEマンザイとの縁+1）',act:(p)=>{addRel(p,'THEマンザイ',1);log('<span class="y">THEマンザイ「……お前も持ってたか。そいつは紅龍會の“挨拶”だ。この街の本当の主が、もうすぐ来る」</span>');}}
+    :{label:'声をかける',note:'マンザイは多くを語らない',act:(p)=>log('<span class="dim">THEマンザイ「……今夜は帰れ。赤い連中には関わるな」</span>')},
+    {label:'黙って立ち去る',note:'',act:(p)=>logp(p,'は事務所の前を黙って通り過ぎた。')},
+  ]})},
+];
+function cleaverEventFor(p){
+  const st=ST._cleaverStage||0;if(st>=CLEAVER_STAGES.length)return null;
+  const c=CLEAVER_STAGES[st];
+  if(ST.chapter<c.minCh||ST.chapter>=2||(ST.roundCount||0)<c.minRound)return null;
+  return c;
+}
+function tryCleaver(p,prob){
+  const c=cleaverEventFor(p);if(!c||Math.random()>=prob)return false;
+  ST._cleaverStage=(ST._cleaverStage||0)+1;
+  handleChoice(p,c.ev(p));return true;
+}
 function withForeshadow(ev){
   const lines=ev.char&&FORESHADOW[ev.char];if(!lines)return ev;
   const line=lines[ST.chapter];if(!line)return ev;
@@ -2726,6 +2762,7 @@ function showAssets(p){
       <div class="row"><span class="k">👥 組員</span><span class="v" style="color:#c89b3c">${p.members}人</span></div>
       ${p.territories?`<div class="row"><span class="k">🏙️ シマ（縄張り）</span><span class="v" style="color:#7fd4ad">${p.territories}ヶ所（+¥${fmt(p.territories*12000)}/ターン）</span></div>`:''}
       ${rolesSummary(p)?`<div class="row"><span class="k">🎖️ 役割持ち</span><span class="v" style="color:#e6c478;font-size:11px;">${rolesSummary(p)}</span></div>`:''}
+      ${p.cleaver?'<div class="row"><span class="k">🔪 中華包丁</span><span class="v" style="font-size:11px;color:#f0c0c0;">柄に赤い龍の彫り物</span></div>':''}
       <div class="row"><span class="k">🎭 名物との縁</span><span class="v" style="font-size:11px;text-align:right;">${relSummaryHtml(p)}</span></div>
       <div class="row"><span class="k">現金</span><span class="v" style="color:${p.money<0?'#ff2d55':'#1fae7a'}">¥${fmt(p.money)}</span></div>
       <div class="row"><span class="k">不動産</span><span class="v" style="color:#6ab0ff">¥${fmt(p.estates.reduce((s,ni)=>s+NODES[ni].estate.value,0))}</span></div>
@@ -2854,6 +2891,7 @@ function runBeniryu(champ,done){
         人影の奥から、ひとりの男がゆっくりと歩み出る。<br>
         サングラスの奥は見えない。だが、その圧は本物だ。
       </div>
+      ${champ.cleaver?`<div style="margin-top:10px;font-size:12.5px;color:#f0c0c0;line-height:1.8;">ベニ龍の視線が、お前の懐で止まった。<br>「……その包丁。私の組の者の“挨拶”だ。<br>拾ったのは、お前だったか」</div>`:''}
     </div>`;
   // --- 段階4：宣言 ---
   const stage4=`
@@ -2891,7 +2929,7 @@ function runBeniryu(champ,done){
       // 最終：選択へ
       showBeniModal('🐲 ベニ龍','どうする','',[
         {label:'🍶 盃を受ける（屈服）',note:'資産の25%を上納するが、安全に頂点を保つ',_k:'submit'},
-        {label:'🔪 決闘を挑む（下剋上）',note:'組の総力＋運で勝負。勝てば紅龍會を奪い圧倒的な王に／負ければ大損',_k:'fight'},
+        {label:'🔪 決闘を挑む（下剋上）',note:'組の総力＋運で勝負。勝てば紅龍會を奪い圧倒的な王に／負ければ大損'+(champ.cleaver?'（中華包丁の因縁で有利）':''),_k:'fight'},
         {label:'🏃 街を捨てて逃げる',note:'資産は守るが、紅龍會の縄張りは得られない',_k:'flee'},
       ],champ,(k)=>{resolveBeniryu(champ,beni,k,done);},stage4);
     }
@@ -2932,7 +2970,7 @@ function resolveBeniryu(champ,beni,choice,done){
     resultHtml=`<div style="text-align:center;"><div style="font-size:13px;color:#d8d8e0;line-height:1.7;"><b style="color:${champ.color}">${champ.name}</b> は紅龍會との衝突を避け、手にした資産を抱えて夜の街を後にした。<br>ベニ龍の縄張りは得られなかったが、失うものもなかった。</div></div>`;
   }else{ // fight
     // 勝者の総力 vs ベニ龍。組員＋シマ＋鉄砲玉＋運（育てた者ほど有利）
-    const myPow=champ.members + (champ.territories||0)*3 + roleCount(champ,'gunman')*4 + Math.random()*12;
+    const myPow=champ.members + (champ.territories||0)*3 + roleCount(champ,'gunman')*4 + Math.random()*12 + (champ.cleaver?5:0); // 中華包丁の因縁で+5
     const beniPow=beni.members + 3 + Math.random()*9;  // 格上だが、育てれば超えられる
     const win=myPow>=beniPow;
     if(win){
