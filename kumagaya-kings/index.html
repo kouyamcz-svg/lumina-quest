@@ -178,6 +178,19 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .pip.on{opacity:1;}
 .logbox{background:#08070a;border:1px solid #1c1820;border-radius:3px;padding:9px 12px;height:78px;overflow-y:auto;margin-top:10px;font-size:12px;line-height:1.6;}
 .logbox .ln{color:#8a8088;margin-bottom:2px;}
+.logbox{position:relative;cursor:pointer;}
+.logwrap{position:relative;}
+.log-hint{position:absolute;right:8px;top:14px;font-size:10px;color:#6a5a64;background:rgba(8,7,10,0.9);padding:1px 6px;border:1px solid #2a2230;border-radius:8px;pointer-events:none;z-index:1;}
+#log-viewer{position:fixed;inset:0;z-index:95;background:rgba(6,5,8,0.97);display:none;flex-direction:column;}
+#log-viewer.active{display:flex;}
+#log-viewer .lv-head{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 10px;border-bottom:1px solid #2a2230;}
+#log-viewer .lv-title{font-family:'Shippori Mincho',serif;font-weight:800;font-size:16px;color:#c89b3c;letter-spacing:0.08em;}
+#log-viewer .lv-close{background:#1a1520;border:1px solid #3a3040;color:#e0d8dc;font-size:15px;border-radius:4px;padding:6px 14px;}
+#log-viewer .lv-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 14px calc(env(safe-area-inset-bottom,0px) + 14px);font-size:13px;line-height:1.75;}
+#log-viewer .lv-body .ln{color:#9a8e96;margin-bottom:3px;padding-bottom:3px;border-bottom:1px dashed #1a1620;}
+#log-viewer .lv-body .ln b{color:#d4ccd2;}
+#log-viewer .lv-foot{padding:8px 14px calc(env(safe-area-inset-bottom,0px) + 10px);display:flex;gap:8px;border-top:1px solid #2a2230;}
+#log-viewer .lv-foot button{flex:1;background:#1a1520;border:1px solid #3a3040;color:#c8bcc2;font-size:12px;border-radius:4px;padding:8px;}
 .logbox .ln b{color:#d4ccd2;}
 .g{color:#5a9e84;font-weight:700;}.r{color:#c43048;font-weight:700;}.y{color:#c89b3c;font-weight:700;}.bl{color:#5a82b0;font-weight:700;}
 .modal-wrap{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(5,5,8,0.82);backdrop-filter:blur(3px);}
@@ -300,7 +313,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
       <button class="btn ghost sm" id="item-btn" style="display:none;" onclick="openItemMenu()">🎒 <span id="item-count">0</span></button>
       <button class="btn" id="roll-btn" onclick="onRoll()">ROLL</button>
     </div>
-    <div class="logbox" id="logbox"></div>
+    <div class="logwrap"><div class="logbox" id="logbox" onclick="openLogViewer()"></div><div class="log-hint">タップで全履歴</div></div>
+  </div>
+  <div id="log-viewer">
+    <div class="lv-head"><div class="lv-title">📜 これまでの出来事</div><button class="lv-close" onclick="closeLogViewer()">✕ 閉じる</button></div>
+    <div class="lv-body" id="lv-body"></div>
+    <div class="lv-foot"><button onclick="document.getElementById('lv-body').scrollTop=0">▲ 最初へ</button><button onclick="const b=document.getElementById('lv-body');b.scrollTop=b.scrollHeight">▼ 最新へ</button></div>
   </div>
 
   <!-- 結果 -->
@@ -1404,7 +1422,17 @@ function fmt(n){return Math.round(n).toLocaleString('ja-JP');}
 function antiqueValue(p){return (p.antiques||[]).reduce((s,a)=>s+(a.revealed?(a.isReal?a.realValue:a.fakeValue):a.price),0);}
 function totalAssets(p){return p.money+p.estates.reduce((s,ni)=>s+NODES[ni].estate.value,0)+p.cashedLoot+antiqueValue(p);}
 
-function log(html){const box=document.getElementById('logbox');const ln=document.createElement('div');ln.className='ln';ln.innerHTML=html;box.appendChild(ln);box.scrollTop=box.scrollHeight;}
+function log(html){const box=document.getElementById('logbox');const ln=document.createElement('div');ln.className='ln';ln.innerHTML=html;box.appendChild(ln);box.scrollTop=box.scrollHeight;
+  const lv=document.getElementById('log-viewer');
+  if(lv&&lv.classList.contains('active')){const body=document.getElementById('lv-body');const atBottom=body.scrollHeight-body.scrollTop-body.clientHeight<40;body.appendChild(ln.cloneNode(true));if(atBottom)body.scrollTop=body.scrollHeight;}
+}
+function openLogViewer(){
+  const body=document.getElementById('lv-body');
+  body.innerHTML=document.getElementById('logbox').innerHTML||'<div class="ln dim">まだ出来事はない。</div>';
+  document.getElementById('log-viewer').classList.add('active');
+  body.scrollTop=body.scrollHeight;
+}
+function closeLogViewer(){document.getElementById('log-viewer').classList.remove('active');const box=document.getElementById('logbox');box.scrollTop=box.scrollHeight;}
 function logp(p,txt){log(`<b style="color:${p.color}">${p.name}</b> ${txt}`);}
 // 金額増減をコマの位置にフロート表示（ゲーム性に影響しない演出）
 function floatMoney(p,amt,positive){
@@ -3133,7 +3161,8 @@ function saveProgress(){
     if(!ST.players||!ST.players.length)return;
     const meta={};NODE_META.forEach(k=>{if(NODES['_'+k]!==undefined)meta[k]=NODES['_'+k];});
     const st=Object.assign({},ST,{rolling:false,busy:false});
-    localStorage.setItem(SAVE_KEY,JSON.stringify({v:1,ts:Date.now(),ST:st,NODES:Array.from(NODES),meta,LAYOUT}));
+    const lns=[...document.getElementById('logbox').children].slice(-400).map(e=>e.innerHTML);
+    localStorage.setItem(SAVE_KEY,JSON.stringify({v:1,ts:Date.now(),ST:st,NODES:Array.from(NODES),meta,LAYOUT,logs:lns}));
   }catch(e){}
 }
 function loadProgress(){
@@ -3163,6 +3192,7 @@ function resumeGame(){
   const cur=ST.players[ST.turn];
   setTimeout(()=>{if(cur&&typeof scrollToTile==='function')scrollToTile(cur.pos);},60);
   const ch=CHAPTERS[ST.chapter]||CHAPTERS[0];
+  if(Array.isArray(d.logs)){const box=document.getElementById('logbox');box.innerHTML='';d.logs.forEach(h=>{const ln=document.createElement('div');ln.className='ln';ln.innerHTML=h;box.appendChild(ln);});}
   log(`<span class="y">━━ つづきから ── ${ch.icon} 第${['一','二','三'][ST.chapter]}章「${ch.name}」 ━━</span>`);
   BGM.start();
   beginTurn();
