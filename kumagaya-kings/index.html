@@ -179,6 +179,20 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .logbox{background:#08070a;border:1px solid #1c1820;border-radius:3px;padding:9px 12px;height:78px;overflow-y:auto;margin-top:10px;font-size:12px;line-height:1.6;}
 .logbox .ln{color:#8a8088;margin-bottom:2px;}
 .logbox{position:relative;cursor:pointer;}
+#item-get{position:fixed;inset:0;z-index:65;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);}
+#item-get.active{display:flex;}
+#item-get .ig-card{width:min(300px,84vw);background:linear-gradient(180deg,#1c1622,#0e0b12);border:2px solid #c89b3c;border-radius:10px;padding:16px 16px 12px;text-align:center;box-shadow:0 0 30px rgba(200,155,60,0.35);animation:igpop .35s ease-out;}
+#item-get .ig-top{font-family:'Shippori Mincho',serif;font-weight:800;font-size:13px;color:#c89b3c;letter-spacing:0.2em;}
+#item-get .ig-icon{font-size:56px;line-height:1.2;margin:6px 0 2px;animation:igbounce .6s ease-out;}
+#item-get .ig-name{font-family:'Shippori Mincho',serif;font-weight:800;font-size:19px;color:#ffd86b;}
+#item-get .ig-src{font-size:11px;color:#9a8e96;margin-top:2px;}
+#item-get .ig-desc{font-size:13.5px;color:#e8e0e4;line-height:1.7;margin:10px 0 8px;padding:8px;background:rgba(255,255,255,0.04);border-radius:6px;}
+#item-get .ig-how{font-size:11.5px;color:#b8aab2;line-height:1.6;}
+#item-get .ig-tap{font-size:10px;color:#6a5a64;margin-top:8px;}
+@keyframes igpop{from{transform:scale(0.7);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes igbounce{0%{transform:translateY(-14px) scale(1.3)}60%{transform:translateY(3px)}100%{transform:none}}
+#item-btn.ig-flash{animation:igflash 0.7s ease-in-out 4;border-color:#ffd86b!important;color:#ffd86b!important;}
+@keyframes igflash{50%{box-shadow:0 0 14px rgba(255,216,107,0.9);transform:scale(1.08)}}
 .logwrap{position:relative;}
 .log-hint{position:absolute;right:8px;top:14px;font-size:10px;color:#6a5a64;background:rgba(8,7,10,0.9);padding:1px 6px;border:1px solid #2a2230;border-radius:8px;pointer-events:none;z-index:1;}
 #log-viewer{position:fixed;inset:0;z-index:95;background:rgba(6,5,8,0.97);display:none;flex-direction:column;}
@@ -316,6 +330,15 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     </div>
     <div class="logwrap"><div class="logbox" id="logbox" onclick="openLogViewer()"></div><div class="log-hint">タップで全履歴</div></div>
   </div>
+  <div id="item-get" onclick="closeItemGet()"><div class="ig-card">
+    <div class="ig-top">アイテム入手！</div>
+    <div class="ig-icon" id="ig-icon"></div>
+    <div class="ig-name" id="ig-name"></div>
+    <div class="ig-src" id="ig-src"></div>
+    <div class="ig-desc" id="ig-desc"></div>
+    <div class="ig-how" id="ig-how"></div>
+    <div class="ig-tap">タップで閉じる</div>
+  </div></div>
   <div id="log-viewer">
     <div class="lv-head"><div class="lv-title">📜 これまでの出来事</div><button class="lv-close" onclick="closeLogViewer()">✕ 閉じる</button></div>
     <div class="lv-body" id="lv-body"></div>
@@ -1919,7 +1942,7 @@ function afterArrive(p,n){
       return;
     }
     case 'start': laterTurn(300);return;
-    case 'money': {let amt=Math.round(n.amt*chapterMul()/1000)*1000;SFX.money();gain(p,amt,n.text||n.name);p.earned.money+=amt;if(Math.random()<0.22)giveItem(p,randomItemKey());laterTurn(950);return;}
+    case 'money': {let amt=Math.round(n.amt*chapterMul()/1000)*1000;SFX.money();gain(p,amt,n.text||n.name);p.earned.money+=amt;if(Math.random()<0.22)giveItem(p,randomItemKey(),'稼ぎのついでに手に入れた');laterTurn(950);return;}
     case 'loss':
       if(p.bribeActive){p.bribeActive=false;SFX.useItem();log(`💼 <b style="color:${p.color}">${p.name}</b> は賄賂で <b>${n.name}</b> を揉み消した`);toast('💼 賄賂で回避','info');laterTurn(900);return;}
       {let dmg=Math.round(Math.abs(n.amt)*chapterMul()/1000)*1000;if(p.charmActive){p.charmActive=false;dmg=Math.round(dmg*0.5/1000)*1000;log(`🧿 <b style="color:${p.color}">${p.name}</b> はヒロシのお守りに守られた（損失半減）`);}if(hasAbility(p,'survivor')){dmg=Math.round(dmg*0.6/1000)*1000;}if(p.motive&&p.motive.key==='debt'){dmg=Math.round(dmg*0.85/1000)*1000;}SFX.loss();lose(p,dmg,n.text||n.name);}laterTurn(850);return;
@@ -2031,7 +2054,26 @@ const ITEMS=[
   {key:'meishi',  icon:'📇',name:'タクミの名刺',desc:'組員が最も多い組から1人引き抜く',use:'instant',special:true},
 ];
 function itemDef(key){return ITEMS.find(i=>i.key===key);}
-function giveItem(p,key){p.items.push(key);const d=itemDef(key);SFX.item();log(`<b style="color:${p.color}">${p.name}</b> がアイテム <span class="y">${d.icon}${d.name}</span> を入手`);toast(d.icon+' '+d.name+' 入手','info');renderHUD();}
+function giveItem(p,key,src){p.items.push(key);const d=itemDef(key);SFX.item();
+  log(`<b style="color:${p.color}">${p.name}</b> がアイテム <span class="y">${d.icon}${d.name}</span> を入手<span class="dim">（${d.desc}）</span>`);
+  if(p.isCPU)toast(`${p.name} が ${d.icon}${d.name} を入手`,'info');
+  else showItemGet(p,d,src);
+  renderHUD();}
+let itemGetTimer=null;
+function showItemGet(p,d,src){
+  const how={roll:'🎒 自分の番、サイコロを振る前に下の［🎒］ボタンから使う',
+             passive:'🎒 ［🎒］ボタンで使うと待機し、条件が来たら自動で発動',
+             instant:'🎒 ［🎒］ボタンで使うとその場で効果が出る'}[d.use]||'🎒 自分の番に下の［🎒］ボタンから使う';
+  document.getElementById('ig-icon').textContent=d.icon;
+  document.getElementById('ig-name').textContent=d.name;
+  document.getElementById('ig-src').textContent=(src?src+' ／ ':'')+`${p.name} の持ち物に入った（所持 ${p.items.length}個）`;
+  document.getElementById('ig-desc').textContent=d.desc;
+  document.getElementById('ig-how').textContent=how;
+  document.getElementById('item-get').classList.add('active');
+  clearTimeout(itemGetTimer);itemGetTimer=setTimeout(closeItemGet,4200);
+  const b=document.getElementById('item-btn');if(b){b.classList.remove('ig-flash');void b.offsetWidth;b.classList.add('ig-flash');setTimeout(()=>b.classList.remove('ig-flash'),3000);}
+}
+function closeItemGet(){clearTimeout(itemGetTimer);document.getElementById('item-get').classList.remove('active');}
 function randomItemKey(){const pool=ITEMS.filter(i=>!i.special);return pool[Math.floor(Math.random()*pool.length)].key;}
 
 const VERSUS_ACTIONS=[
@@ -2571,7 +2613,7 @@ function addRel(p,ch,d){
     p._relFlags[ch+'+']=1;
     log(`🤝 <b style="color:${p.color}">${p.name}</b> と ${REL_ICON[ch]}${ch} の間に<span class="g">絆</span>が生まれた（決戦で力を貸してくれる）`);
     toast('🤝 '+ch+'との絆','pos');
-    if(REL_GIFT[ch])giveItem(p,REL_GIFT[ch]);
+    if(REL_GIFT[ch])giveItem(p,REL_GIFT[ch],`${REL_ICON[ch]}${ch}からの贈り物`);
   }
   if(v<=-REL_TH&&before>-REL_TH&&!p._relFlags[ch+'-']){
     p._relFlags[ch+'-']=1;
