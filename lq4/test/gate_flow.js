@@ -482,5 +482,23 @@ function kill(k){
   const order=['北の 島','東の 島','南の 島','西の 島','中央の 島'].map(n=>pw(isl.find(z=>z.name===n)));
   T('固有種の 強さは 北→東→南→西→中央 の 順', order.every((v,i)=>i===0||v>order[i-1]), order.map(v=>Math.round(v)).join(' < '));
 }
+// ★島の 固有種：絵（assets.js の MON）が ある 島だけ 新しい 表に なる
+{
+  const cx={console, window:{}, localStorage:undefined}; cx.globalThis=cx; vm.createContext(cx);
+  vm.runInContext(fs.readFileSync('assets.js','utf8'), cx);
+  for(const f of ['world.js','npc.js','chapters.js','core.js']) vm.runInContext(fs.readFileSync('src/'+f,'utf8'), cx, {filename:f});
+  const C2=vm.runInContext('LQ4',cx);
+  const isl=C2.MAPS.ground.encIslands;
+  isl.forEach(z=>{
+    const hasAll=z.unique.every(k=>C2.hasFoeArt(k)), pool=C2.islandPool('ground',z.at[0],z.at[1]);
+    if(hasAll) T(z.name+'：絵が そろい、固有種が 出る', !!pool && z.unique.every(k=>pool.includes(k)), JSON.stringify(pool));
+    else T(z.name+'：絵が まだ なく、これまでの 表', pool===null || z.unique.some(k=>pool.includes(k)), JSON.stringify(pool));
+  });
+  T('東の 島の 固有種の 絵が ある', C2.hasFoeArt('sunamogura') && C2.hasFoeArt('hikarabi'));
+  // 戦闘の 背景：砂漠が あり、地上の 野外は 足もとの 地形で えらぶ
+  const V2src=fs.readFileSync('src/view2d.js','utf8');
+  T('戦闘の 背景に 砂漠が ある', /desert:\{sky:/.test(V2src));
+  T('地上の 野外は 足もとで 背景を えらぶ', /bTheme='desert'/.test(V2src) && /bTheme='snow'/.test(V2src));
+}
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

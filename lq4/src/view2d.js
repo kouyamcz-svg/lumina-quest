@@ -1619,6 +1619,9 @@ function battleBackdrop(theme){
             gnd:atlas.rockwall,  haze:'#202634'},
     world: {sky:'#111a2e', sky2:'#1a2540', far:'#20304a', mid:'#2c4438',
             gnd:atlas.plain,     haze:'#26374e'},
+    // ★砂漠（地上の 東の 島）：夜の 砂丘
+    desert:{sky:'#15142a', sky2:'#1f1c36', far:'#3a2f34', mid:'#5c4630',
+            gnd:atlas.desert,    haze:'#3a3040'},
     indoor:{sky:'#100e18', sky2:'#191527', far:'#221d2c', mid:'#332b40',
             gnd:atlas.pave,      haze:'#2a2438'},
   };
@@ -1696,6 +1699,16 @@ function battleBackdrop(theme){
 function battleEnter2D(enemies, mon, done){
   const m = C.MAPS[C.P.map];
   bTheme = (m && m.theme) || 'plain';
+  // ★地上の 野外は 足もとの 地形で 背景を えらぶ（砂漠の 島で 草原の 背景に なって いた）
+  if(bTheme==='world' && m && m.tiles){
+    const cnt={':':0,'=':0}; let n=0;
+    for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
+      const ch=(m.tiles[C.P.y+dy]||'')[C.P.x+dx]; if(ch===undefined||ch==='~') continue;
+      n++; if(ch in cnt) cnt[ch]++;
+    }
+    if(n && cnt[':']*2>=n) bTheme='desert';
+    else if(n && cnt['=']*2>=n) bTheme='snow';
+  }
   battleBackdrop(bTheme);
   bFoes = enemies.map((e,i)=>{
     // art が あれば その えを つかう（あたらしい ボスに きそんの えを あてる）。

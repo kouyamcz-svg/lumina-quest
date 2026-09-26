@@ -97,6 +97,13 @@ if(process.env.SHIP){ const [sx,sy]=process.env.SHIP.split(',').map(Number); C.G
 V.init();
 V.buildMap(MAP);
 V.setActors(true);
+if(process.env.BATTLE){
+  let seed=Number(process.env.SEED||1); const rnd=()=>{ seed=(seed*16807+11)%2147483647; return seed/2147483647; };
+  ctx.__rnd=rnd; vm.runInContext('Math.random=function(){return __rnd();}', ctx);
+  C.party.forEach(p=>p.lv=24); C.G.mode='field';
+  C.bind(V, {msg(l,d){}, menu(i,t,cb){}, hud(){}, label(){}, refresh(){}}, C.NullAudio);
+  try{ C.startBattle(); }catch(e){ console.log('battle err', e.message); }
+}
 // 数フレーム 回して カメラを 寄せる
 let t0=0; for(let i=0;i<5;i++){ t0+=33; try{ V.loop(t0);}catch(e){} }
 const LATER=(process.env.LATER||'').split(';').filter(Boolean);
