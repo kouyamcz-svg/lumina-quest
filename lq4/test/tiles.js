@@ -205,5 +205,33 @@ TERRAINS.forEach(t=>{
   });
 }
 
+// ★ダンジョンは 3D で えがく。3D の 描き方が ない 文字が まじって いない こと。
+//   ★3D化の とき、灯り・水・岩・穴・光珠管・継ぎ目・管の きれはし の 7種が 描けなかった。
+{
+  const V3 = fs.readFileSync('src/view.js','utf8');
+  const blk = V3.slice(V3.indexOf('if(dgn3d){'), V3.indexOf("if(ch==='w'){"));
+  const general = V3.slice(V3.indexOf('function buildMap(name)'));
+  const handledD = new Set([...blk.matchAll(/ch===\'(.)\'/g)].map(m=>m[1]));
+  const handledG = new Set([...general.matchAll(/ch===\'(.)\'/g)].map(m=>m[1]));
+  const cx = {console, window:{}, localStorage:undefined}; cx.globalThis=cx; vm.createContext(cx);
+  for(const f of ['world.js','npc.js','chapters.js','core.js'])
+    vm.runInContext(fs.readFileSync('src/'+f,'utf8'), cx, {filename:f});
+  const C = vm.runInContext('LQ4', cx), W = vm.runInContext('WORLD', cx);
+  Object.keys(C.MAPS).forEach(k=>{
+    if(W.renderModeOf(k)!=='3d') return;
+    const used = new Set(C.MAPS[k].tiles.join('').split(''));
+    // 実行中に かわる 文字も くわえる（灯りの 点灯・継ぎ目の 差しこみ）
+    if(used.has('L')) used.add('l');
+    if(used.has('h')) used.add('H');
+    const miss = [...used].filter(ch => ch!=='.' && !handledD.has(ch) && !handledG.has(ch));
+    T('3D '+k+' の 文字は ぜんぶ 描ける', miss.length===0, '描けない: '+miss.join(''));
+  });
+  T('祠の丘（屋外）は 2D', W.renderModeOf('shrine_hill')==='2d');
+  T('町は 2D', W.renderModeOf('ice_camp')==='2d' && W.renderModeOf('toros')==='2d');
+  T('ダンジョンは 3D', W.renderModeOf('ice_cave')==='3d' && W.renderModeOf('tower2')==='3d');
+  // 地図が かわったら 組み直す（3D は いちど 組んだ だけ だった）
+  T('3D は 地図の 変化で 組み直す', /function watchTiles\(\)/.test(V3) && /watchTiles\(\);/.test(V3));
+}
+
 console.log('\n--- tiles: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

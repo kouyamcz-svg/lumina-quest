@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 18:39 JST", "build":"a378f23a","assets_sha": "93d9f9d5", "lines": {"world": 131, "npc": 858, "chapters": 2664, "bgm": 985, "view2d": 2544, "core": 3973, "view": 1401, "ui": 1149}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 19:12 JST", "build":"aa74b541","assets_sha": "93d9f9d5", "lines": {"world": 139, "npc": 858, "chapters": 2664, "bgm": 985, "view2d": 2544, "core": 3973, "view": 1507, "ui": 1149}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -254,9 +254,17 @@ const SCENES = {
   SCENE_SKY_TOWN: {render:'2d', theme:'sky',    outdoor:true,  snowfall:false, aurora:false, footprints:false},
   SCENE_SKY_IN:   {render:'2d', theme:'indoor', outdoor:false},
   SCENE_SKY_RIFT: {render:'2d', theme:'dream',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
+  // ★地上（第3章）。未定義の まま 使われて いた。
+  SCENE_CAVE:     {render:'2d', theme:'cave',   outdoor:false, snowfall:false, aurora:false, footprints:false},
+  SCENE_FIELD:    {render:'2d', theme:'world',  outdoor:true,  snowfall:false, aurora:false, footprints:false},
 };
+// ★ダンジョン（kind:dgn）は 3D で えがく（DQ4リメイク風の 斜め見下ろし）。
+//   屋外の 丘（祠の丘）は のぞく。町・世界地図は 2D の まま。
+const NO_3D = {shrine_hill:true};
 function renderModeOf(mapId){
-  const s = SCENES[(MAP_IDS[mapId]||{}).scene] || {};
+  const id = MAP_IDS[mapId] || {};
+  if(id.kind==='dgn' && !NO_3D[mapId]) return '3d';
+  const s = SCENES[id.scene] || {};
   return s.render || '2d';
 }
 
@@ -12012,11 +12020,65 @@ function buildMap(name){
   const ice  = map.theme==='ice';
   const cast = map.theme==='castle';
   const baseY = cave?0.25:-0.06;     // 洞窟は台地
+  // ★ダンジョン（kind:dgn）の 3D：DQ4リメイク風に 低く 平らな 壁で 通路を 見せる。
+  //   ★LQ3の 洞窟は 屋外の 崖（高さ 2〜4、上に 岩の とがり）で、迷路が 見えなかった。
+  const skyD = map.theme==='sky';
+  const dgn3d = (cave || skyD) && C.WORLD && C.WORLD.MAP_IDS
+             && (C.WORLD.MAP_IDS[name]||{}).kind==='dgn' && name!=='shrine_hill';
+  // 床の 上面の 高さ（洞窟は 台地 0.5、天空は 0）。仕掛けは ここを 基準に 置く
+  const ft = cave ? 0.5 : 0.0;
+  const WALL_H = cave ? 1.4 : 1.15;
+  // ★地方ごとの 色（壁の 側面の 色あい／上面／床／水）
+  const DPAL = {
+    ice:  {side:0xffffff, top:0xe4f4fc, floor:0x5d7f9e, water:0xbfe8ff},
+    well: {side:0xd8b48c, top:0x7a6650, floor:0x6e5a44, water:0x7fc8e0},   // 地下水路：土と 水
+    sea:  {side:0x9fd8d0, top:0x5a8a84, floor:0xb8a882, water:0x4fa8b8},   // 海蝕洞：砂と 潮
+    peak: {side:0xc0c0c8, top:0x8a8a90, floor:0x76767c, water:0x8fb0d0},   // 山道：灰色の 岩
+    rock: {side:0xc8b8a0, top:0x6a5e50, floor:0x8a7a6a, water:0x7fb8d8},
+    sky:  {side:0xf2eee2, top:0xd8cfae, floor:0xbab39c, water:0xffffff},   // 天空：白い 石と 金
+    forge:{side:0xd8b8a0, top:0x8a5a40, floor:0x7a6050, water:0xffffff},   // 炉：赤茶の 煉瓦
+  };
+  const dkey = ice ? 'ice' : /^well/.test(name) ? 'well' : /^sea/.test(name) ? 'sea'
+             : /^peak|^zenos/.test(name) ? 'peak' : /^furnace/.test(name) ? 'forge'
+             : skyD ? 'sky' : 'rock';
+  const dp = DPAL[dkey];
   const topY  = cave?0.5:0;
   const G_={}, put=(k,v)=>{ (G_[k]=G_[k]||[]).push(v); };
 
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     const ch=rows[y][x];
+    if(dgn3d){
+      const fl = ()=>put('ground',[x,baseY,y]);
+      if(ch==='#'){ put('dwall',[x,WALL_H/2,y]); continue; }            // 低い かべ
+      if(ch==='~'){
+        if(skyD){ put('dcloud',[x,ft-0.35,y]); continue; }               // 天空：雲の ふち
+        put('dwater',[x,ft-0.14,y]); put('dwbed',[x,ft-0.40,y]); continue;   // 水路・潮だまり
+      }
+      if(ch==='K'){ fl(); put('dgate',[x,ft+0.45,y]); continue; }      // 隔壁
+      if(ch==='L'||ch==='l'){                                          // 灯り
+        fl(); put('dped',[x,ft+0.25,y]);
+        put(ch==='l'?'dorbOn':'dorbOff',[x,ft+0.66,y]); continue;
+      }
+      if(ch==='O'){ fl(); put('drock',[x,ft+0.38,y]); continue; }      // 押す 岩
+      if(ch==='x'){ put('dpit',[x,ft-0.46,y]); continue; }             // 穴
+      // ★奥への 口／出口の 門：暗い 入口。両わきに 柱、上に 梁。
+      if(ch==='D'||ch==='G'){
+        put('dpit',[x,ft-0.10,y]);
+        put('dpost',[x-0.42,ft+0.45,y]); put('dpost',[x+0.42,ft+0.45,y]);
+        put('dbeam',[x,ft+1.05,y]);
+        continue;
+      }
+      // ★天空の 仕掛け
+      if(ch==='p'){ fl(); put('dpipeH',[x,ft+0.45,y]); continue; }     // 光珠管（よこ）
+      if(ch==='q'){ fl(); put('dpipeV',[x,ft+0.45,y]); continue; }     // 光珠管（たて）
+      if(ch==='h'){ fl(); put('djoint',[x,ft+0.35,y]); continue; }     // 空の 継ぎ目
+      if(ch==='H'){ fl(); put('djointOn',[x,ft+0.35,y]); continue; }   // 管を さした 継ぎ目
+      if(ch==='u'){ fl(); put('dpiece',[x,ft+0.10,y]); continue; }     // 床の 管の きれはし
+      if(ch==='<'||ch==='>'){                                          // 階段
+        fl(); put('dstep',[x,ft+0.06,y+0.25]); put('dstep',[x,ft+0.18,y]); put('dstep',[x,ft+0.30,y-0.25]);
+        continue;
+      }
+    }
     if(ch==='w'){                    // みず
       put('waterbed',[x,baseY-0.24,y]);
       const wm=new THREE.Mesh(new THREE.PlaneGeometry(1,1),
@@ -12202,14 +12264,50 @@ function buildMap(name){
   const gm=new THREE.MeshLambertMaterial({
     map: snow?TEX.snow : ice?TEX.ice : cast?TEX.carpet : dream?TEX.ice : TEX.grass});
   if(dream) gm.color.setHex(0xc9b2f2);   // ★ゆめのたいりく：あわい むらさきの ゆか
+  // ★天空の ダンジョンは 石の 床（芝生に なって いた）
+  if(dgn3d && skyD){ gm.map = TEX.pave; gm.color.setHex(dp.floor); }
   if(snow && ts && ts.id!=='NORMAL') gm.color.setHex(ts.snowColor);
   addInstanced(box,gm, (G_.ground||[]).map(p=>[p[0],p[1],p[2]]));
   addInstanced(box,new THREE.MeshLambertMaterial({
       map: snow?TEX.pave : ice?TEX.ice : cast?TEX.carpet : TEX.road}),
     (G_.road||[]).map(p=>[p[0],p[1],p[2]]));
+  if(dgn3d){
+    const side = new THREE.MeshLambertMaterial({map: ice?TEX.icewall : skyD?(dkey==='forge'?TEX.brick:TEX.whitestone) : TEX.cliff, color: dp.side});
+    const top  = new THREE.MeshLambertMaterial({color: dp.top});
+    const bot  = new THREE.MeshLambertMaterial({color: 0x101010});
+    addInstanced(new THREE.BoxGeometry(1,WALL_H,1), [side,side,top,bot,side,side], G_.dwall||[]);
+    const wg = new THREE.PlaneGeometry(1,1); wg.rotateX(-Math.PI/2);
+    const wt = TEX.water.clone(); wt.wrapS=wt.wrapT=THREE.RepeatWrapping; wt.needsUpdate=true;
+    const wmat = new THREE.MeshBasicMaterial({map:wt, transparent:true, opacity:0.82, color: dp.water});
+    const wim = addInstanced(wg, wmat, G_.dwater||[]);
+    if(wim){ waters.push({material:wmat, isInst:true}); }
+    addInstanced(new THREE.BoxGeometry(1,0.2,1), new THREE.MeshLambertMaterial({color:0x0c1a28}), G_.dwbed||[]);
+    addInstanced(new THREE.BoxGeometry(0.96,0.9,0.96),
+      new THREE.MeshLambertMaterial({color: ice?0xa8e0ff:0x6a5a48, transparent:ice, opacity: ice?0.78:1}), G_.dgate||[]);
+    addInstanced(new THREE.CylinderGeometry(0.2,0.27,0.5,8), new THREE.MeshLambertMaterial({color:0x7a7f88}), G_.dped||[]);
+    addInstanced(new THREE.SphereGeometry(0.17,12,8), new THREE.MeshLambertMaterial({color:0x2e3a4c}), G_.dorbOff||[]);
+    addInstanced(new THREE.SphereGeometry(0.19,12,8), new THREE.MeshBasicMaterial({color:0xffe6a0}), G_.dorbOn||[]);
+    addInstanced(new THREE.DodecahedronGeometry(0.42,0), new THREE.MeshLambertMaterial({color:0x6b6f78}), G_.drock||[]);
+    addInstanced(new THREE.BoxGeometry(1,0.08,1), new THREE.MeshBasicMaterial({color:0x020204}), G_.dpit||[]);
+    addInstanced(new THREE.BoxGeometry(0.16,1.1,0.3), new THREE.MeshLambertMaterial({color: dp.top}), G_.dpost||[]);
+    addInstanced(new THREE.BoxGeometry(1.0,0.2,0.34), new THREE.MeshLambertMaterial({color: dp.top}), G_.dbeam||[]);
+    // 天空の 仕掛け
+    const brass = new THREE.MeshLambertMaterial({color:0xc8a050});
+    const pgH = new THREE.CylinderGeometry(0.16,0.16,1,10); pgH.rotateZ(Math.PI/2);
+    const pgV = new THREE.CylinderGeometry(0.16,0.16,1,10); pgV.rotateX(Math.PI/2);
+    addInstanced(pgH, brass, G_.dpipeH||[]);
+    addInstanced(pgV, brass, G_.dpipeV||[]);
+    addInstanced(new THREE.BoxGeometry(0.5,0.7,0.5), new THREE.MeshLambertMaterial({color:0x4a4038}), G_.djoint||[]);
+    addInstanced(new THREE.BoxGeometry(0.5,0.7,0.5), new THREE.MeshBasicMaterial({color:0xffd870}), G_.djointOn||[]);
+    const pgP = new THREE.CylinderGeometry(0.12,0.12,0.6,8); pgP.rotateZ(Math.PI/2);
+    addInstanced(pgP, brass, G_.dpiece||[]);
+    addInstanced(new THREE.BoxGeometry(0.9,0.12,0.26), new THREE.MeshLambertMaterial({color: dp.top}), G_.dstep||[]);
+    addInstanced(new THREE.BoxGeometry(1,0.3,1), new THREE.MeshBasicMaterial({color:0xf4f6ff, transparent:true, opacity:0.85}), G_.dcloud||[]);
+  }
   if(cave){
     addInstanced(new THREE.BoxGeometry(1,0.5,1),
-      new THREE.MeshLambertMaterial({map: ice?TEX.ice:TEX.rock}),
+      // ★ダンジョンでは 床を 暗く して、壁の 上面と 見分けやすく する
+      new THREE.MeshLambertMaterial({map: ice?TEX.ice:TEX.rock, color: dgn3d ? dp.floor : 0xffffff}),
       (G_.ground||[]).concat(G_.road||[]).map(p=>[p[0],0.25,p[2]]));
     addInstanced(new THREE.BoxGeometry(1,1,1),
       new THREE.MeshLambertMaterial({map: ice?TEX.icewall:TEX.cliff}),
@@ -12504,8 +12602,24 @@ function update2D(dt,time){
   lastPoses2D = objs.map(o=>o.pose);
   V2.draw(dt, time, objs);
 }
+// ★3Dは 地図を いちど 組み立てる だけ だった。
+//   灯りを 点けても・隔壁を あけても・ボスを 倒しても 画面が かわらなかった。
+//   地図の 文字が かわったら 組み直す。
+let tileSig = null, tileSigMap = null;
+function watchTiles(){
+  const m = C.MAPS[curMap]; if(!m) return;
+  const sig = m.tiles.join('');
+  if(tileSigMap===curMap && tileSig!==null && sig!==tileSig){
+    tileSig = sig;
+    buildMap(curMap);
+    setActors(true);
+    return;
+  }
+  tileSig = sig; tileSigMap = curMap;
+}
 function updateField(dt,time){
   if(!scene) return;
+  watchTiles();
   const objs=actors.list||[];
   if(!objs.length) { renderer.render(scene,cam); return; }
   const tgt=fp._tgt||objs.map(()=>[C.P.x,C.P.y]);

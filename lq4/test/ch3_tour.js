@@ -299,7 +299,7 @@ stand('sea_cave', 9, 9, 'left'); C.interact();
 T('ふたつで 潮が 引く', C.tileAt('sea_cave',13,1)==='.', C.tileAt('sea_cave',13,1));
 T('洞の ぬしは 別の 間', C.tileAt('sea_core',10,4)==='B');
 
-clearLog(); strong(28);
+clearLog(); strong(34);
 stand('sea_core', 10, 5, 'back');
 C.interact();
 T('洞の ぬしに かてる', C.G.flags.ch3_namiSaved===true);
@@ -359,7 +359,7 @@ stand('peak_path', 19, 9, 'left'); C.interact();
 T('ふたつで 道が 通る', C.tileAt('peak_path',9,1)==='.', C.tileAt('peak_path',9,1));
 T('山頂の ぬしは 別の 間', C.tileAt('peak_core',9,4)==='B');
 
-clearLog(); strong(28);
+clearLog(); strong(34);
 stand('peak_core', 9, 5, 'back');
 C.interact();
 T('山頂の ぬしに かてる', C.G.flags.ch3_peakCleared===true);

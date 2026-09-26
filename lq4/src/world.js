@@ -87,9 +87,17 @@ const SCENES = {
   SCENE_SKY_TOWN: {render:'2d', theme:'sky',    outdoor:true,  snowfall:false, aurora:false, footprints:false},
   SCENE_SKY_IN:   {render:'2d', theme:'indoor', outdoor:false},
   SCENE_SKY_RIFT: {render:'2d', theme:'dream',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
+  // ★地上（第3章）。未定義の まま 使われて いた。
+  SCENE_CAVE:     {render:'2d', theme:'cave',   outdoor:false, snowfall:false, aurora:false, footprints:false},
+  SCENE_FIELD:    {render:'2d', theme:'world',  outdoor:true,  snowfall:false, aurora:false, footprints:false},
 };
+// ★ダンジョン（kind:dgn）は 3D で えがく（DQ4リメイク風の 斜め見下ろし）。
+//   屋外の 丘（祠の丘）は のぞく。町・世界地図は 2D の まま。
+const NO_3D = {shrine_hill:true};
 function renderModeOf(mapId){
-  const s = SCENES[(MAP_IDS[mapId]||{}).scene] || {};
+  const id = MAP_IDS[mapId] || {};
+  if(id.kind==='dgn' && !NO_3D[mapId]) return '3d';
+  const s = SCENES[id.scene] || {};
   return s.render || '2d';
 }
 
