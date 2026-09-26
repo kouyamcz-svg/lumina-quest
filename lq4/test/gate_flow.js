@@ -453,5 +453,34 @@ function kill(k){
   const east = at('well_town')[0] > W*2/3, west = at('peak_village')[0] < W/3;
   T('東西が 逆に なって いない', east && west);
 }
+// ★地上の 島ごとの 固有の 敵
+{
+  const g=C.MAPS.ground, isl=g.encIslands||[];
+  T('地上に 島ごとの 出現表が 5つ', isl.length===5, isl.length);
+  const keys=new Set(C.ENEMIES.map(e=>e.key));
+  isl.forEach(z=>{
+    T(z.name+' の 表の 敵は ぜんぶ ある', z.pool.every(k=>keys.has(k)), z.pool.filter(k=>!keys.has(k)).join(','));
+    T(z.name+' の 固有種は 表に 入って いる', z.unique.every(k=>z.pool.includes(k)));
+    T(z.name+' の 基準の ますは その 島', C.islandAt('ground', z.at[0], z.at[1])===z);
+  });
+  // 固有種は ほかの 島にも ダンジョンにも 出ない
+  const uniq=[].concat(...isl.map(z=>z.unique));
+  T('島の 固有種は 10種', new Set(uniq).size===10, uniq.length);
+  uniq.forEach(k=>{
+    const inOther = isl.filter(z=>z.pool.includes(k)).length;
+    const inMap = Object.keys(C.byMap).filter(m=>C.byMap[m].includes(k));
+    T(k+' は ひとつの 島だけ', inOther===1 && inMap.length===0, inOther+' / '+inMap.join(','));
+  });
+  // 島の 見分け：町の 前の ますが それぞれの 島
+  [['北の 島',48,9],['東の 島',86,41],['東の 島',72,12],['南の 島',54,59],['西の 島',9,30],['中央の 島',48,31]].forEach(([nm,x,y])=>{
+    T('('+x+','+y+') は '+nm, (C.islandAt('ground',x,y)||{}).name===nm, (C.islandAt('ground',x,y)||{}).name);
+  });
+  // 絵が ない あいだは これまでの 表（ふるまいが 変わらない）
+  T('絵が ない 敵は 出さない（いまは これまでの 表）', C.islandPool('ground',48,9)===null);
+  // 強さは 訪れる 順に 上がる（固有種の HP＋攻撃 の 平均）
+  const pw=z=>z.unique.map(k=>C.ENEMIES.find(e=>e.key===k)).reduce((a,e)=>a+e.hp+e.atk*3,0)/z.unique.length;
+  const order=['北の 島','東の 島','南の 島','西の 島','中央の 島'].map(n=>pw(isl.find(z=>z.name===n)));
+  T('固有種の 強さは 北→東→南→西→中央 の 順', order.every((v,i)=>i===0||v>order[i-1]), order.map(v=>Math.round(v)).join(' < '));
+}
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

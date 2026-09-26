@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 23:02 JST", "build":"8fc373f5","assets_sha": "91fb430a", "lines": {"world": 140, "npc": 866, "chapters": 2693, "bgm": 985, "view2d": 2578, "core": 4080, "view": 1682, "ui": 1160}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-27 00:22 JST", "build":"5354e0d8","assets_sha": "91fb430a", "lines": {"world": 140, "npc": 866, "chapters": 2693, "bgm": 985, "view2d": 2578, "core": 4159, "view": 1682, "ui": 1160}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -7599,6 +7599,34 @@ const ENEMIES = [
    art:'kirimatoi', inflict:{type:'confuse', p:0.18}},
   {key:'honetori',    name:'骨鳥',      hp:175,atk:46, def:27, agi:26, exp:640, gold:660, minLv:20,
    art:'honetori'},
+  // ---- 地上の 島ごとの 固有種（野外）----
+  //   ★まえは 地上の 野外が 全島 おなじ 5種 だった（雪原でも 砂漠でも 同じ 敵）
+  //   ★絵（MON）が まだ ない 敵は 出ない（島の 表から のぞかれ、いままでの 表に もどる）
+  // 北の 島（雪原）
+  {key:'shimogami',   name:'霜がみ狼',  hp:160,atk:41, def:24, agi:30, exp:540, gold:560, minLv:18,
+   art:'shimogami', inflict:{type:'freeze', p:0.16}},
+  {key:'itega',       name:'凍て蛾',    hp:150,atk:38, def:22, agi:28, exp:520, gold:540, minLv:18,
+   art:'itega', inflict:{type:'sleep', p:0.16}},
+  // 東の 島（砂漠）
+  {key:'sunamogura',  name:'砂もぐら',  hp:235,atk:45, def:38, agi:12, exp:680, gold:720, minLv:19,
+   art:'sunamogura'},
+  {key:'hikarabi',    name:'干からび蠍',hp:200,atk:48, def:32, agi:22, exp:660, gold:700, minLv:19,
+   art:'hikarabi', inflict:{type:'slow', p:0.18}},
+  // 南の 島（平原と 砂浜）
+  {key:'honeyadokari',name:'ほね宿かり',hp:265,atk:46, def:46, agi:10, exp:720, gold:760, minLv:20,
+   art:'honeyadokari'},
+  {key:'nakigai',     name:'鳴き貝',    hp:215,atk:45, def:34, agi:14, exp:690, gold:730, minLv:20,
+   art:'nakigai', inflict:{type:'confuse', p:0.18}},
+  // 西の 島（平原と 山脈・霊峰）
+  {key:'iwainoshishi',name:'岩いのしし',hp:285,atk:52, def:40, agi:18, exp:800, gold:840, minLv:21,
+   art:'iwainoshishi'},
+  {key:'kodamadori',  name:'こだま鳥',  hp:225,atk:50, def:30, agi:30, exp:780, gold:800, minLv:21,
+   art:'kodamadori', inflict:{type:'confuse', p:0.18}},
+  // 中央の 島（平原と 森・トロス）
+  {key:'hagureookami',name:'はぐれ狼',  hp:265,atk:55, def:34, agi:32, exp:860, gold:880, minLv:22,
+   art:'hagureookami'},
+  {key:'hoshikabuto', name:'星かぶと',  hp:305,atk:54, def:48, agi:14, exp:900, gold:920, minLv:22,
+   art:'hoshikabuto'},
   {key:'kamikishi',  name:'くずれ紙の 騎士', hp:96, atk:21, def:20, agi:11, exp:430, gold:320, minLv:12,
    art:'kamikishi'},
   {key:'hikarikui',  name:'光喰いバク',   hp:88, atk:18, def:18, agi:10, exp:400, gold:300, minLv:12,
@@ -7883,7 +7911,21 @@ const MAPS = {
   //     そこへ 五地方だけを おいて ある。
   // ★北の 島の 北東（上2行・x62〜71）は 海。北の 島から 舟で 東の 島へ 抜ける 海峡。
   //   ★まえは 山が 地図の 端まで 続き、東の 島の 北の 海が 閉じて いた（東の 島まで 160歩 → 66歩）
-  ground:{name:'地上', theme:'world', enc:true, encRate:0.06, encGrace:6, tiles:[
+  ground:{name:'地上', theme:'world', enc:true, encRate:0.06, encGrace:6,
+    // ★島ごとの 出現表。at の ますと 陸続きの 所に 出る。unique が ひとつも 出せない ときは byMap.ground
+    encIslands:[
+      {name:'北の 島',  at:[48,8],  unique:['shimogami','itega'],
+       pool:['shimogami','itega','nemurishika','kirimatoi']},
+      {name:'東の 島',  at:[86,41], unique:['sunamogura','hikarabi'],
+       pool:['sunamogura','hikarabi','doronote','kareedano']},
+      {name:'南の 島',  at:[54,59], unique:['honeyadokari','nakigai'],
+       pool:['honeyadokari','nakigai','kirimatoi','honetori']},
+      {name:'西の 島',  at:[9,30],  unique:['iwainoshishi','kodamadori'],
+       pool:['iwainoshishi','kodamadori','kareedano','honetori']},
+      {name:'中央の 島',at:[48,31], unique:['hagureookami','hoshikabuto'],
+       pool:['hagureookami','hoshikabuto','nemurishika','doronote','honetori']},
+    ],
+    tiles:[
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~______~~~~~~~~~~_____~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~__======__~~~~~~__=====_~====^^^^^^~~~~~~~~~~~~~~~~~~~~~~~~",
@@ -9940,6 +9982,42 @@ function makeEnemy(def){
   e.maxhp = e.hp; e.dispName = e.name; e.status = null;
   return e;
 }
+// ★敵の 絵が あるか（絵の ない 敵は 出さない）
+function hasFoeArt(k){
+  const e = ENEMIES.find(x=>x.key===k); if(!e) return false;
+  const M = (typeof MON!=='undefined') ? MON : null;
+  return !!(M && (M[e.art] || M[e.key]));
+}
+// ★島（陸続きの かたまり）を 求める。地図が かわらない かぎり 覚えておく
+const islandCache = {};
+function islandIdAt(map, x, y){
+  const m = MAPS[map]; if(!m) return -1;
+  const sig = m.tiles.length+':'+m.tiles.join('').length;
+  let c = islandCache[map];
+  if(!c || c.sig!==sig){
+    const H=m.tiles.length, W=m.tiles[0].length, id=Array.from({length:H},()=>Array(W).fill(-1)); let n=0;
+    for(let yy=0;yy<H;yy++)for(let xx=0;xx<W;xx++){
+      if(id[yy][xx]>=0 || !walkable(map,xx,yy)) continue;
+      const q=[[xx,yy]]; id[yy][xx]=n;
+      for(let i=0;i<q.length;i++){ const [a,b]=q[i];
+        for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ const u=a+dx,v=b+dy;
+          if(u>=0&&v>=0&&u<W&&v<H && id[v][u]<0 && walkable(map,u,v)){ id[v][u]=n; q.push([u,v]); } } }
+      n++;
+    }
+    c = islandCache[map] = {sig, id};
+  }
+  return (c.id[y]||[])[x] ?? -1;
+}
+function islandAt(map, x, y){
+  const m = MAPS[map]; if(!m || !m.encIslands) return null;
+  const me = islandIdAt(map, x, y); if(me<0) return null;
+  return m.encIslands.find(z=>islandIdAt(map, z.at[0], z.at[1])===me) || null;
+}
+function islandPool(map, x, y){
+  const z = islandAt(map, x, y); if(!z) return null;
+  const pool = z.pool.filter(hasFoeArt);
+  return z.unique.some(k=>pool.includes(k)) ? pool : null;
+}
 function startBattle(kind){
   if(A.battleBgm) A.battleBgm(kind ? 'boss' : 'battle');
   let enemies;
@@ -9955,7 +10033,7 @@ function startBattle(kind){
     }
   }else{
     // レベルが たりない まものは まだ でてこない（はじまりの ちいきを あんぜんに たもつ）
-    let all = byMapCh[(G.chapter||1)+':'+P.map] || byMap[P.map];
+    let all = islandPool(P.map, P.x, P.y) || byMapCh[(G.chapter||1)+':'+P.map] || byMap[P.map];
     if(!all){
       const m=MAPS[P.map];
       const z=(m&&m.encZones||[]).find(z=>P.x>=z.x0&&P.x<=z.x1&&P.y>=z.y0&&P.y<=z.y1);
@@ -11473,6 +11551,7 @@ function swapMember(cls){                     // せんとう ⇄ ひかえ
 return {
   // データ
   MAPS, ENEMIES, MIDBOSS, CLASSES, SPELL_DEFS, SHOPS, INN_PRICE, byMap, byMapCh, TACTICS, LV_CAP,
+  islandAt, islandPool, hasFoeArt,
   // ★しかけ（IVから）
   setTile, applyTileEdits, restoreMaps, snapshotMaps, allLampsLit, GIMMICK_TILES,
   WARDS, wardBlocks, wardMsg,
