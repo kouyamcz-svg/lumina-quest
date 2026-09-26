@@ -430,7 +430,7 @@ function kill(k){
     for(let y=0;y<H;y++)for(let x=0;x<W;x++){ if(sd[y][x]<0) continue; for(const [dx,dy] of D){ const u=x+dx,v=y+dy; if(walk(u,v)&&ld[v][u]>=0){ const tot=sd[y][x]+1+ld[v][u]; if(best<0||tot<best) best=tot; } } }
     return best; };
   const east=steps(80,33);
-  T('北の 島から 舟で 東の 島（若き霊峰）へ 行ける', east>0, east);
+  T('北の 島から 舟で 東の 島（霊峰の村）へ 行ける', east>0, east);
   T('北の 島から 東の 島まで 80歩 以内', east>0 && east<=80, east+'歩');
   [['湧き水の町',9,30],['珊瑚の入り江',54,59],['トロスの村',48,31]].forEach(([nm,x,y])=>{
     T('北の 島から 舟で '+nm+'へ 行ける', steps(x,y)>0, steps(x,y));

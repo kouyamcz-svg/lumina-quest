@@ -1606,8 +1606,8 @@ const CH = {
       {done:'ch3_namiSaved',    text:'入り江の 海蝕洞の 奥へ'},
       {done:'ch3_namiTold',     text:'珊瑚の入り江の 海の 民の 少女と 話す'},
       {done:'ch3_twoHouses',    text:'珊瑚の入り江の 海の 民の 少女に もう一度 話す'},
-      {done:'ch3_zenosTold',    text:'舟で 東へ。若き霊峰の 山の 長に 会う'},
-      {done:'ch3_zenosMet',     text:'霊峰の 村の 北、山道の 入口の 左手の 洞で 学者を 訪ねる'},
+      {done:'ch3_zenosTold',    text:'舟で 東へ。霊峰の村の 山の 長に 会う'},
+      {done:'ch3_zenosMet',     text:'村の 北、山道の 入口の 左手に ある 洞で、学者に 会う'},
       {done:'ch3_peakCleared',  text:'山道を 登り、山頂の ぬしを 鎮める'},
       {done:'ch3_mountEar',     text:'洞の 学者に 報せる'},
       {done:'ch3_torosArrived', text:'舟で 地上の まんなかへ。トロスの村の 老人に 会う'},
@@ -2067,7 +2067,7 @@ const CH = {
              'イオ「会って みます」',
              '',
              '＊ クエスト「山肌の 洞」＊',
-             '＊ 村を 出て 北、山道の 入口の 左手の 洞へ ＊'] },
+             '＊ 村の 北、山道の 入口の 左手に ある 洞へ ＊'] },
 
       // ---- 山道：ゼノスと 巫女 ----
       { npc:'洞の 学者', cond:['ch3_zenosTold'], unless:'ch3_zenosMet',

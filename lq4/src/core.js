@@ -639,7 +639,7 @@ const MAPS = {
 
   // ★祠の 丘：村はずれ。イオが 祠を 建てる 手伝いを する。
   //   ルプスは ここに 落ちてくる。結末で 剣を 納める 場所。
-  shrine_hill:{name:'祠の 丘', theme:'world', enc:false, tiles:[
+  shrine_hill:{name:'祠の丘', theme:'world', enc:false, tiles:[
     "#####################",
     "#####################",
     "#####...........#####",
@@ -657,7 +657,8 @@ const MAPS = {
     }},
 
   // ============ 第3章：若き霊峰（後の エルデ）============
-  peak_village:{name:'若き霊峰', theme:'ice', enc:false, tiles:[
+  // ★若き霊峰 は 山の 名。町の 名は 霊峰の村
+  peak_village:{name:'霊峰の村', theme:'ice', enc:false, tiles:[
     "#####################",
     "#...................#",
     "#..H..H.......H..H..#",
@@ -778,7 +779,7 @@ const MAPS = {
     }},
 
   // ★ゼノスの 庵：山肌の 洞。書物で うまっている。
-  zenos_cave:{name:'山肌の 洞', theme:'cave', enc:false, tiles:[
+  zenos_cave:{name:'山肌の洞', theme:'cave', enc:false, tiles:[
     "###############",
     "#.....#.#.....#",
     "#.C...#.#.....#",

@@ -689,11 +689,11 @@ const QUESTS = {
   ch3_q4_peak: {
     id:'ch3_q4_peak', chapter:4, title:'山肌の 洞',
     giver:'山の 長',
-    desc:'村を 出て 北、山道の 入口の 左手の 洞へ。洞の 学者に 会う。',
+    desc:'村の 北、山道の 入口の 左手に ある 洞で、学者に 会う。',
     steps:[
       {id:'meet', desc:'洞の 学者に 会う',          flag:'ch3_zenosMet'},
       {id:'boss', desc:'山頂の 黒い ものを 討つ',   flag:'ch3_peakCleared'},
-      {id:'ear',  desc:'ゼノスに 話しかける',       flag:'ch3_mountEar'},
+      {id:'ear',  desc:'洞の 学者に 報せる',       flag:'ch3_mountEar'},
     ],
     reward:{}, next:null,
   },
@@ -711,10 +711,10 @@ const QUESTS = {
   ch3_q2_well: {
     id:'ch3_q2_well', chapter:4, title:'三の 水脈',
     giver:'東の 集落長',
-    desc:'町の 井戸から 地下水路へ。第三の 水脈を さがす。',
+    desc:'町の 井戸から 地下水路へ。三の 水脈を さがす。',
     steps:[
       {id:'vein',  desc:'水脈を ふさぐ ものを 討つ', flag:'ch3_veinFound'},
-      {id:'told',  desc:'集落長に 報せる',           flag:'ch3_wellSolved'},
+      {id:'told',  desc:'東の 集落長に 報せる',           flag:'ch3_wellSolved'},
       {id:'cara',  desc:'井戸の 若者たちに 会う',   flag:'ch3_caravan'},
     ],
     reward:{}, next:null,
@@ -726,7 +726,7 @@ const QUESTS = {
     steps:[
       {id:'boss',   desc:'黒い かけらを 討つ',       flag:'ch3_riezeSaved'},
       {id:'back',   desc:'氷窟を 出て 西へ。氏族の 長に 連れて 帰る', flag:'ch3_riezeReturned'},
-      {id:'song',   desc:'谷の 老婆に 唄を 聞く（天幕の 東）',   flag:'ch3_lullaby'},
+      {id:'song',   desc:'谷の 老婆の 唄を 聞く（天幕の 東）',   flag:'ch3_lullaby'},
     ],
     reward:{}, next:null,
   },

@@ -137,7 +137,7 @@ T('舟の ことを 言う', said('海を 渡れる'), log.join(' / ').slice(-90
     }
   }
   [['氷の谷',48,8],['湧き水の町',9,29],['トロスの村',48,30],
-   ['若き霊峰',80,32],['珊瑚の入り江',54,58]].forEach(([nm,x,y])=>{
+   ['霊峰の村',80,32],['珊瑚の入り江',54,58]].forEach(([nm,x,y])=>{
     T('舟で '+nm+' へ 行ける', seen.has(x+','+y));
   });
 }
@@ -348,7 +348,7 @@ T('目は 見られるのを 待って いる', said('見られるのを 待っ�
 // ===== 9.8 若き霊峰（東）=====
 stand('ground', 80, 33, 'back');
 C.stepField(0,-1);
-T('若き霊峰へ 入れる', C.P.map==='peak_village', C.P.map+' '+C.P.x+','+C.P.y);
+T('霊峰の村へ 入れる', C.P.map==='peak_village', C.P.map+' '+C.P.x+','+C.P.y);
 
 talk('peak_village', 9, 6, 'back');
 T('山の 長の 話を 聞く', C.G.flags.ch3_zenosTold===true);

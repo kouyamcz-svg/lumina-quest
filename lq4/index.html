@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 22:14 JST", "build":"33cee89d","assets_sha": "91fb430a", "lines": {"world": 139, "npc": 858, "chapters": 2691, "bgm": 985, "view2d": 2563, "core": 4049, "view": 1682, "ui": 1160}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 22:20 JST", "build":"c79f5a34","assets_sha": "91fb430a", "lines": {"world": 139, "npc": 858, "chapters": 2691, "bgm": 985, "view2d": 2563, "core": 4050, "view": 1682, "ui": 1160}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -228,15 +228,15 @@ const MAP_IDS = {
   well_core:  {region:'land',kind:'dgn',  name:'水脈の 奥',   scene:'SCENE_CAVE'},
   sea_core:   {region:'land',kind:'dgn',  name:'潮だまりの 奥',scene:'SCENE_CAVE'},
   peak_core:  {region:'land',kind:'dgn',  name:'山頂',        scene:'SCENE_CAVE'},
-  zenos_cave: {region:'land',kind:'dgn',  name:'山肌の 洞',   scene:'SCENE_CAVE'},
+  zenos_cave: {region:'land',kind:'dgn',  name:'山肌の洞',   scene:'SCENE_CAVE'},
   well_town:  {region:'land',kind:'town', name:'湧き水の町',  scene:'SCENE_FIELD'},
   well_cave:  {region:'land',kind:'dgn',  name:'地下水路',    scene:'SCENE_CAVE'},
   coral_bay:  {region:'land',kind:'town', name:'珊瑚の入り江',scene:'SCENE_FIELD'},
   sea_cave:   {region:'land',kind:'dgn',  name:'海蝕洞',      scene:'SCENE_CAVE'},
-  peak_village:{region:'land',kind:'town',name:'若き霊峰',    scene:'SCENE_FIELD'},
+  peak_village:{region:'land',kind:'town',name:'霊峰の村',    scene:'SCENE_FIELD'},
   peak_path:  {region:'land',kind:'dgn',  name:'山道',        scene:'SCENE_CAVE'},
   toros:      {region:'land',kind:'town', name:'トロスの村',  scene:'SCENE_FIELD'},
-  shrine_hill:{region:'land',kind:'dgn',  name:'祠の 丘',     scene:'SCENE_FIELD'},
+  shrine_hill:{region:'land',kind:'dgn',  name:'祠の丘',     scene:'SCENE_FIELD'},
   tower1:     {region:'sky', kind:'dgn',  name:'雲見の 塔 一階',   scene:'SCENE_SKY_TOWN'},
   tower2:     {region:'sky', kind:'dgn',  name:'雲見の 塔 二階',   scene:'SCENE_SKY_TOWN'},
   tower3:     {region:'sky', kind:'dgn',  name:'雲見の 塔 三階',   scene:'SCENE_SKY_TOWN'},
@@ -995,11 +995,11 @@ const QUESTS = {
   ch3_q4_peak: {
     id:'ch3_q4_peak', chapter:4, title:'山肌の 洞',
     giver:'山の 長',
-    desc:'村を 出て 北、山道の 入口の 左手の 洞へ。洞の 学者に 会う。',
+    desc:'村の 北、山道の 入口の 左手に ある 洞で、学者に 会う。',
     steps:[
       {id:'meet', desc:'洞の 学者に 会う',          flag:'ch3_zenosMet'},
       {id:'boss', desc:'山頂の 黒い ものを 討つ',   flag:'ch3_peakCleared'},
-      {id:'ear',  desc:'ゼノスに 話しかける',       flag:'ch3_mountEar'},
+      {id:'ear',  desc:'洞の 学者に 報せる',       flag:'ch3_mountEar'},
     ],
     reward:{}, next:null,
   },
@@ -1017,10 +1017,10 @@ const QUESTS = {
   ch3_q2_well: {
     id:'ch3_q2_well', chapter:4, title:'三の 水脈',
     giver:'東の 集落長',
-    desc:'町の 井戸から 地下水路へ。第三の 水脈を さがす。',
+    desc:'町の 井戸から 地下水路へ。三の 水脈を さがす。',
     steps:[
       {id:'vein',  desc:'水脈を ふさぐ ものを 討つ', flag:'ch3_veinFound'},
-      {id:'told',  desc:'集落長に 報せる',           flag:'ch3_wellSolved'},
+      {id:'told',  desc:'東の 集落長に 報せる',           flag:'ch3_wellSolved'},
       {id:'cara',  desc:'井戸の 若者たちに 会う',   flag:'ch3_caravan'},
     ],
     reward:{}, next:null,
@@ -1032,7 +1032,7 @@ const QUESTS = {
     steps:[
       {id:'boss',   desc:'黒い かけらを 討つ',       flag:'ch3_riezeSaved'},
       {id:'back',   desc:'氷窟を 出て 西へ。氏族の 長に 連れて 帰る', flag:'ch3_riezeReturned'},
-      {id:'song',   desc:'谷の 老婆に 唄を 聞く（天幕の 東）',   flag:'ch3_lullaby'},
+      {id:'song',   desc:'谷の 老婆の 唄を 聞く（天幕の 東）',   flag:'ch3_lullaby'},
     ],
     reward:{}, next:null,
   },
@@ -2770,8 +2770,8 @@ const CH = {
       {done:'ch3_namiSaved',    text:'入り江の 海蝕洞の 奥へ'},
       {done:'ch3_namiTold',     text:'珊瑚の入り江の 海の 民の 少女と 話す'},
       {done:'ch3_twoHouses',    text:'珊瑚の入り江の 海の 民の 少女に もう一度 話す'},
-      {done:'ch3_zenosTold',    text:'舟で 東へ。若き霊峰の 山の 長に 会う'},
-      {done:'ch3_zenosMet',     text:'霊峰の 村の 北、山道の 入口の 左手の 洞で 学者を 訪ねる'},
+      {done:'ch3_zenosTold',    text:'舟で 東へ。霊峰の村の 山の 長に 会う'},
+      {done:'ch3_zenosMet',     text:'村の 北、山道の 入口の 左手に ある 洞で、学者に 会う'},
       {done:'ch3_peakCleared',  text:'山道を 登り、山頂の ぬしを 鎮める'},
       {done:'ch3_mountEar',     text:'洞の 学者に 報せる'},
       {done:'ch3_torosArrived', text:'舟で 地上の まんなかへ。トロスの村の 老人に 会う'},
@@ -3231,7 +3231,7 @@ const CH = {
              'イオ「会って みます」',
              '',
              '＊ クエスト「山肌の 洞」＊',
-             '＊ 村を 出て 北、山道の 入口の 左手の 洞へ ＊'] },
+             '＊ 村の 北、山道の 入口の 左手に ある 洞へ ＊'] },
 
       // ---- 山道：ゼノスと 巫女 ----
       { npc:'洞の 学者', cond:['ch3_zenosTold'], unless:'ch3_zenosMet',
@@ -8042,7 +8042,7 @@ const MAPS = {
 
   // ★祠の 丘：村はずれ。イオが 祠を 建てる 手伝いを する。
   //   ルプスは ここに 落ちてくる。結末で 剣を 納める 場所。
-  shrine_hill:{name:'祠の 丘', theme:'world', enc:false, tiles:[
+  shrine_hill:{name:'祠の丘', theme:'world', enc:false, tiles:[
     "#####################",
     "#####################",
     "#####...........#####",
@@ -8060,7 +8060,8 @@ const MAPS = {
     }},
 
   // ============ 第3章：若き霊峰（後の エルデ）============
-  peak_village:{name:'若き霊峰', theme:'ice', enc:false, tiles:[
+  // ★若き霊峰 は 山の 名。町の 名は 霊峰の村
+  peak_village:{name:'霊峰の村', theme:'ice', enc:false, tiles:[
     "#####################",
     "#...................#",
     "#..H..H.......H..H..#",
@@ -8181,7 +8182,7 @@ const MAPS = {
     }},
 
   // ★ゼノスの 庵：山肌の 洞。書物で うまっている。
-  zenos_cave:{name:'山肌の 洞', theme:'cave', enc:false, tiles:[
+  zenos_cave:{name:'山肌の洞', theme:'cave', enc:false, tiles:[
     "###############",
     "#.....#.#.....#",
     "#.C...#.#.....#",
