@@ -249,7 +249,7 @@ stand('ground', 9, 30, 'back');
 C.stepField(0,-1);
 T('湧き水の町へ 入れる', C.P.map==='well_town', C.P.map+' '+C.P.x+','+C.P.y);
 
-talk('well_town', 3, 6, 'back');
+talk('well_town', 21, 6, 'back');   // ★東の 集落長は 町の 東（右）側
 T('東の 長の 話を 聞く', C.G.flags.ch3_wellTold===true);
 T('どちらかが 嘘だと 言う', said('どちらかが 嘘を ついとる'), log.join(' / ').slice(0,120));
 T('どちらも 本当かもと 返す', said('どちらも 本当かも しれません'));
@@ -278,7 +278,7 @@ T('報せに 行けと 出る', said('集落長に 報せよう'));
 {
   const g0 = C.P.gold;
   C.party.forEach(p=>{ p.hp=1; });
-  talk('well_town', 3, 6, 'back');
+  talk('well_town', 21, 6, 'back');
   T('集落長に 報せる', C.G.flags.ch3_wellSolved===true);
   T('真ん中の 井戸だと 言う', said('真ん中だ。どちらの ものでも ない'), log.join(' / ').slice(0,140));
   T('両方の ものだと 言う', said('両方の ものだろう'));
@@ -321,8 +321,8 @@ clearLog(); strong(34);
 stand('sea_core', 10, 5, 'back');
 C.interact();
 T('洞の ぬしに かてる', C.G.flags.ch3_namiSaved===true);
-T('まだ 見て ない だけと 言う', said('まだ 見て ない だけの ものだ'), log.join(' / ').slice(0,140));
-T('見た から 見つかったと 言う', said('見た から 見つかった'));
+T('ナミが 夢で 見た ものだと 言う', said('ナミが 夢で 見た のは、これだ'), log.join(' / ').slice(0,120));
+T('浜へ 戻って ナミに 知らせる', said('ナミに 知らせないと'));
 
 {
   const g0 = C.P.gold;

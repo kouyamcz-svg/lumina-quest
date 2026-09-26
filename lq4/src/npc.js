@@ -335,7 +335,7 @@ const NPCS = {
         '長「山が 鳴っとる。……ひさしぶりだ」',
         '長「祖父の 代には 毎朝 鳴っとったと 聞いた」']},
       {when:{flag:'ch3_zenosTold'}, text:[
-        '長「洞は 村を 出て 北だ。山道を 登れ」']},
+        '長「洞は 村を 出て 北だ。山道の 入口の 左手に ある」']},
       {text:['長「空の 者か。……ちょうど よかった」']}]},
     {at:'17,5', spr:'elderWoman', name:'山の 女', lines:[
       {when:{flag:'ch3_mountEar'}, text:[
@@ -417,7 +417,7 @@ const NPCS = {
 
   // ============ 第3章：湧き水の町 ============
   well_town: [
-    {at:'3,5', spr:'captain', name:'東の 集落長', lines:[
+    {at:'21,5', spr:'captain', name:'東の 集落長', lines:[   // ★町の 東（右）側。まえは 西側に 立って いた
       {when:{flag:'ch3_caravan'}, text:[
         '東の 長「荷が 東西 いっしょに 出る ように なった」',
         '東の 長「……水ひとつで、こうも 変わる ものか」']},
@@ -426,7 +426,7 @@ const NPCS = {
       {when:{flag:'ch3_wellTold'}, text:[
         '東の 長「水路図だ。町の まん中の 井戸から 下りられる」']},
       {text:['東の 長「空の 者か。……悪いが 今は それどころでは ない」']}]},
-    {at:'21,5', spr:'guardB', name:'西の 集落長', lines:[
+    {at:'3,5', spr:'guardB', name:'西の 集落長', lines:[    // ★町の 西（左）側
       {when:{flag:'ch3_wellSolved'}, text:[
         '西の 長「両方の ものだろう。……そう 言うしか ない」']},
       {text:['西の 長「東の 連中が 下流で 汲みすぎとる」',
@@ -689,7 +689,7 @@ const QUESTS = {
   ch3_q4_peak: {
     id:'ch3_q4_peak', chapter:4, title:'山肌の 洞',
     giver:'山の 長',
-    desc:'村を 出て 北の 山道へ。洞の 学者に 会う。',
+    desc:'村を 出て 北、山道の 入口の 左手の 洞へ。洞の 学者に 会う。',
     steps:[
       {id:'meet', desc:'洞の 学者に 会う',          flag:'ch3_zenosMet'},
       {id:'boss', desc:'山頂の 黒い ものを 討つ',   flag:'ch3_peakCleared'},
@@ -722,7 +722,7 @@ const QUESTS = {
   ch3_q1_rieze: {
     id:'ch3_q1_rieze', chapter:4, title:'氷窟の リーゼ',
     giver:'氏族の 長',
-    desc:'谷の 北の 氷窟へ。攫われた 娘を 助ける。',
+    desc:'谷を 出て 東の 氷窟へ。攫われた 娘を 助ける。',
     steps:[
       {id:'boss',   desc:'黒い かけらを 討つ',       flag:'ch3_riezeSaved'},
       {id:'back',   desc:'氷窟を 出て 西へ。氏族の 長に 連れて 帰る', flag:'ch3_riezeReturned'},
