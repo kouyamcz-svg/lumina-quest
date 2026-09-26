@@ -24,7 +24,15 @@ C.bind(Object.assign({}, C.NullView, {
                     hud(){}, label(){}, openTrade(){}}, C.NullAudio);
 
 let n=0, ng=0;
-function T(name, cond, detail){ n++; if(!cond){ ng++; console.log('NG', name, detail!==undefined?'  '+detail:''); } }
+// ★クエスト画面が 空に なる 区間を はかる（章の 途中で「やることが ない」に ならない こと）
+//   ★第0〜3章の すべてで、章の はじめ・地方の あいだ・ボスの あとに 空に なって いた。
+const __GAPS=[]; let __gap=null;
+function __probeQuest(name){ try{
+  const ch=C.G.chapter; const q=C.questList().length, g=C.currentGoal&&C.currentGoal();
+  const cleared=Object.keys(C.G.flags).some(k=>/_cleared$/.test(k)&&C.G.flags[k]&&k.startsWith('ch'+(ch-1)+'_'));
+  if(!q && !g && !cleared && C.G.mode!=='battle'){ if(!__gap){ __gap={from:name,n:0}; __GAPS.push(__gap);} __gap.n++; } else __gap=null;
+}catch(e){} }
+function T(name, cond, detail){ __probeQuest(String(name)); n++; if(!cond){ ng++; console.log('NG', name, detail!==undefined?'  '+detail:''); } }
 function said(w){ return log.some(l=>l.indexOf(w)>=0); }
 function clearLog(){ log.length=0; }
 function stand(map,x,y,dir){ C.G.mode='field'; C.P.map=map; C.P.x=x; C.P.y=y; if(dir) C.P.dir=dir; }
@@ -332,5 +340,6 @@ T('ロード：しかけが もどる', C.tileAt('furnace',10,6)==='.');
 T('ロード：おかねが もどる', C.P.gold===gold);
 T('ロード：Lvが もどる', C.party[0].lv===lv);
 
+T('クエスト画面が 章の 途中で 空に ならない', __GAPS.length===0, __GAPS.map(g=>g.from+'（'+g.n+'）').join(' / '));
 console.log('\n--- ch2_tour: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

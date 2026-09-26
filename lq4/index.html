@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 20:08 JST", "build":"d8b6698e","assets_sha": "93d9f9d5", "lines": {"world": 139, "npc": 858, "chapters": 2692, "bgm": 985, "view2d": 2563, "core": 4034, "view": 1682, "ui": 1159}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 20:14 JST", "build":"c74e44c3","assets_sha": "93d9f9d5", "lines": {"world": 139, "npc": 858, "chapters": 2702, "bgm": 985, "view2d": 2563, "core": 4047, "view": 1682, "ui": 1160}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -1182,6 +1182,10 @@ const CH = {
   //   M0 の 垂直スライス：下層区 → 見習い試験 → ウンブラ戦 → セーブ/ロード
   // ============================================================
   1: {
+    // ★クエスト画面の「目的」（章の はじめ、頼みごとを 受ける まで）
+    goals: [
+      {done:'ch0_errandTaken', text:'下層区の 光珠管の 技師に 会う'},
+    ],
     id: 'ch0_trial',
     title: '見習い試験の日',
     region: 'sky',
@@ -1643,6 +1647,9 @@ const CH = {
   //   イオと セレンの 合同任務。旧管路の 破れ目に 巣くう オボロを 討つ。
   // ============================================================
   2: {
+    goals: [
+      {done:'ch1_taskTaken', text:'中層区の 任務書記に 会う'},
+    ],
     id: 'ch1_lower',
     title: '下層区の亀裂',
     region: 'sky',
@@ -2157,6 +2164,9 @@ const CH = {
   //   炉の 外郭で フォルナクスを 討つ。章末、ノエが 紙片を 見て 呟く。
   // ============================================================
   3: {
+    goals: [
+      {done:'ch2_taskTaken', text:'上層区の 炉の 主任に 会う'},
+    ],
     id: 'ch2_furnace',
     title: '空中庭園と炉の火',
     region: 'sky',
@@ -9633,10 +9643,23 @@ function questAdvance(id, state){
   if(!NPCDATA.QUESTS[id]) return;
   G.quests[id]=state;
 }
+// ★頼みごとの 最後の 段が 済んだか
+function questLastDone(q){
+  const st = (q && q.steps) || [];
+  return !st.length || !!G.flags[st[st.length-1].flag];
+}
+// ★つぎに やる 段（まだ 済んで いない 最初の 段）
+function questNextStep(q){
+  return ((q && q.steps) || []).find(s=>!G.flags[s.flag]) || null;
+}
 function questList(){
   // ★いまの しょうの クエストだけを だす（べつの しょうの まぎれこみ よけ）
+  //   ★ボスを 倒した 時点で「済み」に する 頼みごとが 7件 あり、
+  //     報告などの 段が 残って いるのに 画面から 消えて いた。
+  //     最後の 段が 済む までは 出し つづける。
   const ch = G.chapter||1;
-  return Object.keys(G.quests).filter(k=>G.quests[k]==='active')
+  return Object.keys(G.quests)
+    .filter(k=>G.quests[k]==='active' || (G.quests[k]==='clear' && !questLastDone(NPCDATA.QUESTS[k])))
     .map(k=>NPCDATA.QUESTS[k])
     .filter(q=>q && (!q.chapter || q.chapter===ch));
 }
@@ -11416,7 +11439,7 @@ return {
   tileAt, isBlocked, walkable, warpAt,
   // 行動
   stepField, interact, facing, doWarp, startBattle, beginRound, saveGame, loadGame,
-  runTalkEvent, questOnTalk, questList, currentGoal, deathPoint, triggerChapterEnd, offerNextChapter, homePoint,
+  runTalkEvent, questOnTalk, questList, questNextStep, currentGoal, deathPoint, triggerChapterEnd, offerNextChapter, homePoint,
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
@@ -13594,7 +13617,8 @@ function openFieldMenu(){
       const qs=C.questList(), goal=C.currentGoal();
       const lines=[];
       if(goal) lines.push('【目的】', '　'+goal);
-      qs.forEach(q=>lines.push('＊ '+q.title, '　'+q.desc));
+      // ★説明の かわりに「つぎに やる 段」。段が ぜんぶ 済んで いれば 説明
+      qs.forEach(q=>{ const st=C.questNextStep(q); lines.push('＊ '+q.title, '　'+(st ? st.desc : q.desc)); });
       msg2(lines.length ? lines : ['いまは とくに やることが ない。'], ()=>{ C.G.mode='field'; });
 
     }else if(pick==='セーブ'){

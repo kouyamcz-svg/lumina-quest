@@ -2229,10 +2229,23 @@ function questAdvance(id, state){
   if(!NPCDATA.QUESTS[id]) return;
   G.quests[id]=state;
 }
+// ★頼みごとの 最後の 段が 済んだか
+function questLastDone(q){
+  const st = (q && q.steps) || [];
+  return !st.length || !!G.flags[st[st.length-1].flag];
+}
+// ★つぎに やる 段（まだ 済んで いない 最初の 段）
+function questNextStep(q){
+  return ((q && q.steps) || []).find(s=>!G.flags[s.flag]) || null;
+}
 function questList(){
   // ★いまの しょうの クエストだけを だす（べつの しょうの まぎれこみ よけ）
+  //   ★ボスを 倒した 時点で「済み」に する 頼みごとが 7件 あり、
+  //     報告などの 段が 残って いるのに 画面から 消えて いた。
+  //     最後の 段が 済む までは 出し つづける。
   const ch = G.chapter||1;
-  return Object.keys(G.quests).filter(k=>G.quests[k]==='active')
+  return Object.keys(G.quests)
+    .filter(k=>G.quests[k]==='active' || (G.quests[k]==='clear' && !questLastDone(NPCDATA.QUESTS[k])))
     .map(k=>NPCDATA.QUESTS[k])
     .filter(q=>q && (!q.chapter || q.chapter===ch));
 }
@@ -4012,7 +4025,7 @@ return {
   tileAt, isBlocked, walkable, warpAt,
   // 行動
   stepField, interact, facing, doWarp, startBattle, beginRound, saveGame, loadGame,
-  runTalkEvent, questOnTalk, questList, currentGoal, deathPoint, triggerChapterEnd, offerNextChapter, homePoint,
+  runTalkEvent, questOnTalk, questList, questNextStep, currentGoal, deathPoint, triggerChapterEnd, offerNextChapter, homePoint,
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,

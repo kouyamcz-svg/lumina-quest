@@ -474,7 +474,8 @@ function openFieldMenu(){
       const qs=C.questList(), goal=C.currentGoal();
       const lines=[];
       if(goal) lines.push('【目的】', '　'+goal);
-      qs.forEach(q=>lines.push('＊ '+q.title, '　'+q.desc));
+      // ★説明の かわりに「つぎに やる 段」。段が ぜんぶ 済んで いれば 説明
+      qs.forEach(q=>{ const st=C.questNextStep(q); lines.push('＊ '+q.title, '　'+(st ? st.desc : q.desc)); });
       msg2(lines.length ? lines : ['いまは とくに やることが ない。'], ()=>{ C.G.mode='field'; });
 
     }else if(pick==='セーブ'){

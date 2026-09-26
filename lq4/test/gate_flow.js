@@ -402,5 +402,20 @@ function kill(k){
   T('町では 使えない', !r2.ok, (r2.lines||[]).join(' '));
   T('使えない ときは MPが へらない', C.party[2].mp===20);
 }
+// ★最後の 段が 済む までは、頼みごとを 出し つづける
+{
+  const N = vm.runInContext('NPCDATA', ctx);
+  [['ch0_q1_trial',1],['ch1_q2_pipe',2],['ch2_q3_tower',3],['ch2_q2_core',3],
+   ['ch3_q1_rieze',4],['ch3_q2_well',4],['ch3_q3_nami',4]].forEach(([k,ch])=>{
+    C.freshState(); C.G.chapter=ch;
+    const q=N.QUESTS[k], st=q.steps;
+    st.slice(0,-1).forEach(x=>C.G.flags[x.flag]=true);
+    C.G.quests[k]='clear';
+    T(k+'：報告の 前は 出る', C.questList().some(x=>x.id===k));
+    T(k+'：つぎの 段は 最後の 段', (C.questNextStep(q)||{}).flag===st[st.length-1].flag);
+    C.G.flags[st[st.length-1].flag]=true;
+    T(k+'：最後の 段が 済めば 消える', !C.questList().some(x=>x.id===k));
+  });
+}
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);
