@@ -1,7 +1,7 @@
 // ルミナクエストIV サービスワーカー
 // assets.js は ?v=… つきで よみこむ。ないようが かわると URLも かわるので、
 // ふるい キャッシュは つかわれない（え を さしかえても ふるい ままに なる ふぐあいの たいさく）。
-const CACHE='lq4-5a23e235';
+const CACHE='lq4-b49fe1d7';
 // ★installで index.html を 先に とりこむと、ふるい ものを つかみ続ける ことが ある。
 //   ここでは からの まま はじめて、つかった ものだけ ためる。
 const ASSETS=[];
@@ -26,8 +26,11 @@ self.addEventListener('fetch',e=>{
   // それ いがいは ネットゆうせん（こうしんを すぐ うけとる）
   //   ★キャッシュ名が ビルドごとに かわる ので、
   //     つながらない ときに 出る ひかえも「その ビルドの もの」に なる。
+  // ★ブラウザの HTTP キャッシュを とおさず、毎回 サーバーに 確かめる。
+  //   ★GitHub Pages は 10分 キャッシュして よいと 返すため、
+  //     反映した 直後に ひらくと 古い 版が 出て いた。
   e.respondWith(
-    fetch(e.request).then(res=>{
+    fetch(e.request, {cache:'no-cache'}).then(res=>{
       const copy=res.clone(); caches.open(CACHE).then(c=>c.put(e.request,copy)); return res;
     }).catch(()=>caches.match(e.request).then(r=>r||caches.match('./index.html')))
   );
