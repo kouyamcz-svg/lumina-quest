@@ -335,7 +335,7 @@ const NPCS = {
         '長「山が 鳴っとる。……ひさしぶりだ」',
         '長「祖父の 代には 毎朝 鳴っとったと 聞いた」']},
       {when:{flag:'ch3_zenosTold'}, text:[
-        '長「洞は 村を 出て 北だ。山道の 入口の 左手に ある」']},
+        '長「洞は 村を 出て すぐ 南の 山すそだ」']},
       {text:['長「空の 者か。……ちょうど よかった」']}]},
     {at:'17,5', spr:'elderWoman', name:'山の 女', lines:[
       {when:{flag:'ch3_mountEar'}, text:[
@@ -689,7 +689,7 @@ const QUESTS = {
   ch3_q4_peak: {
     id:'ch3_q4_peak', chapter:4, title:'山肌の 洞',
     giver:'山の 長',
-    desc:'村の 北、山道の 入口の 左手に ある 洞で、学者に 会う。',
+    desc:'村の すぐ 南、山すその 洞で、学者に 会う。',
     steps:[
       {id:'meet', desc:'洞の 学者に 会う',          flag:'ch3_zenosMet'},
       {id:'boss', desc:'山頂の 黒い ものを 討つ',   flag:'ch3_peakCleared'},

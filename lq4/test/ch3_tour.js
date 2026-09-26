@@ -146,13 +146,14 @@ T('舟の ことを 言う', said('海を 渡れる'), log.join(' / ').slice(-90
   const keep = Object.assign({}, C.G.flags);
   C.G.flags.ch3_iceDone = false; C.G.flags.ch3_caravan = false;
   clearLog();
-  stand('ground', 9, 30, 'back'); C.stepField(0,-1);
+  // ★湧き水の町は 東
+  stand('ground', 80, 33, 'back'); C.stepField(0,-1);
   T('先に 湧き水へ 行っても 入れない', C.P.map==='ground', C.P.map);
   T('氷の谷が 先だと 言う', said('先に 氷の谷を'), log.join(' / ').slice(0,90));
   clearLog();
   stand('ground', 54, 59, 'back'); C.stepField(0,-1);
   T('先に 珊瑚へ 行っても 入れない', C.P.map==='ground', C.P.map);
-  T('西の 町が 先だと 言う', said('西の 町が 先です'), log.join(' / ').slice(0,90));
+  T('東の 町が 先だと 言う', said('東の 町が 先です'), log.join(' / ').slice(0,90));
   C.G.flags = keep;
   watchFlags();          // ★目的の 検査：記録を つなぎ直す
 }
@@ -245,7 +246,7 @@ T('千年ぶんが 下に 落ちてる', said('千年ぶんが、下に 落ち�
 T('つぎの 行き先', said('巡回降下 第二区'));
 
 // ===== 9.5 湧き水の町（西）=====
-stand('ground', 9, 30, 'back');
+stand('ground', 80, 33, 'back');
 C.stepField(0,-1);
 T('湧き水の町へ 入れる', C.P.map==='well_town', C.P.map+' '+C.P.x+','+C.P.y);
 
@@ -346,7 +347,7 @@ T('力の 使い方は 選べる', said('力の 使い方は、選べる のか�
 T('目は 見られるのを 待って いる', said('見られるのを 待ってる'), log.join(' / ').slice(0,160));
 
 // ===== 9.8 若き霊峰（東）=====
-stand('ground', 80, 33, 'back');
+stand('ground', 9, 30, 'back');    // ★霊峰の村は 西（LQ3 の エルデ）
 C.stepField(0,-1);
 T('霊峰の村へ 入れる', C.P.map==='peak_village', C.P.map+' '+C.P.x+','+C.P.y);
 
@@ -357,8 +358,8 @@ T('ゼノスの 名が 出る', said('ゼノス、と 名乗った'));
 T('禁書庫の 学者だと 分かる', said('禁書庫の 学者だわ'));
 T('クエストが たつ', C.G.quests.ch3_q4_peak==='active');
 
-stand('ground', 79, 30, 'back');
-C.stepField(0,-1);
+stand('ground', 10, 30, 'front');   // ★庵は 村の すぐ 南の 山すそ
+C.stepField(0,1);
 T('山肌の 洞へ 入れる', C.P.map==='zenos_cave', C.P.map+' '+C.P.x+','+C.P.y);
 
 talk('zenos_cave', 5, 7, 'back');
@@ -367,7 +368,7 @@ T('読んだから 出たと 言う', said('読めたからだ'), log.join(' / '
 T('浮いたのは 事故では ないと 言う', said('あれは 事故では ない'));
 T('アマネが 名のる', said('アマネと 申します'));
 
-stand('ground', 81, 31, 'back');
+stand('ground', 6, 41, 'back');    // ★山道は 山の 西の ふもと（LQ3 の れいほう さんどう）
 C.stepField(0,-1);
 T('山道へ 入れる', C.P.map==='peak_path', C.P.map+' '+C.P.x+','+C.P.y);
 T('はじめは 落石が ふさぐ', C.tileAt('peak_path',9,1)==='K', C.tileAt('peak_path',9,1));

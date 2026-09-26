@@ -771,6 +771,20 @@ function buildAtlas(){
     }
     R(g,0,0,s,1,P16.st3); R(g,0,s-1,s,1,P16.st0);
   });
+  // ★砂漠の 町の 壁：日干し 煉瓦（砂岩）。まえは 普通の 石壁で、氷の 町と 見分けが つかなかった
+  atlas.sandwall = tileSet((g,s,v)=>{
+    R(g,0,0,s,s,'#9c7a4c');                       // 目地
+    for(let j=0;j<4;j++){
+      const off=(j%2)?3:0;
+      for(let i=-1;i<4;i++){
+        const bx=i*6+off, by=j*4;
+        R(g,bx+1,by+1,5,3,(i+j+v)%3===0?'#d9b67c':'#cfa86c');   // 煉瓦
+        R(g,bx+1,by+1,5,1,'#ecd09a');                              // 上の 光
+        R(g,bx+1,by+3,5,1,'#b48d58');                              // 下の 影
+      }
+    }
+    R(g,0,0,s,1,'#f2dcaa'); R(g,0,s-1,s,1,'#7e5e36');
+  });
   atlas.icewall = tileSet((g,s,v)=>{
     R(g,0,0,s,s,P16.ic0);
     for(let x=0;x<s;x+=3) R(g,x+(v%2),0,1,s, x%6? P16.ic1 : P16.ic2);
@@ -1355,6 +1369,7 @@ function tileArt(ch, theme, tx, ty){
     case 'X': return atlas.mCave;
     case 'Q': return atlas.mFuture;
     case '#': return theme==='indoor' ? atlas.indoorwall
+            : theme==='desert' ? atlas.sandwall
             : sky?atlas.skywall : (ice?atlas.icewall : (cave?atlas.rockwall : atlas.wall));
     // ★w は 下の「井戸」で あつかう。ここに 書くと 井戸が 一度も 出ない。
     //   ワールドの みずうみは floor で しょり ずみ。

@@ -430,11 +430,22 @@ function kill(k){
     for(let y=0;y<H;y++)for(let x=0;x<W;x++){ if(sd[y][x]<0) continue; for(const [dx,dy] of D){ const u=x+dx,v=y+dy; if(walk(u,v)&&ld[v][u]>=0){ const tot=sd[y][x]+1+ld[v][u]; if(best<0||tot<best) best=tot; } } }
     return best; };
   const east=steps(80,33);
-  T('北の 島から 舟で 東の 島（霊峰の村）へ 行ける', east>0, east);
+  T('北の 島から 舟で 東の 島（湧き水の町）へ 行ける', east>0, east);
   T('北の 島から 東の 島まで 80歩 以内', east>0 && east<=80, east+'歩');
-  [['湧き水の町',9,30],['珊瑚の入り江',54,59],['トロスの村',48,31]].forEach(([nm,x,y])=>{
+  [['霊峰の村',9,30],['珊瑚の入り江',54,59],['トロスの村',48,31]].forEach(([nm,x,y])=>{
     T('北の 島から 舟で '+nm+'へ 行ける', steps(x,y)>0, steps(x,y));
   });
+}
+// ★地上は LQ3 の 大陸の 流用：西は 寒い 地方（エルデ＝若き霊峰）、東は 砂漠（ザール・サーラ）
+{
+  const g=C.MAPS.ground, W=g.tiles[0].length; const at=to=>Object.keys(g.warpsXY).find(k=>g.warpsXY[k].to===to).split(',').map(Number);
+  T('霊峰の村は 西（LQ3 の エルデと おなじ 所）', at('peak_village')[0]===9 && at('peak_village')[1]===29, at('peak_village'));
+  T('湧き水の町は 東（LQ3 の ザールと おなじ 所）', at('well_town')[0]===80 && at('well_town')[1]===32, at('well_town'));
+  T('山道の 口は 西（LQ3 の れいほう さんどう）', at('peak_path')[0]===6 && at('peak_path')[1]===40, at('peak_path'));
+  T('庵は 霊峰の村の そば', Math.abs(at('zenos_cave')[0]-9)+Math.abs(at('zenos_cave')[1]-29)<=4, at('zenos_cave'));
+  T('湧き水の町は 砂漠の 見た目', C.MAPS.well_town.theme==='desert', C.MAPS.well_town.theme);
+  const east = at('well_town')[0] > W*2/3, west = at('peak_village')[0] < W/3;
+  T('東西が 逆に なって いない', east && west);
 }
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);
