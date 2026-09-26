@@ -678,7 +678,7 @@ function buildMap(name){
   if(map.theme==='snow' && ts){ sky=ts.sky; fog=[ts.fog[0], ts.fog[1]*1.5, ts.fog[2]*1.6]; }
   if(night){ sky=darken(sky,0.34); fog=[darken(fog[0],0.42), fog[1]*0.85, fog[2]*0.9]; }
   scene.background=new THREE.Color(sky);
-  scene.fog=new THREE.Fog(fog[0],fog[1],fog[2]);
+  scene.fog=new THREE.Fog(fog[0],fog[1]*CAM_ZOOM,fog[2]*CAM_ZOOM);
   curScene=sc; curNight=night; curTS=ts;
   animObjs=[]; waters=[]; chestLids={};
   curMap=name;
@@ -1276,6 +1276,9 @@ function update2D(dt,time){
 //   灯りを 点けても・隔壁を あけても・ボスを 倒しても 画面が かわらなかった。
 //   地図の 文字が かわったら 組み直す。
 let tileSig = null, tileSigMap = null;
+// ★カメラの 引き。角度（約60°の 見下ろし）は そのまま、距離だけ 伸ばす。
+//   1 が もとの 位置（高さ 14.2・後ろ 7.2）。霧も 同じ だけ 遠ざける。
+const CAM_ZOOM = 1.3;
 function watchTiles(){
   const m = C.MAPS[curMap]; if(!m) return;
   const sig = m.tiles.join('');
@@ -1329,8 +1332,8 @@ function updateField(dt,time){
     }
   }
   if(actors.lamp) actors.lamp.position.set(fp[0].x,yy+0.6,fp[0].y);
-  const cx=fp[0].x, cz=fp[0].y+7.2;
-  cam.position.lerp(new THREE.Vector3(cx,14.2,cz),Math.min(1,dt*6));   // ひいた しかく
+  const cx=fp[0].x, cz=fp[0].y+7.2*CAM_ZOOM - 0.9*(CAM_ZOOM-1);
+  cam.position.lerp(new THREE.Vector3(cx,14.2*CAM_ZOOM,cz),Math.min(1,dt*6));   // ひいた しかく
   cam.lookAt(fp[0].x,0.2,fp[0].y-0.9);
   animObjs.forEach(o=>{
     if(o.bill){ o.mesh.quaternion.copy(cam.quaternion); return; }
