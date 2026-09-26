@@ -1360,8 +1360,20 @@ function interact(){
   return true;
 }
 
+// ★地上に いるのに ふねが ない ときは、浜に 繋ぎ直す。
+//   ★ふねを 配る しくみを あとから 入れた ため、
+//     さきに 降りて いた セーブでは 海を 渡れなく なって いた。
+function ensureGroundShip(){
+  if(P.map!=='ground') return;
+  if(!G.flags.ch3_landed) return;
+  if(G.ship || G.aboard) return;
+  G.ship = {x:48, y:2};
+  V.refresh && V.refresh();
+}
+
 // ★ワールドは あるくと ちたいめいが かわる。うごいた あとに つけかえる
 function refreshAreaLabel(){
+  ensureGroundShip();
   if(P.map!=='world') return;
   const nm = areaName('world', P.x, P.y);
   if(nm !== G._areaLabel){ G._areaLabel = nm; U.label(nm); }
@@ -1374,7 +1386,7 @@ function stepField(dx,dy){
   //   ワープの ます（もん・かいだん・ちてん）は ふんだら すすむ。
   P.dir = dy<0?'back' : dy>0?'front' : (dx<0?'left':'right');
   // ★ふね：もやって ある ふねに あるいて ふれると のる
-  if(!G.aboard && P.map==='world' && G.ship && nx===G.ship.x && ny===G.ship.y){
+  if(!G.aboard && (MAPS[P.map]||{}).theme==='world' && G.ship && nx===G.ship.x && ny===G.ship.y){
     G.aboard=true;
     G.trail.unshift([P.x,P.y]); if(G.trail.length>8) G.trail.pop();
     P.x=nx; P.y=ny; G.stepFlip=!G.stepFlip;

@@ -80,6 +80,30 @@ T('地上は 重いと 言う', said('ここは 上より 重い'));
 T('地上に 着いて いる', C.P.map==='ground', C.P.map+' '+C.P.x+','+C.P.y);
 // ★五地方は 海で 分かれて いる。降りた 舟で 渡る。
 T('舟が 浜に 繋いで ある', !!C.G.ship, JSON.stringify(C.G.ship));
+// ★地上でも 舟に 乗れる こと
+//   ★乗る はんていが 天空の 地図に かためがき で、地上では 乗れなかった。
+{
+  const sx = C.G.ship.x, sy = C.G.ship.y;
+  C.G.aboard = false;
+  C.G.mode='field'; C.P.map='ground'; C.P.x=sx; C.P.y=sy+1;
+  C.stepField(0,-1);
+  T('地上で 舟に 乗れる', C.G.aboard===true, C.P.x+','+C.P.y);
+  C.G.mode='field'; C.stepField(0,-1);
+  T('海を すすめる', C.tileAt('ground',C.P.x,C.P.y)==='~', C.P.x+','+C.P.y);
+  // 陸に もどす
+  C.G.aboard=false; C.G.ship={x:sx,y:sy};
+  C.G.mode='field'; C.P.map='ground'; C.P.x=48; C.P.y=4;
+}
+// ★舟を 持たずに 地上に いる（古い セーブ）でも 繋ぎ直す
+{
+  const keep = C.G.ship;
+  C.G.ship = null; C.G.aboard = false;
+  C.G.mode='field'; C.P.map='ground'; C.P.x=48; C.P.y=5;
+  C.stepField(0,-1);
+  T('舟が ない ときは 浜に 繋ぎ直す', !!C.G.ship, JSON.stringify(C.G.ship));
+  C.G.ship = keep || C.G.ship;
+  C.G.mode='field'; C.P.map='ground'; C.P.x=48; C.P.y=4;
+}
 T('舟の ことを 言う', said('海を 渡れる'), log.join(' / ').slice(-90));
 {
   // ふね＋歩きで 五地方 ぜんぶに 行ける こと
