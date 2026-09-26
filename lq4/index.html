@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 19:31 JST", "build":"63850c73","assets_sha": "93d9f9d5", "lines": {"world": 139, "npc": 858, "chapters": 2664, "bgm": 985, "view2d": 2544, "core": 3973, "view": 1601, "ui": 1149}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 19:37 JST", "build":"c795be86","assets_sha": "93d9f9d5", "lines": {"world": 139, "npc": 858, "chapters": 2664, "bgm": 985, "view2d": 2544, "core": 3973, "view": 1682, "ui": 1149}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -11744,6 +11744,43 @@ function initTex(){
         x.fillRect(R()*px|0,R()*px|0,3+(R()*6|0),1); }
     },128);
   }
+  {
+    let seed=11; const R=()=>((seed=(seed*16807)%2147483647)/2147483647);
+    // 岩の 側面：地層・ひび。上が 明るく 下が 暗い。
+    TEX.dRockSide = patTex((x,px)=>{
+      const g=x.createLinearGradient(0,0,0,px);
+      g.addColorStop(0,'#e8e8e8'); g.addColorStop(0.5,'#a8a8a8'); g.addColorStop(1,'#565656');
+      x.fillStyle=g; x.fillRect(0,0,px,px);
+      for(let i=0;i<7;i++){ const yy=R()*px, hh=4+R()*10;          // 地層
+        x.fillStyle = R()<0.5 ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.14)'; x.fillRect(0,yy,px,hh); }
+      for(let i=0;i<70;i++){ x.fillStyle='rgba(0,0,0,'+(0.08+R()*0.14)+')';   // ざらつき
+        x.fillRect(R()*px|0,R()*px|0,2+(R()*4|0),2+(R()*3|0)); }
+      x.strokeStyle='rgba(30,30,30,0.45)'; x.lineWidth=1.2;          // ひび
+      for(let i=0;i<7;i++){ let ax=R()*px, ay=R()*px*0.7; x.beginPath(); x.moveTo(ax,ay);
+        for(let k=0;k<4;k++){ ax+=(R()-0.5)*20; ay+=6+R()*12; x.lineTo(ax,ay); } x.stroke(); }
+    },128);
+    // 岩の 上面：ざらついた 岩。縁を 暗く して 面取りに 見せる。
+    TEX.dRockTop = patTex((x,px)=>{
+      x.fillStyle='#bdbdbd'; x.fillRect(0,0,px,px);
+      for(let i=0;i<220;i++){ const v=R();
+        x.fillStyle = v<0.5 ? 'rgba(0,0,0,'+(0.06+R()*0.12)+')' : 'rgba(255,255,255,'+(0.08+R()*0.14)+')';
+        x.fillRect(R()*px|0,R()*px|0,2+(R()*5|0),2+(R()*5|0)); }
+      const v=x.createRadialGradient(px/2,px/2,px*0.25,px/2,px/2,px*0.72);
+      v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(1,'rgba(0,0,0,0.42)');
+      x.fillStyle=v; x.fillRect(0,0,px,px);
+    },128);
+    // 石板の 上面（天空・炉）：縁取りの 彫られた 石板。
+    TEX.dSlabTop = patTex((x,px)=>{
+      x.fillStyle='#c9c9c9'; x.fillRect(0,0,px,px);
+      for(let i=0;i<120;i++){ x.fillStyle='rgba(0,0,0,'+(0.03+R()*0.06)+')';
+        x.fillRect(R()*px|0,R()*px|0,2+(R()*4|0),2+(R()*4|0)); }
+      const b=px*0.1;
+      x.fillStyle='rgba(0,0,0,0.28)'; x.fillRect(0,0,px,b*0.6); x.fillRect(0,0,b*0.6,px);          // 外の 縁（影）
+      x.fillStyle='rgba(255,255,255,0.35)'; x.fillRect(0,px-b*0.6,px,b*0.6); x.fillRect(px-b*0.6,0,b*0.6,px);
+      x.strokeStyle='rgba(0,0,0,0.30)'; x.lineWidth=2; x.strokeRect(b*1.6,b*1.6,px-b*3.2,px-b*3.2);   // 彫り
+      x.strokeStyle='rgba(255,255,255,0.35)'; x.lineWidth=1; x.strokeRect(b*1.6+2,b*1.6+2,px-b*3.2,px-b*3.2);
+    },128);
+  }
   TEX.carpet = patTex((x,px)=>{
     x.fillStyle='#7a2530'; x.fillRect(0,0,px,px);
     for(let i=0;i<40;i++){ x.fillStyle=i%2?'#8c2c38':'#661d26';
@@ -12079,15 +12116,16 @@ function buildMap(name){
   // ★地方ごとの 色（壁の 側面の 色あい／上面／床／水）
   const DPAL = {
     ice:  {side:0xffffff, top:0xe4f4fc, floor:0x5d7f9e, water:0xbfe8ff},
-    well: {side:0xd8b48c, top:0x7a6650, floor:0x6e5a44, water:0x7fc8e0},   // 地下水路：土と 水
-    sea:  {side:0x9fd8d0, top:0x5a8a84, floor:0xb8a882, water:0x4fa8b8},   // 海蝕洞：砂と 潮
-    peak: {side:0xc0c0c8, top:0x8a8a90, floor:0x76767c, water:0x8fb0d0},   // 山道：灰色の 岩
-    rock: {side:0xc8b8a0, top:0x6a5e50, floor:0x8a7a6a, water:0x7fb8d8},
-    sky:  {side:0xf2eee2, top:0xd8cfae, floor:0xbab39c, water:0xffffff},   // 天空：白い 石と 金
-    forge:{side:0xd8b8a0, top:0x8a5a40, floor:0x7a6050, water:0xffffff},   // 炉：赤茶の 煉瓦
+    // lump：上に 載せる 岩くずの 色／deco：地方の 飾り
+    well: {side:0xc8a078, top:0xa08a6c, floor:0x6e5a44, water:0x7fc8e0, lump:0x7a6a58, deco:'moss'},   // 地下水路：土と 水
+    sea:  {side:0x8fc8c0, top:0x8ab8b0, floor:0xb8a882, water:0x4fa8b8, lump:0x6a9a92, deco:'coral'},  // 海蝕洞：砂と 潮
+    peak: {side:0xb8b8c0, top:0xa8a8b0, floor:0x76767c, water:0x8fb0d0, lump:0x8a8a92, deco:'snow'},   // 山道：灰色の 岩
+    rock: {side:0xc0ae96, top:0x9a8c78, floor:0x8a7a6a, water:0x7fb8d8, lump:0x7a6e60},
+    sky:  {side:0xf2eee2, top:0xe6dcc0, floor:0xbab39c, water:0xffffff},   // 天空：白い 石と 金
+    forge:{side:0xd8b8a0, top:0x8a6450, floor:0x7a6050, water:0xffffff},   // 炉：赤茶の 煉瓦
   };
   const dkey = ice ? 'ice' : /^well/.test(name) ? 'well' : /^sea/.test(name) ? 'sea'
-             : /^peak|^zenos/.test(name) ? 'peak' : /^furnace/.test(name) ? 'forge'
+             : /^peak/.test(name) ? 'peak' : /^furnace/.test(name) ? 'forge'
              : skyD ? 'sky' : 'rock';
   const dp = DPAL[dkey];
   const topY  = cave?0.5:0;
@@ -12099,6 +12137,33 @@ function buildMap(name){
       const fl = ()=>put('ground',[x,baseY,y]);
       if(ch==='#'){
         put('dwall',[x,WALL_H/2,y]);                                     // 低い かべ
+        if(!ice && cave){
+          const hsh=(k)=>{ const v=Math.sin(x*12.9898+y*78.233+k*37.719)*43758.5453; return v-Math.floor(v); };
+          // 岩くず：平らな 上面を 崩す（全部には のせず、6割ほど）
+          { const n = hsh(1)<0.25 ? 0 : 1+(hsh(2)*3|0);
+            for(let k=0;k<n;k++){
+              const sz=0.12+hsh(80+k)*0.16;
+              put('dlump',[x+(hsh(84+k)-0.5)*0.7, WALL_H+sz*0.25, y+(hsh(88+k)-0.5)*0.7, hsh(92+k)*6.28, sz, sz*(0.55+hsh(96+k)*0.4)]);
+            } }
+          const d=dp.deco, s1 = rows[y+1] && rows[y+1][x];
+          if(d==='moss' && hsh(21)<0.45)               // 苔：上面の まだら
+            put('dmoss',[x+(hsh(22)-0.5)*0.4, WALL_H+0.012, y+(hsh(23)-0.5)*0.4, hsh(24)*6.28, 0.28+hsh(25)*0.2, 1]);
+          if(d==='moss' && s1 && s1!=='#' && hsh(26)<0.5)   // 手前の 壁を つたう 水の すじ
+            put('ddrip',[x+(hsh(27)-0.5)*0.6, WALL_H*0.55, y+0.505, 0, 1, 1]);
+          if(d==='coral' && hsh(31)<0.3){              // サンゴ：上に 小さな 枝
+            const n=2+(hsh(32)*3|0);
+            for(let k=0;k<n;k++) put('dcoral',[x+(hsh(33+k)-0.5)*0.5, WALL_H+0.14, y+(hsh(40+k)-0.5)*0.5, hsh(47+k)*6.28, 1, 0.8+hsh(54+k)*0.6]);
+          }
+          if(d==='coral' && hsh(61)<0.35)              // 貝がら
+            put('dshell',[x+(hsh(62)-0.5)*0.5, WALL_H+0.04, y+(hsh(63)-0.5)*0.5, hsh(64)*6.28, 1, 1]);
+          if(d==='snow' && hsh(71)<0.35){              // 雪の 吹きだまり：大小の 塊を 寄せて 不規則な 形に
+            const bx=x+(hsh(72)-0.5)*0.3, bz=y+(hsh(73)-0.5)*0.3, n=3+(hsh(74)*3|0);
+            for(let k=0;k<n;k++){
+              const r=0.08+hsh(100+k)*0.14;
+              put('dsnow',[bx+(hsh(106+k)-0.5)*0.42, WALL_H+0.01, bz+(hsh(112+k)-0.5)*0.42, 0, r, r*0.35]);
+            }
+          }
+        }
         if(ice){
           const hsh=(k)=>{ const v=Math.sin(x*12.9898+y*78.233+k*37.719)*43758.5453; return v-Math.floor(v); };
           // 霜の 塊：平らな 上面を 凹凸に
@@ -12347,10 +12412,26 @@ function buildMap(name){
   if(dgn3d){
     const side = ice
       ? new THREE.MeshPhongMaterial({map:TEX.dIceSide, specular:0x9fd0f0, shininess:48})
-      : new THREE.MeshLambertMaterial({map: skyD?(dkey==='forge'?TEX.brick:TEX.whitestone) : TEX.cliff, color: dp.side});
+      : cave
+        ? new THREE.MeshLambertMaterial({map:TEX.dRockSide, color: dp.side})
+        : new THREE.MeshLambertMaterial({map: dkey==='forge'?TEX.brick:TEX.whitestone, color: dp.side});
     const top  = ice
       ? new THREE.MeshLambertMaterial({map:TEX.dIceTop})
-      : new THREE.MeshLambertMaterial({color: dp.top});
+      : new THREE.MeshLambertMaterial({map: cave?TEX.dRockTop:TEX.dSlabTop, color: dp.top});
+    if(!ice && cave){
+      addInstanced(new THREE.DodecahedronGeometry(1,0),
+        new THREE.MeshPhongMaterial({color: dp.lump, specular:0x222222, shininess:8, flatShading:true}), G_.dlump||[]);
+      const mg = new THREE.CircleGeometry(1,7); mg.rotateX(-Math.PI/2);
+      addInstanced(mg, new THREE.MeshLambertMaterial({color:0x4f7a3a}), G_.dmoss||[]);
+      addInstanced(new THREE.BoxGeometry(0.05,WALL_H*0.8,0.02),
+        new THREE.MeshBasicMaterial({color:0x9fd8f0, transparent:true, opacity:0.55}), G_.ddrip||[]);
+      addInstanced(new THREE.ConeGeometry(0.035,0.28,5),
+        new THREE.MeshPhongMaterial({color:0xf07a8a, specular:0x442222, shininess:20, flatShading:true}), G_.dcoral||[]);
+      const sg = new THREE.SphereGeometry(0.07,8,5,0,Math.PI*2,0,Math.PI/2);
+      addInstanced(sg, new THREE.MeshPhongMaterial({color:0xf2e6d2, specular:0x888888, shininess:40}), G_.dshell||[]);
+      addInstanced(new THREE.SphereGeometry(1,10,6),
+        new THREE.MeshLambertMaterial({color:0xe8eef6}), G_.dsnow||[]);
+    }
     if(ice){
       // 霜の 塊（面が きらりと 光る よう 平面陰影）
       addInstanced(new THREE.IcosahedronGeometry(0.58,0),
