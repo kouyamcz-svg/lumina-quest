@@ -288,6 +288,46 @@ const NPCS = {
   ],
 
 
+  // ============ 第3章：トロスの村 ============
+  toros: [
+    {at:'12,9', spr:'elder', name:'村の 老人', lines:[
+      {when:{flag:'ch3_torosDone'}, text:[
+        '老人「あいつの 息子が、空から 降りて きた」',
+        '老人「……長生きは するもんだ」']},
+      {when:{flag:'ch3_fatherTruth'}, text:[
+        '老人「祠の 丘は 村の 東だ。手を 貸して やって くれ」']},
+      {when:{flag:'ch3_torosArrived'}, text:[
+        '老人「鍛冶場の 跡を 見せて やろう」']},
+      {text:['老人「……旅の 者か」']}]},
+    {at:'3,5', spr:'villagerA', name:'村の 鍛冶', lines:[
+      {when:{flag:'ch3_fatherTruth'}, text:[
+        '鍛冶「あんたの 親父の 炉、わしが 預かっとった」',
+        '鍛冶「火は 入れとらん。あいつ 以外に 打てる 者が おらんでな」']},
+      {text:['鍛冶「空の 鋼？　……むかし、ひとり 打てる 男が おった」']}]},
+    {at:'19,5', spr:'elderWoman', name:'村の 女', lines:[
+      {when:{flag:'ch3_lupusDown'}, text:[
+        '女「丘に 落ちて きた 黒い もの……見た 者が おおぜい おる」',
+        '女「空は どう なっとるんじゃ」']},
+      {text:['女「この 村から 空へ 行った 者が ひとり おった」',
+             '女「……帰って こなんだ」']}]},
+    {at:'9,12', spr:'childA', name:'村の 子ども', lines:[
+      {text:['子ども「東の 丘に、むかし 祠が あったんだって」',
+             '子ども「おじいちゃんが 言ってた」']}]},
+    {at:'13,12', spr:'villagerB', name:'村の 大工', lines:[
+      {when:{flag:'ch3_shrineBuilt'}, text:[
+        '大工「祠が 建った。……いい 仕事だった」']},
+      {text:['大工「丘の 祠を 建て直したいが、人手が 足りん」']}]},
+  ],
+
+  // ============ 第3章：祠の 丘 ============
+  shrine_hill: [
+    {at:'10,5', spr:'pipeobj', name:'祠の 跡', lines:[
+      {when:{flag:'ch3_shrineBuilt'}, text:[
+        '小さな 祠。石が 新しい。']},
+      {text:['崩れた 石の 台が ある。']}]},
+  ],
+
+
   // ============ 第3章：若き霊峰 ============
   peak_village: [
     {at:'9,5', spr:'captain', name:'山の 長', lines:[
@@ -633,6 +673,18 @@ const QUESTS = {
     reward:{}, next:'ch2_q2_core',
   },
   // ============ 第3章：氷の谷 ============
+  ch3_q5_toros: {
+    id:'ch3_q5_toros', chapter:4, title:'父の 故郷',
+    giver:'村の 老人',
+    desc:'父が 生まれた 村。なぜ 空へ 行ったのかを 知る。',
+    steps:[
+      {id:'truth',  desc:'村の 老人に 父の 話を 聞く',      flag:'ch3_fatherTruth'},
+      {id:'shrine', desc:'村の 東の 丘で 祠を 建てる',      flag:'ch3_shrineBuilt'},
+      {id:'lupus',  desc:'丘に 落ちてきた ものを 討つ',     flag:'ch3_lupusDown'},
+      {id:'back',   desc:'村の 老人に 報せる',              flag:'ch3_torosDone'},
+    ],
+    reward:{}, next:null,
+  },
   ch3_q4_peak: {
     id:'ch3_q4_peak', chapter:4, title:'山肌の 洞',
     giver:'山の 長',

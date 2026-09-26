@@ -696,6 +696,24 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★店の 建物（S）が ある 町には 品ぞろえが ある こと。
+//   ★第3章の 五地方 すべてで 店が 空っぽ だった（第2章の 上層区でも 同じ）。
+//     入っても 薬草しか 出ず、装備が 買えなかった。
+{
+  Object.keys(C.MAPS).forEach(mp=>{
+    const m = C.MAPS[mp];
+    if(!m.tiles.join('').includes('S')) return;
+    const shop = C.SHOPS[mp+':S'];
+    T('店 '+mp+' に 品ぞろえが ある', !!(shop && shop.length), 'SHOPS に '+mp+':S が ない');
+    if(shop && (C.MAPS[mp].theme!=='indoor')){
+      const eq = shop.filter(i=>i.kind==='w'||i.kind==='a');
+      // 港など 通りすがりの 店は 薬だけで よい
+      if(mp!=='sky_port')
+        T('店 '+mp+' に 装備が ある', eq.length>0, '武器も 防具も ない');
+    }
+  });
+}
+
 // ★「何人めか」を 数える 会話は、書き置きの 順番を つかわない こと。
 //   ★さきに 三人めを 助けても「ひとりめ」と 出て いた。
 {

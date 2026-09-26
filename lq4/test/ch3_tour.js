@@ -219,6 +219,13 @@ T('セレンが 槍を 教える', C.G.flags.ch3_serenTaught===true);
 T('「重い者」の 話が 出る', said('重い者'), log.join(' / ').slice(0,140));
 T('重いのは わたしの ほうだったと 言う', said('重いのは、たぶん わたしの ほうだった'));
 
+// ===== 9.2 氷の谷の 夜（一枚絵）=====
+//   ★章の 途中の 締め。老婆に もう一度 話すと 夜の 場面に なる。
+talk('ice_camp', 17, 6, 'back');
+T('氷の谷の 夜', C.G.flags.ch3_iceDone===true);
+T('千年ぶんが 下に 落ちてる', said('千年ぶんが、下に 落ちてる'), log.join(' / ').slice(0,160));
+T('つぎの 行き先', said('巡回降下 第二区'));
+
 // ===== 9.5 湧き水の町（西）=====
 stand('ground', 9, 30, 'back');
 C.stepField(0,-1);
@@ -370,17 +377,73 @@ T('山が 鳴りはじめる', said('山が 鳴りはじめた'));
   T('四つ 集まった', C.skyPartsGot()===4, C.skyPartsGot()+'／5');
 }
 
+// ===== 9.9 トロスの村（中央・父の 故郷）=====
+stand('ground', 48, 31, 'back');
+C.stepField(0,-1);
+T('トロスの村へ 入れる', C.P.map==='toros', C.P.map+' '+C.P.x+','+C.P.y);
+
+talk('toros', 12, 10, 'back');
+T('父を 知る 老人に 会う', C.G.flags.ch3_torosArrived===true);
+T('父の 師匠だと 分かる', said('わしの 弟子だ'), log.join(' / ').slice(0,140));
+T('クエストが たつ', C.G.quests.ch3_q5_toros==='active');
+
+talk('toros', 12, 10, 'back');
+T('父が 空へ 行った 理由を 知る', C.G.flags.ch3_fatherTruth===true);
+T('守る 剣を 打ちに 行くと 言った', said('誰かを 守る 剣に なる'), log.join(' / ').slice(0,200));
+T('まだ 会って ない 誰かと 言った', said('まだ 会うて ない 誰かだ'));
+T('毎年 防具が 届いたと 言う', said('白い 鋼の 防具だ'));
+
+// ★祠を 建てる 前は ルプスが 出ない
+clearLog();
+stand('shrine_hill', 10, 4, 'back'); C.interact();
+T('祠の 前は ルプスが 出ない', C.G.flags.ch3_lupusDown!==true);
+T('先に 祠を と 言われる', said('先に そっちを'), log.join(' / ').slice(0,70));
+
+talk('shrine_hill', 10, 6, 'back');
+T('祠が 建つ', C.G.flags.ch3_shrineBuilt===true);
+T('あずけたく なる と 言う', said('なにかを、あずけたく なる'), log.join(' / ').slice(0,160));
+
+// ★ルプス戦の 時点で 鎧は まだ 4つ（外套は 討伐後）。
+//   トロスの 店で 買える 装備で 挑む。到達 Lv は 32〜33。
+clearLog();
+C.G.tactic='gungan'; C.party.length=0;
+['io','seren','noe','amane'].forEach((k,j)=>{
+  const m=C.mkMember(k,35);
+  m.weapon={kind:'w',name:'w',v:[26,28,16,16][j]};
+  m.armor ={kind:'a',name:'a',v:[25,25,19,19][j]};
+  C.party.push(m);
+});
+C.P.herbs=14;
+stand('shrine_hill', 10, 4, 'back');
+C.interact();
+T('ルプスが 空から 落ちて くる', said('祠の 上の 空が 裂けた'), log.join(' / ').slice(0,120));
+T('狼に 入る', said('丘の 狼に 触れた'));
+T('ルプスに かてる', C.G.flags.ch3_lupusDown===true);
+T('狼は 生きて 帰る', said('森へ 帰って いった'));
+T('地上まで 来て いる', said('地上まで 来てる'));
+
+{
+  const g0 = C.P.gold;
+  C.party.forEach(p=>{ p.hp=1; });
+  talk('toros', 12, 10, 'back');
+  T('老人に 報せる', C.G.flags.ch3_torosDone===true);
+  T('アマネが 聞く 者だと 言う', said('わたしは、聞く 者です'), log.join(' / ').slice(0,160));
+  T('息子が 来たら 渡せと 言った', said('息子が 来たら 渡して くれ'));
+  T('天空の 外套を もらう', C.G.flags.sky_cloak===true);
+  T('五つ そろう', C.skyPartsGot()===5, C.skyPartsGot()+'／5');
+  T('天空の 鎧に なる', C.G.flags.sky_armor===true);
+  T('イオが 天空の 鎧を 着る',
+    C.party[0].armor && C.party[0].armor.name==='天空の 鎧', JSON.stringify(C.party[0].armor));
+  T('クエストが 片づく', C.G.quests.ch3_q5_toros==='clear');
+}
+
 // ===== 10. 章末 =====
-clearLog(); C.G.tactic='manual';
-C.triggerChapterEnd();
-T('章末が でる', said('千年ぶんが、下に 落ちてる'), log.join(' / ').slice(0,160));
-T('リーゼが 目を 覚ます', said('リーゼが 目を 覚ましたわ'));
-T('唄で 起きたと 分かる', said('唄を 歌ったら'));
-T('つぎの 行き先が 出る', said('巡回降下 第二区'));
-T('ch3_iceDone が たつ', C.G.flags.ch3_iceDone===true);
-// ★章末の 一枚絵
-T('章末に 一枚絵が 出る', scene.some(x=>x==='show:scene_ch3_ice'), scene.join(' '));
-T('一枚絵は あとで しまう', scene.indexOf('hide') > scene.indexOf('show:scene_ch3_ice'), scene.join(' '));
+T('章末が でる', said('傾いて ない？'), log.join(' / ').slice(-200));
+T('戻って くる 者を 初めて 見ると 言う', said('戻って くる 者を 見るのは'));
+T('禁書庫へ 向かう', said('禁書庫ね'));
+T('ch3_cleared が たつ', C.G.flags.ch3_cleared===true);
+// ★氷の谷の 夜は 章の 途中の 一枚絵に なった
+T('氷の谷の 夜の 一枚絵が 出た', scene.some(x=>x==='show:scene_ch3_ice'), scene.join(' '));
 
 // ===== 11. セーブ/ロード =====
 const gold=C.P.gold, lv=C.party[0].lv;

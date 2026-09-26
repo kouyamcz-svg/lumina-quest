@@ -64,6 +64,8 @@ const MAP_IDS = {
   sea_cave:   {region:'land',kind:'dgn',  name:'海蝕洞',      scene:'SCENE_CAVE'},
   peak_village:{region:'land',kind:'town',name:'若き霊峰',    scene:'SCENE_FIELD'},
   peak_path:  {region:'land',kind:'dgn',  name:'山道',        scene:'SCENE_CAVE'},
+  toros:      {region:'land',kind:'town', name:'トロスの村',  scene:'SCENE_FIELD'},
+  shrine_hill:{region:'land',kind:'dgn',  name:'祠の 丘',     scene:'SCENE_FIELD'},
   tower1:     {region:'sky', kind:'dgn',  name:'雲見の 塔 一階',   scene:'SCENE_SKY_TOWN'},
   tower2:     {region:'sky', kind:'dgn',  name:'雲見の 塔 二階',   scene:'SCENE_SKY_TOWN'},
   tower3:     {region:'sky', kind:'dgn',  name:'雲見の 塔 三階',   scene:'SCENE_SKY_TOWN'},
