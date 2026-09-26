@@ -370,6 +370,50 @@ function initTex(){
     x.fillStyle='rgba(230,248,255,0.32)';
     for(let i=0;i<14;i++) x.fillRect(Math.random()*px|0,Math.random()*px*0.5|0,2,4);
   },64);
+  // ★ダンジョンの 氷（3D）。種つき 乱数で 毎回 同じ 絵に する。
+  {
+    let seed=7; const R=()=>((seed=(seed*16807)%2147483647)/2147483647);
+    // 側面：上は 白く、下へ 深い 青に 沈む。結晶の 面と 白い ひび。
+    TEX.dIceSide = patTex((x,px)=>{
+      const g=x.createLinearGradient(0,0,0,px);
+      g.addColorStop(0,'#e6f7ff'); g.addColorStop(0.28,'#a9dcf6');
+      g.addColorStop(0.62,'#5ea6d6'); g.addColorStop(1,'#2a5f94');
+      x.fillStyle=g; x.fillRect(0,0,px,px);
+      for(let i=0;i<16;i++){                       // 結晶の 面（明るい／暗い 三角）
+        const cx=R()*px, cy=R()*px, r=10+R()*26;
+        x.beginPath(); x.moveTo(cx,cy-r); x.lineTo(cx+r*0.7,cy+r*0.4); x.lineTo(cx-r*0.6,cy+r*0.5); x.closePath();
+        x.fillStyle = R()<0.5 ? 'rgba(255,255,255,0.16)' : 'rgba(20,60,110,0.14)'; x.fill();
+      }
+      x.strokeStyle='rgba(255,255,255,0.55)'; x.lineWidth=1;
+      for(let i=0;i<9;i++){                        // ひび
+        let ax=R()*px, ay=R()*px*0.8; x.beginPath(); x.moveTo(ax,ay);
+        for(let k=0;k<4;k++){ ax+= (R()-0.5)*22; ay+= 6+R()*14; x.lineTo(ax,ay); }
+        x.stroke();
+      }
+      x.fillStyle='rgba(255,255,255,0.9)';         // きらめき
+      for(let i=0;i<14;i++) x.fillRect(R()*px|0, R()*px*0.6|0, 2, 2);
+    },128);
+    // 上面：霜。白に 淡い 青の まだら。
+    TEX.dIceTop = patTex((x,px)=>{
+      x.fillStyle='#eaf7ff'; x.fillRect(0,0,px,px);
+      for(let i=0;i<260;i++){ const v=R();
+        x.fillStyle = v<0.5 ? 'rgba(170,215,240,0.45)' : 'rgba(255,255,255,0.8)';
+        x.fillRect(R()*px|0, R()*px|0, 2+(R()*3|0), 2+(R()*3|0)); }
+    },128);
+    // 床：割れ目の 入った 氷。
+    TEX.dIceFloor = patTex((x,px)=>{
+      const g=x.createLinearGradient(0,0,px,px);
+      g.addColorStop(0,'#3f7fb2'); g.addColorStop(0.5,'#2f6aa0'); g.addColorStop(1,'#3a78ab');
+      x.fillStyle=g; x.fillRect(0,0,px,px);
+      const pts=[]; for(let i=0;i<7;i++) pts.push([R()*px,R()*px]);
+      x.strokeStyle='rgba(190,228,250,0.55)'; x.lineWidth=1.4;
+      for(let i=0;i<pts.length;i++){ const a=pts[i], b=pts[(i+2)%pts.length];
+        x.beginPath(); x.moveTo(a[0],a[1]);
+        x.lineTo((a[0]+b[0])/2+(R()-0.5)*20,(a[1]+b[1])/2+(R()-0.5)*20); x.lineTo(b[0],b[1]); x.stroke(); }
+      for(let i=0;i<40;i++){ x.fillStyle='rgba(255,255,255,'+(0.1+R()*0.25)+')';
+        x.fillRect(R()*px|0,R()*px|0,3+(R()*6|0),1); }
+    },128);
+  }
   TEX.carpet = patTex((x,px)=>{
     x.fillStyle='#7a2530'; x.fillRect(0,0,px,px);
     for(let i=0;i<40;i++){ x.fillStyle=i%2?'#8c2c38':'#661d26';
@@ -678,6 +722,10 @@ function buildMap(name){
   if(map.theme==='snow' && ts){ sky=ts.sky; fog=[ts.fog[0], ts.fog[1]*1.5, ts.fog[2]*1.6]; }
   if(night){ sky=darken(sky,0.34); fog=[darken(fog[0],0.42), fog[1]*0.85, fog[2]*0.9]; }
   scene.background=new THREE.Color(sky);
+  if(map.theme==='ice' && C.WORLD && C.WORLD.MAP_IDS && (C.WORLD.MAP_IDS[name]||{}).kind==='dgn'){
+    sky = 0x1d3f63; fog = [0x2a5680, fog[1], fog[2]];
+    scene.background = new THREE.Color(sky);
+  }
   scene.fog=new THREE.Fog(fog[0],fog[1]*CAM_ZOOM,fog[2]*CAM_ZOOM);
   curScene=sc; curNight=night; curTS=ts;
   animObjs=[]; waters=[]; chestLids={};
@@ -719,7 +767,32 @@ function buildMap(name){
     const ch=rows[y][x];
     if(dgn3d){
       const fl = ()=>put('ground',[x,baseY,y]);
-      if(ch==='#'){ put('dwall',[x,WALL_H/2,y]); continue; }            // 低い かべ
+      if(ch==='#'){
+        put('dwall',[x,WALL_H/2,y]);                                     // 低い かべ
+        if(ice){
+          const hsh=(k)=>{ const v=Math.sin(x*12.9898+y*78.233+k*37.719)*43758.5453; return v-Math.floor(v); };
+          // 霜の 塊：平らな 上面を 凹凸に
+          put('dfrost',[x+(hsh(1)-0.5)*0.08, WALL_H, y+(hsh(2)-0.5)*0.08, hsh(3)*6.28, 0.80+hsh(4)*0.12, 0.11+hsh(5)*0.08]);
+          // つらら：手前（南）が 通れる 壁の 縁から 下がる
+          const s1 = rows[y+1] && rows[y+1][x];
+          if(s1 && s1!=='#'){
+            const n=2+(hsh(6)*2|0);
+            for(let k=0;k<n;k++){
+              const len=0.32+hsh(10+k)*0.42;
+              put('dicicle',[x-0.34+(k+0.5)*(0.68/n)+(hsh(20+k)-0.5)*0.08, WALL_H-len/2, y+0.5, 0, 1, len]);
+            }
+          }
+          // 氷の 結晶：ところどころ 壁の 上に 突き出す
+          if(hsh(7)<0.16){
+            const c=1+(hsh(8)*3|0);
+            for(let k=0;k<c;k++){
+              const h=0.35+hsh(30+k)*0.45;
+              put('dcrys',[x+(hsh(40+k)-0.5)*0.5, WALL_H+0.12+h*0.12, y+(hsh(50+k)-0.5)*0.5, hsh(60+k)*6.28, 1, h]);
+            }
+          }
+        }
+        continue;
+      }
       if(ch==='~'){
         if(skyD){ put('dcloud',[x,ft-0.35,y]); continue; }               // 天空：雲の ふち
         put('dwater',[x,ft-0.14,y]); put('dwbed',[x,ft-0.40,y]); continue;   // 水路・潮だまり
@@ -942,8 +1015,23 @@ function buildMap(name){
       map: snow?TEX.pave : ice?TEX.ice : cast?TEX.carpet : TEX.road}),
     (G_.road||[]).map(p=>[p[0],p[1],p[2]]));
   if(dgn3d){
-    const side = new THREE.MeshLambertMaterial({map: ice?TEX.icewall : skyD?(dkey==='forge'?TEX.brick:TEX.whitestone) : TEX.cliff, color: dp.side});
-    const top  = new THREE.MeshLambertMaterial({color: dp.top});
+    const side = ice
+      ? new THREE.MeshPhongMaterial({map:TEX.dIceSide, specular:0x9fd0f0, shininess:48})
+      : new THREE.MeshLambertMaterial({map: skyD?(dkey==='forge'?TEX.brick:TEX.whitestone) : TEX.cliff, color: dp.side});
+    const top  = ice
+      ? new THREE.MeshLambertMaterial({map:TEX.dIceTop})
+      : new THREE.MeshLambertMaterial({color: dp.top});
+    if(ice){
+      // 霜の 塊（面が きらりと 光る よう 平面陰影）
+      addInstanced(new THREE.IcosahedronGeometry(0.58,0),
+        new THREE.MeshPhongMaterial({color:0xf0faff, specular:0xffffff, shininess:70, flatShading:true}), G_.dfrost||[]);
+      // つらら（先が 下）
+      const ig = new THREE.ConeGeometry(0.085,1,6); ig.rotateX(Math.PI);
+      addInstanced(ig, new THREE.MeshPhongMaterial({color:0xcff0ff, specular:0xffffff, shininess:90, flatShading:true}), G_.dicicle||[]);
+      // 結晶（細長い 八面体）
+      const cg = new THREE.OctahedronGeometry(0.11,0);
+      addInstanced(cg, new THREE.MeshPhongMaterial({color:0xaeeaff, emissive:0x1e5a7a, specular:0xffffff, shininess:100, flatShading:true}), G_.dcrys||[]);
+    }
     const bot  = new THREE.MeshLambertMaterial({color: 0x101010});
     addInstanced(new THREE.BoxGeometry(1,WALL_H,1), [side,side,top,bot,side,side], G_.dwall||[]);
     const wg = new THREE.PlaneGeometry(1,1); wg.rotateX(-Math.PI/2);
@@ -977,8 +1065,11 @@ function buildMap(name){
   if(cave){
     addInstanced(new THREE.BoxGeometry(1,0.5,1),
       // ★ダンジョンでは 床を 暗く して、壁の 上面と 見分けやすく する
-      new THREE.MeshLambertMaterial({map: ice?TEX.ice:TEX.rock, color: dgn3d ? dp.floor : 0xffffff}),
-      (G_.ground||[]).concat(G_.road||[]).map(p=>[p[0],0.25,p[2]]));
+      (dgn3d && ice)
+        ? new THREE.MeshPhongMaterial({map:TEX.dIceFloor, specular:0x4a78a0, shininess:60})
+        : new THREE.MeshLambertMaterial({map: ice?TEX.ice:TEX.rock, color: dgn3d ? dp.floor : 0xffffff}),
+      // ★ダンジョンでは 床の 向きを ますごとに 回して 模様の くり返しを 散らす
+      (G_.ground||[]).concat(G_.road||[]).map(p=>[p[0],0.25,p[2], dgn3d ? ((p[0]*7+p[2]*3)%4)*Math.PI/2 : 0]));
     addInstanced(new THREE.BoxGeometry(1,1,1),
       new THREE.MeshLambertMaterial({map: ice?TEX.icewall:TEX.cliff}),
       (G_.cliff||[]).map(p=>[p[0],p[1],p[2],0,1,p[5]]));

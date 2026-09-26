@@ -5,7 +5,7 @@ const {createCanvas, Image}=require('canvas');
 const createGL=require('gl');
 const {PNG}=require('pngjs');
 const [,, MAP, PX, PY, OUT, CH] = process.argv;
-const W=390, H=500;   // スマホの ゲーム画面 ぐらい
+const W=Number(process.env.W||390), H=Number(process.env.H||500);   // スマホの ゲーム画面 ぐらい
 const LQ='/home/claude/lq4';
 
 const gl = createGL(W, H, {preserveDrawingBuffer:true});
@@ -75,6 +75,7 @@ for(const f of ['world.js','npc.js','chapters.js','core.js','bgm.js']) { try{ lo
 try{ load(LQ+'/src/view2d.js'); }catch(e){ console.log('view2d skip', e.message.slice(0,80)); }
 { // ★調べる ための 口（撮影ツールの 中だけ）
   let src=fs.readFileSync(LQ+'/src/view.js','utf8');
+  if(process.env.CAMZ) src=src.replace('const CAM_ZOOM = 1.3;','const CAM_ZOOM = '+process.env.CAMZ+';');
   src=src.replace('window.LQ4View = {', 'window.__rend=()=>{ cam.updateMatrixWorld(); renderer.render(scene,cam); return renderer.info.render; };\nwindow.__dbg=()=>({scene:!!scene, n:scene?scene.children.length:0, list:(actors.list||[]).length, cam:cam.position.toArray().map(v=>+v.toFixed(2)), is2D, mode, fp:(fp||[]).slice(0,1)});\nwindow.LQ4View = {');
   vm.runInContext(src, ctx, {filename:'view.js'});
 }
