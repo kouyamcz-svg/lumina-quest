@@ -174,11 +174,11 @@ T('ひとつでは 開かない', C.tileAt('ice_cave',11,3)==='K');
 stand('ice_cave', 19, 7, 'back'); C.interact();
 T('ふたつで 開く', C.tileAt('ice_cave',11,3)==='.', C.tileAt('ice_cave',11,3));
 // ★ボスは 別の 間。入口からは 見えない
-T('ボスは 別の 間に いる', C.MAPS.ice_core && C.tileAt('ice_core',9,5)==='B');
+T('ボスは 別の 間に いる', C.MAPS.ice_core && C.tileAt('ice_core',9,4)==='B');
 
 // ===== 6. あくむへん =====
 clearLog(); strong(26);
-stand('ice_core', 9, 6, 'back');
+stand('ice_core', 9, 5, 'back');
 C.interact();
 T('少女が 眠って いる', said('少女が 横たわっていた'), log.join(' / ').slice(0,120));
 T('上から 落ちた ものだと 言う', said('天空大陸から'));
@@ -241,16 +241,17 @@ stand('well_town', 12, 8, 'back');
 C.stepField(0,-1);
 T('地下水路へ 入れる', C.P.map==='well_cave', C.P.map);
 
-T('はじめは 土の 壁', C.tileAt('well_cave',10,6)==='K', C.tileAt('well_cave',10,6));
-talk('well_cave', 10, 7, 'back');
+T('はじめは 土の 壁', C.tileAt('well_cave',11,1)==='K', C.tileAt('well_cave',11,1));
+talk('well_cave', 11, 2, 'back');
 T('三の 水脈の 話が 出る', said('三の 水脈'), log.join(' / ').slice(0,70));
-stand('well_cave', 3, 10, 'back'); C.interact();
-T('ひとつでは 開かない', C.tileAt('well_cave',10,6)==='K');
-stand('well_cave', 20, 14, 'back'); C.interact();
-T('ふたつで 開く', C.tileAt('well_cave',10,6)==='.', C.tileAt('well_cave',10,6));
+stand('well_cave', 21, 9, 'left'); C.interact();
+T('ひとつでは 開かない', C.tileAt('well_cave',11,1)==='K');
+stand('well_cave', 11, 11, 'left'); C.interact();
+T('ふたつで 開く', C.tileAt('well_cave',11,1)==='.', C.tileAt('well_cave',11,1));
+T('水脈の ぬしは 別の 間', C.tileAt('well_core',9,4)==='B');
 
 clearLog(); strong(26);
-stand('well_cave', 10, 5, 'back');
+stand('well_core', 9, 5, 'back');
 C.interact();
 T('水脈の ぬしに かてる', C.G.flags.ch3_veinFound===true);
 T('吸って いたと 言う', said('吸って いたんだ'), log.join(' / ').slice(0,120));
@@ -266,7 +267,7 @@ T('報せに 行けと 出る', said('集落長に 報せよう'));
   T('礼を もらえる', C.P.gold===g0+2400, C.P.gold+' ← '+g0);
   T('クエストが 片づく', C.G.quests.ch3_q2_well==='clear');
   T('天空の 篭手を もらう', C.G.flags.sky_arm===true);
-  T('二十年 かかったと 言う', said('二十年 かかったな'), log.join(' / ').slice(0,140));
+  T('十三年 かかったと 言う', said('十三年 かかったな'), log.join(' / ').slice(0,140));
 }
 
 talk('well_town', 11, 11, 'back');
@@ -291,14 +292,15 @@ stand('coral_bay', 11, 8, 'back');
 C.stepField(0,-1);
 T('海蝕洞へ 入れる', C.P.map==='sea_cave', C.P.map);
 
-T('はじめは 潮が 満ちて いる', C.tileAt('sea_cave',10,6)==='K', C.tileAt('sea_cave',10,6));
-stand('sea_cave', 3, 10, 'back'); C.interact();
-T('ひとつでは 引かない', C.tileAt('sea_cave',10,6)==='K');
-stand('sea_cave', 20, 14, 'back'); C.interact();
-T('ふたつで 潮が 引く', C.tileAt('sea_cave',10,6)==='.', C.tileAt('sea_cave',10,6));
+T('はじめは 潮が 満ちて いる', C.tileAt('sea_cave',13,1)==='K', C.tileAt('sea_cave',13,1));
+stand('sea_cave', 25, 5, 'left'); C.interact();
+T('ひとつでは 引かない', C.tileAt('sea_cave',13,1)==='K');
+stand('sea_cave', 9, 9, 'left'); C.interact();
+T('ふたつで 潮が 引く', C.tileAt('sea_cave',13,1)==='.', C.tileAt('sea_cave',13,1));
+T('洞の ぬしは 別の 間', C.tileAt('sea_core',10,4)==='B');
 
 clearLog(); strong(28);
-stand('sea_cave', 10, 5, 'back');
+stand('sea_core', 10, 5, 'back');
 C.interact();
 T('洞の ぬしに かてる', C.G.flags.ch3_namiSaved===true);
 T('まだ 見て ない だけと 言う', said('まだ 見て ない だけの ものだ'), log.join(' / ').slice(0,140));
@@ -337,24 +339,28 @@ T('ゼノスの 名が 出る', said('ゼノス、と 名乗った'));
 T('禁書庫の 学者だと 分かる', said('禁書庫の 学者だわ'));
 T('クエストが たつ', C.G.quests.ch3_q4_peak==='active');
 
-stand('ground', 81, 31, 'back');
+stand('ground', 79, 30, 'back');
 C.stepField(0,-1);
-T('山道へ 入れる', C.P.map==='peak_path', C.P.map+' '+C.P.x+','+C.P.y);
+T('山肌の 洞へ 入れる', C.P.map==='zenos_cave', C.P.map+' '+C.P.x+','+C.P.y);
 
-talk('peak_path', 10, 18, 'back');
+talk('zenos_cave', 5, 7, 'back');
 T('ゼノスに 会う', C.G.flags.ch3_zenosMet===true);
 T('読んだから 出たと 言う', said('読めたからだ'), log.join(' / ').slice(0,140));
 T('浮いたのは 事故では ないと 言う', said('あれは 事故では ない'));
 T('アマネが 名のる', said('アマネと 申します'));
 
-T('はじめは 落石が ふさぐ', C.tileAt('peak_path',10,6)==='K', C.tileAt('peak_path',10,6));
-stand('peak_path', 3, 10, 'back'); C.interact();
-T('ひとつでは 動かない', C.tileAt('peak_path',10,6)==='K');
-stand('peak_path', 20, 16, 'back'); C.interact();
-T('ふたつで 道が 通る', C.tileAt('peak_path',10,6)==='.', C.tileAt('peak_path',10,6));
+stand('ground', 81, 31, 'back');
+C.stepField(0,-1);
+T('山道へ 入れる', C.P.map==='peak_path', C.P.map+' '+C.P.x+','+C.P.y);
+T('はじめは 落石が ふさぐ', C.tileAt('peak_path',9,1)==='K', C.tileAt('peak_path',9,1));
+stand('peak_path', 7, 7, 'left'); C.interact();
+T('ひとつでは 動かない', C.tileAt('peak_path',9,1)==='K');
+stand('peak_path', 19, 9, 'left'); C.interact();
+T('ふたつで 道が 通る', C.tileAt('peak_path',9,1)==='.', C.tileAt('peak_path',9,1));
+T('山頂の ぬしは 別の 間', C.tileAt('peak_core',9,4)==='B');
 
 clearLog(); strong(28);
-stand('peak_path', 10, 5, 'back');
+stand('peak_core', 9, 5, 'back');
 C.interact();
 T('山頂の ぬしに かてる', C.G.flags.ch3_peakCleared===true);
 T('見られて いる あいだは 音が 入らない', said('ほかの 音が 入らない'), log.join(' / ').slice(0,140));
@@ -363,13 +369,13 @@ T('山が 鳴りはじめる', said('山が 鳴りはじめた'));
 {
   const g0 = C.P.gold, n0 = C.party.length;
   C.party.forEach(p=>{ p.hp=1; });
-  talk('peak_path', 10, 18, 'back');
+  talk('zenos_cave', 5, 7, 'back');
   T('山の耳', C.G.flags.ch3_mountEar===true);
   T('竜の 声を 反響させると 言う', said('竜の 声を 反響させる'), log.join(' / ').slice(0,160));
   T('口では なく 耳だと 気づく', said('道具は 聞きません'));
   T('アマネが 仲間に なる', C.party.length===n0+1 && C.party[n0].cls==='amane',
     C.party.map(p=>p.name).join(' '));
-  T('アマネが 地図から 消える', C.tileAt('peak_path',12,17)==='.', C.tileAt('peak_path',12,17));
+  T('アマネが 地図から 消える', C.tileAt('zenos_cave',9,6)==='.', C.tileAt('zenos_cave',9,6));
   T('天空の 兜を もらう', C.G.flags.sky_helm===true);
   T('父の ものだと 言う', said('父の ものです'));
   T('礼を もらえる', C.P.gold===g0+3200, C.P.gold+' ← '+g0);
@@ -429,6 +435,9 @@ T('地上まで 来て いる', said('地上まで 来てる'));
   T('老人に 報せる', C.G.flags.ch3_torosDone===true);
   T('アマネが 聞く 者だと 言う', said('わたしは、聞く 者です'), log.join(' / ').slice(0,160));
   T('息子が 来たら 渡せと 言った', said('息子が 来たら 渡して くれ'));
+  // ★最後の 荷。翌年から 来なく なった ＝ 父の 死（第1章の 帳面が 止まった 年）
+  T('最後の 荷だと 言う', said('それが 最後の 荷だ'));
+  T('父の 死と つながる', said('父が 死んだのは、十年 前です'));
   T('天空の 外套を もらう', C.G.flags.sky_cloak===true);
   T('五つ そろう', C.skyPartsGot()===5, C.skyPartsGot()+'／5');
   T('天空の 鎧に なる', C.G.flags.sky_armor===true);

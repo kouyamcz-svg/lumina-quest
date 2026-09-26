@@ -696,6 +696,74 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+// ★第3章の 宝箱には 中身が 書いて ある こと。
+//   ★乱数 だけで、ダンジョンの 奥の 箱でも 薬草 4つ などで、
+//     ざこ 1戦の おかねと 変わらなかった。
+{
+  const tr = CHD.CH[4].treasure || {};
+  ['ice_cave','well_cave','sea_cave','peak_path','zenos_cave',
+   'ice_camp','well_town','coral_bay','peak_village','toros'].forEach(mp=>{
+    const m = C.MAPS[mp]; if(!m) return;
+    m.tiles.forEach((r,y)=>[...r].forEach((ch,x)=>{
+      if(ch!=='C') return;
+      const k = mp+':'+x+','+y;
+      T('宝箱 '+k+' に 中身が ある', !!tr[k], 'treasure に ない');
+    }));
+  });
+  // 書いて ある 箱が 地図に ある こと（座標の 書きちがい）
+  Object.keys(tr).forEach(k=>{
+    const [mp,xy]=k.split(':'); const [x,y]=xy.split(',').map(Number);
+    T('treasure '+k+' の ますが 宝箱', C.tileAt(mp,x,y)==='C', 'いまは「'+C.tileAt(mp,x,y)+'」');
+  });
+  // ダンジョンの 奥の 装備は その 地方の 店より 強い
+  const SHOP_BEST = {};
+  ['ice_camp','well_town','coral_bay','peak_village','toros'].forEach(t=>{
+    (C.SHOPS[t+':S']||[]).forEach(i=>{ if(i.kind==='w'||i.kind==='a')
+      SHOP_BEST[t+':'+i.kind] = Math.max(SHOP_BEST[t+':'+i.kind]||0, i.v); });
+  });
+  const town = {ice_cave:'ice_camp', well_cave:'well_town', sea_cave:'coral_bay',
+                peak_path:'peak_village', zenos_cave:'peak_village'};
+  Object.keys(tr).forEach(k=>{
+    const mp=k.split(':')[0], o=tr[k];
+    if(!town[mp] || (o.kind!=='w'&&o.kind!=='a')) return;
+    // 杖（v が 低め）は 杖どうしで くらべたい が、ここでは「店で 買える いちばん 弱い 装備」より 上なら よい
+    const shopItems = (C.SHOPS[town[mp]+':S']||[]).filter(i=>i.kind===o.kind);
+    const weakest = Math.min(...shopItems.map(i=>i.v));
+    T('宝箱 '+k+' の 装備は 店の 品と くらべて 見劣りしない', o.v>=weakest,
+      o.name+' v'+o.v+' ／ 店の いちばん 下 v'+weakest);
+  });
+}
+
+// ★父の 年表が くいちがわない こと。
+//   ★防具が 五つ とも「二十年 前」に 届いた ことに なって いて、
+//     「毎年 届いた」と 合わなかった。イオ（16）も 空で 生まれた ことに なって いた。
+//   きまり（イオ 16歳・地上生まれ）：
+//     十五年前 父、空へ／十四〜十年前 毎年 一点ずつ／十年前 最後の 荷・帳面が 止まる・父 死す
+{
+  const cd = CHD.CH[4];
+  const parts = cd.talkEvents.filter(e=>e.skyPart);
+  const yearOf = (e)=>{
+    const ls = (e.msg||[]).join(' ');
+    const m = ls.match(/(十[一二三四五]?|[一二三四五六七八九])年 前/);
+    return m ? m[1] : null;
+  };
+  const KAN = {'十':10,'十一':11,'十二':12,'十三':13,'十四':14,'十五':15};
+  const years = parts.map(e=>({part:e.skyPart, y:KAN[yearOf(e)]}));
+  T('父の 防具 すべてに 届いた 年が ある', years.every(o=>o.y), JSON.stringify(years));
+  const uniq = new Set(years.map(o=>o.y));
+  T('父の 防具は 毎年 一点ずつ（年が かさならない）', uniq.size===years.length, JSON.stringify(years));
+  T('防具は 父が 空へ 行った あと（十五年 前 より 後）', years.every(o=>!o.y || o.y<15), JSON.stringify(years));
+  T('防具は 父の 死（十年 前）より 前', years.every(o=>!o.y || o.y>=10), JSON.stringify(years));
+  // どこかで「二十年 前」に 父や 荷が 出て こない
+  const all = [];
+  cd.talkEvents.forEach(e=>(e.msg||[]).forEach(l=>all.push(String(l))));
+  Object.values(NPCD.NPCS).forEach(list=>list.forEach(e=>(e.lines||[]).forEach(l=>(l.text||[]).forEach(t=>all.push(String(t))))));
+  all.forEach(l=>{
+    if(/二十年/.test(l) && /荷|父|あいつ|空へ|鋼|男/.test(l))
+      T('父の 話に「二十年」を つかわない', false, l.slice(0,44));
+  });
+}
+
 // ★店の 建物（S）が ある 町には 品ぞろえが ある こと。
 //   ★第3章の 五地方 すべてで 店が 空っぽ だった（第2章の 上層区でも 同じ）。
 //     入っても 薬草しか 出ず、装備が 買えなかった。
