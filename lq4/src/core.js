@@ -2236,6 +2236,13 @@ function questList(){
     .map(k=>NPCDATA.QUESTS[k])
     .filter(q=>q && (!q.chapter || q.chapter===ch));
 }
+// ★いまの 目的（章データの goals の、まだ 済んで いない 最初の 段）
+function currentGoal(){
+  const cd = chData();
+  const gs = (cd && cd.goals) || [];
+  const g = gs.find(x=>!G.flags[x.done]);
+  return g ? g.text : null;
+}
 function useInn(){
   const price = INN_PRICE[P.map]||10;
   G.mode='msg';
@@ -4005,7 +4012,7 @@ return {
   tileAt, isBlocked, walkable, warpAt,
   // 行動
   stepField, interact, facing, doWarp, startBattle, beginRound, saveGame, loadGame,
-  runTalkEvent, questOnTalk, questList, deathPoint, triggerChapterEnd, offerNextChapter, homePoint,
+  runTalkEvent, questOnTalk, questList, currentGoal, deathPoint, triggerChapterEnd, offerNextChapter, homePoint,
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,

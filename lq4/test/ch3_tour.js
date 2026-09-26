@@ -46,6 +46,15 @@ C.party.length=0;
 C.G.flags.ch2_cleared = true;
 C.switchChapter(4);
 T('第3章に なる', C.G.chapter===4);
+// ★目的の 検査の ため、印が 立った 順を 記録する
+const FLAG_ORDER = [];
+const GOAL_SEEN = [];
+const watchFlags = ()=>{ C.G.flags = new Proxy(C.G.flags, {
+  set(t,k,v){ if(v && !t[k]) FLAG_ORDER.push(k); t[k]=v;
+    const g=C.currentGoal(); if(GOAL_SEEN[GOAL_SEEN.length-1]!==g) GOAL_SEEN.push(g); return true; }
+}); };
+watchFlags();
+T('はじめの 目的は 降下', /降下用の 舟/.test(C.currentGoal()||''), C.currentGoal());
 // ★天空から はじまり、港の 舟で 地上へ 降りる
 T('はじまりは 天空（上層区）', C.P.map==='upper_dist', C.P.map+' '+C.P.x+','+C.P.y);
 T('章データが ひける', C.chData() && C.chData().id==='ch3_ground');
@@ -137,6 +146,7 @@ T('舟の ことを 言う', said('海を 渡れる'), log.join(' / ').slice(-90
   T('先に 珊瑚へ 行っても 入れない', C.P.map==='ground', C.P.map);
   T('西の 町が 先だと 言う', said('西の 町が 先です'), log.join(' / ').slice(0,90));
   C.G.flags = keep;
+  watchFlags();          // ★目的の 検査：記録を つなぎ直す
 }
 
 // ===== 2. 氷の谷へ =====
@@ -451,6 +461,23 @@ T('章末が でる', said('傾いて ない？'), log.join(' / ').slice(-200));
 T('戻って くる 者を 初めて 見ると 言う', said('戻って くる 者を 見るのは'));
 T('禁書庫へ 向かう', said('禁書庫ね'));
 T('ch3_cleared が たつ', C.G.flags.ch3_cleared===true);
+// ★目的（クエスト画面の 先頭）
+{
+  const goals = (C.CHD ? C.CHD.get(4) : C.chData()).goals || [];
+  const src = require('fs').readFileSync('src/chapters.js','utf8');
+  goals.forEach(g=>{
+    const setAnywhere = new RegExp("set:\\[[^\\]]*'"+g.done+"'").test(src);
+    T('目的の 印 '+g.done+' は どこかで 立つ', setAnywhere);
+  });
+  // 通しで 実際に 立った 順と、目的の 並びが 一致する
+  const idx = goals.map(g=>FLAG_ORDER.indexOf(g.done));
+  T('目的の 印は 通しで ぜんぶ 立った', idx.every(i=>i>=0), goals.filter((g,i)=>idx[i]<0).map(g=>g.done).join(' '));
+  const bad = []; for(let i=1;i<idx.length;i++) if(idx[i]<idx[i-1]) bad.push(goals[i-1].done+'→'+goals[i].done);
+  T('目的の 並びが 物語の 順と 一致する', bad.length===0, bad.join(' / '));
+  T('目的は とちゅうで 空に ならない', GOAL_SEEN.slice(0,-1).every(g=>!!g), GOAL_SEEN.join(' | '));
+  T('章の 終わりで 目的は なくなる', C.currentGoal()===null, C.currentGoal());
+  T('目的は 段ごとに 出た', GOAL_SEEN.filter(Boolean).length >= goals.length-2, GOAL_SEEN.filter(Boolean).length+'/'+goals.length);
+}
 // ★氷の谷の 夜は 章の 途中の 一枚絵に なった
 T('氷の谷の 夜の 一枚絵が 出た', scene.some(x=>x==='show:scene_ch3_ice'), scene.join(' '));
 

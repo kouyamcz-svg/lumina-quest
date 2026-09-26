@@ -470,10 +470,12 @@ function openFieldMenu(){
       openSound();
 
     }else if(pick==='クエスト'){
-      const qs=C.questList();
-      msg2(qs.length
-        ? qs.reduce((a,q)=>a.concat(['＊ '+q.title, '　'+q.desc]),[])
-        : ['いまは とくに やることが ない。'], ()=>{ C.G.mode='field'; });
+      // ★先頭に 物語の「目的」、つづけて 受けて いる 頼みごと
+      const qs=C.questList(), goal=C.currentGoal();
+      const lines=[];
+      if(goal) lines.push('【目的】', '　'+goal);
+      qs.forEach(q=>lines.push('＊ '+q.title, '　'+q.desc));
+      msg2(lines.length ? lines : ['いまは とくに やることが ない。'], ()=>{ C.G.mode='field'; });
 
     }else if(pick==='セーブ'){
       const ok=C.saveGame();

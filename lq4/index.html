@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 20:00 JST", "build":"6a8fc585","assets_sha": "93d9f9d5", "lines": {"world": 139, "npc": 858, "chapters": 2664, "bgm": 985, "view2d": 2563, "core": 4027, "view": 1682, "ui": 1157}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 20:08 JST", "build":"d8b6698e","assets_sha": "93d9f9d5", "lines": {"world": 139, "npc": 858, "chapters": 2692, "bgm": 985, "view2d": 2563, "core": 4034, "view": 1682, "ui": 1159}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -2742,6 +2742,34 @@ const CH = {
   //   まずは 北の 氷の谷。
   // ============================================================
   4: {
+    // ★クエスト画面の「目的」。まだ 済んで いない 最初の 段を 出す（done の 印で 判定）。
+    //   ★第3章は 地方ごとに 頼みごとが 始まる ため、地方と 地方の あいだで
+    //     クエスト画面が「とくに やることが ない」に なって いた。
+    goals: [
+      {done:'ch3_landed',       text:'雲海港の 降下用の 舟で、地上へ 降りる'},
+      {done:'ch3_taskTaken',    text:'舟を 降りた 浜の 南、氷の谷の 氏族の 長に 会う'},
+      {done:'ch3_riezeSaved',   text:'氷窟の 奥へ。リーゼを 探す'},
+      {done:'ch3_riezeReturned',text:'氷の谷の 氏族の 長に 報せる'},
+      {done:'ch3_lullaby',      text:'氷の谷の 老婆と 話す'},
+      {done:'ch3_iceDone',      text:'氷の谷の 老婆に もう一度 話す'},
+      {done:'ch3_wellTold',     text:'舟で 西へ。湧き水の町の 東の 集落長に 会う'},
+      {done:'ch3_veinFound',    text:'町の 地下水路の 奥で、水脈を 探す'},
+      {done:'ch3_wellSolved',   text:'湧き水の町の 東の 集落長に 報せる'},
+      {done:'ch3_caravan',      text:'湧き水の町の 両集落の 若者と 話す'},
+      {done:'ch3_namiMet',      text:'舟で 南へ。珊瑚の入り江の 海の 民の 少女に 会う'},
+      {done:'ch3_namiSaved',    text:'入り江の 海蝕洞の 奥へ'},
+      {done:'ch3_namiTold',     text:'珊瑚の入り江の 海の 民の 少女と 話す'},
+      {done:'ch3_twoHouses',    text:'珊瑚の入り江の 海の 民の 少女に もう一度 話す'},
+      {done:'ch3_zenosTold',    text:'舟で 東へ。若き霊峰の 山の 長に 会う'},
+      {done:'ch3_zenosMet',     text:'霊峰の 村の 北西、洞の 学者を 訪ねる'},
+      {done:'ch3_peakCleared',  text:'山道を 登り、山頂の ぬしを 鎮める'},
+      {done:'ch3_mountEar',     text:'洞の 学者に 報せる'},
+      {done:'ch3_torosArrived', text:'舟で 地上の まんなかへ。トロスの村の 老人に 会う'},
+      {done:'ch3_fatherTruth',  text:'トロスの村の 老人の 話を 聞く'},
+      {done:'ch3_shrineBuilt',  text:'村の 東の 丘、祠の 跡へ'},
+      {done:'ch3_lupusDown',    text:'祠の丘の 異変を 確かめる'},
+      {done:'ch3_torosDone',    text:'トロスの村の 老人に 報せる'},
+    ],
     id: 'ch3_ground',
     title: '五つの大地',
     region: 'land',
@@ -9612,6 +9640,13 @@ function questList(){
     .map(k=>NPCDATA.QUESTS[k])
     .filter(q=>q && (!q.chapter || q.chapter===ch));
 }
+// ★いまの 目的（章データの goals の、まだ 済んで いない 最初の 段）
+function currentGoal(){
+  const cd = chData();
+  const gs = (cd && cd.goals) || [];
+  const g = gs.find(x=>!G.flags[x.done]);
+  return g ? g.text : null;
+}
 function useInn(){
   const price = INN_PRICE[P.map]||10;
   G.mode='msg';
@@ -11381,7 +11416,7 @@ return {
   tileAt, isBlocked, walkable, warpAt,
   // 行動
   stepField, interact, facing, doWarp, startBattle, beginRound, saveGame, loadGame,
-  runTalkEvent, questOnTalk, questList, deathPoint, triggerChapterEnd, offerNextChapter, homePoint,
+  runTalkEvent, questOnTalk, questList, currentGoal, deathPoint, triggerChapterEnd, offerNextChapter, homePoint,
   saveInfo, switchChapter, SAVE_SLOTS, SAVE_VERSION,
   get lastSaveError(){return lastSaveError;},
   useInn, useChurch, openShop, talkNPC,
@@ -13555,10 +13590,12 @@ function openFieldMenu(){
       openSound();
 
     }else if(pick==='クエスト'){
-      const qs=C.questList();
-      msg2(qs.length
-        ? qs.reduce((a,q)=>a.concat(['＊ '+q.title, '　'+q.desc]),[])
-        : ['いまは とくに やることが ない。'], ()=>{ C.G.mode='field'; });
+      // ★先頭に 物語の「目的」、つづけて 受けて いる 頼みごと
+      const qs=C.questList(), goal=C.currentGoal();
+      const lines=[];
+      if(goal) lines.push('【目的】', '　'+goal);
+      qs.forEach(q=>lines.push('＊ '+q.title, '　'+q.desc));
+      msg2(lines.length ? lines : ['いまは とくに やることが ない。'], ()=>{ C.G.mode='field'; });
 
     }else if(pick==='セーブ'){
       const ok=C.saveGame();

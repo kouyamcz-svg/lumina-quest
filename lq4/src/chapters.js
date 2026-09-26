@@ -1578,6 +1578,34 @@ const CH = {
   //   まずは 北の 氷の谷。
   // ============================================================
   4: {
+    // ★クエスト画面の「目的」。まだ 済んで いない 最初の 段を 出す（done の 印で 判定）。
+    //   ★第3章は 地方ごとに 頼みごとが 始まる ため、地方と 地方の あいだで
+    //     クエスト画面が「とくに やることが ない」に なって いた。
+    goals: [
+      {done:'ch3_landed',       text:'雲海港の 降下用の 舟で、地上へ 降りる'},
+      {done:'ch3_taskTaken',    text:'舟を 降りた 浜の 南、氷の谷の 氏族の 長に 会う'},
+      {done:'ch3_riezeSaved',   text:'氷窟の 奥へ。リーゼを 探す'},
+      {done:'ch3_riezeReturned',text:'氷の谷の 氏族の 長に 報せる'},
+      {done:'ch3_lullaby',      text:'氷の谷の 老婆と 話す'},
+      {done:'ch3_iceDone',      text:'氷の谷の 老婆に もう一度 話す'},
+      {done:'ch3_wellTold',     text:'舟で 西へ。湧き水の町の 東の 集落長に 会う'},
+      {done:'ch3_veinFound',    text:'町の 地下水路の 奥で、水脈を 探す'},
+      {done:'ch3_wellSolved',   text:'湧き水の町の 東の 集落長に 報せる'},
+      {done:'ch3_caravan',      text:'湧き水の町の 両集落の 若者と 話す'},
+      {done:'ch3_namiMet',      text:'舟で 南へ。珊瑚の入り江の 海の 民の 少女に 会う'},
+      {done:'ch3_namiSaved',    text:'入り江の 海蝕洞の 奥へ'},
+      {done:'ch3_namiTold',     text:'珊瑚の入り江の 海の 民の 少女と 話す'},
+      {done:'ch3_twoHouses',    text:'珊瑚の入り江の 海の 民の 少女に もう一度 話す'},
+      {done:'ch3_zenosTold',    text:'舟で 東へ。若き霊峰の 山の 長に 会う'},
+      {done:'ch3_zenosMet',     text:'霊峰の 村の 北西、洞の 学者を 訪ねる'},
+      {done:'ch3_peakCleared',  text:'山道を 登り、山頂の ぬしを 鎮める'},
+      {done:'ch3_mountEar',     text:'洞の 学者に 報せる'},
+      {done:'ch3_torosArrived', text:'舟で 地上の まんなかへ。トロスの村の 老人に 会う'},
+      {done:'ch3_fatherTruth',  text:'トロスの村の 老人の 話を 聞く'},
+      {done:'ch3_shrineBuilt',  text:'村の 東の 丘、祠の 跡へ'},
+      {done:'ch3_lupusDown',    text:'祠の丘の 異変を 確かめる'},
+      {done:'ch3_torosDone',    text:'トロスの村の 老人に 報せる'},
+    ],
     id: 'ch3_ground',
     title: '五つの大地',
     region: 'land',
