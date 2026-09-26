@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 17:01 JST", "build":"b218f5b7","assets_sha": "93d9f9d5", "lines": {"world": 123, "npc": 743, "chapters": 2279, "bgm": 985, "view2d": 2544, "core": 3669, "view": 1401, "ui": 1149}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 17:02 JST", "build":"5101701e","assets_sha": "93d9f9d5", "lines": {"world": 123, "npc": 743, "chapters": 2279, "bgm": 985, "view2d": 2544, "core": 3669, "view": 1401, "ui": 1149}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -8436,11 +8436,11 @@ function wardBlocks(to){
 function wardMsg(to){
   const wd = WARDS[to];
   if(!wd) return null;
-  // ★まだ 入れない とき（章が 前／めじるしが 立って いない）は
-  //   「なぜ 入れないか」を つたえる。
-  //   ★ふねで 好きな 順に 行ける ように なり、先に 着く ことが できる。
-  if(wd.msgEarly && ((G.chapter||1) < wd.chapter || (wd.flag && !G.flags[wd.flag])))
-    return wd.msgEarly;
+  if((G.chapter||1) < wd.chapter && wd.msgEarly) return wd.msgEarly;
+  // ★同じ 章の うちでも、順を とばして 着いた ときは
+  //   「なぜ 入れないか」を つたえる（earlyInChapter を 書いた ところだけ）。
+  //   ★ふねで 好きな 順に 行ける ように なり、先に 着ける ように なった。
+  if(wd.earlyInChapter && wd.flag && !G.flags[wd.flag]) return wd.earlyInChapter;
   // ★やる ことは 済ませた が、まだ ひと手 のこって いる とき。
   //   ★そらくらいを 倒したのに「書類が いる」とだけ 出て、
   //     どこへ 行けば よいか 分からなかった。
@@ -9953,13 +9953,13 @@ const WARDS = {
   // ★第3章：五地方は ふねで 好きな 順に 行けるが、話は 順に すすむ。
   //   先に 着いても 何も できない ので、行き先を つたえる。
   well_town: {chapter:4, flag:'ch3_iceDone',
-    msgEarly:['湧き水の町。井戸の まわりに 人が 集まって いる。',
+    earlyInChapter:['湧き水の町。井戸の まわりに 人が 集まって いる。',
               '町の 者「空の 者か。……今年は まだ 荷が 来とらんが」',
               'セレン「順に 回って います。まだ 北の 谷の ぶんが」',
               'イオ「……先に 氷の谷を 片づけましょう」'],
     msg:['湧き水の町。東と 西で にらみあって いる。']},
   coral_bay: {chapter:4, flag:'ch3_caravan',
-    msgEarly:['珊瑚の入り江。浜に 舟が 並んで いる。',
+    earlyInChapter:['珊瑚の入り江。浜に 舟が 並んで いる。',
               '浜の 者「空の 方。荷は まだですかい」',
               'セレン「西の 町が 先です。順が あるの」',
               'イオ「……戻りましょう」'],
