@@ -161,7 +161,7 @@ function kill(k){
     // ---- 第3章：雲海港と 地上 ----
     sky_port:   4,   // 第3章から（降下の 出発点）
     ground:     4, ice_camp: 4, ice_cave: 4,
-    well_town:  4, well_cave: 4, coral_bay: 4, sea_cave: 4,
+    well_town:  4, well_west: 4, well_cave: 4, coral_bay: 4, sea_cave: 4,
     furnace_core: 3,
     trial_yard: 1, rift_yard: 1, home_forge: 1,
   };
@@ -440,10 +440,16 @@ function kill(k){
 {
   const g=C.MAPS.ground, W=g.tiles[0].length; const at=to=>Object.keys(g.warpsXY).find(k=>g.warpsXY[k].to===to).split(',').map(Number);
   T('霊峰の村は 西（LQ3 の エルデと おなじ 所）', at('peak_village')[0]===9 && at('peak_village')[1]===29, at('peak_village'));
-  T('湧き水の町は 東（LQ3 の ザールと おなじ 所）', at('well_town')[0]===80 && at('well_town')[1]===32, at('well_town'));
+  T('湧き水 西の集落は LQ3 の ザールと おなじ 所', at('well_west')[0]===80 && at('well_west')[1]===32, at('well_west'));
+  T('湧き水 東の集落は LQ3 の サーラと おなじ 所', at('well_town')[0]===86 && at('well_town')[1]===40, at('well_town'));
+  T('東の集落は 西の集落より 東', at('well_town')[0] > at('well_west')[0]);
+  T('井戸（地下水路）は 町の 外、ふたつの 集落の あいだ', (()=>{ const w=at('well_cave'); return w[0]>=at('well_west')[0] && w[0]<=at('well_town')[0]; })(), at('well_cave'));
+  T('東の集落の 中に 井戸の 口は ない', !Object.values(C.MAPS.well_town.warpsXY).some(w=>w.to==='well_cave'));
+  T('西の 集落長は 西の集落に いる', (vm.runInContext('NPCDATA',ctx).NPCS.well_west||[]).some(n=>n.name==='西の 集落長'));
+  T('東の集落に 西の 集落長は いない', !(vm.runInContext('NPCDATA',ctx).NPCS.well_town||[]).some(n=>n.name==='西の 集落長'));
   T('山道の 口は 西（LQ3 の れいほう さんどう）', at('peak_path')[0]===6 && at('peak_path')[1]===40, at('peak_path'));
   T('庵は 霊峰の村の そば', Math.abs(at('zenos_cave')[0]-9)+Math.abs(at('zenos_cave')[1]-29)<=4, at('zenos_cave'));
-  T('湧き水の町は 砂漠の 見た目', C.MAPS.well_town.theme==='desert', C.MAPS.well_town.theme);
+  T('湧き水の 集落は どちらも 砂漠の 見た目', C.MAPS.well_town.theme==='desert' && C.MAPS.well_west.theme==='desert');
   const east = at('well_town')[0] > W*2/3, west = at('peak_village')[0] < W/3;
   T('東西が 逆に なって いない', east && west);
 }

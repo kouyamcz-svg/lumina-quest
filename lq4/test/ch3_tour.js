@@ -146,8 +146,8 @@ T('舟の ことを 言う', said('海を 渡れる'), log.join(' / ').slice(-90
   const keep = Object.assign({}, C.G.flags);
   C.G.flags.ch3_iceDone = false; C.G.flags.ch3_caravan = false;
   clearLog();
-  // ★湧き水の町は 東
-  stand('ground', 80, 33, 'back'); C.stepField(0,-1);
+  // ★湧き水 東の集落は 東の 島の 東（86,40）
+  stand('ground', 86, 41, 'back'); C.stepField(0,-1);
   T('先に 湧き水へ 行っても 入れない', C.P.map==='ground', C.P.map);
   T('氷の谷が 先だと 言う', said('先に 氷の谷を'), log.join(' / ').slice(0,90));
   clearLog();
@@ -245,10 +245,10 @@ T('氷の谷の 夜', C.G.flags.ch3_iceDone===true);
 T('千年ぶんが 下に 落ちてる', said('千年ぶんが、下に 落ちてる'), log.join(' / ').slice(0,160));
 T('つぎの 行き先', said('巡回降下 第二区'));
 
-// ===== 9.5 湧き水の町（西）=====
-stand('ground', 80, 33, 'back');
+// ===== 9.5 湧き水 東の集落（東の 島）=====
+stand('ground', 86, 41, 'back');
 C.stepField(0,-1);
-T('湧き水の町へ 入れる', C.P.map==='well_town', C.P.map+' '+C.P.x+','+C.P.y);
+T('湧き水 東の集落へ 入れる', C.P.map==='well_town', C.P.map+' '+C.P.x+','+C.P.y);
 
 talk('well_town', 21, 6, 'back');   // ★東の 集落長は 町の 東（右）側
 T('東の 長の 話を 聞く', C.G.flags.ch3_wellTold===true);
@@ -256,8 +256,15 @@ T('どちらかが 嘘だと 言う', said('どちらかが 嘘を ついとる'
 T('どちらも 本当かもと 返す', said('どちらも 本当かも しれません'));
 T('クエストが たつ', C.G.quests.ch3_q2_well==='active');
 
-stand('well_town', 12, 8, 'back');
-C.stepField(0,-1);
+// ★西の 集落は べつの 町（80,32）。西の 長は そこに いる
+stand('ground', 80, 33, 'back'); C.stepField(0,-1);
+T('湧き水 西の集落へ 入れる', C.P.map==='well_west', C.P.map);
+
+stand('well_west', 10, 11, 'front'); C.stepField(0,1);
+T('西の集落から 地上へ 出る', C.P.map==='ground', C.P.map);
+
+stand('ground', 80, 40, 'front');   // ★井戸は ふたつの 集落の あいだ、オアシスの ほとり
+C.stepField(0,1);
 T('地下水路へ 入れる', C.P.map==='well_cave', C.P.map);
 
 T('はじめは 土の 壁', C.tileAt('well_cave',11,1)==='K', C.tileAt('well_cave',11,1));
