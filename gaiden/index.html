@@ -6178,8 +6178,21 @@ function drawTile(ch,px,py,x,y){
   if(drawNPCex(ch,px,py))return;
   switch(ch){
     case 'Ω':{drawTile('.',px,py,x,y);
-      if(G.flags.dg_meido){ctx.fillStyle='#141018';ctx.beginPath();ctx.moveTo(px+3,py+12);ctx.lineTo(px+9,py+6);ctx.lineTo(px+13,py+13);ctx.lineTo(px+19,py+8);ctx.lineTo(px+21,py+16);ctx.lineTo(px+14,py+19);ctx.lineTo(px+8,py+15);ctx.fill();
-       ctx.fillStyle='rgba(120,70,180,'+(0.25+0.15*Math.sin(performance.now()/500))+')';ctx.fillRect(px+9,py+9,7,6);}
+      if(G.flags.dg_meido){
+       const tn=performance.now();
+       // そとがわの ほのかな むらさきの ひかり
+       ctx.fillStyle='rgba(110,60,170,'+(0.16+0.10*Math.sin(tn/420))+')';ctx.fillRect(px,py,24,24);
+       // おおきな じわれ（タイルいっぱい）
+       ctx.fillStyle='#0c0a14';ctx.beginPath();
+       ctx.moveTo(px+2,py+16);ctx.lineTo(px+7,py+4);ctx.lineTo(px+11,py+12);ctx.lineTo(px+15,py+2);ctx.lineTo(px+21,py+9);ctx.lineTo(px+22,py+19);ctx.lineTo(px+15,py+22);ctx.lineTo(px+9,py+18);ctx.lineTo(px+5,py+21);ctx.fill();
+       // われめの コア（あかるく めいめつ）
+       ctx.fillStyle='rgba(190,120,255,'+(0.55+0.35*Math.sin(tn/300))+')';ctx.fillRect(px+9,py+8,6,9);
+       ctx.fillStyle='rgba(255,240,255,'+(0.5+0.4*Math.sin(tn/300))+')';ctx.fillRect(px+11,py+10,2,5);
+       // たちのぼる ひかりの つぶ
+       for(let i=0;i<3;i++){const ph=(tn/900+i*0.33)%1;
+        ctx.fillStyle='rgba(200,140,255,'+(0.9-ph*0.9)+')';
+        ctx.fillRect(px+6+i*6,py+18-Math.round(ph*20),2,2);}
+      }
       break;}
     case '£':{ctx.fillStyle='#8a8a7a';ctx.fillRect(px,py,TS,TS);ctx.fillStyle='#9a9a8a';for(let i=0;i<3;i++)for(let j=0;j<3;j++)ctx.fillRect(px+1+i*8,py+1+j*8,6,6);ctx.fillStyle='#6a4a26';ctx.fillRect(px,py,4,TS);ctx.fillRect(px+TS-4,py,4,TS);ctx.fillStyle='#8a5f36';ctx.fillRect(px,py,TS,4);ctx.fillStyle='#e8d8a0';ctx.fillRect(px+6,py+1,12,2);break;}
     case '§':{ctx.fillStyle='#2f8f3f';ctx.fillRect(px,py,TS,TS);ctx.fillStyle='#2a4a3a';ctx.fillRect(px+2,py+6,20,16);ctx.fillStyle='#1c3a30';ctx.beginPath();ctx.arc(px+12,py+15,6,0,7);ctx.fill();ctx.fillStyle='#0a1a18';ctx.beginPath();ctx.arc(px+12,py+15,3,0,7);ctx.fill();ctx.fillStyle='#6a9a4a';ctx.fillRect(px+3,py+2,1,7);ctx.fillRect(px+6,py+3,1,6);ctx.fillRect(px+19,py+2,1,7);ctx.fillRect(px+16,py+4,1,5);ctx.fillStyle='#8ab0ff';ctx.fillRect(px+5,py+11,2,1);ctx.fillRect(px+17,py+18,2,1);break;}
@@ -10605,7 +10618,7 @@ interact=function(){
  if(f){const lines=f();if(lines===null)return;G.mode='msg';showMsg(lines,()=>{G.mode='field';render();});return;}
  _interact();
 };
-const GD_VER='v0901r';
+const GD_VER='v0901s';
 function drawStars(n,hmax){for(let i=0;i<n;i++){const x=(i*97+13)%CW,y=(i*57+29)%hmax;const tw=(i%3===0)&&(Math.floor(performance.now()/400+i)%2===0);ctx.fillStyle=tw?'#fff':'#c8d0ff';ctx.fillRect(x,y,i%4===0?2:1,i%4===0?2:1);}}
 function drawShip(cx,cy,dark){
  ctx.fillStyle=dark?'#1a1420':'#5a4630';ctx.fillRect(cx-70,cy,140,26);
