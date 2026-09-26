@@ -360,7 +360,7 @@ const NPCS = {
 
   // ============ 第3章：山肌の 洞（ゼノスの 庵）============
   zenos_cave: [
-    {at:'5,6', spr:'butler', name:'洞の 学者', lines:[
+    {at:'5,6', spr:'zenos', name:'洞の 学者', lines:[
       {when:{flag:'ch3_mountEar'}, text:[
         'ゼノス「山の 音は 記録した。あとは 意味を 読むだけだ」',
         'ゼノス「……何年 かかるかな」']},
