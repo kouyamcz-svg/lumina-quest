@@ -21,6 +21,12 @@ LATER="well_cave,20,9,l" xvfb-run -a node shot3d.js well_cave 20 11 b.png 4   # 
 xvfb-run -a node shot3d.js __flow 0 0 x 4                                    # 2D→3D→2D の 行き来
 ```
 
+## 2D を iPhone 条件で 撮る
+```
+DPR=2 SAFETOP=54 TWO_D=1 SHIP=48,2 W=395 H=473 xvfb-run -a node shot3d.js ground 48 4 out.png 4
+```
+- SAFETOP：画面上部の 隠れる 帯（css px）。DPR：画素比。SHIP：地上の 舟の 位置
+
 ## 注意
 - vm の 別領域で 作った 型付き配列を headless-gl が 受けとれない。GL 呼び出しの 手前で 変換して いる
 - headless-gl は 画像を 直接 受けとれない。texImage2D の 手前で 画素に なおして いる

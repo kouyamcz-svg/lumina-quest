@@ -9,7 +9,7 @@ const W=Number(process.env.W||390), H=Number(process.env.H||500);   // スマホ
 const LQ='/home/claude/lq4';
 
 const gl = createGL(W, H, {preserveDrawingBuffer:true});
-function mkCanvas(w,h){ const c=createCanvas(w||300,h||150); c.style={}; c.addEventListener=()=>{}; c.getBoundingClientRect=()=>({left:0,top:0,width:c.width,height:c.height}); c.clientWidth=c.width; c.clientHeight=c.height; return c; }
+function mkCanvas(w,h){ const c=createCanvas(w||300,h||150); c.style={}; c.addEventListener=()=>{}; const cw=c.width, ch=c.height; c.getBoundingClientRect=()=>({left:0,top:0,width:cw,height:ch}); c.clientWidth=cw; c.clientHeight=ch; return c; }
 const glCanvas = {width:W, height:H, style:{}, clientWidth:W, clientHeight:H,
   addEventListener(){}, removeEventListener(){}, getContext(t){ return (t==='webgl'||t==='experimental-webgl'||t==='webgl2')? gl : null; },
   getBoundingClientRect(){ return {left:0,top:0,width:W,height:H}; } };
@@ -59,10 +59,10 @@ const stage = {clientWidth:W, clientHeight:H, style:{}, appendChild(){}, addEven
 const document = {
   getElementById(id){ return id==='gl'?glCanvas : id==='gl2d'?c2d : id==='stage'?stage : (this._e[id]=this._e[id]||{style:{},classList:{add(){},remove(){},toggle(){}},appendChild(){},addEventListener(){},textContent:'',innerHTML:''}); }, _e:{},
   createElementNS(ns,t){ return this.createElement(t); },
-  createElement(t){ if(t==='canvas') return mkCanvas(); if(t==='img') return mkImg(); return {style:{},appendChild(){},addEventListener(){}}; },
-  body:{appendChild(){}, style:{}}, addEventListener(){},
+  createElement(t){ if(t==='canvas') return mkCanvas(); if(t==='img') return mkImg(); return {style:{},appendChild(){},addEventListener(){},remove(){},getBoundingClientRect(){ return {top:0,left:0,width:1,height:Number(process.env.SAFETOP||0)}; }}; },
+  body:{appendChild(){}, removeChild(){}, style:{}}, addEventListener(){},
 };
-const ctx = {console, document, Image, devicePixelRatio:1, navigator:{userAgent:'node'},
+const ctx = {console, document, Image, devicePixelRatio:Number(process.env.DPR||1), navigator:{userAgent:'node'},
   setTimeout:(f)=>{ try{f();}catch(e){} return 0; }, clearTimeout(){}, requestAnimationFrame:()=>0, performance:{now:()=>Date.now()},
   addEventListener(){}, localStorage:undefined, HTMLCanvasElement:function(){}, HTMLImageElement:Image,
   ImageBitmap:function(){}, WebGL2RenderingContext:function(){}, WebGLRenderingContext:function(){} };
@@ -90,9 +90,10 @@ C.G.trail=[[C.P.x,C.P.y+1],[C.P.x,C.P.y+2],[C.P.x,C.P.y+3]];
 // 3D で えがく ように 強制
 const WD = vm.runInContext('WORLD', ctx);
 const sc = WD.SCENES[(WD.MAP_IDS[MAP]||{}).scene];
-if(sc) sc.render='3d'; else { WD.SCENES.__T={render:'3d',theme:C.MAPS[MAP].theme}; WD.MAP_IDS[MAP].scene='__T'; }
+if(!process.env.TWO_D){ if(sc) sc.render='3d'; else { WD.SCENES.__T={render:'3d',theme:C.MAPS[MAP].theme}; WD.MAP_IDS[MAP].scene='__T'; } }
 const SETS=(process.env.SETS||'').split(';').filter(Boolean);
 SETS.forEach(t=>{ const [mp,x,y,ch]=t.split(','); C.setTile(mp,+x,+y,ch); });
+if(process.env.SHIP){ const [sx,sy]=process.env.SHIP.split(',').map(Number); C.G.ship={x:sx,y:sy}; }
 V.init();
 V.buildMap(MAP);
 V.setActors(true);
@@ -102,7 +103,10 @@ const LATER=(process.env.LATER||'').split(';').filter(Boolean);
 LATER.forEach(t=>{ const [mp,x,y,ch]=t.split(','); C.setTile(mp,+x,+y,ch); });
 let t=0; for(let i=0;i<40;i++){ t+=33; try{ V.loop(t); }catch(e){ if(i===0) console.log('loop err', e.message.slice(0,160)); } }
 console.log('DBG', JSON.stringify(vm.runInContext('__dbg()',ctx)));
-console.log('REND', JSON.stringify(vm.runInContext('__rend()',ctx)), 'glErr', gl.getError());
+if(!process.env.TWO_D) console.log('REND', JSON.stringify(vm.runInContext('__rend()',ctx)), 'glErr', gl.getError());
+if(process.env.TWO_D){
+  const buf = c2d.toBuffer('image/png'); fs.writeFileSync(OUT, buf); console.log('ok', OUT); process.exit(0);
+}
 // よみだし
 const px = new Uint8Array(W*H*4);
 gl.readPixels(0,0,W,H,gl.RGBA,gl.UNSIGNED_BYTE,px);

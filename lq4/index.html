@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 19:51 JST", "build":"66618fd0","assets_sha": "93d9f9d5", "lines": {"world": 139, "npc": 858, "chapters": 2664, "bgm": 985, "view2d": 2544, "core": 4027, "view": 1682, "ui": 1157}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 20:00 JST", "build":"6a8fc585","assets_sha": "93d9f9d5", "lines": {"world": 139, "npc": 858, "chapters": 2664, "bgm": 985, "view2d": 2563, "core": 4027, "view": 1682, "ui": 1157}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -6359,6 +6359,20 @@ function buildMap(name){
   //   ゆきの ちほう（ヴェルサ・エルデ）に いる ときだけ ゆきを ふらせる。
   snowOn = null;            // ★つぎの えがきで あわせなおす
 }
+// ★画面の 上の 隠れる 帯（iPhone の 時刻・ダイナミックアイランド）。キャンバスの 画素で。
+//   ★地図の 端で カメラを 止めると、いちばん 上の 行が この 帯の 裏に 入り、
+//     地上の 舟（2行め）が ちょうど アイランドの 裏に 隠れて いた。
+let safeTopPx = 0;
+function measureSafeTop(r, dpr){
+  try{
+    const d = document.createElement('div');
+    d.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none';
+    document.body.appendChild(d);
+    const inset = d.getBoundingClientRect().height || 0;
+    d.remove();
+    return Math.max(0, Math.round((inset - r.top) * dpr));   // キャンバスに かかる ぶんだけ
+  }catch(e){ return 0; }
+}
 function resize(){
   if(!cv) return;
   const r = cv.getBoundingClientRect();
@@ -6367,6 +6381,7 @@ function resize(){
   cv.height = Math.max(1, Math.round(r.height*dpr));
   cx = cv.getContext('2d'); cx.imageSmoothingEnabled = false;
   W = cv.width; H = cv.height;
+  safeTopPx = measureSafeTop(r, dpr);
 }
 
 // ---------------- あしあと ----------------
@@ -6887,14 +6902,18 @@ function draw(dt, time, actors){
 
   // カメラ（プレイヤーちゅうしん・はしで とめる）
   const p = actors && actors[0] ? actors[0] : {x:C.P.x, y:C.P.y};
-  const viewW = W/ts, viewH = H/ts;
+  // ★たては 上の 隠れる 帯を のぞいた 高さ（availH）で 考える
+  const top0 = Math.min(safeTopPx, Math.floor(H*0.2));
+  const availH = H - top0;
+  const viewW = W/ts, viewH = availH/ts;
   camX = Math.min(Math.max(p.x+0.5, viewW/2), Math.max(viewW/2, MW-viewW/2));
   camY = Math.min(Math.max(p.y+0.5, viewH/2), Math.max(viewH/2, MH-viewH/2));
   // カメラの ずれも せいすうに して、すべての タイルが ぴったり ならぶように する
   // ★マップが 画面より 小さい ときは まんなかに おく（左上に よらない）
   const mapW = MW*ts, mapH = MH*ts;
   const ox = (mapW <= W) ? Math.round((W-mapW)/2) : Math.round(W/2 - camX*ts);
-  const oy = (mapH <= H) ? Math.round((H-mapH)/2) : Math.round(H/2 - camY*ts);
+  const oy = (mapH <= availH) ? top0 + Math.round((availH-mapH)/2)
+                              : Math.round(top0 + availH/2 - camY*ts);
 
   // はいけい
   cx.fillStyle = theme==='ice' ? '#0d2036' : theme==='cave' ? '#0a1020'
