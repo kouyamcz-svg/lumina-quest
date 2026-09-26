@@ -417,5 +417,24 @@ function kill(k){
     T(k+'：最後の 段が 済めば 消える', !C.questList().some(x=>x.id===k));
   });
 }
+// ★地上：北の 島の 舟（48,2）から 各地方まで、舟＋上陸＋歩きの 歩数
+//   ★東の 島の 北の 海が 閉じて いて、東の 島の 南端まで 回りこむ 160歩 だった
+{
+  const mp='ground', t=C.MAPS[mp].tiles, W=t[0].length, H=t.length;
+  const walk=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&C.walkable(mp,x,y), sea=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&t[y][x]==='~';
+  const D=[[1,0],[-1,0],[0,1],[0,-1]];
+  const bfs=(sx,sy,ok)=>{ const d=Array.from({length:H},()=>Array(W).fill(-1)); const q=[[sx,sy]]; d[sy][sx]=0;
+    for(let i=0;i<q.length;i++){ const [a,b]=q[i]; for(const [dx,dy] of D){ const u=a+dx,v=b+dy; if(ok(u,v)&&d[v][u]<0){ d[v][u]=d[b][a]+1; q.push([u,v]); } } } return d; };
+  const sd=bfs(48,2,sea);
+  const steps=(tx,ty)=>{ const ld=bfs(tx,ty,walk); let best=-1;
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){ if(sd[y][x]<0) continue; for(const [dx,dy] of D){ const u=x+dx,v=y+dy; if(walk(u,v)&&ld[v][u]>=0){ const tot=sd[y][x]+1+ld[v][u]; if(best<0||tot<best) best=tot; } } }
+    return best; };
+  const east=steps(80,33);
+  T('北の 島から 舟で 東の 島（若き霊峰）へ 行ける', east>0, east);
+  T('北の 島から 東の 島まで 80歩 以内', east>0 && east<=80, east+'歩');
+  [['湧き水の町',9,30],['珊瑚の入り江',54,59],['トロスの村',48,31]].forEach(([nm,x,y])=>{
+    T('北の 島から 舟で '+nm+'へ 行ける', steps(x,y)>0, steps(x,y));
+  });
+}
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);
