@@ -357,7 +357,9 @@ function kill(k){
       C.G.chapter = wd.chapter - 1;
       C.G.flags[wd.flag] = true;
       T('けっかい '+mp+' は 前の 章では 通さない', C.wardBlocks(mp));
-      T('けっかい '+mp+' に 前の 章むけの ことばが ある', !!wd.msgEarly);
+      // ★同じ 章の うちで 順を とばす ところは earlyInChapter を つかう
+      T('けっかい '+mp+' に 入れない わけを 言う ことばが ある',
+        !!(wd.msgEarly || wd.earlyInChapter), 'どちらも ない');
       C.G.flags[wd.flag] = false;
     }
     C.G.chapter = wd.chapter;
