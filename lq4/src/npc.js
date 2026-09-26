@@ -288,6 +288,57 @@ const NPCS = {
   ],
 
 
+  // ============ 第3章：若き霊峰 ============
+  peak_village: [
+    {at:'9,5', spr:'captain', name:'山の 長', lines:[
+      {when:{flag:'ch3_mountEar'}, text:[
+        '長「山が 鳴っとる。……ひさしぶりだ」',
+        '長「祖父の 代には 毎朝 鳴っとったと 聞いた」']},
+      {when:{flag:'ch3_zenosTold'}, text:[
+        '長「洞は 村を 出て 北だ。山道を 登れ」']},
+      {text:['長「空の 者か。……ちょうど よかった」']}]},
+    {at:'17,5', spr:'elderWoman', name:'山の 女', lines:[
+      {when:{flag:'ch3_mountEar'}, text:[
+        '女「山が 鳴る 日は 不作が ないと 言うてな」',
+        '女「……今年は 良い 年に なる」']},
+      {text:['女「洞の 男は 悪い 人では なかろう」',
+             '女「だが 書物ばかり 読んで おる。あれは 何を 探しとるのか」']}]},
+    {at:'11,9', spr:'childA', name:'山の 子ども', lines:[
+      {text:['子ども「洞に、白い 服の おねえちゃんが いるよ」',
+             '子ども「うたを うたうんだ。かぜみたいな こえで」']}]},
+    {at:'9,12', spr:'villagerA', name:'山の 猟師', lines:[
+      {when:{flag:'ch3_peakCleared'}, text:[
+        '猟師「山道の 落石が どいたそうだな」',
+        '猟師「半年 ふさがっとった。よく 動いた ものだ」']},
+      {text:['猟師「山道は 途中で 落石に ふさがれとる」',
+             '猟師「洞までは 行ける。その 先は 無理だ」']}]},
+    {at:'13,12', spr:'villagerB', name:'山の 鍛冶', lines:[
+      {text:['鍛冶「空の 鋼を 見た ことが ある」',
+             '鍛冶「二十年 前、荷の ひとつが 谷に 落ちた」',
+             '鍛冶「拾いに 行った 者は おらん。……いまも あそこに あるはずだ」']}]},
+  ],
+
+  // ============ 第3章：山道 ============
+  peak_path: [
+    {at:'10,17', spr:'butler', name:'洞の 学者', lines:[
+      {when:{flag:'ch3_mountEar'}, text:[
+        'ゼノス「山の 音は 記録した。あとは 意味を 読むだけだ」',
+        'ゼノス「……何年 かかるかな」']},
+      {when:{flag:'ch3_peakCleared'}, text:[
+        'ゼノス「聞こえるか。これだ」']},
+      {when:{flag:'ch3_zenosMet'}, text:[
+        'ゼノス「落石は 石灯 ふたつで ゆるむ。理屈は わからんが、そうなる」']},
+      {text:['洞の 奥に、書物に 埋もれた 男が 座っている。']}]},
+    {at:'12,17', spr:'amane', name:'白い 装束の 娘', lines:[
+      {when:{flag:'ch3_mountEar'}, text:[
+        'アマネ「聞くのは、わたしが して いる ことです」']},
+      {when:{flag:'ch3_zenosMet'}, text:[
+        'アマネ「山が 鳴らないのです。半年 ずっと」',
+        'アマネ「上に 何か いる。……見られて いる 感じが します」']},
+      {text:['白い 装束の 娘が 静かに 立っている。']}]},
+  ],
+
+
   // ============ 第3章：珊瑚の入り江 ============
   coral_bay: [
     {at:'11,9', spr:'priestess', name:'海の 民の 少女', lines:[
@@ -582,6 +633,17 @@ const QUESTS = {
     reward:{}, next:'ch2_q2_core',
   },
   // ============ 第3章：氷の谷 ============
+  ch3_q4_peak: {
+    id:'ch3_q4_peak', chapter:4, title:'山肌の 洞',
+    giver:'山の 長',
+    desc:'村を 出て 北の 山道へ。洞の 学者に 会う。',
+    steps:[
+      {id:'meet', desc:'洞の 学者に 会う',          flag:'ch3_zenosMet'},
+      {id:'boss', desc:'山頂の 黒い ものを 討つ',   flag:'ch3_peakCleared'},
+      {id:'ear',  desc:'ゼノスに 話しかける',       flag:'ch3_mountEar'},
+    ],
+    reward:{}, next:null,
+  },
   ch3_q3_nami: {
     id:'ch3_q3_nami', chapter:4, title:'海の 底の 洞',
     giver:'海の 民の 少女',

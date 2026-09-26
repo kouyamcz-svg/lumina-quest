@@ -318,6 +318,58 @@ T('返して ほしいのかもと 言う', said('返して ほしいって こ�
 T('力の 使い方は 選べる', said('力の 使い方は、選べる のかも しれない'));
 T('目は 見られるのを 待って いる', said('見られるのを 待ってる'), log.join(' / ').slice(0,160));
 
+// ===== 9.8 若き霊峰（東）=====
+stand('ground', 80, 33, 'back');
+C.stepField(0,-1);
+T('若き霊峰へ 入れる', C.P.map==='peak_village', C.P.map+' '+C.P.x+','+C.P.y);
+
+talk('peak_village', 9, 6, 'back');
+T('山の 長の 話を 聞く', C.G.flags.ch3_zenosTold===true);
+T('天空人が 住みついて いる', said('あんたらの 国の 者が 住みついとる'), log.join(' / ').slice(0,120));
+T('ゼノスの 名が 出る', said('ゼノス、と 名乗った'));
+T('禁書庫の 学者だと 分かる', said('禁書庫の 学者だわ'));
+T('クエストが たつ', C.G.quests.ch3_q4_peak==='active');
+
+stand('ground', 81, 31, 'back');
+C.stepField(0,-1);
+T('山道へ 入れる', C.P.map==='peak_path', C.P.map+' '+C.P.x+','+C.P.y);
+
+talk('peak_path', 10, 18, 'back');
+T('ゼノスに 会う', C.G.flags.ch3_zenosMet===true);
+T('読んだから 出たと 言う', said('読めたからだ'), log.join(' / ').slice(0,140));
+T('浮いたのは 事故では ないと 言う', said('あれは 事故では ない'));
+T('アマネが 名のる', said('アマネと 申します'));
+
+T('はじめは 落石が ふさぐ', C.tileAt('peak_path',10,6)==='K', C.tileAt('peak_path',10,6));
+stand('peak_path', 3, 10, 'back'); C.interact();
+T('ひとつでは 動かない', C.tileAt('peak_path',10,6)==='K');
+stand('peak_path', 20, 16, 'back'); C.interact();
+T('ふたつで 道が 通る', C.tileAt('peak_path',10,6)==='.', C.tileAt('peak_path',10,6));
+
+clearLog(); strong(28);
+stand('peak_path', 10, 5, 'back');
+C.interact();
+T('山頂の ぬしに かてる', C.G.flags.ch3_peakCleared===true);
+T('見られて いる あいだは 音が 入らない', said('ほかの 音が 入らない'), log.join(' / ').slice(0,140));
+T('山が 鳴りはじめる', said('山が 鳴りはじめた'));
+
+{
+  const g0 = C.P.gold, n0 = C.party.length;
+  C.party.forEach(p=>{ p.hp=1; });
+  talk('peak_path', 10, 18, 'back');
+  T('山の耳', C.G.flags.ch3_mountEar===true);
+  T('竜の 声を 反響させると 言う', said('竜の 声を 反響させる'), log.join(' / ').slice(0,160));
+  T('口では なく 耳だと 気づく', said('道具は 聞きません'));
+  T('アマネが 仲間に なる', C.party.length===n0+1 && C.party[n0].cls==='amane',
+    C.party.map(p=>p.name).join(' '));
+  T('アマネが 地図から 消える', C.tileAt('peak_path',12,17)==='.', C.tileAt('peak_path',12,17));
+  T('天空の 兜を もらう', C.G.flags.sky_helm===true);
+  T('父の ものだと 言う', said('父の ものです'));
+  T('礼を もらえる', C.P.gold===g0+3200, C.P.gold+' ← '+g0);
+  T('クエストが 片づく', C.G.quests.ch3_q4_peak==='clear');
+  T('四つ 集まった', C.skyPartsGot()===4, C.skyPartsGot()+'／5');
+}
+
 // ===== 10. 章末 =====
 clearLog(); C.G.tactic='manual';
 C.triggerChapterEnd();
@@ -336,7 +388,7 @@ T('セーブできる', C.saveGame(0)===true, C.lastSaveError);
 C.freshState();
 T('ロードできる', C.loadGame(0)===true);
 T('ロード：章が もどる', C.G.chapter===4);
-T('ロード：3人 いる', C.party.length===3);
+T('ロード：4人 いる（アマネ 加入ずみ）', C.party.length===4, C.party.length+'人');
 T('ロード：しかけが もどる', C.tileAt('ice_cave',10,6)==='.');
 T('ロード：おかねが もどる', C.P.gold===gold);
 T('ロード：Lvが もどる', C.party[0].lv===lv);

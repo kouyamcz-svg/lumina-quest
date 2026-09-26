@@ -417,15 +417,22 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
   Object.keys(CHD.CH).forEach(no=>{
     const cd = CHD.CH[no];
     (cd.talkEvents||[]).forEach(e=>{
-      if(!e.join || !e.npc) return;
-      // その 会話あいてが 地図の どこに いるか
+      if(!e.join) return;
+      // ★消す のは「仲間に なる 本人」。
+      //   話しかける あいてと 加入する 人が ちがう ことも ある
+      //   （山道では 学者に 話して 巫女が 加わる）。
+      const joinName = (C.CLASSES[e.join]||{}).name;
       const spots = [];
       Object.keys(NPCD.NPCS).forEach(mp=>
-        (NPCD.NPCS[mp]||[]).forEach(x=>{ if(x.name===e.npc) spots.push([mp, x.at]); }));
+        (NPCD.NPCS[mp]||[]).forEach(x=>{
+          // 加入する 人の 絵を つかって いる NPC を さがす
+          if(x.spr === e.join) spots.push([mp, x.at]);
+          else if(joinName && x.name === joinName) spots.push([mp, x.at]);
+        }));
       const cleared = (e.setTiles ? (Array.isArray(e.setTiles)?e.setTiles:[e.setTiles]) : [])
         .map(o=>o.map+':'+o.x+','+o.y);
       spots.forEach(([mp,at])=>{
-        T('第'+(no-1)+'章：仲間に なると 地図から 消える '+e.npc,
+        T('第'+(no-1)+'章：仲間に なると 地図から 消える '+e.join,
           cleared.indexOf(mp+':'+at)>=0,
           '地図に のこる（'+mp+' '+at+'）／消して いる：'+(cleared.join(' ')||'なし'));
       });
