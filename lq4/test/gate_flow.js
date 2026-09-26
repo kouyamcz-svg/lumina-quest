@@ -380,5 +380,27 @@ function kill(k){
   C.G.chapter = 1;
 }
 
+// ★夢還り（ノエ Lv8）：どの ダンジョンからも 外へ 出られる こと
+{
+  C.bind(Object.assign({},C.NullView,{fade(a,d){d&&d();}}),{msg(l,d){d&&d();},menu(i,t,cb){cb(0);},hud(){},label(){}},C.NullAudio);
+  C.freshState(); C.G.chapter=4; C.party.length=0;
+  ['io','seren','noe'].forEach(k=>C.party.push(C.mkMember(k,30)));
+  T('ノエは Lv7 では 覚えない', !C.knownSpells(C.mkMember('noe',7)).some(s=>s.key==='yumegaeri'));
+  T('ノエは Lv8 で 覚える', C.knownSpells(C.mkMember('noe',8)).some(s=>s.key==='yumegaeri'));
+  T('フィールドの 技に 出る', C.fieldSpells(C.party[2]).some(s=>s.key==='yumegaeri'));
+  Object.keys(C.MAPS).filter(k=>C.isDungeon(k)).forEach(mp=>{
+    C.G.entry={}; C.P.map=mp; C.party[2].mp=99; C.G.mode='field';
+    const r=C.castEscape(2);
+    if(!r.ok){ T('夢還り '+mp+' から 出られる', false, r.lines.join(' ')); return; }
+    C.doWarp(r.warp);
+    T('夢還り '+mp+' から 外へ 出る', !C.isDungeon(C.P.map), C.P.map);
+    T('夢還り '+mp+' の 出た 先が 通れる', C.walkable(C.P.map,C.P.x,C.P.y), C.P.map+' '+C.P.x+','+C.P.y);
+  });
+  // 町や 世界地図では 使えない。MP も へらない。
+  C.P.map='ice_camp'; C.party[2].mp=20;
+  const r2=C.castEscape(2);
+  T('町では 使えない', !r2.ok, (r2.lines||[]).join(' '));
+  T('使えない ときは MPが へらない', C.party[2].mp===20);
+}
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

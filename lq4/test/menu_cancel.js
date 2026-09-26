@@ -248,5 +248,22 @@ T('せんとうで Bを おしたら えらび直し',
   }
 }
 
+// ★移動の 呪文（夢還り・リターン）は 戦闘の 技一覧に 出さない
+{
+  let seen=null;
+  C.bind(C.NullView,{msg(l,d){d&&d();},
+    menu(items,title,cb){ const t=String(title);
+      if(t==='ノエ'){ cb(1); return; }                // 技
+      if(t.indexOf('ノエ　技')===0){ seen=items.slice(); cb(null); return; }
+      if(t==='イオ'||t==='セレン'){ cb(4); return; }  // 逃げる
+      cb(4); },
+    hud(){},label(){}}, C.NullAudio);
+  C.freshState(); C.G.chapter=4; C.G.tactic='manual'; C.party.length=0;
+  ['noe','io','seren'].forEach(k=>C.party.push(C.mkMember(k,20)));
+  C.P.map='ice_cave'; C.G.mode='field';
+  try{ C.startBattle(); }catch(e){}
+  T('戦闘の 技一覧を 見られた', !!seen, String(seen));
+  T('戦闘の 技一覧に 夢還りが ない', seen && !seen.some(x=>String(x).indexOf('夢還り')>=0), String(seen));
+}
 console.log('\n--- menu_cancel: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

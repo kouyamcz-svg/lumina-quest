@@ -85,6 +85,8 @@ const SPELL_DEFS = {
 
   // ============ 共通（移動） ============
   ret:        {name:'リターン',    mp:8, type:'return'},
+  // ★夢還り（ノエ）：来た 道の 夢を たどって、ダンジョンの 外へ 戻る
+  yumegaeri:  {name:'夢還り',      mp:4, type:'escape'},
 };
 const CLASSES = {
   // イオ（16・主人公／地上生まれの見習い騎士）剣
@@ -106,7 +108,7 @@ const CLASSES = {
   // ノエ（14・夢守りの少年）夢術：回復と弱体
   noe:  {name:'ノエ',  hp:13,mp:10,atk:3,def:3,agi:5, g:{hp:4,mp:5,atk:1,def:2,agi:2},
          learns:[{lv:3,key:'heal'},{lv:5,key:'yumetsubute'},{lv:6,key:'mezamashi'},
-                 {lv:9,key:'madoromi'},{lv:11,key:'yumekasumi'},{lv:13,key:'yumekui'},
+                 {lv:8,key:'yumegaeri'},{lv:9,key:'madoromi'},{lv:11,key:'yumekasumi'},{lv:13,key:'yumekui'},
                  {lv:14,key:'hiira'},{lv:17,key:'yumeomori'},{lv:21,key:'yumeutsutsu'},
                  {lv:26,key:'hiiga'},{lv:29,key:'yumenowa'},{lv:31,key:'yumenotobari'},{lv:35,key:'healall'},
                  {lv:42,key:'hiiraall'},{lv:44,key:'yumenoumi'},{lv:47,key:'hiija'},{lv:55,key:'tokoyo'}]},
@@ -1431,7 +1433,7 @@ function castVerb(m){
 }
 const SPELL_TAG = {dmg:'単体', dmgall:'全体', heal:'回復',
                    healall:'全体回復', cure:'状態', revive:'蘇生',
-                   defdown:'守り下げ', 'return':'移動',
+                   defdown:'守り下げ', 'return':'移動', escape:'脱出',
                    inflict:'状態', buff:'強化'};
 function spellLabel(s){
   const tag = SPELL_TAG[s.type] || '';
@@ -1873,7 +1875,8 @@ function wardMsg(to){
   return wd.msg;
 }
 function doWarp(w){
-  if(w && wardBlocks(w.to)){
+  // ★脱出（夢還り）は 来た 道を 戻るだけ。結界で 止めない。
+  if(w && !w.escape && wardBlocks(w.to)){
     G.mode='msg';
     U.msg(wardMsg(w.to), ()=>{ G.mode='field'; });
     return;
@@ -1892,7 +1895,7 @@ function doWarp(w){
   // ★おぼえる のは「ひとつ 手前の ます」。
   //   ワープの ます そのものを おぼえると、もどった とき 門や 口の 上に 立ち、
   //   すぐ また 入って しまったり、両わきが かべで 動けなく なる。
-  if(!w.back && !fromInner){
+  if(!w.back && !fromInner && !w.escape){
     const tr = G.trail && G.trail[0];
     const back = (tr && walkable(P.map, tr[0], tr[1]) && !warpAt(P.map, tr[0], tr[1]))
                ? {x:tr[0], y:tr[1]} : {x:P.x, y:P.y};
@@ -2623,7 +2626,7 @@ function collectCommands(i){
       });
     }
     else if(sel===1){
-      const sp = knownSpells(m).filter(s=>s.mp<=m.mp);
+      const sp = knownSpells(m).filter(s=>s.mp<=m.mp && !FIELD_ONLY[s.type]);
       if(!sp.length){ G.mode='msg'; U.msg(['つかえる 技が ない！'], ()=>{ G.mode='battle'; again(i); }); return; }
       const backToSkills = ()=>{ if(typeof setTimeout==='function') setTimeout(pickSkill,0); else pickSkill(); };
       const pickSkill = ()=>
@@ -3482,7 +3485,9 @@ const WARDS = {
 // ★ふね・こぶねは IVでは つかわない（飛翔グライダーは M2いこう）
 const FERRY = {};
 const FERRY_BACK = null;
-const FIELD_SPELL = {heal:true, cure:true, revive:true, healall:true, 'return':true};
+const FIELD_SPELL = {heal:true, cure:true, revive:true, healall:true, 'return':true, escape:true};
+// ★戦闘では 使えない（一覧に 出さない）
+const FIELD_ONLY = {'return':true, escape:true};
 // リターンで いける ばしょ（いちど おとずれた ところ だけ）
 // ★リターンさきは 「いまの しょうの ちほう」だけ。
 //   しょうは それぞれ べつの ものがたりなので、ほかの ちほうへ とんでは いけない
@@ -3513,6 +3518,55 @@ function castReturn(ci, di){
   moorShipFor(d.map);                          // ★ふねも いきさきの はまへ
   return {ok:true, warp:{to:d.map, x:d.x, y:d.y},
           lines:[m.name+'は リターンを 唱えた！','光に 包まれ、空へ 舞い上がった——']};
+}
+function isDungeon(mp){ return (WORLD.MAP_IDS[mp]||{}).kind==='dgn'; }
+// ★ダンジョンの 外の 出口を さがす。
+//   入った 順を 逆に たどる（氷の奥 → 氷窟 → 地上）。
+//   おぼえが ない ときは その 地図の 帰り道（back:true）を つかう。
+function escapeTarget(){
+  let mp = P.map, dest = null;
+  for(let guard=0; guard<8 && isDungeon(mp); guard++){
+    const e = G.entry && G.entry[mp];
+    let nx = e ? {to:e.map, x:e.x, y:e.y} : null;
+    if(!nx){
+      const ws = (MAPS[mp]||{}).warpsXY || {};
+      const k = Object.keys(ws).find(k=>ws[k].back);
+      if(k) nx = {to:ws[k].to, x:ws[k].x, y:ws[k].y};
+    }
+    if(!nx) return nearestOutside(mp);
+    if(!MAPS[nx.to]) return null;
+    dest = nx; mp = nx.to;
+  }
+  return (dest && !isDungeon(dest.to)) ? dest : null;
+}
+// ★記録も 帰り道も ない とき（塔の 階段 など）：
+//   地図の つながりを 順に たどって、いちばん 近い 外の 地図へ。
+function nearestOutside(start){
+  const seen = {[start]:true}, q = [start];
+  while(q.length){
+    const mp = q.shift();
+    const ws = (MAPS[mp]||{}).warpsXY || {};
+    for(const k of Object.keys(ws)){
+      const w = ws[k];
+      if(!MAPS[w.to] || seen[w.to]) continue;
+      if(!isDungeon(w.to)) return {to:w.to, x:w.x, y:w.y};
+      seen[w.to] = true; q.push(w.to);
+    }
+  }
+  return null;
+}
+function castEscape(ci){
+  const m = party[ci], sp = SPELL_DEFS.yumegaeri;
+  if(!m) return {ok:false, lines:['誰が 使う？']};
+  if(m.hp<=0) return {ok:false, lines:[m.name+'は 倒れている。']};
+  if(!isDungeon(P.map)) return {ok:false, lines:['ここでは 使えない。','迷宮の 中で なければ ならない。']};
+  const d = escapeTarget();
+  if(!d) return {ok:false, lines:['来た 道が たどれない。']};
+  if(m.mp < sp.mp) return {ok:false, lines:['MPが たりない！']};
+  m.mp -= sp.mp;
+  return {ok:true, warp:{to:d.to, x:d.x, y:d.y, escape:true},
+          lines:[m.name+'は '+sp.name+'を 唱えた！',
+                 '来た 道の 夢が ほどけ、入口へ 引き戻された——']};
 }
 function fieldSpells(m){
   return knownSpells(m).filter(s=>FIELD_SPELL[s.type]);
@@ -3957,7 +4011,7 @@ return {
   useInn, useChurch, openShop, talkNPC,
   moorShipFor, MOORS,
   itemList, useItemField, equipCandidates, equipFromBag, unequip, equipSummary, slotOf,
-  fieldSpells, castField, spellNeedsTarget,
+  fieldSpells, castField, spellNeedsTarget, castEscape, escapeTarget, isDungeon,
   returnDestinations, canReturnHere, castReturn, allReturnSpots, bossInfoAt, chData,
   chapterLabel,                    // ★章の 名まえ（序章ぶん ずらす）
   wardsStatus, skyPartsGot,        // ★天空シリーズ

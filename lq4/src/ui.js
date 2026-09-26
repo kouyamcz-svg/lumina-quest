@@ -609,6 +609,14 @@ function spellsOf(ci){
     if(k>=sp.length){ C.G.mode='field'; return; }
     const s = sp[k];
     if(s.type==='return'){ chooseReturn(ci); return; }
+    // ★夢還り：ダンジョンの 外へ
+    if(s.type==='escape'){
+      const r = C.castEscape(ci);
+      hud();
+      if(!r.ok){ msg2(r.lines, ()=>{ C.G.mode='menu'; spellsOf(ci); }); return; }
+      msg2(r.lines, ()=>{ C.G.mode='field'; C.doWarp(r.warp); });
+      return;
+    }
     if(!C.spellNeedsTarget(s)){ applySpell(ci, s.key, null); return; }
     if(C.party.length===1){ applySpell(ci, s.key, 0); return; }
     menu(C.party.map(t=>t.name+'　HP'+t.hp+'/'+t.maxhp+(t.hp<=0?'（倒れている）':''))
