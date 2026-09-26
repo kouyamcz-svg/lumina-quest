@@ -78,6 +78,42 @@ T('番人が 四十年 磨いたと 言う', said('四十年 この 舟を 磨�
 T('戻ってきた 者は いないと 言う', said('戻ってきた 者も おらんからな'));
 T('地上は 重いと 言う', said('ここは 上より 重い'));
 T('地上に 着いて いる', C.P.map==='ground', C.P.map+' '+C.P.x+','+C.P.y);
+// ★五地方は 海で 分かれて いる。降りた 舟で 渡る。
+T('舟が 浜に 繋いで ある', !!C.G.ship, JSON.stringify(C.G.ship));
+T('舟の ことを 言う', said('海を 渡れる'), log.join(' / ').slice(-90));
+{
+  // ふね＋歩きで 五地方 ぜんぶに 行ける こと
+  const t = C.MAPS.ground.tiles, W = t[0].length, H = t.length;
+  const seen = new Set([C.G.ship.x+','+C.G.ship.y]);
+  const q = [[C.G.ship.x, C.G.ship.y]];
+  while(q.length){
+    const [x,y] = q.shift();
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const nx=x+dx, ny=y+dy, k=nx+','+ny;
+      if(seen.has(k)||nx<0||ny<0||nx>=W||ny>=H) continue;
+      if(t[ny][nx]!=='~' && !C.walkable('ground',nx,ny)) continue;
+      seen.add(k); q.push([nx,ny]);
+    }
+  }
+  [['氷の谷',48,8],['湧き水の町',9,29],['トロスの村',48,30],
+   ['若き霊峰',80,32],['珊瑚の入り江',54,58]].forEach(([nm,x,y])=>{
+    T('舟で '+nm+' へ 行ける', seen.has(x+','+y));
+  });
+}
+// ★順を とばして 着いても、なぜ 入れないかを 言う
+{
+  const keep = Object.assign({}, C.G.flags);
+  C.G.flags.ch3_iceDone = false; C.G.flags.ch3_caravan = false;
+  clearLog();
+  stand('ground', 9, 30, 'back'); C.stepField(0,-1);
+  T('先に 湧き水へ 行っても 入れない', C.P.map==='ground', C.P.map);
+  T('氷の谷が 先だと 言う', said('先に 氷の谷を'), log.join(' / ').slice(0,90));
+  clearLog();
+  stand('ground', 54, 59, 'back'); C.stepField(0,-1);
+  T('先に 珊瑚へ 行っても 入れない', C.P.map==='ground', C.P.map);
+  T('西の 町が 先だと 言う', said('西の 町が 先です'), log.join(' / ').slice(0,90));
+  C.G.flags = keep;
+}
 
 // ===== 2. 氷の谷へ =====
 stand('ground', 48, 9, 'back');

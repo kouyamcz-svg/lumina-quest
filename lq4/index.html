@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-08-27 21:28 JST", "build":"5a8388fb","assets_sha": "93d9f9d5", "lines": {"world": 123, "npc": 743, "chapters": 2268, "bgm": 985, "view2d": 2544, "core": 3650, "view": 1401, "ui": 1149}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-26 17:01 JST", "build":"b218f5b7","assets_sha": "93d9f9d5", "lines": {"world": 123, "npc": 743, "chapters": 2279, "bgm": 985, "view2d": 2544, "core": 3669, "view": 1401, "ui": 1149}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -2798,6 +2798,7 @@ const CH = {
       { npc:'降下用の 舟', unless:'ch3_landed',
         set:['ch3_landed'],
         warp:{map:'ground', x:48, y:4},
+        moor:[48, 2],                    // ★降りた 舟を 浜に 繋ぐ
         msg:['桟橋の 先に、小さな 舟が 繋いで あった。',
              '木でも 鉄でも ない。白い、軽い 何か で できている。',
              '',
@@ -2825,7 +2826,17 @@ const CH = {
              '',
              'ノエ「大地の 上だからね。……ぼくたちが いた ほうが 軽すぎたんだ」',
              '',
+             '舟は 雪の 浜に 乗りあげて 止まった。',
+             '',
+             'セレン「……これ、海も 行けるの」',
+             'ノエ「雲海を 渡る 舟だよ。水の 上なんて 楽な ものさ」',
+             '',
+             'イオ「五地方は 海で 分かれて いると 聞きました」',
+             'セレン「ええ。歩いては 回れないわ」',
+             'ノエ「だから この 舟が 一隻 だけ あるんだ」',
+             '',
              '＊ 千年ぶりに 地上へ 降りた ＊',
+             '＊ 舟は 浜に 繋いである。海を 渡れる ＊',
              '＊ 巡回降下 第一区、氷の谷へ ＊'] },
 
       // ---- 珊瑚の入り江：夢を 視る 少女 ----
@@ -8425,7 +8436,11 @@ function wardBlocks(to){
 function wardMsg(to){
   const wd = WARDS[to];
   if(!wd) return null;
-  if((G.chapter||1) < wd.chapter && wd.msgEarly) return wd.msgEarly;
+  // ★まだ 入れない とき（章が 前／めじるしが 立って いない）は
+  //   「なぜ 入れないか」を つたえる。
+  //   ★ふねで 好きな 順に 行ける ように なり、先に 着く ことが できる。
+  if(wd.msgEarly && ((G.chapter||1) < wd.chapter || (wd.flag && !G.flags[wd.flag])))
+    return wd.msgEarly;
   // ★やる ことは 済ませた が、まだ ひと手 のこって いる とき。
   //   ★そらくらいを 倒したのに「書類が いる」とだけ 出て、
   //     どこへ 行けば よいか 分からなかった。
@@ -9935,6 +9950,21 @@ const WARDS = {
               'セレン「わたしの 家の 名でも 通らないの」',
               '衛兵「……お嬢様。今は そういう ご時世で」'],
     msg:['衛兵「炉の 件だな。通れ」']},
+  // ★第3章：五地方は ふねで 好きな 順に 行けるが、話は 順に すすむ。
+  //   先に 着いても 何も できない ので、行き先を つたえる。
+  well_town: {chapter:4, flag:'ch3_iceDone',
+    msgEarly:['湧き水の町。井戸の まわりに 人が 集まって いる。',
+              '町の 者「空の 者か。……今年は まだ 荷が 来とらんが」',
+              'セレン「順に 回って います。まだ 北の 谷の ぶんが」',
+              'イオ「……先に 氷の谷を 片づけましょう」'],
+    msg:['湧き水の町。東と 西で にらみあって いる。']},
+  coral_bay: {chapter:4, flag:'ch3_caravan',
+    msgEarly:['珊瑚の入り江。浜に 舟が 並んで いる。',
+              '浜の 者「空の 方。荷は まだですかい」',
+              'セレン「西の 町が 先です。順が あるの」',
+              'イオ「……戻りましょう」'],
+    msg:['珊瑚の入り江。潮の 匂いが する。']},
+
   // ★第3章：雲海港は 降下の 出発点。第3章に なってから。
   sky_port: {chapter:4,
     msgEarly:['雲海港。荷を 積んだ 舟が 何隻も 繋がれている。',
