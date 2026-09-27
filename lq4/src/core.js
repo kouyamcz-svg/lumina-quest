@@ -44,14 +44,14 @@ const SPELL_DEFS = {
   //     回復が いらない 場面で 手持ち無沙汰に なって いた。
   //   ★光の 術（アマネ）と かぶらない よう、夢術は
   //     「単体は ひかえめ／全体が とくい／状態いじょうを そえる」に する。
-  yumetsubute:{name:'ゆめつぶて',  mp:3, type:'dmg',    min:3,  max:7, mpw:1.2},
-  yumekasumi: {name:'ゆめがすみ',  mp:6, type:'dmgall', min:5,  max:11, mpw:1.2,
+  yumetsubute:{name:'ゆめつぶて',  mp:3, type:'dmg',    min:3,  max:7,  pw:0.55},
+  yumekasumi: {name:'ゆめがすみ',  mp:6, type:'dmgall', min:5,  max:11, pw:0.55,
                inflict:{type:'slow', p:0.20}},
-  yumekui:    {name:'ゆめくい',    mp:9, type:'dmg',    min:6,  max:12, mpw:2.6,
+  yumekui:    {name:'ゆめくい',    mp:9, type:'dmg',    min:6,  max:12, pw:0.70,
                inflict:{type:'sleep', p:0.30}},
-  yumenowa:   {name:'ゆめの わ',   mp:14,type:'dmgall', min:7,  max:14, mpw:2.2,
+  yumenowa:   {name:'ゆめの わ',   mp:14,type:'dmgall', min:7,  max:14, pw:0.60,
                inflict:{type:'confuse', p:0.24}},
-  yumenoumi:  {name:'ゆめの うみ', mp:24,type:'dmgall', min:12, max:22, mpw:2.8},
+  yumenoumi:  {name:'ゆめの うみ', mp:26,type:'dmgall', min:120, max:150},
 
   heal:       {name:'ヒール',      mp:3, type:'heal', min:20, max:28},
   mezamashi:  {name:'目覚まし',    mp:2, type:'cure'},
@@ -69,17 +69,28 @@ const SPELL_DEFS = {
   tokoyo:     {name:'とこよの ゆめ',mp:24,type:'inflict', st:'sleep', st2:'slow', p:0.35, p2:0.55, all:true},
 
   // ============ アマネ（光術）：攻撃と支援 ============
-  spark:      {name:'スパーク',    mp:2, type:'dmg', min:12, max:18, mpw:1.0},
+  spark:      {name:'スパーク',    mp:2, type:'dmg', min:12, max:18},
   hikari_tate:{name:'ひかりの たて',mp:5, type:'buff', stat:'def', mul:1.30, turns:3, all:true},
-  spara:      {name:'スパーラ',    mp:5, type:'dmg', min:26, max:34, mpw:2.0},
+  spara:      {name:'スパーラ',    mp:5, type:'dmg', min:26, max:34},
   hikari_ken: {name:'ひかりの つるぎ',mp:6,type:'buff', stat:'atk', mul:1.25, turns:3},
-  hikari_uzu: {name:'ひかりの うず',mp:10,type:'dmgall', min:26, max:36, mpw:1.6},
-  sparga:     {name:'スパーガ',    mp:11,type:'dmg', min:42, max:56, mpw:3.2},   // ★MP8 → 11（MP1あたりの 威力を 剣・槍の 技に そろえる）
+  hikari_uzu: {name:'ひかりの うず',mp:10,type:'dmgall', min:26, max:36},
+  sparga:     {name:'スパーガ',    mp:8, type:'dmg', min:42, max:56},
   hayate:     {name:'はやての ひかり',mp:7,type:'buff', stat:'agi', mul:1.30, turns:3, all:true},
   revive:     {name:'リヴァイブ',  mp:12,type:'revive'},
-  holyray:    {name:'ひかりの あらし',mp:16,type:'dmgall', min:42, max:56, mpw:2.2},
-  sparja:     {name:'スパージャ',  mp:18,type:'dmg', min:88, max:116, mpw:4.0},
-  hikari_taika:{name:'ひかりの たいか',mp:26,type:'dmgall', min:74, max:98, mpw:2.6},
+  // ★上位の 呪文（第3章の Lv30 前後）。
+  //   ★まえは スパーガ（Lv24、49）・ひかりのうず（Lv20、31）・ゆめくい（Lv13）・ゆめのわ（Lv29）が
+  //     Lv33 でも いちばん 上で、剣・槍の 技の 約5分の1。スパーガは 通常こうげきより 弱かった。
+  //     呪文を 強く する かわりに、上位の 呪文を 足した。
+  sparda:     {name:'スパーダ',    mp:12,type:'dmg', min:130, max:160},
+  hikari_nami:{name:'ひかりの なみ',mp:16,type:'dmgall', min:76, max:92},
+  yumesarai:  {name:'ゆめさらい',  mp:12,type:'dmg',    min:84, max:104,
+               inflict:{type:'sleep', p:0.3}},
+  yumenadare: {name:'ゆめの なだれ',mp:18,type:'dmgall', min:70, max:90,
+               inflict:{type:'confuse', p:0.24}},
+  // ★上位の 呪文より 上の ものは、新しい 呪文より 強く する（順番が 逆に ならない ように）
+  holyray:    {name:'ひかりの あらし',mp:20,type:'dmgall', min:120, max:144},
+  sparja:     {name:'スパージャ',  mp:20,type:'dmg', min:230, max:280},
+  hikari_taika:{name:'ひかりの たいか',mp:30,type:'dmgall', min:180, max:220},
   judgment:   {name:'ばんぶつの ひかり',mp:34,type:'dmg', min:140,max:185},
   shiratatsu: {name:'しらたつの いのり',mp:34,type:'healall', min:110,max:150},
 
@@ -110,13 +121,13 @@ const CLASSES = {
          learns:[{lv:3,key:'heal'},{lv:5,key:'yumetsubute'},{lv:6,key:'mezamashi'},
                  {lv:8,key:'yumegaeri'},{lv:9,key:'madoromi'},{lv:11,key:'yumekasumi'},{lv:13,key:'yumekui'},
                  {lv:14,key:'hiira'},{lv:17,key:'yumeomori'},{lv:21,key:'yumeutsutsu'},
-                 {lv:26,key:'hiiga'},{lv:29,key:'yumenowa'},{lv:31,key:'yumenotobari'},{lv:35,key:'healall'},
+                 {lv:26,key:'hiiga'},{lv:28,key:'yumesarai'},{lv:29,key:'yumenowa'},{lv:31,key:'yumenotobari'},{lv:33,key:'yumenadare'},{lv:35,key:'healall'},
                  {lv:42,key:'hiiraall'},{lv:44,key:'yumenoumi'},{lv:47,key:'hiija'},{lv:55,key:'tokoyo'}]},
   // アマネ（15・白竜の声を聞く巫女）光術：攻撃と支援
   amane:{name:'アマネ',hp:14,mp:12,atk:3,def:3,agi:6, g:{hp:4,mp:5,atk:2,def:2,agi:2},
          learns:[{lv:5,key:'spark'},{lv:9,key:'hikari_tate'},{lv:12,key:'spara'},
                  {lv:17,key:'hikari_ken'},{lv:20,key:'hikari_uzu'},{lv:24,key:'sparga'},
-                 {lv:28,key:'hayate'},{lv:34,key:'revive'},{lv:38,key:'holyray'},
+                 {lv:28,key:'hayate'},{lv:30,key:'sparda'},{lv:31,key:'hikari_nami'},{lv:34,key:'revive'},{lv:38,key:'holyray'},
                  {lv:45,key:'sparja'},{lv:50,key:'hikari_taika'},{lv:56,key:'shiratatsu'}]},
 };
 const TACTICS = {manual:'命令させろ', gungan:'ガンガンいこうぜ', inochi:'命大事に'};
@@ -222,7 +233,7 @@ const MIDBOSS = {
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第3章ボス：あくむじゅう ルプス（狼座）----
   //   大陸から 落ちた 悪夢の かけらが 地上の 狼に 憑いた もの。
-  lupus:{key:'lupus', name:'あくむじゅう ルプス', hp:8200,   /* ★5600 → 8200：アマネの 光術を 強めた ぶん（勝率 Lv32・33で 77%。変更前 Lv32で 78%） */ atk:82, def:42, agi:24, acts:1,
+  lupus:{key:'lupus', name:'あくむじゅう ルプス', hp:7400,   /* ★5600 → 7400：上位の 呪文（スパーダ など）を 足した ぶん（勝率 Lv32で 75%・Lv33で 83%） */ atk:82, def:42, agi:24, acts:1,
     exp:6200, gold:6800, art:'lupus', scale:1.25,
     skill:{p:0.30, mul:1.30, name:'かみくだき'},
     aoe:{p:0.24, lo:34, hi:50, name:'とおぼえ'},
@@ -253,7 +264,7 @@ const MIDBOSS = {
 
   // ---- 第2章ボス：あくむじゅう フォルナクス（炉座）----
   //   炉の 外郭に わき、光を 喰らう。倒すと 紙片が 残る。
-  fornax:{key:'fornax', name:'あくむじゅう フォルナクス', hp:2000,   /* ★1700 → 2000：ノエの 夢術を 強めた ぶん（勝率 78%。変更前 79%） */ atk:52, def:29, agi:16, acts:1,
+  fornax:{key:'fornax', name:'あくむじゅう フォルナクス', hp:1700, atk:52, def:29, agi:16, acts:1,
     exp:3800, gold:4000, art:'fornax', scale:1.10,
     skill:{p:0.30, mul:1.35, name:'ほのおの あぎと'},
     aoe:{p:0.24, lo:26, hi:38, name:'炉のいぶき'},
@@ -1699,6 +1710,15 @@ function interact(){
 // ★舟を 扱う 地図は 天空大陸（world）と 地上（ground）だけ。
 //   ★まえは 見た目が 野外（theme:'world'）なら 舟を 扱って いた。トロスの村・珊瑚の入り江・祠の丘も
 //     野外の 見た目なので、舟を 繋いだ まま 入ると 地図の 外の 地面を 描こうとして 画面が 止まった。
+// ★仲間の 絵の 鍵。イオは 天空の 鎧が そろったら 天空装備の 姿（ioSky の 絵が あれば）
+function spriteKeyOf(m){
+  if(!m) return null;
+  if(m.cls==='io' && G && G.flags && G.flags.sky_armor){
+    const R = (typeof CHR!=='undefined') ? CHR : null;
+    if(R && R.ioSky) return 'ioSky';
+  }
+  return m.cls;
+}
 function isShipMap(map){ return map==='world' || map==='ground'; }
 function ensureGroundShip(){
   if(P.map!=='ground') return;
@@ -4138,7 +4158,7 @@ function swapMember(cls){                     // せんとう ⇄ ひかえ
 return {
   // データ
   MAPS, ENEMIES, MIDBOSS, CLASSES, SPELL_DEFS, SHOPS, INN_PRICE, byMap, byMapCh, TACTICS, LV_CAP,
-  islandAt, islandPool, hasFoeArt, isShipMap,
+  islandAt, islandPool, hasFoeArt, isShipMap, spriteKeyOf,
   // ★しかけ（IVから）
   setTile, applyTileEdits, restoreMaps, snapshotMaps, allLampsLit, GIMMICK_TILES,
   WARDS, wardBlocks, wardMsg,

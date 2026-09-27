@@ -546,6 +546,10 @@ const NPCS = {
         '女「リーゼの 笑う 声が 戻った。……谷が 明るく なったよ」']},
       {text:['女「リーゼが 氷窟に 連れて いかれて から、長は 眠って いない」',
              '女「子守唄も、この ところ 聞こえないね」']}]},
+    // ★トロスの あとに 立つ（トロスの 場面で 地図に 人の 印を 置く）
+    {at:'12,12', spr:'guardB', name:'天空の 職員', lines:[
+      {when:{flag:'ch3_ascend'}, text:['職員「舟へ どうぞ。港が 引き上げます」']},
+      {text:['職員「帰りの 合図は、わたしが 出します」']}]},
   ],
 
   // ============ 第2章：炉心の 手前（ボスの 間）============
@@ -737,6 +741,7 @@ const QUESTS = {
       {id:'shrine', desc:'村の 東の 丘で 祠を 建てる',      flag:'ch3_shrineBuilt'},
       {id:'lupus',  desc:'丘に 落ちてきた ものを 討つ',     flag:'ch3_lupusDown'},
       {id:'back',   desc:'村の 老人に 報せる',              flag:'ch3_torosDone'},
+      {id:'ascend', desc:'北の 谷の 天空の 職員と 話す', flag:'ch3_ascend'},
     ],
     reward:{}, next:null,
   },

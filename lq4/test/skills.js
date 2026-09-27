@@ -88,7 +88,7 @@ const expect = (m,s)=> ((s.min+s.max)/2) + atkOf(m)*(s.pw||0);
                  .map(l=>D[l.key]).filter(x=>x && x.type===ty);
     if(!ls.length) return 0;
     return Math.max.apply(null,
-      ls.map(x=>((x.min+x.max)/2) + atkOf2(m)*(x.pw||0) + lv*(x.mpw||0)));   // ★呪文は レベルで のびる（mpw）
+      ls.map(x=>((x.min+x.max)/2) + atkOf2(m)*(x.pw||0)));
   };
   // ① ノエは せめ手を もつ（第2章の ころには 使える）
   T('ノエが 攻撃呪文を 覚える', top('noe',13,'dmg') > 0, '手が ない');
@@ -111,23 +111,35 @@ const expect = (m,s)=> ((s.min+s.max)/2) + atkOf(m)*(s.pw||0);
   }
 }
 
-// ★呪文が レベルで のびる こと（アマネの 光術は 固定値、ノエの 夢術は 攻撃力×0.55〜0.7 で、
-//   Lv33 で 剣・槍の 技の 約5分の1。アマネの スパーガは 通常こうげきより 弱かった）
+// ★上位の 呪文（強化 では なく 上位の 呪文を 足す）
+//   ★まえは Lv33 でも スパーガ（49）・ひかりのうず（31）・ゆめくい・ゆめのわ が いちばん 上で、
+//     剣・槍の 技の 約5分の1。スパーガは 通常こうげきより 弱かった。
 {
   const atk=(m)=>m.batk+(m.weapon?m.weapon.v:0);
-  const best=(cls,lv,ty)=>{ const m=C.mkMember(cls,lv); m.weapon={kind:'w',name:'w',v:{io:26,seren:28,noe:16,amane:16}[cls]};
-    const ls=C.knownSpells(m).filter(x=>x.type===ty); return ls.length? Math.max(...ls.map(x=>((x.min+x.max)/2)+atk(m)*(x.pw||0)+lv*(x.mpw||0))) : 0; };
-  const normal=(cls,lv)=>{ const m=C.mkMember(cls,lv); m.weapon={v:{io:26,seren:28,noe:16,amane:16}[cls]}; return atk(m)-21; };
-  [26,33].forEach(lv=>{
-    const phys=Math.max(best('io',lv,'dmg'), best('seren',lv,'dmg'));
-    T('Lv'+lv+'：アマネの 単体呪文は 剣・槍の 技の 6割 以上', best('amane',lv,'dmg') >= phys*0.6, Math.round(best('amane',lv,'dmg'))+' / '+Math.round(phys));
-    T('Lv'+lv+'：アマネの 単体呪文は 通常こうげきより 強い', best('amane',lv,'dmg') > normal('amane',lv)*1.5);
-    T('Lv'+lv+'：ノエの 単体呪文は 通常こうげきより ずっと 強い', best('noe',lv,'dmg') > normal('noe',lv)*2);
-    T('Lv'+lv+'：全体呪文は アマネが 上', best('amane',lv,'dmgall') >= best('noe',lv,'dmgall'));
+  const W={io:26,seren:28,noe:16,amane:16};
+  const avg=(x,m)=>((x.min+x.max)/2)+atk(m)*(x.pw||0);
+  const best=(cls,lv,ty)=>{ const m=C.mkMember(cls,lv); m.weapon={kind:'w',name:'w',v:W[cls]};
+    const ls=C.knownSpells(m).filter(x=>x.type===ty); return ls.length? Math.max(...ls.map(x=>avg(x,m))) : 0; };
+  const normal=(cls,lv)=>{ const m=C.mkMember(cls,lv); m.weapon={v:W[cls]}; return atk(m)-21; };
+  // 新しい 上位の 呪文が ある
+  [['amane','sparda',30],['amane','hikari_nami',31],['noe','yumesarai',28],['noe','yumenadare',33]].forEach(([c,k,lv])=>{
+    T(C.CLASSES[c].name+' が Lv'+lv+' で '+(D[k]||{}).name+' を 覚える', C.CLASSES[c].learns.some(l=>l.key===k && l.lv===lv));
   });
-  // 呪文の 鍵には pw（攻撃力）で なく mpw（レベル）
-  ['yumetsubute','yumekasumi','yumekui','yumenowa','yumenoumi','spark','spara','sparga','sparja','hikari_uzu','holyray','hikari_taika']
-    .forEach(k=>T(k+' は レベルで のびる', D[k] && D[k].mpw>0 && !D[k].pw, JSON.stringify(D[k]&&{pw:D[k].pw,mpw:D[k].mpw})));
+  // もとの 呪文は 強く して いない（上位の 呪文で 補う）
+  T('スパーガは もとの まま（42-56・MP8）', D.sparga.min===42 && D.sparga.max===56 && D.sparga.mp===8, JSON.stringify(D.sparga));
+  T('ひかりのうずは もとの まま（26-36）', D.hikari_uzu.min===26 && D.hikari_uzu.max===36);
+  // Lv33：アマネの 単体は 剣・槍の 技の 6割 以上、通常こうげきより 強い／ノエの 単体は 通常こうげきの 2倍 以上
+  const phys=Math.max(best('io',33,'dmg'), best('seren',33,'dmg'));
+  T('Lv33：アマネの 単体呪文は 剣・槍の 技の 6割 以上', best('amane',33,'dmg') >= phys*0.6, Math.round(best('amane',33,'dmg'))+' / '+Math.round(phys));
+  T('Lv33：アマネの 単体呪文は 通常こうげきより 強い', best('amane',33,'dmg') > normal('amane',33)*1.5);
+  T('Lv33：ノエの 単体呪文は 通常こうげきの 2倍 以上', best('noe',33,'dmg') > normal('noe',33)*2);
+  T('Lv33：全体呪文は アマネが 上', best('amane',33,'dmgall') >= best('noe',33,'dmgall'));
+  // 系統ごとに 上の 呪文ほど 強い（覚える Lv の 順に 見こみが ふえる）
+  ['noe','amane'].forEach(c=>['dmg','dmgall'].forEach(ty=>{
+    const ls=C.CLASSES[c].learns.map(l=>({lv:l.lv,s:D[l.key]})).filter(o=>o.s&&o.s.type===ty).sort((a,b)=>a.lv-b.lv);
+    for(let i=1;i<ls.length;i++){ const m=C.mkMember(c,ls[i].lv); m.weapon={v:W[c]};
+      T(C.CLASSES[c].name+'：'+ls[i].s.name+' は '+ls[i-1].s.name+' より 強い', avg(ls[i].s,m) >= avg(ls[i-1].s,m), Math.round(avg(ls[i].s,m))+' / '+Math.round(avg(ls[i-1].s,m))); }
+  }));
 }
 console.log('\n--- skills: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

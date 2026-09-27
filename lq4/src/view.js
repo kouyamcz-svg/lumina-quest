@@ -1232,8 +1232,9 @@ function buildMap(name){
   // 隊列アクター（パーティ人数ぶんだけ つくる）
   actors.list=[];
   C.party.forEach((m,i)=>{
-    const b = CHR[m.cls] ? chrBillboard(m.cls, i===0?1.50:1.44)
-                         : billboard(m.cls, i===0?1.25:1.20);
+    const sk = (C.spriteKeyOf ? C.spriteKeyOf(m) : m.cls);   // ★天空装備の イオ
+    const b = CHR[sk] ? chrBillboard(sk, i===0?1.50:1.44)
+                      : billboard(m.cls, i===0?1.25:1.20);
     scene.add(b); actors.list.push(b);
   });
   actors.hero=actors.list[0]||null;
@@ -1437,9 +1438,10 @@ function update2D(dt,time){
     }
     const dist=Math.abs(tgt[i][0]-fp[i].x)+Math.abs(tgt[i][1]-fp[i].y);
     const moving=dist>0.06;
-    const pf=poseOf(m.cls, dir, moving && C.G.stepFlip);
+    const sk=(C.spriteKeyOf ? C.spriteKeyOf(m) : m.cls);   // ★天空装備の イオ
+    const pf=poseOf(sk, dir, moving && C.G.stepFlip);
     const t=1-Math.min(1,dist);
-    objs.push({x:fp[i].x, y:fp[i].y, cls:m.cls, pose:pf.pose, flip:pf.flip,
+    objs.push({x:fp[i].x, y:fp[i].y, cls:sk, pose:pf.pose, flip:pf.flip,
                bob: moving ? -Math.abs(Math.sin(t*Math.PI))*0.06 : 0});
   });
   lastPoses2D = objs.map(o=>o.pose);

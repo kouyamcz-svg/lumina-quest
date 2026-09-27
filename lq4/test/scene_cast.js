@@ -95,5 +95,24 @@ Object.keys(N.NPCS).forEach(mp=>{
   T('状態の 枠が 出て いれば 窓を その 下に 置く', /function placeCmdWin\(\)/.test(U) && /hud\(\); placeCmdWin\(\);/.test(U));
   T('戦闘中は 地名を 隠す', /labelEl\.style\.visibility = inBattle \? 'hidden'/.test(U));
 }
+// ⑧ 天空の 鎧が そろったら イオは 天空装備の 姿（絵が あれば）／北の 谷で 職員に 話して から 帰る
+{
+  C.freshState(); const io=C.mkMember('io',33);
+  T('鎧が そろう 前の イオは ふつうの 姿', C.spriteKeyOf(io)==='io');
+  C.G.flags.sky_armor=true;
+  const cx={console,window:{}}; cx.globalThis=cx; vm.createContext(cx);
+  vm.runInContext(fs.readFileSync('assets.js','utf8'), cx);
+  const hasSky=!!vm.runInContext('CHR', cx).ioSky;
+  T('天空の 鎧が そろったら 天空装備の 姿（絵が '+(hasSky?'ある':'まだ ない')+'）', hasSky ? true : C.spriteKeyOf(io)==='io');
+  const V3=fs.readFileSync('src/view.js','utf8');
+  T('2D・3D とも 絵の 鍵は spriteKeyOf で 引く', (V3.match(/C\.spriteKeyOf\(m\)/g)||[]).length>=2);
+  const d=CHD.get(4);
+  T('第3章の 終わりは 天空の 職員に 話した あと', d.ending.trigger==='ch3_ascend');
+  const ev=d.talkEvents.find(e=>e.npc==='天空の 職員');
+  T('天空の 職員は トロスの あと', ev && (ev.cond||[]).includes('ch3_torosDone'));
+  T('天空の 職員は 氷の谷（北の 国）に いる', (N.NPCS.ice_camp||[]).some(p=>p.name==='天空の 職員'));
+  const tor=d.talkEvents.find(e=>(e.set||[]).includes('ch3_torosDone'));
+  T('トロスの 場面で 氷の谷に 職員を 立たせる', tor && (tor.setTiles||[]).some(t=>t.map==='ice_camp' && t.ch==='n'));
+}
 console.log('\n--- scene_cast: '+(n-ng)+'/'+n+' 通過 ---');
 process.exit(ng?1:0);

@@ -471,7 +471,19 @@ T('地上まで 来て いる', said('地上まで 来てる'));
   T('イオが 天空の 鎧を 着る',
     C.party[0].armor && C.party[0].armor.name==='天空の 鎧', JSON.stringify(C.party[0].armor));
   T('クエストが 片づく', C.G.quests.ch3_q5_toros==='clear');
+  // ★老人に 報せた だけでは まだ 帰らない（北の 谷の 職員に 合図を 頼む）
+  T('老人に 報せた だけでは 章末に ならない', !C.G.flags.ch3_cleared);
+  T('北の 島へ 戻る 話が 出る', said('北の 谷に 港の 職員が'));
+  T('氷の谷に 天空の 職員が 立つ', C.tileAt('ice_camp',12,12)==='n');
 }
+
+// ===== 9.9 北の 島へ。天空の 職員に 合図を 頼む =====
+clearLog();
+stand('ground', 48, 9, 'back'); C.stepField(0,-1);
+T('氷の谷へ 入れる（帰り）', C.P.map==='ice_camp', C.P.map);
+talk('ice_camp', 12, 13, 'back');
+T('天空の 職員に 話す', C.G.flags.ch3_ascend===true);
+T('帰る 合図が 上がる', said('帰る 合図が 上がった'));
 
 // ===== 10. 章末 =====
 T('章末が でる', said('傾いて ない？'), log.join(' / ').slice(-200));
