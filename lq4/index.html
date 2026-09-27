@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-27 14:02 JST", "build":"61b6e7bd","assets_sha": "e8202ec3", "lines": {"world": 140, "npc": 866, "chapters": 2693, "bgm": 985, "view2d": 2591, "core": 4159, "view": 1682, "ui": 1160}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-27 14:10 JST", "build":"d30b3b08","assets_sha": "e8202ec3", "lines": {"world": 140, "npc": 866, "chapters": 2693, "bgm": 985, "view2d": 2591, "core": 4160, "view": 1683, "ui": 1160}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -9894,6 +9894,7 @@ function triggerBoss(x,y){
     if(bi.img && V.showScene) V.showScene(bi.img);
     U.msg(bi.intro || ['まものが たちふさがった！'], ()=>{
       if(bi.img && V.hideScene) V.hideScene();
+      G.bossAt=[x,y];      // ★二体ボスの 判定で 使う（地図名だけでは 第3章の ボスが 見つからない）
       startBattle(bi.key);
     });
     return;
@@ -10039,7 +10040,7 @@ function startBattle(kind){
     enemies[0].boss = true;                 // ★LQ4：状態 いじょうは はんげん
     // ★そうしボス：章データに pair が あれば 2たいで あらわれる
     {
-      const bi = bossInfoAt(P.map);
+      const bi = G.bossAt ? bossInfoAt(P.map, G.bossAt[0], G.bossAt[1]) : bossInfoAt(P.map);
       if(bi && bi.key === kind && bi.pair && MIDBOSS[bi.pair]){
         const e2 = makeEnemy(MIDBOSS[bi.pair]); e2.boss = true; enemies.push(e2);
       }
@@ -12624,7 +12625,8 @@ function buildMap(name){
       // ★まえは desgran1（LQ2の まおう）の えを かりて いたため、
       //   せんとうの すがた（regretshadow）と ちがって いた。
       //   しょうデータから ボスを ひき、せんとうと おなじ えを 使う。
-      const bi = C.bossInfoAt ? C.bossInfoAt(name) : null;
+      // ★座標も わたす（第3章の ボスは「地図名:x,y」で 登録。地図名 だけ だと 見つからず、奥の間に 何も 描かれなかった）
+      const bi = C.bossInfoAt ? C.bossInfoAt(name, x, y) : null;
       const done = bi && bi.clearedFlag && C.G.flags[bi.clearedFlag];
       if(bi && !done){
         const bd = (C.MIDBOSS && C.MIDBOSS[bi.key]) || null;

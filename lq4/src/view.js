@@ -1023,7 +1023,8 @@ function buildMap(name){
       // ★まえは desgran1（LQ2の まおう）の えを かりて いたため、
       //   せんとうの すがた（regretshadow）と ちがって いた。
       //   しょうデータから ボスを ひき、せんとうと おなじ えを 使う。
-      const bi = C.bossInfoAt ? C.bossInfoAt(name) : null;
+      // ★座標も わたす（第3章の ボスは「地図名:x,y」で 登録。地図名 だけ だと 見つからず、奥の間に 何も 描かれなかった）
+      const bi = C.bossInfoAt ? C.bossInfoAt(name, x, y) : null;
       const done = bi && bi.clearedFlag && C.G.flags[bi.clearedFlag];
       if(bi && !done){
         const bd = (C.MIDBOSS && C.MIDBOSS[bi.key]) || null;

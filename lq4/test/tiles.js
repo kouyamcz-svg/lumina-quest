@@ -230,6 +230,16 @@ TERRAINS.forEach(t=>{
   T('町は 2D', W.renderModeOf('ice_camp')==='2d' && W.renderModeOf('toros')==='2d');
   T('ダンジョンは 3D', W.renderModeOf('ice_cave')==='3d' && W.renderModeOf('tower2')==='3d');
   // 地図が かわったら 組み直す（3D は いちど 組んだ だけ だった）
+  // ★3D の 奥の間に ボスが 描かれる こと（地図名だけで さがして 見つからず、何も 描かれて いなかった）
+  T('3D は ボスを 座標つきで さがす', /C\.bossInfoAt\(name, x, y\)/.test(V3));
+  C.freshState();
+  Object.keys(C.MAPS).forEach(k=>{
+    if(W.renderModeOf(k)!=='3d') return;
+    C.MAPS[k].tiles.forEach((r,y)=>{ for(let x=0;x<r.length;x++) if(r[x]==='B'){
+      for(const ch of [1,2,3,4]){ C.G.chapter=ch; if(C.bossInfoAt(k,x,y)) break; }
+      T('3D '+k+' の ボス('+x+','+y+')が 引ける', !!C.bossInfoAt(k,x,y));
+    } });
+  });
   T('3D は 地図の 変化で 組み直す', /function watchTiles\(\)/.test(V3) && /watchTiles\(\);/.test(V3));
 }
 

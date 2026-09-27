@@ -2452,6 +2452,7 @@ function triggerBoss(x,y){
     if(bi.img && V.showScene) V.showScene(bi.img);
     U.msg(bi.intro || ['まものが たちふさがった！'], ()=>{
       if(bi.img && V.hideScene) V.hideScene();
+      G.bossAt=[x,y];      // ★二体ボスの 判定で 使う（地図名だけでは 第3章の ボスが 見つからない）
       startBattle(bi.key);
     });
     return;
@@ -2597,7 +2598,7 @@ function startBattle(kind){
     enemies[0].boss = true;                 // ★LQ4：状態 いじょうは はんげん
     // ★そうしボス：章データに pair が あれば 2たいで あらわれる
     {
-      const bi = bossInfoAt(P.map);
+      const bi = G.bossAt ? bossInfoAt(P.map, G.bossAt[0], G.bossAt[1]) : bossInfoAt(P.map);
       if(bi && bi.key === kind && bi.pair && MIDBOSS[bi.pair]){
         const e2 = makeEnemy(MIDBOSS[bi.pair]); e2.boss = true; enemies.push(e2);
       }
