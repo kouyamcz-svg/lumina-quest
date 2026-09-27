@@ -526,5 +526,22 @@ function kill(k){
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){ if(sd[y][x]<0) continue; for(const [dx,dy] of D){ const u=x+dx,v=y+dy; if(walk(u,v)&&ld[v][u]>=0){ const tot=sd[y][x]+1+ld[v][u]; if(best<0||tot<best) best=tot; } } }
   T('東の 島の 北端から 南の 島まで 120歩 以内', best>0 && best<=120, best+'歩');
 }
+// ★舟を 扱うのは 天空大陸と 地上だけ
+//   ★見た目が 野外の 町（トロスの村・珊瑚の入り江・祠の丘）でも 舟を 扱って いて、
+//     舟を 繋いだ まま 入ると 地図の 外の 地面を 描こうとして 画面が 止まった
+{
+  T('舟の 地図：天空大陸と 地上', C.isShipMap('world') && C.isShipMap('ground'));
+  ['toros','coral_bay','shrine_hill'].forEach(m=>T(m+' では 舟を 扱わない', !C.isShipMap(m)));
+  // 町の 中で 舟と 同じ 座標に 歩いても 乗らない
+  C.freshState(); C.G.chapter=4;
+  const t=C.MAPS.toros.tiles; let at=null;
+  for(let y=1;y<t.length-1&&!at;y++)for(let x=1;x<t[0].length-1;x++){ if(C.walkable('toros',x,y)&&C.walkable('toros',x,y-1)){ at=[x,y]; break; } }
+  C.G.ship={x:at[0], y:at[1]-1}; C.G.aboard=false;
+  C.P.map='toros'; C.P.x=at[0]; C.P.y=at[1]; C.G.mode='field'; C.G.busy=false;
+  C.stepField(0,-1);
+  T('トロスの村で 舟の 座標に 歩いても 乗らない', !C.G.aboard && C.P.map==='toros', C.P.map+' aboard='+C.G.aboard);
+  const V2src=fs.readFileSync('src/view2d.js','utf8');
+  T('2D は 舟の 地図だけで 舟を 描く', /C\.isShipMap\(curMap\) && C\.G && C\.G\.ship/.test(V2src));
+}
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

@@ -81,6 +81,7 @@ try{ load(LQ+'/src/view2d.js'); }catch(e){ console.log('view2d skip', e.message.
 }
 const C = vm.runInContext('LQ4', ctx), V = vm.runInContext('LQ4View', ctx);
 // 画像の 読みこみ（data URL は 同期で ロードされる）
+if(MAP==='__flowT'){ require('./flow_toros.js')(C,V,vm,ctx); process.exit(0); }
 if(MAP==='__flow'){ require('./flow_body.js')(C,V,vm,ctx); process.exit(0); }
 C.bind(C.NullView,{msg(l,d){d&&d();},menu(i,t,cb){cb(0);},hud(){},label(){}},C.NullAudio);
 C.freshState(); C.G.chapter = Number(CH||4);

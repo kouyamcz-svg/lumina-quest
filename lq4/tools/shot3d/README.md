@@ -27,6 +27,11 @@ DPR=2 SAFETOP=54 TWO_D=1 SHIP=48,2 W=395 H=473 xvfb-run -a node shot3d.js ground
 ```
 - SAFETOP：画面上部の 隠れる 帯（css px）。DPR：画素比。SHIP：地上の 舟の 位置
 
+## 舟を 繋いで 町に 入る 流れ（画面が 止まらないか）
+```
+xvfb-run -a node shot3d.js __flowT 0 0 x 4      # トロスの村・珊瑚の入り江・祠の丘に 入る
+```
+
 ## 注意
 - vm の 別領域で 作った 型付き配列を headless-gl が 受けとれない。GL 呼び出しの 手前で 変換して いる
 - headless-gl は 画像を 直接 受けとれない。texImage2D の 手前で 画素に なおして いる

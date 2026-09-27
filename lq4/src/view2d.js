@@ -2273,14 +2273,14 @@ function draw(dt, time, actors){
   drawRunner(ox, oy, ts, time);
   _bossQ.length=0;
   // ★もやって ある ふね（ワールドのみ）
-  if(theme==='world' && C.G && C.G.ship && !C.G.aboard){
+  if(C.isShipMap && C.isShipMap(curMap) && C.G && C.G.ship && !C.G.aboard){
     const sx=C.G.ship.x, sy=C.G.ship.y;
     cx.drawImage(groundTile(sx,sy,terrainOf), ox+sx*ts, oy+sy*ts, ts, ts);
     cx.drawImage(atlas.boat, ox+sx*ts, oy+sy*ts, ts, ts);
   }
   // ④ キャラ（Yじゅんに かさねる）★ふねに のって いる あいだは ふねだけを えがく
   let list = (actors||[]).slice();
-  if(C.G && C.G.aboard && theme==='world' && list.length){
+  if(C.G && C.G.aboard && C.isShipMap && C.isShipMap(curMap) && list.length){
     const lead=list[0];
     cx.drawImage(atlas.boat, ox+lead.x*ts, oy+lead.y*ts, ts, ts);
     list=[];

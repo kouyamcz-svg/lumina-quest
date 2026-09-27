@@ -1685,6 +1685,10 @@ function interact(){
 // ★地上に いるのに ふねが ない ときは、浜に 繋ぎ直す。
 //   ★ふねを 配る しくみを あとから 入れた ため、
 //     さきに 降りて いた セーブでは 海を 渡れなく なって いた。
+// ★舟を 扱う 地図は 天空大陸（world）と 地上（ground）だけ。
+//   ★まえは 見た目が 野外（theme:'world'）なら 舟を 扱って いた。トロスの村・珊瑚の入り江・祠の丘も
+//     野外の 見た目なので、舟を 繋いだ まま 入ると 地図の 外の 地面を 描こうとして 画面が 止まった。
+function isShipMap(map){ return map==='world' || map==='ground'; }
 function ensureGroundShip(){
   if(P.map!=='ground') return;
   if(!G.flags.ch3_landed) return;
@@ -1708,7 +1712,7 @@ function stepField(dx,dy){
   //   ワープの ます（もん・かいだん・ちてん）は ふんだら すすむ。
   P.dir = dy<0?'back' : dy>0?'front' : (dx<0?'left':'right');
   // ★ふね：もやって ある ふねに あるいて ふれると のる
-  if(!G.aboard && (MAPS[P.map]||{}).theme==='world' && G.ship && nx===G.ship.x && ny===G.ship.y){
+  if(!G.aboard && isShipMap(P.map) && G.ship && nx===G.ship.x && ny===G.ship.y){
     G.aboard=true;
     G.trail.unshift([P.x,P.y]); if(G.trail.length>8) G.trail.pop();
     P.x=nx; P.y=ny; G.stepFlip=!G.stepFlip;
@@ -4124,7 +4128,7 @@ function swapMember(cls){                     // せんとう ⇄ ひかえ
 return {
   // データ
   MAPS, ENEMIES, MIDBOSS, CLASSES, SPELL_DEFS, SHOPS, INN_PRICE, byMap, byMapCh, TACTICS, LV_CAP,
-  islandAt, islandPool, hasFoeArt,
+  islandAt, islandPool, hasFoeArt, isShipMap,
   // ★しかけ（IVから）
   setTile, applyTileEdits, restoreMaps, snapshotMaps, allLampsLit, GIMMICK_TILES,
   WARDS, wardBlocks, wardMsg,
