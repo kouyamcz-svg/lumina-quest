@@ -46,5 +46,20 @@ for(const ch of [1,2,3,4]){ const d=CHD.get(ch);
     });
   });
 }
+// ③ 台詞の 話し手（女・男 など）と 絵の 性別が 合う こと
+//   ★水汲みの 女・集落の 女が ひげの 男の 絵（villagerB）だった
+{
+  const femSpr=new Set(['elderWoman','priestess','valeElder','amane','seren']);
+  const maleSpr=new Set(['villagerA','villagerB','captain','guardA','guardB','butler','elder','zenos','noe']);
+  Object.keys(N.NPCS).forEach(mp=>(N.NPCS[mp]||[]).forEach(p=>{
+    const fName=/女|娘|母|婆|婦|少女|おばさん/.test(p.name);
+    if(fName) T(mp+' の '+p.name+' は 女性の 絵', !maleSpr.has(p.spr), p.spr);
+    const txt=JSON.stringify(p.lines||[]);
+    [...new Set([...txt.matchAll(/"([^"「」]{1,8})「/g)].map(m=>m[1]))].forEach(sp=>{
+      if(/^(女|娘|母|婆|老女|おばさん|婦人|少女)$/.test(sp)) T(mp+' の '+p.name+'（話し手「'+sp+'」）は 女性の 絵', !maleSpr.has(p.spr), p.spr);
+      if(/^(男|親父|おやじ|爺|主人|親方)$/.test(sp)) T(mp+' の '+p.name+'（話し手「'+sp+'」）は 男性の 絵', !femSpr.has(p.spr), p.spr);
+    });
+  }));
+}
 console.log('\n--- scene_cast: '+(n-ng)+'/'+n+' 通過 ---');
 process.exit(ng?1:0);

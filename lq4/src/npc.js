@@ -433,7 +433,7 @@ const NPCS = {
         '若者「水は 共同に なった。なら 荷も 共同で いいだろう」']},
       {text:['若者「東と 西で 顔を 合わせるのは、水汲みの ときだけだ」',
              '若者「……にらみあう ために 会っとる ような ものさ」']}]},
-    {at:'13,10', spr:'villagerB', name:'水汲みの 女', lines:[
+    {at:'13,10', spr:'elderWoman', name:'水汲みの 女', lines:[
       {when:{flag:'ch3_veinFound'}, text:[
         '女「水が すこし 澄んだ。……気の せいかね」']},
       {text:['女「湧き水が 半分に なったのは 去年から」',
@@ -449,7 +449,7 @@ const NPCS = {
     {at:'14,5', spr:'elderWoman', name:'集落の 古老', lines:[
       {text:['古老「塔の 水路図か。……あれは 空の 者の 字で 書いてある」',
              '古老「わしらには 読めん。だから 誰も 見に 行かん」']}]},
-    {at:'7,10', spr:'villagerB', name:'集落の 女', lines:[
+    {at:'7,10', spr:'elderWoman', name:'集落の 女', lines:[
       {when:{flag:'ch3_wellSolved'}, text:[
         '女「井戸は 真ん中。……こっちから 汲みに 行っても いいそうだ」']},
       {text:['女「東の 連中とは、井戸の そばでしか 顔を 合わせん」',
