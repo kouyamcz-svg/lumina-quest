@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-27 14:14 JST", "build":"f90f6d53","assets_sha": "e8202ec3", "lines": {"world": 140, "npc": 866, "chapters": 2693, "bgm": 985, "view2d": 2591, "core": 4160, "view": 1683, "ui": 1160}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-27 14:21 JST", "build":"5e085d2d","assets_sha": "e8202ec3", "lines": {"world": 140, "npc": 904, "chapters": 2693, "bgm": 985, "view2d": 2591, "core": 4160, "view": 1683, "ui": 1160}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -663,6 +663,11 @@ const NPCS = {
       {text:['鍛冶「空の 鋼を 見た ことが ある」',
              '鍛冶「十一年 前、荷の ひとつが 谷に 落ちた」',
              '鍛冶「洞の 学者どのが 預かって おると 聞いた」']}]},
+    {at:'3,5', spr:'guardA', name:'山の 見張り', lines:[
+      {when:{flag:'ch3_peakCleared'}, text:[
+        '見張り「……山が 鳴っとる。久しぶりに 眠れそうだ」']},
+      {text:['見張り「山が 鳴らなく なって 半年。白竜さまの 声も 聞こえん」',
+             '見張り「庵の 学者は 変わり者だが、山の ことは 詳しい」']}]},
   ],
 
   // ============ 第3章：山肌の 洞（ゼノスの 庵）============
@@ -745,6 +750,33 @@ const NPCS = {
         '女「水が すこし 澄んだ。……気の せいかね」']},
       {text:['女「湧き水が 半分に なったのは 去年から」',
              '女「上流も 下流も 減っとる。おかしな 話さ」']}]},
+    {at:'3,5', spr:'villagerA', name:'塩づくりの 男', lines:[
+      {when:{flag:'ch3_wellSolved'}, text:[
+        '男「水が 戻れば 塩田も 戻る。……西の 連中にも 分けて やるさ」']},
+      {text:['男「東の 塩は 西の 麦と 替える。水が 減って、塩田も 半分だ」']}]},
+    {at:'6,5', spr:'childA', name:'集落の 子ども', lines:[
+      {when:{flag:'ch3_veinFound'}, text:[
+        '子ども「井戸の 下の 音、もう しないよ。やっつけたの？」']},
+      {text:['子ども「オアシスの 井戸の 下で、夜に 音が するんだ」',
+             '子ども「おとなは 聞こえないって 言う」']}]},
+    {at:'18,5', spr:'villagerB', name:'隊商の 男', lines:[
+      {when:{flag:'ch3_caravan'}, text:[
+        '男「東と 西の 荷を 一度に 運べる。……こんな 日が 来るとはな」']},
+      {text:['男「東と 西が 別々に 荷を 出すから、隊商は 二度 手間だ」']}]},
+    {at:'3,12', spr:'elderWoman', name:'機織りの 女', lines:[
+      {when:{flag:'ch3_wellSolved'}, text:[
+        '女「染め場に 水が 来た。赤も 青も 出せるよ」']},
+      {text:['女「砂嵐の 季節は 布が 売れる。……水が ないと 染めも できんがね」']}]},
+    {at:'21,12', spr:'guardA', name:'集落の 見張り', lines:[
+      {when:{flag:'ch3_wellSolved'}, text:[
+        '見張り「西の 長が 来ても、もう 追い返さん」']},
+      {text:['見張り「西の 者は 通さん……と 言いたい ところだが」',
+             '見張り「井戸は 真ん中だ。どちらの ものでも ない」']}]},
+    {at:'18,13', spr:'elder', name:'砂よみの 老人', lines:[
+      {when:{flag:'ch3_veinFound'}, text:[
+        '老人「水の 音が 変わった。……地の 底で、何かが 目を 閉じたな」']},
+      {text:['老人「湧き水は わしの 祖父の 代より 前から ある」',
+             '老人「減ったのは、去年が 初めてだ」']}]},
   ],
   // ★湧き水 西の集落
   well_west: [
@@ -807,6 +839,12 @@ const NPCS = {
              '鍛冶「十五年ほど 前、若い 男が この 谷を 通った」',
              '鍛冶「赤子を 抱いとった。空から 迎えが 来るのを 待つと」',
              '鍛冶「打ちに 空へ 行くと 言うて、それきりだ」']}]},
+    // ★設定の ない 人の 印（話すと「……」）だった ところに 置いた
+    {at:'3,5', spr:'elderWoman', name:'天幕の 女', lines:[
+      {when:{flag:'ch3_riezeReturned'}, text:[
+        '女「リーゼの 笑う 声が 戻った。……谷が 明るく なったよ」']},
+      {text:['女「リーゼが 氷窟に 連れて いかれて から、長は 眠って いない」',
+             '女「子守唄も、この ところ 聞こえないね」']}]},
   ],
 
   // ============ 第2章：炉心の 手前（ボスの 間）============

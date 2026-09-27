@@ -61,5 +61,10 @@ for(const ch of [1,2,3,4]){ const d=CHD.get(ch);
     });
   }));
 }
+// ④ 人の 印（n）には かならず 人物の 設定が ある こと
+//   ★設定が ないと 既定の 村人の 絵で 立ち、話しかけても「……」だけ だった（8か所）
+Object.keys(C.MAPS).forEach(mp=>C.MAPS[mp].tiles.forEach((r,y)=>{
+  for(let x=0;x<r.length;x++) if(r[x]==='n') T(mp+' ('+x+','+y+') の 人に 設定が ある', !!N.npcAt(mp,x,y));
+}));
 console.log('\n--- scene_cast: '+(n-ng)+'/'+n+' 通過 ---');
 process.exit(ng?1:0);
