@@ -500,5 +500,16 @@ function kill(k){
   T('戦闘の 背景に 砂漠が ある', /desert:\{sky:/.test(V2src));
   T('地上の 野外は 足もとで 背景を えらぶ', /bTheme='desert'/.test(V2src) && /bTheme='snow'/.test(V2src));
 }
+// ★地方の 終わりに、次の 地方へ 向かう 区切りが ある こと
+//   ★東の 問題を 片づけた あと、南へ 行く 理由が なかった（第三区 以降の 区切りが なかった）
+{
+  const ev=(C.CHD?C.CHD:vm.runInContext('CHAPTERS_DATA',ctx)).get(4).talkEvents;
+  const findSet=f=>ev.find(e=>(e.set||[]).includes(f));
+  [['ch3_iceDone','第二区','湧き水'],['ch3_caravan','第三区','珊瑚'],['ch3_twoHouses','第四区','霊峰'],['ch3_mountEar','第五区','トロス']].forEach(([f,ku,to])=>{
+    const e=findSet(f), txt=(e&&e.msg||[]).join('\n');
+    T(f+' の 場面に 「巡回降下 '+ku+'」が ある', txt.includes('巡回降下 '+ku), (e&&e.npc));
+    T(f+' の 場面で 次の 行き先（'+to+'）を 言う', txt.includes(to));
+  });
+}
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);
