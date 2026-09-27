@@ -511,5 +511,20 @@ function kill(k){
     T(f+' の 場面で 次の 行き先（'+to+'）を 言う', txt.includes(to));
   });
 }
+// ★東の 島の 北端（舟を 着ける 所）から、東側を 回って 南の 島へ 行ける
+//   ★東の 島の 東端が 地図の 右端まで 陸で、東側の 海が 仕切られて いた（西を 大回り 156歩）
+{
+  const mp='ground', t=C.MAPS[mp].tiles, W=t[0].length, H=t.length;
+  const walk=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&C.walkable(mp,x,y), sea=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&t[y][x]==='~';
+  const D=[[1,0],[-1,0],[0,1],[0,-1]];
+  const bfs=(sx,sy,ok)=>{ const d=Array.from({length:H},()=>Array(W).fill(-1)); const q=[[sx,sy]]; d[sy][sx]=0;
+    for(let i=0;i<q.length;i++){ const [a,b]=q[i]; for(const [dx,dy] of D){ const u=a+dx,v=b+dy; if(ok(u,v)&&d[v][u]<0){ d[v][u]=d[b][a]+1; q.push([u,v]); } } } return d; };
+  // 東端の 海だけで 北と 南が つながって いるか（x>=90 の 海）
+  const east=bfs(95,20,(x,y)=>sea(x,y)&&x>=90);
+  T('東の 島の 東側で 北の 海と 南の 海が つながる', east[40][95]>=0, east[40][95]);
+  const sd=bfs(73,12,sea), ld=bfs(54,59,walk); let best=-1;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){ if(sd[y][x]<0) continue; for(const [dx,dy] of D){ const u=x+dx,v=y+dy; if(walk(u,v)&&ld[v][u]>=0){ const tot=sd[y][x]+1+ld[v][u]; if(best<0||tot<best) best=tot; } } }
+  T('東の 島の 北端から 南の 島まで 120歩 以内', best>0 && best<=120, best+'歩');
+}
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);
