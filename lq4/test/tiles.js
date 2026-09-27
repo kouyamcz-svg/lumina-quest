@@ -231,6 +231,12 @@ TERRAINS.forEach(t=>{
   T('ダンジョンは 3D', W.renderModeOf('ice_cave')==='3d' && W.renderModeOf('tower2')==='3d');
   // 地図が かわったら 組み直す（3D は いちど 組んだ だけ だった）
   // ★3D の 奥の間に ボスが 描かれる こと（地図名だけで さがして 見つからず、何も 描かれて いなかった）
+  // ★家（H など）の ある 地図が 野外の 見た目（world）だと、家が 天空の 管の 継ぎ目の 絵に なる
+  //   ★トロスの村・珊瑚の入り江が そう なって いた
+  Object.keys(C.MAPS).forEach(k=>{
+    const m=C.MAPS[k]; const hasBuild=/[HIPWMS]/.test(m.tiles.join(''));
+    if(hasBuild) T(k+'（'+m.name+'）の 家は 家の 絵で 描かれる（見た目が 野外でない）', m.theme!=='world', m.theme);
+  });
   T('3D は ボスを 座標つきで さがす', /C\.bossInfoAt\(name, x, y\)/.test(V3));
   C.freshState();
   Object.keys(C.MAPS).forEach(k=>{

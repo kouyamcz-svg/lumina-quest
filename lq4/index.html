@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-27 23:08 JST", "build":"237238bf","assets_sha": "9897cd19", "lines": {"world": 140, "npc": 904, "chapters": 2717, "bgm": 985, "view2d": 2591, "core": 4165, "view": 1683, "ui": 1160}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-27 23:23 JST", "build":"dee68ecf","assets_sha": "9897cd19", "lines": {"world": 140, "npc": 904, "chapters": 2717, "bgm": 985, "view2d": 2591, "core": 4167, "view": 1683, "ui": 1160}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -8166,7 +8166,8 @@ const MAPS = {
     }},
 
   // ============ 第3章：トロスの村（父の 故郷）============
-  toros:{name:'トロスの村', theme:'world', enc:false, tiles:[
+  // ★見た目が 野外（world）だと 家が 天空の 管の 継ぎ目の 絵に なって いた → 村の 見た目
+  toros:{name:'トロスの村', theme:'village', enc:false, tiles:[
     "#######################",
     "#.....................#",
     "#..H..H.........H..H..#",
@@ -8419,7 +8420,8 @@ const MAPS = {
     }},
 
   // ============ 第3章：珊瑚の入り江（後の ミナモ）============
-  coral_bay:{name:'珊瑚の入り江', theme:'world', enc:false, tiles:[
+  // ★同じく 家が 管の 継ぎ目に なって いた → 白い 砂と 貝殻の 道の 港町
+  coral_bay:{name:'珊瑚の入り江', theme:'coral', enc:false, tiles:[
     "#######################",
     "#.....................#",
     "#..H..H.......H..H....#",
