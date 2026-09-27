@@ -106,6 +106,7 @@ if(process.env.BATTLE){
   C.bind(V, {msg(l,d){}, menu(i,t,cb){}, hud(){}, label(){}, refresh(){}}, C.NullAudio);
   try{ C.startBattle(); }catch(e){ console.log('battle err', e.message); }
 }
+if(process.env.SCENE && V.showScene) V.showScene(process.env.SCENE);
 // 数フレーム 回して カメラを 寄せる
 let t0=0; for(let i=0;i<5;i++){ t0+=33; try{ V.loop(t0);}catch(e){} }
 const LATER=(process.env.LATER||'').split(';').filter(Boolean);

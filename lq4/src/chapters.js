@@ -2250,6 +2250,7 @@ const CH = {
       // ---- サブ：ふたつの 家 ----
       { npc:'海の 民の 少女', cond:['ch3_namiTold'], unless:'ch3_twoHouses',
         set:['ch3_twoHouses'],
+        img:'scene_ch3_beach',            // ★夜の 浜の 一枚絵
         msg:['夜。浜に ノエと ナミが 並んで 座っていた。',
              'イオと セレンは 少し 離れて 焚き火の そばに いる。',
              '',
