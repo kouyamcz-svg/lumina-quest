@@ -321,10 +321,18 @@ const NPCS = {
 
   // ============ 第3章：祠の 丘 ============
   shrine_hill: [
-    {at:'10,5', spr:'pipeobj', name:'祠の 跡', lines:[
+    // ★祠を 建てたら 絵が 祠に かわる（sprWhen）
+    {at:'10,5', spr:'shrineRuin', sprWhen:{flag:'ch3_shrineBuilt', spr:'shrine'}, name:'祠の 跡', lines:[
       {when:{flag:'ch3_shrineBuilt'}, text:[
         '小さな 祠。石が 新しい。']},
       {text:['崩れた 石の 台が ある。']}]},
+    // ★台詞に 出てくる「村の 者」が 丘に いなかった
+    {at:'8,5', spr:'villagerA', name:'村の 者', lines:[
+      {when:{flag:'ch3_lupusDown'}, text:[
+        '村の 者「狼は 森へ 帰って いった。……祠が 守って くれたんかの」']},
+      {when:{flag:'ch3_shrineBuilt'}, text:[
+        '村の 者「祠が 建った。……ここは 空が 近い 場所だで」']},
+      {text:['村の 者「ここに 祠が あった。嵐で 倒れて それきりだ」']}]},
   ],
 
 

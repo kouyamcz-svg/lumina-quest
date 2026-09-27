@@ -2363,6 +2363,8 @@ function drawNPC(dx,dy,ts,x,y){
   if(NPCREF && NPCREF.npcAt){
     const e=NPCREF.npcAt(curMap, x, y);
     if(e && e.spr) key=e.spr;
+    // ★物語の 進み具合で 絵が かわる もの（祠の 跡 → 祠）
+    if(e && e.sprWhen && C.G && C.G.flags && C.G.flags[e.sprWhen.flag]) key=e.sprWhen.spr;
   }
   // ★人だけで なく まもの の 絵も つかえる ように する
   //   （物語に 出てくる 悪夢獣を 地図に 立たせる ため）

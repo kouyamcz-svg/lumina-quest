@@ -95,6 +95,7 @@ if(!process.env.TWO_D){ if(sc) sc.render='3d'; else { WD.SCENES.__T={render:'3d'
 const SETS=(process.env.SETS||'').split(';').filter(Boolean);
 SETS.forEach(t=>{ const [mp,x,y,ch]=t.split(','); C.setTile(mp,+x,+y,ch); });
 if(process.env.SHIP){ const [sx,sy]=process.env.SHIP.split(',').map(Number); C.G.ship={x:sx,y:sy}; }
+if(process.env.FLAGS) process.env.FLAGS.split(',').forEach(f=>C.G.flags[f]=true);
 V.init();
 V.buildMap(MAP);
 V.setActors(true);

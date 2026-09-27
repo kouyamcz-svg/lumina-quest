@@ -72,5 +72,15 @@ Object.keys(N.NPCS).forEach(mp=>{
   const dup=f.filter((k,i)=>f.indexOf(k)!==i);
   T(mp+' に 同じ 顔の 女性が 並ばない', dup.length===0, dup.join(','));
 });
+// ⑥ 祠の丘：祠の 跡は 石の 台（建てたら 祠）、台詞の「村の 者」が 丘に いる、周りは 石壁で ない
+{
+  const sh=N.NPCS.shrine_hill||[], ruin=sh.find(p=>p.name==='祠の 跡');
+  T('祠の 跡は 石の 台の 絵', ruin && ruin.spr==='shrineRuin', ruin&&ruin.spr);
+  T('祠を 建てたら 祠の 絵', ruin && ruin.sprWhen && ruin.sprWhen.flag==='ch3_shrineBuilt' && ruin.sprWhen.spr==='shrine');
+  T('祠の丘に 村の 者が いる', sh.some(p=>p.name==='村の 者'));
+  T('祠の丘の 周りは 石壁で ない', !C.MAPS.shrine_hill.tiles.join('').includes('#'));
+  const V2src=fs.readFileSync('src/view2d.js','utf8');
+  T('2D は 物語の 進み具合で 人の 絵を 切りかえる', /e\.sprWhen && C\.G && C\.G\.flags && C\.G\.flags\[e\.sprWhen\.flag\]/.test(V2src));
+}
 console.log('\n--- scene_cast: '+(n-ng)+'/'+n+' 通過 ---');
 process.exit(ng?1:0);

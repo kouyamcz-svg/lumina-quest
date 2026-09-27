@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-27 23:23 JST", "build":"dee68ecf","assets_sha": "9897cd19", "lines": {"world": 140, "npc": 904, "chapters": 2717, "bgm": 985, "view2d": 2591, "core": 4167, "view": 1683, "ui": 1160}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-27 23:55 JST", "build":"232d57c7","assets_sha": "ff8e722f", "lines": {"world": 140, "npc": 912, "chapters": 2717, "bgm": 985, "view2d": 2593, "core": 4168, "view": 1683, "ui": 1160}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -157,7 +157,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=9897cd19"></script>
+<script src="assets.js?v=ff8e722f"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -628,10 +628,18 @@ const NPCS = {
 
   // ============ 第3章：祠の 丘 ============
   shrine_hill: [
-    {at:'10,5', spr:'pipeobj', name:'祠の 跡', lines:[
+    // ★祠を 建てたら 絵が 祠に かわる（sprWhen）
+    {at:'10,5', spr:'shrineRuin', sprWhen:{flag:'ch3_shrineBuilt', spr:'shrine'}, name:'祠の 跡', lines:[
       {when:{flag:'ch3_shrineBuilt'}, text:[
         '小さな 祠。石が 新しい。']},
       {text:['崩れた 石の 台が ある。']}]},
+    // ★台詞に 出てくる「村の 者」が 丘に いなかった
+    {at:'8,5', spr:'villagerA', name:'村の 者', lines:[
+      {when:{flag:'ch3_lupusDown'}, text:[
+        '村の 者「狼は 森へ 帰って いった。……祠が 守って くれたんかの」']},
+      {when:{flag:'ch3_shrineBuilt'}, text:[
+        '村の 者「祠が 建った。……ここは 空が 近い 場所だで」']},
+      {text:['村の 者「ここに 祠が あった。嵐で 倒れて それきりだ」']}]},
   ],
 
 
@@ -7276,6 +7284,8 @@ function drawNPC(dx,dy,ts,x,y){
   if(NPCREF && NPCREF.npcAt){
     const e=NPCREF.npcAt(curMap, x, y);
     if(e && e.spr) key=e.spr;
+    // ★物語の 進み具合で 絵が かわる もの（祠の 跡 → 祠）
+    if(e && e.sprWhen && C.G && C.G.flags && C.G.flags[e.sprWhen.flag]) key=e.sprWhen.spr;
   }
   // ★人だけで なく まもの の 絵も つかえる ように する
   //   （物語に 出てくる 悪夢獣を 地図に 立たせる ため）
@@ -8189,19 +8199,20 @@ const MAPS = {
 
   // ★祠の 丘：村はずれ。イオが 祠を 建てる 手伝いを する。
   //   ルプスは ここに 落ちてくる。結末で 剣を 納める 場所。
-  shrine_hill:{name:'祠の丘', theme:'world', enc:false, tiles:[
-    "#####################",
-    "#####################",
-    "#####...........#####",
-    "####......B......####",
-    "###...............###",
-    "###.......n.......###",
-    "##.................##",
-    "##.................##",
-    "#...................#",
-    "#...................#",
-    "#########...#########",
-    "##########.##########"],
+  // ★丘の 上の 開けた 場所。まえは 灰色の 石壁で 囲まれ、中庭の ように 見えた
+  shrine_hill:{name:'祠の丘', theme:'field', enc:false, tiles:[
+    "fffffffffffffffffffff",
+    "fffffffffffffffffffff",
+    "fffff...........fffff",
+    "ffff......B......ffff",
+    "fff...............fff",
+    "fff.....n.n.......fff",
+    "ff.................ff",
+    "ff.................ff",
+    "f...................f",
+    "f...................f",
+    "fffffffff...fffffffff",
+    "ffffffffff.ffffffffff"],
     warpsXY:{
       '10,11':{to:'ground', x:53, y:32, back:true}
     }},
