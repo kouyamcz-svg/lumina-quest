@@ -214,11 +214,11 @@ T('せんとうで Bを おしたら えらび直し',
 //   ★ボス戦は 逃げられない。えらんだ とたんに つたえる。
 {
   const run = (boss)=>{
-    const asked = [], log2 = [];
+    const asked = [], log2 = [], seq = [];
     C.bind(C.NullView,
-      {msg(l,d){ l.forEach(x=>log2.push(String(x))); d&&d(); },
+      {msg(l,d){ l.forEach(x=>{ log2.push(String(x)); seq.push('|'); }); d&&d(); },
        menu(items, title, cb){
-         asked.push(String(title));
+         asked.push(String(title)); seq.push(String(title));
          const t = String(title);
          if(t==='イオ'||t==='セレン'||t==='ノエ'){ cb(4); return; }  // 逃げる
          cb(0);
@@ -228,15 +228,18 @@ T('せんとうで Bを おしたら えらび直し',
     ['io','seren','noe'].forEach(k=>C.party.push(C.mkMember(k,26)));
     C.P.map='ice_cave'; C.G.mode='field';
     try{ boss ? C.startBattle('akumuhen') : C.startBattle(); }catch(e){}
-    return {asked, log2};
+    return {asked, log2, seq};
   };
   // ざこ戦：ひとりめだけ 聞かれる
   {
     const r = run(false);
     // ★まわりこまれると つぎの ラウンドで また 聞かれる。
     //   だいじなのは「セレン・ノエには 聞かない」こと。
-    const others = r.asked.filter(t=>t==='セレン'||t==='ノエ');
-    T('逃げると ほかの 人には 聞かない', others.length===0, r.asked.join(' '));
+    // ★1回（メッセージと メッセージの あいだ）に 聞かれるのは 1人だけ。
+    //   ★まえは「セレン・ノエが 一度も 聞かれない」で 判定して いた。逃げそこねた 次の 回に
+    //     イオが 眠る・凍る などで 動けないと セレンが 最初に 聞かれ、正しいのに 落ちて いた（40回に 2回）
+    const rounds = r.seq.join(' ').split('|').map(x=>x.trim().split(/\s+/).filter(Boolean)).filter(a=>a.length);
+    T('逃げると ほかの 人には 聞かない', rounds.every(a=>a.length===1), rounds.map(a=>a.join('+')).join(' / '));
     T('その場で 逃げる', r.log2.some(l=>l.indexOf('にげ')>=0), r.log2.slice(0,3).join(' / '));
   }
   // ボス戦：逃げられないと すぐ 出る
