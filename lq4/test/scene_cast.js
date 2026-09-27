@@ -49,7 +49,7 @@ for(const ch of [1,2,3,4]){ const d=CHD.get(ch);
 // ③ 台詞の 話し手（女・男 など）と 絵の 性別が 合う こと
 //   ★水汲みの 女・集落の 女が ひげの 男の 絵（villagerB）だった
 {
-  const femSpr=new Set(['elderWoman','priestess','valeElder','amane','seren']);
+  const femSpr=new Set(['elderWoman','townGirl','priestess','valeElder','amane','seren']);
   const maleSpr=new Set(['villagerA','villagerB','captain','guardA','guardB','butler','elder','zenos','noe']);
   Object.keys(N.NPCS).forEach(mp=>(N.NPCS[mp]||[]).forEach(p=>{
     const fName=/女|娘|母|婆|婦|少女|おばさん/.test(p.name);
@@ -66,5 +66,11 @@ for(const ch of [1,2,3,4]){ const d=CHD.get(ch);
 Object.keys(C.MAPS).forEach(mp=>C.MAPS[mp].tiles.forEach((r,y)=>{
   for(let x=0;x<r.length;x++) if(r[x]==='n') T(mp+' ('+x+','+y+') の 人に 設定が ある', !!N.npcAt(mp,x,y));
 }));
+// ⑤ 同じ 町に 同じ 顔の 女性が 並ばない こと
+Object.keys(N.NPCS).forEach(mp=>{
+  const f=(N.NPCS[mp]||[]).filter(p=>/女|娘|母|婆|婦|おばさん|古老/.test(p.name)).map(p=>p.spr);
+  const dup=f.filter((k,i)=>f.indexOf(k)!==i);
+  T(mp+' に 同じ 顔の 女性が 並ばない', dup.length===0, dup.join(','));
+});
 console.log('\n--- scene_cast: '+(n-ng)+'/'+n+' 通過 ---');
 process.exit(ng?1:0);
