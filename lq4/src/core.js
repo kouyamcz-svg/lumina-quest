@@ -44,14 +44,14 @@ const SPELL_DEFS = {
   //     回復が いらない 場面で 手持ち無沙汰に なって いた。
   //   ★光の 術（アマネ）と かぶらない よう、夢術は
   //     「単体は ひかえめ／全体が とくい／状態いじょうを そえる」に する。
-  yumetsubute:{name:'ゆめつぶて',  mp:3, type:'dmg',    min:3,  max:7,  pw:0.55},
-  yumekasumi: {name:'ゆめがすみ',  mp:6, type:'dmgall', min:5,  max:11, pw:0.55,
+  yumetsubute:{name:'ゆめつぶて',  mp:3, type:'dmg',    min:3,  max:7, mpw:1.2},
+  yumekasumi: {name:'ゆめがすみ',  mp:6, type:'dmgall', min:5,  max:11, mpw:1.2,
                inflict:{type:'slow', p:0.20}},
-  yumekui:    {name:'ゆめくい',    mp:9, type:'dmg',    min:6,  max:12, pw:0.70,
+  yumekui:    {name:'ゆめくい',    mp:9, type:'dmg',    min:6,  max:12, mpw:2.6,
                inflict:{type:'sleep', p:0.30}},
-  yumenowa:   {name:'ゆめの わ',   mp:14,type:'dmgall', min:7,  max:14, pw:0.60,
+  yumenowa:   {name:'ゆめの わ',   mp:14,type:'dmgall', min:7,  max:14, mpw:2.2,
                inflict:{type:'confuse', p:0.24}},
-  yumenoumi:  {name:'ゆめの うみ', mp:24,type:'dmgall', min:12, max:22, pw:0.80},
+  yumenoumi:  {name:'ゆめの うみ', mp:24,type:'dmgall', min:12, max:22, mpw:2.8},
 
   heal:       {name:'ヒール',      mp:3, type:'heal', min:20, max:28},
   mezamashi:  {name:'目覚まし',    mp:2, type:'cure'},
@@ -69,17 +69,17 @@ const SPELL_DEFS = {
   tokoyo:     {name:'とこよの ゆめ',mp:24,type:'inflict', st:'sleep', st2:'slow', p:0.35, p2:0.55, all:true},
 
   // ============ アマネ（光術）：攻撃と支援 ============
-  spark:      {name:'スパーク',    mp:2, type:'dmg', min:12, max:18},
+  spark:      {name:'スパーク',    mp:2, type:'dmg', min:12, max:18, mpw:1.0},
   hikari_tate:{name:'ひかりの たて',mp:5, type:'buff', stat:'def', mul:1.30, turns:3, all:true},
-  spara:      {name:'スパーラ',    mp:5, type:'dmg', min:26, max:34},
+  spara:      {name:'スパーラ',    mp:5, type:'dmg', min:26, max:34, mpw:2.0},
   hikari_ken: {name:'ひかりの つるぎ',mp:6,type:'buff', stat:'atk', mul:1.25, turns:3},
-  hikari_uzu: {name:'ひかりの うず',mp:10,type:'dmgall', min:26, max:36},
-  sparga:     {name:'スパーガ',    mp:8, type:'dmg', min:42, max:56},
+  hikari_uzu: {name:'ひかりの うず',mp:10,type:'dmgall', min:26, max:36, mpw:1.6},
+  sparga:     {name:'スパーガ',    mp:11,type:'dmg', min:42, max:56, mpw:3.2},   // ★MP8 → 11（MP1あたりの 威力を 剣・槍の 技に そろえる）
   hayate:     {name:'はやての ひかり',mp:7,type:'buff', stat:'agi', mul:1.30, turns:3, all:true},
   revive:     {name:'リヴァイブ',  mp:12,type:'revive'},
-  holyray:    {name:'ひかりの あらし',mp:16,type:'dmgall', min:42, max:56},
-  sparja:     {name:'スパージャ',  mp:18,type:'dmg', min:88, max:116},
-  hikari_taika:{name:'ひかりの たいか',mp:26,type:'dmgall', min:74, max:98},
+  holyray:    {name:'ひかりの あらし',mp:16,type:'dmgall', min:42, max:56, mpw:2.2},
+  sparja:     {name:'スパージャ',  mp:18,type:'dmg', min:88, max:116, mpw:4.0},
+  hikari_taika:{name:'ひかりの たいか',mp:26,type:'dmgall', min:74, max:98, mpw:2.6},
   judgment:   {name:'ばんぶつの ひかり',mp:34,type:'dmg', min:140,max:185},
   shiratatsu: {name:'しらたつの いのり',mp:34,type:'healall', min:110,max:150},
 
@@ -222,7 +222,7 @@ const MIDBOSS = {
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第3章ボス：あくむじゅう ルプス（狼座）----
   //   大陸から 落ちた 悪夢の かけらが 地上の 狼に 憑いた もの。
-  lupus:{key:'lupus', name:'あくむじゅう ルプス', hp:5600, atk:82, def:42, agi:24, acts:1,
+  lupus:{key:'lupus', name:'あくむじゅう ルプス', hp:8200,   /* ★5600 → 8200：アマネの 光術を 強めた ぶん（勝率 Lv32・33で 77%。変更前 Lv32で 78%） */ atk:82, def:42, agi:24, acts:1,
     exp:6200, gold:6800, art:'lupus', scale:1.25,
     skill:{p:0.30, mul:1.30, name:'かみくだき'},
     aoe:{p:0.24, lo:34, hi:50, name:'とおぼえ'},
@@ -253,7 +253,7 @@ const MIDBOSS = {
 
   // ---- 第2章ボス：あくむじゅう フォルナクス（炉座）----
   //   炉の 外郭に わき、光を 喰らう。倒すと 紙片が 残る。
-  fornax:{key:'fornax', name:'あくむじゅう フォルナクス', hp:1700, atk:52, def:29, agi:16, acts:1,
+  fornax:{key:'fornax', name:'あくむじゅう フォルナクス', hp:2000,   /* ★1700 → 2000：ノエの 夢術を 強めた ぶん（勝率 78%。変更前 79%） */ atk:52, def:29, agi:16, acts:1,
     exp:3800, gold:4000, art:'fornax', scale:1.10,
     skill:{p:0.30, mul:1.35, name:'ほのおの あぎと'},
     aoe:{p:0.24, lo:26, hi:38, name:'炉のいぶき'},
@@ -1485,11 +1485,19 @@ function buffMul(m, stat){
 //   通常こうげきに 追いこされ、MPを 払って 弱く なって いた。
 //   いまは 「固定ぶん ＋ 攻撃力の わりあい」。剣・槍の 技は 攻撃力が よく のる。
 //   pw：攻撃力に かける わりあい（書いて なければ 0＝むかしどおりの 固定値）
+//   mpw：レベルに かける わりあい（呪文。ノエの 夢術・アマネの 光術）
+//   ★呪文は 攻撃力が 低い 術者でも レベルで のびる。まえは アマネの 光術が 固定値、
+//     ノエの 夢術が 攻撃力×0.55〜0.7 で、Lv33 で 剣・槍の 技の 約5分の1。
+//     アマネの スパーガ（49）は 通常こうげき（62）より 弱かった。
 function skillDamage(m, sp){
   const base = sp.min + Math.floor(Math.random()*(sp.max - sp.min + 1));
-  const pw   = sp.pw || 0;
-  if(!pw) return base;
-  return Math.max(1, Math.round(base + mAtk(m) * pw));
+  const pw   = sp.pw || 0, mpw = sp.mpw || 0;
+  if(!pw && !mpw) return base;
+  return Math.max(1, Math.round(base + mAtk(m) * pw + (m.lv||1) * mpw));
+}
+// ★技の 見こみダメージ（作戦で 技を えらぶ ときも 同じ 計算）
+function skillExpect(m, sp){
+  return ((sp.min + sp.max)/2) + mAtk(m) * (sp.pw || 0) + (m.lv||1) * (sp.mpw || 0);
 }
 function mAtk(m){ return Math.round((m.batk + (m.weapon?m.weapon.v:0)) * buffMul(m,'atk')); }
 function mDef(m){ return Math.round((m.bdef + (m.armor?m.armor.v:0)) * buffMul(m,'def')); }
@@ -2892,15 +2900,14 @@ function autoCommand(m){
   const dmg = sp.filter(s=>s.type==='dmg'||s.type==='dmgall');
   if(dmg.length && alive.length>=2){
     const all = dmg.filter(s=>s.type==='dmgall')
-                   .sort((a,c)=>(((c.min+c.max)/2)+mAtk(m)*(c.pw||0))
-                               -(((a.min+a.max)/2)+mAtk(m)*(a.pw||0)))[0];
+                   .sort((a,c)=>skillExpect(m,c)-skillExpect(m,a))[0];
     if(all && m.mp >= all.mp*2) return {actor:m, type:'spell', sp:all};
   }
   // ★技の いりょくは 攻撃力に つれて のびる ように なった。
   //   まえは 「攻撃力 ＜ 技の 最大値」で くらべて いた ため、
   //   剣・槍の 技を いつまでも つかわなかった。
   //   いまは 「その 技の 見こみダメージ」と 「通常こうげき」を くらべる。
-  const expect = (s)=>((s.min + s.max)/2) + mAtk(m) * (s.pw || 0);
+  const expect = (s)=>skillExpect(m, s);
   const single = dmg.filter(s=>s.type==='dmg')
                     .sort((a,c)=>expect(c)-expect(a))[0];
   if(single && m.mp > single.mp*3 && expect(single) > mAtk(m)*1.05)
