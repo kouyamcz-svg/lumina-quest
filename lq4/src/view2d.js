@@ -2423,7 +2423,8 @@ function drawBoss(dx,dy,ts,tx,ty){
       if(chr){ const o = Object.create(chr); o._isChr = true; return o; }
       return null;
     };
-    const a1 = pick(bi.key);
+    // ★地図の 上では 別の 絵を 出す ボス（mapArt）。ルプスは 戦う まで ふつうの 丘の 狼
+    const a1 = (bi.mapArt && MONREF && MONREF[bi.mapArt]) || pick(bi.key);
     if(a1) arts.push(a1);
     if(bi.pair){ const a2 = pick(bi.pair); if(a2) arts.push(a2); }
   }

@@ -1757,6 +1757,8 @@ const CH = {
     bosses: {
       'shrine_hill:10,3': {
         key: 'lupus',
+        // ★地図では 戦う まで ふつうの 狼（登場場面「それは 丘の 狼に 触れた」の 前の 姿）
+        mapArt: 'hagureookami',
         clearedFlag: 'ch3_lupusDown',
         // ★祠を 建てて から 落ちて くる
         needFlag: 'ch3_shrineBuilt',

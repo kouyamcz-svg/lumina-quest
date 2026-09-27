@@ -439,8 +439,9 @@ T('あずけたく なる と 言う', said('なにかを、あずけたく な�
 //   トロスの 店で 買える 装備で 挑む。到達 Lv は 32〜33。
 clearLog();
 C.G.tactic='gungan'; C.party.length=0;
+// ★Lv35 だと まれに 負けて 以降が 連鎖して 落ちた（揺れ）。流れを 見る 検査なので Lv40
 ['io','seren','noe','amane'].forEach((k,j)=>{
-  const m=C.mkMember(k,35);
+  const m=C.mkMember(k,40);
   m.weapon={kind:'w',name:'w',v:[26,28,16,16][j]};
   m.armor ={kind:'a',name:'a',v:[25,25,19,19][j]};
   C.party.push(m);

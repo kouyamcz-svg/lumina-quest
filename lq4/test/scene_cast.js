@@ -82,5 +82,18 @@ Object.keys(N.NPCS).forEach(mp=>{
   const V2src=fs.readFileSync('src/view2d.js','utf8');
   T('2D は 物語の 進み具合で 人の 絵を 切りかえる', /e\.sprWhen && C\.G && C\.G\.flags && C\.G\.flags\[e\.sprWhen\.flag\]/.test(V2src));
 }
+// ⑦ ルプス：ボスらしい 大きさ／地図では 戦う まで ふつうの 狼
+{
+  const cx={console,window:{}}; cx.globalThis=cx; vm.createContext(cx);
+  vm.runInContext(fs.readFileSync('assets.js','utf8'), cx);
+  const MON=vm.runInContext('MON', cx);
+  T('ルプスの 絵は ボスらしい 高さ（60以上）', MON.lupus && MON.lupus.h>=60, MON.lupus && (MON.lupus.w+'x'+MON.lupus.h));
+  T('ルプスの 絵は 同じ 島の はぐれ狼より 大きい', MON.lupus.w*MON.lupus.h > MON.hagureookami.w*MON.hagureookami.h);
+  const bi=CHD.get(4).bosses['shrine_hill:10,3'];
+  T('祠の丘の 地図では ふつうの 狼（mapArt）', bi && bi.mapArt==='hagureookami' && !!MON.hagureookami);
+  const U=fs.readFileSync('src/ui.js','utf8');
+  T('状態の 枠が 出て いれば 窓を その 下に 置く', /function placeCmdWin\(\)/.test(U) && /hud\(\); placeCmdWin\(\);/.test(U));
+  T('戦闘中は 地名を 隠す', /labelEl\.style\.visibility = inBattle \? 'hidden'/.test(U));
+}
 console.log('\n--- scene_cast: '+(n-ng)+'/'+n+' 通過 ---');
 process.exit(ng?1:0);

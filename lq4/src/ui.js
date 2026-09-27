@@ -268,6 +268,7 @@ function menu(items, title, onPick, opt){
              cancel:(opt && opt.cancel) || 'last'};
   renderMenu();
   cmdWin.style.display='block';
+  hud(); placeCmdWin();
   A.cursor && A.cursor();               // ★メニューを ひらいた おと
 }
 function renderMenu(){
@@ -319,8 +320,26 @@ function hud(){
     '<div class="hm gold">'+
     '<div class="hn">ゴールド</div><div class="hv">'+C.P.gold+'G</div>'+
     '<div class="hv">薬草 '+C.P.herbs+'</div></div>';
+  placeCmdWin();
 }
 function label(t){ labelEl.textContent=t; }
+// ★状態の 枠が 出て いる ときは、窓を その 下に 置く。戦闘中は 地名を 隠す。
+//   ★まえは 窓が 上から 14% に 固定で、仲間が 4人に なると 左端の イオの 枠に 重なり、
+//     イオの HP・MP が 読めなかった。戦闘中も 地名が 出た まま だった。
+function placeCmdWin(){
+  if(!cmdWin) return;
+  const inBattle = !!(C.G && C.G.battle);
+  if(labelEl) labelEl.style.visibility = inBattle ? 'hidden' : '';
+  cmdWin.style.top = '';
+  if(hudEl.style.display==='none' || !hudEl.firstElementChild) return;
+  const box = hudEl.firstElementChild.getBoundingClientRect();
+  const st  = cmdWin.offsetParent ? cmdWin.offsetParent.getBoundingClientRect() : {top:0};
+  const cw  = cmdWin.getBoundingClientRect();
+  // 横に 重なる ときだけ 下へ
+  if(cw.right > box.left && cw.left < box.right && cw.top < box.bottom + 6){
+    cmdWin.style.top = Math.round(box.bottom - st.top + 6) + 'px';
+  }
+}
 
 const UI = {msg:msg2, menu, hud, label, openTrade};
 // ★メニューの ひらけしめで ステータスの ひょうじも きりかえる

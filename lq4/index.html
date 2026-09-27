@@ -136,7 +136,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-28 00:04 JST", "build":"ee44735c","assets_sha": "8a2900c7", "lines": {"world": 140, "npc": 912, "chapters": 2718, "bgm": 985, "view2d": 2593, "core": 4168, "view": 1683, "ui": 1160}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-28 00:58 JST", "build":"e828b21b","assets_sha": "435f88ce", "lines": {"world": 140, "npc": 912, "chapters": 2720, "bgm": 985, "view2d": 2594, "core": 4168, "view": 1683, "ui": 1179}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -157,7 +157,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=8a2900c7"></script>
+<script src="assets.js?v=435f88ce"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -2976,6 +2976,8 @@ const CH = {
     bosses: {
       'shrine_hill:10,3': {
         key: 'lupus',
+        // ★地図では 戦う まで ふつうの 狼（登場場面「それは 丘の 狼に 触れた」の 前の 姿）
+        mapArt: 'hagureookami',
         clearedFlag: 'ch3_lupusDown',
         // ★祠を 建てて から 落ちて くる
         needFlag: 'ch3_shrineBuilt',
@@ -7345,7 +7347,8 @@ function drawBoss(dx,dy,ts,tx,ty){
       if(chr){ const o = Object.create(chr); o._isChr = true; return o; }
       return null;
     };
-    const a1 = pick(bi.key);
+    // ★地図の 上では 別の 絵を 出す ボス（mapArt）。ルプスは 戦う まで ふつうの 丘の 狼
+    const a1 = (bi.mapArt && MONREF && MONREF[bi.mapArt]) || pick(bi.key);
     if(a1) arts.push(a1);
     if(bi.pair){ const a2 = pick(bi.pair); if(a2) arts.push(a2); }
   }
@@ -13634,6 +13637,7 @@ function menu(items, title, onPick, opt){
              cancel:(opt && opt.cancel) || 'last'};
   renderMenu();
   cmdWin.style.display='block';
+  hud(); placeCmdWin();
   A.cursor && A.cursor();               // ★メニューを ひらいた おと
 }
 function renderMenu(){
@@ -13685,8 +13689,26 @@ function hud(){
     '<div class="hm gold">'+
     '<div class="hn">ゴールド</div><div class="hv">'+C.P.gold+'G</div>'+
     '<div class="hv">薬草 '+C.P.herbs+'</div></div>';
+  placeCmdWin();
 }
 function label(t){ labelEl.textContent=t; }
+// ★状態の 枠が 出て いる ときは、窓を その 下に 置く。戦闘中は 地名を 隠す。
+//   ★まえは 窓が 上から 14% に 固定で、仲間が 4人に なると 左端の イオの 枠に 重なり、
+//     イオの HP・MP が 読めなかった。戦闘中も 地名が 出た まま だった。
+function placeCmdWin(){
+  if(!cmdWin) return;
+  const inBattle = !!(C.G && C.G.battle);
+  if(labelEl) labelEl.style.visibility = inBattle ? 'hidden' : '';
+  cmdWin.style.top = '';
+  if(hudEl.style.display==='none' || !hudEl.firstElementChild) return;
+  const box = hudEl.firstElementChild.getBoundingClientRect();
+  const st  = cmdWin.offsetParent ? cmdWin.offsetParent.getBoundingClientRect() : {top:0};
+  const cw  = cmdWin.getBoundingClientRect();
+  // 横に 重なる ときだけ 下へ
+  if(cw.right > box.left && cw.left < box.right && cw.top < box.bottom + 6){
+    cmdWin.style.top = Math.round(box.bottom - st.top + 6) + 'px';
+  }
+}
 
 const UI = {msg:msg2, menu, hud, label, openTrade};
 // ★メニューの ひらけしめで ステータスの ひょうじも きりかえる
