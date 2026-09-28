@@ -99,6 +99,12 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   margin-bottom:4px;padding-bottom:2px}
 .cmd-item{white-space:normal;overflow-wrap:anywhere;padding:1px 0}
 .cmd-item.sel{color:#ffe98a}
+/* ★長い 一覧（ノエの 技 など）：2列に する／窓の 中で 送る。
+   ★収める 処理（fitCmdWin）は 印を 付けて いたが、この 見た目が なく、1列の まま 下で 切れて いた */
+#cmd-win.two-col .cmd-list{display:grid;grid-template-columns:1fr 1fr;column-gap:10px}
+#cmd-win.scroll .cmd-list{overflow-y:auto;overflow-x:hidden}
+#cmd-win.two-col{min-width:94%}
+#cmd-win.two-col .cmd-item{white-space:nowrap;font-size:12px;letter-spacing:-0.4px}
 #pad{position:relative;height:40%;background:#12101f;border-top:1px solid #2a2540}
 .btn{position:absolute;display:flex;align-items:center;justify-content:center;
   background:#262238;border:1px solid #423c5c;border-radius:10px;color:#d6d2e4;font-size:20px}

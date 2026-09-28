@@ -577,6 +577,15 @@ M1で `Q` を順に実マップへ置き換えていく。
 - `spriteKeyOf(m)`：イオは sky_armor（5つそろった印）が立ち、CHR に `ioSky` があればその絵。2D・3D とも使う
 - 絵はまだない（今は普通のイオのまま）。届いたら CHR.ioSky（front・side・back・frontW・sideW・backW、高さ40）に登録するだけ
 
+## 5-41. 長い技の一覧が下で切れる
+
+- 収める処理（fitCmdWin：2列→窓の中で送る）はあったが、**2列と送りの見た目（CSS）がどこにも無かった**。1列のまま下にはみ出し、送れもしなかった
+- さらに 5-37 の placeCmdWin が、収める処理の後に窓を下へずらしていた（収める処理は非表示のときに動いて何もしていなかった）
+- shell.html に `.two-col .cmd-list{display:grid…}`・`.scroll .cmd-list{overflow-y:auto}`・2列は折り返さず 12px。placeCmdWin は「収める → どの状態の枠とも重ならない所まで下げる → 収め直す」
+- 2列のときは上下で同じ列、左右で隣の列（menuMove ±2／±1）
+- 撮影：`tools/browser/shot.js`（ORDER=noe,io,… PLV=44 SPELLS=n で技の一覧を開いて撮る）
+- 検査（scene_cast ⑨）
+
 ## 6. LQ3 から直したこと（IVでは再発させない）
 
 1. **ボス報酬が「第2章以降だけ」動く決め打ち** → 全章で章データ駆動に統一

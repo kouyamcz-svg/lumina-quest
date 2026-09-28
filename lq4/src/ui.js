@@ -273,14 +273,47 @@ function menu(items, title, onPick, opt){
 }
 function renderMenu(){
   if(!menuState) return;
-  const h='<div class="cmd-title">'+menuState.title+'</div>';
-  cmdWin.innerHTML = h + menuState.items.map((s,i)=>
+  const h='<div class="cmd-title">'+menuState.title+'<span class="cmd-more"></span></div>';
+  cmdWin.innerHTML = h + '<div class="cmd-list">' + menuState.items.map((s,i)=>
     '<div class="cmd-item'+(i===menuState.sel?' sel':'')+'">'+(i===menuState.sel?'▶':'　')+s+'</div>'
-  ).join('');
+  ).join('') + '</div>';
+  fitCmdWin();
+}
+// ★窓が 画面の 下に はみ出す ときの 収め方
+//   ★ノエの 技（16個）が 画面の 下で 切れて いた。
+//     ① 2列に する → ② それでも はみ出すなら 窓の 中で 送る（選んで いる 項目は 常に 見える）
+function fitCmdWin(){
+  if(!cmdWin || cmdWin.style.display==='none') return;
+  const list = cmdWin.querySelector('.cmd-list'); if(!list) return;
+  const stage = cmdWin.offsetParent; if(!stage) return;
+  const bottom = stage.getBoundingClientRect().bottom - 6;
+  const over = ()=> cmdWin.getBoundingClientRect().bottom > bottom;
+  cmdWin.classList.remove('two-col','scroll'); list.style.maxHeight='';
+  if(over() && menuState && menuState.items.length>=6) cmdWin.classList.add('two-col');
+  if(over()){
+    cmdWin.classList.add('scroll');
+    const room = bottom - list.getBoundingClientRect().top - 10;
+    list.style.maxHeight = Math.max(60, Math.floor(room)) + 'px';
+  }
+  const sel = list.querySelector('.cmd-item.sel');
+  if(sel && cmdWin.classList.contains('scroll')){
+    const lr=list.getBoundingClientRect(), sr=sel.getBoundingClientRect();
+    if(sr.bottom>lr.bottom) list.scrollTop += sr.bottom-lr.bottom;
+    if(sr.top<lr.top)       list.scrollTop -= lr.top-sr.top;
+  }
+  const more = cmdWin.querySelector('.cmd-more');
+  if(more){
+    const up = list.scrollTop>0, dn = list.scrollTop+list.clientHeight < list.scrollHeight-1;
+    more.textContent = (up?'▲':'')+(dn?'▼':'');
+  }
 }
 function menuMove(d){
   if(!menuState) return;
-  menuState.sel=(menuState.sel+d+menuState.items.length)%menuState.items.length;
+  const n=menuState.items.length;
+  let s2=menuState.sel+d;
+  // ★2列で 端を こえる ときは 反対の 端の 同じ 列へ
+  if(Math.abs(d)===2 && (s2<0 || s2>=n)){ const col=menuState.sel%2; s2 = d>0 ? col : (n-1 - ((n-1-col)%2)); }
+  menuState.sel=(s2+n)%n;
   renderMenu();
   A.cursor && A.cursor();               // ★カーソルを うごかす おと
 }
@@ -331,13 +364,20 @@ function placeCmdWin(){
   const inBattle = !!(C.G && C.G.battle);
   if(labelEl) labelEl.style.visibility = inBattle ? 'hidden' : '';
   cmdWin.style.top = '';
-  if(hudEl.style.display==='none' || !hudEl.firstElementChild) return;
-  const box = hudEl.firstElementChild.getBoundingClientRect();
-  const st  = cmdWin.offsetParent ? cmdWin.offsetParent.getBoundingClientRect() : {top:0};
-  const cw  = cmdWin.getBoundingClientRect();
-  // 横に 重なる ときだけ 下へ
-  if(cw.right > box.left && cw.left < box.right && cw.top < box.bottom + 6){
-    cmdWin.style.top = Math.round(box.bottom - st.top + 6) + 'px';
+  if(cmdWin.style.display==='none') return;
+  // ★窓を ずらした あとに 収め直す（まえは 収める 処理が ずらす 前に 動き、長い 一覧が 下で 切れた）。
+  //   2列に なると 横に 広がり、右の ゴールドの 枠に 重なる ことが あるので、
+  //   どの 枠とも 重ならない ところまで 下げてから 収める。
+  fitCmdWin();
+  if(hudEl.style.display==='none') return;
+  const st = cmdWin.offsetParent ? cmdWin.offsetParent.getBoundingClientRect() : {top:0};
+  for(let k=0;k<3;k++){
+    const cw = cmdWin.getBoundingClientRect(); let low = null;
+    [...hudEl.children].forEach(el=>{ const b=el.getBoundingClientRect();
+      if(cw.right > b.left && cw.left < b.right && cw.top < b.bottom + 6 && cw.bottom > b.top) low = Math.max(low||0, b.bottom); });
+    if(low===null) break;
+    cmdWin.style.top = Math.round(low - st.top + 6) + 'px';
+    fitCmdWin();
   }
 }
 
@@ -357,8 +397,12 @@ UI.menu = menu;
 function press(k){
   if(msgVisible()){ if(k==='A'||k==='B') tapMsg(); return; }
   if(menuVisible()){
-    if(k==='U') menuMove(-1);
-    else if(k==='D') menuMove(1);
+    // ★2列の ときは 上下＝同じ 列の 上下、左右＝となりの 列（まえは 上下で ジグザグに 進んだ）
+    const two = cmdWin.classList.contains('two-col');
+    if(k==='U') menuMove(two ? -2 : -1);
+    else if(k==='D') menuMove(two ? 2 : 1);
+    else if(two && k==='L') menuMove(-1);
+    else if(two && k==='R') menuMove(1);
     else if(k==='A') menuPick();
     else if(k==='B') menuCancel();
     return;

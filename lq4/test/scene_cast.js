@@ -114,5 +114,14 @@ Object.keys(N.NPCS).forEach(mp=>{
   const tor=d.talkEvents.find(e=>(e.set||[]).includes('ch3_torosDone'));
   T('トロスの 場面で 氷の谷に 職員を 立たせる', tor && (tor.setTiles||[]).some(t=>t.map==='ice_camp' && t.ch==='n'));
 }
+// ⑨ 長い 一覧は 2列／窓の 中で 送る（見た目の 設定が 無く、ノエの 技が 下で 切れて いた）
+{
+  const H=fs.readFileSync('shell.html','utf8'), U=fs.readFileSync('src/ui.js','utf8');
+  T('2列の 見た目が ある', /#cmd-win\.two-col \.cmd-list\{display:grid/.test(H));
+  T('窓の 中で 送る 見た目が ある', /#cmd-win\.scroll \.cmd-list\{overflow-y:auto/.test(H));
+  T('2列は 折り返さない', /#cmd-win\.two-col \.cmd-item\{white-space:nowrap/.test(H));
+  T('窓を ずらした あとに 収め直す', /function placeCmdWin\(\)[\s\S]*?fitCmdWin\(\);[\s\S]*?cmdWin\.style\.top = /.test(U));
+  T('2列では 上下で 同じ 列を 動く', /menuMove\(two \? 2 : 1\)/.test(U));
+}
 console.log('\n--- scene_cast: '+(n-ng)+'/'+n+' 通過 ---');
 process.exit(ng?1:0);
