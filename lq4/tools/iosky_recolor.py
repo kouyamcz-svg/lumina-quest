@@ -113,3 +113,5 @@ if __name__=='__main__':
     for i in ims:
         b=i.resize((i.width*S,i.height*S),Image.NEAREST); c.alpha_composite(b,(x,c.height-b.height-4)); x+=b.width+20
     c.save('/tmp/ioSky2_all.png'); print('ok')
+
+# ---- 頭の 飾り（細い 帯と 翼）----
