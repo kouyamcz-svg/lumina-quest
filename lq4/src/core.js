@@ -2136,13 +2136,23 @@ function giveSkyPart(flag, lines){
     lines.push('＊ 天空の 鋼　'+n+'／'+total+' ＊');
     return;
   }
-  // ★五つ そろった
+  // ★五つ そろった。装備と 見た目の 切りかえは 会話が 終わって から（wearSkyArmor）。
+  //   ★まえは 話しかけた 時点で 装備し、会話の 途中から 見た目が 天空装備に なって いた
+  G._skyArmorPending = true;
+  lines.push('', '五つの 鋼が ひとつに なった。',
+             'イオ「……父さん、ぜんぶ 地上に 送って いたのか」');
+}
+// ★会話が 終わった あとに 天空の 鎧を 装備する（見た目も ここで 切りかわる）
+function wearSkyArmor(done){
+  if(!G._skyArmorPending){ done && done(); return; }
+  G._skyArmorPending = false;
   const io = party.find(m=>m.cls==='io');
   if(io){ io.armor = Object.assign({}, SKY_ARMOR); }
   G.flags.sky_armor = true;
-  lines.push('', '五つの 鋼が ひとつに なった。',
-             'イオ「……父さん、ぜんぶ 地上に 送って いたのか」',
-             '＊ イオが 天空の 鎧 を 身に つけた ＊');
+  V.setActors && V.setActors(true);        // 3D の 人物の 絵を 組み直す（2D は 毎回 引く）
+  U.hud();
+  G.mode = 'msg';
+  U.msg(['＊ イオは 天空の 鎧を 装備した ＊'], () => { done && done(); });
 }
 
 function runTalkEvent(npcName){
@@ -2241,6 +2251,9 @@ function runTalkEvent(npcName){
       V.refresh && V.refresh();
     }
     U.hud();
+    wearSkyArmor(() => afterTalk());
+  });
+  function afterTalk(){
     // ★会話の あとに 別の ところへ 移る（舟で 降下する など）
     if(e.warp){
       const w = e.warp;
@@ -2258,7 +2271,7 @@ function runTalkEvent(npcName){
       return;
     }
     G.mode = 'field';
-  });
+  }
   return true;
 }
 // ---------------- 章の しめくくり（データから）----------------

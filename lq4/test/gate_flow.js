@@ -543,5 +543,28 @@ function kill(k){
   const V2src=fs.readFileSync('src/view2d.js','utf8');
   T('2D は 舟の 地図だけで 舟を 描く', /C\.isShipMap\(curMap\) && C\.G && C\.G\.ship/.test(V2src));
 }
+// ★天空の 鎧：会話が 終わって から 装備し、「装備した」と 出る
+//   ★まえは 話しかけた 時点で 装備し、会話の 途中から 見た目が 変わって いた
+{
+  const pending=[]; const shown=[];
+  C.bind(C.NullView, {msg(l,d){ shown.push(l.join('\n')); pending.push(d); }, menu(i,t,cb){cb(0);}, hud(){}, label(){}}, C.NullAudio);
+  C.freshState(); C.G.chapter=4; C.party.length=0; ['io','seren','noe','amane'].forEach(k=>C.party.push(C.mkMember(k,33)));
+  const src=fs.readFileSync('src/core.js','utf8');
+  const parts=(src.match(/const SKY_PARTS\s*=\s*\[([\s\S]*?)\];/)||[])[1]||'';
+  const flags=[...parts.matchAll(/flag:\s*'([a-z0-9_]+)'/g)].map(m=>m[1]);
+  flags.forEach(f=>{ if(f!=='sky_cloak') C.G.flags[f]=true; });
+  ['ch3_torosArrived','ch3_fatherTruth','ch3_shrineBuilt','ch3_lupusDown','ch3_mountEar'].forEach(f=>C.G.flags[f]=true);
+  C.P.map='toros'; C.G.mode='field';
+  C.runTalkEvent('村の 老人');
+  T('外套を 受け取る 会話が 出る', shown.length===1 && /天空の 外套/.test(shown[0]), shown[0]&&shown[0].slice(0,40));
+  T('会話の あいだは まだ 天空の 鎧を 装備して いない', !C.G.flags.sky_armor);
+  T('会話の 中に「装備した」は 出ない', !/装備した|身に つけた/.test(shown[0]||''));
+  (pending.shift()||(()=>{}))();          // 会話を 閉じる
+  T('会話が 終わると 天空の 鎧を 装備する', C.G.flags.sky_armor===true);
+  T('会話の あとに「イオは 天空の 鎧を 装備した」と 出る', /イオは 天空の 鎧を 装備した/.test(shown[1]||''), shown[1]);
+  const io=C.party.find(m=>m.cls==='io');
+  T('イオの 鎧が 天空の 鎧', io && /天空の 鎧/.test(io.armor.name||''), io&&io.armor.name);
+  (pending.shift()||(()=>{}))();
+}
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);
