@@ -103,7 +103,14 @@ Object.keys(N.NPCS).forEach(mp=>{
   const cx={console,window:{}}; cx.globalThis=cx; vm.createContext(cx);
   vm.runInContext(fs.readFileSync('assets.js','utf8'), cx);
   const hasSky=!!vm.runInContext('CHR', cx).ioSky;
-  T('天空の 鎧が そろったら 天空装備の 姿（絵が '+(hasSky?'ある':'まだ ない')+'）', hasSky ? true : C.spriteKeyOf(io)==='io');
+  T('天空装備の イオの 絵が ある（6枚）', hasSky && ['front','side','back','frontW','sideW','backW'].every(k=>vm.runInContext('CHR', cx).ioSky[k]));
+  // 絵の ある 文脈で：そろう 前は ふつう、そろったら 天空装備
+  for(const f of ['world.js','npc.js','chapters.js','core.js']) vm.runInContext(fs.readFileSync('src/'+f,'utf8'), cx, {filename:f});
+  const C3=vm.runInContext('LQ4', cx); C3.freshState(); const io3=C3.mkMember('io',33);
+  T('天空の 鎧が そろう 前は ふつうの イオ', C3.spriteKeyOf(io3)==='io');
+  C3.G.flags.sky_armor=true;
+  T('天空の 鎧が そろったら 天空装備の イオ', C3.spriteKeyOf(io3)==='ioSky');
+  T('セレンは かわらない', C3.spriteKeyOf(C3.mkMember('seren',33))==='seren');
   const V3=fs.readFileSync('src/view.js','utf8');
   T('2D・3D とも 絵の 鍵は spriteKeyOf で 引く', (V3.match(/C\.spriteKeyOf\(m\)/g)||[]).length>=2);
   const d=CHD.get(4);
