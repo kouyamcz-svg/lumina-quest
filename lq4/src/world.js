@@ -69,6 +69,12 @@ const MAP_IDS = {
   sea_cave:   {region:'land',kind:'dgn',  name:'海蝕洞',      scene:'SCENE_CAVE'},
   peak_village:{region:'land',kind:'town',name:'霊峰の村',    scene:'SCENE_FIELD'},
   peak_path:  {region:'land',kind:'dgn',  name:'山道',        scene:'SCENE_CAVE'},
+  // ---- 第4章 ----
+  sky_castle: {region:'sky',kind:'cast', name:'天空城',      scene:'SCENE_SKY_CASTLE'},
+  temple:     {region:'sky',kind:'cast', name:'神殿の 最奥', scene:'SCENE_SKY_CASTLE'},
+  archive1:   {region:'sky',kind:'dgn',  name:'禁書庫 上層', scene:'SCENE_CAVE'},
+  archive2:   {region:'sky',kind:'dgn',  name:'禁書庫 下層', scene:'SCENE_CAVE'},
+  archive_core:{region:'sky',kind:'dgn', name:'禁書庫 最奥', scene:'SCENE_CAVE'},
   toros:      {region:'land',kind:'town', name:'トロスの村',  scene:'SCENE_FIELD'},
   shrine_hill:{region:'land',kind:'dgn',  name:'祠の丘',     scene:'SCENE_FIELD'},
   tower1:     {region:'sky', kind:'dgn',  name:'雲見の 塔 一階',   scene:'SCENE_SKY_TOWN'},
@@ -87,6 +93,8 @@ const SCENES = {
   SCENE_SKY_FIELD:{render:'2d', theme:'world',  outdoor:true,  snowfall:false, aurora:false, footprints:false},
   SCENE_SKY_TOWN: {render:'2d', theme:'sky',    outdoor:true,  snowfall:false, aurora:false, footprints:false},
   SCENE_SKY_IN:   {render:'2d', theme:'indoor', outdoor:false},
+  // ★天空城・神殿：LQ3の 城の 3D（theme castle）
+  SCENE_SKY_CASTLE:{render:'3d', theme:'castle', outdoor:false},
   SCENE_SKY_RIFT: {render:'2d', theme:'dream',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
   // ★地上（第3章）。未定義の まま 使われて いた。
   SCENE_CAVE:     {render:'2d', theme:'cave',   outdoor:false, snowfall:false, aurora:false, footprints:false},

@@ -544,6 +544,8 @@ Object.keys(NPCD.NPCS).forEach(mp=>{
     Object.keys(C.WARDS||{}).forEach(mp=>{
       if(Number(no) < C.WARDS[mp].chapter) cut(mp);
     });
+    // ★その 章で 閉じて いる 場所（章データの closed：第4章の 封鎖線）も 行けない
+    Object.keys(cd.closed||{}).forEach(mp=>cut(mp));
     seen.forEach(mp=>{
       const t = C.MAPS[mp].tiles;
       let hasL=false, ks=[];

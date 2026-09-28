@@ -266,6 +266,23 @@ function initTex(){
         x.fillStyle='rgba(30,20,10,0.35)'; x.fillRect(sx,sy+h-2,w,2);
       }}
   },64);
+  // ★禁書庫の 書架：木の 棚に 背表紙が 4段
+  TEX.shelf = patTex((x,px)=>{
+    x.fillStyle='#3a2616'; x.fillRect(0,0,px,px);
+    const cols=['#7a2a2a','#2a4a7a','#6a5a2a','#3a6a4a','#5a2a6a','#8a6a3a','#2a2a3a','#9a8a6a'];
+    const sh=px/4;
+    for(let j=0;j<4;j++){
+      let bx=2;
+      while(bx<px-2){
+        const w=3+(Math.random()*4|0), h=sh-4-(Math.random()*4|0);
+        x.fillStyle=cols[(Math.random()*cols.length)|0]; x.fillRect(bx, j*sh+ (sh-3-h), w, h);
+        x.fillStyle='rgba(255,230,160,0.35)'; x.fillRect(bx, j*sh+(sh-3-h)+2, w, 1);
+        bx+=w+1;
+      }
+      x.fillStyle='#5a3a20'; x.fillRect(0, j*sh+sh-3, px, 3);      // 棚板
+    }
+    x.fillStyle='#2a1a0e'; x.fillRect(0,0,2,px); x.fillRect(px-2,0,2,px);
+  },64);
   TEX.brick = patTex((x,px)=>{
     x.fillStyle='#454060'; x.fillRect(0,0,px,px);
     for(let j=0;j<5;j++){ const off=(j%2)?px/6:0;
@@ -514,6 +531,8 @@ const THEME = {
   field:  {sky:0x79b8e8, fog:[0x9ccbe8,12,30], amb:[0xfff2e0,0.85],sun:[0xfff0d8,0.7]},
   cave:   {sky:0x0a1020, fog:[0x0a1020,9,22],  amb:[0x9aa8d0,0.8], sun:[0xbfd0ff,0.35]},
   indoor: {sky:0x1a1420, fog:[0x1a1420,10,24], amb:[0xffe6c0,0.95],sun:[0xffd8a0,0.4]},
+  // ★天空城・神殿：白い 石の 城に 明るい 空の 光（LQ3の 城は 暗い 紫の 石）
+  skycastle:{sky:0xa8c8e8, fog:[0xd0dcec,12,30], amb:[0xfff4e0,1.0], sun:[0xffffff,0.6]},
 };
 
 let canvas2d=null, is2D=false, lastPoses2D=[];
@@ -750,7 +769,9 @@ function buildMap(name){
   }
   disposeScene(scene);
   const map=C.MAPS[name];
-  const th=THEME[map.theme]||THEME.field;
+  // ★禁書庫は 屋内の 暗さ（見た目の 種類 sky の 色が なく、野外の 青空に なって いた）。天空城・神殿は 白い 城
+  const skyCastle = (name==='sky_castle' || name==='temple');
+  const th = /^archive/.test(name) ? THEME.indoor : skyCastle ? THEME.skycastle : (THEME[map.theme]||THEME.field);
   const sc=(C.WORLD&&C.WORLD.sceneOf)?C.WORLD.sceneOf(name):{};
   const ts=(C.townStateDef?C.townStateDef():null);
   const night=!!(C.G&&C.G.night)&&!!sc.outdoor;
@@ -793,8 +814,9 @@ function buildMap(name){
     rock: {side:0xc0ae96, top:0x9a8c78, floor:0x8a7a6a, water:0x7fb8d8, lump:0x7a6e60},
     sky:  {side:0xf2eee2, top:0xe6dcc0, floor:0xbab39c, water:0xffffff},   // 天空：白い 石と 金
     forge:{side:0xd8b8a0, top:0x8a6450, floor:0x7a6050, water:0xffffff},   // 炉：赤茶の 煉瓦
+    archive:{side:0xffffff, top:0x4a3424, floor:0x3c3448, water:0xffffff},  // 禁書庫：書架と 暗い 床
   };
-  const dkey = ice ? 'ice' : /^well/.test(name) ? 'well' : /^sea/.test(name) ? 'sea'
+  const dkey = ice ? 'ice' : /^archive/.test(name) ? 'archive' : /^well/.test(name) ? 'well' : /^sea/.test(name) ? 'sea'
              : /^peak/.test(name) ? 'peak' : /^furnace/.test(name) ? 'forge'
              : skyD ? 'sky' : 'rock';
   const dp = DPAL[dkey];
@@ -920,7 +942,7 @@ function buildMap(name){
         put('pillarCap', [x,topY+2.05,y]);
         continue;
       }
-      if(ch==='K'){                                  // ぎょくざ
+      if(ch==='K' || ch==='U'){                      // ぎょくざ（LQ4 は U。K は 鍵の 扉）
         put('throneSeat',[x,topY+0.42,y]);
         put('throneBack',[x,topY+1.15,y-0.34]);
         put('throneGold',[x,topY+1.72,y-0.34]);
@@ -1028,7 +1050,9 @@ function buildMap(name){
       const done = bi && bi.clearedFlag && C.G.flags[bi.clearedFlag];
       if(bi && !done){
         const bd = (C.MIDBOSS && C.MIDBOSS[bi.key]) || null;
-        const s=billboard((bd && bd.art) || bi.key, 2.4);
+        const ak = (bi.mapArt) || (bd && bd.art) || bi.key;
+        // ★人物の 絵の ボス（番人 アーキス など）は 人物の 大きさで
+        const s = (!MON[ak] && CHR[ak]) ? chrBillboard(ak, 1.5) : billboard(ak, 2.4);
         s.position.set(x,topY+0.75,y); scene.add(s);
         animObjs.push({mesh:s,bill:true,ph:1});
         const li=new THREE.PointLight(0x9a6ad0,1.2,4);
@@ -1085,7 +1109,7 @@ function buildMap(name){
       ? new THREE.MeshPhongMaterial({map:TEX.dIceSide, specular:0x9fd0f0, shininess:48})
       : cave
         ? new THREE.MeshLambertMaterial({map:TEX.dRockSide, color: dp.side})
-        : new THREE.MeshLambertMaterial({map: dkey==='forge'?TEX.brick:TEX.whitestone, color: dp.side});
+        : new THREE.MeshLambertMaterial({map: dkey==='forge'?TEX.brick : dkey==='archive'?TEX.shelf : TEX.whitestone, color: dp.side});
     const top  = ice
       ? new THREE.MeshLambertMaterial({map:TEX.dIceTop})
       : new THREE.MeshLambertMaterial({map: cave?TEX.dRockTop:TEX.dSlabTop, color: dp.top});
@@ -1159,7 +1183,7 @@ function buildMap(name){
       G_.spike||[]);
   }else{
     addInstanced(new THREE.BoxGeometry(1,1.6,1),
-      new THREE.MeshLambertMaterial({map:snow?TEX.whitestone:TEX.brick}),
+      new THREE.MeshLambertMaterial({map:(snow||skyCastle)?TEX.whitestone:TEX.brick, color: skyCastle?0xf6f0e2:0xffffff}),
       (G_.wall||[]).map(p=>[p[0],p[1],p[2]]));
     if(snow) addInstanced(new THREE.BoxGeometry(1.04,0.18,1.04),
       new THREE.MeshBasicMaterial({color:0xf4f9ff}),

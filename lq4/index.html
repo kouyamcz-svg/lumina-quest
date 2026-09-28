@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-28 22:39 JST", "build":"ef2b4947","assets_sha": "0d77bcfc", "lines": {"world": 140, "npc": 917, "chapters": 2751, "bgm": 986, "view2d": 2594, "core": 4208, "view": 1685, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-28 23:08 JST", "build":"888e58f9","assets_sha": "ea404841", "lines": {"world": 148, "npc": 971, "chapters": 3008, "bgm": 986, "view2d": 2594, "core": 4369, "view": 1709, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -163,7 +163,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=0d77bcfc"></script>
+<script src="assets.js?v=ea404841"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -242,6 +242,12 @@ const MAP_IDS = {
   sea_cave:   {region:'land',kind:'dgn',  name:'海蝕洞',      scene:'SCENE_CAVE'},
   peak_village:{region:'land',kind:'town',name:'霊峰の村',    scene:'SCENE_FIELD'},
   peak_path:  {region:'land',kind:'dgn',  name:'山道',        scene:'SCENE_CAVE'},
+  // ---- 第4章 ----
+  sky_castle: {region:'sky',kind:'cast', name:'天空城',      scene:'SCENE_SKY_CASTLE'},
+  temple:     {region:'sky',kind:'cast', name:'神殿の 最奥', scene:'SCENE_SKY_CASTLE'},
+  archive1:   {region:'sky',kind:'dgn',  name:'禁書庫 上層', scene:'SCENE_CAVE'},
+  archive2:   {region:'sky',kind:'dgn',  name:'禁書庫 下層', scene:'SCENE_CAVE'},
+  archive_core:{region:'sky',kind:'dgn', name:'禁書庫 最奥', scene:'SCENE_CAVE'},
   toros:      {region:'land',kind:'town', name:'トロスの村',  scene:'SCENE_FIELD'},
   shrine_hill:{region:'land',kind:'dgn',  name:'祠の丘',     scene:'SCENE_FIELD'},
   tower1:     {region:'sky', kind:'dgn',  name:'雲見の 塔 一階',   scene:'SCENE_SKY_TOWN'},
@@ -260,6 +266,8 @@ const SCENES = {
   SCENE_SKY_FIELD:{render:'2d', theme:'world',  outdoor:true,  snowfall:false, aurora:false, footprints:false},
   SCENE_SKY_TOWN: {render:'2d', theme:'sky',    outdoor:true,  snowfall:false, aurora:false, footprints:false},
   SCENE_SKY_IN:   {render:'2d', theme:'indoor', outdoor:false},
+  // ★天空城・神殿：LQ3の 城の 3D（theme castle）
+  SCENE_SKY_CASTLE:{render:'3d', theme:'castle', outdoor:false},
   SCENE_SKY_RIFT: {render:'2d', theme:'dream',  outdoor:true,  snowfall:false, aurora:true,  footprints:false},
   // ★地上（第3章）。未定義の まま 使われて いた。
   SCENE_CAVE:     {render:'2d', theme:'cave',   outdoor:false, snowfall:false, aurora:false, footprints:false},
@@ -476,6 +484,7 @@ const NPCS = {
   // ============ 第2章：上層区 ============
   upper_dist: [
     {at:'9,4', spr:'villagerB', name:'炉の 主任', lines:[
+      {when:{ch:5, flag:'ch4_gag'}, text:['主任「……わたしは 何も 言って おらん。城へ 行け」']},
       {when:{flag:'ch2_reported'}, text:[
         '主任「炉心の 鍵は 城に ある」',
         '主任「わたしの 判では 開かん。……すまんな」']},
@@ -583,6 +592,7 @@ const NPCS = {
       {text:['桟橋の 先に、小さな 舟が 繋いで ある。',
              '木でも 鉄でも ない。白い、軽い 何か で できている。']}]},
     {at:'5,9', spr:'elder', name:'港の 番人', lines:[
+      {when:{ch:5}, text:['番人「戻ってきたな。……上は 妙に 静かだ」','番人「役人どもが 誰も 口を きかん」']},
       {when:{flag:'ch3_landed'}, text:[
         '番人「行ってきたか。……で、下は どうだった」']},
       {text:['番人「わしは 四十年 この 舟を 磨いてきた」',
@@ -793,6 +803,43 @@ const NPCS = {
              '老人「減ったのは、去年が 初めてだ」']}]},
   ],
   // ★湧き水 西の集落
+  // ============ 第4章：天空城・禁書庫・神殿 ============
+  sky_castle: [
+    {at:'10,2', spr:'albelTmp', name:'公王 アルベル', lines:[
+      {when:{flag:'ch4_king'}, text:['公王は 窓の 外を 見て いる。']},
+      {text:['公王「……下がれ。用が あるなら 団長を 通せ」']}]},
+    {at:'8,4', spr:'guardA', name:'近衛の 騎士', lines:[
+      {when:{flag:'ch4_contract'}, text:['近衛「……禁書庫に 入ったと 聞いた。顔色が 悪いぞ」']},
+      {text:['近衛「謁見の間だ。静かに」']}]},
+    {at:'12,4', spr:'guardA', name:'近衛の 騎士', lines:[
+      {text:['近衛「陛下は この ところ、夜も 眠って おられぬ ようだ」']}]},
+    {at:'3,8', spr:'captain', name:'騎士団長 グラン', lines:[
+      {when:{flag:'ch4_contract'}, text:['グラン「……読んだか。その 顔で 分かる」','グラン「陛下の 前で、同じ 顔を して みせろ」']},
+      {when:{flag:'ch4_granHelp'}, text:['グラン「わしは 表で 見張る。行け」']},
+      {text:['グラン「……何だ」']}]},
+    {at:'2,10', spr:'butler', name:'禁書庫の 司書', lines:[
+      {when:{flag:'ch4_granHelp'}, text:['司書「騎士団長の 鍵……。十年ぶりに 見ました」','司書「中は 迷いやすい。灯を たよりに」']},
+      {text:['司書「禁書庫は 閉じて おります」']}]},
+    {at:'17,8', spr:'priestess', name:'神殿の 巫女', lines:[
+      {when:{flag:'ch4_lumina'}, text:['巫女「アマネさまが、あんな 顔で 笑う なんて」']},
+      {when:{flag:'ch4_templeOpen'}, text:['巫女「白竜さまが、お待ちです」']},
+      {text:['巫女「この 先は 神殿の 最奥。白竜さまの お許しなく、通せません」']}]},
+    {at:'6,14', spr:'guardB', name:'城の 門衛', lines:[
+      {text:['門衛「騎士団の 本部は 左、神殿へは 右、謁見の間は 奥だ」']}]},
+    {at:'14,14', spr:'villagerB', name:'城の 役人', lines:[
+      {when:{flag:'ch4_king'}, text:['役人「団長の 席が……いや、何でも ない」']},
+      {text:['役人「減光の 話は するな。上から そう 言われて いる」']}]},
+  ],
+  archive_core: [
+    {at:'8,2', spr:'shelfobj', name:'千年前の 契約書', lines:[
+      {when:{flag:'ch4_contract'}, text:['「……要らぬ 夢は 夢の 底に 棄てる」']},
+      {text:['書見台の 前に、番人が 立って いる。']}]},
+  ],
+  temple: [
+    {at:'8,3', spr:'luminaTmp', name:'白竜 ルミナ', lines:[
+      {when:{flag:'ch4_lumina'}, text:['白竜は 静かに 目を 閉じて いる。']},
+      {text:['白い 竜が 眠って いる。']}]},
+  ],
   well_west: [
     {at:'3,5', spr:'guardB', name:'西の 集落長', lines:[
       {when:{flag:'ch3_wellSolved'}, text:[
@@ -1045,6 +1092,21 @@ const QUESTS = {
     reward:{}, next:'ch2_q2_core',
   },
   // ============ 第3章：氷の谷 ============
+  ch4_q1_archive: {
+    id:'ch4_q1_archive', chapter:5, title:'禁書庫',
+    giver:'炉の 主任',
+    desc:'減光の 調査は 打ち切られた。千年前の 記録を 確かめる。',
+    steps:[
+      {id:'gran',    desc:'天空城で 騎士団長 グランに 会う',     flag:'ch4_granMet'},
+      {id:'refused', desc:'禁書庫の 司書に 頼む',               flag:'ch4_serenRefused'},
+      {id:'key',     desc:'騎士団長 グランに もう一度 話す',     flag:'ch4_granHelp'},
+      {id:'arkis',   desc:'禁書庫の 奥で 番人を 越える',         flag:'ch4_arkisDone'},
+      {id:'read',    desc:'千年前の 契約書を 読む',             flag:'ch4_contract'},
+      {id:'lumina',  desc:'神殿の 最奥で 白竜に 会う',          flag:'ch4_lumina'},
+      {id:'king',    desc:'謁見の間で 公王に 会う',            flag:'ch4_king'},
+    ],
+    reward:{}, next:null,
+  },
   ch3_q5_toros: {
     id:'ch3_q5_toros', chapter:4, title:'父の 故郷',
     giver:'村の 老人',
@@ -3957,6 +4019,263 @@ const CH = {
            '＊ 第3章　完 ＊'],
       card: {title:'五つの大地', sub:'第3章 完'},
       next: 5,
+    },
+  },
+
+  // ======================= 第4章「禁書庫」 =======================
+  5: {
+    id: 'ch4_archive',
+    title: '禁書庫',
+    region: 'sky',
+    // ★クエスト画面の「目的」
+    goals: [
+      {done:'ch4_gag',        text:'上層区の 炉の 主任に 話を 聞く'},
+      {done:'ch4_granMet',    text:'上層区の 北の 大門から 天空城へ。騎士団長 グランに 会う'},
+      {done:'ch4_serenRefused', text:'天空城の 左の 部屋で、禁書庫の 司書に 頼む'},
+      {done:'ch4_granHelp',   text:'騎士団長 グランに もう一度 話す'},
+      {done:'ch4_arkisDone',  text:'禁書庫の 奥へ（下層の ふたつの 灯を ともす）'},
+      {done:'ch4_contract',   text:'禁書庫の 最奥で、書見台を 調べる'},
+      {done:'ch4_templeOpen', text:'天空城の 右の 部屋で、神殿の 巫女に 話す'},
+      {done:'ch4_lumina',     text:'神殿の 最奥で、白竜 ルミナに 会う'},
+      {done:'ch4_king',       text:'天空城の 謁見の間で、公王に 会う'},
+    ],
+    start: {map:'sky_port', x:9, y:10, dir:'back'},
+    party: ['io','seren','noe','amane'],
+    startLv: 34,
+    inheritParty: {from:4, ifFlag:'ch3_cleared'},
+    gold: 8000, herbs: 12, waters: 4,
+    equip: {
+      io:    {weapon:{kind:'w', name:'鍛冶村の 剣', v:26}, armor:{kind:'a', name:'天空の 鎧', v:34, ward:['sleep','confuse']}},
+      seren: {weapon:{kind:'w', name:'鍛冶村の 槍', v:28}, armor:{kind:'a', name:'鍛冶村の 鎧', v:25}},
+      noe:   {weapon:{kind:'w', name:'山の 錫杖', v:16},   armor:{kind:'a', name:'鍛冶村の 衣', v:19}},
+      amane: {weapon:{kind:'w', name:'山の 錫杖', v:16},   armor:{kind:'a', name:'鍛冶村の 衣', v:19}},
+    },
+    // ★章が かわると 印は 入れかわる。天空の 鎧を そろえた 印を 立てなおす（見た目・戦闘曲）
+    setFlags: ['sky_armor'],
+    opening: ['──帰還の 翌朝──',
+              '雲海港の 空は 晴れて いた。',
+              'だが 港の 役人たちは、誰も 目を 合わせない。',
+              '',
+              'セレン「……静かすぎる」',
+              'ノエ「上層区へ 行こう。炉の 主任なら、何か 知ってる」'],
+    home: {map:'upper_dist', x:3, y:5, name:'上層区の 宿'},
+    returnSpots: [{map:'upper_dist', x:10, y:13}, {map:'sky_port', x:4, y:4}],
+    onEnter: {sky_castle:'ch4_enteredCastle', archive1:'ch4_enteredArchive'},
+    // ★第4章は 第1〜2章の ダンジョンを 封鎖（調査の 打ち切り・緘口令）。中の 灯や 扉の 設定が この 章に ない ため
+    closed: {
+      pipe_path: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「調査は 打ち切りだ。ここから 先は 通せん」']},
+      old_pipe: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「調査は 打ち切りだ。ここから 先は 通せん」']},
+      rift_yard: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「調査は 打ち切りだ。ここから 先は 通せん」']},
+      furnace: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「調査は 打ち切りだ。ここから 先は 通せん」']},
+      garden: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「調査は 打ち切りだ。ここから 先は 通せん」']},
+      tower1: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「調査は 打ち切りだ。ここから 先は 通せん」']},
+      tower2: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「調査は 打ち切りだ。ここから 先は 通せん」']},
+      tower3: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「調査は 打ち切りだ。ここから 先は 通せん」']},
+      tower4: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「調査は 打ち切りだ。ここから 先は 通せん」']},
+      tower5: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「調査は 打ち切りだ。ここから 先は 通せん」']},
+    },
+
+    // ★天空城の 大門（上層区の 北）。炉の 主任に 話を 聞いた あと 開く
+    gates: {
+      'upper_dist:9,0': {
+        need:'ch4_gag',
+        lockMsg:['閉ざされた 大門。白石の 壁が 雲まで 続いている。',
+                 'セレン「まずは 炉の 主任に 話を 聞きましょう」'],
+        msg:['門衛が 騎士団の 胸章を 見て、大門を 開けた。',
+             '',
+             '門衛「騎士団の 方か。……団長なら 本部に おられる」'],
+        to:{map:'sky_castle', x:10, y:15, dir:'back'},
+      },
+    },
+    lampGates: {
+      archive2: {flag:'ch4_archiveLit', open:[{x:10, y:1, ch:'.'}],
+        msg:['ふたつの 灯が ともった。', '奥の 扉の 錠が、ひとりでに 外れた。']},
+    },
+    locks: {
+      'archive2:10,1': {lockMsg:['重い 扉。鍵穴は ない。',
+                                 '左右の 書架の 奥に、火の 消えた 灯が ある。']},
+    },
+    bosses: {
+      'archive_core:8,4': {
+        key:'arkis', clearedFlag:'ch4_arkisDone',
+        intro:['書見台の 前に、古い 鎧の 男が 立って いた。',
+               '',
+               'アーキス「千年、ここを 守って きた」',
+               'アーキス「読む 者は 試す。それが 番人の 務めだ」',
+               '',
+               'イオ「……通して ください」',
+               'アーキス「剣で 言え」',
+               '＊ 番人 アーキスとの 手合わせ ＊'],
+      },
+    },
+    bossReward: {
+      arkis: {
+        set:['ch4_arkisDone'],
+        setTiles:[{map:'archive_core', x:8, y:4, ch:'.'}],
+        loseMsg:['膝を ついた イオの 前で、アーキスは 剣を 下ろした。',
+                 '', 'アーキス「勝ち負けでは ない。……引かなかった な」'],
+        msg:['', 'アーキス「よい。読め」',
+             'アーキス「ただし、読んだ ものは 忘れられん。それを 覚えて おけ」',
+             '', '＊ 番人が 道を あけた ＊'],
+      },
+    },
+    talkEvents: [
+      // ---- 緘口令 ----
+      { npc:'炉の 主任', unless:'ch4_gag',
+        set:['ch4_gag'],
+        quest:{ch4_q1_archive:'active'},
+        msg:['主任は 声を 落とした。',
+             '',
+             '主任「減光の 調査は 打ち切りだ。上からの 達しで」',
+             '主任「口に する ことも 禁じられた。……わたしは 何も 言って おらん」',
+             '',
+             'セレン「緘口令……」',
+             'イオ「なぜ 今なんです。大陸は 傾いて いる」',
+             '主任「わからん。……騎士団長なら、何か 知って いるかも しれん」',
+             '主任「団長は 城の 本部に 詰めて おられる。北の 大門からだ」',
+             '',
+             '＊ クエスト「禁書庫」＊',
+             '＊ 上層区の 北の 大門から 天空城へ ＊'] },
+      // ---- 騎士団長 グラン ----
+      { npc:'騎士団長 グラン', cond:['ch4_gag'], unless:'ch4_granMet',
+        set:['ch4_granMet'],
+        msg:['グランは 地図の 前に 立って いた。',
+             '',
+             'グラン「戻ったか、イオ」',
+             'イオ「団長。調査が 打ち切られたと」',
+             'グラン「わしにも 理由は 知らされて おらん」',
+             '',
+             'イオ「地上で 学者に 会いました。千年前、大陸が 浮いた ときの 記録が ある」',
+             'イオ「……あれは 事故では ない、と」',
+             '',
+             'グランは しばらく 黙って いた。',
+             '',
+             'グラン「禁書庫か。あそこは 公王の 許しが なければ 開かん」',
+             'セレン「わたしの 家の 名で 頼んで みます」',
+             'グラン「……好きに しろ」',
+             '',
+             '＊ 禁書庫の 司書に 話そう（左の 部屋）＊'] },
+      // ---- セレンの 家の 名では 開かない ----
+      { npc:'禁書庫の 司書', cond:['ch4_granMet'], unless:'ch4_serenRefused',
+        set:['ch4_serenRefused'],
+        msg:['司書「禁書庫は 閉じて おります」',
+             'セレン「わたしの 家の 名に かけて、お願いします」',
+             '',
+             '司書は 首を 振った。',
+             '',
+             '司書「家の 名では 開きません。公王陛下の 印か、騎士団長の 鍵が 要ります」',
+             '司書「騎士団長の 鍵は、この 十年 一度も 使われて おりませんが」',
+             '',
+             'セレン「……わたしの 家でも、だめなのね」',
+             'ノエ「十年……」',
+             '',
+             '＊ 騎士団長 グランに もう一度 話そう ＊'] },
+      // ---- グランが 協力する ----
+      { npc:'騎士団長 グラン', cond:['ch4_serenRefused'], unless:'ch4_granHelp',
+        set:['ch4_granHelp'],
+        msg:['グラン「……家の 名では 開かんと 言われたか」',
+             'セレン「はい」',
+             '',
+             'グランは 懐から 古い 鍵を 出した。',
+             '',
+             'グラン「騎士団長の 鍵だ。この 十年、使わずに 持って いた」',
+             'イオ「なぜ 今」',
+             'グラン「知りたい ことが ある。……妻が、庭園で 花を 見る ように なった 年の ことだ」',
+             '',
+             'グラン「わしは 表で 見張る。誰も 通さん」',
+             'グラン「行け、イオ。読んだ ものを、わしに 聞かせろ」',
+             '',
+             '＊ 禁書庫の 扉が 開いた ＊'] },
+      // ---- 千年前の 契約書 ----
+      { npc:'千年前の 契約書', cond:['ch4_arkisDone'], unless:'ch4_contract',
+        set:['ch4_contract'],
+        msg:['書見台に、一枚の 紙が 留めて あった。',
+             '',
+             '　「終わらぬ 夢を 見る 子、ヴォクスを 炉の 核と す。',
+             '　　子の 夢より 光を 汲み、要らぬ 夢は 夢の 底に 棄てる。',
+             '　　夢守りは 子の 眠りを 守り、その 代（しろ）と して',
+             '　　己の 夢を 納める」',
+             '',
+             'イオ「……大陸は、子どもの 夢で 浮いて いる」',
+             'セレン「光の 残りかすを、千年 捨て続けて きた。それが 悪夢」',
+             'イオ「減光も 悪夢獣も……捨て場が、溢れた」',
+             '',
+             'ノエが 紙に 手を 伸ばし、止めた。',
+             '',
+             'ノエ「……ぼくの 家の 者が、夢を 見ない わけ」',
+             'ノエ「自分の 夢を、納めて きたんだ。千年」',
+             '',
+             'アマネが 顔を あげた。',
+             '',
+             'アマネ「……白竜さまが、お呼びです」',
+             'アマネ「神殿の 最奥へ。……わたしが 捨てた 場所です」',
+             '',
+             '＊ 天空城へ 戻り、神殿の 巫女に 話そう（右の 部屋）＊'] },
+      // ---- 神殿の 巫女 ----
+      { npc:'神殿の 巫女', cond:['ch4_contract'], unless:'ch4_templeOpen',
+        set:['ch4_templeOpen'],
+        msg:['巫女「アマネさま……！ お戻りに」',
+             'アマネ「戻って きた わけでは ありません」',
+             'アマネ「白竜さまに、呼ばれました」',
+             '',
+             '巫女は しばらく アマネを 見て、扉の 前を あけた。',
+             '',
+             '巫女「……どうぞ、奥へ」',
+             '',
+             '＊ 神殿の 最奥への 扉が 開いた（右の 奥）＊'] },
+      // ---- 白竜 ルミナ ----
+      { npc:'白竜 ルミナ', cond:['ch4_templeOpen'], unless:'ch4_lumina',
+        set:['ch4_lumina'],
+        msg:['白い 竜が、目を 開けた。',
+             '竜は 何も 言わない。アマネが 静かに 口を 開いた。',
+             '',
+             'アマネ「……千年、われは あの子の 眠りを 見てきた」',
+             'アマネ「もう、限界が 近い」',
+             '',
+             'イオ「あの子……ヴォクス」',
+             'アマネ「夢の 底は、もう 満ちて いる。溢れた ものが、空を 蝕み、地上へ 落ちた」',
+             '',
+             'アマネは 竜から 目を 離し、イオたちを 見た。',
+             '',
+             'アマネ「わたしは もう『白竜さまの 口』では ありません」',
+             'アマネ「でも、この 声は わたしが 伝えます。……わたしが 聞いた ものとして」',
+             '',
+             '＊ 謁見の間の 公王に 会おう ＊'] },
+      // ---- 公王 アルベル ----
+      { npc:'公王 アルベル', cond:['ch4_lumina'], unless:'ch4_king',
+        set:['ch4_king'],
+        quest:{ch4_q1_archive:'clear'},
+        msg:['公王は 玉座から 立たずに、一行を 見た。',
+             '',
+             'イオ「陛下。禁書庫で 契約書を 読みました」',
+             'イオ「大陸は 子どもの 夢で 浮き、捨てた 夢が 溢れて いる」',
+             '',
+             '公王「……知って おる」',
+             '',
+             'セレン「では、なぜ 調査を」',
+             '公王「では 代わりの 浮き方を 示せ」',
+             '公王「示せぬなら、忘れて 務めに 戻れ」',
+             '',
+             '誰も、答えられなかった。'] },
+    ],
+    ending: {
+      trigger: 'ch4_king',
+      set:['ch4_cleared'],
+      msg:['',
+           '── その夜 ──',
+           '',
+           '騎士団の 本部に、灯りは ともらなかった。',
+           '',
+           '翌朝、騎士団長の 席は 空いて いた。',
+           '机の 上に、使い込んだ 鍵が 一本 置いて あった。',
+           '',
+           'イオ「……団長」',
+           '',
+           'その日から、グランは 登城しなく なった。',
+           '',
+           '＊ 第4章　完 ＊'],
+      card: {title:'禁書庫', sub:'第4章 完'},
+      next: 6,
     },
   },
 };
@@ -7742,6 +8061,13 @@ const ENEMIES = [
    art:'kirimatoi', inflict:{type:'confuse', p:0.18}},
   {key:'honetori',    name:'骨鳥',      hp:175,atk:46, def:27, agi:26, exp:640, gold:660, minLv:20,
    art:'honetori'},
+  // ---- 第4章：禁書庫（絵は 仮に 第2章の 敵の 絵）----
+  {key:'kokuhyoushi', name:'黒表紙の 騎士', hp:310,atk:60, def:44, agi:20, exp:1000, gold:920, minLv:24, art:'kamikishi'},
+  {key:'sumibane',    name:'墨羽の カラス', hp:240,atk:57, def:34, agi:34, exp:960,  gold:880, minLv:24, art:'kamigarasu',
+   inflict:{type:'confuse', p:0.18}},
+  {key:'noroichou',   name:'呪い帳面',     hp:265,atk:53, def:38, agi:22, exp:980,  gold:900, minLv:24, art:'susurichou',
+   inflict:{type:'sleep', p:0.2}},
+  {key:'shokabanken', name:'書架の 番犬',   hp:390,atk:64, def:52, agi:16, exp:1180, gold:1000, minLv:25, art:'wasuremono'},
   // ---- 地上の 島ごとの 固有種（野外）----
   //   ★まえは 地上の 野外が 全島 おなじ 5種 だった（雪原でも 砂漠でも 同じ 敵）
   //   ★絵（MON）が まだ ない 敵は 出ない（島の 表から のぞかれ、いままでの 表に もどる）
@@ -7794,6 +8120,10 @@ const MIDBOSS = {
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第3章ボス：あくむじゅう ルプス（狼座）----
   //   大陸から 落ちた 悪夢の かけらが 地上の 狼に 憑いた もの。
+  // ★禁書庫の 番人 アーキス（手合わせ。絵は 仮： CHR.arkisTmp）
+  // ★勝率：Lv34で 70%・Lv35で 95%（第3章の 終わりの 装備・天空の 鎧）。負けても 手合わせで 進む
+  arkis:{key:'arkis', name:'番人 アーキス', hp:10400, atk:98, def:46, agi:28, acts:1,
+    exp:3400, gold:0, art:'arkisTmp', spar:true},
   lupus:{key:'lupus', name:'あくむじゅう ルプス', hp:7400,   /* ★5600 → 7400：上位の 呪文（スパーダ など）を 足した ぶん（勝率 Lv32で 75%・Lv33で 83%） */ atk:82, def:42, agi:24, acts:1,
     exp:6200, gold:6800, art:'lupus', scale:1.25,
     skill:{p:0.30, mul:1.30, name:'かみくだき'},
@@ -7878,13 +8208,19 @@ const MIDBOSS = {
 };
 const EXP_MUL = {};
 // ★章べつの でかた（きょうつう byMap より ゆうせん）
-const byMapCh = {};
+const byMapCh = {
+  // ★第4章（内部の 章 番号 5）
+  '5:archive1': ['kokuhyoushi','sumibane','noroichou'],
+  '5:archive2': ['kokuhyoushi','noroichou','sumibane','shokabanken'],
+};
 const byMap = {
   rift_yard: ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
   world:     ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
   pipe_path: ['kagekakera','shihenchu','akumuga','yamiinu'],
   old_pipe:  ['kansuiki','shokudai','hakoyami','yamiinu','sumibami'],
   furnace:   ['kamikishi','hikarikui','kamigarasu','kudamukade','susurichou','wasuremono','nukegara'],
+  archive1:  ['kokuhyoushi','sumibane','noroichou'],
+  archive2:  ['kokuhyoushi','noroichou','sumibane','shokabanken'],
   // ★塔は 5階だて。上へ 行くほど 手ごわく なる。
   tower1:    ['kamigarasu','hikarikui'],
   tower2:    ['kamigarasu','hikarikui','susurichou'],
@@ -8234,6 +8570,105 @@ const MAPS = {
     }},
 
   // ============ 第3章：トロスの村（父の 故郷）============
+  // ================= 第4章「禁書庫」 =================
+  // ★天空城：LQ3の 城の 3D（柱 T・玉座 K・扉 D・窓と 垂れ幕の 壁・絨毯の 床）を そのまま 使う
+  sky_castle:{name:'天空城', theme:'castle', enc:false, tiles:[
+    "#####################",
+    "#.........U.........#",
+    "#..T...T..n..T...T..#",
+    "#...................#",
+    "#..T....n...n....T..#",
+    "#...................#",
+    "##########.##########",
+    "#......#.....#......#",
+    "#..n...#.....#...n..#",
+    "D...................D",
+    "#.n....#.....#......#",
+    "#......#.....#......#",
+    "##########.##########",
+    "#..T.............T..#",
+    "#.....n.......n.....#",
+    "#..T.............T..#",
+    "##########G##########",
+  ], warpsXY:{
+      '10,16':{to:'upper_dist', x:10, y:2},
+      '0,9':  {to:'archive1',   x:10, y:13},
+      '20,9': {to:'temple',     x:8,  y:10}
+    }},
+  // ★禁書庫：書架の 迷路（3Dの ダンジョン。壁は 書架）
+  archive1:{name:'禁書庫 上層', theme:'sky', enc:true, encRate:0.07, encGrace:6, tiles:[
+    "#####################",
+    "#.....#.......#.....#",
+    "#.###.#.#####.#.###.#",
+    "#.#...#.#...#...#...#",
+    "#.#.###.#.#.#####.###",
+    "#.#.....#.#.......#.#",
+    "#.#######.#######.#.#",
+    "#...#.....#.....#...#",
+    "###.#.#####.###.###.#",
+    "#...#.#.....#.#.....#",
+    "#.###.#.#####.#####.#",
+    "#.#...#.....#.....#.#",
+    "#.#.#######.#.###.#.#",
+    "#...........#...#..>#",
+    "##########G##########",
+  ], warpsXY:{
+      '10,14':{to:'sky_castle', x:1,  y:9, back:true},
+      '19,13':{to:'archive2',   x:2,  y:13}
+    }},
+  archive2:{name:'禁書庫 下層', theme:'sky', enc:true, encRate:0.07, encGrace:6, tiles:[
+    "##########.##########",
+    "#.........K.........#",
+    "#.#######.#.#######.#",
+    "#.#.....#...#.....#.#",
+    "#.#.###.#####.###.#.#",
+    "#...#L#.......#L#...#",
+    "###.#.#.#####.#.#.###",
+    "#...#...#...#...#...#",
+    "#.#####.#.#.#.#####.#",
+    "#.......#.#.#.......#",
+    "#.#######.#.#######.#",
+    "#.#.......#.......#.#",
+    "#.#.#####.#.#####.#.#",
+    "#<..#.........#.....#",
+    "#####################",
+  ], warpsXY:{
+      '1,13': {to:'archive1',     x:18, y:13, back:true},
+      '10,0': {to:'archive_core', x:8,  y:10}
+    }},
+  archive_core:{name:'禁書庫 最奥', theme:'sky', enc:false, tiles:[
+    "#################",
+    "#...............#",
+    "#..#....n....#..#",
+    "#...............#",
+    "#.......B.......#",
+    "#...............#",
+    "#..#.........#..#",
+    "#...............#",
+    "#...............#",
+    "#..#.........#..#",
+    "#...............#",
+    "########G########",
+  ], warpsXY:{
+      '8,11':{to:'archive2', x:9, y:1, back:true}
+    }},
+  // ★神殿の 最奥（城の 3D）
+  temple:{name:'神殿の 最奥', theme:'castle', enc:false, tiles:[
+    "#################",
+    "#...............#",
+    "#.T...........T.#",
+    "#.......n.......#",
+    "#...............#",
+    "#.T...........T.#",
+    "#...............#",
+    "#...............#",
+    "#.T...........T.#",
+    "#...............#",
+    "#...............#",
+    "########G########",
+  ], warpsXY:{
+      '8,11':{to:'sky_castle', x:19, y:9, back:true}
+    }},
   // ★見た目が 野外（world）だと 家が 天空の 管の 継ぎ目の 絵に なって いた → 村の 見た目
   toros:{name:'トロスの村', theme:'village', enc:false, tiles:[
     "#######################",
@@ -9107,7 +9542,7 @@ function chapterLabel(no){
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
-                       'O','x','L','l','p','q','%','R','h','H','E','u']);
+                       'O','x','L','l','p','q','%','R','h','H','E','u','U']);   // U：天空城の 玉座
                        // u＝ゆかの 管の きれはし（しらべる もの。宝箱と おなじく 通れない）
                        // A＝天空城の 大門（3×3）
                        // j/J＝かべの 継ぎ目（管を さす ところ）
@@ -9249,9 +9684,24 @@ function interact(){
     let gx=nx, gy=ny;
     while(tileAt(P.map,gx-1,gy)==='E') gx--;
     while(tileAt(P.map,gx,gy-1)==='E') gy--;
-    const lines = (cd && cd.gates && (cd.gates[P.map+':'+gx+','+gy]
-                                   || cd.gates[P.map+':'+nx+','+ny]))
-                || ['閉ざされた 大門。白石の 壁が 雲まで 続いている。'];
+    const gate = cd && cd.gates && (cd.gates[P.map+':'+gx+','+gy] || cd.gates[P.map+':'+nx+','+ny]);
+    // ★第4章：大門が 開く（{to, need, lockMsg, msg}）。まえは 断りの 文だけ だった
+    if(gate && !Array.isArray(gate) && gate.to){
+      if(gate.need && !G.flags[gate.need]){
+        G.mode='msg'; U.msg(gate.lockMsg || ['大門は 閉ざされて いる。'], ()=>{ G.mode='field'; }); return;
+      }
+      G.mode='msg';
+      U.msg(gate.msg || ['大門が 開いた。'], ()=>{
+        const t=gate.to; P.map=t.map; P.x=t.x; P.y=t.y; P.dir=t.dir||'back';
+        G.trail=[[P.x,P.y],[P.x,P.y],[P.x,P.y]];
+        V.buildMap(P.map); V.setActors(true); U.label(WORLD.mapName(P.map)); U.hud();
+        A.bgm && A.bgm(P.map);
+        if(cd.onEnter && cd.onEnter[P.map]) G.flags[cd.onEnter[P.map]] = true;
+        G.mode='field';
+      });
+      return;
+    }
+    const lines = gate || ['閉ざされた 大門。白石の 壁が 雲まで 続いている。'];
     G.mode='msg';
     U.msg(lines, ()=>{ G.mode='field'; });
     return;
@@ -9510,6 +9960,9 @@ function areaName(map,x,y){
 // ★けっかい：じょうけんが そろうまで 入れない。
 //   はんていは ここ 1か所。よそで 見おとしても かならず ここで 止まる。
 function wardBlocks(to){
+  // ★章データの closed：その 章の あいだ 閉じて いる 場所（第4章の 封鎖線など）。
+  //   ★結界の 表（WARDS）に 同じ 地図を 重ねて 書くと、前の 章の 結界を 上書きして しまう
+  { const cd=chData(); if(cd && cd.closed && cd.closed[to] && !(cd.closed[to].until && G.flags[cd.closed[to].until])) return true; }
   const wd = WARDS[to];
   if(!wd) return false;
   const now = G.chapter||1;
@@ -9523,6 +9976,7 @@ function wardBlocks(to){
   return !G.flags[wd.flag];
 }
 function wardMsg(to){
+  { const cd=chData(); if(cd && cd.closed && cd.closed[to] && !(cd.closed[to].until && G.flags[cd.closed[to].until])) return cd.closed[to].msg; }
   const wd = WARDS[to];
   if(!wd) return null;
   if((G.chapter||1) < wd.chapter && wd.msgEarly) return wd.msgEarly;
@@ -11038,6 +11492,23 @@ function victory(){
   U.msg(lines, ()=>endBattle(true));
 }
 function defeat(){
+  // ★手合わせ（spar）：負けても 全滅に しない。ごほうびの 印・ますの 書きかえは 勝った ときと 同じ
+  const b0 = G.battle, sparKey = b0 && b0.named && MIDBOSS[b0.named] && MIDBOSS[b0.named].spar ? b0.named : null;
+  if(sparKey){
+    const cd = chData(), rw = cd && cd.bossReward && cd.bossReward[sparKey];
+    party.concat(reserve).forEach(m=>{ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; });
+    if(rw){
+      (rw.set||[]).forEach(f=>{ G.flags[f]=true; });
+      if(rw.setTiles){
+        (Array.isArray(rw.setTiles)?rw.setTiles:[rw.setTiles]).forEach(o=>{ setTile(o.map||P.map, o.x, o.y, o.ch||'.'); });
+        V.refresh && V.refresh();
+      }
+      Object.keys(rw.quest||{}).forEach(q=>questAdvance(q, rw.quest[q]));
+    }
+    U.hud();
+    U.msg([].concat((rw && rw.loseMsg) || ['手合わせは 終わった。'], (rw && rw.msg) || []), ()=>endBattle(true));
+    return;
+  }
   A.lose();
   U.msg(['全滅して しまった…'], ()=>{
     party.concat(reserve).forEach(m=>{ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; });
@@ -11132,6 +11603,15 @@ function sellGood(map, key, n){
 // 攻撃 技は 「ここでは つかえない」。
 // ★けっかい：ここを とおるには じょうけんが いる
 const WARDS = {
+  // ---- 第4章 ----
+  archive1: {chapter:5, flag:'ch4_granHelp',
+    earlyInChapter:['禁書庫の 扉は 閉ざされて いる。',
+              '司書「公王陛下の 印か、騎士団長の 鍵が なければ 開きません」'],
+    msg:['禁書庫。書架が 天井まで 続いて いる。']},
+  temple: {chapter:5, flag:'ch4_templeOpen',
+    earlyInChapter:['神殿の 最奥への 扉。巫女が 前に 立って いる。',
+              '巫女「白竜さまの お許しなく、奥へは 通せません」'],
+    msg:['神殿の 最奥。']},
   // ★試験場：技師の 頼みを 済ませるまで 入れない。
   //   まえは たのまれごとを とばして 試験に 行けて しまい、
   //   点検路も かげの あぎとも 見ずに 話が すすんで いた。
@@ -12035,6 +12515,23 @@ function initTex(){
         x.fillStyle='rgba(30,20,10,0.35)'; x.fillRect(sx,sy+h-2,w,2);
       }}
   },64);
+  // ★禁書庫の 書架：木の 棚に 背表紙が 4段
+  TEX.shelf = patTex((x,px)=>{
+    x.fillStyle='#3a2616'; x.fillRect(0,0,px,px);
+    const cols=['#7a2a2a','#2a4a7a','#6a5a2a','#3a6a4a','#5a2a6a','#8a6a3a','#2a2a3a','#9a8a6a'];
+    const sh=px/4;
+    for(let j=0;j<4;j++){
+      let bx=2;
+      while(bx<px-2){
+        const w=3+(Math.random()*4|0), h=sh-4-(Math.random()*4|0);
+        x.fillStyle=cols[(Math.random()*cols.length)|0]; x.fillRect(bx, j*sh+ (sh-3-h), w, h);
+        x.fillStyle='rgba(255,230,160,0.35)'; x.fillRect(bx, j*sh+(sh-3-h)+2, w, 1);
+        bx+=w+1;
+      }
+      x.fillStyle='#5a3a20'; x.fillRect(0, j*sh+sh-3, px, 3);      // 棚板
+    }
+    x.fillStyle='#2a1a0e'; x.fillRect(0,0,2,px); x.fillRect(px-2,0,2,px);
+  },64);
   TEX.brick = patTex((x,px)=>{
     x.fillStyle='#454060'; x.fillRect(0,0,px,px);
     for(let j=0;j<5;j++){ const off=(j%2)?px/6:0;
@@ -12283,6 +12780,8 @@ const THEME = {
   field:  {sky:0x79b8e8, fog:[0x9ccbe8,12,30], amb:[0xfff2e0,0.85],sun:[0xfff0d8,0.7]},
   cave:   {sky:0x0a1020, fog:[0x0a1020,9,22],  amb:[0x9aa8d0,0.8], sun:[0xbfd0ff,0.35]},
   indoor: {sky:0x1a1420, fog:[0x1a1420,10,24], amb:[0xffe6c0,0.95],sun:[0xffd8a0,0.4]},
+  // ★天空城・神殿：白い 石の 城に 明るい 空の 光（LQ3の 城は 暗い 紫の 石）
+  skycastle:{sky:0xa8c8e8, fog:[0xd0dcec,12,30], amb:[0xfff4e0,1.0], sun:[0xffffff,0.6]},
 };
 
 let canvas2d=null, is2D=false, lastPoses2D=[];
@@ -12519,7 +13018,9 @@ function buildMap(name){
   }
   disposeScene(scene);
   const map=C.MAPS[name];
-  const th=THEME[map.theme]||THEME.field;
+  // ★禁書庫は 屋内の 暗さ（見た目の 種類 sky の 色が なく、野外の 青空に なって いた）。天空城・神殿は 白い 城
+  const skyCastle = (name==='sky_castle' || name==='temple');
+  const th = /^archive/.test(name) ? THEME.indoor : skyCastle ? THEME.skycastle : (THEME[map.theme]||THEME.field);
   const sc=(C.WORLD&&C.WORLD.sceneOf)?C.WORLD.sceneOf(name):{};
   const ts=(C.townStateDef?C.townStateDef():null);
   const night=!!(C.G&&C.G.night)&&!!sc.outdoor;
@@ -12562,8 +13063,9 @@ function buildMap(name){
     rock: {side:0xc0ae96, top:0x9a8c78, floor:0x8a7a6a, water:0x7fb8d8, lump:0x7a6e60},
     sky:  {side:0xf2eee2, top:0xe6dcc0, floor:0xbab39c, water:0xffffff},   // 天空：白い 石と 金
     forge:{side:0xd8b8a0, top:0x8a6450, floor:0x7a6050, water:0xffffff},   // 炉：赤茶の 煉瓦
+    archive:{side:0xffffff, top:0x4a3424, floor:0x3c3448, water:0xffffff},  // 禁書庫：書架と 暗い 床
   };
-  const dkey = ice ? 'ice' : /^well/.test(name) ? 'well' : /^sea/.test(name) ? 'sea'
+  const dkey = ice ? 'ice' : /^archive/.test(name) ? 'archive' : /^well/.test(name) ? 'well' : /^sea/.test(name) ? 'sea'
              : /^peak/.test(name) ? 'peak' : /^furnace/.test(name) ? 'forge'
              : skyD ? 'sky' : 'rock';
   const dp = DPAL[dkey];
@@ -12689,7 +13191,7 @@ function buildMap(name){
         put('pillarCap', [x,topY+2.05,y]);
         continue;
       }
-      if(ch==='K'){                                  // ぎょくざ
+      if(ch==='K' || ch==='U'){                      // ぎょくざ（LQ4 は U。K は 鍵の 扉）
         put('throneSeat',[x,topY+0.42,y]);
         put('throneBack',[x,topY+1.15,y-0.34]);
         put('throneGold',[x,topY+1.72,y-0.34]);
@@ -12797,7 +13299,9 @@ function buildMap(name){
       const done = bi && bi.clearedFlag && C.G.flags[bi.clearedFlag];
       if(bi && !done){
         const bd = (C.MIDBOSS && C.MIDBOSS[bi.key]) || null;
-        const s=billboard((bd && bd.art) || bi.key, 2.4);
+        const ak = (bi.mapArt) || (bd && bd.art) || bi.key;
+        // ★人物の 絵の ボス（番人 アーキス など）は 人物の 大きさで
+        const s = (!MON[ak] && CHR[ak]) ? chrBillboard(ak, 1.5) : billboard(ak, 2.4);
         s.position.set(x,topY+0.75,y); scene.add(s);
         animObjs.push({mesh:s,bill:true,ph:1});
         const li=new THREE.PointLight(0x9a6ad0,1.2,4);
@@ -12854,7 +13358,7 @@ function buildMap(name){
       ? new THREE.MeshPhongMaterial({map:TEX.dIceSide, specular:0x9fd0f0, shininess:48})
       : cave
         ? new THREE.MeshLambertMaterial({map:TEX.dRockSide, color: dp.side})
-        : new THREE.MeshLambertMaterial({map: dkey==='forge'?TEX.brick:TEX.whitestone, color: dp.side});
+        : new THREE.MeshLambertMaterial({map: dkey==='forge'?TEX.brick : dkey==='archive'?TEX.shelf : TEX.whitestone, color: dp.side});
     const top  = ice
       ? new THREE.MeshLambertMaterial({map:TEX.dIceTop})
       : new THREE.MeshLambertMaterial({map: cave?TEX.dRockTop:TEX.dSlabTop, color: dp.top});
@@ -12928,7 +13432,7 @@ function buildMap(name){
       G_.spike||[]);
   }else{
     addInstanced(new THREE.BoxGeometry(1,1.6,1),
-      new THREE.MeshLambertMaterial({map:snow?TEX.whitestone:TEX.brick}),
+      new THREE.MeshLambertMaterial({map:(snow||skyCastle)?TEX.whitestone:TEX.brick, color: skyCastle?0xf6f0e2:0xffffff}),
       (G_.wall||[]).map(p=>[p[0],p[1],p[2]]));
     if(snow) addInstanced(new THREE.BoxGeometry(1.04,0.18,1.04),
       new THREE.MeshBasicMaterial({color:0xf4f9ff}),

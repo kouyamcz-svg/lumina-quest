@@ -163,6 +163,7 @@ const NPCS = {
   // ============ 第2章：上層区 ============
   upper_dist: [
     {at:'9,4', spr:'villagerB', name:'炉の 主任', lines:[
+      {when:{ch:5, flag:'ch4_gag'}, text:['主任「……わたしは 何も 言って おらん。城へ 行け」']},
       {when:{flag:'ch2_reported'}, text:[
         '主任「炉心の 鍵は 城に ある」',
         '主任「わたしの 判では 開かん。……すまんな」']},
@@ -270,6 +271,7 @@ const NPCS = {
       {text:['桟橋の 先に、小さな 舟が 繋いで ある。',
              '木でも 鉄でも ない。白い、軽い 何か で できている。']}]},
     {at:'5,9', spr:'elder', name:'港の 番人', lines:[
+      {when:{ch:5}, text:['番人「戻ってきたな。……上は 妙に 静かだ」','番人「役人どもが 誰も 口を きかん」']},
       {when:{flag:'ch3_landed'}, text:[
         '番人「行ってきたか。……で、下は どうだった」']},
       {text:['番人「わしは 四十年 この 舟を 磨いてきた」',
@@ -480,6 +482,43 @@ const NPCS = {
              '老人「減ったのは、去年が 初めてだ」']}]},
   ],
   // ★湧き水 西の集落
+  // ============ 第4章：天空城・禁書庫・神殿 ============
+  sky_castle: [
+    {at:'10,2', spr:'albelTmp', name:'公王 アルベル', lines:[
+      {when:{flag:'ch4_king'}, text:['公王は 窓の 外を 見て いる。']},
+      {text:['公王「……下がれ。用が あるなら 団長を 通せ」']}]},
+    {at:'8,4', spr:'guardA', name:'近衛の 騎士', lines:[
+      {when:{flag:'ch4_contract'}, text:['近衛「……禁書庫に 入ったと 聞いた。顔色が 悪いぞ」']},
+      {text:['近衛「謁見の間だ。静かに」']}]},
+    {at:'12,4', spr:'guardA', name:'近衛の 騎士', lines:[
+      {text:['近衛「陛下は この ところ、夜も 眠って おられぬ ようだ」']}]},
+    {at:'3,8', spr:'captain', name:'騎士団長 グラン', lines:[
+      {when:{flag:'ch4_contract'}, text:['グラン「……読んだか。その 顔で 分かる」','グラン「陛下の 前で、同じ 顔を して みせろ」']},
+      {when:{flag:'ch4_granHelp'}, text:['グラン「わしは 表で 見張る。行け」']},
+      {text:['グラン「……何だ」']}]},
+    {at:'2,10', spr:'butler', name:'禁書庫の 司書', lines:[
+      {when:{flag:'ch4_granHelp'}, text:['司書「騎士団長の 鍵……。十年ぶりに 見ました」','司書「中は 迷いやすい。灯を たよりに」']},
+      {text:['司書「禁書庫は 閉じて おります」']}]},
+    {at:'17,8', spr:'priestess', name:'神殿の 巫女', lines:[
+      {when:{flag:'ch4_lumina'}, text:['巫女「アマネさまが、あんな 顔で 笑う なんて」']},
+      {when:{flag:'ch4_templeOpen'}, text:['巫女「白竜さまが、お待ちです」']},
+      {text:['巫女「この 先は 神殿の 最奥。白竜さまの お許しなく、通せません」']}]},
+    {at:'6,14', spr:'guardB', name:'城の 門衛', lines:[
+      {text:['門衛「騎士団の 本部は 左、神殿へは 右、謁見の間は 奥だ」']}]},
+    {at:'14,14', spr:'villagerB', name:'城の 役人', lines:[
+      {when:{flag:'ch4_king'}, text:['役人「団長の 席が……いや、何でも ない」']},
+      {text:['役人「減光の 話は するな。上から そう 言われて いる」']}]},
+  ],
+  archive_core: [
+    {at:'8,2', spr:'shelfobj', name:'千年前の 契約書', lines:[
+      {when:{flag:'ch4_contract'}, text:['「……要らぬ 夢は 夢の 底に 棄てる」']},
+      {text:['書見台の 前に、番人が 立って いる。']}]},
+  ],
+  temple: [
+    {at:'8,3', spr:'luminaTmp', name:'白竜 ルミナ', lines:[
+      {when:{flag:'ch4_lumina'}, text:['白竜は 静かに 目を 閉じて いる。']},
+      {text:['白い 竜が 眠って いる。']}]},
+  ],
   well_west: [
     {at:'3,5', spr:'guardB', name:'西の 集落長', lines:[
       {when:{flag:'ch3_wellSolved'}, text:[
@@ -732,6 +771,21 @@ const QUESTS = {
     reward:{}, next:'ch2_q2_core',
   },
   // ============ 第3章：氷の谷 ============
+  ch4_q1_archive: {
+    id:'ch4_q1_archive', chapter:5, title:'禁書庫',
+    giver:'炉の 主任',
+    desc:'減光の 調査は 打ち切られた。千年前の 記録を 確かめる。',
+    steps:[
+      {id:'gran',    desc:'天空城で 騎士団長 グランに 会う',     flag:'ch4_granMet'},
+      {id:'refused', desc:'禁書庫の 司書に 頼む',               flag:'ch4_serenRefused'},
+      {id:'key',     desc:'騎士団長 グランに もう一度 話す',     flag:'ch4_granHelp'},
+      {id:'arkis',   desc:'禁書庫の 奥で 番人を 越える',         flag:'ch4_arkisDone'},
+      {id:'read',    desc:'千年前の 契約書を 読む',             flag:'ch4_contract'},
+      {id:'lumina',  desc:'神殿の 最奥で 白竜に 会う',          flag:'ch4_lumina'},
+      {id:'king',    desc:'謁見の間で 公王に 会う',            flag:'ch4_king'},
+    ],
+    reward:{}, next:null,
+  },
   ch3_q5_toros: {
     id:'ch3_q5_toros', chapter:4, title:'父の 故郷',
     giver:'村の 老人',

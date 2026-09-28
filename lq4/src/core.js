@@ -181,6 +181,13 @@ const ENEMIES = [
    art:'kirimatoi', inflict:{type:'confuse', p:0.18}},
   {key:'honetori',    name:'骨鳥',      hp:175,atk:46, def:27, agi:26, exp:640, gold:660, minLv:20,
    art:'honetori'},
+  // ---- 第4章：禁書庫（絵は 仮に 第2章の 敵の 絵）----
+  {key:'kokuhyoushi', name:'黒表紙の 騎士', hp:310,atk:60, def:44, agi:20, exp:1000, gold:920, minLv:24, art:'kamikishi'},
+  {key:'sumibane',    name:'墨羽の カラス', hp:240,atk:57, def:34, agi:34, exp:960,  gold:880, minLv:24, art:'kamigarasu',
+   inflict:{type:'confuse', p:0.18}},
+  {key:'noroichou',   name:'呪い帳面',     hp:265,atk:53, def:38, agi:22, exp:980,  gold:900, minLv:24, art:'susurichou',
+   inflict:{type:'sleep', p:0.2}},
+  {key:'shokabanken', name:'書架の 番犬',   hp:390,atk:64, def:52, agi:16, exp:1180, gold:1000, minLv:25, art:'wasuremono'},
   // ---- 地上の 島ごとの 固有種（野外）----
   //   ★まえは 地上の 野外が 全島 おなじ 5種 だった（雪原でも 砂漠でも 同じ 敵）
   //   ★絵（MON）が まだ ない 敵は 出ない（島の 表から のぞかれ、いままでの 表に もどる）
@@ -233,6 +240,10 @@ const MIDBOSS = {
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第3章ボス：あくむじゅう ルプス（狼座）----
   //   大陸から 落ちた 悪夢の かけらが 地上の 狼に 憑いた もの。
+  // ★禁書庫の 番人 アーキス（手合わせ。絵は 仮： CHR.arkisTmp）
+  // ★勝率：Lv34で 70%・Lv35で 95%（第3章の 終わりの 装備・天空の 鎧）。負けても 手合わせで 進む
+  arkis:{key:'arkis', name:'番人 アーキス', hp:10400, atk:98, def:46, agi:28, acts:1,
+    exp:3400, gold:0, art:'arkisTmp', spar:true},
   lupus:{key:'lupus', name:'あくむじゅう ルプス', hp:7400,   /* ★5600 → 7400：上位の 呪文（スパーダ など）を 足した ぶん（勝率 Lv32で 75%・Lv33で 83%） */ atk:82, def:42, agi:24, acts:1,
     exp:6200, gold:6800, art:'lupus', scale:1.25,
     skill:{p:0.30, mul:1.30, name:'かみくだき'},
@@ -317,13 +328,19 @@ const MIDBOSS = {
 };
 const EXP_MUL = {};
 // ★章べつの でかた（きょうつう byMap より ゆうせん）
-const byMapCh = {};
+const byMapCh = {
+  // ★第4章（内部の 章 番号 5）
+  '5:archive1': ['kokuhyoushi','sumibane','noroichou'],
+  '5:archive2': ['kokuhyoushi','noroichou','sumibane','shokabanken'],
+};
 const byMap = {
   rift_yard: ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
   world:     ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
   pipe_path: ['kagekakera','shihenchu','akumuga','yamiinu'],
   old_pipe:  ['kansuiki','shokudai','hakoyami','yamiinu','sumibami'],
   furnace:   ['kamikishi','hikarikui','kamigarasu','kudamukade','susurichou','wasuremono','nukegara'],
+  archive1:  ['kokuhyoushi','sumibane','noroichou'],
+  archive2:  ['kokuhyoushi','noroichou','sumibane','shokabanken'],
   // ★塔は 5階だて。上へ 行くほど 手ごわく なる。
   tower1:    ['kamigarasu','hikarikui'],
   tower2:    ['kamigarasu','hikarikui','susurichou'],
@@ -673,6 +690,105 @@ const MAPS = {
     }},
 
   // ============ 第3章：トロスの村（父の 故郷）============
+  // ================= 第4章「禁書庫」 =================
+  // ★天空城：LQ3の 城の 3D（柱 T・玉座 K・扉 D・窓と 垂れ幕の 壁・絨毯の 床）を そのまま 使う
+  sky_castle:{name:'天空城', theme:'castle', enc:false, tiles:[
+    "#####################",
+    "#.........U.........#",
+    "#..T...T..n..T...T..#",
+    "#...................#",
+    "#..T....n...n....T..#",
+    "#...................#",
+    "##########.##########",
+    "#......#.....#......#",
+    "#..n...#.....#...n..#",
+    "D...................D",
+    "#.n....#.....#......#",
+    "#......#.....#......#",
+    "##########.##########",
+    "#..T.............T..#",
+    "#.....n.......n.....#",
+    "#..T.............T..#",
+    "##########G##########",
+  ], warpsXY:{
+      '10,16':{to:'upper_dist', x:10, y:2},
+      '0,9':  {to:'archive1',   x:10, y:13},
+      '20,9': {to:'temple',     x:8,  y:10}
+    }},
+  // ★禁書庫：書架の 迷路（3Dの ダンジョン。壁は 書架）
+  archive1:{name:'禁書庫 上層', theme:'sky', enc:true, encRate:0.07, encGrace:6, tiles:[
+    "#####################",
+    "#.....#.......#.....#",
+    "#.###.#.#####.#.###.#",
+    "#.#...#.#...#...#...#",
+    "#.#.###.#.#.#####.###",
+    "#.#.....#.#.......#.#",
+    "#.#######.#######.#.#",
+    "#...#.....#.....#...#",
+    "###.#.#####.###.###.#",
+    "#...#.#.....#.#.....#",
+    "#.###.#.#####.#####.#",
+    "#.#...#.....#.....#.#",
+    "#.#.#######.#.###.#.#",
+    "#...........#...#..>#",
+    "##########G##########",
+  ], warpsXY:{
+      '10,14':{to:'sky_castle', x:1,  y:9, back:true},
+      '19,13':{to:'archive2',   x:2,  y:13}
+    }},
+  archive2:{name:'禁書庫 下層', theme:'sky', enc:true, encRate:0.07, encGrace:6, tiles:[
+    "##########.##########",
+    "#.........K.........#",
+    "#.#######.#.#######.#",
+    "#.#.....#...#.....#.#",
+    "#.#.###.#####.###.#.#",
+    "#...#L#.......#L#...#",
+    "###.#.#.#####.#.#.###",
+    "#...#...#...#...#...#",
+    "#.#####.#.#.#.#####.#",
+    "#.......#.#.#.......#",
+    "#.#######.#.#######.#",
+    "#.#.......#.......#.#",
+    "#.#.#####.#.#####.#.#",
+    "#<..#.........#.....#",
+    "#####################",
+  ], warpsXY:{
+      '1,13': {to:'archive1',     x:18, y:13, back:true},
+      '10,0': {to:'archive_core', x:8,  y:10}
+    }},
+  archive_core:{name:'禁書庫 最奥', theme:'sky', enc:false, tiles:[
+    "#################",
+    "#...............#",
+    "#..#....n....#..#",
+    "#...............#",
+    "#.......B.......#",
+    "#...............#",
+    "#..#.........#..#",
+    "#...............#",
+    "#...............#",
+    "#..#.........#..#",
+    "#...............#",
+    "########G########",
+  ], warpsXY:{
+      '8,11':{to:'archive2', x:9, y:1, back:true}
+    }},
+  // ★神殿の 最奥（城の 3D）
+  temple:{name:'神殿の 最奥', theme:'castle', enc:false, tiles:[
+    "#################",
+    "#...............#",
+    "#.T...........T.#",
+    "#.......n.......#",
+    "#...............#",
+    "#.T...........T.#",
+    "#...............#",
+    "#...............#",
+    "#.T...........T.#",
+    "#...............#",
+    "#...............#",
+    "########G########",
+  ], warpsXY:{
+      '8,11':{to:'sky_castle', x:19, y:9, back:true}
+    }},
   // ★見た目が 野外（world）だと 家が 天空の 管の 継ぎ目の 絵に なって いた → 村の 見た目
   toros:{name:'トロスの村', theme:'village', enc:false, tiles:[
     "#######################",
@@ -1546,7 +1662,7 @@ function chapterLabel(no){
 function chData(){ return CHD ? CHD.get(G.chapter||1) : null; }
 
 const SOLID = new Set(['#','f','w','o','T','F','K','~','^','H','e','y','j',
-                       'O','x','L','l','p','q','%','R','h','H','E','u']);
+                       'O','x','L','l','p','q','%','R','h','H','E','u','U']);   // U：天空城の 玉座
                        // u＝ゆかの 管の きれはし（しらべる もの。宝箱と おなじく 通れない）
                        // A＝天空城の 大門（3×3）
                        // j/J＝かべの 継ぎ目（管を さす ところ）
@@ -1688,9 +1804,24 @@ function interact(){
     let gx=nx, gy=ny;
     while(tileAt(P.map,gx-1,gy)==='E') gx--;
     while(tileAt(P.map,gx,gy-1)==='E') gy--;
-    const lines = (cd && cd.gates && (cd.gates[P.map+':'+gx+','+gy]
-                                   || cd.gates[P.map+':'+nx+','+ny]))
-                || ['閉ざされた 大門。白石の 壁が 雲まで 続いている。'];
+    const gate = cd && cd.gates && (cd.gates[P.map+':'+gx+','+gy] || cd.gates[P.map+':'+nx+','+ny]);
+    // ★第4章：大門が 開く（{to, need, lockMsg, msg}）。まえは 断りの 文だけ だった
+    if(gate && !Array.isArray(gate) && gate.to){
+      if(gate.need && !G.flags[gate.need]){
+        G.mode='msg'; U.msg(gate.lockMsg || ['大門は 閉ざされて いる。'], ()=>{ G.mode='field'; }); return;
+      }
+      G.mode='msg';
+      U.msg(gate.msg || ['大門が 開いた。'], ()=>{
+        const t=gate.to; P.map=t.map; P.x=t.x; P.y=t.y; P.dir=t.dir||'back';
+        G.trail=[[P.x,P.y],[P.x,P.y],[P.x,P.y]];
+        V.buildMap(P.map); V.setActors(true); U.label(WORLD.mapName(P.map)); U.hud();
+        A.bgm && A.bgm(P.map);
+        if(cd.onEnter && cd.onEnter[P.map]) G.flags[cd.onEnter[P.map]] = true;
+        G.mode='field';
+      });
+      return;
+    }
+    const lines = gate || ['閉ざされた 大門。白石の 壁が 雲まで 続いている。'];
     G.mode='msg';
     U.msg(lines, ()=>{ G.mode='field'; });
     return;
@@ -1949,6 +2080,9 @@ function areaName(map,x,y){
 // ★けっかい：じょうけんが そろうまで 入れない。
 //   はんていは ここ 1か所。よそで 見おとしても かならず ここで 止まる。
 function wardBlocks(to){
+  // ★章データの closed：その 章の あいだ 閉じて いる 場所（第4章の 封鎖線など）。
+  //   ★結界の 表（WARDS）に 同じ 地図を 重ねて 書くと、前の 章の 結界を 上書きして しまう
+  { const cd=chData(); if(cd && cd.closed && cd.closed[to] && !(cd.closed[to].until && G.flags[cd.closed[to].until])) return true; }
   const wd = WARDS[to];
   if(!wd) return false;
   const now = G.chapter||1;
@@ -1962,6 +2096,7 @@ function wardBlocks(to){
   return !G.flags[wd.flag];
 }
 function wardMsg(to){
+  { const cd=chData(); if(cd && cd.closed && cd.closed[to] && !(cd.closed[to].until && G.flags[cd.closed[to].until])) return cd.closed[to].msg; }
   const wd = WARDS[to];
   if(!wd) return null;
   if((G.chapter||1) < wd.chapter && wd.msgEarly) return wd.msgEarly;
@@ -3477,6 +3612,23 @@ function victory(){
   U.msg(lines, ()=>endBattle(true));
 }
 function defeat(){
+  // ★手合わせ（spar）：負けても 全滅に しない。ごほうびの 印・ますの 書きかえは 勝った ときと 同じ
+  const b0 = G.battle, sparKey = b0 && b0.named && MIDBOSS[b0.named] && MIDBOSS[b0.named].spar ? b0.named : null;
+  if(sparKey){
+    const cd = chData(), rw = cd && cd.bossReward && cd.bossReward[sparKey];
+    party.concat(reserve).forEach(m=>{ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; });
+    if(rw){
+      (rw.set||[]).forEach(f=>{ G.flags[f]=true; });
+      if(rw.setTiles){
+        (Array.isArray(rw.setTiles)?rw.setTiles:[rw.setTiles]).forEach(o=>{ setTile(o.map||P.map, o.x, o.y, o.ch||'.'); });
+        V.refresh && V.refresh();
+      }
+      Object.keys(rw.quest||{}).forEach(q=>questAdvance(q, rw.quest[q]));
+    }
+    U.hud();
+    U.msg([].concat((rw && rw.loseMsg) || ['手合わせは 終わった。'], (rw && rw.msg) || []), ()=>endBattle(true));
+    return;
+  }
   A.lose();
   U.msg(['全滅して しまった…'], ()=>{
     party.concat(reserve).forEach(m=>{ m.hp=m.maxhp; m.mp=m.maxmp; m.status=null; });
@@ -3571,6 +3723,15 @@ function sellGood(map, key, n){
 // 攻撃 技は 「ここでは つかえない」。
 // ★けっかい：ここを とおるには じょうけんが いる
 const WARDS = {
+  // ---- 第4章 ----
+  archive1: {chapter:5, flag:'ch4_granHelp',
+    earlyInChapter:['禁書庫の 扉は 閉ざされて いる。',
+              '司書「公王陛下の 印か、騎士団長の 鍵が なければ 開きません」'],
+    msg:['禁書庫。書架が 天井まで 続いて いる。']},
+  temple: {chapter:5, flag:'ch4_templeOpen',
+    earlyInChapter:['神殿の 最奥への 扉。巫女が 前に 立って いる。',
+              '巫女「白竜さまの お許しなく、奥へは 通せません」'],
+    msg:['神殿の 最奥。']},
   // ★試験場：技師の 頼みを 済ませるまで 入れない。
   //   まえは たのまれごとを とばして 試験に 行けて しまい、
   //   点検路も かげの あぎとも 見ずに 話が すすんで いた。

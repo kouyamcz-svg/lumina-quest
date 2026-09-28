@@ -199,6 +199,9 @@ function kill(k){
     //   ＝ 入って きた ぜんぶの さきへ、この マップから 出口が ある なら よい。
     const w = m.warpsXY || {};
     const outs = Object.keys(w).map(k=>w[k].to);
+    // ★大門（章データの gates）で 行ける 先も 出口（上層区 → 天空城）
+    const CHD_ = vm.runInContext('CHAPTERS_DATA', ctx);
+    CHD_.list().forEach(no=>{ const g=CHD_.get(no).gates||{}; Object.keys(g).forEach(k=>{ if(k.split(':')[0]===mp && g[k] && g[k].to) outs.push(g[k].to.map); }); });
     const paired = froms.every(f=>outs.includes(f));
     if(paired) return;
     const hasBack = Object.keys(w).some(k=>w[k].back);
