@@ -2687,6 +2687,7 @@ const CH = {
     ending: {
       trigger: 'ch3_ascend',          // ★天空の 職員に 合図を 頼んだ あと（まえは トロスの 老人に 報せた 直後）
       set:['ch3_cleared'],
+      img:'scene_ch3_return',          // ★帰還の 一枚絵（まえは 氷の谷の 地図の 上に 文が 出て いた）
       msg:['',
            '── 帰還 ──',
            '',
