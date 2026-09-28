@@ -848,7 +848,8 @@ function setFieldVolume(v){
 //   きょくごとに <audio> を べつに もつ。1つの ようそで src を さしかえると、
 //   よみこみの とちゅうで さいせいが みだれる（じっさいに おきた）。
 let batWant = false, batVol = 0.55, batErr = '', batTrack = null;
-const BATTLE_TRACKS = {battle3:'battle3.mp3', boss:'boss.mp3'};
+// ★battleSky：天空の 鎧を 装備した あとの ふつうの せんとう（いただいた 曲。頭の 無音 0.24秒を 削り +1.5dB）
+const BATTLE_TRACKS = {battle3:'battle3.mp3', boss:'boss.mp3', battleSky:'battle_sky.mp3'};
 const batEls = {};        // なまえ → {el, src, gain}
 function battleEl(track){
   if(batEls[track]) return batEls[track];

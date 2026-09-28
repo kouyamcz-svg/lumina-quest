@@ -1,7 +1,7 @@
 // ルミナクエストIV サービスワーカー
 // assets.js は ?v=… つきで よみこむ。ないようが かわると URLも かわるので、
 // ふるい キャッシュは つかわれない（え を さしかえても ふるい ままに なる ふぐあいの たいさく）。
-const CACHE='lq4-0c70d727';
+const CACHE='lq4-243ce847';
 // ★installで index.html を 先に とりこむと、ふるい ものを つかみ続ける ことが ある。
 //   ここでは からの まま はじめて、つかった ものだけ ためる。
 const ASSETS=[];
@@ -17,7 +17,7 @@ self.addEventListener('fetch',e=>{
   if(e.request.method!=='GET') return;
   const url=new URL(e.request.url);
   // そざいは キャッシュゆうせん（おおきくて かわらない）
-  if(url.pathname.endsWith('/assets.js') || url.pathname.endsWith('/field.mp3') || url.pathname.endsWith('/castle.mp3') || url.pathname.endsWith('/town.mp3') || url.pathname.endsWith('/battle3.mp3') || url.pathname.endsWith('/dungeon.mp3') || url.pathname.endsWith('/boss.mp3')){
+  if(url.pathname.endsWith('/assets.js') || url.pathname.endsWith('/field.mp3') || url.pathname.endsWith('/castle.mp3') || url.pathname.endsWith('/town.mp3') || url.pathname.endsWith('/battle3.mp3') || url.pathname.endsWith('/dungeon.mp3') || url.pathname.endsWith('/boss.mp3') || url.pathname.endsWith('/battle_sky.mp3')){
     e.respondWith(caches.match(e.request).then(r=>r || fetch(e.request).then(res=>{
       const copy=res.clone(); caches.open(CACHE).then(c=>c.put(e.request,copy)); return res;
     })));

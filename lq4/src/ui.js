@@ -201,6 +201,8 @@ const A = {
     // ★ボスせんは どの しょうでも せんようの きょく
     if(kind === 'boss' && BGM.playBattleFile){
       BGM.playBattleFile('boss');
+    }else if(C.G.flags && C.G.flags.sky_armor && BGM.playBattleFile){
+      BGM.playBattleFile('battleSky');          // ★天空の 鎧を 装備した あと
     }else if(no >= 3 && BGM.playBattleFile){
       BGM.playBattleFile('battle3');            // 第3章いこう：ふつうの せんとう
     }else{

@@ -608,6 +608,12 @@ M1で `Q` を順に実マップへ置き換えていく。
 - build_verify の横向きの判定：生成りの上着を顔と数えて右向きと誤判定 → 肌の色（r-g≥28・r-b≥45）で見る。肌が少ない（ノエ）ときは明るい色で見る
 - これで 5-40〜5-43 の描き替え（iosky_recolor・iosky_head・io_proportion）は使わない
 
+## 5-45. 天空の鎧の後の戦闘曲
+
+- `battle_sky.mp3`（いただいた m4a 57.8秒 → mp3 112kbps。頭の無音0.24秒を削り、+1.5dB で平均−17.6dB＝ボス戦と同じくらい）
+- bgm.js の BATTLE_TRACKS に `battleSky`。ui.js の battleBgm：ボス戦はボスの曲、sky_armor が立っていれば battleSky、それ以外は従来（第3章以降 battle3・第1〜2章は合成）
+- sw.js に追加。検査（sound）、ブラウザでの確認 `tools/browser/bgmtest.js`
+
 ## 6. LQ3 から直したこと（IVでは再発させない）
 
 1. **ボス報酬が「第2章以降だけ」動く決め打ち** → 全章で章データ駆動に統一

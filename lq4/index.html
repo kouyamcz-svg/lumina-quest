@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-28 21:59 JST", "build":"7f80e68b","assets_sha": "1205bb29", "lines": {"world": 140, "npc": 917, "chapters": 2750, "bgm": 985, "view2d": 2594, "core": 4208, "view": 1685, "ui": 1223}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-28 22:22 JST", "build":"5a8fe580","assets_sha": "1205bb29", "lines": {"world": 140, "npc": 917, "chapters": 2750, "bgm": 986, "view2d": 2594, "core": 4208, "view": 1685, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -4828,7 +4828,8 @@ function setFieldVolume(v){
 //   きょくごとに <audio> を べつに もつ。1つの ようそで src を さしかえると、
 //   よみこみの とちゅうで さいせいが みだれる（じっさいに おきた）。
 let batWant = false, batVol = 0.55, batErr = '', batTrack = null;
-const BATTLE_TRACKS = {battle3:'battle3.mp3', boss:'boss.mp3'};
+// ★battleSky：天空の 鎧を 装備した あとの ふつうの せんとう（いただいた 曲。頭の 無音 0.24秒を 削り +1.5dB）
+const BATTLE_TRACKS = {battle3:'battle3.mp3', boss:'boss.mp3', battleSky:'battle_sky.mp3'};
 const batEls = {};        // なまえ → {el, src, gain}
 function battleEl(track){
   if(batEls[track]) return batEls[track];
@@ -13653,6 +13654,8 @@ const A = {
     // ★ボスせんは どの しょうでも せんようの きょく
     if(kind === 'boss' && BGM.playBattleFile){
       BGM.playBattleFile('boss');
+    }else if(C.G.flags && C.G.flags.sky_armor && BGM.playBattleFile){
+      BGM.playBattleFile('battleSky');          // ★天空の 鎧を 装備した あと
     }else if(no >= 3 && BGM.playBattleFile){
       BGM.playBattleFile('battle3');            // 第3章いこう：ふつうの せんとう
     }else{

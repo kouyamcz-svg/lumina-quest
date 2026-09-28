@@ -95,5 +95,20 @@ T('きりかえも のこる', JSON.parse(stored.LQ4_SOUND).mix===true, stored.L
   T('stopBattleAll が そとに 出て いる', /stopBattleAll,/.test(bg));
 }
 
+// ★天空の 鎧を 装備した あとの ふつうの せんとうは battleSky。ボス戦は ボスの 曲
+{
+  const U=fs.readFileSync('src/ui.js','utf8'), B=fs.readFileSync('src/bgm.js','utf8');
+  const a=U.indexOf('  battleBgm(kind){'), b=U.indexOf('  bgmStop(){', a);
+  const fnSrc='({'+U.slice(a,b)+'})';
+  const played=[];
+  const make=(flags,chapter)=>{ const cx={C:{G:{flags,chapter}}, ctx:()=>null, sndApply:()=>{},
+    BGM:{attach(){},resume(){},playBattleFile(t){played.push(t);},stopBattleFile(){},play(t){played.push('合成:'+t);}}};
+    vm.createContext(cx); return vm.runInContext(fnSrc, cx); };
+  played.length=0; make({sky_armor:true},4).battleBgm('');      T('天空の 鎧の あとの ふつうの せんとうは 新しい 曲', played[0]==='battleSky', played.join(','));
+  played.length=0; make({sky_armor:true},4).battleBgm('boss');  T('天空の 鎧の あとでも ボス戦は ボスの 曲', played[0]==='boss', played.join(','));
+  played.length=0; make({},4).battleBgm('');                     T('天空の 鎧の まえは これまでの 曲', played[0]==='battle3', played.join(','));
+  T('曲の ファイルが ある', /battleSky:'battle_sky\.mp3'/.test(B) && fs.existsSync('battle_sky.mp3'));
+  T('とぎれずに 使えるよう しまって おく（sw.js）', /battle_sky\.mp3/.test(fs.readFileSync('sw.js','utf8')));
+}
 console.log('\n--- sound: '+(n-ng)+'/'+n+' 通過 ---');
 process.exit(ng?1:0);
