@@ -82,19 +82,22 @@ T('LQ4_BUILD が ある', html.includes('window.LQ4_BUILD='));
   // 顔の 高さ帯（上から 15〜50%）で、はだ色に ちかい ドットの かたよりを 見る
   const faceSide = (buf)=>{
     const {w,h,px} = unpack(buf);
-    let L=0, R=0;
-    for(let y=Math.floor(h*0.15); y<Math.floor(h*0.52); y++){
-      for(let x=0;x<w;x++){
-        const o=(y*w+x)*4, a=px[o+3];
-        if(a<100) continue;
-        const r=px[o], g=px[o+1], b=px[o+2];
-        // はだ／目の しろ：明るく、青みが 強すぎない
-        const lum=(r+g+b)/3;
-        if(lum<120) continue;
-        if(b > r+30) continue;                  // 青い ぬの は のぞく
-        if(x < w/2) L++; else R++;
+    // ★まず 肌の 色（赤みが 強い）で 見る。生成りの 上着を 顔と 数えて 新しい イオを 右向きと
+    //   誤判定 した ため。肌の ドットが 少ない（ノエの 白い 顔など）ときは 明るい 色で 見る
+    const count=(strict)=>{ let L=0,R=0;
+      for(let y=Math.floor(h*0.15); y<Math.floor(h*0.52); y++){
+        for(let x=0;x<w;x++){
+          const o=(y*w+x)*4, a=px[o+3]; if(a<100) continue;
+          const r=px[o], g=px[o+1], b=px[o+2], lum=(r+g+b)/3;
+          if(lum<120) continue;
+          if(b > r+30) continue;                  // 青い ぬの は のぞく
+          if(strict && !(r-g >= 28 && r-b >= 45)) continue;
+          if(x < w/2) L++; else R++;
+        }
       }
-    }
+      return [L,R]; };
+    let [L,R]=count(true);
+    if(L+R < 6) [L,R]=count(false);
     if(L===0 && R===0) return '?';
     return L>R ? 'left' : 'right';
   };
