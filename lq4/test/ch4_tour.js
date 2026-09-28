@@ -142,6 +142,17 @@ for(const no of [2,3,4]){
   T('第'+(no-1)+'章では 炉の 外郭を 第4章の 封鎖で 閉じない', !(C.chData().closed||{}).furnace);
 }
 
+// ===== 絵：白竜 ルミナは 正式な 絵（仮の 絵 luminaTmp は 使わない）=====
+{
+  const actx={console, window:{}}; actx.globalThis=actx; vm.createContext(actx);
+  vm.runInContext(fs.readFileSync('assets.js','utf8')+';globalThis.__CHR=CHR;', actx, {filename:'assets.js'});
+  const CH=actx.__CHR, e=C.NPCDATA ? C.NPCDATA.npcAt('temple',8,3) : vm.runInContext("NPCDATA.npcAt('temple',8,3)", ctx);
+  T('神殿の 最奥の 白竜は 絵 lumina', e && e.spr==='lumina', e && e.spr);
+  T('CHR.lumina が ある（座った 姿・3D の 高さ bb）', CH.lumina && CH.lumina.front && CH.lumina.bb>1.45, CH.lumina && (CH.lumina.w+'x'+CH.lumina.h));
+  T('仮の 絵 luminaTmp が 残って いない', !CH.luminaTmp && fs.readFileSync('src/npc.js','utf8').indexOf('luminaTmp')<0);
+  T('飛ぶ 姿は 終章用に 保存（art/chr/luminaFly.png）', fs.existsSync('art/chr/luminaFly.png') && fs.existsSync('art/chr/luminaFly_src.png'));
+}
+
 T('クエスト画面が 章の 途中で 空に ならない', __GAPS.length===0, __GAPS.map(g=>g.from+'（'+g.n+'）').join(' / '));
 console.log('\n--- ch4_tour: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

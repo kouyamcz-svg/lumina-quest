@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-28 23:08 JST", "build":"888e58f9","assets_sha": "ea404841", "lines": {"world": 148, "npc": 971, "chapters": 3008, "bgm": 986, "view2d": 2594, "core": 4369, "view": 1709, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 08:00 JST", "build":"8d622679","assets_sha": "5f51c0eb", "lines": {"world": 148, "npc": 971, "chapters": 3008, "bgm": 986, "view2d": 2594, "core": 4369, "view": 1711, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -163,7 +163,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=ea404841"></script>
+<script src="assets.js?v=5f51c0eb"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -836,7 +836,7 @@ const NPCS = {
       {text:['書見台の 前に、番人が 立って いる。']}]},
   ],
   temple: [
-    {at:'8,3', spr:'luminaTmp', name:'白竜 ルミナ', lines:[
+    {at:'8,3', spr:'lumina', name:'白竜 ルミナ', lines:[
       {when:{flag:'ch4_lumina'}, text:['白竜は 静かに 目を 閉じて いる。']},
       {text:['白い 竜が 眠って いる。']}]},
   ],
@@ -13252,10 +13252,12 @@ function buildMap(name){
         const e=NPCDATA.npcAt(name,x,y);
         if(e && e.spr) key=e.spr;
       }
-      const s = CHR[key] ? chrBillboard(key,1.45) : billboard('npc',1.2);
-      s.position.set(x, topY+0.74, y); s.userData.bill=true;
+      // ★大きな 生き物（白竜など）は CHR の bb で 高さを 決める（人は 1.45）
+      const bh = (CHR[key] && CHR[key].bb) || 1.45;
+      const s = CHR[key] ? chrBillboard(key,bh) : billboard('npc',1.2);
+      s.position.set(x, topY+bh/2+0.015, y); s.userData.bill=true;
       scene.add(s); animObjs.push({mesh:s,bill:true,ph:0});
-      const sh=new THREE.Mesh(new THREE.CircleGeometry(0.30,12),
+      const sh=new THREE.Mesh(new THREE.CircleGeometry(0.30*Math.max(1,bh/1.45),12),
         new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.28,depthWrite:false}));
       sh.rotation.x=-Math.PI/2; sh.position.set(x, topY+0.045, y);
       scene.add(sh);                                  // あしもとの かげ

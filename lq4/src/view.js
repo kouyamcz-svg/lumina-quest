@@ -1003,10 +1003,12 @@ function buildMap(name){
         const e=NPCDATA.npcAt(name,x,y);
         if(e && e.spr) key=e.spr;
       }
-      const s = CHR[key] ? chrBillboard(key,1.45) : billboard('npc',1.2);
-      s.position.set(x, topY+0.74, y); s.userData.bill=true;
+      // ★大きな 生き物（白竜など）は CHR の bb で 高さを 決める（人は 1.45）
+      const bh = (CHR[key] && CHR[key].bb) || 1.45;
+      const s = CHR[key] ? chrBillboard(key,bh) : billboard('npc',1.2);
+      s.position.set(x, topY+bh/2+0.015, y); s.userData.bill=true;
       scene.add(s); animObjs.push({mesh:s,bill:true,ph:0});
-      const sh=new THREE.Mesh(new THREE.CircleGeometry(0.30,12),
+      const sh=new THREE.Mesh(new THREE.CircleGeometry(0.30*Math.max(1,bh/1.45),12),
         new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.28,depthWrite:false}));
       sh.rotation.x=-Math.PI/2; sh.position.set(x, topY+0.045, y);
       scene.add(sh);                                  // あしもとの かげ

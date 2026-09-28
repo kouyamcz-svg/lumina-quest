@@ -515,7 +515,7 @@ const NPCS = {
       {text:['書見台の 前に、番人が 立って いる。']}]},
   ],
   temple: [
-    {at:'8,3', spr:'luminaTmp', name:'白竜 ルミナ', lines:[
+    {at:'8,3', spr:'lumina', name:'白竜 ルミナ', lines:[
       {when:{flag:'ch4_lumina'}, text:['白竜は 静かに 目を 閉じて いる。']},
       {text:['白い 竜が 眠って いる。']}]},
   ],
