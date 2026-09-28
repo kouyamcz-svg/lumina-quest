@@ -85,9 +85,10 @@ if(MAP==='__flowT'){ require('./flow_toros.js')(C,V,vm,ctx); process.exit(0); }
 if(MAP==='__flow'){ require('./flow_body.js')(C,V,vm,ctx); process.exit(0); }
 C.bind(C.NullView,{msg(l,d){d&&d();},menu(i,t,cb){cb(0);},hud(){},label(){}},C.NullAudio);
 C.freshState(); C.G.chapter = Number(CH||4);
-C.party.length=0; ['io','seren','noe'].forEach(k=>C.party.push(C.mkMember(k,20)));
+C.party.length=0; (process.env.PARTY4?['io','seren','noe','amane']:['io','seren','noe']).forEach(k=>C.party.push(C.mkMember(k,20)));
 C.P.map=MAP; C.P.x=Number(PX); C.P.y=Number(PY); C.P.dir='back'; C.G.mode='field';
-C.G.trail=[[C.P.x,C.P.y+1],[C.P.x,C.P.y+2],[C.P.x,C.P.y+3]];
+C.G.trail = process.env.ROW ? [[C.P.x+1,C.P.y],[C.P.x+2,C.P.y],[C.P.x+3,C.P.y]] : [[C.P.x,C.P.y+1],[C.P.x,C.P.y+2],[C.P.x,C.P.y+3]];
+if(process.env.DIR) C.P.dir=process.env.DIR;
 // 3D で えがく ように 強制
 const WD = vm.runInContext('WORLD', ctx);
 const sc = WD.SCENES[(WD.MAP_IDS[MAP]||{}).scene];
