@@ -150,6 +150,8 @@ for(const no of [2,3,4]){
   T('神殿の 最奥の 白竜は 絵 lumina', e && e.spr==='lumina', e && e.spr);
   T('CHR.lumina が ある（座った 姿・3D の 高さ bb）', CH.lumina && CH.lumina.front && CH.lumina.bb>1.45, CH.lumina && (CH.lumina.w+'x'+CH.lumina.h));
   T('仮の 絵 luminaTmp が 残って いない', !CH.luminaTmp && fs.readFileSync('src/npc.js','utf8').indexOf('luminaTmp')<0);
+  T('番人 アーキスの 絵は CHR.arkis（3面）', C.MIDBOSS.arkis.art==='arkis' && CH.arkis && CH.arkis.front && CH.arkis.side && CH.arkis.back, C.MIDBOSS.arkis.art);
+  T('仮の 絵 arkisTmp が 残って いない', !CH.arkisTmp && fs.readFileSync('src/core.js','utf8').indexOf('arkisTmp')<0);
   T('飛ぶ 姿は 終章用に 保存（art/chr/luminaFly.png）', fs.existsSync('art/chr/luminaFly.png') && fs.existsSync('art/chr/luminaFly_src.png'));
 }
 

@@ -240,10 +240,10 @@ const MIDBOSS = {
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第3章ボス：あくむじゅう ルプス（狼座）----
   //   大陸から 落ちた 悪夢の かけらが 地上の 狼に 憑いた もの。
-  // ★禁書庫の 番人 アーキス（手合わせ。絵は 仮： CHR.arkisTmp）
+  // ★禁書庫の 番人 アーキス（手合わせ。絵は CHR.arkis）
   // ★勝率：Lv34で 70%・Lv35で 95%（第3章の 終わりの 装備・天空の 鎧）。負けても 手合わせで 進む
   arkis:{key:'arkis', name:'番人 アーキス', hp:10400, atk:98, def:46, agi:28, acts:1,
-    exp:3400, gold:0, art:'arkisTmp', spar:true},
+    exp:3400, gold:0, art:'arkis', spar:true},
   lupus:{key:'lupus', name:'あくむじゅう ルプス', hp:7400,   /* ★5600 → 7400：上位の 呪文（スパーダ など）を 足した ぶん（勝率 Lv32で 75%・Lv33で 83%） */ atk:82, def:42, agi:24, acts:1,
     exp:6200, gold:6800, art:'lupus', scale:1.25,
     skill:{p:0.30, mul:1.30, name:'かみくだき'},
