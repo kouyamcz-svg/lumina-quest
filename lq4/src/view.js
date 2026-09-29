@@ -207,7 +207,8 @@ function poseOf(key,dir,walk){
 //   板は カメラと 同じ 向きに 傾く ので、上端が 奥へ、下端が 手前へ 倒れる。
 //   幅 1ますの 通路では 頭が 奥の 壁に、足が 手前の 壁に めりこみ、頭が 見切れて いた（第5章 裂け目の広場）。
 //   視線の 向きに ずらす だけ なので、画面の 上の 位置は 変わらない（近づく ぶん BB_K で 縮めて 大きさも そろえる）。
-const BB_FWD = 0.8, BB_K = 0.96;
+//   ★0.8 では 頭は 出たが 足が 手前の 壁に 埋まった。1.8 で 足まで 出る。
+const BB_FWD = 1.8, BB_K = 0.912;
 function bbGeo(w,h,flat){ if(flat) return new THREE.PlaneGeometry(w,h); const g=new THREE.PlaneGeometry(w*BB_K, h*BB_K); g.translate(0,0,BB_FWD); return g; }
 function chrBillboard(key,size){
   const d=CHR[key];
