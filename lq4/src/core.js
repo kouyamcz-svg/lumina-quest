@@ -2462,9 +2462,11 @@ function triggerChapterEnd(){
   G.cleared = true;
   Object.keys(en.quest || {}).forEach(q => questAdvance(q, en.quest[q]));
   G.mode = 'msg';
-  if(en.img && V.showScene) V.showScene(en.img);   // ★エンディングの いちまいえ
+  // ★エンディングの いちまいえ。dark:true なら まっ暗な 画面に 文字だけ
+  const sk = en.img || (en.dark ? '__dark' : null);
+  if(sk && V.showScene) V.showScene(sk);
   U.msg(en.msg || ['……'], () => {
-    if(en.img && V.hideScene) V.hideScene();
+    if(sk && V.hideScene) V.hideScene();
     const card = en.card || {title:'', sub:''};
     V.chapterCard(card.title, card.sub, () => { offerNextChapter(en.next, cd.title, en.final); });
   });

@@ -2969,6 +2969,7 @@ const CH = {
     ending: {
       trigger: 'ch4_king',
       set:['ch4_cleared'],
+      dark: true,   // ★その夜の 場面は まっ暗な 画面に 文字だけ
       msg:['',
            '── その夜 ──',
            '',

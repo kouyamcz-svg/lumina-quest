@@ -1672,10 +1672,13 @@ window.LQ4View = {
       V2.resize();
     }
     V2.showScene(k);
+    // ★まっ暗な 場面は 地名の 札も 隠す（文字だけに する）
+    const lb=document.getElementById('label'); if(lb) lb.style.opacity = (k==='__dark') ? '0' : '';
   },
   hideScene(){
     if(!(V2&&V2.hideScene)) return;
     V2.hideScene();
+    { const lb=document.getElementById('label'); if(lb) lb.style.opacity=''; }
     if(!is2D && mode!=='battle'){
       if(canvas2d) canvas2d.style.display='none';
       if(canvas)   canvas.style.visibility='visible';

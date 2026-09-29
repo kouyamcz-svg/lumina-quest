@@ -133,6 +133,7 @@ T('公王に 会う', C.G.flags.ch4_king===true && said('代わりの 浮き方�
 T('頼みごとが 片づく', C.G.quests.ch4_q1_archive==='clear');
 T('章末が 出る', said('グランは 登城しなく なった'));
 T('ch4_cleared が たつ', C.G.flags.ch4_cleared===true);
+T('章末（その夜）は まっ暗な 画面に 文字だけ', scene.indexOf('show:__dark')>=0 && scene.lastIndexOf('hide')>scene.indexOf('show:__dark'), scene.join(','));
 T('章の 終わりで 目的は なくなる', C.currentGoal()===null, C.currentGoal());
 T('目的の 印は ぜんぶ 立った', C.chData().goals.every(g=>C.G.flags[g.done]), C.chData().goals.filter(g=>!C.G.flags[g.done]).map(g=>g.done).join(' '));
 

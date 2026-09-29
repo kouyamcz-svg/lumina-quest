@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 09:40 JST", "build":"a8e99ebd","assets_sha": "00cd8f56", "lines": {"world": 148, "npc": 971, "chapters": 3008, "bgm": 986, "view2d": 2594, "core": 4369, "view": 1711, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 13:34 JST", "build":"4d6444b1","assets_sha": "00cd8f56", "lines": {"world": 148, "npc": 971, "chapters": 3009, "bgm": 986, "view2d": 2596, "core": 4371, "view": 1714, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -4261,6 +4261,7 @@ const CH = {
     ending: {
       trigger: 'ch4_king',
       set:['ch4_cleared'],
+      dark: true,   // ★その夜の 場面は まっ暗な 画面に 文字だけ
       msg:['',
            '── その夜 ──',
            '',
@@ -7674,6 +7675,8 @@ let sceneKey = null;
 function showScene(k){ sceneKey = k; }
 function hideScene(){ sceneKey = null; }
 function drawSceneOverlay(time){
+  // ★まっ暗な 画面（文字だけの 場面。章データの dark:true）
+  if(sceneKey==='__dark'){ cx.fillStyle='#000'; cx.fillRect(0,0,W,H); return; }
   const a = MONREF && MONREF[sceneKey];
   if(!a) return;
   cx.fillStyle='#05060c'; cx.fillRect(0,0,W,H);
@@ -10342,9 +10345,11 @@ function triggerChapterEnd(){
   G.cleared = true;
   Object.keys(en.quest || {}).forEach(q => questAdvance(q, en.quest[q]));
   G.mode = 'msg';
-  if(en.img && V.showScene) V.showScene(en.img);   // ★エンディングの いちまいえ
+  // ★エンディングの いちまいえ。dark:true なら まっ暗な 画面に 文字だけ
+  const sk = en.img || (en.dark ? '__dark' : null);
+  if(sk && V.showScene) V.showScene(sk);
   U.msg(en.msg || ['……'], () => {
-    if(en.img && V.hideScene) V.hideScene();
+    if(sk && V.hideScene) V.hideScene();
     const card = en.card || {title:'', sub:''};
     V.chapterCard(card.title, card.sub, () => { offerNextChapter(en.next, cd.title, en.final); });
   });
@@ -13921,10 +13926,13 @@ window.LQ4View = {
       V2.resize();
     }
     V2.showScene(k);
+    // ★まっ暗な 場面は 地名の 札も 隠す（文字だけに する）
+    const lb=document.getElementById('label'); if(lb) lb.style.opacity = (k==='__dark') ? '0' : '';
   },
   hideScene(){
     if(!(V2&&V2.hideScene)) return;
     V2.hideScene();
+    { const lb=document.getElementById('label'); if(lb) lb.style.opacity=''; }
     if(!is2D && mode!=='battle'){
       if(canvas2d) canvas2d.style.display='none';
       if(canvas)   canvas.style.visibility='visible';

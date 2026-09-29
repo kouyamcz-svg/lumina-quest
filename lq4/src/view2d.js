@@ -2388,6 +2388,8 @@ let sceneKey = null;
 function showScene(k){ sceneKey = k; }
 function hideScene(){ sceneKey = null; }
 function drawSceneOverlay(time){
+  // ★まっ暗な 画面（文字だけの 場面。章データの dark:true）
+  if(sceneKey==='__dark'){ cx.fillStyle='#000'; cx.fillRect(0,0,W,H); return; }
   const a = MONREF && MONREF[sceneKey];
   if(!a) return;
   cx.fillStyle='#05060c'; cx.fillRect(0,0,W,H);
