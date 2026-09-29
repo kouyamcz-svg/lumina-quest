@@ -64,6 +64,11 @@ talk('lower_dist', 8, 13, 'back');  T('荷運びの 男（第5章）', said('荷
 talk('lower_dist', 5, 6, 'back');   T('光珠管の 技師（第5章）', said('炉の 鼓動が 乱れて'));
 talk('lower_dist', 12, 14, 'back'); T('見習いの 母（第5章）', said('床に、細い ひびが'));
 talk('lower_dist', 12, 10, 'back'); T('うわさずきの 男（第5章）', said('城を 出たきり'));
+// ===== 0c. 中層区・上層区の 人々（危機感）=====
+[['mid_dist',5,6,'back','団長の 机の 書類'],['mid_dist',14,6,'back','上層の 方々が 先に'],['mid_dist',7,12,'front','棚が 全部 片側に'],
+ ['mid_dist',3,6,'back','逃げて きた 人を 入れて'],['mid_dist',16,12,'front','花なんて 誰も'],['mid_dist',2,12,'back','上りだけに した'],
+ ['upper_dist',9,5,'back','炉の 鼓動が 乱れて いる'],['upper_dist',11,5,'back','上層の 者から だ'],['upper_dist',8,10,'front','花瓶が 全部 割れた'],
+ ['upper_dist',4,8,'front','昇降機は 止めた']].forEach(([m,x,y,d,w])=>{ talk(m,x,y,d); T(m+' の 人（第5章）：'+w, said(w), log.join(' / ').slice(0,60)); });
 // ===== 1. 東門の 見張り =====
 talk('rift_yard', 10, 4, 'back');
 T('見張りに 会う 前は 裂け目の 悪夢に 挑めない', !C.G.flags.ch5_riftDown && said('見張りに 話を'), log.join(' / ').slice(0,80));
@@ -93,6 +98,9 @@ T('奥様と 庭番は 避難', C.tileAt('garden',9,2)==='.' && C.tileAt('garden
 T('光珠炉が 開く', !C.wardBlocks('furnace'));
 
 talk('lower_dist', 12, 10, 'back'); T('報せの 後の うわさずきの 男', said('団長が 炉に 入ったって'));
+talk('upper_dist', 9, 5, 'back');  T('報せの 後の 炉の 主任', said('半日も もたん'));
+talk('upper_dist', 4, 8, 'front'); T('報せの 後の 炉の 技師', said('昇降機が 動いた 跡'));
+talk('mid_dist', 2, 12, 'back');   T('裂け目の 後の 石段の 衛兵', said('裂け目を 払ったのは'));
 // ===== 4. 光珠炉 =====
 stand('upper_dist', 17, 11, 'back'); C.stepField(0,-1);
 T('上層区から 光珠炉の 外郭へ', C.P.map==='furnace', C.P.map);
