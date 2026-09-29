@@ -152,6 +152,13 @@ for(const no of [2,3,4]){
   T('仮の 絵 luminaTmp が 残って いない', !CH.luminaTmp && fs.readFileSync('src/npc.js','utf8').indexOf('luminaTmp')<0);
   T('番人 アーキスの 絵は CHR.arkis（3面）', C.MIDBOSS.arkis.art==='arkis' && CH.arkis && CH.arkis.front && CH.arkis.side && CH.arkis.back, C.MIDBOSS.arkis.art);
   T('仮の 絵 arkisTmp が 残って いない', !CH.arkisTmp && fs.readFileSync('src/core.js','utf8').indexOf('arkisTmp')<0);
+  { const actx2={console,window:{}}; actx2.globalThis=actx2; vm.createContext(actx2);
+    vm.runInContext(fs.readFileSync('assets.js','utf8')+';globalThis.__MON=MON;', actx2, {filename:'assets.js'});
+    const MN=actx2.__MON, FO=vm.runInContext('typeof ENEMIES!=="undefined"?ENEMIES:null', ctx) || (C.ENEMIES||[]);
+    for (const k of ['kokuhyoushi','sumibane','noroichou']){
+      const e=(FO||[]).find(x=>x.key===k);
+      T('禁書庫の 敵 '+k+' は 色を 変えた 自分の 絵', e && e.art===k && MN[k] && MN[k].src, e && e.art);
+    } }
   T('飛ぶ 姿は 終章用に 保存（art/chr/luminaFly.png）', fs.existsSync('art/chr/luminaFly.png') && fs.existsSync('art/chr/luminaFly_src.png'));
 }
 
