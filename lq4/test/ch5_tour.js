@@ -71,7 +71,7 @@ talk('lower_dist', 12, 10, 'back'); T('うわさずきの 男（第5章）', sai
  ['upper_dist',4,8,'front','昇降機は 止めた']].forEach(([m,x,y,d,w])=>{ talk(m,x,y,d); T(m+' の 人（第5章）：'+w, said(w), log.join(' / ').slice(0,60)); });
 // ===== 1. 東門の 見張り =====
 talk('rift_yard', 10, 4, 'back');
-T('見張りに 会う 前は 裂け目の 悪夢に 挑めない', !C.G.flags.ch5_riftDown && said('見張りに 話を'), log.join(' / ').slice(0,80));
+T('見張りに 会う 前は 裂け目の 悪夢に 挑めない', !C.G.flags.ch5_riftDown && said('見張りに 様子を 聞こう'), log.join(' / ').slice(0,80));
 talk('lower_dist', 18, 6, 'back');
 T('見張りが 裂け目を 伝える', C.G.flags.ch5_evac===true && said('北の 広場に また 裂け目'));
 T('頼みごとが 始まる', C.G.quests.ch5_q1_gran==='active');
@@ -83,6 +83,10 @@ T('下層区の 北から 裂け目の広場へ', C.P.map==='rift_yard', C.P.map
 strong(70);
 talk('rift_yard', 10, 4, 'back');
 T('クラテルを 倒す', C.G.flags.ch5_riftDown===true && said('「クラテル」と 記す'));
+T('地の 文に「序章」と 出ない', !said('序章'));
+T('クラテルは「この 魔物」', said('この魔物を「クラテル」'));
+T('人々は 戦いの 間に 逃げて いる', said('もう 南の 路地へ 逃げた 後') && !said('逃げ遅れた 人々は'));
+T('杯の 声は 崩れた 直後', log.findIndex(l=>/崩れた 杯の 底から/.test(l)) < log.findIndex(l=>/迎えに 行こう/.test(l)));
 T('倒した 後に メーアの 名が 出る', said('メーア、サマ') && said('名前を、言った'));
 T('庭園へ 案内', said('空中庭園へ'));
 T('ボスの ますが 消える', C.tileAt('rift_yard',10,3)==='.');
