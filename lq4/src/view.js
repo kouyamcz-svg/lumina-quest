@@ -203,10 +203,16 @@ function poseOf(key,dir,walk){
   if(walk && d[base+'W']) base=base+'W';
   return {pose:base, flip};
 }
+// ★人物・魔物の 板は カメラへ 向けて 少し 手前に 出す（BB_FWD）。
+//   板は カメラと 同じ 向きに 傾く ので、上端が 奥へ、下端が 手前へ 倒れる。
+//   幅 1ますの 通路では 頭が 奥の 壁に、足が 手前の 壁に めりこみ、頭が 見切れて いた（第5章 裂け目の広場）。
+//   視線の 向きに ずらす だけ なので、画面の 上の 位置は 変わらない（近づく ぶん BB_K で 縮めて 大きさも そろえる）。
+const BB_FWD = 0.8, BB_K = 0.96;
+function bbGeo(w,h,flat){ if(flat) return new THREE.PlaneGeometry(w,h); const g=new THREE.PlaneGeometry(w*BB_K, h*BB_K); g.translate(0,0,BB_FWD); return g; }
 function chrBillboard(key,size){
   const d=CHR[key];
   if(!d) return billboard(key,size);
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(size*d.w/d.h, size),
+  const m=new THREE.Mesh(bbGeo(size*d.w/d.h, size),
     new THREE.MeshBasicMaterial({map:chrTex(key,'front'),transparent:true,alphaTest:0.35}));
   m.userData.chr=key; m.userData.pose='front';
   return m;
@@ -220,14 +226,14 @@ function monTex(key){
   }
   return monTexCache[key];
 }
-function billboard(key, size){
+function billboard(key, size, flat){   // flat：手前に 出さない（3Dの 戦闘の 場）
   if(!MON[key] && !SPR[key]){
     console.warn('[view] スプライトが ありません: '+key+' → sora で だいようします');
     key='sora';
   }
   const mon=MON[key];
   if(mon){                                       // こうかいぞうどの まもの（PNG）
-    const m=new THREE.Mesh(new THREE.PlaneGeometry(size*mon.w/mon.h, size),
+    const m=new THREE.Mesh(bbGeo(size*mon.w/mon.h, size, flat),
       new THREE.MeshBasicMaterial({map:monTex(key),transparent:true,alphaTest:0.12}));
     m.userData.aspect=mon.w/mon.h;
     return m;
@@ -235,7 +241,7 @@ function billboard(key, size){
   const art=SPR[key];
   if(!sprCache[key]) sprCache[key]=texFromCanvas(artCanvas(art,8));
   const w=art[0].length, h=art.length;          // size は「たかさ」。よこは アスペクトで きめる
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(size*w/h, size),
+  const m=new THREE.Mesh(bbGeo(size*w/h, size, flat),
     new THREE.MeshBasicMaterial({map:sprCache[key],transparent:true,alphaTest:0.4}));
   m.userData.aspect=w/h;
   return m;
@@ -1346,7 +1352,7 @@ function battleEnter(enemies, done){
       console.warn('[view] まものの えが ありません: '+key);
       key = MON.icicleslime ? 'icicleslime' : 'sora';
     }
-    const m=billboard(key, size);
+    const m=billboard(key, size, true);
     const spread = n===1?0:(i-(n-1)/2)*2.6;
     m.position.set(spread, size*0.5, -3.2 - (i%2)*0.6);
     batScene.add(m);
