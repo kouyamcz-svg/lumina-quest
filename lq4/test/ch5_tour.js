@@ -59,6 +59,11 @@ T('庭園に ノエは 立って いない（一行に いる）', C.tileAt('gar
 T('裂け目の広場の 穴は 片づいて いる', C.tileAt('rift_yard',9,10)==='.' && C.tileAt('rift_yard',16,9)==='.');
 T('ゆりかごの 前に グラン', C.tileAt('cradle',7,4)==='B');
 
+// ===== 0b. 下層区の 人々（危機感）=====
+talk('lower_dist', 8, 13, 'back');  T('荷運びの 男（第5章）', said('荷車が 勝手に 転がって'));
+talk('lower_dist', 5, 6, 'back');   T('光珠管の 技師（第5章）', said('炉の 鼓動が 乱れて'));
+talk('lower_dist', 12, 14, 'back'); T('見習いの 母（第5章）', said('床に、細い ひびが'));
+talk('lower_dist', 12, 10, 'back'); T('うわさずきの 男（第5章）', said('城を 出たきり'));
 // ===== 1. 東門の 見張り =====
 talk('rift_yard', 10, 4, 'back');
 T('見張りに 会う 前は 裂け目の 悪夢に 挑めない', !C.G.flags.ch5_riftDown && said('見張りに 話を'), log.join(' / ').slice(0,80));
@@ -77,6 +82,8 @@ T('倒した 後に メーアの 名が 出る', said('メーア、サマ') && s
 T('庭園へ 案内', said('空中庭園へ'));
 T('ボスの ますが 消える', C.tileAt('rift_yard',10,3)==='.');
 
+talk('lower_dist', 12, 14, 'back'); T('裂け目の 後の 見習いの 母', said('広場の 子たちを 助けて'));
+talk('lower_dist', 8, 13, 'back');  T('裂け目の 後の 荷運びの 男', said('礼を 言いたがってた'));
 // ===== 3. 空中庭園 =====
 T('炉は まだ 通さない', C.wardBlocks('furnace'));
 talk('garden', 9, 3, 'back');
@@ -85,6 +92,7 @@ T('近衛の 報せ', said('単身、光珠炉へ'));
 T('奥様と 庭番は 避難', C.tileAt('garden',9,2)==='.' && C.tileAt('garden',5,12)==='.');
 T('光珠炉が 開く', !C.wardBlocks('furnace'));
 
+talk('lower_dist', 12, 10, 'back'); T('報せの 後の うわさずきの 男', said('団長が 炉に 入ったって'));
 // ===== 4. 光珠炉 =====
 stand('upper_dist', 17, 11, 'back'); C.stepField(0,-1);
 T('上層区から 光珠炉の 外郭へ', C.P.map==='furnace', C.P.map);

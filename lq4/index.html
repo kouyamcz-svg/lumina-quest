@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 15:13 JST", "build":"d41b9ddb","assets_sha": "7eac4ed3", "lines": {"world": 149, "npc": 999, "chapters": 3271, "bgm": 986, "view2d": 2597, "core": 4418, "view": 1714, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 18:17 JST", "build":"db630d6e","assets_sha": "7eac4ed3", "lines": {"world": 149, "npc": 1006, "chapters": 3271, "bgm": 986, "view2d": 2597, "core": 4418, "view": 1714, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -355,6 +355,8 @@ const NPCS = {
   // ============ 序章：下層区 ============
   lower_dist: [
     {at:'8,12', spr:'villagerA', name:'荷運びの 男', lines:[
+      {when:{ch:6, flag:'ch5_riftDown'}, text:['「北の 広場から 逃げて きた 連中が、礼を 言いたがってたぞ」','「……荷は 捨てて きたそうだ。命の ほうが 重い」']},
+      {when:{ch:6}, text:['「傾いてから、荷車が 勝手に 転がって いく」','「上へ 逃げろと 言われても、上層の 床だって 傾いてるんだ」']},
       {when:{ch:2, flag:'ch1_enteredMid'}, text:[
         '「中層へ 行ったのか。石畳が つるつるだろう」',
         '「うちの 通りは 継ぎ当てだらけさ。転ばんように な」',
@@ -377,6 +379,7 @@ const NPCS = {
       {text:['「下層区は 地上生まれの 街だ」',
              '「上の 連中は おれたちを 重い者と 呼ぶ」']}]},
     {at:'5,5', spr:'villagerB', name:'光珠管の 技師', lines:[
+      {when:{ch:6}, text:['「管の 光が 脈打ってる。炉の 鼓動が 乱れて いるんだ」','「裂け目の 近くの 管は、もう 冷たい。直す 手も 足りん」']},
       {when:{flag:'ch1_reported'}, text:[
         '技師「管の 光が 戻った。二十年で 初めてだ」',
         '技師「……お前の 父さんに 見せたかったな」']},
@@ -412,6 +415,8 @@ const NPCS = {
       {text:['「外は 下層の たな。牧草地と 岩場ばかりだ」',
              '「今日は 試験だろう。寄り道は あとに しろ」']}]},
     {at:'12,13', spr:'elderWoman', name:'見習いの 母', lines:[
+      {when:{ch:6, flag:'ch5_riftDown'}, text:['「広場の 子たちを 助けて くれたって。……ありがとう」','「うちも 荷を まとめたわ。上層の 避難所へ 行く」']},
+      {when:{ch:6}, text:['「うちの 子の 部屋の 床に、細い ひびが 入ったの」','「……夜中に あの子、泣いて 起きるのよ。夢が 怖いって」']},
       {when:{flag:'ch1_sonThanked'}, text:[
         '「知らない 名前を、知らない 声で……」',
         '「あの子、しばらく 管には 下ろしません」']},
@@ -424,6 +429,8 @@ const NPCS = {
       {text:['「息子が 管の 見習いを して います」',
              '「危ない 仕事だと 言うのに、聞かなくて」']}]},
     {at:'12,9', spr:'butler', name:'うわさずきの 男', lines:[
+      {when:{ch:6, flag:'ch5_granNews'}, text:['「炉の ほうへ 騎士が 何人も 走って いった」','「……団長が 炉に 入ったって 本当か？　何を する 気だ」']},
+      {when:{ch:6}, text:['「聞いたか。騎士団長が 三日前に 城を 出たきり、戻らないって」','「騎士団は 上層の 避難で 手一杯。下層は 後回しさ」']},
       {when:{ch:2}, text:[
         '「上じゃ『下層の 血』で 話が まとまってるとさ」',
         '「言い返せる 者が いないんだ。ここには」']},
