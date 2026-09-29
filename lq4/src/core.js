@@ -181,13 +181,13 @@ const ENEMIES = [
    art:'kirimatoi', inflict:{type:'confuse', p:0.18}},
   {key:'honetori',    name:'骨鳥',      hp:175,atk:46, def:27, agi:26, exp:640, gold:660, minLv:20,
    art:'honetori'},
-  // ---- 第4章：禁書庫（3種は 第2章の 敵の 形で 色を 変えた 絵。書架の 番犬は 仮に 忘れもの）----
+  // ---- 第4章：禁書庫（3種は 第2章の 敵の 形で 色を 変えた 絵、書架の 番犬は 新しい 絵）----
   {key:'kokuhyoushi', name:'黒表紙の 騎士', hp:310,atk:60, def:44, agi:20, exp:1000, gold:920, minLv:24, art:'kokuhyoushi'},
   {key:'sumibane',    name:'墨羽の カラス', hp:240,atk:57, def:34, agi:34, exp:960,  gold:880, minLv:24, art:'sumibane',
    inflict:{type:'confuse', p:0.18}},
   {key:'noroichou',   name:'呪い帳面',     hp:265,atk:53, def:38, agi:22, exp:980,  gold:900, minLv:24, art:'noroichou',
    inflict:{type:'sleep', p:0.2}},
-  {key:'shokabanken', name:'書架の 番犬',   hp:390,atk:64, def:52, agi:16, exp:1180, gold:1000, minLv:25, art:'wasuremono'},
+  {key:'shokabanken', name:'書架の 番犬',   hp:390,atk:64, def:52, agi:16, exp:1180, gold:1000, minLv:25, art:'shokabanken'},
   // ---- 地上の 島ごとの 固有種（野外）----
   //   ★まえは 地上の 野外が 全島 おなじ 5種 だった（雪原でも 砂漠でも 同じ 敵）
   //   ★絵（MON）が まだ ない 敵は 出ない（島の 表から のぞかれ、いままでの 表に もどる）
