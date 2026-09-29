@@ -152,6 +152,18 @@ T('章の 終わりで 目的は なくなる', C.currentGoal()===null, C.curren
   T('床の 花の 絵', CH.granFlower);
 }
 
+// ===== 出口：おぼえた 戻り先が こわれて いても、外の 歩ける ますに 出る =====
+//   ★上層区の 庭から 出たら 世界地図の 雲海の 上に 出た（実機で 報告）
+{
+  const bad={map:'world', x:1, y:7};
+  C.G.entry = C.G.entry||{};
+  stand('garden', 9, 13, 'front'); C.G.entry.garden=Object.assign({},bad); C.stepField(0,1);
+  T('庭園：こわれた 戻り先でも 庭園の 入口の 前に 出る', C.P.map==='world' && C.P.x===30 && C.P.y===9, C.P.map+' '+C.P.x+','+C.P.y);
+  stand('garden', 9, 13, 'front'); C.G.entry.garden={map:'upper_dist', x:1, y:7}; C.stepField(0,1);
+  T('庭園：上層区から 入ったら 上層区へ 戻る', C.P.map==='upper_dist' && C.P.x===1 && C.P.y===7, C.P.map+' '+C.P.x+','+C.P.y);
+  stand('furnace', 10, 19, 'front'); C.G.entry.furnace=Object.assign({},bad); C.stepField(0,1);
+  T('光珠炉：こわれた 戻り先でも 外の 歩ける ますに 出る', C.P.map!=='furnace' && C.walkable(C.P.map,C.P.x,C.P.y) && C.tileAt(C.P.map,C.P.x,C.P.y)!=='~', C.P.map+' '+C.P.x+','+C.P.y);
+}
 T('クエスト画面が 章の 途中で 空に ならない', __GAPS.length===0, __GAPS.map(g=>g.from+'（'+g.n+'）').join(' / '));
 console.log('\n--- ch5_tour: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

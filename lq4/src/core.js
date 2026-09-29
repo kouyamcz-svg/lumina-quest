@@ -2157,6 +2157,19 @@ function wardMsg(to){
   if(wd.doneFlag && G.flags[wd.doneFlag] && wd.msgDone) return wd.msgDone;
   return wd.msg;
 }
+// ★おぼえた 戻り先が 正しいか：その 地図の 入口（mp へ 入る ワープ）の そばで、歩ける ます
+//   ★上層区の 庭から 出たら、世界地図の 雲海の 上に 出た（実機で 報告。原因は 再現できず）。
+//     おぼえが 入口から はなれて いる とき・歩けない とき は 使わない。
+function entryOk(mp, e){
+  if(!e || !MAPS[e.map] || e.map===mp) return false;
+  if(!walkable(e.map, e.x, e.y)) return false;
+  for(let dy=-2; dy<=2; dy++) for(let dx=-2; dx<=2; dx++){
+    if(Math.abs(dx)+Math.abs(dy)>2) continue;
+    const w = warpAt(e.map, e.x+dx, e.y+dy);
+    if(w && w.to===mp) return true;
+  }
+  return false;
+}
 function doWarp(w){
   // ★脱出（夢還り）は 来た 道を 戻るだけ。結界で 止めない。
   if(w && !w.escape && wardBlocks(w.to)){
@@ -2193,8 +2206,11 @@ function doWarp(w){
     let dest = w;
     if(w.back){
       const back = G.entry && G.entry[P.map];
-      if(back){
+      if(back && entryOk(P.map, back)){
         dest = {to:back.map, x:back.x, y:back.y};
+      }else if(MAPS[w.to] && walkable(w.to, w.x, w.y) && !warpAt(w.to, w.x, w.y)){
+        // ★おぼえが ない・こわれて いる：ワープに 書いた 行き先が 外の 歩ける ます なら それ
+        dest = w;
       }else{
         // ★おぼえが ない（古い セーブ など）とき。
         //   かためがきの 行き先が 建物の 中だと「かべの 中」に 出る ので、
@@ -3917,7 +3933,7 @@ function escapeTarget(){
   let mp = P.map, dest = null;
   for(let guard=0; guard<8 && isDungeon(mp); guard++){
     const e = G.entry && G.entry[mp];
-    let nx = e ? {to:e.map, x:e.x, y:e.y} : null;
+    let nx = (e && entryOk(mp, e)) ? {to:e.map, x:e.x, y:e.y} : null;
     if(!nx){
       const ws = (MAPS[mp]||{}).warpsXY || {};
       const k = Object.keys(ws).find(k=>ws[k].back);
