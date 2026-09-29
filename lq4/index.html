@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 13:41 JST", "build":"7d457155","assets_sha": "00cd8f56", "lines": {"world": 148, "npc": 972, "chapters": 3030, "bgm": 986, "view2d": 2596, "core": 4371, "view": 1714, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 14:55 JST", "build":"32375d56","assets_sha": "affefbc4", "lines": {"world": 149, "npc": 999, "chapters": 3259, "bgm": 986, "view2d": 2597, "core": 4418, "view": 1714, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -163,7 +163,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=00cd8f56"></script>
+<script src="assets.js?v=affefbc4"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -248,6 +248,7 @@ const MAP_IDS = {
   archive1:   {region:'sky',kind:'dgn',  name:'禁書庫 上層', scene:'SCENE_CAVE'},
   archive2:   {region:'sky',kind:'dgn',  name:'禁書庫 下層', scene:'SCENE_CAVE'},
   archive_core:{region:'sky',kind:'dgn', name:'禁書庫 最奥', scene:'SCENE_CAVE'},
+  cradle:{region:'sky',kind:'dgn',  name:'ゆりかごの 前',   scene:'SCENE_SKY_TOWN'},
   toros:      {region:'land',kind:'town', name:'トロスの村',  scene:'SCENE_FIELD'},
   shrine_hill:{region:'land',kind:'dgn',  name:'祠の丘',     scene:'SCENE_FIELD'},
   tower1:     {region:'sky', kind:'dgn',  name:'雲見の 塔 一階',   scene:'SCENE_SKY_TOWN'},
@@ -396,6 +397,8 @@ const NPCS = {
       {text:['「この 管には 炉の 光が 流れてる」',
              '「……最近、少し 濁ってる 気が するんだ」']}]},
     {at:'18,5', spr:'guardA', name:'東門の 見張り', lines:[
+      {when:{ch:6, flag:'ch5_riftDown'}, text:['見張り「広場の 者は 逃げて きた。……礼を 言う」','見張り「団長を 頼む」']},
+      {when:{ch:6, flag:'ch5_evac'}, text:['見張り「北の 広場だ。急いで くれ」']},
       {when:{ch:2}, text:[
         '「点検路が 詰まってる。技師が 手を 焼いてた」',
         '「外は 前より 湧く。日が 高いうちに 戻れよ」']},
@@ -527,6 +530,7 @@ const NPCS = {
   // ============ 第2章：空中庭園 ============
   garden: [
     {at:'9,2', spr:'priestess', name:'花を 見ている 女', lines:[
+      {when:{ch:6}, text:['女は 花壇を 見ている。真ん中の 一輪ぶん だけ、茎が 折れて いる。']},
       {when:{flag:'ch2_wifeSeen'}, text:[
         '女は 花壇を 見ている。まばたきが、ゆっくり。']},
       {text:['ベンチに 女が ひとり 座っている。']}]},
@@ -538,6 +542,7 @@ const NPCS = {
              'ノエ「案内の 話？　まだ 聞いてない けど」',
              'ノエ「炉の 主任に 先に 会って きて。手続きが あるから」']}]},
     {at:'5,12', spr:'villagerA', name:'庭番', lines:[
+      {when:{ch:6}, text:['庭番「上層の 避難は 城の 方へ。……奥様は、ここを 動かれません」']},
       {when:{flag:'ch2_skyeaterDown'}, text:[
         '庭番「雲が 戻りました。花も 持ち直します」',
         '庭番「……ありがとう ございます」']},
@@ -830,6 +835,16 @@ const NPCS = {
       {when:{flag:'ch4_king'}, text:['役人「団長の 席が……いや、何でも ない」']},
       {text:['役人「減光の 話は するな。上から そう 言われて いる」']}]},
   ],
+  // ============ 第5章：ゆりかごの 前 ============
+  cradle: [
+    {at:'7,1', spr:'pipeobj', name:'ゆりかごの 扉', lines:[
+      {text:['ゆりかごへ 続く 扉。分厚く、冷たい。',
+             '耳を 寄せると、奥で ゆっくりした 寝息が 聞こえる。',
+             'ノエ「ここから 先は……今は 開けちゃ いけない」']}]},
+    {at:'7,4', spr:'granFlower', name:'床に 残った 花', lines:[
+      {when:{flag:'ch5_flower'}, text:['グランが 立って いた 床。裂け目は 閉じて いる。']},
+      {text:['床に、花が 一輪 落ちて いる。']}]},
+  ],
   archive_core: [
     {at:'8,2', spr:'shelfobj', name:'千年前の 契約書', lines:[
       {when:{flag:'ch4_contract'}, text:['「……要らぬ 夢は 夢の 底に 棄てる」']},
@@ -915,6 +930,7 @@ const NPCS = {
   // ============ 第2章：炉心の 手前（ボスの 間）============
   furnace_core: [
     {at:'11,6', spr:'pipeobj', name:'炉心の 壁', lines:[
+      {when:{ch:6}, text:['隔壁の 向こうの 寝息が、前より 浅い。']},
       {when:{flag:'ch2_heardBreath'}, text:[
         '隔壁の 向こうから、ゆっくりした 音が つづいている。']},
       {text:['分厚い 隔壁。触れると 熱い。']}]},
@@ -1092,6 +1108,18 @@ const QUESTS = {
     reward:{}, next:'ch2_q2_core',
   },
   // ============ 第3章：氷の谷 ============
+  ch5_q1_gran: {
+    id:'ch5_q1_gran', chapter:6, title:'蝕まれる大陸',
+    giver:'東門の 見張り',
+    desc:'裂け目が 各区に 開き、避難が 始まった。団長は 三日前から 姿を 見せない。',
+    steps:[
+      {id:'rift',   desc:'北の 裂け目の広場で 逃げ遅れた 人々を 助ける', flag:'ch5_riftDown'},
+      {id:'garden', desc:'空中庭園で 団長の 奥様を 避難させる',         flag:'ch5_granNews'},
+      {id:'gran',   desc:'光珠炉の 奥で 団長に 追いつく',              flag:'ch5_granFell'},
+      {id:'flower', desc:'床に 残った 花を 拾う',                      flag:'ch5_flower'},
+    ],
+    reward:{}, next:null,
+  },
   ch4_q1_archive: {
     id:'ch4_q1_archive', chapter:5, title:'禁書庫',
     giver:'炉の 主任',
@@ -4301,6 +4329,235 @@ const CH = {
       next: 6,
     },
   },
+
+  // ======================= 第5章「蝕まれる大陸」 =======================
+  //   下層区（避難）→ 東門の 見張り → 北の 裂け目の広場（あくむへん）→ 空中庭園
+  //   （団長の 奥様・摘まれた 花・近衛の 報せ）→ 光珠炉の 外郭 → 炉心の 手前 →
+  //   ゆりかごの 前で グラン（2形態）→ 床に 残った 花 → 章末（メーアの 目覚め）
+  6: {
+    id: 'ch5_eclipse',
+    title: '蝕まれる大陸',
+    region: 'sky',
+    goals: [
+      {done:'ch5_evac',     text:'下層区の 東門の 見張りに 話を 聞く'},
+      {done:'ch5_riftDown', text:'北の 裂け目の広場で、逃げ遅れた 人々を 助ける'},
+      {done:'ch5_granNews', text:'空中庭園へ。団長の 奥様を 避難させる'},
+      {done:'ch5_granFell', text:'光珠炉の 奥へ。団長を 追う'},
+      {done:'ch5_flower',   text:'床に 残った 花を 拾う'},
+    ],
+    start: {map:'lower_dist', x:10, y:7, dir:'front'},
+    party: ['io','seren','noe','amane'],
+    startLv: 36,
+    inheritParty: {from:5, ifFlag:'ch4_cleared'},
+    gold: 9000, herbs: 12, waters: 4,
+    equip: {
+      io:    {weapon:{kind:'w', name:'鍛冶村の 剣', v:26}, armor:{kind:'a', name:'天空の 鎧', v:34, ward:['sleep','confuse']}},
+      seren: {weapon:{kind:'w', name:'鍛冶村の 槍', v:28}, armor:{kind:'a', name:'鍛冶村の 鎧', v:25}},
+      noe:   {weapon:{kind:'w', name:'山の 錫杖', v:16},   armor:{kind:'a', name:'鍛冶村の 衣', v:19}},
+      amane: {weapon:{kind:'w', name:'山の 錫杖', v:16},   armor:{kind:'a', name:'鍛冶村の 衣', v:19}},
+    },
+    setFlags: ['sky_armor'],
+    opening: ['──三日後──',
+              '大陸は、目に 見えて 傾いて いた。',
+              '下層区の 路地を、荷を 背負った 人々が 上へ 上へと 流れて いく。',
+              '',
+              'セレン「避難が 始まってる」',
+              'ノエ「……裂け目の 音が する。北の 広場の ほうだ」',
+              '',
+              '＊ 東門の 見張りに 話を 聞こう ＊'],
+    home: {map:'lower_dist', x:4, y:5, name:'下層区の 宿'},
+    returnSpots: [{map:'lower_dist', x:10, y:7}, {map:'upper_dist', x:10, y:13}],
+    closed: {
+      pipe_path: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      old_pipe: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      tower1: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      tower2: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      tower3: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      tower4: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      tower5: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      furnace: {until:'ch5_granNews',
+        msg:['昇降機の 前に 衛兵が 立って いる。', '衛兵「避難の 最中だ。炉へは 通せん」']},
+    },
+    // ★前の 章の しかけを かたづけ、この 章の ますに する
+    setTiles: [
+      // 裂け目の広場：序章の 穴・岩・扉・灯・中ボスの あとを 片づけ、ボスの ますだけ 置く
+      {map:'rift_yard', x:16, y:9, ch:'.'}, {map:'rift_yard', x:16, y:5, ch:'.'},
+      {map:'rift_yard', x:5,  y:6, ch:'.'}, {map:'rift_yard', x:12, y:6, ch:'.'},
+      {map:'rift_yard', x:2, y:10, ch:'.'}, {map:'rift_yard', x:3, y:10, ch:'.'}, {map:'rift_yard', x:4, y:10, ch:'.'}, {map:'rift_yard', x:5, y:10, ch:'.'}, {map:'rift_yard', x:6, y:10, ch:'.'}, {map:'rift_yard', x:7, y:10, ch:'.'}, {map:'rift_yard', x:8, y:10, ch:'.'}, {map:'rift_yard', x:9, y:10, ch:'.'}, {map:'rift_yard', x:10, y:10, ch:'.'}, {map:'rift_yard', x:11, y:10, ch:'.'}, {map:'rift_yard', x:12, y:10, ch:'.'}, {map:'rift_yard', x:13, y:10, ch:'.'}, {map:'rift_yard', x:14, y:10, ch:'.'}, {map:'rift_yard', x:15, y:10, ch:'.'}, {map:'rift_yard', x:16, y:10, ch:'.'}, {map:'rift_yard', x:17, y:10, ch:'.'}, {map:'rift_yard', x:18, y:10, ch:'.'},
+      {map:'rift_yard', x:5, y:12, ch:'.'}, {map:'rift_yard', x:13, y:12, ch:'.'}, {map:'rift_yard', x:7, y:13, ch:'.'},
+      {map:'rift_yard', x:10, y:3, ch:'B'},
+      // 空中庭園：ノエは 一行に いる
+      {map:'garden', x:13, y:5, ch:'.'},
+      // 光珠炉の 外郭：隔壁は 開き、灯と 炉番は いない（避難ずみ）
+      {map:'furnace', x:10, y:6, ch:'.'},
+      {map:'furnace', x:3,  y:9, ch:'.'}, {map:'furnace', x:20, y:13, ch:'.'},
+      {map:'furnace', x:17, y:17, ch:'.'}, {map:'furnace', x:2, y:10, ch:'.'}, {map:'furnace', x:13, y:15, ch:'.'},
+      // 炉心の 手前：燃えかすは 片づく（奥へは「炉心の 壁」の 会話で 進む）
+      {map:'furnace_core', x:7, y:4, ch:'.'},
+      // ゆりかごの 前：グラン
+      {map:'cradle', x:7, y:4, ch:'B'},
+    ],
+    bosses: {
+      'rift_yard:10,3': {
+        key:'akumuhen5', clearedFlag:'ch5_riftDown', needFlag:'ch5_evac',
+        lockMsg:['広場の 奥で、何かが うごめいて いる。',
+                 'セレン「……先に 見張りに 話を 聞きましょう」'],
+        intro:['広場の 空が、また 裂けて いた。',
+               '序章の 夜と 同じ 場所。だが 裂け目は あの 夜より ずっと 大きい。',
+               '',
+               '取り残された 人々が、瓦礫の 陰に 固まって いる。',
+               'セレン「わたしたちが 引きつける。その 間に 逃げて！」',
+               '',
+               '裂け目から、大きな 目が 覗いた。',
+               '＊ あくむへん が 現れた！ ＊'],
+      },
+      'cradle:7,4': {
+        key:'gran1', clearedFlag:'ch5_granFell',
+        intro:['炉心の 奥。ゆりかごへ 続く 扉の 前に、グランが 立って いた。',
+               '背後の 床が 裂け、黒い ものが 滲んで いる。',
+               '手には、花が 一輪。',
+               '',
+               'イオ「団長」',
+               'グラン「来たか、イオ」',
+               '',
+               'グラン「見ろ、イオ。この 国は 子供の 夢を 啜り、要らぬ 夢を 捨て、',
+               '　　　　夢を 守る 者の 心まで 捨てさせた」',
+               'グラン「捨てて 浮かぶ 国なら、堕ちるのが 正しい」',
+               '',
+               'イオ「なら、堕ちた 後に あの子は？　下層の 皆は？」',
+               'イオ「……先生が 守れって 教えた 順番は、そうじゃ ないでしょう」',
+               '',
+               'グランは 花を 胸の 留め具に 挿し、剣を 抜いた。',
+               'グラン「構えろ。……教えた 通りに」',
+               '＊ 騎士団長 グランとの 戦い ＊'],
+      },
+    },
+    bossReward: {
+      akumuhen5: {
+        set:['ch5_riftDown'],
+        setTiles:[{map:'rift_yard', x:10, y:3, ch:'.'}],
+        quest:{ch5_q1_gran:'active'},
+        msg:['', '目は ほどけ、裂け目は 細く なった。',
+             '……だが、閉じは しなかった。',
+             '',
+             'イオ「閉じない……」',
+             'ノエ「捨て場が 溢れてるんだ。ひとつ 払っても、また 開く」',
+             '',
+             '逃げ遅れた 人々は、南の 路地へ 走って いった。',
+             '',
+             'セレン「上層も 避難が 始まって いる はず」',
+             'セレン「……団長の 奥様は、庭園から 動けない」',
+             'イオ「迎えに 行こう」',
+             '',
+             '＊ 空中庭園へ（団長の 奥様を 避難させる）＊'],
+      },
+      // ★第1形態を 倒すと、そのまま 第2形態（nextBoss。HP・MPは そのまま）
+      gran1: {
+        nextBoss:'gran2',
+        msg:['', 'グランは 膝を つかなかった。',
+             '足もとの 裂け目から、黒い ものが 這い上がる。',
+             '',
+             'ノエ「だめだ、団長！　それは 捨てられた 夢だ！」',
+             'グラン「……知って おる」',
+             '',
+             '悪夢が、グランの 鎧を 覆った。',
+             '＊ 悪夢を 纏う グランとの 戦い ＊'],
+      },
+      gran2: {
+        set:['ch5_granFell'],
+        setTiles:[{map:'cradle', x:7, y:4, ch:'n'}],
+        quest:{ch5_q1_gran:'clear'},
+        msg:['', 'グランの 剣が 床に 落ちた。',
+             '黒い 鎧が、ぼろぼろと 剥がれて いく。',
+             '',
+             'イオ「団長……」',
+             'グラン「炉は 壊さん。……あの子に 罪は ない」',
+             '',
+             'グランは 背後の 裂け目へ 一歩 下がった。',
+             'セレン「待って！」',
+             '',
+             'グラン「私は 捨てられた 側に 立つ」',
+             'グラン「夢に 縋る 国も、夢を 捨てる 国も、いつか 私が 終わらせに 来る」',
+             '',
+             'グランの 姿が、裂け目に 消えた。',
+             '床には、花が 一輪だけ 残って いた。'],
+      },
+    },
+    talkEvents: [
+      // ---- 東門の 見張り ----
+      { npc:'東門の 見張り', unless:'ch5_evac',
+        set:['ch5_evac'],
+        quest:{ch5_q1_gran:'active'},
+        msg:['見張り「イオ！　無事だったか」',
+             '見張り「北の 広場に また 裂け目だ。逃げ遅れた 者が 残って いる」',
+             '見張り「騎士団は 上層の 避難に 回された。下層には 手が 足りん」',
+             '',
+             'イオ「団長は」',
+             '見張り「……三日前から、誰も 姿を 見て いない」',
+             '',
+             '＊ 北の 裂け目の広場へ（逃げ遅れた 人々を 助ける）＊'] },
+      // ---- 空中庭園：摘まれた 花・近衛の 報せ ----
+      { npc:'花を 見ている 女', cond:['ch5_riftDown'], unless:'ch5_granNews',
+        set:['ch5_granNews'],
+        preMsg:['女は 花壇の 前に 座って いた。いつもと 同じ ように。',
+                '',
+                '花壇の 真ん中で、一輪ぶん だけ 茎が 折れて いる。',
+                '',
+                '庭番「今朝、団長が 来られました」',
+                '庭番「隣に 座って……帰り際に、一輪だけ 摘んで 行かれた」',
+                '庭番「三年で 初めてです。花に 触れられたのは」'],
+        runIn:{spr:'guardA', from:[9,13], to:[10,3], speed:0.10},
+        setTiles:[{map:'garden', x:9, y:2, ch:'.'}, {map:'garden', x:5, y:12, ch:'.'}],
+        msg:['近衛「イオ殿！　ここに おられたか」',
+             '近衛「団長が……単身、光珠炉へ 入られました」',
+             '近衛「騎士団長の 権限で 隔壁を 開けて、奥へ」',
+             '',
+             'セレン「炉へ？　何を するつもり」',
+             '近衛「わかりません。止めようと した 者は、剣の 腹で 打たれて……」',
+             '',
+             'ノエ「……ゆりかごだ」',
+             '',
+             '庭番「奥様は わたしが お連れします。行って ください」',
+             '',
+             '＊ 光珠炉へ（上層区の 東、または 天空大陸の 西）＊'] },
+      // ---- 炉心の 壁：団長が 開けた 隔壁から 奥へ（何度でも）----
+      { npc:'炉心の 壁', cond:['ch5_granNews'],
+        msg:['隔壁が 半分 開いて いる。騎士団長の 鍵の 跡が 残って いる。',
+             '奥から、冷たい 風が 吹いて くる。',
+             '',
+             '＊ 奥へ 進んだ ＊'],
+        warp:{map:'cradle', x:7, y:9, dir:'back'} },
+      // ---- 床に 残った 花 → 章末 ----
+      { npc:'床に 残った 花', cond:['ch5_granFell'], unless:'ch5_flower',
+        set:['ch5_flower'],
+        msg:['イオは 花を 拾い上げた。',
+             '空中庭園の 花壇に しか 咲かない 花だ。',
+             '',
+             'セレン「……奥様に、届けましょう」',
+             'イオ「ああ」'] },
+    ],
+    ending: {
+      trigger: 'ch5_flower',
+      set:['ch5_cleared'],
+      dark: true,   // ★メーアの 目覚めは まっ暗な 画面に 文字だけ
+      msg:['',
+           '── 夢の 底 ──',
+           '',
+           '花を 拾い上げた とき、炉が 低く 鳴った。',
+           '',
+           '＜……アア＞',
+           '＜最後ノ 一頁ガ、綴ジラレタ＞',
+           '',
+           'ノエ「……何か、起きた」',
+           'アマネ「白竜さまが……震えて いる」',
+           '',
+           '夢の 底で、何かが 目を 開けた。',
+           '',
+           '＊ 第5章　完 ＊'],
+      card: {title:'蝕まれる大陸', sub:'第5章 完'},
+      next: 7,
+    },
+  },
 };
 
 function get(no){ return CH[no] || CH[1]; }
@@ -7007,7 +7264,8 @@ function battleBackdrop(theme){
 
 function battleEnter2D(enemies, mon, done){
   const m = C.MAPS[C.P.map];
-  bTheme = (m && m.theme) || 'plain';
+  // ★地図の bbg で 戦闘の 背景を 決められる（見た目の 種類 sky の 屋内で 野原に なる ため。第5章の ゆりかごの 前）
+  bTheme = (m && (m.bbg || m.theme)) || 'plain';
   // ★地上の 野外は 足もとの 地形で 背景を えらぶ（砂漠の 島で 草原の 背景に なって いた）
   if(bTheme==='world' && m && m.tiles){
     const cnt={':':0,'=':0}; let n=0;
@@ -8093,6 +8351,12 @@ const ENEMIES = [
   {key:'noroichou',   name:'呪い帳面',     hp:265,atk:53, def:38, agi:22, exp:980,  gold:900, minLv:24, art:'noroichou',
    inflict:{type:'sleep', p:0.2}},
   {key:'shokabanken', name:'書架の 番犬',   hp:390,atk:64, def:52, agi:16, exp:1180, gold:1000, minLv:25, art:'shokabanken'},
+  // ---- 第5章：悪夢に 蝕まれた 敵（第2〜3章の 敵の 形で 色を 変えた 絵）----
+  {key:'kuroikui',    name:'黒喰いバク',     hp:360,atk:66, def:46, agi:22, exp:1250, gold:1000, minLv:26, art:'kuroikui',
+   inflict:{type:'sleep', p:0.18}},
+  {key:'shokumukade', name:'蝕み ムカデ',     hp:400,atk:70, def:50, agi:26, exp:1320, gold:1040, minLv:26, art:'shokumukade'},
+  {key:'kokujugara',  name:'黒珠の 抜け殻',   hp:430,atk:64, def:58, agi:16, exp:1360, gold:1080, minLv:27, art:'kokujugara',
+   inflict:{type:'slow', p:0.2}},
   // ---- 地上の 島ごとの 固有種（野外）----
   //   ★まえは 地上の 野外が 全島 おなじ 5種 だった（雪原でも 砂漠でも 同じ 敵）
   //   ★絵（MON）が まだ ない 敵は 出ない（島の 表から のぞかれ、いままでの 表に もどる）
@@ -8145,6 +8409,26 @@ const MIDBOSS = {
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第3章ボス：あくむじゅう ルプス（狼座）----
   //   大陸から 落ちた 悪夢の かけらが 地上の 狼に 憑いた もの。
+  // ---- 第5章：騎士団長 グラン（2形態。第1形態を 倒すと そのまま 第2形態：bossReward の nextBoss）----
+  //   ★第1形態の 絵は 騎士団長の 絵（captain）、第2形態は 仮の 絵（gran2Tmp）
+  //   ★勝率（連戦・tools/granrate.js）：Lv38で 80%・Lv40で 90%
+  gran1:{key:'gran1', name:'騎士団長 グラン', hp:6800, atk:96, def:50, agi:34, acts:1,
+    exp:3000, gold:0, art:'captain',
+    skill:{p:0.30, mul:1.35, name:'騎士団の 剣'},
+    charge:{p:0.18, mul:2.0, tell:'剣を 引いて 構えた…', name:'団長の 一閃'},
+    brace:{p:0.12, name:'剣を 立てて かまえた！'}},
+  gran2:{key:'gran2', name:'悪夢を 纏う グラン', hp:4800, atk:100, def:48, agi:30, acts:1,
+    exp:6800, gold:7000, art:'gran2Tmp',
+    skill:{p:0.28, mul:1.30, name:'黒い 剣'},
+    aoe:{p:0.26, lo:40, hi:58, name:'捨てられた 夢の 波'},
+    inflict:{type:'confuse', p:0.20},
+    enrage:{at:0.35, atk:1.15, name:'悪夢が グランの 鎧を 覆いつくした！'}},
+  // ---- 第5章 中ボス：あくむへん（下層の 裂け目）----
+  akumuhen5:{key:'akumuhen5', name:'あくむへん', hp:9000, atk:110,   /* ★勝率 Lv35で 80%・Lv36で 95% */ def:46, agi:26, acts:1,
+    exp:3200, gold:3400, art:'akumuhen5', scale:1.05,
+    skill:{p:0.28, mul:1.25, name:'裂け目の 爪'},
+    aoe:{p:0.22, lo:30, hi:44, name:'溢れた 夢'},
+    inflict:{type:'sleep', p:0.18}},
   // ★禁書庫の 番人 アーキス（手合わせ。絵は CHR.arkis）
   // ★勝率：Lv34で 70%・Lv35で 95%（第3章の 終わりの 装備・天空の 鎧）。負けても 手合わせで 進む
   arkis:{key:'arkis', name:'番人 アーキス', hp:10400, atk:98, def:46, agi:28, acts:1,
@@ -8237,6 +8521,9 @@ const byMapCh = {
   // ★第4章（内部の 章 番号 5）
   '5:archive1': ['kokuhyoushi','sumibane','noroichou'],
   '5:archive2': ['kokuhyoushi','noroichou','sumibane','shokabanken'],
+  // ★第5章（内部の 章 番号 6）：蝕まれた 敵
+  '6:rift_yard': ['kuroikui','shokumukade','sumibane'],
+  '6:furnace':   ['kuroikui','shokumukade','kokujugara','kokuhyoushi'],
 };
 const byMap = {
   rift_yard: ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
@@ -9190,6 +9477,24 @@ const MAPS = {
     "###############"],
     warpsXY:{
       '7,9':{to:'furnace', x:10, y:7}
+    }},
+
+  // ★第5章：ゆりかごの 前（炉心の 奥。グランが 待つ）。入口は 炉心の 手前の「炉心の 壁」（第5章の 会話で 移る）
+  cradle:{name:'ゆりかごの 前', theme:'sky', bbg:'indoor', enc:false, tiles:[
+    "###############",
+    "#######n#######",
+    "#.............#",
+    "#.............#",
+    "#......B......#",
+    "#.............#",
+    "#..#.......#..#",
+    "#.............#",
+    "#.............#",
+    "######...######",
+    "#######.#######",
+    "###############"],
+    warpsXY:{
+      '7,10':{to:'furnace_core', x:7, y:3}
     }},
 
   // ============ 第1章：騎士団 中層詰所 ============

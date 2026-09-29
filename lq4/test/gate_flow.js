@@ -202,6 +202,9 @@ function kill(k){
     // ★大門（章データの gates）で 行ける 先も 出口（上層区 → 天空城）
     const CHD_ = vm.runInContext('CHAPTERS_DATA', ctx);
     CHD_.list().forEach(no=>{ const g=CHD_.get(no).gates||{}; Object.keys(g).forEach(k=>{ if(k.split(':')[0]===mp && g[k] && g[k].to) outs.push(g[k].to.map); }); });
+    // ★会話の あとに 移る 先（章データ talkEvents の warp）も 出口（第5章：炉心の 壁 → ゆりかごの 前）
+    { const ND=vm.runInContext('NPCDATA', ctx); const names=(ND.NPCS[mp]||[]).map(n=>n.name);
+      CHD_.list().forEach(no=>{ (CHD_.get(no).talkEvents||[]).forEach(e=>{ if(e.warp && names.includes(e.npc)) outs.push(e.warp.map); }); }); }
     const paired = froms.every(f=>outs.includes(f));
     if(paired) return;
     const hasBack = Object.keys(w).some(k=>w[k].back);

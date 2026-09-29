@@ -75,6 +75,8 @@ const NPCS = {
       {text:['「この 管には 炉の 光が 流れてる」',
              '「……最近、少し 濁ってる 気が するんだ」']}]},
     {at:'18,5', spr:'guardA', name:'東門の 見張り', lines:[
+      {when:{ch:6, flag:'ch5_riftDown'}, text:['見張り「広場の 者は 逃げて きた。……礼を 言う」','見張り「団長を 頼む」']},
+      {when:{ch:6, flag:'ch5_evac'}, text:['見張り「北の 広場だ。急いで くれ」']},
       {when:{ch:2}, text:[
         '「点検路が 詰まってる。技師が 手を 焼いてた」',
         '「外は 前より 湧く。日が 高いうちに 戻れよ」']},
@@ -206,6 +208,7 @@ const NPCS = {
   // ============ 第2章：空中庭園 ============
   garden: [
     {at:'9,2', spr:'priestess', name:'花を 見ている 女', lines:[
+      {when:{ch:6}, text:['女は 花壇を 見ている。真ん中の 一輪ぶん だけ、茎が 折れて いる。']},
       {when:{flag:'ch2_wifeSeen'}, text:[
         '女は 花壇を 見ている。まばたきが、ゆっくり。']},
       {text:['ベンチに 女が ひとり 座っている。']}]},
@@ -217,6 +220,7 @@ const NPCS = {
              'ノエ「案内の 話？　まだ 聞いてない けど」',
              'ノエ「炉の 主任に 先に 会って きて。手続きが あるから」']}]},
     {at:'5,12', spr:'villagerA', name:'庭番', lines:[
+      {when:{ch:6}, text:['庭番「上層の 避難は 城の 方へ。……奥様は、ここを 動かれません」']},
       {when:{flag:'ch2_skyeaterDown'}, text:[
         '庭番「雲が 戻りました。花も 持ち直します」',
         '庭番「……ありがとう ございます」']},
@@ -509,6 +513,16 @@ const NPCS = {
       {when:{flag:'ch4_king'}, text:['役人「団長の 席が……いや、何でも ない」']},
       {text:['役人「減光の 話は するな。上から そう 言われて いる」']}]},
   ],
+  // ============ 第5章：ゆりかごの 前 ============
+  cradle: [
+    {at:'7,1', spr:'pipeobj', name:'ゆりかごの 扉', lines:[
+      {text:['ゆりかごへ 続く 扉。分厚く、冷たい。',
+             '耳を 寄せると、奥で ゆっくりした 寝息が 聞こえる。',
+             'ノエ「ここから 先は……今は 開けちゃ いけない」']}]},
+    {at:'7,4', spr:'granFlower', name:'床に 残った 花', lines:[
+      {when:{flag:'ch5_flower'}, text:['グランが 立って いた 床。裂け目は 閉じて いる。']},
+      {text:['床に、花が 一輪 落ちて いる。']}]},
+  ],
   archive_core: [
     {at:'8,2', spr:'shelfobj', name:'千年前の 契約書', lines:[
       {when:{flag:'ch4_contract'}, text:['「……要らぬ 夢は 夢の 底に 棄てる」']},
@@ -594,6 +608,7 @@ const NPCS = {
   // ============ 第2章：炉心の 手前（ボスの 間）============
   furnace_core: [
     {at:'11,6', spr:'pipeobj', name:'炉心の 壁', lines:[
+      {when:{ch:6}, text:['隔壁の 向こうの 寝息が、前より 浅い。']},
       {when:{flag:'ch2_heardBreath'}, text:[
         '隔壁の 向こうから、ゆっくりした 音が つづいている。']},
       {text:['分厚い 隔壁。触れると 熱い。']}]},
@@ -771,6 +786,18 @@ const QUESTS = {
     reward:{}, next:'ch2_q2_core',
   },
   // ============ 第3章：氷の谷 ============
+  ch5_q1_gran: {
+    id:'ch5_q1_gran', chapter:6, title:'蝕まれる大陸',
+    giver:'東門の 見張り',
+    desc:'裂け目が 各区に 開き、避難が 始まった。団長は 三日前から 姿を 見せない。',
+    steps:[
+      {id:'rift',   desc:'北の 裂け目の広場で 逃げ遅れた 人々を 助ける', flag:'ch5_riftDown'},
+      {id:'garden', desc:'空中庭園で 団長の 奥様を 避難させる',         flag:'ch5_granNews'},
+      {id:'gran',   desc:'光珠炉の 奥で 団長に 追いつく',              flag:'ch5_granFell'},
+      {id:'flower', desc:'床に 残った 花を 拾う',                      flag:'ch5_flower'},
+    ],
+    reward:{}, next:null,
+  },
   ch4_q1_archive: {
     id:'ch4_q1_archive', chapter:5, title:'禁書庫',
     giver:'炉の 主任',

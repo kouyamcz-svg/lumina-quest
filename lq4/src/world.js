@@ -75,6 +75,7 @@ const MAP_IDS = {
   archive1:   {region:'sky',kind:'dgn',  name:'禁書庫 上層', scene:'SCENE_CAVE'},
   archive2:   {region:'sky',kind:'dgn',  name:'禁書庫 下層', scene:'SCENE_CAVE'},
   archive_core:{region:'sky',kind:'dgn', name:'禁書庫 最奥', scene:'SCENE_CAVE'},
+  cradle:{region:'sky',kind:'dgn',  name:'ゆりかごの 前',   scene:'SCENE_SKY_TOWN'},
   toros:      {region:'land',kind:'town', name:'トロスの村',  scene:'SCENE_FIELD'},
   shrine_hill:{region:'land',kind:'dgn',  name:'祠の丘',     scene:'SCENE_FIELD'},
   tower1:     {region:'sky', kind:'dgn',  name:'雲見の 塔 一階',   scene:'SCENE_SKY_TOWN'},

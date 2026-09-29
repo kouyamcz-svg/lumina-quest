@@ -188,6 +188,12 @@ const ENEMIES = [
   {key:'noroichou',   name:'呪い帳面',     hp:265,atk:53, def:38, agi:22, exp:980,  gold:900, minLv:24, art:'noroichou',
    inflict:{type:'sleep', p:0.2}},
   {key:'shokabanken', name:'書架の 番犬',   hp:390,atk:64, def:52, agi:16, exp:1180, gold:1000, minLv:25, art:'shokabanken'},
+  // ---- 第5章：悪夢に 蝕まれた 敵（第2〜3章の 敵の 形で 色を 変えた 絵）----
+  {key:'kuroikui',    name:'黒喰いバク',     hp:360,atk:66, def:46, agi:22, exp:1250, gold:1000, minLv:26, art:'kuroikui',
+   inflict:{type:'sleep', p:0.18}},
+  {key:'shokumukade', name:'蝕み ムカデ',     hp:400,atk:70, def:50, agi:26, exp:1320, gold:1040, minLv:26, art:'shokumukade'},
+  {key:'kokujugara',  name:'黒珠の 抜け殻',   hp:430,atk:64, def:58, agi:16, exp:1360, gold:1080, minLv:27, art:'kokujugara',
+   inflict:{type:'slow', p:0.2}},
   // ---- 地上の 島ごとの 固有種（野外）----
   //   ★まえは 地上の 野外が 全島 おなじ 5種 だった（雪原でも 砂漠でも 同じ 敵）
   //   ★絵（MON）が まだ ない 敵は 出ない（島の 表から のぞかれ、いままでの 表に もどる）
@@ -240,6 +246,26 @@ const MIDBOSS = {
     brace:{p:0.15, name:'かまえを かためた！'}},
   // ---- 第3章ボス：あくむじゅう ルプス（狼座）----
   //   大陸から 落ちた 悪夢の かけらが 地上の 狼に 憑いた もの。
+  // ---- 第5章：騎士団長 グラン（2形態。第1形態を 倒すと そのまま 第2形態：bossReward の nextBoss）----
+  //   ★第1形態の 絵は 騎士団長の 絵（captain）、第2形態は 仮の 絵（gran2Tmp）
+  //   ★勝率（連戦・tools/granrate.js）：Lv38で 80%・Lv40で 90%
+  gran1:{key:'gran1', name:'騎士団長 グラン', hp:6800, atk:96, def:50, agi:34, acts:1,
+    exp:3000, gold:0, art:'captain',
+    skill:{p:0.30, mul:1.35, name:'騎士団の 剣'},
+    charge:{p:0.18, mul:2.0, tell:'剣を 引いて 構えた…', name:'団長の 一閃'},
+    brace:{p:0.12, name:'剣を 立てて かまえた！'}},
+  gran2:{key:'gran2', name:'悪夢を 纏う グラン', hp:4800, atk:100, def:48, agi:30, acts:1,
+    exp:6800, gold:7000, art:'gran2Tmp',
+    skill:{p:0.28, mul:1.30, name:'黒い 剣'},
+    aoe:{p:0.26, lo:40, hi:58, name:'捨てられた 夢の 波'},
+    inflict:{type:'confuse', p:0.20},
+    enrage:{at:0.35, atk:1.15, name:'悪夢が グランの 鎧を 覆いつくした！'}},
+  // ---- 第5章 中ボス：あくむへん（下層の 裂け目）----
+  akumuhen5:{key:'akumuhen5', name:'あくむへん', hp:9000, atk:110,   /* ★勝率 Lv35で 80%・Lv36で 95% */ def:46, agi:26, acts:1,
+    exp:3200, gold:3400, art:'akumuhen5', scale:1.05,
+    skill:{p:0.28, mul:1.25, name:'裂け目の 爪'},
+    aoe:{p:0.22, lo:30, hi:44, name:'溢れた 夢'},
+    inflict:{type:'sleep', p:0.18}},
   // ★禁書庫の 番人 アーキス（手合わせ。絵は CHR.arkis）
   // ★勝率：Lv34で 70%・Lv35で 95%（第3章の 終わりの 装備・天空の 鎧）。負けても 手合わせで 進む
   arkis:{key:'arkis', name:'番人 アーキス', hp:10400, atk:98, def:46, agi:28, acts:1,
@@ -332,6 +358,9 @@ const byMapCh = {
   // ★第4章（内部の 章 番号 5）
   '5:archive1': ['kokuhyoushi','sumibane','noroichou'],
   '5:archive2': ['kokuhyoushi','noroichou','sumibane','shokabanken'],
+  // ★第5章（内部の 章 番号 6）：蝕まれた 敵
+  '6:rift_yard': ['kuroikui','shokumukade','sumibane'],
+  '6:furnace':   ['kuroikui','shokumukade','kokujugara','kokuhyoushi'],
 };
 const byMap = {
   rift_yard: ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
@@ -1285,6 +1314,24 @@ const MAPS = {
     "###############"],
     warpsXY:{
       '7,9':{to:'furnace', x:10, y:7}
+    }},
+
+  // ★第5章：ゆりかごの 前（炉心の 奥。グランが 待つ）。入口は 炉心の 手前の「炉心の 壁」（第5章の 会話で 移る）
+  cradle:{name:'ゆりかごの 前', theme:'sky', bbg:'indoor', enc:false, tiles:[
+    "###############",
+    "#######n#######",
+    "#.............#",
+    "#.............#",
+    "#......B......#",
+    "#.............#",
+    "#..#.......#..#",
+    "#.............#",
+    "#.............#",
+    "######...######",
+    "#######.#######",
+    "###############"],
+    warpsXY:{
+      '7,10':{to:'furnace_core', x:7, y:3}
     }},
 
   // ============ 第1章：騎士団 中層詰所 ============

@@ -1698,7 +1698,8 @@ function battleBackdrop(theme){
 
 function battleEnter2D(enemies, mon, done){
   const m = C.MAPS[C.P.map];
-  bTheme = (m && m.theme) || 'plain';
+  // ★地図の bbg で 戦闘の 背景を 決められる（見た目の 種類 sky の 屋内で 野原に なる ため。第5章の ゆりかごの 前）
+  bTheme = (m && (m.bbg || m.theme)) || 'plain';
   // ★地上の 野外は 足もとの 地形で 背景を えらぶ（砂漠の 島で 草原の 背景に なって いた）
   if(bTheme==='world' && m && m.tiles){
     const cnt={':':0,'=':0}; let n=0;
