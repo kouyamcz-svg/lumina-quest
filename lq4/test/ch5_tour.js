@@ -149,9 +149,9 @@ T('章の 終わりで 目的は なくなる', C.currentGoal()===null, C.curren
   ['kuroikui','shokumukade','kokujugara'].forEach(k=>{ const e=FO.find(x=>x.key===k); T('敵 '+k+' の 絵', e && MN[e.art]); });
   T('クラテルの 絵', MN.crater && C.MIDBOSS.crater.art==='crater');
   T('色変えの あくむへん（第5章）は 使わない', !MN.akumuhen5 && !C.MIDBOSS.akumuhen5);
-  T('グラン 第1形態の 絵（騎士団長）', CH[C.MIDBOSS.gran1.art]);
   T('グラン 第2形態の 絵（正式）', C.MIDBOSS.gran2.art==='gran2' && MN.gran2 && !CH.gran2Tmp);
-  T('グランは 戦闘で 大きく 描く（人の 絵は 小さく 見えた）', C.MIDBOSS.gran1.scale>=1.8);
+  T('グラン 第1形態の 戦闘の 絵は 細かい 絵（MON gran1）', C.MIDBOSS.gran1.art==='gran1' && MN.gran1 && MN.gran1.h>=80);
+  T('地図の グランは 騎士団長の 人の 絵', C.bossInfoAt('cradle',7,4).mapArt==='captain' && CH.captain);
   T('床の 花の 絵', CH.granFlower);
 }
 

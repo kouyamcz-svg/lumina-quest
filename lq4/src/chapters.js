@@ -3095,7 +3095,7 @@ const CH = {
                '討伐記録は のちに この魔物を「クラテル」と 記す。'],
       },
       'cradle:7,4': {
-        key:'gran1', clearedFlag:'ch5_granFell',
+        key:'gran1', clearedFlag:'ch5_granFell', mapArt:'captain',   // ★地図では 騎士団長の 人の 絵（戦闘は MON gran1）
         intro:['炉心の 奥。ゆりかごへ 続く 扉の 前に、グランが 立って いた。',
                '背後の 床が 裂け、黒い ものが 滲んで いる。',
                '手には、花が 一輪。',

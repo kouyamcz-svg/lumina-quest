@@ -2419,8 +2419,9 @@ function drawBoss(dx,dy,ts,tx,ty){
     //   大きさで えがくと 人だけ 大きく 見える。人は 人の 大きさに そろえる。
     const pick = (key)=>{
       const b = C.MIDBOSS && C.MIDBOSS[key];
-      const art = (b && b.art) || key;
-      const mon = MONREF && (MONREF[art] || MONREF[key]);
+      // ★地図では 別の 絵（mapArt：グランは 地図では 騎士団長の 人の 絵）
+      const art = (bi.mapArt && key===bi.key) ? bi.mapArt : ((b && b.art) || key);
+      const mon = MONREF && (MONREF[art] || (art===((b&&b.art)||key) ? MONREF[key] : null));
       if(mon) return mon;
       const chr = CHRREF && (CHRREF[art] || CHRREF[key]);
       if(chr){ const o = Object.create(chr); o._isChr = true; return o; }
