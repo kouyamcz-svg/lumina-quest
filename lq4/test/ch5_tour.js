@@ -151,6 +151,7 @@ T('章の 終わりで 目的は なくなる', C.currentGoal()===null, C.curren
   T('色変えの あくむへん（第5章）は 使わない', !MN.akumuhen5 && !C.MIDBOSS.akumuhen5);
   T('グラン 第1形態の 絵（騎士団長）', CH[C.MIDBOSS.gran1.art]);
   T('グラン 第2形態の 絵', CH[C.MIDBOSS.gran2.art]);
+  T('グランは 戦闘で 大きく 描く（人の 絵は 小さく 見えた）', C.MIDBOSS.gran1.scale>=1.8 && C.MIDBOSS.gran2.scale>=1.8);
   T('床の 花の 絵', CH.granFlower);
 }
 

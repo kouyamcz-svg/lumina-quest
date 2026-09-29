@@ -250,12 +250,12 @@ const MIDBOSS = {
   //   ★第1形態の 絵は 騎士団長の 絵（captain）、第2形態は 仮の 絵（gran2Tmp）
   //   ★勝率（連戦・tools/granrate.js）：Lv38で 75%・Lv39で 93%（アマネの 光術を 強化した 後、攻 96/100 → 103/107 で もとの 強さに）
   gran1:{key:'gran1', name:'騎士団長 グラン', hp:6800, atk:103, def:50, agi:34, acts:1,
-    exp:3000, gold:0, art:'captain',
+    exp:3000, gold:0, art:'captain', scale:2.0,   /* ★人の 絵（縦44）は 戦闘で 小さく 弱そうに 見えた */
     skill:{p:0.30, mul:1.35, name:'騎士団の 剣'},
     charge:{p:0.18, mul:2.0, tell:'剣を 引いて 構えた…', name:'団長の 一閃'},
     brace:{p:0.12, name:'剣を 立てて かまえた！'}},
   gran2:{key:'gran2', name:'悪夢を 纏う グラン', hp:4800, atk:107, def:48, agi:30, acts:1,
-    exp:6800, gold:7000, art:'gran2Tmp',
+    exp:6800, gold:7000, art:'gran2Tmp', scale:2.0,   /* ★人の 絵（縦44）は 戦闘で 小さく 弱そうに 見えた */
     skill:{p:0.28, mul:1.30, name:'黒い 剣'},
     aoe:{p:0.26, lo:40, hi:58, name:'捨てられた 夢の 波'},
     inflict:{type:'confuse', p:0.20},
