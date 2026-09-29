@@ -493,7 +493,7 @@ const NPCS = {
     {at:'12,4', spr:'guardA', name:'近衛の 騎士', lines:[
       {text:['近衛「陛下は この ところ、夜も 眠って おられぬ ようだ」']}]},
     {at:'3,8', spr:'captain', name:'騎士団長 グラン', lines:[
-      {when:{flag:'ch4_contract'}, text:['グラン「……読んだか。その 顔で 分かる」','グラン「陛下の 前で、同じ 顔を して みせろ」']},
+      {when:{flag:'ch4_granTold'}, text:['グラン「……わしは、少し ここに いる」']},
       {when:{flag:'ch4_granHelp'}, text:['グラン「わしは 表で 見張る。行け」']},
       {text:['グラン「……何だ」']}]},
     {at:'2,10', spr:'butler', name:'禁書庫の 司書', lines:[
@@ -781,6 +781,7 @@ const QUESTS = {
       {id:'key',     desc:'騎士団長 グランに もう一度 話す',     flag:'ch4_granHelp'},
       {id:'arkis',   desc:'禁書庫の 奥で 番人を 越える',         flag:'ch4_arkisDone'},
       {id:'read',    desc:'千年前の 契約書を 読む',             flag:'ch4_contract'},
+      {id:'told',    desc:'騎士団長 グランに 読んだ ことを 伝える', flag:'ch4_granTold'},
       {id:'lumina',  desc:'神殿の 最奥で 白竜に 会う',          flag:'ch4_lumina'},
       {id:'king',    desc:'謁見の間で 公王に 会う',            flag:'ch4_king'},
     ],

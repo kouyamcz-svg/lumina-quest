@@ -116,6 +116,17 @@ talk('archive_core', 8, 3, 'back');
 T('契約書を 読む', C.G.flags.ch4_contract===true && said('要らぬ 夢は 夢の 底に 棄てる'));
 T('ノエの 家の わけが わかる', said('自分の 夢を、納めて きたんだ'));
 T('アマネが 白竜に 呼ばれる', said('白竜さまが、お呼びです'));
+T('契約書の 後は グランへ 案内', said('騎士団長 グランに 伝えよう'));
+
+// ===== 5b. グランに 伝える（鍵を 渡すとき「聞かせろ」と 頼んだ 答え）=====
+talk('sky_castle', 17, 9, 'back');
+T('グランに 伝える 前は 巫女が 通さない', !C.G.flags.ch4_templeOpen && said('お許しなく'), log.join(' / ').slice(0,80));
+T('目的が グランに 伝える に なる', /グランに 伝える/.test(C.currentGoal()||''), C.currentGoal());
+talk('sky_castle', 3, 9, 'back');
+T('グランに 伝える', C.G.flags.ch4_granTold===true && said('己の 夢を 納める') && said('病だと 言われた'));
+T('グランは 神殿へ 送り出す', said('神殿の 巫女に 話そう'));
+talk('sky_castle', 3, 9, 'back');
+T('伝えた 後の グランの 普段の 台詞', said('少し ここに いる') && !said('陛下の 前で'), log.join(' / ').slice(0,80));
 
 // ===== 6. 神殿 → 白竜 =====
 stand('sky_castle', 19, 9, 'right'); clearLog(); C.stepField(1,0);

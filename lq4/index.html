@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 13:34 JST", "build":"4d6444b1","assets_sha": "00cd8f56", "lines": {"world": 148, "npc": 971, "chapters": 3009, "bgm": 986, "view2d": 2596, "core": 4371, "view": 1714, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 13:41 JST", "build":"7d457155","assets_sha": "00cd8f56", "lines": {"world": 148, "npc": 972, "chapters": 3030, "bgm": 986, "view2d": 2596, "core": 4371, "view": 1714, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -814,7 +814,7 @@ const NPCS = {
     {at:'12,4', spr:'guardA', name:'近衛の 騎士', lines:[
       {text:['近衛「陛下は この ところ、夜も 眠って おられぬ ようだ」']}]},
     {at:'3,8', spr:'captain', name:'騎士団長 グラン', lines:[
-      {when:{flag:'ch4_contract'}, text:['グラン「……読んだか。その 顔で 分かる」','グラン「陛下の 前で、同じ 顔を して みせろ」']},
+      {when:{flag:'ch4_granTold'}, text:['グラン「……わしは、少し ここに いる」']},
       {when:{flag:'ch4_granHelp'}, text:['グラン「わしは 表で 見張る。行け」']},
       {text:['グラン「……何だ」']}]},
     {at:'2,10', spr:'butler', name:'禁書庫の 司書', lines:[
@@ -1102,6 +1102,7 @@ const QUESTS = {
       {id:'key',     desc:'騎士団長 グランに もう一度 話す',     flag:'ch4_granHelp'},
       {id:'arkis',   desc:'禁書庫の 奥で 番人を 越える',         flag:'ch4_arkisDone'},
       {id:'read',    desc:'千年前の 契約書を 読む',             flag:'ch4_contract'},
+      {id:'told',    desc:'騎士団長 グランに 読んだ ことを 伝える', flag:'ch4_granTold'},
       {id:'lumina',  desc:'神殿の 最奥で 白竜に 会う',          flag:'ch4_lumina'},
       {id:'king',    desc:'謁見の間で 公王に 会う',            flag:'ch4_king'},
     ],
@@ -4035,6 +4036,7 @@ const CH = {
       {done:'ch4_granHelp',   text:'騎士団長 グランに もう一度 話す'},
       {done:'ch4_arkisDone',  text:'禁書庫の 奥へ（下層の ふたつの 灯を ともす）'},
       {done:'ch4_contract',   text:'禁書庫の 最奥で、書見台を 調べる'},
+      {done:'ch4_granTold',   text:'天空城の 左の 部屋で、騎士団長 グランに 伝える'},
       {done:'ch4_templeOpen', text:'天空城の 右の 部屋で、神殿の 巫女に 話す'},
       {done:'ch4_lumina',     text:'神殿の 最奥で、白竜 ルミナに 会う'},
       {done:'ch4_king',       text:'天空城の 謁見の間で、公王に 会う'},
@@ -4210,9 +4212,29 @@ const CH = {
              'アマネ「……白竜さまが、お呼びです」',
              'アマネ「神殿の 最奥へ。……わたしが 捨てた 場所です」',
              '',
-             '＊ 天空城へ 戻り、神殿の 巫女に 話そう（右の 部屋）＊'] },
+             '＊ 天空城へ 戻り、騎士団長 グランに 伝えよう（左の 部屋）＊'] },
+      // ---- グランに 伝える（鍵を 渡すとき「読んだ ものを 聞かせろ」と 頼んだ 答え）----
+      { npc:'騎士団長 グラン', cond:['ch4_contract'], unless:'ch4_granTold',
+        set:['ch4_granTold'],
+        msg:['グラン「……読んだか」',
+             'イオ「団長。契約書が ありました」',
+             '',
+             'イオは 書見台の 文を 読み上げた。',
+             '',
+             'グラン「夢守りは……己の 夢を 納める」',
+             '',
+             'グランは 窓の 外を 見た。庭園の 方角だった。',
+             '',
+             'グラン「三年前、あれは 務めから 戻って、花を 見る ように なった」',
+             'グラン「病だと 言われた。わしは それを 信じた」',
+             'セレン「団長……」',
+             '',
+             'グラン「行け。白竜が 呼んで いるのだろう」',
+             'グラン「……わしは、少し ここに いる」',
+             '',
+             '＊ 神殿の 巫女に 話そう（右の 部屋）＊'] },
       // ---- 神殿の 巫女 ----
-      { npc:'神殿の 巫女', cond:['ch4_contract'], unless:'ch4_templeOpen',
+      { npc:'神殿の 巫女', cond:['ch4_granTold'], unless:'ch4_templeOpen',
         set:['ch4_templeOpen'],
         msg:['巫女「アマネさま……！ お戻りに」',
              'アマネ「戻って きた わけでは ありません」',
