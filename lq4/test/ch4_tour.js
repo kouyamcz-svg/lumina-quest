@@ -159,6 +159,9 @@ for(const no of [2,3,4]){
       const e=(FO||[]).find(x=>x.key===k);
       T('禁書庫の 敵 '+k+' は 色を 変えた 自分の 絵', e && e.art===k && MN[k] && MN[k].src, e && e.art);
     } }
+  { const e2=vm.runInContext("NPCDATA.npcAt('sky_castle',10,2)", ctx);
+    T('公王 アルベルの 絵は CHR.albel（3面）', e2 && e2.spr==='albel' && CH.albel && CH.albel.front && CH.albel.side && CH.albel.back, e2 && e2.spr);
+    T('仮の 絵 albelTmp が 残って いない', !CH.albelTmp && fs.readFileSync('src/npc.js','utf8').indexOf('albelTmp')<0); }
   T('飛ぶ 姿は 終章用に 保存（art/chr/luminaFly.png）', fs.existsSync('art/chr/luminaFly.png') && fs.existsSync('art/chr/luminaFly_src.png'));
 }
 

@@ -484,7 +484,7 @@ const NPCS = {
   // ★湧き水 西の集落
   // ============ 第4章：天空城・禁書庫・神殿 ============
   sky_castle: [
-    {at:'10,2', spr:'albelTmp', name:'公王 アルベル', lines:[
+    {at:'10,2', spr:'albel', name:'公王 アルベル', lines:[
       {when:{flag:'ch4_king'}, text:['公王は 窓の 外を 見て いる。']},
       {text:['公王「……下がれ。用が あるなら 団長を 通せ」']}]},
     {at:'8,4', spr:'guardA', name:'近衛の 騎士', lines:[
