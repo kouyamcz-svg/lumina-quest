@@ -269,22 +269,22 @@ const MIDBOSS = {
     enrage:{at:0.35, atk:1.15, name:'悪夢が グランの 鎧を 覆いつくした！'}},
   // ---- 終章：魔王 メーア（3形態の 連戦：装丁 → 乱丁 → 白紙。HP・MPは 引き継ぐ）----
   //   ★白紙は HPが 残り mitoriAt（割合）を 下回ると 戦いが 止まり、一行は 武器を 収めて「看取る」（倒さない）
-  //   ★絵は 仮（meraTmp1〜3：禁書庫の 敵の 色変え）
+  //   ★絵は 装丁＝書物の 山、乱丁＝頁で できた 人型の 魔王、白紙＝膝を 抱えた 白い 人の 形
   //   ★勝率（連戦・tools/merarate.js、15回ずつ）：Lv40 67%・Lv41 73%・Lv42 93%・Lv43 100%
   mera1:{key:'mera1', name:'魔王 メーア〈装丁〉', hp:6000, atk:104, def:54, agi:30, acts:1,
-    exp:4000, gold:0, art:'meraTmp1', scale:1.7,
+    exp:4000, gold:0, art:'mera1', scale:1.05,
     skill:{p:0.28, mul:1.30, name:'綴じ糸'},
     aoe:{p:0.26, lo:44, hi:62, name:'頁の 嵐'},
     inflict:{type:'sleep', p:0.20}},
   mera2:{key:'mera2', name:'魔王 メーア〈乱丁〉', hp:5000, atk:108, def:50, agi:34, acts:1,
-    exp:5000, gold:0, art:'meraTmp2', scale:1.4,
-    skill:{p:0.30, mul:1.35, name:'乱れた 牙'},
-    charge:{p:0.18, mul:2.0, tell:'頁を 逆立てて 身を 沈めた…', name:'乱丁の 咆哮'},
+    exp:5000, gold:0, art:'mera2', scale:1.05,
+    skill:{p:0.30, mul:1.35, name:'乱れた 爪'},
+    charge:{p:0.18, mul:2.0, tell:'黒い 本を 開いた…', name:'乱丁の 呪文'},
     aoe:{p:0.22, lo:46, hi:64, name:'捨てられた 夢の 群れ'},
     inflict:{type:'confuse', p:0.18},
     enrage:{at:0.35, atk:1.15, name:'頁が ばらばらに 飛び散った！'}},
   mera3:{key:'mera3', name:'魔王 メーア〈白紙〉', hp:4000, atk:98, def:40, agi:26, acts:1,
-    exp:9000, gold:9000, art:'meraTmp3', scale:1.6, mitoriAt:0.25,
+    exp:9000, gold:9000, art:'mera3', scale:1.0, mitoriAt:0.25,
     skill:{p:0.26, mul:1.25, name:'白い 手'},
     aoe:{p:0.26, lo:40, hi:58, name:'何も ない 声'}},
   // ---- 第5章 中ボス：クラテル（コップ座。下層の 裂け目から 溢れた 捨てられた 夢の 杯）----
@@ -2663,14 +2663,24 @@ function triggerChapterEnd(){
   G.cleared = true;
   Object.keys(en.quest || {}).forEach(q => questAdvance(q, en.quest[q]));
   G.mode = 'msg';
-  // ★エンディングの いちまいえ。dark:true なら まっ暗な 画面に 文字だけ
-  const sk = en.img || (en.dark ? '__dark' : null);
-  if(sk && V.showScene) V.showScene(sk);
-  U.msg(en.msg || ['……'], () => {
-    if(sk && V.hideScene) V.hideScene();
-    const card = en.card || {title:'', sub:''};
-    V.chapterCard(card.title, card.sub, () => { offerNextChapter(en.next, cd.title, en.final); });
-  });
+  // ★エンディングの いちまいえ。dark:true なら まっ暗な 画面に 文字だけ。
+  //   parts（[{img|dark, msg}, …]）が あれば 段ごとに 絵を 切り替える（結末：真っ暗 → 千年後の 祠 → 真っ暗）
+  const parts = en.parts || [{img:en.img, dark:en.dark, msg:en.msg || ['……']}];
+  const run = (i) => {
+    if(i >= parts.length){
+      const card = en.card || {title:'', sub:''};
+      V.chapterCard(card.title, card.sub, () => { offerNextChapter(en.next, cd.title, en.final); });
+      return;
+    }
+    const p = parts[i];
+    const sk = p.img || (p.dark ? '__dark' : null);
+    if(sk && V.showScene) V.showScene(sk);
+    U.msg(p.msg || ['……'], () => {
+      if(sk && V.hideScene) V.hideScene();
+      run(i+1);
+    });
+  };
+  run(0);
 }
 function questOnTalk(npcName){
   // ★IVは 章データ（chapters.js）の talkEvents だけで ものがたりが うごく。

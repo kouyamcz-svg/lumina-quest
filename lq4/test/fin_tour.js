@@ -58,7 +58,7 @@ T('はじめの 目的は 白竜', /白竜/.test(C.currentGoal()||''), C.current
 scene.length=0;
 talk('temple', 8, 4, 'back');
 T('白竜に 乗って 夢の 内界へ', C.G.flags.fin_dive===true && C.P.map==='dream1', C.P.map);
-T('飛ぶ 姿の 一枚絵', scene.indexOf('show:sceneLuminaFly')>=0, scene.join(','));
+T('白竜の 背で 夢へ の 一枚絵', scene.indexOf('show:scene_fin_fly')>=0, scene.join(','));
 stand('dream1', 7, 9, 'front'); C.stepField(0,1);
 T('夢から 神殿へ 戻れる', C.P.map==='temple', C.P.map);
 talk('temple', 8, 4, 'back');
@@ -77,7 +77,7 @@ T('目的が メーアに', /メーア/.test(C.currentGoal()||''), C.currentGoal
 strong(80);
 talk('dream_depths', 7, 4, 'back');
 T('メーアの 台詞', said('裏ノ頁') && said('誰ガ 看ル'));
-T('装丁 → 乱丁 → 白紙', said('＊ 乱丁 ＊') && said('＊ 白紙 ＊'));
+T('装丁 → 乱丁 → 白紙', said('＊ 乱丁 ＊') && said('＊ 白紙 ＊') && said('魔王の 姿に'));
 T('白紙は 倒さず 看取る', C.G.flags.fin_mitori===true && said('武器を 収めた') && said('看取ります') && !log.some(l=>/〈白紙〉を 倒した/.test(l)), log.filter(l=>/白紙/.test(l)).join(' / ').slice(0,120));
 T('眠る 子が 現れる', C.tileAt('dream_depths',7,3)==='n');
 talk('dream_depths', 7, 4, 'back');
@@ -94,8 +94,9 @@ T('目的が 道具棚', /道具棚/.test(C.currentGoal()||''), C.currentGoal())
 scene.length=0;
 talk('home_forge', 11, 7, 'back');
 T('天空鋼の 剣', C.G.flags.fin_sword===true && said('父さん、打てたよ'));
+T('鍛冶場の 一枚絵', scene.indexOf('show:scene_fin_forge')>=0, scene.join(','));
 T('結末：引き上げ・降下・扉・祠・千年後', said('雲海の 上へ 昇って') && said('五つの 土地へ') && said('「扉」と 呼ばれる') && said('祠に 納めた') && said('千年後') && said('ゆっくりと 引き抜いた'));
-T('結末は まっ暗な 画面に 文字だけ', scene.indexOf('show:__dark')>=0, scene.join(','));
+T('結末：真っ暗 → 千年後の 祠の 一枚絵 → 真っ暗', (()=>{ const a=scene.indexOf('show:__dark'), b=scene.indexOf('show:scene_fin_shrine'), c=scene.lastIndexOf('show:__dark'); return a>=0 && b>a && c>b; })(), scene.join(','));
 T('完結の 文', said('完結') && !said('めざめの あさ'));
 T('ch6_cleared', C.G.flags.ch6_cleared===true);
 T('終わった あと 目的は ない', C.currentGoal()===null, C.currentGoal());
@@ -105,6 +106,14 @@ T('終わった あと 目的は ない', C.currentGoal()===null, C.currentGoal(
   C.G.flags.fin_mitori=false; C.G.mode='field'; C.P.map='dream_depths';
   C.startBattle('mera3');
   T('看取りで 戦いが 終わる', C.G.flags.fin_mitori===true);
+}
+{
+  const actx={console, window:{}}; actx.globalThis=actx; vm.createContext(actx);
+  vm.runInContext(fs.readFileSync('assets.js','utf8')+';globalThis.__CHR=CHR;globalThis.__MON=MON;', actx, {filename:'assets.js'});
+  const CH=actx.__CHR, MN=actx.__MON;
+  ['mera1','mera2','mera3'].forEach(k=>T(k+' は 正式な 絵', C.MIDBOSS[k].art===k && MN[k] && !MN['meraTmp'+k.slice(-1)]));
+  T('眠る 子は ヴォクスの 絵', CH.vox && C.NPCDATA ? true : !!CH.vox);
+  ['scene_fin_fly','scene_fin_forge','scene_fin_shrine'].forEach(k=>T('一枚絵 '+k, MN[k] && MN[k].w===192));
 }
 T('クエスト画面が 章の 途中で 空に ならない', __GAPS.length===0, __GAPS.map(g=>g.from+'（'+g.n+'）').join(' / '));
 console.log('\n--- fin_tour: ' + (n-ng) + '/' + n + ' 通過 ---');

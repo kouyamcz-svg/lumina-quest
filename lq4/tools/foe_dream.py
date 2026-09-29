@@ -15,7 +15,7 @@ MODES={
  'hakushi':((0.60,1.60,0.05),(0.60,1.70,0.04)), # 白紙：ほとんど 白
 }
 JOBS={'yumeboshi':('kamigarasu','dream'), 'yumekazura':('kudamukade','dream'), 'yumemori_kage':('wasuremono','dream'),
-      'meraTmp1':('noroichou','soutei'), 'meraTmp2':('shokabanken','rantei'), 'meraTmp3':('kokuhyoushi','hakushi')}
+}
 for new,(src,mode) in JOBS.items():
     (hp,lp,sp),(ho,lo,so)=MODES[mode]
     a=np.array(mon(src)).astype(float); out=a.copy()

@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 04:55 JST", "build":"c051345d","assets_sha": "fae79eeb", "lines": {"world": 154, "npc": 1065, "chapters": 3499, "bgm": 986, "view2d": 2598, "core": 4579, "view": 1733, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 08:39 JST", "build":"399fbab1","assets_sha": "44a12aed", "lines": {"world": 154, "npc": 1065, "chapters": 3500, "bgm": 986, "view2d": 2598, "core": 4589, "view": 1733, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -163,7 +163,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=fae79eeb"></script>
+<script src="assets.js?v=44a12aed"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -889,7 +889,7 @@ const NPCS = {
       {text:['「霊峰の 祠に、灯を 絶やさぬ ように」','「……あなたたち、夢の 外から 来た 人ね。この 子を 頼みます」']}]},
   ],
   dream_depths: [
-    {at:'7,3', spr:'childA', name:'眠る 子', lines:[
+    {at:'7,3', spr:'vox', name:'眠る 子', lines:[
       {text:['子どもは 静かに 寝息を 立てて いる。']}]},
   ],
   // ============ 第5章：ゆりかごの 前 ============
@@ -4715,13 +4715,14 @@ const CH = {
       mera1: {
         nextBoss:'mera2',
         msg:['', '綴じ糸が ほどけ、頁が 床に 散った。',
-             '散った 頁が、獣の 形に 組み直されて いく。',
+             '散った 頁が、人の 形に 組み直されて いく。',
+             '頁で できた 衣を まとい、冠を 戴いた、魔王の 姿に。',
              'セレン「……まだ 来る！」',
              '＊ 乱丁 ＊'],
       },
       mera2: {
         nextBoss:'mera3',
-        msg:['', '獣が 崩れた。',
+        msg:['', '魔王の 衣が、頁ごと ほどけて 崩れた。',
              '頁の 文字が、一文字ずつ 消えて いく。',
              '',
              '残ったのは、何も 書かれて いない 白い 頁だけ だった。',
@@ -4755,7 +4756,7 @@ const CH = {
       { npc:'白竜 ルミナ', unless:'fin_dive',
         set:['fin_dive'],
         quest:{fin_q1_dream:'active'},
-        img:'sceneLuminaFly',
+        img:'scene_fin_fly',
         msg:['白竜が 身を 起こした。',
              'アマネ「……乗れ、と おっしゃって います」',
              '',
@@ -4822,6 +4823,7 @@ const CH = {
       // ---- 最後の 夜：天空鋼の 剣 ----
       { npc:'父の 道具棚', cond:['fin_decide'], unless:'fin_sword',
         set:['fin_sword'],
+        img:'scene_fin_forge',
         msg:['道具棚の 奥に、油紙に 包まれた 鋼が あった。',
              '父が 打ちかけの まま 残した、天空鋼。',
              '',
@@ -4838,8 +4840,8 @@ const CH = {
     ending: {
       trigger: 'fin_sword',
       set:['ch6_cleared'],
-      dark: true,   // ★結末は まっ暗な 画面に 文字だけ（一枚絵は あとで）
-      msg:['',
+      // ★結末は 段に 分ける：まっ暗な 画面 → 千年後の 祠の 一枚絵 → まっ暗な 画面
+      parts:[{dark:true, msg:['',
            '── 夜明け ──',
            '',
            '白竜が 翼を 広げた。',
@@ -4854,17 +4856,16 @@ const CH = {
            'イオは 天空鋼の 剣を、地上の 祠に 納めた。',
            'イオ「いつか、誰かが 必要と する 日まで」',
            '',
-           '── 千年後 ──',
-           '',
+           '── 千年後 ──']},
+        {img:'scene_fin_shrine', msg:[
            '祠の 前に、ひとりの 若者が 立って いた。',
-           '若者は 剣の 柄に 手を かけ、ゆっくりと 引き抜いた。',
-           '',
-           '',
+           '若者は 剣の 柄に 手を かけ、ゆっくりと 引き抜いた。']},
+        {dark:true, msg:[
            '　ルミナクエストIV 〜天空のルミナ〜',
            '',
            '',
            '雲海の 上。朝日に 照らされて、',
-           'ルミナリアは 今も 静かに 浮かんで いる。'],
+           'ルミナリアは 今も 静かに 浮かんで いる。']}],
       card: {title:'沈まない島', sub:'ルミナクエストIV 完'},
       final: true,
     },
@@ -8744,22 +8745,22 @@ const MIDBOSS = {
     enrage:{at:0.35, atk:1.15, name:'悪夢が グランの 鎧を 覆いつくした！'}},
   // ---- 終章：魔王 メーア（3形態の 連戦：装丁 → 乱丁 → 白紙。HP・MPは 引き継ぐ）----
   //   ★白紙は HPが 残り mitoriAt（割合）を 下回ると 戦いが 止まり、一行は 武器を 収めて「看取る」（倒さない）
-  //   ★絵は 仮（meraTmp1〜3：禁書庫の 敵の 色変え）
+  //   ★絵は 装丁＝書物の 山、乱丁＝頁で できた 人型の 魔王、白紙＝膝を 抱えた 白い 人の 形
   //   ★勝率（連戦・tools/merarate.js、15回ずつ）：Lv40 67%・Lv41 73%・Lv42 93%・Lv43 100%
   mera1:{key:'mera1', name:'魔王 メーア〈装丁〉', hp:6000, atk:104, def:54, agi:30, acts:1,
-    exp:4000, gold:0, art:'meraTmp1', scale:1.7,
+    exp:4000, gold:0, art:'mera1', scale:1.05,
     skill:{p:0.28, mul:1.30, name:'綴じ糸'},
     aoe:{p:0.26, lo:44, hi:62, name:'頁の 嵐'},
     inflict:{type:'sleep', p:0.20}},
   mera2:{key:'mera2', name:'魔王 メーア〈乱丁〉', hp:5000, atk:108, def:50, agi:34, acts:1,
-    exp:5000, gold:0, art:'meraTmp2', scale:1.4,
-    skill:{p:0.30, mul:1.35, name:'乱れた 牙'},
-    charge:{p:0.18, mul:2.0, tell:'頁を 逆立てて 身を 沈めた…', name:'乱丁の 咆哮'},
+    exp:5000, gold:0, art:'mera2', scale:1.05,
+    skill:{p:0.30, mul:1.35, name:'乱れた 爪'},
+    charge:{p:0.18, mul:2.0, tell:'黒い 本を 開いた…', name:'乱丁の 呪文'},
     aoe:{p:0.22, lo:46, hi:64, name:'捨てられた 夢の 群れ'},
     inflict:{type:'confuse', p:0.18},
     enrage:{at:0.35, atk:1.15, name:'頁が ばらばらに 飛び散った！'}},
   mera3:{key:'mera3', name:'魔王 メーア〈白紙〉', hp:4000, atk:98, def:40, agi:26, acts:1,
-    exp:9000, gold:9000, art:'meraTmp3', scale:1.6, mitoriAt:0.25,
+    exp:9000, gold:9000, art:'mera3', scale:1.0, mitoriAt:0.25,
     skill:{p:0.26, mul:1.25, name:'白い 手'},
     aoe:{p:0.26, lo:40, hi:58, name:'何も ない 声'}},
   // ---- 第5章 中ボス：クラテル（コップ座。下層の 裂け目から 溢れた 捨てられた 夢の 杯）----
@@ -11138,14 +11139,24 @@ function triggerChapterEnd(){
   G.cleared = true;
   Object.keys(en.quest || {}).forEach(q => questAdvance(q, en.quest[q]));
   G.mode = 'msg';
-  // ★エンディングの いちまいえ。dark:true なら まっ暗な 画面に 文字だけ
-  const sk = en.img || (en.dark ? '__dark' : null);
-  if(sk && V.showScene) V.showScene(sk);
-  U.msg(en.msg || ['……'], () => {
-    if(sk && V.hideScene) V.hideScene();
-    const card = en.card || {title:'', sub:''};
-    V.chapterCard(card.title, card.sub, () => { offerNextChapter(en.next, cd.title, en.final); });
-  });
+  // ★エンディングの いちまいえ。dark:true なら まっ暗な 画面に 文字だけ。
+  //   parts（[{img|dark, msg}, …]）が あれば 段ごとに 絵を 切り替える（結末：真っ暗 → 千年後の 祠 → 真っ暗）
+  const parts = en.parts || [{img:en.img, dark:en.dark, msg:en.msg || ['……']}];
+  const run = (i) => {
+    if(i >= parts.length){
+      const card = en.card || {title:'', sub:''};
+      V.chapterCard(card.title, card.sub, () => { offerNextChapter(en.next, cd.title, en.final); });
+      return;
+    }
+    const p = parts[i];
+    const sk = p.img || (p.dark ? '__dark' : null);
+    if(sk && V.showScene) V.showScene(sk);
+    U.msg(p.msg || ['……'], () => {
+      if(sk && V.hideScene) V.hideScene();
+      run(i+1);
+    });
+  };
+  run(0);
 }
 function questOnTalk(npcName){
   // ★IVは 章データ（chapters.js）の talkEvents だけで ものがたりが うごく。
