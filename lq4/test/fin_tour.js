@@ -82,6 +82,23 @@ T('白紙は 倒さず 看取る', C.G.flags.fin_mitori===true && said('武器�
 T('眠る 子が 現れる', C.tileAt('dream_depths',7,3)==='n');
 talk('dream_depths', 7, 4, 'back');
 T('ヴォクスに 会う', C.G.flags.fin_vox===true && said('ヴォクス「……おにいちゃんたち'));
+T('約束', said('もう、わるいゆめを すてないで') && said('約束する'));
+T('夢の 外（神殿）へ 戻る', C.P.map==='temple', C.P.map);
+T('目的が 白竜に', /白竜/.test(C.currentGoal()||''), C.currentGoal());
+
+// ===== 4. 決断 → 最後の 夜 =====
+talk('temple', 8, 4, 'back');
+T('白竜と 長老会の 決断', C.G.flags.fin_decide===true && said('雲の 上へ 引き上げる') && said('最後の 夢守り'));
+T('夢へは 入らず 鍛冶場へ', C.P.map==='home_forge', C.P.map);
+T('目的が 道具棚', /道具棚/.test(C.currentGoal()||''), C.currentGoal());
+scene.length=0;
+talk('home_forge', 11, 7, 'back');
+T('天空鋼の 剣', C.G.flags.fin_sword===true && said('父さん、打てたよ'));
+T('結末：引き上げ・降下・扉・祠・千年後', said('雲海の 上へ 昇って') && said('五つの 土地へ') && said('「扉」と 呼ばれる') && said('祠に 納めた') && said('千年後') && said('ゆっくりと 引き抜いた'));
+T('結末は まっ暗な 画面に 文字だけ', scene.indexOf('show:__dark')>=0, scene.join(','));
+T('完結の 文', said('完結') && !said('めざめの あさ'));
+T('ch6_cleared', C.G.flags.ch6_cleared===true);
+T('終わった あと 目的は ない', C.currentGoal()===null, C.currentGoal());
 
 // ===== 看取りの 仕組み：HPが 決めた 割合を 下回った ところで 止まる =====
 {

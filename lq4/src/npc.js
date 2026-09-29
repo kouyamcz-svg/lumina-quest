@@ -847,6 +847,8 @@ const QUESTS = {
       {id:'depths', desc:'夢の 内界を 抜け、夢の 底へ',       flag:'fin_depths'},
       {id:'mera',   desc:'夢の 底で 魔王 メーアと 向き合う',  flag:'fin_mitori'},
       {id:'vox',    desc:'眠る 子に 会う',                   flag:'fin_vox'},
+      {id:'decide', desc:'神殿の 最奥で 白竜 ルミナに 話す',  flag:'fin_decide'},
+      {id:'sword',  desc:'最後の 夜、父の 鍛冶場で 剣を 打つ', flag:'fin_sword'},
     ],
     reward:{}, next:null,
   },
