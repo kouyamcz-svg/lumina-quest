@@ -158,9 +158,17 @@ T('章の 終わりで 目的は なくなる', C.currentGoal()===null, C.curren
   const bad={map:'world', x:1, y:7};
   C.G.entry = C.G.entry||{};
   stand('garden', 9, 13, 'front'); C.G.entry.garden=Object.assign({},bad); C.stepField(0,1);
-  T('庭園：こわれた 戻り先でも 庭園の 入口の 前に 出る', C.P.map==='world' && C.P.x===30 && C.P.y===9, C.P.map+' '+C.P.x+','+C.P.y);
+  T('庭園：地図名だけ ずれた おぼえ（world 1,7）は 上層区の 1,7 に 直して 戻る', C.P.map==='upper_dist' && C.P.x===1 && C.P.y===7, C.P.map+' '+C.P.x+','+C.P.y);
+  stand('garden', 9, 13, 'front'); C.G.entry.garden={map:'world', x:3, y:2}; C.stepField(0,1);
+  T('庭園：どこにも 合わない おぼえは 世界地図の 庭園の 入口の 前', C.P.map==='world' && C.P.x===30 && C.P.y===9, C.P.map+' '+C.P.x+','+C.P.y);
   stand('garden', 9, 13, 'front'); C.G.entry.garden={map:'upper_dist', x:1, y:7}; C.stepField(0,1);
   T('庭園：上層区から 入ったら 上層区へ 戻る', C.P.map==='upper_dist' && C.P.x===1 && C.P.y===7, C.P.map+' '+C.P.x+','+C.P.y);
+  // ★古い セーブの ように、上層区の おぼえが「庭園から」、庭園の おぼえが 壊れて いる とき
+  C.G.entry.upper_dist={map:'garden', x:9, y:13}; C.G.entry.garden={map:'world', x:3, y:2};
+  stand('upper_dist', 1, 7, 'left'); C.stepField(-1,0);
+  T('古い おぼえが あっても 上層区から 入れば 上層区を おぼえ直す', C.P.map==='garden' && C.G.entry.garden.map==='upper_dist', JSON.stringify(C.G.entry.garden));
+  stand('garden', 9, 13, 'front'); C.stepField(0,1);
+  T('そして 上層区へ 戻る', C.P.map==='upper_dist' && C.P.x===1 && C.P.y===7, C.P.map+' '+C.P.x+','+C.P.y);
   stand('furnace', 10, 19, 'front'); C.G.entry.furnace=Object.assign({},bad); C.stepField(0,1);
   T('光珠炉：こわれた 戻り先でも 外の 歩ける ますに 出る', C.P.map!=='furnace' && C.walkable(C.P.map,C.P.x,C.P.y) && C.tileAt(C.P.map,C.P.x,C.P.y)!=='~', C.P.map+' '+C.P.x+','+C.P.y);
 }

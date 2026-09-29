@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 19:56 JST", "build":"a98dc8b1","assets_sha": "7eac4ed3", "lines": {"world": 149, "npc": 1020, "chapters": 3271, "bgm": 986, "view2d": 2597, "core": 4434, "view": 1733, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 20:01 JST", "build":"a366a693","assets_sha": "7eac4ed3", "lines": {"world": 149, "npc": 1020, "chapters": 3271, "bgm": 986, "view2d": 2597, "core": 4449, "view": 1733, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -10366,6 +10366,18 @@ function entryOk(mp, e){
   }
   return false;
 }
+// ★おぼえの 地図名だけが ずれて いる とき（ます目は 正しい）を 直す。
+//   ★上層区から 庭園に 入って 出たら、世界地図の 1,7（＝上層区の 庭園口の 前の ます目）に 出た。
+//     ます目が 入口の そばに なる 地図を さがし、見つかれば それを 使う。
+function repairEntry(mp, e){
+  if(!e) return null;
+  if(entryOk(mp, e)) return e;
+  for(const m2 of Object.keys(MAPS)){
+    const e2 = {map:m2, x:e.x, y:e.y};
+    if(entryOk(mp, e2)) return e2;
+  }
+  return null;
+}
 function doWarp(w){
   // ★脱出（夢還り）は 来た 道を 戻るだけ。結界で 止めない。
   if(w && !w.escape && wardBlocks(w.to)){
@@ -10383,7 +10395,10 @@ function doWarp(w){
   //   ・おく の 部屋から 手前へ 戻る ときも おぼえない
   //     （＝ いま いる ところが 行き先から 入った 部屋の とき）
   G.entry = G.entry || {};
-  const fromInner = G.entry[P.map] && G.entry[P.map].map === w.to;
+  // ★「おくから 戻る」と みなすのは、行き先の おぼえが 正しく 残って いる ときだけ。
+  //   ★上層区の おぼえが「庭園から 来た」に なって いると、庭園へ 入る たびに
+  //     おくから 戻ったと みなされ、庭園の 古い おぼえ（世界地図の 1,7）が 残り 続けた。
+  const fromInner = G.entry[P.map] && G.entry[P.map].map === w.to && !!repairEntry(w.to, G.entry[w.to]);
   // ★おぼえる のは「ひとつ 手前の ます」。
   //   ワープの ます そのものを おぼえると、もどった とき 門や 口の 上に 立ち、
   //   すぐ また 入って しまったり、両わきが かべで 動けなく なる。
@@ -10401,8 +10416,8 @@ function doWarp(w){
     //     世界地図から 入っても 上層区に 出て いた。
     let dest = w;
     if(w.back){
-      const back = G.entry && G.entry[P.map];
-      if(back && entryOk(P.map, back)){
+      const back = repairEntry(P.map, G.entry && G.entry[P.map]);
+      if(back){
         dest = {to:back.map, x:back.x, y:back.y};
       }else if(MAPS[w.to] && walkable(w.to, w.x, w.y) && !warpAt(w.to, w.x, w.y)){
         // ★おぼえが ない・こわれて いる：ワープに 書いた 行き先が 外の 歩ける ます なら それ
@@ -12128,8 +12143,8 @@ function isDungeon(mp){ return (WORLD.MAP_IDS[mp]||{}).kind==='dgn'; }
 function escapeTarget(){
   let mp = P.map, dest = null;
   for(let guard=0; guard<8 && isDungeon(mp); guard++){
-    const e = G.entry && G.entry[mp];
-    let nx = (e && entryOk(mp, e)) ? {to:e.map, x:e.x, y:e.y} : null;
+    const e = repairEntry(mp, G.entry && G.entry[mp]);
+    let nx = e ? {to:e.map, x:e.x, y:e.y} : null;
     if(!nx){
       const ws = (MAPS[mp]||{}).warpsXY || {};
       const k = Object.keys(ws).find(k=>ws[k].back);
