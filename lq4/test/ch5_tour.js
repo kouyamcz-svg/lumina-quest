@@ -72,7 +72,8 @@ stand('lower_dist', 10, 1, 'back'); C.stepField(0,-1);
 T('下層区の 北から 裂け目の広場へ', C.P.map==='rift_yard', C.P.map);
 strong(70);
 talk('rift_yard', 10, 4, 'back');
-T('あくむへんを 倒す', C.G.flags.ch5_riftDown===true && said('裂け目から、大きな 目が'));
+T('クラテルを 倒す', C.G.flags.ch5_riftDown===true && said('「クラテル」と 記す'));
+T('倒した 後に メーアの 名が 出る', said('メーア、サマ') && said('名前を、言った'));
 T('庭園へ 案内', said('空中庭園へ'));
 T('ボスの ますが 消える', C.tileAt('rift_yard',10,3)==='.');
 
@@ -124,7 +125,8 @@ T('章の 終わりで 目的は なくなる', C.currentGoal()===null, C.curren
   vm.runInContext(fs.readFileSync('assets.js','utf8')+';globalThis.__CHR=CHR;globalThis.__MON=MON;', actx, {filename:'assets.js'});
   const CH=actx.__CHR, MN=actx.__MON, FO=C.ENEMIES||[];
   ['kuroikui','shokumukade','kokujugara'].forEach(k=>{ const e=FO.find(x=>x.key===k); T('敵 '+k+' の 絵', e && MN[e.art]); });
-  T('あくむへん（第5章）の 絵', MN.akumuhen5);
+  T('クラテルの 絵', MN.crater && C.MIDBOSS.crater.art==='crater');
+  T('色変えの あくむへん（第5章）は 使わない', !MN.akumuhen5 && !C.MIDBOSS.akumuhen5);
   T('グラン 第1形態の 絵（騎士団長）', CH[C.MIDBOSS.gran1.art]);
   T('グラン 第2形態の 絵', CH[C.MIDBOSS.gran2.art]);
   T('床の 花の 絵', CH.granFlower);

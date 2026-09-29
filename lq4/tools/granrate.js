@@ -1,5 +1,5 @@
 // 第5章の ボスの 勝率（node tools/granrate.js 回数 [boss] [hp:atk ...]）
-//   boss：gran（第1形態→第2形態の 連戦）／akumuhen5（裂け目の 中ボス）
+//   boss：gran（第1形態→第2形態の 連戦）／crater（裂け目の 中ボス）
 const fs=require('fs'),vm=require('vm');const c={console,window:{},localStorage:undefined};c.globalThis=c;vm.createContext(c);
 for(const f of ['world.js','npc.js','chapters.js','core.js'])vm.runInContext(fs.readFileSync(__dirname+'/../src/'+f,'utf8'),c,{filename:f});
 const C=vm.runInContext('LQ4',c);

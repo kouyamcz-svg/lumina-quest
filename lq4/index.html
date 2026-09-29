@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 14:55 JST", "build":"32375d56","assets_sha": "affefbc4", "lines": {"world": 149, "npc": 999, "chapters": 3259, "bgm": 986, "view2d": 2597, "core": 4418, "view": 1714, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 15:13 JST", "build":"d41b9ddb","assets_sha": "7eac4ed3", "lines": {"world": 149, "npc": 999, "chapters": 3271, "bgm": 986, "view2d": 2597, "core": 4418, "view": 1714, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -163,7 +163,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=affefbc4"></script>
+<script src="assets.js?v=7eac4ed3"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -4331,7 +4331,7 @@ const CH = {
   },
 
   // ======================= 第5章「蝕まれる大陸」 =======================
-  //   下層区（避難）→ 東門の 見張り → 北の 裂け目の広場（あくむへん）→ 空中庭園
+  //   下層区（避難）→ 東門の 見張り → 北の 裂け目の広場（クラテル）→ 空中庭園
   //   （団長の 奥様・摘まれた 花・近衛の 報せ）→ 光珠炉の 外郭 → 炉心の 手前 →
   //   ゆりかごの 前で グラン（2形態）→ 床に 残った 花 → 章末（メーアの 目覚め）
   6: {
@@ -4399,7 +4399,7 @@ const CH = {
     ],
     bosses: {
       'rift_yard:10,3': {
-        key:'akumuhen5', clearedFlag:'ch5_riftDown', needFlag:'ch5_evac',
+        key:'crater', clearedFlag:'ch5_riftDown', needFlag:'ch5_evac',
         lockMsg:['広場の 奥で、何かが うごめいて いる。',
                  'セレン「……先に 見張りに 話を 聞きましょう」'],
         intro:['広場の 空が、また 裂けて いた。',
@@ -4408,8 +4408,12 @@ const CH = {
                '取り残された 人々が、瓦礫の 陰に 固まって いる。',
                'セレン「わたしたちが 引きつける。その 間に 逃げて！」',
                '',
-               '裂け目から、大きな 目が 覗いた。',
-               '＊ あくむへん が 現れた！ ＊'],
+               '裂け目の 真下に、黒い 杯が 立って いた。',
+               '縁から 溢れた 墨の 中に、壊れた 玩具や 破れた 絵本が 浮いて いる。',
+               'ノエ「……捨てられた 夢だ。下層の 子どもたちの」',
+               '',
+               '杯の 奥で、紅い 光が 三つ ともった。',
+               '討伐記録は のちに この影を「クラテル」と 記す。'],
       },
       'cradle:7,4': {
         key:'gran1', clearedFlag:'ch5_granFell',
@@ -4433,11 +4437,11 @@ const CH = {
       },
     },
     bossReward: {
-      akumuhen5: {
+      crater: {
         set:['ch5_riftDown'],
         setTiles:[{map:'rift_yard', x:10, y:3, ch:'.'}],
         quest:{ch5_q1_gran:'active'},
-        msg:['', '目は ほどけ、裂け目は 細く なった。',
+        msg:['', '杯は ひびから 崩れ、裂け目は 細く なった。',
              '……だが、閉じは しなかった。',
              '',
              'イオ「閉じない……」',
@@ -4448,6 +4452,14 @@ const CH = {
              'セレン「上層も 避難が 始まって いる はず」',
              'セレン「……団長の 奥様は、庭園から 動けない」',
              'イオ「迎えに 行こう」',
+             '',
+             '崩れた 杯の 底から、かすれた 声が 漏れた。',
+             '＜……アフレル。モウ、入ラナイ＞',
+             '＜ワタシタチヲ 綴ジル 方ガ……目ヲ 覚マス＞',
+             '＜……メーア、サマ＞',
+             '',
+             'ノエ「……名前を、言った」',
+             'アマネ「白竜さまが、その 名を 聞いて 黙って しまわれた」',
              '',
              '＊ 空中庭園へ（団長の 奥様を 避難させる）＊'],
       },
@@ -8423,10 +8435,10 @@ const MIDBOSS = {
     aoe:{p:0.26, lo:40, hi:58, name:'捨てられた 夢の 波'},
     inflict:{type:'confuse', p:0.20},
     enrage:{at:0.35, atk:1.15, name:'悪夢が グランの 鎧を 覆いつくした！'}},
-  // ---- 第5章 中ボス：あくむへん（下層の 裂け目）----
-  akumuhen5:{key:'akumuhen5', name:'あくむへん', hp:9000, atk:110,   /* ★勝率 Lv35で 80%・Lv36で 95% */ def:46, agi:26, acts:1,
-    exp:3200, gold:3400, art:'akumuhen5', scale:1.05,
-    skill:{p:0.28, mul:1.25, name:'裂け目の 爪'},
+  // ---- 第5章 中ボス：クラテル（コップ座。下層の 裂け目から 溢れた 捨てられた 夢の 杯）----
+  crater:{key:'crater', name:'クラテル', hp:9000, atk:110,   /* ★勝率 Lv35で 80%・Lv36で 95% */ def:46, agi:26, acts:1,
+    exp:3200, gold:3400, art:'crater', scale:1.05,
+    skill:{p:0.28, mul:1.25, name:'影の 腕'},
     aoe:{p:0.22, lo:30, hi:44, name:'溢れた 夢'},
     inflict:{type:'sleep', p:0.18}},
   // ★禁書庫の 番人 アーキス（手合わせ。絵は CHR.arkis）

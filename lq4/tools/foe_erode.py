@@ -8,7 +8,7 @@ SRC=open('assets.js').read()
 def mon(k):
     m=re.search(r"\n  "+k+r":\{w:\d+,h:\d+,src:'data:image/png;base64,([^']*)'",SRC)
     return Image.open(io.BytesIO(base64.b64decode(m.group(1)))).convert('RGBA')
-JOBS={'kuroikui':'hikarikui','shokumukade':'kudamukade','kokujugara':'nukegara','akumuhen5':'akumuhen'}
+JOBS={'kuroikui':'hikarikui','shokumukade':'kudamukade','kokujugara':'nukegara'}
 for new,src in JOBS.items():
     im=mon(src); a=np.array(im).astype(float)
     out=a.copy(); nP=nB=0

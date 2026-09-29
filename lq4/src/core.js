@@ -260,10 +260,10 @@ const MIDBOSS = {
     aoe:{p:0.26, lo:40, hi:58, name:'捨てられた 夢の 波'},
     inflict:{type:'confuse', p:0.20},
     enrage:{at:0.35, atk:1.15, name:'悪夢が グランの 鎧を 覆いつくした！'}},
-  // ---- 第5章 中ボス：あくむへん（下層の 裂け目）----
-  akumuhen5:{key:'akumuhen5', name:'あくむへん', hp:9000, atk:110,   /* ★勝率 Lv35で 80%・Lv36で 95% */ def:46, agi:26, acts:1,
-    exp:3200, gold:3400, art:'akumuhen5', scale:1.05,
-    skill:{p:0.28, mul:1.25, name:'裂け目の 爪'},
+  // ---- 第5章 中ボス：クラテル（コップ座。下層の 裂け目から 溢れた 捨てられた 夢の 杯）----
+  crater:{key:'crater', name:'クラテル', hp:9000, atk:110,   /* ★勝率 Lv35で 80%・Lv36で 95% */ def:46, agi:26, acts:1,
+    exp:3200, gold:3400, art:'crater', scale:1.05,
+    skill:{p:0.28, mul:1.25, name:'影の 腕'},
     aoe:{p:0.22, lo:30, hi:44, name:'溢れた 夢'},
     inflict:{type:'sleep', p:0.18}},
   // ★禁書庫の 番人 アーキス（手合わせ。絵は CHR.arkis）
