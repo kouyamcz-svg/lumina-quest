@@ -572,5 +572,34 @@ function kill(k){
   T('イオの 鎧が 天空の 鎧', io && /天空の 鎧/.test(io.armor.name||''), io&&io.armor.name);
   (pending.shift()||(()=>{}))();
 }
+// ============ 帰り道（back）で 返す とき、描く 地図も じっさいの 行き先 ============
+//   ★上層区から 庭園に 入って 出ると、中身は 上層区なのに 世界地図を 描いて いた（w.to を 描いて いた）
+{
+  let built=null;
+  C.bind(Object.assign({},C.NullView,{fade(a,d){d&&d();}, buildMap(m){ built=m; }}),{msg(l,d){d&&d();},menu(i,t,cb){cb(0);},hud(){},label(){}},C.NullAudio);
+  Object.keys(C.MAPS).forEach(mp=>{
+    const ws=C.MAPS[mp].warpsXY||{};
+    Object.keys(ws).forEach(k=>{
+      const w=ws[k]; if(!w.back) return;
+      // その 地図へ 入れる 入口 ぜんぶ
+      Object.keys(C.MAPS).forEach(from=>{
+        const fw=C.MAPS[from].warpsXY||{};
+        Object.keys(fw).forEach(fk=>{
+          if(fw[fk].to!==mp || fw[fk].back) return;
+          const [ex,ey]=fk.split(',').map(Number);
+          const spot=[[0,1],[0,-1],[1,0],[-1,0]].map(([dx,dy])=>[ex+dx,ey+dy]).find(([x,y])=>C.walkable(from,x,y) && !(C.MAPS[from].warpsXY||{})[x+','+y]);
+          if(!spot) return;
+          C.freshState(); C.G.chapter=4; C.G.entry={[mp]:{map:from, x:spot[0], y:spot[1]}};
+          const [sx,sy]=k.split(',').map(Number);
+          if(C.wardBlocks(from)){ C.G.chapter=6; if(C.wardBlocks(from)) return; }
+          C.P.map=mp; C.P.x=sx; C.P.y=sy; C.G.mode='field'; built=null;
+          C.doWarp ? C.doWarp(w) : vm.runInContext('doWarp', ctx)(w);
+          T('帰り道で 描く 地図 '+mp+'→'+from, C.P.map===from && built===from, 'P='+C.P.map+' 描いた='+built);
+        });
+      });
+    });
+  });
+}
+
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

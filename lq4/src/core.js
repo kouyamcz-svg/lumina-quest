@@ -2263,14 +2263,18 @@ function doWarp(w){
     {
       const cd = chData();
       if(cd){
-        if(cd.onEnter && cd.onEnter[w.to]) G.flags[cd.onEnter[w.to]] = true;
-        if(cd.onEnterState && cd.onEnterState[w.to] && WORLD.TOWN_STATES[cd.onEnterState[w.to]])
-          G.townState = cd.onEnterState[w.to];
+        if(cd.onEnter && cd.onEnter[dest.to]) G.flags[cd.onEnter[dest.to]] = true;
+        if(cd.onEnterState && cd.onEnterState[dest.to] && WORLD.TOWN_STATES[cd.onEnterState[dest.to]])
+          G.townState = cd.onEnterState[dest.to];
       }
     }
-    if(TRADE_MARKET[w.to]) G.marketTick = (G.marketTick|0) + 1;   // そうばが うごく
-    V.buildMap(w.to); V.setActors(); U.label(areaName(w.to, w.x, w.y));
-    A.bgm(w.to);
+    // ★ここから 下は かならず「じっさいの 行き先（dest）」で。
+    //   ★帰り道（back）で 入った ところへ 返す とき、ワープに 書いた 行き先（w.to＝世界地図）の
+    //     地図を 組んで いた。上層区から 庭園に 入って 出ると、中身は 上層区の 1,7 なのに
+    //     世界地図が 描かれ、雲海の 上に 立って 見えた（地名も 世界地図の「上層の たな」）。
+    if(TRADE_MARKET[dest.to]) G.marketTick = (G.marketTick|0) + 1;   // そうばが うごく
+    V.buildMap(dest.to); V.setActors(); U.label(areaName(dest.to, dest.x, dest.y));
+    A.bgm(dest.to);
     V.fade(0, ()=>{ G.busy=false; G.mode='field'; });   // メッセージ中から呼ばれても操作可へ戻す
   });
 }

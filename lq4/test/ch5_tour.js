@@ -12,9 +12,11 @@ for (const f of ['world.js','npc.js','chapters.js','core.js'])
 const C = vm.runInContext('LQ4', ctx);
 
 const log=[], scene=[];
+let __built=null;
 C.bind(Object.assign({}, C.NullView, {
         showScene(k){ scene.push('show:'+k); }, hideScene(){ scene.push('hide'); },
         runner(o){ o.done && o.done(); }, runnerClear(){},
+        buildMap(m){ __built=m; },
        }),
        {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); },
         menu(i,t,cb){ cb(t==='これから' ? 1 : 0); },
@@ -152,6 +154,17 @@ T('章の 終わりで 目的は なくなる', C.currentGoal()===null, C.curren
   T('床の 花の 絵', CH.granFlower);
 }
 
+// ===== 出口：描く 地図も じっさいの 行き先（帰り道で 上層区へ 返す とき、世界地図を 描いて いた）=====
+{
+  C.G.entry = C.G.entry||{};
+  stand('upper_dist', 1, 7, 'left'); C.stepField(-1,0);
+  T('上層区から 庭園へ（描く 地図も 庭園）', C.P.map==='garden' && __built==='garden', __built);
+  stand('garden', 9, 13, 'front'); C.stepField(0,1);
+  T('庭園から 出ると 上層区を 描く（世界地図で ない）', C.P.map==='upper_dist' && __built==='upper_dist', 'P='+C.P.map+' 描いた='+__built);
+  stand('upper_dist', 17, 11, 'back'); C.stepField(0,-1);
+  stand('furnace', 10, 19, 'front'); C.stepField(0,1);
+  T('光珠炉から 出ると 上層区を 描く', C.P.map==='upper_dist' && __built==='upper_dist', 'P='+C.P.map+' 描いた='+__built);
+}
 // ===== 出口：おぼえた 戻り先が こわれて いても、外の 歩ける ますに 出る =====
 //   ★上層区の 庭から 出たら 世界地図の 雲海の 上に 出た（実機で 報告）
 {
