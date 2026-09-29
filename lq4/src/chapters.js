@@ -3304,7 +3304,7 @@ const CH = {
       cradle: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
     },
     bosses: {
-      'dream_depths:7,3': {
+      'dream_depths:7,5': {
         key:'mera1', clearedFlag:'fin_mitori',
         intro:['書架が 果てしなく 続いて いた。',
                '棚に 並ぶのは、千年の あいだ 捨てられて きた 悪夢の 頁。',
@@ -3339,7 +3339,7 @@ const CH = {
       },
       mera3: {
         set:['fin_mitori'],
-        setTiles:[{map:'dream_depths', x:7, y:3, ch:'n'}],
+        setTiles:[{map:'dream_depths', x:7, y:5, ch:'n'}],
         msg:['', '白い 頁は、もう 何も 攻めて こなかった。',
              '捨てられ 続けた 果てに、悪夢で すら なくなった もの。',
              '',

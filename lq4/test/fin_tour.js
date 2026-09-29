@@ -75,12 +75,12 @@ T('目的が メーアに', /メーア/.test(C.currentGoal()||''), C.currentGoal
 
 // ===== 3. メーア（3形態）→ 看取り =====
 strong(80);
-talk('dream_depths', 7, 4, 'back');
+talk('dream_depths', 7, 6, 'back');
 T('メーアの 台詞', said('裏ノ頁') && said('誰ガ 看ル'));
 T('装丁 → 乱丁 → 白紙', said('＊ 乱丁 ＊') && said('＊ 白紙 ＊') && said('魔王の 姿に'));
 T('白紙は 倒さず 看取る', C.G.flags.fin_mitori===true && said('武器を 収めた') && said('看取ります') && !log.some(l=>/〈白紙〉を 倒した/.test(l)), log.filter(l=>/白紙/.test(l)).join(' / ').slice(0,120));
-T('眠る 子が 現れる', C.tileAt('dream_depths',7,3)==='n');
-talk('dream_depths', 7, 4, 'back');
+T('眠る 子が 現れる', C.tileAt('dream_depths',7,5)==='n');
+talk('dream_depths', 7, 6, 'back');
 T('ヴォクスに 会う', C.G.flags.fin_vox===true && said('ヴォクス「……おにいちゃんたち'));
 T('約束', said('もう、わるいゆめを すてないで') && said('約束する'));
 T('夢の 外（神殿）へ 戻る', C.P.map==='temple', C.P.map);

@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 08:39 JST", "build":"399fbab1","assets_sha": "44a12aed", "lines": {"world": 154, "npc": 1065, "chapters": 3500, "bgm": 986, "view2d": 2598, "core": 4589, "view": 1733, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 08:41 JST", "build":"8c840990","assets_sha": "44a12aed", "lines": {"world": 154, "npc": 1065, "chapters": 3500, "bgm": 986, "view2d": 2598, "core": 4589, "view": 1733, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -889,7 +889,7 @@ const NPCS = {
       {text:['「霊峰の 祠に、灯を 絶やさぬ ように」','「……あなたたち、夢の 外から 来た 人ね。この 子を 頼みます」']}]},
   ],
   dream_depths: [
-    {at:'7,3', spr:'vox', name:'眠る 子', lines:[
+    {at:'7,5', spr:'vox', name:'眠る 子', lines:[
       {text:['子どもは 静かに 寝息を 立てて いる。']}]},
   ],
   // ============ 第5章：ゆりかごの 前 ============
@@ -4696,7 +4696,7 @@ const CH = {
       cradle: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
     },
     bosses: {
-      'dream_depths:7,3': {
+      'dream_depths:7,5': {
         key:'mera1', clearedFlag:'fin_mitori',
         intro:['書架が 果てしなく 続いて いた。',
                '棚に 並ぶのは、千年の あいだ 捨てられて きた 悪夢の 頁。',
@@ -4731,7 +4731,7 @@ const CH = {
       },
       mera3: {
         set:['fin_mitori'],
-        setTiles:[{map:'dream_depths', x:7, y:3, ch:'n'}],
+        setTiles:[{map:'dream_depths', x:7, y:5, ch:'n'}],
         msg:['', '白い 頁は、もう 何も 攻めて こなかった。',
              '捨てられ 続けた 果てに、悪夢で すら なくなった もの。',
              '',
@@ -9894,14 +9894,14 @@ const MAPS = {
       '7,0':{to:'dream_depths', x:7, y:9},
       '7,10':{to:'dream3', x:7, y:1},
     }},
-  // ★終章：夢の 底（捨てられた 悪夢の 書庫）。メーアは 7,3
+  // ★終章：夢の 底（捨てられた 悪夢の 書庫）。メーアは 7,5（絵が 大きいので 上に 4ます あける）
   dream_depths:{name:'夢の 底', theme:'sky', bbg:'indoor', enc:false, tiles:[
     "###############",
     "#.............#",
     "#..#.......#..#",
-    "#......B......#",
-    "#..#.......#..#",
     "#.............#",
+    "#..#.......#..#",
+    "#......B......#",
     "#..#.......#..#",
     "#.............#",
     "#.............#",
