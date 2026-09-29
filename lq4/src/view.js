@@ -203,13 +203,25 @@ function poseOf(key,dir,walk){
   if(walk && d[base+'W']) base=base+'W';
   return {pose:base, flip};
 }
-// ★人物・魔物の 板は カメラへ 向けて 少し 手前に 出す（BB_FWD）。
+// ★人物・魔物の 板は、上の ほど カメラへ 向けて 手前に 出す（BB_FWD は 上端での 量、下端は 0）。
 //   板は カメラと 同じ 向きに 傾く ので、上端が 奥へ、下端が 手前へ 倒れる。
-//   幅 1ますの 通路では 頭が 奥の 壁に、足が 手前の 壁に めりこみ、頭が 見切れて いた（第5章 裂け目の広場）。
-//   視線の 向きに ずらす だけ なので、画面の 上の 位置は 変わらない（近づく ぶん BB_K で 縮めて 大きさも そろえる）。
-//   ★0.8 では 頭は 出たが 足が 手前の 壁に 埋まった。1.8 で 足まで 出る。
-const BB_FWD = 1.8, BB_K = 0.912;
-function bbGeo(w,h,flat){ if(flat) return new THREE.PlaneGeometry(w,h); const g=new THREE.PlaneGeometry(w*BB_K, h*BB_K); g.translate(0,0,BB_FWD); return g; }
+//   幅 1ますの 通路では 頭が 奥の 壁に めりこみ、見切れて いた（第5章 裂け目の広場）。
+//   ★全体を 手前に 出すと（0.8 で 足が 埋まり、1.8 で 全身が 出た）手前の 壁の 上に 立って 見えた。
+//     上だけ 出し、下半分は 手前の 壁に 隠れる 形に した（実機を 見て 決めた 見え方）。
+//   視線の 向きに ずらす だけ なので、画面の 上の 位置は ほぼ 変わらない。
+const BB_FWD = 0.8;
+function bbGeo(w,h,flat){
+  const g=new THREE.PlaneGeometry(w,h);
+  if(flat) return g;
+  const p=g.attributes.position;
+  for(let i=0;i<p.count;i++){
+    const v=(p.getY(i)+h/2)/h;             // 下端 0 → 上端 1
+    const f=BB_FWD*v, k=1-f/20.5;          // 近づく ぶん 縮めて 大きさを そろえる（カメラまで 約20.5）
+    p.setXYZ(i, p.getX(i)*k, p.getY(i)*k, f);
+  }
+  p.needsUpdate=true; g.computeBoundingSphere();
+  return g;
+}
 function chrBillboard(key,size){
   const d=CHR[key];
   if(!d) return billboard(key,size);
