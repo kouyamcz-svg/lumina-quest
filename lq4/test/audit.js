@@ -930,7 +930,7 @@ Object.keys(C.MAPS).forEach(mp=>{
 //     めやすは「つぎの Lvまでの 経験値 ÷ ざこ1体」が 2〜6戦。
 {
   const expNeed = (lv)=> lv*lv*6;
-  const CH_LV = {1:5, 2:10, 3:15, 4:21};   // その章の およその Lv
+  const CH_LV = {1:5, 2:10, 3:15, 4:21, 5:34, 6:37, 7:41};   // その章の およその Lv（★第4章〜終章を 足した：終章の 敵が 第3章の 敵と みなされて いた）
   Object.keys(CH_LV).forEach(no=>{
     const lv = CH_LV[no];
     const need = expNeed(lv);
@@ -939,7 +939,10 @@ Object.keys(C.MAPS).forEach(mp=>{
       const near = (no==='1' && e.minLv<=4)
                 || (no==='2' && e.minLv>=7 && e.minLv<=9)
                 || (no==='3' && e.minLv>=12 && e.minLv<=15)
-                || (no==='4' && e.minLv>=18);
+                || (no==='4' && e.minLv>=18 && e.minLv<=23)
+                || (no==='5' && e.minLv>=24 && e.minLv<=25)
+                || (no==='6' && e.minLv>=26 && e.minLv<=29)
+                || (no==='7' && e.minLv>=30);
       if(!near) return;
       const fights = need / e.exp;
       T('第'+(no-1)+'章：'+e.name+' の 経験値が 高すぎない', fights >= 1.5,

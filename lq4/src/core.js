@@ -194,6 +194,13 @@ const ENEMIES = [
   {key:'shokumukade', name:'蝕み ムカデ',     hp:400,atk:74, def:50, agi:26, exp:1320, gold:1040, minLv:26, art:'shokumukade'},
   {key:'kokujugara',  name:'黒珠の 抜け殻',   hp:430,atk:68, def:58, agi:16, exp:1360, gold:1080, minLv:27, art:'kokujugara',
    inflict:{type:'slow', p:0.2}},
+  // ---- 終章：夢の 内界（ヴォクスの 夢。前の 章の 敵の 形で 色を 変えた 絵）----
+  {key:'yumeboshi',     name:'夢星の 鳥',     hp:460,atk:78, def:52, agi:36, exp:1700, gold:1200, minLv:30, art:'yumeboshi',
+   inflict:{type:'sleep', p:0.18}},
+  {key:'yumekazura',    name:'夢かずら',       hp:520,atk:82, def:56, agi:28, exp:1780, gold:1260, minLv:30, art:'yumekazura',
+   inflict:{type:'slow', p:0.18}},
+  {key:'yumemori_kage', name:'夢守りの 影',   hp:580,atk:80, def:62, agi:20, exp:1860, gold:1320, minLv:31, art:'yumemori_kage',
+   inflict:{type:'confuse', p:0.16}},
   // ---- 地上の 島ごとの 固有種（野外）----
   //   ★まえは 地上の 野外が 全島 おなじ 5種 だった（雪原でも 砂漠でも 同じ 敵）
   //   ★絵（MON）が まだ ない 敵は 出ない（島の 表から のぞかれ、いままでの 表に もどる）
@@ -260,6 +267,26 @@ const MIDBOSS = {
     aoe:{p:0.26, lo:40, hi:58, name:'捨てられた 夢の 波'},
     inflict:{type:'confuse', p:0.20},
     enrage:{at:0.35, atk:1.15, name:'悪夢が グランの 鎧を 覆いつくした！'}},
+  // ---- 終章：魔王 メーア（3形態の 連戦：装丁 → 乱丁 → 白紙。HP・MPは 引き継ぐ）----
+  //   ★白紙は HPが 残り mitoriAt（割合）を 下回ると 戦いが 止まり、一行は 武器を 収めて「看取る」（倒さない）
+  //   ★絵は 仮（meraTmp1〜3：禁書庫の 敵の 色変え）
+  //   ★勝率（連戦・tools/merarate.js、15回ずつ）：Lv40 67%・Lv41 73%・Lv42 93%・Lv43 100%
+  mera1:{key:'mera1', name:'魔王 メーア〈装丁〉', hp:6000, atk:104, def:54, agi:30, acts:1,
+    exp:4000, gold:0, art:'meraTmp1', scale:1.7,
+    skill:{p:0.28, mul:1.30, name:'綴じ糸'},
+    aoe:{p:0.26, lo:44, hi:62, name:'頁の 嵐'},
+    inflict:{type:'sleep', p:0.20}},
+  mera2:{key:'mera2', name:'魔王 メーア〈乱丁〉', hp:5000, atk:108, def:50, agi:34, acts:1,
+    exp:5000, gold:0, art:'meraTmp2', scale:1.4,
+    skill:{p:0.30, mul:1.35, name:'乱れた 牙'},
+    charge:{p:0.18, mul:2.0, tell:'頁を 逆立てて 身を 沈めた…', name:'乱丁の 咆哮'},
+    aoe:{p:0.22, lo:46, hi:64, name:'捨てられた 夢の 群れ'},
+    inflict:{type:'confuse', p:0.18},
+    enrage:{at:0.35, atk:1.15, name:'頁が ばらばらに 飛び散った！'}},
+  mera3:{key:'mera3', name:'魔王 メーア〈白紙〉', hp:4000, atk:98, def:40, agi:26, acts:1,
+    exp:9000, gold:9000, art:'meraTmp3', scale:1.6, mitoriAt:0.25,
+    skill:{p:0.26, mul:1.25, name:'白い 手'},
+    aoe:{p:0.26, lo:40, hi:58, name:'何も ない 声'}},
   // ---- 第5章 中ボス：クラテル（コップ座。下層の 裂け目から 溢れた 捨てられた 夢の 杯）----
   crater:{key:'crater', name:'クラテル', hp:9000, atk:120,   /* ★勝率 Lv35で 80%・Lv36で 95%（アマネ強化の 後 攻110→120） */ def:46, agi:26, acts:1,
     exp:3200, gold:3400, art:'crater', scale:1.05,
@@ -358,11 +385,21 @@ const byMapCh = {
   // ★第4章（内部の 章 番号 5）
   '5:archive1': ['kokuhyoushi','sumibane','noroichou'],
   '5:archive2': ['kokuhyoushi','noroichou','sumibane','shokabanken'],
+  // ★終章（内部の 章 番号 7）：夢の 内界
+  '7:dream1': ['yumeboshi','yumekazura'],
+  '7:dream2': ['yumeboshi','yumekazura','yumemori_kage'],
+  '7:dream3': ['yumekazura','yumemori_kage','yumeboshi'],
+  '7:dream4': ['yumemori_kage','yumeboshi','yumekazura'],
   // ★第5章（内部の 章 番号 6）：蝕まれた 敵
   '6:rift_yard': ['kuroikui','shokumukade','sumibane'],
   '6:furnace':   ['kuroikui','shokumukade','kokujugara','kokuhyoushi'],
 };
 const byMap = {
+  // ★終章：夢の 内界
+  dream1: ['yumeboshi','yumekazura'],
+  dream2: ['yumeboshi','yumekazura','yumemori_kage'],
+  dream3: ['yumekazura','yumemori_kage','yumeboshi'],
+  dream4: ['yumemori_kage','yumeboshi','yumekazura'],
   rift_yard: ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
   world:     ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
   pipe_path: ['kagekakera','shihenchu','akumuga','yamiinu'],
@@ -1316,6 +1353,87 @@ const MAPS = {
       '7,9':{to:'furnace', x:10, y:7}
     }},
 
+  // ★終章：夢の 内界（ヴォクスが 見て きた 千年の 地上の 四季。下から 春・夏・秋・冬、いちばん 奥が 夢の 底）
+  dream1:{name:'夢の 内界 ── 春', theme:'field', enc:true, encRate:0.08, encGrace:4, tiles:[
+    "#######.#######",
+    "#.............#",
+    "#.............#",
+    "#..n..........#",
+    "#.............#",
+    "#.............#",
+    "#..........n..#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#######.#######"],
+    warpsXY:{
+      '7,0':{to:'dream2', x:7, y:9},
+      '7,10':{to:'temple', x:8, y:9},
+    }},
+  dream2:{name:'夢の 内界 ── 夏', theme:'coral', enc:true, encRate:0.08, encGrace:4, tiles:[
+    "#######.#######",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#...n.........#",
+    "#.............#",
+    "#.............#",
+    "#.........n...#",
+    "#.............#",
+    "#.............#",
+    "#######.#######"],
+    warpsXY:{
+      '7,0':{to:'dream3', x:7, y:9},
+      '7,10':{to:'dream1', x:7, y:1},
+    }},
+  dream3:{name:'夢の 内界 ── 秋', theme:'village', enc:true, encRate:0.08, encGrace:4, tiles:[
+    "#######.#######",
+    "#.............#",
+    "#.............#",
+    "#..........n..#",
+    "#.............#",
+    "#.............#",
+    "#..n..........#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#######.#######"],
+    warpsXY:{
+      '7,0':{to:'dream4', x:7, y:9},
+      '7,10':{to:'dream2', x:7, y:1},
+    }},
+  dream4:{name:'夢の 内界 ── 冬', theme:'ice', enc:true, encRate:0.08, encGrace:4, tiles:[
+    "#######.#######",
+    "#.............#",
+    "#.............#",
+    "#...n.........#",
+    "#.............#",
+    "#.............#",
+    "#.........n...#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#######.#######"],
+    warpsXY:{
+      '7,0':{to:'dream_depths', x:7, y:9},
+      '7,10':{to:'dream3', x:7, y:1},
+    }},
+  // ★終章：夢の 底（捨てられた 悪夢の 書庫）。メーアは 7,3
+  dream_depths:{name:'夢の 底', theme:'sky', bbg:'indoor', enc:false, tiles:[
+    "###############",
+    "#.............#",
+    "#..#.......#..#",
+    "#......B......#",
+    "#..#.......#..#",
+    "#.............#",
+    "#..#.......#..#",
+    "#.............#",
+    "#.............#",
+    "######...######",
+    "#######.#######"],
+    warpsXY:{
+      '7,10':{to:'dream4', x:7, y:1}
+    }},
   // ★第5章：ゆりかごの 前（炉心の 奥。グランが 待つ）。入口は 炉心の 手前の「炉心の 壁」（第5章の 会話で 移る）
   cradle:{name:'ゆりかごの 前', theme:'sky', bbg:'indoor', enc:false, tiles:[
     "###############",
@@ -3185,8 +3303,15 @@ function resolveRound(){
   party.forEach(p=>p.guard=false);
   stepAction(acts,0);
 }
+// ★看取り（終章の メーア〈白紙〉）：HPが mitoriAt を 下回ったら そこで 止め、倒さずに 戦いを 終える
+function mitoriFloor(e){
+  if(!e || !e.mitoriAt || e.hp<=0 && !e.maxhp) return;
+  const fl = Math.max(1, Math.ceil(e.maxhp*e.mitoriAt));
+  if(e.hp < fl){ e.hp = fl; if(G.battle) G.battle.mitori = true; }
+}
 function stepAction(acts,i){
   const b=G.battle; if(!b) return;
+  if(b.mitori && !b.mitoriDone){ b.mitoriDone = true; b.enemies.forEach(e=>{ e.hp=0; }); victory(); return; }
   if(b.enemies.every(e=>e.hp<=0)){ victory(); return; }
   if(aliveMembers().length===0){ defeat(); return; }
   if(i>=acts.length){ beginRound(); return; }
@@ -3293,7 +3418,7 @@ function memberAct(a, done){
       V.fx('spellall',{key:a.sp&&a.sp.key}, ()=>{
         alive.forEach(e=>{
           const d = skillDamage(m, sp);
-          e.hp-=d; V.pop({enemy:e, text:d, kind:'dmg'});
+          e.hp-=d; mitoriFloor(e); V.pop({enemy:e, text:d, kind:'dmg'});
           lines.push(e.dispName+'に '+d+'の ダメージ！');
           if(e.hp<=0){ e.hp=0; lines.push(e.dispName+'を 倒した！'); killed(e); }
         });
@@ -3377,7 +3502,7 @@ function memberAct(a, done){
     A.hit();
     V.fx('spell',{target:t, key:a.sp&&a.sp.key}, ()=>{
       V.pop({enemy:t, text:d, kind:'dmg'});
-      t.hp-=d;
+      t.hp-=d; mitoriFloor(t);
       const lines=[m.name+'は '+sp.name+castVerb(m), t.dispName+'に '+d+'の ダメージ！'];
       if(t.hp<=0){ t.hp=0; lines.push(t.dispName+'を 倒した！'); killed(t); }
       // ★ダメージ技に そえた 追加こうか（陽炎突き など）。
@@ -3402,7 +3527,7 @@ function memberAct(a, done){
   if(t.tough) d = crit ? Math.max(2, Math.floor(d*0.3)) : (Math.random()<0.5?1:2); // めったに きかない
   A.hit();
   V.fx('attack',{member:m, target:t}, ()=>{
-    t.hp-=d;
+    t.hp-=d; mitoriFloor(t);
     V.pop({enemy:t, text:d, kind:crit?'crit':'dmg'});
     const lines=[m.name+'の 攻撃！'];
     if(crit) lines.push('会心の 一撃！！');
@@ -3644,7 +3769,7 @@ function victory(){
   const gold = got.reduce((a,e)=>a+e.gold,0);
   P.gold += gold;
   A.win();
-  const lines=['魔物たちを 倒した！','経験値 '+exp+'、'+gold+'ゴールドを 獲得！'];
+  const lines=[b.mitoriDone ? '……一行は、武器を 収めた。' : '魔物たちを 倒した！','経験値 '+exp+'、'+gold+'ゴールドを 獲得！'];
   let leveled=false;
   aliveMembers().concat(reserve.filter(m=>m.hp>0)).forEach(m=>{
     m.exp += exp;

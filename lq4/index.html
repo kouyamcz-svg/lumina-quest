@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-29 21:34 JST", "build":"879a2a2f","assets_sha": "ebf04983", "lines": {"world": 149, "npc": 1020, "chapters": 3271, "bgm": 986, "view2d": 2598, "core": 4455, "view": 1733, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 04:40 JST", "build":"c84fceca","assets_sha": "fae79eeb", "lines": {"world": 154, "npc": 1063, "chapters": 3418, "bgm": 986, "view2d": 2598, "core": 4580, "view": 1733, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -163,7 +163,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   });
 })();
 </script>
-<script src="assets.js?v=ebf04983"></script>
+<script src="assets.js?v=fae79eeb"></script>
 <script>/**
  * @license
  * Copyright 2010-2021 Three.js Authors
@@ -249,6 +249,11 @@ const MAP_IDS = {
   archive2:   {region:'sky',kind:'dgn',  name:'禁書庫 下層', scene:'SCENE_CAVE'},
   archive_core:{region:'sky',kind:'dgn', name:'禁書庫 最奥', scene:'SCENE_CAVE'},
   cradle:{region:'sky',kind:'dgn',  name:'ゆりかごの 前',   scene:'SCENE_SKY_TOWN'},
+  dream1:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 春',   scene:'SCENE_SKY_TOWN'},
+  dream2:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 夏',   scene:'SCENE_SKY_TOWN'},
+  dream3:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 秋',   scene:'SCENE_SKY_TOWN'},
+  dream4:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 冬',   scene:'SCENE_SKY_TOWN'},
+  dream_depths:{region:'sky',kind:'dgn',  name:'夢の 底',   scene:'SCENE_SKY_TOWN'},
   toros:      {region:'land',kind:'town', name:'トロスの村',  scene:'SCENE_FIELD'},
   shrine_hill:{region:'land',kind:'dgn',  name:'祠の丘',     scene:'SCENE_FIELD'},
   tower1:     {region:'sky', kind:'dgn',  name:'雲見の 塔 一階',   scene:'SCENE_SKY_TOWN'},
@@ -856,6 +861,37 @@ const NPCS = {
       {when:{flag:'ch4_king'}, text:['役人「団長の 席が……いや、何でも ない」']},
       {text:['役人「減光の 話は するな。上から そう 言われて いる」']}]},
   ],
+  // ============ 終章：夢の 内界（ヴォクスの 夢に 写った 地上の 人々）============
+  dream1: [
+    {at:'3,3', spr:'villagerA', name:'畑を 耕す 男', lines:[
+      {text:['「春だ。雪が 溶けたら、麦を まく」','「……あんたら、どこの 村の 者だい？　見ない 顔だ」']}]},
+    {at:'11,6', spr:'townGirl', name:'花を 摘む 娘', lines:[
+      {text:['「トロスの 丘は、この 季節 いちめんの 花なの」','「天の 上にも 花は 咲くの？」']}]},
+  ],
+  dream2: [
+    {at:'4,4', spr:'sailor', name:'網を 繕う 漁師', lines:[
+      {text:['「入り江の 珊瑚が いちばん 光る 季節だ」','「海の 底には、空の 夢が 沈んでる……なんて 言う 婆さんも いたな」']}]},
+    {at:'10,7', spr:'childA', name:'浜で 遊ぶ 子', lines:[
+      {text:['「ねえ、いっしょに 貝を ひろおうよ」','「……あれ？　きみたち、どこから 来たの」']}]},
+  ],
+  dream3: [
+    {at:'3,6', spr:'villagerB', name:'鍛冶場の 男', lines:[
+      {text:['男は 背を 向けたまま、鎚を 振るって いる。',
+             '「空の 鋼は……いつか 誰かを 守る 剣に なる」',
+             '振り返った 顔は、光に かすんで 見えなかった。']}]},
+    {at:'11,3', spr:'elderWoman', name:'水を 汲む 老婆', lines:[
+      {text:['「湧き水の 集落の 秋は、実りの 祭りさ」','「水が 枯れた 年も あった。でも みんなで 掘り直した」']}]},
+  ],
+  dream4: [
+    {at:'4,3', spr:'valeElder', name:'雪の 中の 老人', lines:[
+      {text:['「氷の 谷の 冬は 長い。だが 春は 必ず 来る」','「……この 夢を 見て いる 子は、春を 待つのが 上手だ」']}]},
+    {at:'10,6', spr:'priestess', name:'祈る 巫女', lines:[
+      {text:['「霊峰の 祠に、灯を 絶やさぬ ように」','「……あなたたち、夢の 外から 来た 人ね。この 子を 頼みます」']}]},
+  ],
+  dream_depths: [
+    {at:'7,3', spr:'childA', name:'眠る 子', lines:[
+      {text:['子どもは 静かに 寝息を 立てて いる。']}]},
+  ],
   // ============ 第5章：ゆりかごの 前 ============
   cradle: [
     {at:'7,1', spr:'pipeobj', name:'ゆりかごの 扉', lines:[
@@ -1129,6 +1165,18 @@ const QUESTS = {
     reward:{}, next:'ch2_q2_core',
   },
   // ============ 第3章：氷の谷 ============
+  fin_q1_dream: {
+    id:'fin_q1_dream', chapter:7, title:'夢の内界',
+    giver:'アマネ',
+    desc:'光珠炉から 悪夢が 溢れ、大陸が 沈み はじめた。白竜が 一行を 呼んで いる。',
+    steps:[
+      {id:'dive',   desc:'神殿の 最奥で 白竜 ルミナに 話す', flag:'fin_dive'},
+      {id:'depths', desc:'夢の 内界を 抜け、夢の 底へ',       flag:'fin_depths'},
+      {id:'mera',   desc:'夢の 底で 魔王 メーアと 向き合う',  flag:'fin_mitori'},
+      {id:'vox',    desc:'眠る 子に 会う',                   flag:'fin_vox'},
+    ],
+    reward:{}, next:null,
+  },
   ch5_q1_gran: {
     id:'ch5_q1_gran', chapter:6, title:'蝕まれる大陸',
     giver:'東門の 見張り',
@@ -4589,6 +4637,153 @@ const CH = {
            '＊ 第5章　完 ＊'],
       card: {title:'蝕まれる大陸', sub:'第5章 完'},
       next: 7,
+    },
+  },
+
+  // ======================= 終章「夢の内界」（1回目：夢の 内界と メーアまで）=======================
+  //   神殿の 最奥（白竜）→ 白竜の 背で 夢へ → 夢の 内界 春・夏・秋・冬 → 夢の 底（捨てられた 悪夢の 書庫）
+  //   → 魔王 メーア（装丁 → 乱丁 → 白紙。白紙は 倒さず 看取る）→ 眠る 子 ヴォクス
+  //   ★結末（約束・引き上げ・降下・天空鋼の 剣・千年後）は 2回目に 作る
+  7: {
+    id: 'fin_dream',
+    title: '夢の内界',
+    region: 'sky',
+    goals: [
+      {done:'fin_dive',   text:'神殿の 最奥で、白竜 ルミナに 話す'},
+      {done:'fin_depths', text:'夢の 内界を 抜け、夢の 底へ'},
+      {done:'fin_mitori', text:'夢の 底で、魔王 メーアと 向き合う'},
+      {done:'fin_vox',    text:'眠る 子に 会う'},
+    ],
+    start: {map:'temple', x:8, y:8, dir:'back'},
+    party: ['io','seren','noe','amane'],
+    startLv: 40,
+    inheritParty: {from:6, ifFlag:'ch5_cleared'},
+    gold: 12000, herbs: 15, waters: 6,
+    equip: {
+      io:    {weapon:{kind:'w', name:'鍛冶村の 剣', v:26}, armor:{kind:'a', name:'天空の 鎧', v:34, ward:['sleep','confuse']}},
+      seren: {weapon:{kind:'w', name:'鍛冶村の 槍', v:28}, armor:{kind:'a', name:'鍛冶村の 鎧', v:25}},
+      noe:   {weapon:{kind:'w', name:'山の 錫杖', v:16},   armor:{kind:'a', name:'鍛冶村の 衣', v:19}},
+      amane: {weapon:{kind:'w', name:'山の 錫杖', v:16},   armor:{kind:'a', name:'鍛冶村の 衣', v:19}},
+    },
+    setFlags: ['sky_armor'],
+    opening: ['──その 夜──',
+              '光珠炉から 悪夢が 溢れ出した。',
+              '大陸が、ゆっくりと 沈み はじめる。',
+              '',
+              'アマネ「白竜さまが……呼んで いる。神殿の 奥へ」',
+              '',
+              '＊ 白竜 ルミナに 話そう ＊'],
+    home: {map:'temple', x:8, y:8, name:'神殿の 最奥'},
+    onEnter: {dream_depths:'fin_depths'},
+    returnSpots: [{map:'temple', x:8, y:8}],
+    closed: {
+      pipe_path: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      old_pipe: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      tower1: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      tower2: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      tower3: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      tower4: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      tower5: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      furnace: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      rift_yard: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      archive1: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      archive2: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      archive_core: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+      cradle: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
+    },
+    bosses: {
+      'dream_depths:7,3': {
+        key:'mera1', clearedFlag:'fin_mitori',
+        intro:['書架が 果てしなく 続いて いた。',
+               '棚に 並ぶのは、千年の あいだ 捨てられて きた 悪夢の 頁。',
+               '',
+               '頁が 寄り集まり、ひとつの 形を 綴じて いく。',
+               '',
+               '＜ワタシハ 棄テラレタモノ。オマエタチノ 繁栄ノ、裏ノ頁＞',
+               '＜アノ子ハ 千年、良イ夢ダケヲ 搾ラレタ＞',
+               '＜ナラバ 悪イ夢ハ、誰ガ 看ル？＞',
+               '',
+               'ノエ「……ぼくたちが、看る」',
+               '＊ 魔王 メーアとの 戦い ＊'],
+      },
+    },
+    bossReward: {
+      mera1: {
+        nextBoss:'mera2',
+        msg:['', '綴じ糸が ほどけ、頁が 床に 散った。',
+             '散った 頁が、獣の 形に 組み直されて いく。',
+             'セレン「……まだ 来る！」',
+             '＊ 乱丁 ＊'],
+      },
+      mera2: {
+        nextBoss:'mera3',
+        msg:['', '獣が 崩れた。',
+             '頁の 文字が、一文字ずつ 消えて いく。',
+             '',
+             '残ったのは、何も 書かれて いない 白い 頁だけ だった。',
+             'アマネ「白竜さまが……悲しんで いる」',
+             '＊ 白紙 ＊'],
+      },
+      mera3: {
+        set:['fin_mitori'],
+        setTiles:[{map:'dream_depths', x:7, y:3, ch:'n'}],
+        msg:['', '白い 頁は、もう 何も 攻めて こなかった。',
+             '捨てられ 続けた 果てに、悪夢で すら なくなった もの。',
+             '',
+             'イオは 剣を 下ろした。',
+             'セレンも、アマネも、武器を 収めた。',
+             '',
+             'ノエが 前に 出た。',
+             'ノエ「……夢守りの 家の 者として、看取ります」',
+             '',
+             'ノエ「眠れ、捨てられた 夢よ。',
+             '　　　お前を 見た 者が、ここに いる。',
+             '　　　お前の 頁を、ぼくが 覚えて いく」',
+             '',
+             '白い 頁は、ノエの 手の 中で 静かに ほどけた。',
+             '細かな 欠片が、夢の 底へ 散って いく。',
+             '',
+             '……静かに なった 書庫の 奥で、小さな 寝息が 聞こえた。'],
+      },
+    },
+    talkEvents: [
+      // ---- 白竜 ルミナ：背に 乗って 夢へ（何度でも）----
+      { npc:'白竜 ルミナ', unless:'fin_dive',
+        set:['fin_dive'],
+        quest:{fin_q1_dream:'active'},
+        img:'sceneLuminaFly',
+        msg:['白竜が 身を 起こした。',
+             'アマネ「……乗れ、と おっしゃって います」',
+             '',
+             '一行を 背に 乗せ、白竜は 神殿の 天井へ 舞い上がった。',
+             '石の 天井が、水面の ように 揺れて ほどける。',
+             '',
+             'その 先は、眠る 子の 夢の 中だった。',
+             '',
+             '＊ 夢の 内界へ ＊'],
+        warp:{map:'dream1', x:7, y:9, dir:'back'} },
+      { npc:'白竜 ルミナ', cond:['fin_dive'],
+        msg:['白竜は 一行を 背に 乗せた。', '', '＊ 夢の 内界へ ＊'],
+        warp:{map:'dream1', x:7, y:9, dir:'back'} },
+      // ---- 眠る 子 ----
+      { npc:'眠る 子', cond:['fin_mitori'], unless:'fin_vox',
+        set:['fin_vox'],
+        msg:['書庫の 奥に、小さな 子どもが 丸く なって 眠って いた。',
+             '',
+             'ノエ「……ヴォクス」',
+             '',
+             '子どもが 薄く 目を 開けた。',
+             'ヴォクス「……おにいちゃんたち、だれ？」',
+             'ヴォクス「ぼく、ずっと ここで ゆめを みてたの。',
+             '　　　　　ちじょうの はるも、なつも、あきも、ふゆも」'] },
+    ],
+    // ★1回目は ここで 区切る（結末は 2回目に 作り、この ending を 差し替える）
+    ending: {
+      trigger: 'fin_vox',
+      set:['ch6_cleared'],   // ★1回目の 区切り（2回目で 結末の 後に 動かす）
+      dark: true,
+      msg:['', '── つづく ──'],
+      card: {title:'夢の内界', sub:'つづく'},
     },
   },
 };
@@ -8391,6 +8586,13 @@ const ENEMIES = [
   {key:'shokumukade', name:'蝕み ムカデ',     hp:400,atk:74, def:50, agi:26, exp:1320, gold:1040, minLv:26, art:'shokumukade'},
   {key:'kokujugara',  name:'黒珠の 抜け殻',   hp:430,atk:68, def:58, agi:16, exp:1360, gold:1080, minLv:27, art:'kokujugara',
    inflict:{type:'slow', p:0.2}},
+  // ---- 終章：夢の 内界（ヴォクスの 夢。前の 章の 敵の 形で 色を 変えた 絵）----
+  {key:'yumeboshi',     name:'夢星の 鳥',     hp:460,atk:78, def:52, agi:36, exp:1700, gold:1200, minLv:30, art:'yumeboshi',
+   inflict:{type:'sleep', p:0.18}},
+  {key:'yumekazura',    name:'夢かずら',       hp:520,atk:82, def:56, agi:28, exp:1780, gold:1260, minLv:30, art:'yumekazura',
+   inflict:{type:'slow', p:0.18}},
+  {key:'yumemori_kage', name:'夢守りの 影',   hp:580,atk:80, def:62, agi:20, exp:1860, gold:1320, minLv:31, art:'yumemori_kage',
+   inflict:{type:'confuse', p:0.16}},
   // ---- 地上の 島ごとの 固有種（野外）----
   //   ★まえは 地上の 野外が 全島 おなじ 5種 だった（雪原でも 砂漠でも 同じ 敵）
   //   ★絵（MON）が まだ ない 敵は 出ない（島の 表から のぞかれ、いままでの 表に もどる）
@@ -8457,6 +8659,26 @@ const MIDBOSS = {
     aoe:{p:0.26, lo:40, hi:58, name:'捨てられた 夢の 波'},
     inflict:{type:'confuse', p:0.20},
     enrage:{at:0.35, atk:1.15, name:'悪夢が グランの 鎧を 覆いつくした！'}},
+  // ---- 終章：魔王 メーア（3形態の 連戦：装丁 → 乱丁 → 白紙。HP・MPは 引き継ぐ）----
+  //   ★白紙は HPが 残り mitoriAt（割合）を 下回ると 戦いが 止まり、一行は 武器を 収めて「看取る」（倒さない）
+  //   ★絵は 仮（meraTmp1〜3：禁書庫の 敵の 色変え）
+  //   ★勝率（連戦・tools/merarate.js、15回ずつ）：Lv40 67%・Lv41 73%・Lv42 93%・Lv43 100%
+  mera1:{key:'mera1', name:'魔王 メーア〈装丁〉', hp:6000, atk:104, def:54, agi:30, acts:1,
+    exp:4000, gold:0, art:'meraTmp1', scale:1.7,
+    skill:{p:0.28, mul:1.30, name:'綴じ糸'},
+    aoe:{p:0.26, lo:44, hi:62, name:'頁の 嵐'},
+    inflict:{type:'sleep', p:0.20}},
+  mera2:{key:'mera2', name:'魔王 メーア〈乱丁〉', hp:5000, atk:108, def:50, agi:34, acts:1,
+    exp:5000, gold:0, art:'meraTmp2', scale:1.4,
+    skill:{p:0.30, mul:1.35, name:'乱れた 牙'},
+    charge:{p:0.18, mul:2.0, tell:'頁を 逆立てて 身を 沈めた…', name:'乱丁の 咆哮'},
+    aoe:{p:0.22, lo:46, hi:64, name:'捨てられた 夢の 群れ'},
+    inflict:{type:'confuse', p:0.18},
+    enrage:{at:0.35, atk:1.15, name:'頁が ばらばらに 飛び散った！'}},
+  mera3:{key:'mera3', name:'魔王 メーア〈白紙〉', hp:4000, atk:98, def:40, agi:26, acts:1,
+    exp:9000, gold:9000, art:'meraTmp3', scale:1.6, mitoriAt:0.25,
+    skill:{p:0.26, mul:1.25, name:'白い 手'},
+    aoe:{p:0.26, lo:40, hi:58, name:'何も ない 声'}},
   // ---- 第5章 中ボス：クラテル（コップ座。下層の 裂け目から 溢れた 捨てられた 夢の 杯）----
   crater:{key:'crater', name:'クラテル', hp:9000, atk:120,   /* ★勝率 Lv35で 80%・Lv36で 95%（アマネ強化の 後 攻110→120） */ def:46, agi:26, acts:1,
     exp:3200, gold:3400, art:'crater', scale:1.05,
@@ -8555,11 +8777,21 @@ const byMapCh = {
   // ★第4章（内部の 章 番号 5）
   '5:archive1': ['kokuhyoushi','sumibane','noroichou'],
   '5:archive2': ['kokuhyoushi','noroichou','sumibane','shokabanken'],
+  // ★終章（内部の 章 番号 7）：夢の 内界
+  '7:dream1': ['yumeboshi','yumekazura'],
+  '7:dream2': ['yumeboshi','yumekazura','yumemori_kage'],
+  '7:dream3': ['yumekazura','yumemori_kage','yumeboshi'],
+  '7:dream4': ['yumemori_kage','yumeboshi','yumekazura'],
   // ★第5章（内部の 章 番号 6）：蝕まれた 敵
   '6:rift_yard': ['kuroikui','shokumukade','sumibane'],
   '6:furnace':   ['kuroikui','shokumukade','kokujugara','kokuhyoushi'],
 };
 const byMap = {
+  // ★終章：夢の 内界
+  dream1: ['yumeboshi','yumekazura'],
+  dream2: ['yumeboshi','yumekazura','yumemori_kage'],
+  dream3: ['yumekazura','yumemori_kage','yumeboshi'],
+  dream4: ['yumemori_kage','yumeboshi','yumekazura'],
   rift_yard: ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
   world:     ['kagekakera','shihenchu','akumuga','yamiinu','sumibami'],
   pipe_path: ['kagekakera','shihenchu','akumuga','yamiinu'],
@@ -9513,6 +9745,87 @@ const MAPS = {
       '7,9':{to:'furnace', x:10, y:7}
     }},
 
+  // ★終章：夢の 内界（ヴォクスが 見て きた 千年の 地上の 四季。下から 春・夏・秋・冬、いちばん 奥が 夢の 底）
+  dream1:{name:'夢の 内界 ── 春', theme:'field', enc:true, encRate:0.08, encGrace:4, tiles:[
+    "#######.#######",
+    "#.............#",
+    "#.............#",
+    "#..n..........#",
+    "#.............#",
+    "#.............#",
+    "#..........n..#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#######.#######"],
+    warpsXY:{
+      '7,0':{to:'dream2', x:7, y:9},
+      '7,10':{to:'temple', x:8, y:9},
+    }},
+  dream2:{name:'夢の 内界 ── 夏', theme:'coral', enc:true, encRate:0.08, encGrace:4, tiles:[
+    "#######.#######",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#...n.........#",
+    "#.............#",
+    "#.............#",
+    "#.........n...#",
+    "#.............#",
+    "#.............#",
+    "#######.#######"],
+    warpsXY:{
+      '7,0':{to:'dream3', x:7, y:9},
+      '7,10':{to:'dream1', x:7, y:1},
+    }},
+  dream3:{name:'夢の 内界 ── 秋', theme:'village', enc:true, encRate:0.08, encGrace:4, tiles:[
+    "#######.#######",
+    "#.............#",
+    "#.............#",
+    "#..........n..#",
+    "#.............#",
+    "#.............#",
+    "#..n..........#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#######.#######"],
+    warpsXY:{
+      '7,0':{to:'dream4', x:7, y:9},
+      '7,10':{to:'dream2', x:7, y:1},
+    }},
+  dream4:{name:'夢の 内界 ── 冬', theme:'ice', enc:true, encRate:0.08, encGrace:4, tiles:[
+    "#######.#######",
+    "#.............#",
+    "#.............#",
+    "#...n.........#",
+    "#.............#",
+    "#.............#",
+    "#.........n...#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#######.#######"],
+    warpsXY:{
+      '7,0':{to:'dream_depths', x:7, y:9},
+      '7,10':{to:'dream3', x:7, y:1},
+    }},
+  // ★終章：夢の 底（捨てられた 悪夢の 書庫）。メーアは 7,3
+  dream_depths:{name:'夢の 底', theme:'sky', bbg:'indoor', enc:false, tiles:[
+    "###############",
+    "#.............#",
+    "#..#.......#..#",
+    "#......B......#",
+    "#..#.......#..#",
+    "#.............#",
+    "#..#.......#..#",
+    "#.............#",
+    "#.............#",
+    "######...######",
+    "#######.#######"],
+    warpsXY:{
+      '7,10':{to:'dream4', x:7, y:1}
+    }},
   // ★第5章：ゆりかごの 前（炉心の 奥。グランが 待つ）。入口は 炉心の 手前の「炉心の 壁」（第5章の 会話で 移る）
   cradle:{name:'ゆりかごの 前', theme:'sky', bbg:'indoor', enc:false, tiles:[
     "###############",
@@ -11382,8 +11695,15 @@ function resolveRound(){
   party.forEach(p=>p.guard=false);
   stepAction(acts,0);
 }
+// ★看取り（終章の メーア〈白紙〉）：HPが mitoriAt を 下回ったら そこで 止め、倒さずに 戦いを 終える
+function mitoriFloor(e){
+  if(!e || !e.mitoriAt || e.hp<=0 && !e.maxhp) return;
+  const fl = Math.max(1, Math.ceil(e.maxhp*e.mitoriAt));
+  if(e.hp < fl){ e.hp = fl; if(G.battle) G.battle.mitori = true; }
+}
 function stepAction(acts,i){
   const b=G.battle; if(!b) return;
+  if(b.mitori && !b.mitoriDone){ b.mitoriDone = true; b.enemies.forEach(e=>{ e.hp=0; }); victory(); return; }
   if(b.enemies.every(e=>e.hp<=0)){ victory(); return; }
   if(aliveMembers().length===0){ defeat(); return; }
   if(i>=acts.length){ beginRound(); return; }
@@ -11490,7 +11810,7 @@ function memberAct(a, done){
       V.fx('spellall',{key:a.sp&&a.sp.key}, ()=>{
         alive.forEach(e=>{
           const d = skillDamage(m, sp);
-          e.hp-=d; V.pop({enemy:e, text:d, kind:'dmg'});
+          e.hp-=d; mitoriFloor(e); V.pop({enemy:e, text:d, kind:'dmg'});
           lines.push(e.dispName+'に '+d+'の ダメージ！');
           if(e.hp<=0){ e.hp=0; lines.push(e.dispName+'を 倒した！'); killed(e); }
         });
@@ -11574,7 +11894,7 @@ function memberAct(a, done){
     A.hit();
     V.fx('spell',{target:t, key:a.sp&&a.sp.key}, ()=>{
       V.pop({enemy:t, text:d, kind:'dmg'});
-      t.hp-=d;
+      t.hp-=d; mitoriFloor(t);
       const lines=[m.name+'は '+sp.name+castVerb(m), t.dispName+'に '+d+'の ダメージ！'];
       if(t.hp<=0){ t.hp=0; lines.push(t.dispName+'を 倒した！'); killed(t); }
       // ★ダメージ技に そえた 追加こうか（陽炎突き など）。
@@ -11599,7 +11919,7 @@ function memberAct(a, done){
   if(t.tough) d = crit ? Math.max(2, Math.floor(d*0.3)) : (Math.random()<0.5?1:2); // めったに きかない
   A.hit();
   V.fx('attack',{member:m, target:t}, ()=>{
-    t.hp-=d;
+    t.hp-=d; mitoriFloor(t);
     V.pop({enemy:t, text:d, kind:crit?'crit':'dmg'});
     const lines=[m.name+'の 攻撃！'];
     if(crit) lines.push('会心の 一撃！！');
@@ -11841,7 +12161,7 @@ function victory(){
   const gold = got.reduce((a,e)=>a+e.gold,0);
   P.gold += gold;
   A.win();
-  const lines=['魔物たちを 倒した！','経験値 '+exp+'、'+gold+'ゴールドを 獲得！'];
+  const lines=[b.mitoriDone ? '……一行は、武器を 収めた。' : '魔物たちを 倒した！','経験値 '+exp+'、'+gold+'ゴールドを 獲得！'];
   let leveled=false;
   aliveMembers().concat(reserve.filter(m=>m.hp>0)).forEach(m=>{
     m.exp += exp;
