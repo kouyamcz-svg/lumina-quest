@@ -185,6 +185,14 @@ T('章の 終わりで 目的は なくなる', C.currentGoal()===null, C.curren
   stand('furnace', 10, 19, 'front'); C.G.entry.furnace=Object.assign({},bad); C.stepField(0,1);
   T('光珠炉：こわれた 戻り先でも 外の 歩ける ますに 出る', C.P.map!=='furnace' && C.walkable(C.P.map,C.P.x,C.P.y) && C.tileAt(C.P.map,C.P.x,C.P.y)!=='~', C.P.map+' '+C.P.x+','+C.P.y);
 }
+// ===== アマネの 光術は レベルで 伸びる（mpw）=====
+{
+  const m=C.mkMember('amane',38); m.weapon={kind:'w',name:'w',v:16};
+  const sp=C.knownSpells(m).filter(x=>x.type==='dmg'||x.type==='dmgall');
+  T('アマネの 攻撃の 光術に すべて レベルの 伸び', sp.length>=7 && sp.every(x=>x.mpw>0), sp.filter(x=>!x.mpw).map(x=>x.name).join(','));
+  const sd=sp.find(x=>x.key==='sparda'); const ex=((sd.min+sd.max)/2)+38*sd.mpw;
+  T('Lv38の スパーダは 220 以上（強化の 前は 145）', ex>=220, ex);
+}
 T('クエスト画面が 章の 途中で 空に ならない', __GAPS.length===0, __GAPS.map(g=>g.from+'（'+g.n+'）').join(' / '));
 console.log('\n--- ch5_tour: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

@@ -69,27 +69,27 @@ const SPELL_DEFS = {
   tokoyo:     {name:'とこよの ゆめ',mp:24,type:'inflict', st:'sleep', st2:'slow', p:0.35, p2:0.55, all:true},
 
   // ============ アマネ（光術）：攻撃と支援 ============
-  spark:      {name:'スパーク',    mp:2, type:'dmg', min:12, max:18},
+  spark:      {name:'スパーク',    mp:2, type:'dmg', min:12, max:18, mpw:0.6},
   hikari_tate:{name:'ひかりの たて',mp:5, type:'buff', stat:'def', mul:1.30, turns:3, all:true},
-  spara:      {name:'スパーラ',    mp:5, type:'dmg', min:26, max:34},
+  spara:      {name:'スパーラ',    mp:5, type:'dmg', min:26, max:34, mpw:1.0},
   hikari_ken: {name:'ひかりの つるぎ',mp:6,type:'buff', stat:'atk', mul:1.25, turns:3},
-  hikari_uzu: {name:'ひかりの うず',mp:10,type:'dmgall', min:26, max:36},
-  sparga:     {name:'スパーガ',    mp:8, type:'dmg', min:42, max:56},
+  hikari_uzu: {name:'ひかりの うず',mp:10,type:'dmgall', min:26, max:36, mpw:0.8},
+  sparga:     {name:'スパーガ',    mp:8, type:'dmg', min:42, max:56, mpw:1.6},
   hayate:     {name:'はやての ひかり',mp:7,type:'buff', stat:'agi', mul:1.30, turns:3, all:true},
   revive:     {name:'リヴァイブ',  mp:12,type:'revive'},
   // ★上位の 呪文（第3章の Lv30 前後）。
   //   ★まえは スパーガ（Lv24、49）・ひかりのうず（Lv20、31）・ゆめくい（Lv13）・ゆめのわ（Lv29）が
   //     Lv33 でも いちばん 上で、剣・槍の 技の 約5分の1。スパーガは 通常こうげきより 弱かった。
   //     呪文を 強く する かわりに、上位の 呪文を 足した。
-  sparda:     {name:'スパーダ',    mp:12,type:'dmg', min:130, max:160},
-  hikari_nami:{name:'ひかりの なみ',mp:16,type:'dmgall', min:76, max:92},
+  sparda:     {name:'スパーダ',    mp:12,type:'dmg', min:130, max:160, mpw:2.4},
+  hikari_nami:{name:'ひかりの なみ',mp:16,type:'dmgall', min:76, max:92, mpw:1.4},
   yumesarai:  {name:'ゆめさらい',  mp:12,type:'dmg',    min:84, max:104,
                inflict:{type:'sleep', p:0.3}},
   yumenadare: {name:'ゆめの なだれ',mp:18,type:'dmgall', min:70, max:90,
                inflict:{type:'confuse', p:0.24}},
   // ★上位の 呪文より 上の ものは、新しい 呪文より 強く する（順番が 逆に ならない ように）
-  holyray:    {name:'ひかりの あらし',mp:20,type:'dmgall', min:120, max:144},
-  sparja:     {name:'スパージャ',  mp:20,type:'dmg', min:230, max:280},
+  holyray:    {name:'ひかりの あらし',mp:20,type:'dmgall', min:120, max:144, mpw:1.0},
+  sparja:     {name:'スパージャ',  mp:20,type:'dmg', min:230, max:280, mpw:3.0},
   hikari_taika:{name:'ひかりの たいか',mp:30,type:'dmgall', min:180, max:220},
   judgment:   {name:'ばんぶつの ひかり',mp:34,type:'dmg', min:140,max:185},
   shiratatsu: {name:'しらたつの いのり',mp:34,type:'healall', min:110,max:150},
@@ -248,7 +248,7 @@ const MIDBOSS = {
   //   大陸から 落ちた 悪夢の かけらが 地上の 狼に 憑いた もの。
   // ---- 第5章：騎士団長 グラン（2形態。第1形態を 倒すと そのまま 第2形態：bossReward の nextBoss）----
   //   ★第1形態の 絵は 騎士団長の 絵（captain）、第2形態は 仮の 絵（gran2Tmp）
-  //   ★勝率（連戦・tools/granrate.js）：Lv38で 80%・Lv40で 90%
+  //   ★勝率（連戦・tools/granrate.js）：Lv38で 80%・Lv40で 90%（アマネの 光術を 強化した 後：Lv36で 60%・Lv37で 83%・Lv38以上 87〜100%）
   gran1:{key:'gran1', name:'騎士団長 グラン', hp:6800, atk:96, def:50, agi:34, acts:1,
     exp:3000, gold:0, art:'captain',
     skill:{p:0.30, mul:1.35, name:'騎士団の 剣'},
@@ -1663,6 +1663,8 @@ function buffMul(m, stat){
 //   ★呪文は 攻撃力が 低い 術者でも レベルで のびる。まえは アマネの 光術が 固定値、
 //     ノエの 夢術が 攻撃力×0.55〜0.7 で、Lv33 で 剣・槍の 技の 約5分の1。
 //     アマネの スパーガ（49）は 通常こうげき（62）より 弱かった。
+//   ★説明と ちがい、アマネの 光術には mpw が 入って いなかった（Lv38 で スパーダ 145、イオの 星鋼閃 239）。
+//     攻撃の 光術 8つに mpw を 入れた（スパーダ ×2.4 で Lv38 236 など）。敵は そのまま。
 function skillDamage(m, sp){
   const base = sp.min + Math.floor(Math.random()*(sp.max - sp.min + 1));
   const pw   = sp.pw || 0, mpw = sp.mpw || 0;
