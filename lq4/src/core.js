@@ -1354,7 +1354,7 @@ const MAPS = {
     }},
 
   // ★終章：夢の 内界（ヴォクスが 見て きた 千年の 地上の 四季。下から 春・夏・秋・冬、いちばん 奥が 夢の 底）
-  dream1:{name:'夢の 内界 ── 春', theme:'field', look3d:{sky:0xbfe4ff, fog:0xe8f4ff, ground:0x9ee07a, leafA:0xf4b0cc, leafB:0xffd4e4, flower:0xfff0a8}, enc:true, encRate:0.08, encGrace:4, tiles:[
+  dream1:{name:'夢の 内界 ── 春', theme:'field', look3d:{sky:0xbfe4ff, fog:0xe8f4ff, ground:0x9ee07a, leafA:0xf6b8d2, leafB:0xffdcea, trunk:0x7a5238, flower:0xff8ab0, flower2:0xfff4f8}, enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
     "#f*..*..*.*..f#",
     "#.*..f.*.o.**.#",
@@ -1386,7 +1386,7 @@ const MAPS = {
       '7,0':{to:'dream3', x:7, y:9},
       '7,10':{to:'dream1', x:7, y:1},
     }},
-  dream3:{name:'夢の 内界 ── 秋', theme:'field', look3d:{sky:0xf0b87a, fog:0xf4d2a8, tex:'road', ground:0xc89a58, leafA:0xe0662a, leafB:0xc8401e, flower:0xf0b030}, enc:true, encRate:0.08, encGrace:4, tiles:[
+  dream3:{name:'夢の 内界 ── 秋', theme:'field', look3d:{sky:0xf0b87a, fog:0xf4d2a8, tex:'road', ground:0xc89a58, leafA:0xc8582a, leafB:0xd49a34, trunk:0x5a3a24, fallen:0xb8482a, flower:0xf0b030}, enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
     "#f..o.....o..f#",
     "#.............#",

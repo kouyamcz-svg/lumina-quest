@@ -992,8 +992,24 @@ function buildMap(name){
         else if(key===4) put('wallTorch',[x,topY+0.95,y+0.48]);
       }
     }
-    if(ch==='*'){                    // ★花（look3d の flower の 色）
-      put('flw',[x-0.22,topY+0.10,y-0.16]); put('flw',[x+0.20,topY+0.10,y+0.08]); put('flw',[x-0.02,topY+0.10,y+0.26]);
+    if(ch==='*'){                    // ★花：茎・花びら（2色を 交互）・黄色い しべ（look3d の flower／flower2）
+      [[-0.24,-0.16],[0.22,0.06],[-0.04,0.28],[0.16,-0.26]].forEach(([dx,dz],k)=>{
+        const hx=x+dx, hz=y+dz;
+        put('stem',[hx,topY+0.13,hz]);
+        put(k%2 ? 'petalB' : 'petalA',[hx,topY+0.26,hz]);
+        put('pistil',[hx,topY+0.285,hz]);
+      });
+    }
+    if(ch==='f' && L3){              // ★look3d の 地図の 木：幹と、上に 高く 茂る 葉（丸い 塊だけ だと 何か 分からなかった）
+      // ★カメラは 上から 見下ろす ので、葉は 高く 小さめに、少し 奥へ 寄せて 幹を 見せる
+      put('trunk',[x,topY+0.45,y+0.06]);
+      put('leafA',[x,topY+1.22,y-0.10,(x*7+y*3)%6,0.82]);
+      put('leafB',[x-0.24,topY+1.04,y-0.16,0,0.95]);
+      put('leafB',[x+0.24,topY+1.08,y-0.18,0,0.95]);
+      if(L3.fallen!==undefined){      // 落ち葉（木の まわりの 床に）
+        [[-0.34,0.3],[0.36,0.22],[0.1,-0.38],[-0.2,-0.3],[0.3,-0.1]].forEach(([dx,dz],k)=>put('fallen',[x+dx,topY+0.07,y+dz,k]));
+      }
+      continue;
     }
     if(ch==='f'){                    // もり
       put('leafA',[x,topY+0.5,y,(x*7+y*3)%6]);
@@ -1222,8 +1238,20 @@ function buildMap(name){
     new THREE.MeshLambertMaterial({color:(L3&&L3.leafA!==undefined)?L3.leafA:0x2c7a34,flatShading:true}), G_.leafA||[]);
   addInstanced(new THREE.IcosahedronGeometry(0.3,0),
     new THREE.MeshLambertMaterial({color:(L3&&L3.leafB!==undefined)?L3.leafB:0x1e5c28,flatShading:true}), G_.leafB||[]);
-  addInstanced(new THREE.IcosahedronGeometry(0.12,0),
-    new THREE.MeshLambertMaterial({color:(L3&&L3.flower!==undefined)?L3.flower:0xf4c0d8,flatShading:true}), G_.flw||[]);
+  if(L3){
+    addInstanced(new THREE.CylinderGeometry(0.018,0.018,0.26,5),
+      new THREE.MeshLambertMaterial({color:0x3f8a34}), G_.stem||[]);
+    addInstanced(new THREE.CylinderGeometry(0.14,0.09,0.05,6),
+      new THREE.MeshLambertMaterial({color:L3.flower!==undefined?L3.flower:0xf4c0d8,flatShading:true}), G_.petalA||[]);
+    addInstanced(new THREE.CylinderGeometry(0.14,0.09,0.05,6),
+      new THREE.MeshLambertMaterial({color:L3.flower2!==undefined?L3.flower2:0xffffff,flatShading:true}), G_.petalB||[]);
+    addInstanced(new THREE.SphereGeometry(0.035,6,4),
+      new THREE.MeshLambertMaterial({color:0xffd23a}), G_.pistil||[]);
+    addInstanced(new THREE.CylinderGeometry(0.07,0.11,0.90,6),
+      new THREE.MeshLambertMaterial({color:L3.trunk!==undefined?L3.trunk:0x6a4a2a,flatShading:true}), G_.trunk||[]);
+    addInstanced(new THREE.CylinderGeometry(0.09,0.09,0.012,5),
+      new THREE.MeshLambertMaterial({color:L3.fallen!==undefined?L3.fallen:0xd0602a}), G_.fallen||[]);
+  }
   addInstanced(new THREE.DodecahedronGeometry(0.42,0),
     new THREE.MeshLambertMaterial({color:0x8a8f9c,flatShading:true}), G_.rock||[]);
   addInstanced(box,new THREE.MeshLambertMaterial({color:0x0d2c50}), (G_.waterbed||[]).map(p=>[p[0],p[1],p[2]]));
