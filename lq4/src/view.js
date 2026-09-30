@@ -796,6 +796,9 @@ function buildMap(name){
   const night=!!(C.G&&C.G.night)&&!!sc.outdoor;
   scene=new THREE.Scene();
   let sky=th.sky, fog=[th.fog[0], th.fog[1]*1.5, th.fog[2]*1.6];
+  // ★地図ごとの 3Dの 色（look3d：終章の 夢の 四季。空・霧・床・木・花の 色を 地図で 決める）
+  const L3 = map.look3d || null;
+  if(L3 && L3.sky!==undefined){ sky=L3.sky; fog=[L3.fog!==undefined?L3.fog:L3.sky, fog[1], fog[2]]; }
   if(map.theme==='snow' && ts){ sky=ts.sky; fog=[ts.fog[0], ts.fog[1]*1.5, ts.fog[2]*1.6]; }
   if(night){ sky=darken(sky,0.34); fog=[darken(fog[0],0.42), fog[1]*0.85, fog[2]*0.9]; }
   scene.background=new THREE.Color(sky);
@@ -989,6 +992,9 @@ function buildMap(name){
         else if(key===4) put('wallTorch',[x,topY+0.95,y+0.48]);
       }
     }
+    if(ch==='*'){                    // ★花（look3d の flower の 色）
+      put('flw',[x-0.22,topY+0.10,y-0.16]); put('flw',[x+0.20,topY+0.10,y+0.08]); put('flw',[x-0.02,topY+0.10,y+0.26]);
+    }
     if(ch==='f'){                    // もり
       put('leafA',[x,topY+0.5,y,(x*7+y*3)%6]);
       put('leafB',[x-0.28,topY+0.34,y+0.2,0]);
@@ -1121,6 +1127,8 @@ function buildMap(name){
   // ★天空の ダンジョンは 石の 床（芝生に なって いた）
   if(dgn3d && skyD){ gm.map = TEX.pave; gm.color.setHex(dp.floor); }
   if(snow && ts && ts.id!=='NORMAL') gm.color.setHex(ts.snowColor);
+  if(L3 && L3.tex && TEX[L3.tex]) gm.map = TEX[L3.tex];
+  if(L3 && L3.ground!==undefined) gm.color.setHex(L3.ground);
   addInstanced(box,gm, (G_.ground||[]).map(p=>[p[0],p[1],p[2]]));
   addInstanced(box,new THREE.MeshLambertMaterial({
       map: snow?TEX.pave : ice?TEX.ice : cast?TEX.carpet : TEX.road}),
@@ -1211,9 +1219,11 @@ function buildMap(name){
       (G_.wall||[]).map(p=>[p[0],p[1]+0.82,p[2]]));
   }
   addInstanced(new THREE.IcosahedronGeometry(0.44,0),
-    new THREE.MeshLambertMaterial({color:0x2c7a34,flatShading:true}), G_.leafA||[]);
+    new THREE.MeshLambertMaterial({color:(L3&&L3.leafA!==undefined)?L3.leafA:0x2c7a34,flatShading:true}), G_.leafA||[]);
   addInstanced(new THREE.IcosahedronGeometry(0.3,0),
-    new THREE.MeshLambertMaterial({color:0x1e5c28,flatShading:true}), G_.leafB||[]);
+    new THREE.MeshLambertMaterial({color:(L3&&L3.leafB!==undefined)?L3.leafB:0x1e5c28,flatShading:true}), G_.leafB||[]);
+  addInstanced(new THREE.IcosahedronGeometry(0.12,0),
+    new THREE.MeshLambertMaterial({color:(L3&&L3.flower!==undefined)?L3.flower:0xf4c0d8,flatShading:true}), G_.flw||[]);
   addInstanced(new THREE.DodecahedronGeometry(0.42,0),
     new THREE.MeshLambertMaterial({color:0x8a8f9c,flatShading:true}), G_.rock||[]);
   addInstanced(box,new THREE.MeshLambertMaterial({color:0x0d2c50}), (G_.waterbed||[]).map(p=>[p[0],p[1],p[2]]));

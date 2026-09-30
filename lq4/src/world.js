@@ -76,11 +76,11 @@ const MAP_IDS = {
   archive2:   {region:'sky',kind:'dgn',  name:'禁書庫 下層', scene:'SCENE_CAVE'},
   archive_core:{region:'sky',kind:'dgn', name:'禁書庫 最奥', scene:'SCENE_CAVE'},
   cradle:{region:'sky',kind:'dgn',  name:'ゆりかごの 前',   scene:'SCENE_SKY_TOWN'},
-  // ★夢の 四季は 2Dで 描く（3Dでは 草原・珊瑚・砂の 床が 同じ 草に なり、季節が 分からなかった）
-  dream1:{region:'sky',kind:'town',  name:'夢の 内界 ── 春',   scene:'SCENE_SKY_TOWN'},
-  dream2:{region:'sky',kind:'town',  name:'夢の 内界 ── 夏',   scene:'SCENE_SKY_TOWN'},
-  dream3:{region:'sky',kind:'town',  name:'夢の 内界 ── 秋',   scene:'SCENE_SKY_TOWN'},
-  dream4:{region:'sky',kind:'town',  name:'夢の 内界 ── 冬',   scene:'SCENE_SKY_TOWN'},
+  // ★夢の 四季は 3Dで、地図の look3d で 季節の 色を 付ける（はじめ 3Dでは どれも 同じ 草、次に 2Dに した）
+  dream1:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 春',   scene:'SCENE_SKY_TOWN'},
+  dream2:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 夏',   scene:'SCENE_SKY_TOWN'},
+  dream3:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 秋',   scene:'SCENE_SKY_TOWN'},
+  dream4:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 冬',   scene:'SCENE_SKY_TOWN'},
   dream_depths:{region:'sky',kind:'dgn',  name:'夢の 底',   scene:'SCENE_SKY_TOWN'},
   toros:      {region:'land',kind:'town', name:'トロスの村',  scene:'SCENE_FIELD'},
   shrine_hill:{region:'land',kind:'dgn',  name:'祠の丘',     scene:'SCENE_FIELD'},

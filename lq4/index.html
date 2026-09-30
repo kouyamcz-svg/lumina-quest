@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 11:57 JST", "build":"f531cecb","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1065, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4601, "view": 1733, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 12:02 JST", "build":"cfc51a74","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1065, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4601, "view": 1743, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -249,11 +249,11 @@ const MAP_IDS = {
   archive2:   {region:'sky',kind:'dgn',  name:'禁書庫 下層', scene:'SCENE_CAVE'},
   archive_core:{region:'sky',kind:'dgn', name:'禁書庫 最奥', scene:'SCENE_CAVE'},
   cradle:{region:'sky',kind:'dgn',  name:'ゆりかごの 前',   scene:'SCENE_SKY_TOWN'},
-  // ★夢の 四季は 2Dで 描く（3Dでは 草原・珊瑚・砂の 床が 同じ 草に なり、季節が 分からなかった）
-  dream1:{region:'sky',kind:'town',  name:'夢の 内界 ── 春',   scene:'SCENE_SKY_TOWN'},
-  dream2:{region:'sky',kind:'town',  name:'夢の 内界 ── 夏',   scene:'SCENE_SKY_TOWN'},
-  dream3:{region:'sky',kind:'town',  name:'夢の 内界 ── 秋',   scene:'SCENE_SKY_TOWN'},
-  dream4:{region:'sky',kind:'town',  name:'夢の 内界 ── 冬',   scene:'SCENE_SKY_TOWN'},
+  // ★夢の 四季は 3Dで、地図の look3d で 季節の 色を 付ける（はじめ 3Dでは どれも 同じ 草、次に 2Dに した）
+  dream1:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 春',   scene:'SCENE_SKY_TOWN'},
+  dream2:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 夏',   scene:'SCENE_SKY_TOWN'},
+  dream3:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 秋',   scene:'SCENE_SKY_TOWN'},
+  dream4:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 冬',   scene:'SCENE_SKY_TOWN'},
   dream_depths:{region:'sky',kind:'dgn',  name:'夢の 底',   scene:'SCENE_SKY_TOWN'},
   toros:      {region:'land',kind:'town', name:'トロスの村',  scene:'SCENE_FIELD'},
   shrine_hill:{region:'land',kind:'dgn',  name:'祠の丘',     scene:'SCENE_FIELD'},
@@ -9842,13 +9842,13 @@ const MAPS = {
     }},
 
   // ★終章：夢の 内界（ヴォクスが 見て きた 千年の 地上の 四季。下から 春・夏・秋・冬、いちばん 奥が 夢の 底）
-  dream1:{name:'夢の 内界 ── 春', theme:'field', enc:true, encRate:0.08, encGrace:4, tiles:[
+  dream1:{name:'夢の 内界 ── 春', theme:'field', look3d:{sky:0xbfe4ff, fog:0xe8f4ff, ground:0x9ee07a, leafA:0xf4b0cc, leafB:0xffd4e4, flower:0xfff0a8}, enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
     "#f*..*..*.*..f#",
     "#.*..f.*.o.**.#",
     "#..n.*..*.....#",
-    "#f..%%...*f.f.#",
-    "#.*.%%.*...**.#",
+    "#f..**...*f.f.#",
+    "#.*.**.*...**.#",
     "#..*......*n*.#",
     "#.f..*..*..*.f#",
     "#.*.f.....f.*.#",
@@ -9858,29 +9858,29 @@ const MAPS = {
       '7,0':{to:'dream2', x:7, y:9},
       '7,10':{to:'temple', x:8, y:9},
     }},
-  dream2:{name:'夢の 内界 ── 夏', theme:'coral', enc:true, encRate:0.08, encGrace:4, tiles:[
+  dream2:{name:'夢の 内界 ── 夏', theme:'field', look3d:{sky:0x5ab4f0, fog:0xa8dcff, tex:'road', ground:0xf2e2b0, leafA:0x2e9a3a, leafB:0x1e7a2c, flower:0xff7a5a}, enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
     "#............o#",
     "#.f.........f.#",
     "#.............#",
     "#...n.........#",
     "#o...........o#",
-    "#_________n___#",
-    "#~~~~~___~~~~~#",
-    "#~~~~~...~~~~~#",
+    "#.........n...#",
+    "#wwwww...wwwww#",
+    "#wwwww...wwwww#",
     "#.............#",
     "######...######"],
     warpsXY:{
       '7,0':{to:'dream3', x:7, y:9},
       '7,10':{to:'dream1', x:7, y:1},
     }},
-  dream3:{name:'夢の 内界 ── 秋', theme:'desert', enc:true, encRate:0.08, encGrace:4, tiles:[
+  dream3:{name:'夢の 内界 ── 秋', theme:'field', look3d:{sky:0xf0b87a, fog:0xf4d2a8, tex:'road', ground:0xc89a58, leafA:0xe0662a, leafB:0xc8401e, flower:0xf0b030}, enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
     "#f..o.....o..f#",
     "#.............#",
     "#.f......w.nf.#",
     "#.............#",
-    "#eee.ee.eee.ee#",
+    "#f.f.f...f.f.f#",
     "#..n..........#",
     "#.f...f.....f.#",
     "#........f....#",
@@ -9890,7 +9890,7 @@ const MAPS = {
       '7,0':{to:'dream4', x:7, y:9},
       '7,10':{to:'dream2', x:7, y:1},
     }},
-  dream4:{name:'夢の 内界 ── 冬', theme:'ice', enc:true, encRate:0.08, encGrace:4, tiles:[
+  dream4:{name:'夢の 内界 ── 冬', theme:'snow', look3d:{sky:0xc8dcec, fog:0xe4eef6}, enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
     "#ff.o....o..ff#",
     "#f.........o.f#",
@@ -13885,6 +13885,9 @@ function buildMap(name){
   const night=!!(C.G&&C.G.night)&&!!sc.outdoor;
   scene=new THREE.Scene();
   let sky=th.sky, fog=[th.fog[0], th.fog[1]*1.5, th.fog[2]*1.6];
+  // ★地図ごとの 3Dの 色（look3d：終章の 夢の 四季。空・霧・床・木・花の 色を 地図で 決める）
+  const L3 = map.look3d || null;
+  if(L3 && L3.sky!==undefined){ sky=L3.sky; fog=[L3.fog!==undefined?L3.fog:L3.sky, fog[1], fog[2]]; }
   if(map.theme==='snow' && ts){ sky=ts.sky; fog=[ts.fog[0], ts.fog[1]*1.5, ts.fog[2]*1.6]; }
   if(night){ sky=darken(sky,0.34); fog=[darken(fog[0],0.42), fog[1]*0.85, fog[2]*0.9]; }
   scene.background=new THREE.Color(sky);
@@ -14078,6 +14081,9 @@ function buildMap(name){
         else if(key===4) put('wallTorch',[x,topY+0.95,y+0.48]);
       }
     }
+    if(ch==='*'){                    // ★花（look3d の flower の 色）
+      put('flw',[x-0.22,topY+0.10,y-0.16]); put('flw',[x+0.20,topY+0.10,y+0.08]); put('flw',[x-0.02,topY+0.10,y+0.26]);
+    }
     if(ch==='f'){                    // もり
       put('leafA',[x,topY+0.5,y,(x*7+y*3)%6]);
       put('leafB',[x-0.28,topY+0.34,y+0.2,0]);
@@ -14210,6 +14216,8 @@ function buildMap(name){
   // ★天空の ダンジョンは 石の 床（芝生に なって いた）
   if(dgn3d && skyD){ gm.map = TEX.pave; gm.color.setHex(dp.floor); }
   if(snow && ts && ts.id!=='NORMAL') gm.color.setHex(ts.snowColor);
+  if(L3 && L3.tex && TEX[L3.tex]) gm.map = TEX[L3.tex];
+  if(L3 && L3.ground!==undefined) gm.color.setHex(L3.ground);
   addInstanced(box,gm, (G_.ground||[]).map(p=>[p[0],p[1],p[2]]));
   addInstanced(box,new THREE.MeshLambertMaterial({
       map: snow?TEX.pave : ice?TEX.ice : cast?TEX.carpet : TEX.road}),
@@ -14300,9 +14308,11 @@ function buildMap(name){
       (G_.wall||[]).map(p=>[p[0],p[1]+0.82,p[2]]));
   }
   addInstanced(new THREE.IcosahedronGeometry(0.44,0),
-    new THREE.MeshLambertMaterial({color:0x2c7a34,flatShading:true}), G_.leafA||[]);
+    new THREE.MeshLambertMaterial({color:(L3&&L3.leafA!==undefined)?L3.leafA:0x2c7a34,flatShading:true}), G_.leafA||[]);
   addInstanced(new THREE.IcosahedronGeometry(0.3,0),
-    new THREE.MeshLambertMaterial({color:0x1e5c28,flatShading:true}), G_.leafB||[]);
+    new THREE.MeshLambertMaterial({color:(L3&&L3.leafB!==undefined)?L3.leafB:0x1e5c28,flatShading:true}), G_.leafB||[]);
+  addInstanced(new THREE.IcosahedronGeometry(0.12,0),
+    new THREE.MeshLambertMaterial({color:(L3&&L3.flower!==undefined)?L3.flower:0xf4c0d8,flatShading:true}), G_.flw||[]);
   addInstanced(new THREE.DodecahedronGeometry(0.42,0),
     new THREE.MeshLambertMaterial({color:0x8a8f9c,flatShading:true}), G_.rock||[]);
   addInstanced(box,new THREE.MeshLambertMaterial({color:0x0d2c50}), (G_.waterbed||[]).map(p=>[p[0],p[1],p[2]]));

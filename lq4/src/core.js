@@ -1354,13 +1354,13 @@ const MAPS = {
     }},
 
   // ★終章：夢の 内界（ヴォクスが 見て きた 千年の 地上の 四季。下から 春・夏・秋・冬、いちばん 奥が 夢の 底）
-  dream1:{name:'夢の 内界 ── 春', theme:'field', enc:true, encRate:0.08, encGrace:4, tiles:[
+  dream1:{name:'夢の 内界 ── 春', theme:'field', look3d:{sky:0xbfe4ff, fog:0xe8f4ff, ground:0x9ee07a, leafA:0xf4b0cc, leafB:0xffd4e4, flower:0xfff0a8}, enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
     "#f*..*..*.*..f#",
     "#.*..f.*.o.**.#",
     "#..n.*..*.....#",
-    "#f..%%...*f.f.#",
-    "#.*.%%.*...**.#",
+    "#f..**...*f.f.#",
+    "#.*.**.*...**.#",
     "#..*......*n*.#",
     "#.f..*..*..*.f#",
     "#.*.f.....f.*.#",
@@ -1370,29 +1370,29 @@ const MAPS = {
       '7,0':{to:'dream2', x:7, y:9},
       '7,10':{to:'temple', x:8, y:9},
     }},
-  dream2:{name:'夢の 内界 ── 夏', theme:'coral', enc:true, encRate:0.08, encGrace:4, tiles:[
+  dream2:{name:'夢の 内界 ── 夏', theme:'field', look3d:{sky:0x5ab4f0, fog:0xa8dcff, tex:'road', ground:0xf2e2b0, leafA:0x2e9a3a, leafB:0x1e7a2c, flower:0xff7a5a}, enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
     "#............o#",
     "#.f.........f.#",
     "#.............#",
     "#...n.........#",
     "#o...........o#",
-    "#_________n___#",
-    "#~~~~~___~~~~~#",
-    "#~~~~~...~~~~~#",
+    "#.........n...#",
+    "#wwwww...wwwww#",
+    "#wwwww...wwwww#",
     "#.............#",
     "######...######"],
     warpsXY:{
       '7,0':{to:'dream3', x:7, y:9},
       '7,10':{to:'dream1', x:7, y:1},
     }},
-  dream3:{name:'夢の 内界 ── 秋', theme:'desert', enc:true, encRate:0.08, encGrace:4, tiles:[
+  dream3:{name:'夢の 内界 ── 秋', theme:'field', look3d:{sky:0xf0b87a, fog:0xf4d2a8, tex:'road', ground:0xc89a58, leafA:0xe0662a, leafB:0xc8401e, flower:0xf0b030}, enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
     "#f..o.....o..f#",
     "#.............#",
     "#.f......w.nf.#",
     "#.............#",
-    "#eee.ee.eee.ee#",
+    "#f.f.f...f.f.f#",
     "#..n..........#",
     "#.f...f.....f.#",
     "#........f....#",
@@ -1402,7 +1402,7 @@ const MAPS = {
       '7,0':{to:'dream4', x:7, y:9},
       '7,10':{to:'dream2', x:7, y:1},
     }},
-  dream4:{name:'夢の 内界 ── 冬', theme:'ice', enc:true, encRate:0.08, encGrace:4, tiles:[
+  dream4:{name:'夢の 内界 ── 冬', theme:'snow', look3d:{sky:0xc8dcec, fog:0xe4eef6}, enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
     "#ff.o....o..ff#",
     "#f.........o.f#",
