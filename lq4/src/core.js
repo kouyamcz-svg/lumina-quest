@@ -2632,7 +2632,18 @@ function offerNextChapter(next, title, isFinal){
            '',
            'ながい たびに おつきあい いただき、',
            'ありがとう ございました！'],   // ★「めざめの 朝」は 前作の 文。IVでは 眠る 子は 眠り 続けるので 外した
-          () => { G.mode='field'; });
+          () => {
+            // ★完結の あと：ゆっくり 暗く して、少し 間を おき、タイトルへ 戻して ゆっくり 明るく する
+            G.mode = 'msg';
+            V.fade(1, () => {
+              // ★setTimeout が ない 場所（テスト）では すぐ 進める
+              const later = (typeof setTimeout==='function') ? setTimeout : ((f)=>f());
+              later(() => {
+                if(U.toTitle) U.toTitle(); else G.mode='field';
+                V.fade(0, null, 2.5);
+              }, 1500);
+            }, 3.0);
+          });
     return;
   }
   const ready = next && CHD && CHD.has(next);

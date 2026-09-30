@@ -384,6 +384,8 @@ function placeCmdWin(){
 }
 
 const UI = {msg:msg2, menu, hud, label, openTrade};
+// ★完結の あと ゆっくり タイトルへ 戻す ため（core の offerNextChapter から 呼ぶ）
+UI.toTitle = function(){ titleScreen(); };
 // ★メニューの ひらけしめで ステータスの ひょうじも きりかえる
 const _menuOrig = menu;
 menu = function(items, title, cb, opt){

@@ -12,7 +12,7 @@ for (const f of ['world.js','npc.js','chapters.js','core.js'])
 const C = vm.runInContext('LQ4', ctx);
 
 const log=[], scene=[];
-let __built=null; const allLog=[];
+let __built=null; const allLog=[]; let __toTitle=0;
 C.bind(Object.assign({}, C.NullView, {
         showScene(k){ scene.push('show:'+k); }, hideScene(){ scene.push('hide'); },
         runner(o){ o.done && o.done(); }, runnerClear(){},
@@ -20,7 +20,7 @@ C.bind(Object.assign({}, C.NullView, {
        }),
        {msg(l,d){ l.forEach(x=>{ log.push(x); allLog.push(x); }); d&&d(); },
         menu(i,t,cb){ cb(t==='これから' ? 1 : 0); },
-        hud(){}, label(){}, openTrade(){}}, C.NullAudio);
+        hud(){}, label(){}, openTrade(){}, toTitle(){ __toTitle++; }}, C.NullAudio);
 
 let n=0, ng=0;
 // ★クエスト画面が 空に なる 区間を はかる（章の 途中で「やることが ない」に ならない こと）
@@ -103,6 +103,7 @@ T('結末：引き上げ・降下・扉・祠・千年後', said('雲海の 上�
 T('結末：真っ暗 → 千年後の 祠の 一枚絵 → 真っ暗', (()=>{ const a=scene.indexOf('show:__dark'), b=scene.indexOf('show:scene_fin_shrine'), c=scene.lastIndexOf('show:__dark'); return a>=0 && b>a && c>b; })(), scene.join(','));
 T('完結の 文', said('完結') && !said('めざめの あさ'));
 T('ch6_cleared', C.G.flags.ch6_cleared===true);
+T('完結の あと タイトルへ 戻る', __toTitle===1, __toTitle);
 talk('home_forge', 3, 7, 'back');
 T('剣を 打った 後の となりの おばさん', said('打てたんだね'));
 T('終わった あと 目的は ない', C.currentGoal()===null, C.currentGoal());

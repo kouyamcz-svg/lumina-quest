@@ -1457,11 +1457,13 @@ function chapterCard(title, sub, done){
     setTimeout(()=>{ if(done) done(); }, 700);
   }, 2400);
 }
-function fade(to, done){
+function fade(to, done, sec){
+  // ★sec：かかる 秒（ふだんは 0.3。完結の あと タイトルへ 戻る ときは ゆっくり）
+  const t = (sec>0) ? sec : 0.3;
   const f=document.getElementById('fade');
-  f.style.transition='opacity 0.3s'; f.style.opacity=to;
+  f.style.transition='opacity '+t+'s'; f.style.opacity=to;
   if(V2) V2.setFade(0);          // DOMがわの おおいで じゅうぶん
-  setTimeout(()=>done&&done(), 330);
+  setTimeout(()=>done&&done(), t*1000+30);
 }
 
 // ---------------- ループ ----------------

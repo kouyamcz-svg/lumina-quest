@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 17:10 JST", "build":"e32d297f","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4601, "view": 1771, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 17:18 JST", "build":"fd1bd971","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4612, "view": 1773, "ui": 1227}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -11129,7 +11129,18 @@ function offerNextChapter(next, title, isFinal){
            '',
            'ながい たびに おつきあい いただき、',
            'ありがとう ございました！'],   // ★「めざめの 朝」は 前作の 文。IVでは 眠る 子は 眠り 続けるので 外した
-          () => { G.mode='field'; });
+          () => {
+            // ★完結の あと：ゆっくり 暗く して、少し 間を おき、タイトルへ 戻して ゆっくり 明るく する
+            G.mode = 'msg';
+            V.fade(1, () => {
+              // ★setTimeout が ない 場所（テスト）では すぐ 進める
+              const later = (typeof setTimeout==='function') ? setTimeout : ((f)=>f());
+              later(() => {
+                if(U.toTitle) U.toTitle(); else G.mode='field';
+                V.fade(0, null, 2.5);
+              }, 1500);
+            }, 3.0);
+          });
     return;
   }
   const ready = next && CHD && CHD.has(next);
@@ -14555,11 +14566,13 @@ function chapterCard(title, sub, done){
     setTimeout(()=>{ if(done) done(); }, 700);
   }, 2400);
 }
-function fade(to, done){
+function fade(to, done, sec){
+  // ★sec：かかる 秒（ふだんは 0.3。完結の あと タイトルへ 戻る ときは ゆっくり）
+  const t = (sec>0) ? sec : 0.3;
   const f=document.getElementById('fade');
-  f.style.transition='opacity 0.3s'; f.style.opacity=to;
+  f.style.transition='opacity '+t+'s'; f.style.opacity=to;
   if(V2) V2.setFade(0);          // DOMがわの おおいで じゅうぶん
-  setTimeout(()=>done&&done(), 330);
+  setTimeout(()=>done&&done(), t*1000+30);
 }
 
 // ---------------- ループ ----------------
@@ -15253,6 +15266,8 @@ function placeCmdWin(){
 }
 
 const UI = {msg:msg2, menu, hud, label, openTrade};
+// ★完結の あと ゆっくり タイトルへ 戻す ため（core の offerNextChapter から 呼ぶ）
+UI.toTitle = function(){ titleScreen(); };
 // ★メニューの ひらけしめで ステータスの ひょうじも きりかえる
 const _menuOrig = menu;
 menu = function(items, title, cb, opt){
