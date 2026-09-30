@@ -2627,20 +2627,18 @@ function runTalkEvent(npcName){
 // 章の おわりに 「つぎへ すすむ」か「この しょうを つづける」を えらばせる
 function offerNextChapter(next, title, isFinal){
   if(isFinal){
+    // ★完結：札「沈まない島／ルミナクエストIV 完」の あと、文を 出さずに ゆっくり 暗く して、
+    //   少し 間を おき、タイトルへ 戻して ゆっくり 明るく する
+    //   （前は「＊＊ ルミナクエスト IV　完結 ＊＊」などの 文が 出て いた。指示で 消した）
     G.mode = 'msg';
-    U.msg(['＊＊ ルミナクエスト IV　完結 ＊＊'],   // ★「めざめの 朝」（前作の 文）と「ながい たびに…ありがとう ございました！」は 外した
-          () => {
-            // ★完結の あと：ゆっくり 暗く して、少し 間を おき、タイトルへ 戻して ゆっくり 明るく する
-            G.mode = 'msg';
-            V.fade(1, () => {
-              // ★setTimeout が ない 場所（テスト）では すぐ 進める
-              const later = (typeof setTimeout==='function') ? setTimeout : ((f)=>f());
-              later(() => {
-                if(U.toTitle) U.toTitle(); else G.mode='field';
-                V.fade(0, null, 2.5);
-              }, 1500);
-            }, 3.0);
-          });
+    V.fade(1, () => {
+      // ★setTimeout が ない 場所（テスト）では すぐ 進める
+      const later = (typeof setTimeout==='function') ? setTimeout : ((f)=>f());
+      later(() => {
+        if(U.toTitle) U.toTitle(); else G.mode='field';
+        V.fade(0, null, 2.5);
+      }, 1500);
+    }, 3.0);
     return;
   }
   const ready = next && CHD && CHD.has(next);

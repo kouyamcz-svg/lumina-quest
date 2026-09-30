@@ -101,7 +101,7 @@ T('天空鋼の 剣', C.G.flags.fin_sword===true && said('父さん、打てた�
 T('鍛冶場の 一枚絵', scene.indexOf('show:scene_fin_forge')>=0, scene.join(','));
 T('結末：引き上げ・降下・扉・祠・千年後', said('雲海の 上へ 昇って') && said('五つの 土地へ') && said('「扉」と 呼ばれる') && said('祠に 納めた') && said('千年後') && said('ゆっくりと 引き抜いた'));
 T('結末：真っ暗 → 千年後の 祠の 一枚絵 → 真っ暗', (()=>{ const a=scene.indexOf('show:__dark'), b=scene.indexOf('show:scene_fin_shrine'), c=scene.lastIndexOf('show:__dark'); return a>=0 && b>a && c>b; })(), scene.join(','));
-T('完結の 文', said('完結') && !said('めざめの あさ'));
+T('札の あとに 完結の 文は 出ない', !said('完結') && !said('めざめの あさ') && !said('ながい たびに'));
 T('ch6_cleared', C.G.flags.ch6_cleared===true);
 T('完結の あと タイトルへ 戻る', __toTitle===1, __toTitle);
 talk('home_forge', 3, 7, 'back');
