@@ -12,13 +12,13 @@ for (const f of ['world.js','npc.js','chapters.js','core.js'])
 const C = vm.runInContext('LQ4', ctx);
 
 const log=[], scene=[];
-let __built=null;
+let __built=null; const allLog=[];
 C.bind(Object.assign({}, C.NullView, {
         showScene(k){ scene.push('show:'+k); }, hideScene(){ scene.push('hide'); },
         runner(o){ o.done && o.done(); }, runnerClear(){},
         buildMap(m){ __built=m; },
        }),
-       {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); },
+       {msg(l,d){ l.forEach(x=>{ log.push(x); allLog.push(x); }); d&&d(); },
         menu(i,t,cb){ cb(t==='これから' ? 1 : 0); },
         hud(){}, label(){}, openTrade(){}}, C.NullAudio);
 
@@ -71,6 +71,8 @@ T('何度でも 夢へ', C.P.map==='dream1');
   T(m+' から '+nx+' へ', C.P.map===nx, C.P.map);
 });
 T('夢の 底に 着いた 印', C.G.flags.fin_depths===true);
+['春','夏','秋','冬'].forEach(k=>T('はじめて 入った ときに 季節が 出る：'+k, allLog.includes('── 夢の 内界　'+k+' ──')));
+T('季節の 文は 一度だけ（春は 2回 入った）', allLog.filter(l=>l==='── 夢の 内界　春 ──').length===1);
 T('目的が メーアに', /メーア/.test(C.currentGoal()||''), C.currentGoal());
 
 // ===== 3. メーア（3形態）→ 看取り =====

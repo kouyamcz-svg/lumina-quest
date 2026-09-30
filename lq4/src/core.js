@@ -1356,64 +1356,64 @@ const MAPS = {
   // ★終章：夢の 内界（ヴォクスが 見て きた 千年の 地上の 四季。下から 春・夏・秋・冬、いちばん 奥が 夢の 底）
   dream1:{name:'夢の 内界 ── 春', theme:'field', enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
+    "#f*..*..*.*..f#",
+    "#.*..f.*.o.**.#",
+    "#..n.*..*.....#",
+    "#f..%%...*f.f.#",
+    "#.*.%%.*...**.#",
+    "#..*......*n*.#",
+    "#.f..*..*..*.f#",
+    "#.*.f.....f.*.#",
     "#.............#",
-    "#.............#",
-    "#..n..........#",
-    "#.............#",
-    "#.............#",
-    "#..........n..#",
-    "#.............#",
-    "#.............#",
-    "#.............#",
-    "#######.#######"],
+    "######...######"],
     warpsXY:{
       '7,0':{to:'dream2', x:7, y:9},
       '7,10':{to:'temple', x:8, y:9},
     }},
   dream2:{name:'夢の 内界 ── 夏', theme:'coral', enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
-    "#.............#",
-    "#.............#",
+    "#............o#",
+    "#.f.........f.#",
     "#.............#",
     "#...n.........#",
+    "#o...........o#",
+    "#_________n___#",
+    "#~~~~~___~~~~~#",
+    "#~~~~~...~~~~~#",
     "#.............#",
-    "#.............#",
-    "#.........n...#",
-    "#.............#",
-    "#.............#",
-    "#######.#######"],
+    "######...######"],
     warpsXY:{
       '7,0':{to:'dream3', x:7, y:9},
       '7,10':{to:'dream1', x:7, y:1},
     }},
-  dream3:{name:'夢の 内界 ── 秋', theme:'village', enc:true, encRate:0.08, encGrace:4, tiles:[
+  dream3:{name:'夢の 内界 ── 秋', theme:'desert', enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
+    "#f..o.....o..f#",
     "#.............#",
+    "#.f......w.nf.#",
     "#.............#",
-    "#..........n..#",
-    "#.............#",
-    "#.............#",
+    "#eee.ee.eee.ee#",
     "#..n..........#",
+    "#.f...f.....f.#",
+    "#........f....#",
     "#.............#",
-    "#.............#",
-    "#.............#",
-    "#######.#######"],
+    "######...######"],
     warpsXY:{
       '7,0':{to:'dream4', x:7, y:9},
       '7,10':{to:'dream2', x:7, y:1},
     }},
   dream4:{name:'夢の 内界 ── 冬', theme:'ice', enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
+    "#ff.o....o..ff#",
+    "#f.........o.f#",
+    "#..on.........#",
+    "#f....o.......#",
+    "#..o........o.#",
+    "#f........n...#",
+    "#o.f..o.f..o.f#",
+    "#ff.........ff#",
     "#.............#",
-    "#.............#",
-    "#...n.........#",
-    "#.............#",
-    "#.............#",
-    "#.........n...#",
-    "#.............#",
-    "#.............#",
-    "#.............#",
-    "#######.#######"],
+    "######...######"],
     warpsXY:{
       '7,0':{to:'dream_depths', x:7, y:9},
       '7,10':{to:'dream3', x:7, y:1},
@@ -2302,6 +2302,16 @@ function repairEntry(mp, e){
   }
   return null;
 }
+// ★はじめて 入った ときの 文（章データの enterMsg：{地図名:[文…]}）。一度だけ。出したら true
+//   ★夢の 内界の 4階が どれも 同じ 部屋に 見え、春夏秋冬が 分からなかった
+function showEnterMsg(mp){
+  const cd = chData(); const ls = cd && cd.enterMsg && cd.enterMsg[mp];
+  const fk = '_enter_' + mp;
+  if(!ls || G.flags[fk]) return false;
+  G.flags[fk] = true; G.mode = 'msg';
+  U.msg(ls, () => { G.mode = 'field'; });
+  return true;
+}
 function doWarp(w){
   // ★脱出（夢還り）は 来た 道を 戻るだけ。結界で 止めない。
   if(w && !w.escape && wardBlocks(w.to)){
@@ -2395,7 +2405,7 @@ function doWarp(w){
     if(TRADE_MARKET[dest.to]) G.marketTick = (G.marketTick|0) + 1;   // そうばが うごく
     V.buildMap(dest.to); V.setActors(); U.label(areaName(dest.to, dest.x, dest.y));
     A.bgm(dest.to);
-    V.fade(0, ()=>{ G.busy=false; G.mode='field'; });   // メッセージ中から呼ばれても操作可へ戻す
+    V.fade(0, ()=>{ G.busy=false; G.mode='field'; showEnterMsg(dest.to); });   // メッセージ中から呼ばれても操作可へ戻す
   });
 }
 let encSteps = 0;
@@ -2601,6 +2611,7 @@ function runTalkEvent(npcName){
       U.label(WORLD.mapName(P.map)); U.hud();
       A.bgm && A.bgm(P.map);
       if(cd.onEnter && cd.onEnter[P.map]) G.flags[cd.onEnter[P.map]] = true;
+      G._enterAfterTalk = P.map;
     }
     // 章の おわりに たっしたか
     if(cd.ending && cd.ending.trigger && G.flags[cd.ending.trigger] && !G.flags[(cd.ending.set||[])[0]]){
@@ -2608,6 +2619,7 @@ function runTalkEvent(npcName){
       return;
     }
     G.mode = 'field';
+    if(G._enterAfterTalk){ const mp=G._enterAfterTalk; G._enterAfterTalk=null; showEnterMsg(mp); }
   }
   return true;
 }

@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 08:41 JST", "build":"8c840990","assets_sha": "44a12aed", "lines": {"world": 154, "npc": 1065, "chapters": 3500, "bgm": 986, "view2d": 2598, "core": 4589, "view": 1733, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 11:52 JST", "build":"710aa5ba","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1065, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4601, "view": 1733, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -249,10 +249,11 @@ const MAP_IDS = {
   archive2:   {region:'sky',kind:'dgn',  name:'禁書庫 下層', scene:'SCENE_CAVE'},
   archive_core:{region:'sky',kind:'dgn', name:'禁書庫 最奥', scene:'SCENE_CAVE'},
   cradle:{region:'sky',kind:'dgn',  name:'ゆりかごの 前',   scene:'SCENE_SKY_TOWN'},
-  dream1:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 春',   scene:'SCENE_SKY_TOWN'},
-  dream2:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 夏',   scene:'SCENE_SKY_TOWN'},
-  dream3:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 秋',   scene:'SCENE_SKY_TOWN'},
-  dream4:{region:'sky',kind:'dgn',  name:'夢の 内界 ── 冬',   scene:'SCENE_SKY_TOWN'},
+  // ★夢の 四季は 2Dで 描く（3Dでは 草原・珊瑚・砂の 床が 同じ 草に なり、季節が 分からなかった）
+  dream1:{region:'sky',kind:'town',  name:'夢の 内界 ── 春',   scene:'SCENE_SKY_TOWN'},
+  dream2:{region:'sky',kind:'town',  name:'夢の 内界 ── 夏',   scene:'SCENE_SKY_TOWN'},
+  dream3:{region:'sky',kind:'town',  name:'夢の 内界 ── 秋',   scene:'SCENE_SKY_TOWN'},
+  dream4:{region:'sky',kind:'town',  name:'夢の 内界 ── 冬',   scene:'SCENE_SKY_TOWN'},
   dream_depths:{region:'sky',kind:'dgn',  name:'夢の 底',   scene:'SCENE_SKY_TOWN'},
   toros:      {region:'land',kind:'town', name:'トロスの村',  scene:'SCENE_FIELD'},
   shrine_hill:{region:'land',kind:'dgn',  name:'祠の丘',     scene:'SCENE_FIELD'},
@@ -871,7 +872,7 @@ const NPCS = {
   dream2: [
     {at:'4,4', spr:'sailor', name:'網を 繕う 漁師', lines:[
       {text:['「入り江の 珊瑚が いちばん 光る 季節だ」','「海の 底には、空の 夢が 沈んでる……なんて 言う 婆さんも いたな」']}]},
-    {at:'10,7', spr:'childA', name:'浜で 遊ぶ 子', lines:[
+    {at:'10,6', spr:'childA', name:'浜で 遊ぶ 子', lines:[
       {text:['「ねえ、いっしょに 貝を ひろおうよ」','「……あれ？　きみたち、どこから 来たの」']}]},
   ],
   dream3: [
@@ -4679,6 +4680,17 @@ const CH = {
               '＊ 白竜 ルミナに 話そう ＊'],
     home: {map:'temple', x:8, y:8, name:'神殿の 最奥'},
     onEnter: {dream_depths:'fin_depths'},
+    // ★はじめて 入った ときの 文（夢の 内界の 四季が 分かる ように）
+    enterMsg: {
+      dream1: ['── 夢の 内界　春 ──', '花の 匂いが した。', '見た ことの ない 丘に、若い 緑と 花が 揺れて いる。',
+               'ノエ「……ヴォクスが 見て きた、地上の 春だ」'],
+      dream2: ['── 夢の 内界　夏 ──', '強い 日差しと、波の 音。', '白い 砂浜の 先に、青い 海が 光って いる。',
+               'セレン「海……本物の 海なんて、見た ことが ない」'],
+      dream3: ['── 夢の 内界　秋 ──', '乾いた 風が 吹いた。', '柵に 囲まれた 畑と、水を 湛えた 井戸。実りの 季節だ。',
+               'アマネ「湧き水の 里の 秋祭りの 頃……」'],
+      dream4: ['── 夢の 内界　冬 ──', '吐く 息が 白く なった。', '雪を かぶった 木々と、軒から 下がる 氷柱。',
+               'イオ「冷たい。……でも、春を 待つ 冬だ」'],
+    },
     returnSpots: [{map:'temple', x:8, y:8}],
     closed: {
       pipe_path: {msg:['騎士団の 封鎖線が 張られて いる。','衛兵「避難の 最中だ。ここから 先は 通せん」']},
@@ -9832,64 +9844,64 @@ const MAPS = {
   // ★終章：夢の 内界（ヴォクスが 見て きた 千年の 地上の 四季。下から 春・夏・秋・冬、いちばん 奥が 夢の 底）
   dream1:{name:'夢の 内界 ── 春', theme:'field', enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
+    "#f*..*..*.*..f#",
+    "#.*..f.*.o.**.#",
+    "#..n.*..*.....#",
+    "#f..%%...*f.f.#",
+    "#.*.%%.*...**.#",
+    "#..*......*n*.#",
+    "#.f..*..*..*.f#",
+    "#.*.f.....f.*.#",
     "#.............#",
-    "#.............#",
-    "#..n..........#",
-    "#.............#",
-    "#.............#",
-    "#..........n..#",
-    "#.............#",
-    "#.............#",
-    "#.............#",
-    "#######.#######"],
+    "######...######"],
     warpsXY:{
       '7,0':{to:'dream2', x:7, y:9},
       '7,10':{to:'temple', x:8, y:9},
     }},
   dream2:{name:'夢の 内界 ── 夏', theme:'coral', enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
-    "#.............#",
-    "#.............#",
+    "#............o#",
+    "#.f.........f.#",
     "#.............#",
     "#...n.........#",
+    "#o...........o#",
+    "#_________n___#",
+    "#~~~~~___~~~~~#",
+    "#~~~~~...~~~~~#",
     "#.............#",
-    "#.............#",
-    "#.........n...#",
-    "#.............#",
-    "#.............#",
-    "#######.#######"],
+    "######...######"],
     warpsXY:{
       '7,0':{to:'dream3', x:7, y:9},
       '7,10':{to:'dream1', x:7, y:1},
     }},
-  dream3:{name:'夢の 内界 ── 秋', theme:'village', enc:true, encRate:0.08, encGrace:4, tiles:[
+  dream3:{name:'夢の 内界 ── 秋', theme:'desert', enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
+    "#f..o.....o..f#",
     "#.............#",
+    "#.f......w.nf.#",
     "#.............#",
-    "#..........n..#",
-    "#.............#",
-    "#.............#",
+    "#eee.ee.eee.ee#",
     "#..n..........#",
+    "#.f...f.....f.#",
+    "#........f....#",
     "#.............#",
-    "#.............#",
-    "#.............#",
-    "#######.#######"],
+    "######...######"],
     warpsXY:{
       '7,0':{to:'dream4', x:7, y:9},
       '7,10':{to:'dream2', x:7, y:1},
     }},
   dream4:{name:'夢の 内界 ── 冬', theme:'ice', enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
+    "#ff.o....o..ff#",
+    "#f.........o.f#",
+    "#..on.........#",
+    "#f....o.......#",
+    "#..o........o.#",
+    "#f........n...#",
+    "#o.f..o.f..o.f#",
+    "#ff.........ff#",
     "#.............#",
-    "#.............#",
-    "#...n.........#",
-    "#.............#",
-    "#.............#",
-    "#.........n...#",
-    "#.............#",
-    "#.............#",
-    "#.............#",
-    "#######.#######"],
+    "######...######"],
     warpsXY:{
       '7,0':{to:'dream_depths', x:7, y:9},
       '7,10':{to:'dream3', x:7, y:1},
@@ -10778,6 +10790,16 @@ function repairEntry(mp, e){
   }
   return null;
 }
+// ★はじめて 入った ときの 文（章データの enterMsg：{地図名:[文…]}）。一度だけ。出したら true
+//   ★夢の 内界の 4階が どれも 同じ 部屋に 見え、春夏秋冬が 分からなかった
+function showEnterMsg(mp){
+  const cd = chData(); const ls = cd && cd.enterMsg && cd.enterMsg[mp];
+  const fk = '_enter_' + mp;
+  if(!ls || G.flags[fk]) return false;
+  G.flags[fk] = true; G.mode = 'msg';
+  U.msg(ls, () => { G.mode = 'field'; });
+  return true;
+}
 function doWarp(w){
   // ★脱出（夢還り）は 来た 道を 戻るだけ。結界で 止めない。
   if(w && !w.escape && wardBlocks(w.to)){
@@ -10871,7 +10893,7 @@ function doWarp(w){
     if(TRADE_MARKET[dest.to]) G.marketTick = (G.marketTick|0) + 1;   // そうばが うごく
     V.buildMap(dest.to); V.setActors(); U.label(areaName(dest.to, dest.x, dest.y));
     A.bgm(dest.to);
-    V.fade(0, ()=>{ G.busy=false; G.mode='field'; });   // メッセージ中から呼ばれても操作可へ戻す
+    V.fade(0, ()=>{ G.busy=false; G.mode='field'; showEnterMsg(dest.to); });   // メッセージ中から呼ばれても操作可へ戻す
   });
 }
 let encSteps = 0;
@@ -11077,6 +11099,7 @@ function runTalkEvent(npcName){
       U.label(WORLD.mapName(P.map)); U.hud();
       A.bgm && A.bgm(P.map);
       if(cd.onEnter && cd.onEnter[P.map]) G.flags[cd.onEnter[P.map]] = true;
+      G._enterAfterTalk = P.map;
     }
     // 章の おわりに たっしたか
     if(cd.ending && cd.ending.trigger && G.flags[cd.ending.trigger] && !G.flags[(cd.ending.set||[])[0]]){
@@ -11084,6 +11107,7 @@ function runTalkEvent(npcName){
       return;
     }
     G.mode = 'field';
+    if(G._enterAfterTalk){ const mp=G._enterAfterTalk; G._enterAfterTalk=null; showEnterMsg(mp); }
   }
   return true;
 }
