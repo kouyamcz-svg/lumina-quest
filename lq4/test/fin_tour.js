@@ -93,6 +93,8 @@ talk('temple', 8, 4, 'back');
 T('白竜と 長老会の 決断', C.G.flags.fin_decide===true && said('雲の 上へ 引き上げる') && said('最後の 夢守り'));
 T('夢へは 入らず 鍛冶場へ', C.P.map==='home_forge', C.P.map);
 T('目的が 道具棚', /道具棚/.test(C.currentGoal()||''), C.currentGoal());
+talk('home_forge', 3, 7, 'back');
+T('最後の 夜の となりの おばさん（序章の 台詞で ない）', said('鎚の 音が する') && !said('今日が 試験'), log.join(' / ').slice(0,80));
 scene.length=0;
 talk('home_forge', 11, 7, 'back');
 T('天空鋼の 剣', C.G.flags.fin_sword===true && said('父さん、打てたよ'));
@@ -101,6 +103,8 @@ T('結末：引き上げ・降下・扉・祠・千年後', said('雲海の 上�
 T('結末：真っ暗 → 千年後の 祠の 一枚絵 → 真っ暗', (()=>{ const a=scene.indexOf('show:__dark'), b=scene.indexOf('show:scene_fin_shrine'), c=scene.lastIndexOf('show:__dark'); return a>=0 && b>a && c>b; })(), scene.join(','));
 T('完結の 文', said('完結') && !said('めざめの あさ'));
 T('ch6_cleared', C.G.flags.ch6_cleared===true);
+talk('home_forge', 3, 7, 'back');
+T('剣を 打った 後の となりの おばさん', said('打てたんだね'));
 T('終わった あと 目的は ない', C.currentGoal()===null, C.currentGoal());
 
 // ===== 看取りの 仕組み：HPが 決めた 割合を 下回った ところで 止まる =====

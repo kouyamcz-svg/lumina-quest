@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 12:18 JST", "build":"001270a5","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1065, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4601, "view": 1771, "ui": 1225}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 17:05 JST", "build":"2ea79be5","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4601, "view": 1771, "ui": 1225}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -336,6 +336,8 @@ const NPCS = {
   // ============ 序章：イオの家（父の鍛冶場） ============
   home_forge: [
     {at:'11,6', spr:'shelfobj', name:'父の 道具棚', lines:[
+      {when:{ch:7, flag:'fin_sword'}, text:['空に なった 棚の 奥に、油紙だけが 残って いる。']},
+      {when:{ch:7}, text:['父の 道具棚。奥に 油紙の 包みが 見える。']},
       {when:{flag:'ch0_notebookRead'}, text:[
         '父の 帳面。十年 前で 止まっている。']},
       {when:{flag:'ch0_mawTold'}, text:[
@@ -343,6 +345,13 @@ const NPCS = {
       {text:['父の 道具棚。鑢と 槌が きちんと 並んでいる。',
              '手前の 段だけ、埃が 薄い。']}]},
     {at:'3,6', spr:'elderWoman', name:'となりの おばさん', lines:[
+      {when:{ch:7, flag:'fin_sword'}, text:['「打てたんだね。……父さんに 見せて やりたかったよ」','「降りても、たまには 空を 見上げて おくれ」']},
+      {when:{ch:7, flag:'fin_decide'}, text:['「今夜は 鎚の 音が するね。父さんと 同じ 音だ」','「降りるんだろ。……体に 気を つけて お行き」']},
+      {when:{ch:7}, text:['「島が 沈むって 大騒ぎだよ」','「……あんたは 逃げないんだね。父さんも そういう 人だった」']},
+      {when:{ch:6}, text:['「傾いてるよ、この 島。棚の 皿が みんな 落ちた」','「……あたしは ここを 離れないよ。父さんの 鍛冶場を 見てて やらないと」']},
+      {when:{ch:5}, text:['「城へ 呼ばれたって？　下層の 子が 偉く なったもんだ」','「偉く なっても、ちゃんと 食べるんだよ」']},
+      {when:{ch:4}, text:['「地上へ 行くんだって？」','「父さんの 故郷を、よく 見て おいで」']},
+      {when:{ch:3}, text:['「塔だの 炉だの、危ない ところ ばかりだね」','「……無事で 帰って おいで」']},
       {when:{ch:2}, text:[
         '「正騎士さまが うちの となりから 出るとはね」',
         '「……父さんの 帳面、まだ 持ってるかい」']},
