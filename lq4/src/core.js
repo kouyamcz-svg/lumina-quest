@@ -2628,10 +2628,7 @@ function runTalkEvent(npcName){
 function offerNextChapter(next, title, isFinal){
   if(isFinal){
     G.mode = 'msg';
-    U.msg(['＊＊ ルミナクエスト IV　完結 ＊＊',
-           '',
-           'ながい たびに おつきあい いただき、',
-           'ありがとう ございました！'],   // ★「めざめの 朝」は 前作の 文。IVでは 眠る 子は 眠り 続けるので 外した
+    U.msg(['＊＊ ルミナクエスト IV　完結 ＊＊'],   // ★「めざめの 朝」（前作の 文）と「ながい たびに…ありがとう ございました！」は 外した
           () => {
             // ★完結の あと：ゆっくり 暗く して、少し 間を おき、タイトルへ 戻して ゆっくり 明るく する
             G.mode = 'msg';

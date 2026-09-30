@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 17:18 JST", "build":"fd1bd971","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4612, "view": 1773, "ui": 1227}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-09-30 17:46 JST", "build":"52f6c4ef","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4609, "view": 1773, "ui": 1227}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -11125,10 +11125,7 @@ function runTalkEvent(npcName){
 function offerNextChapter(next, title, isFinal){
   if(isFinal){
     G.mode = 'msg';
-    U.msg(['＊＊ ルミナクエスト IV　完結 ＊＊',
-           '',
-           'ながい たびに おつきあい いただき、',
-           'ありがとう ございました！'],   // ★「めざめの 朝」は 前作の 文。IVでは 眠る 子は 眠り 続けるので 外した
+    U.msg(['＊＊ ルミナクエスト IV　完結 ＊＊'],   // ★「めざめの 朝」（前作の 文）と「ながい たびに…ありがとう ございました！」は 外した
           () => {
             // ★完結の あと：ゆっくり 暗く して、少し 間を おき、タイトルへ 戻して ゆっくり 明るく する
             G.mode = 'msg';
