@@ -98,11 +98,13 @@ const SPELL_DEFS = {
   ret:        {name:'リターン',    mp:8, type:'return'},
   // ★夢還り（ノエ）：来た 道の 夢を たどって、ダンジョンの 外へ 戻る
   yumegaeri:  {name:'夢還り',      mp:4, type:'escape'},
+  // ★みちしるべ（イオ）：来た 道の 光珠を たどって、ダンジョンの 外へ 戻る（夢還りと 同じ はたらき）
+  michishirube:{name:'みちしるべ', mp:4, type:'escape', escMsg:'来た 道の 光珠が ひとつずつ ともり、入口へ 導かれた——'},
 };
 const CLASSES = {
   // イオ（16・主人公／地上生まれの見習い騎士）剣
   io:   {name:'イオ',  hp:18,mp:6, atk:6,def:4,agi:5, g:{hp:6,mp:3,atk:3,def:2,agi:2},
-         learns:[{lv:2,key:'ikkiuchi'},{lv:4,key:'migamae'},
+         learns:[{lv:2,key:'ikkiuchi'},{lv:3,key:'michishirube'},{lv:4,key:'migamae'},
                  {lv:5,key:'kabutowari'},{lv:7,key:'kabaidachi'},
                  {lv:9,key:'renzan'},{lv:11,key:'toushin'},{lv:15,key:'yoroikudaki'},
                  {lv:20,key:'tenkuuken'},{lv:26,key:'kenpunagi'},{lv:32,key:'seikousen'},
@@ -4133,8 +4135,9 @@ function nearestOutside(start){
   }
   return null;
 }
-function castEscape(ci){
-  const m = party[ci], sp = SPELL_DEFS.yumegaeri;
+function castEscape(ci, key){
+  // ★key：唱える 呪文（夢還り＝ノエ／みちしるべ＝イオ）。なければ 夢還り
+  const m = party[ci], sp = SPELL_DEFS[key] || SPELL_DEFS.yumegaeri;
   if(!m) return {ok:false, lines:['誰が 使う？']};
   if(m.hp<=0) return {ok:false, lines:[m.name+'は 倒れている。']};
   if(!isDungeon(P.map)) return {ok:false, lines:['ここでは 使えない。','迷宮の 中で なければ ならない。']};
@@ -4144,7 +4147,7 @@ function castEscape(ci){
   m.mp -= sp.mp;
   return {ok:true, warp:{to:d.to, x:d.x, y:d.y, escape:true},
           lines:[m.name+'は '+sp.name+'を 唱えた！',
-                 '来た 道の 夢が ほどけ、入口へ 引き戻された——']};
+                 sp.escMsg || '来た 道の 夢が ほどけ、入口へ 引き戻された——']};
 }
 function fieldSpells(m){
   return knownSpells(m).filter(s=>FIELD_SPELL[s.type]);

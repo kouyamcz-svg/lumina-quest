@@ -408,6 +408,18 @@ function kill(k){
   T('町では 使えない', !r2.ok, (r2.lines||[]).join(' '));
   T('使えない ときは MPが へらない', C.party[2].mp===20);
 }
+// ★みちしるべ（イオ Lv3）：イオも ダンジョンから 外へ 出られる（夢還りと 同じ はたらき）
+{
+  C.freshState(); C.G.chapter=2; C.party.length=0;
+  C.party.push(C.mkMember('io',10));
+  T('イオは Lv2 では 覚えない', !C.knownSpells(C.mkMember('io',2)).some(s=>s.key==='michishirube'));
+  T('イオは Lv3 で 覚える', C.knownSpells(C.mkMember('io',3)).some(s=>s.key==='michishirube'));
+  T('イオの フィールドの 技に 出る', C.fieldSpells(C.party[0]).some(s=>s.key==='michishirube'));
+  C.G.entry={}; C.P.map='pipe_path'; C.P.x=2; C.P.y=2; C.party[0].mp=30; C.G.mode='field';
+  const r=C.castEscape(0,'michishirube');
+  T('みちしるべで 点検路から 出られる', r.ok && /光珠が ひとつずつ/.test(r.lines.join(' ')) && C.party[0].mp===26, (r.lines||[]).join(' '));
+  if(r.ok){ C.doWarp(r.warp); T('みちしるべで 外へ 出る', !C.isDungeon(C.P.map), C.P.map); }
+}
 // ★最後の 段が 済む までは、頼みごとを 出し つづける
 {
   const N = vm.runInContext('NPCDATA', ctx);

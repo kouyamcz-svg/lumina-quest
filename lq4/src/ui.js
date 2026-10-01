@@ -679,9 +679,9 @@ function spellsOf(ci){
     if(k>=sp.length){ C.G.mode='field'; return; }
     const s = sp[k];
     if(s.type==='return'){ chooseReturn(ci); return; }
-    // ★夢還り：ダンジョンの 外へ
+    // ★夢還り（ノエ）・みちしるべ（イオ）：ダンジョンの 外へ
     if(s.type==='escape'){
-      const r = C.castEscape(ci);
+      const r = C.castEscape(ci, s.key);
       hud();
       if(!r.ok){ msg2(r.lines, ()=>{ C.G.mode='menu'; spellsOf(ci); }); return; }
       msg2(r.lines, ()=>{ C.G.mode='field'; C.doWarp(r.warp); });

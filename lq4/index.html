@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-10-02 01:07 JST", "build":"72b9bdc0","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4606, "view": 1776, "ui": 1227}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-10-02 08:02 JST", "build":"f1b88214","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4609, "view": 1776, "ui": 1227}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -8595,11 +8595,13 @@ const SPELL_DEFS = {
   ret:        {name:'リターン',    mp:8, type:'return'},
   // ★夢還り（ノエ）：来た 道の 夢を たどって、ダンジョンの 外へ 戻る
   yumegaeri:  {name:'夢還り',      mp:4, type:'escape'},
+  // ★みちしるべ（イオ）：来た 道の 光珠を たどって、ダンジョンの 外へ 戻る（夢還りと 同じ はたらき）
+  michishirube:{name:'みちしるべ', mp:4, type:'escape', escMsg:'来た 道の 光珠が ひとつずつ ともり、入口へ 導かれた——'},
 };
 const CLASSES = {
   // イオ（16・主人公／地上生まれの見習い騎士）剣
   io:   {name:'イオ',  hp:18,mp:6, atk:6,def:4,agi:5, g:{hp:6,mp:3,atk:3,def:2,agi:2},
-         learns:[{lv:2,key:'ikkiuchi'},{lv:4,key:'migamae'},
+         learns:[{lv:2,key:'ikkiuchi'},{lv:3,key:'michishirube'},{lv:4,key:'migamae'},
                  {lv:5,key:'kabutowari'},{lv:7,key:'kabaidachi'},
                  {lv:9,key:'renzan'},{lv:11,key:'toushin'},{lv:15,key:'yoroikudaki'},
                  {lv:20,key:'tenkuuken'},{lv:26,key:'kenpunagi'},{lv:32,key:'seikousen'},
@@ -12630,8 +12632,9 @@ function nearestOutside(start){
   }
   return null;
 }
-function castEscape(ci){
-  const m = party[ci], sp = SPELL_DEFS.yumegaeri;
+function castEscape(ci, key){
+  // ★key：唱える 呪文（夢還り＝ノエ／みちしるべ＝イオ）。なければ 夢還り
+  const m = party[ci], sp = SPELL_DEFS[key] || SPELL_DEFS.yumegaeri;
   if(!m) return {ok:false, lines:['誰が 使う？']};
   if(m.hp<=0) return {ok:false, lines:[m.name+'は 倒れている。']};
   if(!isDungeon(P.map)) return {ok:false, lines:['ここでは 使えない。','迷宮の 中で なければ ならない。']};
@@ -12641,7 +12644,7 @@ function castEscape(ci){
   m.mp -= sp.mp;
   return {ok:true, warp:{to:d.to, x:d.x, y:d.y, escape:true},
           lines:[m.name+'は '+sp.name+'を 唱えた！',
-                 '来た 道の 夢が ほどけ、入口へ 引き戻された——']};
+                 sp.escMsg || '来た 道の 夢が ほどけ、入口へ 引き戻された——']};
 }
 function fieldSpells(m){
   return knownSpells(m).filter(s=>FIELD_SPELL[s.type]);
@@ -15558,9 +15561,9 @@ function spellsOf(ci){
     if(k>=sp.length){ C.G.mode='field'; return; }
     const s = sp[k];
     if(s.type==='return'){ chooseReturn(ci); return; }
-    // ★夢還り：ダンジョンの 外へ
+    // ★夢還り（ノエ）・みちしるべ（イオ）：ダンジョンの 外へ
     if(s.type==='escape'){
-      const r = C.castEscape(ci);
+      const r = C.castEscape(ci, s.key);
       hud();
       if(!r.ok){ msg2(r.lines, ()=>{ C.G.mode='menu'; spellsOf(ci); }); return; }
       msg2(r.lines, ()=>{ C.G.mode='field'; C.doWarp(r.warp); });
