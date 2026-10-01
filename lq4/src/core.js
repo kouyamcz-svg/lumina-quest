@@ -2648,9 +2648,8 @@ function offerNextChapter(next, title, isFinal){
            '（つづきの 章は これから 作ります）'], () => { G.mode='field'; });
     return;
   }
-  const nc = CHD.get(next);
-  U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊',
-         'つぎは ' + chapterLabel(next) + '「' + nc.title + '」。'], () => {
+  // ★「つぎは 第N章「…」。」の 文は 出さない（指示）。次の 章の 名は 下の えらぶ 欄に ある
+  U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊'], () => {
     G.mode = 'menu';
     // ★Bを おしたら「この 章を 続ける」。末尾が それなので 'last' で よい
     //   （うっかり 章が すすまない ように、ここは わざと 末尾を 続ける に して ある）

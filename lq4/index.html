@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-10-02 01:00 JST", "build":"2e09b152","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4607, "view": 1776, "ui": 1227}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-10-02 01:07 JST", "build":"72b9bdc0","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4606, "view": 1776, "ui": 1227}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -11145,9 +11145,8 @@ function offerNextChapter(next, title, isFinal){
            '（つづきの 章は これから 作ります）'], () => { G.mode='field'; });
     return;
   }
-  const nc = CHD.get(next);
-  U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊',
-         'つぎは ' + chapterLabel(next) + '「' + nc.title + '」。'], () => {
+  // ★「つぎは 第N章「…」。」の 文は 出さない（指示）。次の 章の 名は 下の えらぶ 欄に ある
+  U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊'], () => {
     G.mode = 'menu';
     // ★Bを おしたら「この 章を 続ける」。末尾が それなので 'last' で よい
     //   （うっかり 章が すすまない ように、ここは わざと 末尾を 続ける に して ある）
