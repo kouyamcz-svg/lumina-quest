@@ -1045,8 +1045,11 @@ function buildMap(name){
         if(e && e.spr) key=e.spr;
       }
       // ★大きな 生き物（白竜など）は CHR の bb で 高さを 決める（人は 1.45）
-      const bh = (CHR[key] && CHR[key].bb) || 1.45;
-      const s = CHR[key] ? chrBillboard(key,bh) : billboard('npc',1.2);
+      // ★魔物の 絵（MON）を 使う 地図の 人（序章の 点検路の かげの あぎと など）は 魔物の 絵で。
+      //   ★人物の 絵（CHR）に ない ので、ふつうの 人の 絵（npc）で 描かれて いた
+      const isMon = !CHR[key] && (MON[key] || SPR[key]);
+      const bh = (CHR[key] && CHR[key].bb) || (isMon ? 1.6 : 1.45);
+      const s = CHR[key] ? chrBillboard(key,bh) : (isMon ? billboard(key,bh) : billboard('npc',1.2));
       s.position.set(x, topY+bh/2+0.015, y); s.userData.bill=true;
       scene.add(s); animObjs.push({mesh:s,bill:true,ph:0});
       const sh=new THREE.Mesh(new THREE.CircleGeometry(0.30*Math.max(1,bh/1.45),12),
