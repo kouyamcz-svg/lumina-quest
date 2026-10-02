@@ -2651,6 +2651,8 @@ function offerNextChapter(next, title, isFinal){
     return;
   }
   // ★「つぎは 第N章「…」。」の 文は 出さない（指示）。次の 章の 名は 下の えらぶ 欄に ある
+  //   ★nc は 下の「進む」で 章の 札と はじまりの 文に 使う（この 文と 一緒に 消して しまい、進むと 止まった）
+  const nc = CHD.get(next);
   U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊'], () => {
     G.mode = 'menu';
     // ★Bを おしたら「この 章を 続ける」。末尾が それなので 'last' で よい
