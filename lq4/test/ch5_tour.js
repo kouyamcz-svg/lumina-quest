@@ -19,7 +19,7 @@ C.bind(Object.assign({}, C.NullView, {
         buildMap(m){ __built=m; },
        }),
        {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); },
-        menu(i,t,cb){ cb(t==='これから' ? 1 : 0); },
+        menu(i,t,cb){ cb(t==='これから' ? 1 : 0); }, keepChapterOnEnd:true,
         hud(){}, label(){}, openTrade(){}}, C.NullAudio);
 
 let n=0, ng=0;

@@ -617,13 +617,15 @@ function kill(k){
 //   ★「つぎは 第N章」の 文を 消した とき、使って いた 変数まで 消し、進むと エラーで 止まった
 //     （通しテストは どれも「この 章を 続ける」を えらんで いて 気づかなかった）
 {
-  C.bind(Object.assign({},C.NullView,{fade(a,d){d&&d();}}),{msg(l,d){d&&d();},menu(i,t,cb){cb(0);},hud(){},label(){}},C.NullAudio);
+  let asked=0;
+  C.bind(Object.assign({},C.NullView,{fade(a,d){d&&d();}}),{msg(l,d){d&&d();},menu(i,t,cb){ if(t==='これから') asked++; cb(0);},hud(){},label(){}},C.NullAudio);
   for(const no of [2,3,4,5,6,7]){
     C.freshState(); C.G.chapter=no-1;
     let err=null;
     try{ C.offerNextChapter(no, 'まえの 章', false); }catch(e){ err=e.message; }
     T('章の 終わりで 第'+(no-1)+'章へ 進める（エラーで 止まらない）', !err && C.G.chapter===no, err || ('いまの 章='+C.G.chapter));
   }
+  T('「進む／続ける」を えらぶ 欄は 出ない（自動で 次の 章へ）', asked===0, asked);
 }
 
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');

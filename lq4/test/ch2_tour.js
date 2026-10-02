@@ -20,7 +20,7 @@ C.bind(Object.assign({}, C.NullView, {
         hideScene(){ scene.push('hide'); },
        }),
        {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); },
-                    menu(i,t,cb){ cb(t==='これから' ? 1 : 0); },
+                    menu(i,t,cb){ cb(t==='これから' ? 1 : 0); }, keepChapterOnEnd:true,
                     hud(){}, label(){}, openTrade(){}}, C.NullAudio);
 
 let n=0, ng=0;
@@ -202,7 +202,7 @@ C.bind(Object.assign({}, C.NullView, {
         runner(o){ ranIn = o; o.done && o.done(); },
        }),
        {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); },
-        menu(i,t,cb){ cb(t==='これから' ? 1 : 0); },
+        menu(i,t,cb){ cb(t==='これから' ? 1 : 0); }, keepChapterOnEnd:true,
         hud(){}, label(){}, openTrade(){}}, C.NullAudio);
 talk('upper_dist', 9, 5, 'back');
 T('衛兵が 走って くる', !!ranIn, 'えんしゅつが ない');

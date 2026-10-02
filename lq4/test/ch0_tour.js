@@ -23,7 +23,7 @@ const UI = {
   msg(lines, done){ lines.forEach(l=>log.push(l)); done && done(); },
   // ★章末の「これから」だけは「この しょうを つづける」を えらぶ。
   //   0ばんを えらぶと 第1章へ すすんで しまい、序章の たしかめが できない。
-  menu(items, title, onPick){ onPick(title==='これから' ? 1 : 0); },
+  menu(items, title, onPick){ onPick(title==='これから' ? 1 : 0); }, keepChapterOnEnd:true,
   hud(){}, label(){}, openTrade(){},
 };
 C.bind(C.NullView, UI, C.NullAudio);

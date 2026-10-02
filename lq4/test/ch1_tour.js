@@ -16,7 +16,7 @@ const log=[];
 // ★章末の「これから」では「この 章を 続ける」を えらぶ。
 //   0ばんを えらぶと 第2章へ すすんで しまい、第1章の たしかめが できない。
 C.bind(C.NullView, {msg(l,d){ l.forEach(x=>log.push(x)); d&&d(); },
-                    menu(i,t,cb){ cb(t==='これから' ? 1 : 0); },
+                    menu(i,t,cb){ cb(t==='これから' ? 1 : 0); }, keepChapterOnEnd:true,
                     hud(){}, label(){}, openTrade(){}}, C.NullAudio);
 
 let n=0, ng=0;

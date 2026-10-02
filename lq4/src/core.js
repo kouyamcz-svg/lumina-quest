@@ -2650,29 +2650,22 @@ function offerNextChapter(next, title, isFinal){
            '（つづきの 章は これから 作ります）'], () => { G.mode='field'; });
     return;
   }
-  // ★「つぎは 第N章「…」。」の 文は 出さない（指示）。次の 章の 名は 下の えらぶ 欄に ある
-  //   ★nc は 下の「進む」で 章の 札と はじまりの 文に 使う（この 文と 一緒に 消して しまい、進むと 止まった）
+  // ★「つぎは 第N章「…」。」の 文も、「第N章へ 進む／この 章を 続ける」の えらぶ 欄も 出さず、
+  //   「完結」の 文の あと 自動で 次の 章へ 進む（指示）
   const nc = CHD.get(next);
   U.msg(['＊＊ ' + (title||'') + ' 完結 ＊＊'], () => {
-    G.mode = 'menu';
-    // ★Bを おしたら「この 章を 続ける」。末尾が それなので 'last' で よい
-    //   （うっかり 章が すすまない ように、ここは わざと 末尾を 続ける に して ある）
-    U.menu([chapterLabel(next) + 'へ 進む', 'この 章を 続ける'], 'これから', (k) => {
-      if(k === 0){
-        switchChapter(next);
-        G.mode = 'msg';
-        V.buildMap(P.map); V.setActors(true);
-        U.label(WORLD.mapName(P.map)); U.hud();
-        A.bgm(P.map);
-        // ★しょうの はじまりの せつめい（opening）を ここでも だす。
-        //   まえは ニューゲームで その しょうから はじめた とき しか でて おらず、
-        //   ふつうに すすめると ぜんしょうで せつめいが とんで いた。
-        V.chapterCard(chapterLabel(next), nc.title, () => {
-          const open = nc.opening;
-          if(open && open.length) U.msg(open.slice(), () => { G.mode = 'field'; });
-          else G.mode = 'field';
-        });
-      }else G.mode = 'field';
+    // ★テスト用：章ごとの 通しテストは 章の 終わりの あとも その 章を 調べる ので、ここで 止める
+    if(U.keepChapterOnEnd){ G.mode = 'field'; return; }
+    switchChapter(next);
+    G.mode = 'msg';
+    V.buildMap(P.map); V.setActors(true);
+    U.label(WORLD.mapName(P.map)); U.hud();
+    A.bgm(P.map);
+    // ★しょうの はじまりの せつめい（opening）を ここでも だす
+    V.chapterCard(chapterLabel(next), nc.title, () => {
+      const open = nc.opening;
+      if(open && open.length) U.msg(open.slice(), () => { G.mode = 'field'; });
+      else G.mode = 'field';
     });
   });
 }
