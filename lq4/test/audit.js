@@ -1262,5 +1262,19 @@ Object.keys(C.MAPS).forEach(mp=>{
   }
 });
 
+
+// ★倒した ボスの ますは 消す（setTiles）。消さないと 倒した あとも 地図に 姿が 残る（第2章の そらくらい）
+//   ★連戦（nextBoss）は 最後の 形で 消せば よい。訓練用の 木人（trialdummy）と 序章の ウンブラ（倒すと すぐ 章の 終わり）は 対象外
+{
+  const CHD_ = CHD;
+  CHD_.list().forEach(no=>{ const cd=CHD_.get(no);
+    Object.keys(cd.bosses||{}).forEach(k=>{ const b=cd.bosses[k]; const [mp,xy]=k.split(':'); const [x,y]=xy.split(',').map(Number);
+      if(b.key==='trialdummy' || b.key==='umbra') return;
+      let key=b.key, ok=false, guard=0;
+      while(key && guard++<6){ const r=(cd.bossReward||{})[key]||{}; if((r.setTiles||[]).some(t=>t.map===mp&&t.x===x&&t.y===y)) ok=true; key=r.nextBoss; }
+      T('第'+(no-1)+'章：倒した ボスの ますを 消す '+k, ok, b.key);
+    });
+  });
+}
 console.log('\n--- audit: ' + (n-ng) + '/' + n + ' 通過（ワープ ' + warpN + 'けん）---');
 process.exit(ng ? 1 : 0);

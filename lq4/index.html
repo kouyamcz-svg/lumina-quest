@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-10-03 02:31 JST", "build":"8e9675de","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3511, "bgm": 986, "view2d": 2598, "core": 4604, "view": 1776, "ui": 1227}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-10-03 08:33 JST", "build":"8513dbd0","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3513, "bgm": 986, "view2d": 2598, "core": 4604, "view": 1776, "ui": 1227}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -2899,6 +2899,8 @@ const CH = {
     bossReward: {
       sorakurai: {
         set:['ch2_skyeaterDown'],
+        // ★倒した あとも 最上階に 姿が 残って いた（ボスの ますを 消して いなかった）
+        setTiles:[{map:'tower5', x:9, y:6, ch:'.'}],
         quest:{ch2_q3_tower:'clear'},
         msg:['', '翼が ほどけ、黒い 紙片に なって 散った。',
              '吸われていた 雲が、ゆっくりと 塔の まわりへ 戻ってくる。',

@@ -1497,6 +1497,8 @@ const CH = {
     bossReward: {
       sorakurai: {
         set:['ch2_skyeaterDown'],
+        // ★倒した あとも 最上階に 姿が 残って いた（ボスの ますを 消して いなかった）
+        setTiles:[{map:'tower5', x:9, y:6, ch:'.'}],
         quest:{ch2_q3_tower:'clear'},
         msg:['', '翼が ほどけ、黒い 紙片に なって 散った。',
              '吸われていた 雲が、ゆっくりと 塔の まわりへ 戻ってくる。',
