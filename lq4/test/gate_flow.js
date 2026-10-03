@@ -597,7 +597,7 @@ function kill(k){
       Object.keys(C.MAPS).forEach(from=>{
         const fw=C.MAPS[from].warpsXY||{};
         Object.keys(fw).forEach(fk=>{
-          if(fw[fk].to!==mp || fw[fk].back) return;
+          if(fw[fk].to!==mp || fw[fk].back || fw[fk].noEntry) return;   // ★覚えない 道（夢 → 神殿）は 入口に 数えない
           const [ex,ey]=fk.split(',').map(Number);
           const spot=[[0,1],[0,-1],[1,0],[-1,0]].map(([dx,dy])=>[ex+dx,ey+dy]).find(([x,y])=>C.walkable(from,x,y) && !(C.MAPS[from].warpsXY||{})[x+','+y]);
           if(!spot) return;

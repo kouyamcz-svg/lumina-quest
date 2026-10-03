@@ -1370,7 +1370,9 @@ const MAPS = {
     "######...######"],
     warpsXY:{
       '7,0':{to:'dream2', x:7, y:9},
-      '7,10':{to:'temple', x:8, y:9},
+      // ★神殿へ 戻る 道は「覚えない」道（noEntry）。前は ふつうの 道で、神殿に「夢から 入った」と 覚え、
+      //   神殿の 出口が 夢の 内界へ 戻して いた（back に すると、冬から 下りて きた とき 春の 出口が 夏へ 戻す）
+      '7,10':{to:'temple', x:8, y:9, noEntry:true},
     }},
   dream2:{name:'夢の 内界 ── 夏', theme:'field', look3d:{sky:0x5ab4f0, fog:0xa8dcff, tex:'road', ground:0xf2e2b0, leafA:0x2e9a3a, leafB:0x1e7a2c, flower:0xff7a5a}, enc:true, encRate:0.08, encGrace:4, tiles:[
     "#######.#######",
@@ -2293,7 +2295,8 @@ function entryOk(mp, e){
   for(let dy=-2; dy<=2; dy++) for(let dx=-2; dx<=2; dx++){
     if(Math.abs(dx)+Math.abs(dy)>2) continue;
     const w = warpAt(e.map, e.x+dx, e.y+dy);
-    if(w && w.to===mp) return true;
+    // ★帰り道（back）と 覚えない 道（noEntry）は 入口に 数えない（夢の 内界 → 神殿 で、神殿の おぼえが 夢に なって いた）
+    if(w && w.to===mp && !w.back && !w.noEntry) return true;
   }
   return false;
 }
@@ -2343,7 +2346,7 @@ function doWarp(w){
   // ★おぼえる のは「ひとつ 手前の ます」。
   //   ワープの ます そのものを おぼえると、もどった とき 門や 口の 上に 立ち、
   //   すぐ また 入って しまったり、両わきが かべで 動けなく なる。
-  if(!w.back && !fromInner && !w.escape){
+  if(!w.back && !fromInner && !w.escape && !w.noEntry){
     const tr = G.trail && G.trail[0];
     const back = (tr && walkable(P.map, tr[0], tr[1]) && !warpAt(P.map, tr[0], tr[1]))
                ? {x:tr[0], y:tr[1]} : {x:P.x, y:P.y};

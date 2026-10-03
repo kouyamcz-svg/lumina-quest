@@ -61,6 +61,11 @@ T('白竜に 乗って 夢の 内界へ', C.G.flags.fin_dive===true && C.P.map==
 T('白竜の 背で 夢へ の 一枚絵', scene.indexOf('show:scene_fin_fly')>=0, scene.join(','));
 stand('dream1', 7, 9, 'front'); C.stepField(0,1);
 T('夢から 神殿へ 戻れる', C.P.map==='temple', C.P.map);
+stand('temple', 8, 10, 'front'); C.stepField(0,1);
+T('神殿の 出口は 天空城へ（夢の 内界へ 戻らない）', C.P.map==='sky_castle', C.P.map);
+C.G.entry.temple={map:'dream1', x:7, y:9};   // ★古い セーブの おぼえ
+stand('temple', 8, 10, 'front'); C.stepField(0,1);
+T('古い おぼえが 夢でも 天空城へ', C.P.map==='sky_castle', C.P.map);
 talk('temple', 8, 4, 'back');
 T('何度でも 夢へ', C.P.map==='dream1');
 
