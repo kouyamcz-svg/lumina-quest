@@ -1057,6 +1057,33 @@ function buildAtlas(){
     R(g,6,11,4,1,'#241c26');
     R(g,1,15,14,1,P16.st0);
   });
+  // ★天空城（世界地図の 大門・Q）：白石の 城、金の 尖塔、青い 旗。32×32 で 作り、3まいぶんの 大きさで えがく
+  atlas.mSkyCastle = (()=>{
+    const c=mk(32,32), g=c.getContext('2d'); g.imageSmoothingEnabled=false;
+    const W='#eef2f8', Ws='#c8d0e0', Wd='#8a94ac', G1='#e8c048', G0='#b08a28', GL='#fff0a8', B='#3a62c8', BL='#6a90e8', Wn='#9fd8ff', K='#2a2438';
+    // 城壁（ぎざぎざ）
+    R(g,1,20,30,11,Ws); R(g,1,20,30,1,W); R(g,1,30,30,1,Wd);
+    for(let x=1;x<31;x+=3) R(g,x,18,2,2,Ws);
+    // 左右の 塔
+    [[3,13],[24,13]].forEach(([x,y])=>{
+      R(g,x,y,6,17,W); R(g,x,y,1,17,Ws); R(g,x+5,y,1,17,Wd);
+      for(let i=0;i<5;i++) R(g,x+2-((i/2)|0),y-5+i,2+((i/2)|0)*2,1, i<2?G1:G0);   // 金の とんがり屋根
+      R(g,x+2,y-6,2,1,GL);
+      R(g,x+2,y+4,2,3,Wn); R(g,x+2,y+4,2,1,'#e4f6ff');                         // 窓
+      R(g,x+3,y-9,1,4,Wd); R(g,x+4,y-9,3,2,B); R(g,x+4,y-9,3,1,BL);             // 旗
+    });
+    // 天守
+    R(g,11,9,10,21,W); R(g,11,9,1,21,Ws); R(g,20,9,1,21,Wd);
+    for(let i=0;i<8;i++) R(g,16-((i+1)>>1),1+i,((i+1)>>1)*2+1,1, i<3?GL:(i<6?G1:G0));  // 金の 尖塔
+    R(g,15,0,2,1,GL);
+    [[13,12],[17,12],[15,16]].forEach(([x,y])=>{ R(g,x,y,2,3,Wn); R(g,x,y,2,1,'#e4f6ff'); });
+    R(g,11,9,10,1,G1);                                                          // 金の 帯
+    // 門（金の 縁）
+    R(g,13,22,6,9,G0); R(g,14,23,4,8,K); R(g,14,23,4,1,'#3c3450'); R(g,15,22,2,1,GL);
+    // 光の 粒
+    [[2,6],[29,5],[8,2],[24,1]].forEach(([x,y])=>R(g,x,y,1,1,GL));
+    return c;
+  })();
   // むら：あかい やねの いえ2けん＋き の さく。まんなかが もん。
   atlas.mVillage = marker((g,s)=>{
     const roofD=P16.roof0, roofM=P16.roof1, roofH=P16.roof2;
@@ -2241,6 +2268,10 @@ function draw(dt, time, actors){
     else if(theme==='world' && (ch==='A'||ch==='V')){
       _mkQ.push([ch, ox+x*ts, oy+y*ts]);
     }
+    // ★天空大陸の Q は 天空城の 大門。小さな 印では なく、大きな 城を えがく
+    else if(theme==='world' && isSkyWorld() && ch==='Q'){
+      _mkQ.push(['K', ox+x*ts, oy+y*ts]);
+    }
     else {
       // ★天空大陸では 木・岩山も 寒色の 天空版に する
       let art = (theme==='world' && isSkyWorld() && ch===',') ? atlas.skywoods
@@ -2263,6 +2294,16 @@ function draw(dt, time, actors){
   }
   // ★まち・むらは 1.45ばいで えがく（ちいさくて みつけにくかった）
   _mkQ.forEach(([ch,mx,my])=>{
+    if(ch==='K'){
+      // ★天空城：足もとに 光の 輪、城は 3.2まいぶん
+      const mw = ts*3.2, mh = ts*3.2, cxp = mx + ts/2, by = my + ts;
+      const pulse = 0.55 + 0.15*Math.sin((performance.now? performance.now():0)/600);
+      const gr = cx.createRadialGradient(cxp, by-ts*0.3, ts*0.2, cxp, by-ts*0.3, ts*1.9);
+      gr.addColorStop(0, 'rgba(255,240,170,'+pulse+')'); gr.addColorStop(1, 'rgba(255,240,170,0)');
+      cx.fillStyle = gr; cx.beginPath(); cx.ellipse(cxp, by-ts*0.3, ts*1.9, ts*0.9, 0, 0, Math.PI*2); cx.fill();
+      cx.drawImage(atlas.mSkyCastle, Math.round(cxp - mw/2), Math.round(by - mh), mw, mh);
+      return;
+    }
     const art = ch==='A' ? atlas.mCastle : atlas.mVillage;
     const mw = ts*1.45, mh = ts*1.45;
     cx.drawImage(art, Math.round(mx + ts/2 - mw/2), Math.round(my + ts - mh), mw, mh);

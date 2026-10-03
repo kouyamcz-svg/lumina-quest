@@ -142,7 +142,7 @@ html,body{height:100%;background:#0b0a16;color:#f0eee6;
   <div class="btn" id="btnL">◀</div><div class="btn" id="btnR">▶</div>
   <div class="btn" id="btnB">B</div><div class="btn" id="btnA">A</div>
 </div>
-<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-10-03 08:33 JST", "build":"8513dbd0","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3513, "bgm": 986, "view2d": 2598, "core": 4604, "view": 1776, "ui": 1227}};</script>
+<script>window.LQ4_BUILD={"ver": "M0", "at": "2026-10-03 19:21 JST", "build":"067bd599","assets_sha": "44a12aed", "lines": {"world": 155, "npc": 1074, "chapters": 3546, "bgm": 986, "view2d": 2639, "core": 4609, "view": 1776, "ui": 1227}};</script>
 <script>
 // ★ふぐあい ちょうさよう：エラーを がめんに だす（iPhoneは console が みえない ため）
 (function(){
@@ -2027,6 +2027,9 @@ const CH = {
     },
 
     gates: {
+      // ★世界地図の 天空城の 大門（Q）
+      'world:21,6': ['天空城の 大門。白石の 壁が 雲まで 続いている。',
+                     '門衛「正騎士か。……城に 入れるのは、騎士団長に 呼ばれた 者だけだ」'],
       'mid_dist:10,0': ['上層への 石段。白い 手すりが 雲まで 続いている。',
                         '衛兵「合同任務の 許可証は 中層までだ」',
                         'セレン「わたしの 家の 名でも 通らないの」',
@@ -2527,6 +2530,9 @@ const CH = {
     },
 
     gates: {
+      // ★世界地図の 天空城の 大門（Q）
+      'world:21,6': ['天空城の 大門。白石の 壁が 雲まで 続いている。',
+                     '門衛「上層の 騒ぎは 聞いて いる。だが、城は 開けられん」'],
       'upper_dist:9,0': ['天空城の 大門。見あげても 天辺が 見えない。',
                          '扉は 二枚。金の 帯が 三本、横に わたしてある。',
                           '門衛「炉の 件は 聞いている。だが 城へは 通せん」',
@@ -3022,7 +3028,12 @@ const CH = {
       {done:'ch3_ascend',       text:'舟で 北の 島へ。氷の谷の 天空の 職員と 話す'},
     ],
     id: 'ch3_ground',
-    title: '五つの大地',
+
+    // ★世界地図の 天空城の 大門（Q）
+    gates: {
+      'world:21,6': ['天空城の 大門。白石の 壁が 雲まで 続いている。',
+                     '門衛「地上へ 行くそうだな。……城の 門は、戻って からだ」'],
+    },    title: '五つの大地',
     region: 'land',
 
     start: {map:'upper_dist', x:10, y:13, dir:'back'},
@@ -4190,6 +4201,16 @@ const CH = {
 
     // ★天空城の 大門（上層区の 北）。炉の 主任に 話を 聞いた あと 開く
     gates: {
+      // ★世界地図の 天空城の 大門（Q）：上層区の 大門と 同じ 条件で 開く
+      'world:21,6': {
+        need:'ch4_gag',
+        lockMsg:['天空城の 大門。白石の 壁が 雲まで 続いている。',
+                 'セレン「まずは 上層区で、炉の 主任に 話を 聞きましょう」'],
+        msg:['門衛が 騎士団の 胸章を 見て、大門を 開けた。',
+             '',
+             '門衛「騎士団の 方か。……団長なら 本部に おられる」'],
+        to:{map:'sky_castle', x:10, y:15, dir:'back'},
+      },
       'upper_dist:9,0': {
         need:'ch4_gag',
         lockMsg:['閉ざされた 大門。白石の 壁が 雲まで 続いている。',
@@ -4419,6 +4440,12 @@ const CH = {
   //   ゆりかごの 前で グラン（2形態）→ 床に 残った 花 → 章末（メーアの 目覚め）
   6: {
     id: 'ch5_eclipse',
+    // ★世界地図の 天空城の 大門（Q）
+    gates: {
+      'world:21,6': ['天空城の 大門。白石の 壁が 雲まで 続いている。',
+                     '避難の 人々が、門の 前に 長い 列を 作って いる。',
+                     '門衛「上層の 者から 先だ。……すまん」'],
+    },
     title: '蝕まれる大陸',
     region: 'sky',
     goals: [
@@ -4660,6 +4687,12 @@ const CH = {
   //   → 約束（夢の 外へ）→ 白竜と 長老会の 決断 → 最後の 夜（天空鋼の 剣）→ 章末：引き上げ・降下・祠・千年後・おわり
   7: {
     id: 'fin_dream',
+    // ★世界地図の 天空城の 大門（Q）
+    gates: {
+      'world:21,6': {
+        to:{map:'sky_castle', x:10, y:15, dir:'back'},
+        msg:['門衛が 黙って 大門を 開けた。','門衛「……白竜さまの 御用 なのだろう。行け」']},
+    },
     title: '夢の内界',
     region: 'sky',
     goals: [
@@ -6958,6 +6991,33 @@ function buildAtlas(){
     R(g,6,11,4,1,'#241c26');
     R(g,1,15,14,1,P16.st0);
   });
+  // ★天空城（世界地図の 大門・Q）：白石の 城、金の 尖塔、青い 旗。32×32 で 作り、3まいぶんの 大きさで えがく
+  atlas.mSkyCastle = (()=>{
+    const c=mk(32,32), g=c.getContext('2d'); g.imageSmoothingEnabled=false;
+    const W='#eef2f8', Ws='#c8d0e0', Wd='#8a94ac', G1='#e8c048', G0='#b08a28', GL='#fff0a8', B='#3a62c8', BL='#6a90e8', Wn='#9fd8ff', K='#2a2438';
+    // 城壁（ぎざぎざ）
+    R(g,1,20,30,11,Ws); R(g,1,20,30,1,W); R(g,1,30,30,1,Wd);
+    for(let x=1;x<31;x+=3) R(g,x,18,2,2,Ws);
+    // 左右の 塔
+    [[3,13],[24,13]].forEach(([x,y])=>{
+      R(g,x,y,6,17,W); R(g,x,y,1,17,Ws); R(g,x+5,y,1,17,Wd);
+      for(let i=0;i<5;i++) R(g,x+2-((i/2)|0),y-5+i,2+((i/2)|0)*2,1, i<2?G1:G0);   // 金の とんがり屋根
+      R(g,x+2,y-6,2,1,GL);
+      R(g,x+2,y+4,2,3,Wn); R(g,x+2,y+4,2,1,'#e4f6ff');                         // 窓
+      R(g,x+3,y-9,1,4,Wd); R(g,x+4,y-9,3,2,B); R(g,x+4,y-9,3,1,BL);             // 旗
+    });
+    // 天守
+    R(g,11,9,10,21,W); R(g,11,9,1,21,Ws); R(g,20,9,1,21,Wd);
+    for(let i=0;i<8;i++) R(g,16-((i+1)>>1),1+i,((i+1)>>1)*2+1,1, i<3?GL:(i<6?G1:G0));  // 金の 尖塔
+    R(g,15,0,2,1,GL);
+    [[13,12],[17,12],[15,16]].forEach(([x,y])=>{ R(g,x,y,2,3,Wn); R(g,x,y,2,1,'#e4f6ff'); });
+    R(g,11,9,10,1,G1);                                                          // 金の 帯
+    // 門（金の 縁）
+    R(g,13,22,6,9,G0); R(g,14,23,4,8,K); R(g,14,23,4,1,'#3c3450'); R(g,15,22,2,1,GL);
+    // 光の 粒
+    [[2,6],[29,5],[8,2],[24,1]].forEach(([x,y])=>R(g,x,y,1,1,GL));
+    return c;
+  })();
   // むら：あかい やねの いえ2けん＋き の さく。まんなかが もん。
   atlas.mVillage = marker((g,s)=>{
     const roofD=P16.roof0, roofM=P16.roof1, roofH=P16.roof2;
@@ -8142,6 +8202,10 @@ function draw(dt, time, actors){
     else if(theme==='world' && (ch==='A'||ch==='V')){
       _mkQ.push([ch, ox+x*ts, oy+y*ts]);
     }
+    // ★天空大陸の Q は 天空城の 大門。小さな 印では なく、大きな 城を えがく
+    else if(theme==='world' && isSkyWorld() && ch==='Q'){
+      _mkQ.push(['K', ox+x*ts, oy+y*ts]);
+    }
     else {
       // ★天空大陸では 木・岩山も 寒色の 天空版に する
       let art = (theme==='world' && isSkyWorld() && ch===',') ? atlas.skywoods
@@ -8164,6 +8228,16 @@ function draw(dt, time, actors){
   }
   // ★まち・むらは 1.45ばいで えがく（ちいさくて みつけにくかった）
   _mkQ.forEach(([ch,mx,my])=>{
+    if(ch==='K'){
+      // ★天空城：足もとに 光の 輪、城は 3.2まいぶん
+      const mw = ts*3.2, mh = ts*3.2, cxp = mx + ts/2, by = my + ts;
+      const pulse = 0.55 + 0.15*Math.sin((performance.now? performance.now():0)/600);
+      const gr = cx.createRadialGradient(cxp, by-ts*0.3, ts*0.2, cxp, by-ts*0.3, ts*1.9);
+      gr.addColorStop(0, 'rgba(255,240,170,'+pulse+')'); gr.addColorStop(1, 'rgba(255,240,170,0)');
+      cx.fillStyle = gr; cx.beginPath(); cx.ellipse(cxp, by-ts*0.3, ts*1.9, ts*0.9, 0, 0, Math.PI*2); cx.fill();
+      cx.drawImage(atlas.mSkyCastle, Math.round(cxp - mw/2), Math.round(by - mh), mw, mh);
+      return;
+    }
     const art = ch==='A' ? atlas.mCastle : atlas.mVillage;
     const mw = ts*1.45, mh = ts*1.45;
     cx.drawImage(art, Math.round(mx + ts/2 - mw/2), Math.round(my + ts - mh), mw, mh);
@@ -10380,6 +10454,23 @@ function tileAt(map,x,y){
   if(y<0||x<0||y>=m.tiles.length||x>=m.tiles[y].length) return '#';
   return m.tiles[y][x];
 }
+// ★大門を 開いて 中へ（gates の {to, need, lockMsg, msg}）。開け閉めの 文を 出したら true
+function openGate(gate, cd){
+  if(!gate || Array.isArray(gate) || !gate.to) return false;
+  if(gate.need && !G.flags[gate.need]){
+    G.mode='msg'; U.msg(gate.lockMsg || ['大門は 閉ざされて いる。'], ()=>{ G.mode='field'; }); return true;
+  }
+  G.mode='msg';
+  U.msg(gate.msg || ['大門が 開いた。'], ()=>{
+    const t=gate.to; P.map=t.map; P.x=t.x; P.y=t.y; P.dir=t.dir||'back';
+    G.trail=[[P.x,P.y],[P.x,P.y],[P.x,P.y]];
+    V.buildMap(P.map); V.setActors(true); U.label(WORLD.mapName(P.map)); U.hud();
+    A.bgm && A.bgm(P.map);
+    if(cd && cd.onEnter && cd.onEnter[P.map]) G.flags[cd.onEnter[P.map]] = true;
+    G.mode='field';
+  });
+  return true;
+}
 function isBlocked(ch){
   return SOLID.has(ch) || ch==='I' || ch==='P' || ch==='S' || ch==='W' || ch==='M'
       || ch==='n' || ch==='C' || ch==='B'
@@ -10443,11 +10534,13 @@ function interact(){
       doWarp(w); return;      // ★けっかいの はんていは doWarp の 中
     }
   }
-  if(ch==='Q'){                               // まだ 入れない 場所
+  if(ch==='Q'){                               // まだ 入れない 場所（天空大陸では 天空城の 大門）
     // ★「これから 作られます」の ような 中の 人の ことばを 画面に 出さない。
     //   行けない りゆうは 物語の 中で つける。ばしょごとの 文は 章データの gates に かく。
-    G.mode='msg';
+    //   ★gates に {to, need, …} が あれば 開いて 入れる（世界地図の 天空城の 大門）
     const gt = ((chData()||{}).gates||{})[P.map+':'+nx+','+ny];
+    if(openGate(gt, chData())) return;
+    G.mode='msg';
     U.msg(gt || ['道は 先へ 続いている。',
                  'だが 今の ' + (party[0] ? party[0].name : '彼ら') + 'に、ここから 先へ 進む 用は ない。'],
       ()=>{ G.mode='field'; });
@@ -10474,21 +10567,7 @@ function interact(){
     while(tileAt(P.map,gx,gy-1)==='E') gy--;
     const gate = cd && cd.gates && (cd.gates[P.map+':'+gx+','+gy] || cd.gates[P.map+':'+nx+','+ny]);
     // ★第4章：大門が 開く（{to, need, lockMsg, msg}）。まえは 断りの 文だけ だった
-    if(gate && !Array.isArray(gate) && gate.to){
-      if(gate.need && !G.flags[gate.need]){
-        G.mode='msg'; U.msg(gate.lockMsg || ['大門は 閉ざされて いる。'], ()=>{ G.mode='field'; }); return;
-      }
-      G.mode='msg';
-      U.msg(gate.msg || ['大門が 開いた。'], ()=>{
-        const t=gate.to; P.map=t.map; P.x=t.x; P.y=t.y; P.dir=t.dir||'back';
-        G.trail=[[P.x,P.y],[P.x,P.y],[P.x,P.y]];
-        V.buildMap(P.map); V.setActors(true); U.label(WORLD.mapName(P.map)); U.hud();
-        A.bgm && A.bgm(P.map);
-        if(cd.onEnter && cd.onEnter[P.map]) G.flags[cd.onEnter[P.map]] = true;
-        G.mode='field';
-      });
-      return;
-    }
+    if(openGate(gate, cd)) return;
     const lines = gate || ['閉ざされた 大門。白石の 壁が 雲まで 続いている。'];
     G.mode='msg';
     U.msg(lines, ()=>{ G.mode='field'; });

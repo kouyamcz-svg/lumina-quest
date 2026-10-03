@@ -628,5 +628,17 @@ function kill(k){
   T('「進む／続ける」を えらぶ 欄は 出ない（自動で 次の 章へ）', asked===0, asked);
 }
 
+// ============ 世界地図の 天空城の 大門（Q）============
+{
+  let said=[];
+  C.bind(Object.assign({},C.NullView,{fade(a,d){d&&d();}}),{msg(l,d){ said=said.concat(l); d&&d();},menu(i,t,cb){cb(0);},hud(){},label(){}},C.NullAudio);
+  const knock=(no,flags)=>{ C.freshState(); C.G.chapter=no; Object.assign(C.G.flags, flags||{}); said=[];
+    C.P.map='world'; C.P.x=21; C.P.y=7; C.P.dir='back'; C.G.mode='field'; C.interact(); return C.P.map; };
+  [1,2,3,4,6].forEach(no=>{ const m=knock(no); T('第'+(no-1)+'章：大門は 開かず 門衛の 文', m==='world' && said.some(l=>/門衛|大門/.test(l)) && !said.some(l=>/用は ない/.test(l)), said.join(' ')); });
+  T('第4章：炉の 主任の 話の 前は 開かない', knock(5)==='world' && said.some(l=>/炉の 主任/.test(l)));
+  T('第4章：話の 後は 天空城へ', knock(5,{ch4_gag:true})==='sky_castle' && C.P.x===10 && C.P.y===15, C.P.map+' '+C.P.x+','+C.P.y);
+  T('終章：天空城へ', knock(7)==='sky_castle');
+}
+
 console.log('\n--- gate_flow: ' + (n-ng) + '/' + n + ' 通過 ---');
 process.exit(ng ? 1 : 0);

@@ -1881,6 +1881,23 @@ function tileAt(map,x,y){
   if(y<0||x<0||y>=m.tiles.length||x>=m.tiles[y].length) return '#';
   return m.tiles[y][x];
 }
+// ★大門を 開いて 中へ（gates の {to, need, lockMsg, msg}）。開け閉めの 文を 出したら true
+function openGate(gate, cd){
+  if(!gate || Array.isArray(gate) || !gate.to) return false;
+  if(gate.need && !G.flags[gate.need]){
+    G.mode='msg'; U.msg(gate.lockMsg || ['大門は 閉ざされて いる。'], ()=>{ G.mode='field'; }); return true;
+  }
+  G.mode='msg';
+  U.msg(gate.msg || ['大門が 開いた。'], ()=>{
+    const t=gate.to; P.map=t.map; P.x=t.x; P.y=t.y; P.dir=t.dir||'back';
+    G.trail=[[P.x,P.y],[P.x,P.y],[P.x,P.y]];
+    V.buildMap(P.map); V.setActors(true); U.label(WORLD.mapName(P.map)); U.hud();
+    A.bgm && A.bgm(P.map);
+    if(cd && cd.onEnter && cd.onEnter[P.map]) G.flags[cd.onEnter[P.map]] = true;
+    G.mode='field';
+  });
+  return true;
+}
 function isBlocked(ch){
   return SOLID.has(ch) || ch==='I' || ch==='P' || ch==='S' || ch==='W' || ch==='M'
       || ch==='n' || ch==='C' || ch==='B'
@@ -1944,11 +1961,13 @@ function interact(){
       doWarp(w); return;      // ★けっかいの はんていは doWarp の 中
     }
   }
-  if(ch==='Q'){                               // まだ 入れない 場所
+  if(ch==='Q'){                               // まだ 入れない 場所（天空大陸では 天空城の 大門）
     // ★「これから 作られます」の ような 中の 人の ことばを 画面に 出さない。
     //   行けない りゆうは 物語の 中で つける。ばしょごとの 文は 章データの gates に かく。
-    G.mode='msg';
+    //   ★gates に {to, need, …} が あれば 開いて 入れる（世界地図の 天空城の 大門）
     const gt = ((chData()||{}).gates||{})[P.map+':'+nx+','+ny];
+    if(openGate(gt, chData())) return;
+    G.mode='msg';
     U.msg(gt || ['道は 先へ 続いている。',
                  'だが 今の ' + (party[0] ? party[0].name : '彼ら') + 'に、ここから 先へ 進む 用は ない。'],
       ()=>{ G.mode='field'; });
@@ -1975,21 +1994,7 @@ function interact(){
     while(tileAt(P.map,gx,gy-1)==='E') gy--;
     const gate = cd && cd.gates && (cd.gates[P.map+':'+gx+','+gy] || cd.gates[P.map+':'+nx+','+ny]);
     // ★第4章：大門が 開く（{to, need, lockMsg, msg}）。まえは 断りの 文だけ だった
-    if(gate && !Array.isArray(gate) && gate.to){
-      if(gate.need && !G.flags[gate.need]){
-        G.mode='msg'; U.msg(gate.lockMsg || ['大門は 閉ざされて いる。'], ()=>{ G.mode='field'; }); return;
-      }
-      G.mode='msg';
-      U.msg(gate.msg || ['大門が 開いた。'], ()=>{
-        const t=gate.to; P.map=t.map; P.x=t.x; P.y=t.y; P.dir=t.dir||'back';
-        G.trail=[[P.x,P.y],[P.x,P.y],[P.x,P.y]];
-        V.buildMap(P.map); V.setActors(true); U.label(WORLD.mapName(P.map)); U.hud();
-        A.bgm && A.bgm(P.map);
-        if(cd.onEnter && cd.onEnter[P.map]) G.flags[cd.onEnter[P.map]] = true;
-        G.mode='field';
-      });
-      return;
-    }
+    if(openGate(gate, cd)) return;
     const lines = gate || ['閉ざされた 大門。白石の 壁が 雲まで 続いている。'];
     G.mode='msg';
     U.msg(lines, ()=>{ G.mode='field'; });
