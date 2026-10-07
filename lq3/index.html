@@ -3007,6 +3007,7 @@ function play(name){
   if(name !== 'battle' && name !== 'boss'){ stop(); return; }
   pauseField();                       // せんとうちゅうは いちじ ていし（いしは のこす）
   fieldUnlocked = true;               // せんとうちゅうに あけなおさない
+  if(muted) return;                   // ★おんがく なし
   // ★おなじ きょくでも まいかい あたまから ならしなおす
   if(playing === name){ if(ensure()){ begin(name); } return; }
   if(!ensure()){ return; }
@@ -3068,11 +3069,29 @@ function applyMuteEls(){
   if(fieldEl){ try{ fieldEl.muted = muted; }catch(e){} }
   Object.keys(batEls).forEach(k=>{ try{ batEls[k].el.muted = muted; }catch(e){} });
 }
+// ★iOS: 「なし」のときは ambient にして、きいている おんがくを とめない。
+function applySession(){
+  try{ if(navigator.audioSession) navigator.audioSession.type = muted ? 'ambient' : 'auto'; }catch(e){}
+}
+applySession();
 function setMuted(m){
   muted = !!m;
   try{ localStorage.setItem('lq3_bgm_mute', muted?'1':'0'); }catch(e){}
   applyMuteEls();
-  gainNow(effVol());
+  applySession();
+  if(muted){
+    // ★ならさない（ならしつづけると iOSが ほかの おんがくを とめる）
+    cancelResume();
+    if(timer){ clearInterval(timer); timer=null; }
+    playing = null; pending = null;
+    gainNow(0);
+    if(fieldEl){ try{ fieldEl.pause(); }catch(e){} }
+    Object.keys(batEls).forEach(k=>{ try{ batEls[k].el.pause(); }catch(e){} });
+  }else{
+    gainNow(effVol());
+    if(batWant && batTrack) playBattleFile(batTrack);
+    else if(fieldWant) playField(fieldTrack);
+  }
 }
 // ★きょくごとの おおきさ。どうくつは すこし しずかに する。
 const TRACK_VOL = {field:1.00, town:1.00, castle:1.00, dungeon:0.62};
@@ -3143,6 +3162,7 @@ function playField(track){
   //   ファイルの せんとうきょく（batWant）を みて いなかった ため、
   //   きょくが かさなって きこえる ことが あった。
   if(playing || batWant) return;
+  if(muted) return;                   // ★おんがく なし
   cancelResume();                     // もどす しごとは もう いらない
   routeField();
   try{ AC && AC.resume && AC.resume(); }catch(e){}
@@ -3185,6 +3205,7 @@ function unlockField(){
   //   フィールドきょくが ならり なおしてしまう（じっさいに でた ふぐあい）。
   if(fieldUnlocked) return;
   if(playing) return;                 // せんとうちゅうは さわらない
+  if(muted) return;                   // ★おんがく なし：<audio> を あけない
   const el = fieldAudio(); if(!el) return;
   routeField();
   try{
@@ -3259,6 +3280,7 @@ function playBattleFile(track){
   stop();                              // ごうせいの せんとうきょくは とめる
   pauseField();                        // フィールドきょくも とめる
   silenceOtherBattle(track);
+  if(muted) return;                    // ★おんがく なし（いしは たてて おく）
   const slot = battleEl(track); if(!slot) return;
   const el = slot.el;
   routeBattle(track);
