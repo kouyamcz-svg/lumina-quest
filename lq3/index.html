@@ -7100,7 +7100,19 @@ function collectCommands(i){
   if(G.tactic!=='manual'){ b.queue.push(autoCommand(m)); collectCommands(i+1); return; }
   G.menu={kind:'battle'};
   const items=['こうげき','じゅもん','どうぐ','ぼうぎょ','にげる'];
+  // ★まえの なかまへ もどる（きめた コマンドを とりけす）。
+  //   まえは Bボタンが 末尾の「にげる」に なっていて、もどれない うえに にげていた。
+  const STUCK = {sleep:1, confuse:1, freeze:1};
+  let back = i-1;
+  while(back>=0 && STUCK[list[back].status]) back--;
+  if(back>=0) items.push('もどる');
+  const goBack = ()=>{
+    if(back<0){ collectCommands(i); return; }                 // せんとうの ひとりめは もどれない
+    b.queue = b.queue.filter(q=> list.indexOf(q.actor) < back);
+    collectCommands(back);
+  };
   U.menu(items, m.name, (sel)=>{
+    if(sel===5){ goBack(); return; }
     if(sel===0){
       chooseTarget(m, (tgt)=>{
         if(tgt===null){ collectCommands(i); return; }        // もどる
@@ -7153,7 +7165,7 @@ function collectCommands(i){
     }
     else if(sel===3){ b.queue.push({actor:m, type:'guard'}); collectCommands(i+1); }
     else { b.queue.push({actor:m, type:'flee'}); collectCommands(i+1); }
-  });
+  }, {onCancel: goBack});
 }
 function bestHeal(m, need){
   const sp = knownSpells(m).filter(s=>s.type==='heal' && s.mp<=m.mp).sort((a,b)=>b.max-a.max);
@@ -9872,8 +9884,8 @@ function msgVisible(){ const d=msgWin.style.display; return d!=='' && d!=='none'
 
 // ---------------- コマンドメニュー ----------------
 let menuState=null;
-function menu(items, title, onPick){
-  menuState={items:items.slice(), sel:0, onPick, title};
+function menu(items, title, onPick, opts){
+  menuState={items:items.slice(), sel:0, onPick, title, onCancel:(opts&&opts.onCancel)||null};
   renderMenu();
   cmdWin.style.display='block';
   A.cursor && A.cursor();               // ★メニューを ひらいた おと
@@ -9903,6 +9915,7 @@ function menuCancel(){
   const st=menuState; menuState=null;
   cmdWin.style.display='none';
   A.cancel && A.cancel();               // ★とりけしの おと
+  if(st.onCancel){ st.onCancel(); return; }   // ★とりけし せんよう（せんとうの コマンド など）
   st.onPick(st.items.length-1);       // 末尾＝やめる／もどる
 }
 function menuVisible(){ return !!menuState; }
@@ -9931,8 +9944,8 @@ function label(t){ labelEl.textContent=t; }
 const UI = {msg:msg2, menu, hud, label, openTrade};
 // ★メニューの ひらけしめで ステータスの ひょうじも きりかえる
 const _menuOrig = menu;
-menu = function(items, title, cb){
-  _menuOrig(items, title, (k)=>{ cb(k); hud(); });
+menu = function(items, title, cb, opts){
+  _menuOrig(items, title, (k)=>{ cb(k); hud(); }, opts);
   hud();
 };
 UI.menu = menu;
