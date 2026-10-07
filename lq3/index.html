@@ -2938,7 +2938,7 @@ function ensure(){
   if(!G){
     try{ G = buildGraph(AC); }
     catch(e){ console.warn('[bgm] おとの グラフを つくれません', e); G = null; }
-    if(G && G.out) G.out.gain.value = vol;
+    if(G && G.out) G.out.gain.value = effVol();
   }
   if(!EVENTS){
     EVENTS = buildEvents().slice().sort((a,b)=>a.t-b.t);
@@ -2998,7 +2998,7 @@ function begin(name){
   idx = idxStart; loopN = 0;
   t0 = AC.currentTime + 0.10 - songStart;   // ここから ならすと じこくを あわせる
   lastNow = -1;                  // さいしょの pump を みはりで はじかない
-  gainNow(vol);                  // ★のこっている フェードを とりけして おんりょうを もどす
+  gainNow(effVol());             // ★のこっている フェードを とりけして おんりょうを もどす
   pump();                        // だせない じょうたいなら pump が たてなおしを つづける
   if(timer) clearInterval(timer);
   timer = setInterval(pump, TICK);
@@ -3050,7 +3050,7 @@ function stop(){
 }
 function setVolume(v){
   vol = Math.max(0, Math.min(1, v));
-  gainNow(vol);
+  gainNow(effVol());
 }
 function resume(){ const a=ctx(); if(a && a.state==='suspended') a.resume(); }
 
@@ -3060,6 +3060,20 @@ function resume(){ const a=ctx(); if(a && a.state==='suspended') a.resume(); }
 // ばしょごとの きょく。<audio> は 1つを つかいまわし、src を さしかえる。
 const TRACKS = {field:'field.mp3', town:'town.mp3', castle:'castle.mp3', dungeon:'dungeon.mp3'};
 let fieldEl = null, fieldWant = false, fieldVol = 0.55;
+// ★おんがくを けす（BGMだけ。こうかおんは のこす）。せっていは のこしておく。
+let muted = false;
+try{ muted = (localStorage.getItem('lq3_bgm_mute')==='1'); }catch(e){}
+function effVol(){ return muted ? 0 : vol; }
+function applyMuteEls(){
+  if(fieldEl){ try{ fieldEl.muted = muted; }catch(e){} }
+  Object.keys(batEls).forEach(k=>{ try{ batEls[k].el.muted = muted; }catch(e){} });
+}
+function setMuted(m){
+  muted = !!m;
+  try{ localStorage.setItem('lq3_bgm_mute', muted?'1':'0'); }catch(e){}
+  applyMuteEls();
+  gainNow(effVol());
+}
 // ★きょくごとの おおきさ。どうくつは すこし しずかに する。
 const TRACK_VOL = {field:1.00, town:1.00, castle:1.00, dungeon:0.62};
 function volOf(track){ return fieldVol * (TRACK_VOL[track] || 1); }
@@ -3085,6 +3099,7 @@ function fieldAudio(){
     fieldEl.preload = 'auto';          // さきに よみこんでおく
     fieldEl.crossOrigin = 'anonymous';
     fieldEl.volume = 1;                // おんりょうは グラフがわで きめる
+    fieldEl.muted = muted;
     fieldEl.addEventListener('error', ()=>{
       const e = fieldEl.error;
       fieldErr = 'よみこみ しっぱい' + (e ? '(code '+e.code+')' : '');
@@ -3203,6 +3218,7 @@ function battleEl(track){
     el.loop = true;
     el.preload = 'auto';
     el.volume = 1;
+    el.muted = muted;
     el.addEventListener('error', ()=>{
       const e = el.error;
       batErr = track + ' よみこみ しっぱい' + (e ? '(code '+e.code+')' : '');
@@ -3312,7 +3328,7 @@ function status(){
     fieldErr: fieldErr || 'なし',
   };
 }
-return {play, stop, setVolume, resume, attach, status,
+return {play, stop, setVolume, resume, attach, status, setMuted, get muted(){return muted;},
         playBattleFile, stopBattleFile, setBattleVolume, stopBattleAll,
         get battleTrack(){return batTrack;}, BATTLE_TRACKS,
         playField, stopField, pauseField, unlockField, setFieldVolume,
@@ -9944,7 +9960,8 @@ function openFieldMenu(){
   // ★ひかえが いる ときだけ「いれかえ」が ふえる。ばんごうでなく なまえで わける
   const items=['つよさ','じゅもん','どうぐ','そうび','ちず','さくせん'];
   if(C.reserve.length>0) items.push('いれかえ');
-  items.push('クエスト','セーブ','とじる');
+  const bgmOff = (typeof BGM!=='undefined' && BGM.muted);
+  items.push('クエスト','セーブ', bgmOff?'おんがく：なし':'おんがく：あり', 'とじる');
   menu(items,'メニュー',(sel)=>{
     const pick=items[sel];
     if(pick==='つよさ'){
@@ -9978,6 +9995,11 @@ function openFieldMenu(){
       msg2(qs.length
         ? qs.reduce((a,q)=>a.concat(['＊ '+q.title, '　'+q.desc]),[])
         : ['いまは とくに やることが ない。'], ()=>{ C.G.mode='field'; });
+
+    }else if(pick.indexOf('おんがく')===0){
+      if(typeof BGM!=='undefined'){ BGM.setMuted(!BGM.muted); }
+      A.cursor && A.cursor();
+      openFieldMenu();                                     // ひらいたまま きりかわる
 
     }else if(pick==='セーブ'){
       const ok=C.saveGame();
