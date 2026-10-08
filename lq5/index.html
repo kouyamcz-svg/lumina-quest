@@ -19,9 +19,13 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #dpad .k{position:absolute;width:52px;height:52px;background:#2f2848;border:2px solid #4a4070;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:18px}
 #dpad .u{left:52px;top:0}#dpad .d{left:52px;bottom:0}#dpad .l{left:0;top:52px}#dpad .r{right:0;top:52px}
 #dpad .k.on{background:#4a4070;color:var(--ink)}
-#btns{display:flex;gap:18px}
+#btns{display:flex;gap:18px;margin-top:26px}
 .b{width:72px;height:72px;border-radius:50%;background:#2f2848;border:2px solid #4a4070;color:var(--ink);font-size:22px;display:flex;align-items:center;justify-content:center}
 .b.on{background:#4a4070}
+.b.m{position:absolute;top:10px;right:24px;width:84px;height:30px;border-radius:17px;font-size:13px;letter-spacing:.1em;background:#3a2f58}
+#pad{position:relative}
+#mapview{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(0,0,0,.85);font-size:13px;color:var(--dim)}
+#mapview canvas{width:94%;height:auto;image-rendering:pixelated;border:2px solid var(--line)}
 #fade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .2s;pointer-events:none}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 #bt{position:absolute;inset:0;display:none;pointer-events:none}
@@ -42,11 +46,11 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 </style></head><body>
 <div id="wrap">
  <div id="view"><canvas id="c"></canvas><canvas id="c2" style="display:none"></canvas><div id="place">国境の村 ルーエ</div>
-  <div id="hint">十字で歩く・A 話す／調べる・B 短く押す＝メニュー、押しながら歩く＝ダッシュ</div><div id="msg"></div><div id="fade"></div><div id="flash"></div><div id="fmenu"></div><div id="card"></div>
+  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="flash"></div><div id="mapview"></div><div id="fmenu"></div><div id="card"></div>
   <div id="bt"><div id="bparty"></div><div id="bmenu"></div><div id="bmsg"></div></div></div>
  <div id="pad">
   <div id="dpad"><div class="k u">▲</div><div class="k l">◀</div><div class="k r">▶</div><div class="k d">▼</div></div>
-  <div id="btns"><div class="b" id="bB">B</div><div class="b" id="bA">A</div></div>
+  <div id="btns"><div class="b m" id="bM">MENU</div><div class="b" id="bB">B</div><div class="b" id="bA">A</div></div>
  </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -85,11 +89,11 @@ const ROOMS=[
  {name:'長老の 家', rows:["WWWWWWWWW","WsW.f..bW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"],
   npc:{x:6.5,y:3.5,spr:'elder',name:'長老',lines:['長老「よく 来たな、エルト」','長老「この 村の 麦は、昔 ヴェルナから 贈られた 種から 育った」']}},
  {name:'鍛冶屋', rows:["WWWWWWWWW","Wf..s..sW","W.......W","W.T...T.W","W.......W","Wp......W","WWWWXWWWW"],
-  npc:{x:2.5,y:2.5,spr:'smith',name:'鍛冶屋の 親方',lines:['親方「剣の 手入れか？　国境が きな臭い。いつでも 来い」']}},
+  npc:{x:2.5,y:2.5,spr:'smith',name:'鍛冶屋の 親方',talk:()=>say(['親方「剣の 手入れか？　国境が きな臭い」'],()=>openShop('smith','鍛冶屋（所持金 '+BAG.gold+'G）'))}},
  {name:'宿屋', rows:["WWWWWWWWW","Wb.bfb.sW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"],   // ★暖炉は 奥の 壁へ（前は 出口の すぐ 前に あった）
-  npc:{x:2.5,y:2.4,spr:'girl',name:'宿の 娘',lines:['娘「いらっしゃい。今夜は 旅の 人が 多いの」','（試作：宿で 泊まる 仕組みは まだ ありません）']}},
+  npc:{x:2.5,y:2.4,spr:'girl',name:'宿の 娘',talk:()=>say(['娘「いらっしゃい。宿屋へ ようこそ」'],openInn)}},
  {name:'道具屋', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.TTT...W","W.......W","Wp.....pW","WWWWXWWWW"],
-  npc:{x:3.5,y:2.5,spr:'okami',name:'道具屋の おかみ',talk:()=>{ if(!ST.gotHerb){ ST.gotHerb=1; BAG.herbs+=1; say(['おかみ「いらっしゃい、エルト。薬草なら たんと あるよ」','おかみ「見回りに 行くなら、ひとつ 持って お行き」','＊ 薬草を もらった ＊']); } else say(['おかみ「無理を するんじゃ ないよ」']); }}},
+  npc:{x:3.5,y:2.5,spr:'okami',name:'道具屋の おかみ',talk:()=>{ if(!ST.gotHerb){ ST.gotHerb=1; BAG.herbs+=1; say(['おかみ「いらっしゃい、エルト。薬草なら たんと あるよ」','おかみ「見回りに 行くなら、ひとつ 持って お行き」','＊ 薬草を もらった ＊']); } else say(['おかみ「何に するかい？」'],()=>openShop('tools','道具屋（所持金 '+BAG.gold+'G）')); }}},
  {name:'兵舎', rows:["WWWWWWWWW","Wbb...bbW","W.......W","W..cTc..W","W.......W","Ws.....sW","WWWWXWWWW"],
   npc:{x:6.5,y:4.2,spr:'asoldier',name:'見張りの 兵',lines:['兵「見張り櫓の 当番は 交代だ。ガイルさんが 呼んで いたぞ」']}},
  {name:'空き家', rows:["WWWWWWWWW","W.......W","W..p....W","W.......W","W....T..W","W.......W","WWWWXWWWW"], npc:null},
@@ -263,7 +267,7 @@ function setNpcs(list){ clearNpcs(); cur.npcs=list.map(n=>({...n,ang:0,p:person(
 function resetTrail(){ trail=[]; for(let i=0;i<200;i++) trail.push([hero.x,hero.z,hero.ang]); followers.forEach(f=>{f.x=hero.x;f.z=hero.z;f.ang=hero.ang;}); }   // ★みんな 先頭と 同じ 場所（重なる）
 function enterTown(at){ if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildTown(); if(ST.phase==='burn'||ST.phase==='after') burnTown();
   cur={kind:'town', rows:TOWN, solid:new Set(['#','H','t','F','w']), npcs:cur.npcs, room:null};
-  setNpcs(townNpcs()); if(at){ hero.x=at[0]; hero.z=at[1]; hero.ang=0; } resetTrail();
+  setNpcs(townNpcs()); chestMesh('town'); if(at){ hero.x=at[0]; hero.z=at[1]; hero.ang=0; } resetTrail();
   document.getElementById('place').textContent= ST.phase==='burn' ? '燃える 村 ルーエ' : '国境の村 ルーエ'; }
 function enterRoom(i){ const r=ROOMS[i]; if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildRoom(r);
   cur={kind:'room', rows:r.rows, solid:new Set(['W','s','b','T','f','p']), npcs:cur.npcs, room:i};
@@ -287,7 +291,8 @@ const bA=document.getElementById('bA'),bB=document.getElementById('bB');
 // ★Bを 押して いる 間（holdB）は 町の 中だけ ダッシュ
 let holdB=false;
 let bDownAt=0, bMoved=false;
-const bHold=v=>{ holdB=v; if(v){ bDownAt=performance.now(); bMoved=false; } else if(!bMoved && performance.now()-bDownAt<350 && !BT && !msgQ && !MENU) openFieldMenu(); };
+const bHold=v=>{ holdB=v; };   // ★メニューは 専用の ボタン（MENU）で 開く
+const bM=document.getElementById('bM'); bM.addEventListener('touchstart',e=>{e.preventDefault(); bM.classList.add('on'); if(MENU) closeMenu(); else openFieldMenu();},{passive:false}); bM.addEventListener('touchend',()=>bM.classList.remove('on')); bM.addEventListener('mousedown',()=>{ if(MENU) closeMenu(); else openFieldMenu(); });
 [[bA,()=>pressA(),null],[bB,()=>pressB(),bHold]].forEach(([el,fn,hold])=>{
   el.addEventListener('touchstart',e=>{e.preventDefault();el.classList.add('on');fn();hold&&hold(true);},{passive:false});
   el.addEventListener('touchend',e=>{e.preventDefault();el.classList.remove('on');hold&&hold(false);},{passive:false});
@@ -297,7 +302,7 @@ const msgEl=document.getElementById('msg'); let msgQ=null;
 let msgDone=null;
 function say(lines,done){msgQ=lines.slice();msgDone=done||null;msgEl.style.display='block';msgEl.textContent=msgQ.shift();}
 function closeMsg(){ msgQ=null; msgEl.style.display='none'; const d=msgDone; msgDone=null; d&&d(); }
-function pressA(){ if(BT){ if(BT.phase==='menu') battleCmd(); return; }
+function pressA(){ if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='menu'){ se('ok'); battleCmd(); } return; }
   if(MENU){ MENU.onPick(MENU.sel); return; }
   if(msgQ){ if(msgQ.length) msgEl.textContent=msgQ.shift(); else closeMsg(); return; }
   const fx=Math.sin(hero.ang), fz=Math.cos(hero.ang); let best=null,bd=1e9;
@@ -305,12 +310,13 @@ function pressA(){ if(BT){ if(BT.phase==='menu') battleCmd(); return; }
   if(best){ best.ang=Math.atan2(hero.x-best.x,hero.z-best.y); if(best.talk){ best.talk(best); return; } say([best.name+'：'].concat(best.lines)); return; }
   if(examine()) return;
   say(['……なにも ない。']); }
-function pressB(){ if(BT){ if(BT.phase==='item'){ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); } return; } if(MENU){ MENU.onBack&&MENU.onBack(); return; } if(msgQ){ closeMsg(); } }
+function pressB(){ if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='item'){ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); } return; } if(MENU){ MENU.onBack&&MENU.onBack(); return; } if(msgQ){ closeMsg(); } }
 // ================= 動き =================
 const SPEED=3.2, DASH=1.8, RADT=0.38;   // DASH：町の 中で Bを 押して いる 間の 速さの 倍
 const at=(x,y)=>{ const r=cur.rows; return (y<0||y>=r.length||x<0||x>=r[0].length)?'#':r[y][x]; };
 function blockedAt(x,z){ const c=at(Math.floor(x),Math.floor(z)); if(cur.solid.has(c)) return true;
   if(cur.kind==='town' && ST.phase==='burn' && fires.some(f=>Math.hypot(f[0]-x,f[1]-z)<.45)) return true;
+  if((CHESTS[cur.kind]||[]).some(c=>Math.abs(c.x-x)<.36&&Math.abs(c.z-z)<.3)) return true;
   if(cur.kind==='town' && Math.hypot(x-12,z-8.5)<1.62) return true;
   return cur.npcs.some(n=>Math.hypot(n.x-x,n.y-z)<0.55); }
 function freeCircle(x,z){ const RAD = cur.kind==='world' ? 0.3 : RADT; for(const [ox,oz] of [[RAD,0],[-RAD,0],[0,RAD],[0,-RAD],[RAD*.7,RAD*.7],[-RAD*.7,RAD*.7],[RAD*.7,-RAD*.7],[-RAD*.7,-RAD*.7]]) if(blockedAt(x+ox,z+oz)) return false; return true; }
@@ -579,14 +585,15 @@ function queue(fns,delay){ BT.steps=fns.slice(); BT.st=delay||0; }
 function enemyTurn(){ const alive=BT.party.filter(m=>m.hp>0); const t=alive[Math.floor(Math.random()*alive.length)];
   return [
    ()=>{ bsay(BT.ename+BT.def.wind); setEnemyFrame('wind'); BT.shake=.55; return .65; },         // 構え（震える）
-   ()=>{ setEnemyFrame('atk'); BT.lunge=1; BT.flash=1; BT.quake=.35; let d=BT.def.atk[0]+Math.floor(Math.random()*(BT.def.atk[1]-BT.def.atk[0]+1)); if(BT.guard) d=Math.ceil(d/2);
+   ()=>{ setEnemyFrame('atk'); BT.lunge=1; BT.flash=1; BT.quake=.35; let d=BT.def.atk[0]+Math.floor(Math.random()*(BT.def.atk[1]-BT.def.atk[0]+1)); d=Math.max(1,d-Math.floor((t.defT||0)/4)); if(BT.guard) d=Math.ceil(d/2); se('hit');
          t.hp=Math.max(0,t.hp-d); BT.hitIdx=BT.party.indexOf(t); bsay(BT.ename+'の '+BT.def.verb+'！ '+t.name+'に '+d+'の ダメージ！'); drawBattleUI(); return .45; },  // 攻撃（飛びかかる）
    ()=>{ setEnemyFrame('idle'); BT.hitIdx=-1; drawBattleUI(); return .6; },
    ()=>{ BT.guard=false; if(BT.party.every(m=>m.hp<=0)){ bsay('目の 前が まっくらに なった……（体力を 戻して 続けます）'); BT.party.forEach(m=>m.hp=m.max); drawBattleUI(); return 1.4; } return 0; },
    ()=>{ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; } ]; }
 function partyAttacks(){ const steps=[];
   BT.party.forEach(m=>{ if(m.hp<=0) return; steps.push(()=>{ if(BT.ehp<=0) return 0; const d=m.atk+Math.floor(Math.random()*4); BT.ehp=Math.max(0,BT.ehp-d); BT.hurt=.35; bsay(m.name+'の こうげき！ '+BT.ename+'に '+d+'の ダメージ！'); return .75; }); });
-  steps.push(()=>{ if(BT.ehp<=0){ bsay(BT.ename+'を たおした！'); BT.ex=1; BT.dead=true; return 1.3; } return 0; });
+  steps.push(()=>{ if(BT.ehp<=0){ bsay(BT.ename+'を たおした！'); BT.ex=1; BT.dead=true; se('win'); return 1.3; } return 0; });
+  steps.push(()=>{ if(BT.ehp<=0){ const ex=BT.def.exp||0, gd=BT.def.gold||0; BAG.gold+=gd; const ups=gainExp(ex); bsay('経験値 '+ex+'、'+gd+'ゴールドを 手に 入れた！'+(ups.length?'　'+ups.join('　'):'')); return ups.length?2.2:1.4; } return 0; });
   steps.push(()=>{ if(BT.ehp<=0){ endBattle(); return 99; } BT.steps.push(...enemyTurn()); return 0; });
   return steps; }
 function battleCmd(){ const c=CMDS[BT.sel]; BT.phase='act'; drawBattleUI();
@@ -625,11 +632,11 @@ function battleTick(dt,now){
 //  → after（部隊長を 倒した）→ road（ガイルの 別れ。夜の 街道へ）→ end（王に 会い、兵士に 任じられる）
 const ST={phase:'morning', rescued:{}, kills:0};
 const PARTY=['elt'];                                   // ★序章〜第1章は エルト 1人
-const STATS={ elt:{name:'エルト',hp:34,max:34,mp:6,atk:9} };
+const STATS={ elt:{name:'エルト',lv:1,exp:0,hp:34,max:34,mp:6,maxmp:6,batk:3,atk:9,def:3,defT:7,agi:6} };
 const FOES={
-  nousagi:{key:'nousagi', name:'野ウサギ', hp:16, atk:[2,4], wind:'は 口を 大きく 開けた！', verb:'かみつき', frames:{idle:RAB.idle,wind:RAB.wind,atk:RAB.atk}},
+  nousagi:{key:'nousagi', name:'野ウサギ', hp:16, exp:4, gold:3, atk:[2,4], wind:'は 口を 大きく 開けた！', verb:'かみつき', frames:{idle:RAB.idle,wind:RAB.wind,atk:RAB.atk}},
   // ★部隊長：ボスの 5こま（待機1・待機2・構え・攻撃・大技）。大技は まだ 使わない
-  taicho:{key:'taicho', name:'ヴェルナの 部隊長', hp:52, atk:[4,7], wind:'は 剣を 振りかぶった！', verb:'斬りつけ', boss:true, frames:{idle:RAB.tc_idle,idle2:RAB.tc_idle2,wind:RAB.tc_wind,atk:RAB.tc_atk,big:RAB.tc_big}},
+  taicho:{key:'taicho', name:'ヴェルナの 部隊長', hp:52, exp:30, gold:60, atk:[4,7], wind:'は 剣を 振りかぶった！', verb:'斬りつけ', boss:true, frames:{idle:RAB.tc_idle,idle2:RAB.tc_idle2,wind:RAB.tc_wind,atk:RAB.tc_atk,big:RAB.tc_big}},
 };
 let fires=[], fireMeshes=[];
 function townNpcs(){
@@ -651,7 +658,7 @@ function townNpcs(){
         say(['部隊長は 剣を 落とした。','部隊長「……なぜ、わたしは ここに……」','部隊長は 崩れるように 倒れた。'],()=>{ ST.phase='after'; setNpcs(townNpcs()); }); })); }});
   }
   if(P==='after'){
-    list.push({x:12,y:12.3,spr:'gail',name:'師匠 ガイル',talk:()=>say(['ガイル「……エルト。無事か」','ガイルの 脇腹が、赤く 染まって いる。','ガイル「村の 者を 逃がすのに、少し しくじった」','ガイル「この 剣を 持って いけ。……おれには もう 重い」','ガイル「王都へ 行け。王に、このことを 伝えろ」','エルト「師匠……！」','ガイル「行け。……振り返るな」'],()=>{ ST.phase='road'; STATS.elt.atk+=3; EQUIP.elt.weapon={name:'ガイルの 剣',v:12}; setNpcs(townNpcs()); say(['＊ ガイルの 剣を 受け取った（こうげき＋3） ＊','南の 門から、夜の 街道へ。王都は 北東。']); })});
+    list.push({x:12,y:12.3,spr:'gail',name:'師匠 ガイル',talk:()=>say(['ガイル「……エルト。無事か」','ガイルの 脇腹が、赤く 染まって いる。','ガイル「村の 者を 逃がすのに、少し しくじった」','ガイル「この 剣を 持って いけ。……おれには もう 重い」','ガイル「王都へ 行け。王に、このことを 伝えろ」','エルト「師匠……！」','ガイル「行け。……振り返るな」'],()=>{ ST.phase='road'; if(EQUIP.elt.weapon) BAG.gear.push(EQUIP.elt.weapon); EQUIP.elt.weapon={name:'ガイルの 剣',v:12,price:0}; syncAtk(); setNpcs(townNpcs()); say(['＊ ガイルの 剣を 受け取り、装備した ＊','南の 門から、夜の 街道へ。王都は 北東。']); })});
   }
   return list; }
 function burnTown(){   // ★燃える 夜の 村
@@ -700,11 +707,15 @@ function buildFarm(){
   add(new THREE.PlaneGeometry(1.2,1.5),L(T.door),cx,.75,by+h+.02);
   add(new THREE.PlaneGeometry(.5,.36),L(null,0x3a2a5a),cx,1.75,by+h+.02);   // 色あせた 紋（ヴェルナの）
 }
+function chestMesh(kind){ (G.userData.chests||[]).forEach(m=>G.remove(m)); G.userData.chests=[]; (CHESTS[kind]||[]).forEach(c=>{ const open=BAG.opened[c.id];
+  const b=add(box,L(null,open?0x5a3a20:0x8a5a28),c.x,.22,c.z,.6,.44,.42); const lid=add(box,L(null,0xd8b040),c.x,open?.62:.47,open?c.z-.2:c.z,.62,.08,.44); if(open) lid.rotation.x=-1.1; G.userData.chests.push(b,lid); }); }
 function enterFarm(){ if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; fireMeshes=[]; buildFarm();
-  cur={kind:'farm', rows:FARM, solid:new Set(['#','t','e','B']), npcs:cur.npcs, room:null}; setNpcs([]);
+  cur={kind:'farm', rows:FARM, solid:new Set(['#','t','e','B']), npcs:cur.npcs, room:null}; setNpcs([]); chestMesh('farm');
   hero.x=12; hero.z=FARM.length-1.6; hero.ang=Math.PI; resetTrail(); wWalk=0; wEnc=6+Math.random()*6;
   document.getElementById('place').textContent='村の 北の 畑'; }
-function examine(){   // 向いて いる 先の 物を 調べる（畑の 倉）
+function examine(){   // 向いて いる 先の 物を 調べる（宝箱・畑の 倉）
+  for(const c of (CHESTS[cur.kind]||[])){ if(Math.hypot(c.x-hero.x,c.z-hero.z)<1.1){ if(BAG.opened[c.id]){ say(['空っぽだ。']); return true; } BAG.opened[c.id]=1; se('ok');
+      if(c.gold){ BAG.gold+=c.gold; say(['宝箱を 開けた。',c.gold+'ゴールドを 手に 入れた！']); } else { BAG.herbs+=c.herb; say(['宝箱を 開けた。','薬草を 手に 入れた！']); } chestMesh(cur.kind); return true; } }
   if(cur.kind==='farm' && Math.abs(hero.x-19)<1.4 && hero.z<8.9 && hero.z>8 && Math.cos(hero.ang)<-.5){
     if(ST.phase==='field'){ say(['古い 倉の 扉を 開けた。','埃を かぶった 麦袋が 積まれて いる。','袋には、色あせた 紋。……ヴェルナの 紋だ。','エルト「昔、ヴェルナが 贈って くれた 麦……？」','そのとき、村の 方角から 鐘の 音が 鳴り響いた。','エルト「……警鐘！」'],()=>{ ST.phase='raid'; say(['＊ 急いで 村へ 戻ろう（南の 出口） ＊']); }); }
     else say(['古い 倉。ヴェルナの 紋の 麦袋が 積まれて いる。']);
@@ -745,8 +756,8 @@ function showEnd(){ ST.phase='end'; const c=document.getElementById('card'); c.i
 // ================= メニュー（Ⅳの メニューの 作りを 写した もの）=================
 //  Bを 短く 押して 離すと 開く（押した まま 歩くと ダッシュ）。十字の 上下で 選び、Aで 決定、Bで 戻る
 //  強さ・技・道具・装備・クエスト・セーブ・とじる（Ⅳの 地図・作戦・入れ替え・音は まだ ない）
-const BAG={gold:30, herbs:1};          // ★道具：薬草（HPを 30 回復）とゴールド
-const EQUIP={elt:{weapon:{name:'見習いの 剣',v:9},armor:{name:'革の 胸当て',v:4}}};
+const BAG={gold:30, herbs:1, gear:[], opened:{}};          // ★道具：薬草（HPを 30 回復）とゴールド
+const EQUIP={elt:{weapon:{name:'見習いの 剣',v:6,price:20},armor:{name:'革の 胸当て',v:4,price:20}}};
 let MENU=null;   // {title, items, sel, onPick, onBack}
 const menuEl=document.getElementById('fmenu');
 function drawMenu(){ if(!MENU){ menuEl.style.display='none'; return; } menuEl.style.display='block';
@@ -756,12 +767,15 @@ function closeMenu(){ MENU=null; drawMenu(); }
 function goalText(){ return ({morning:'村の 北の 入口に いる ガイルに 話す', field:'北の 畑を 見回り、外れの 古い 倉を 調べる', raid:'南の 出口から 村へ 戻る',
   burn:'逃げ遅れた 村の 人を 助ける（'+Object.keys(ST.rescued).length+'／3）。そして 広場の 部隊長', after:'広場の ガイルの もとへ', road:'夜の 街道を 北東へ。王都 アルディアの 王に 会う', end:'（序章 完）'})[ST.phase]; }
 function openFieldMenu(){ if(msgQ||BT||fading||ST.phase==='end') return;
-  const items=['強さ','技','道具','装備','クエスト','セーブ','とじる'];
+  const items=['強さ','技','道具','装備','地図','作戦','クエスト','音','セーブ','とじる'];
   menu(items,'メニュー',(sel)=>{ const pick=items[sel];
-    if(pick==='強さ'){ const m=STATS.elt, e=EQUIP.elt; closeMenu(); say([m.name+'　Lv1　見習い兵士','HP '+m.hp+' / '+m.max+'　　MP '+m.mp,'攻撃力 '+m.atk+'　　守備力 '+e.armor.v,'所持金 '+BAG.gold+' ゴールド'],openFieldMenu); }
+    if(pick==='強さ'){ const m=STATS.elt; closeMenu(); say([m.name+'　Lv'+m.lv+'　見習い兵士','HP '+m.hp+' / '+m.max+'　　MP '+m.mp+' / '+m.maxmp,'攻撃力 '+m.atk+'　守備力 '+m.defT+'　素早さ '+m.agi,'次の レベルまで あと '+(expNeed(m.lv)-m.exp)+'　所持金 '+BAG.gold+'G'],openFieldMenu); }
     else if(pick==='技'){ closeMenu(); say(['エルトは まだ 技を 覚えて いない。','（雷の 呪文 ヴォルトは Lv12 で 覚える）'],openFieldMenu); }
     else if(pick==='道具'){ openItems(); }
-    else if(pick==='装備'){ const e=EQUIP.elt; closeMenu(); say(['右手：'+e.weapon.name,'体　：'+e.armor.name],openFieldMenu); }
+    else if(pick==='装備'){ openEquip(); }
+    else if(pick==='地図'){ openMap(); }
+    else if(pick==='作戦'){ openTactics(); }
+    else if(pick==='音'){ openSound(); }
     else if(pick==='クエスト'){ closeMenu(); say(['【目的】','　'+goalText()],openFieldMenu); }
     else if(pick==='セーブ'){ closeMenu(); const ok=saveGame(); say([ok?'ぼうけんの きろくを つけた。':'きろくに しっぱいした…'],openFieldMenu); }
     else closeMenu(); }, ()=>closeMenu()); }
@@ -769,15 +783,70 @@ function openItems(){ const opts=[]; if(BAG.herbs>0) opts.push('薬草　'+BAG.h
   if(BAG.herbs<=0){ closeMenu(); say(['道具を なにも もって いない。'],openFieldMenu); return; }
   menu(opts,'道具',(k)=>{ if(k===0&&BAG.herbs>0){ closeMenu(); say(useHerb(STATS.elt),openItems); } else openFieldMenu(); }, ()=>openFieldMenu()); }
 function useHerb(m){ if(m.hp>=m.max) return [m.name+'の HPは 減って いない。']; BAG.herbs--; const h=Math.min(30,m.max-m.hp); m.hp+=h; return [m.name+'は 薬草を 使った。','HPが '+h+' 回復した！']; }
-function menuInput(iy){ if(!MENU) return; if(iy!==0 && iy!==menuLastY){ MENU.sel=(MENU.sel+(iy>0?1:-1)+MENU.items.length)%MENU.items.length; drawMenu(); } menuLastY=iy; }
+function menuInput(iy){ if(!MENU) return; if(iy!==0 && iy!==menuLastY){ se('cursor'); MENU.sel=(MENU.sel+(iy>0?1:-1)+MENU.items.length)%MENU.items.length; drawMenu(); } menuLastY=iy; }
 let menuLastY=0;
 // ---- セーブ（この 端末の ブラウザに 残す）----
-function saveGame(){ try{ localStorage.setItem('lq5save', JSON.stringify({ST,STATS,BAG,EQUIP,at:{kind:cur.kind,x:hero.x,z:hero.z}})); return true; }catch(e){ return false; } }
+function saveGame(){ try{ localStorage.setItem('lq5save', JSON.stringify({ST,STATS,BAG,EQUIP,tactic,SND,at:{kind:cur.kind,x:hero.x,z:hero.z}})); return true; }catch(e){ return false; } }
 function loadGame(){ try{ const d=JSON.parse(localStorage.getItem('lq5save')||'null'); if(!d) return false;
-  Object.assign(ST,d.ST); Object.assign(STATS.elt,d.STATS.elt); Object.assign(BAG,d.BAG); Object.assign(EQUIP.elt,d.EQUIP.elt);
+  Object.assign(ST,d.ST); Object.assign(STATS.elt,d.STATS.elt); Object.assign(BAG,d.BAG); Object.assign(EQUIP.elt,d.EQUIP.elt); if(!BAG.gear) BAG.gear=[]; if(!BAG.opened) BAG.opened={}; if(d.tactic) tactic=d.tactic; if(d.SND) SND=d.SND; if(STATS.elt.lv===undefined){ Object.assign(STATS.elt,{lv:1,exp:0,maxmp:6,batk:3,def:3,agi:6}); } syncAtk();
   const k=d.at.kind; if(k==='world') enterWorld([d.at.x,d.at.z]); else if(k==='farm'){ enterFarm(); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='castle'){ enterCastle(); } else enterTown([d.at.x,d.at.z]);
   return true; }catch(e){ return false; } }
 function hasSave(){ try{ return !!localStorage.getItem('lq5save'); }catch(e){ return false; } }
+
+// ================= Ⅳの 仕組みを 写した もの（レベル・経験値・お店・宿屋・装備の 付け替え・地図・作戦・音）=================
+const expNeed=(lv)=>lv*lv*6;                       // Ⅳと 同じ：次の レベルまでの 経験値
+const GROW={elt:{hp:5,mp:2,atk:2,def:1,agi:1}};     // 1レベルごとの 伸び
+function gainExp(n){ const m=STATS.elt, out=[]; m.exp=(m.exp||0)+n;
+  while(m.exp>=expNeed(m.lv)){ m.exp-=expNeed(m.lv); m.lv++; const g=GROW.elt; m.max+=g.hp; m.hp+=g.hp; m.maxmp+=g.mp; m.mp+=g.mp; m.batk+=g.atk; m.def+=g.def; m.agi+=g.agi;
+    out.push(m.name+'は レベル '+m.lv+' に 上がった！'); if(m.lv===12) out.push('＊ '+m.name+'は ヴォルトを 覚えた！ ＊'); }
+  syncAtk(); return out; }
+function syncAtk(){ const m=STATS.elt, e=EQUIP.elt; m.atk=m.batk+(e.weapon?e.weapon.v:0); m.defT=m.def+(e.armor?e.armor.v:0); }
+// ---- お店（鍛冶屋＝武器と 防具、道具屋＝道具）----
+const SHOP={ smith:[{name:'銅の 剣',kind:'weapon',v:6,price:60},{name:'鉄の 剣',kind:'weapon',v:10,price:180},{name:'皮の よろい',kind:'armor',v:6,price:70},{name:'くさりかたびら',kind:'armor',v:10,price:200}],
+             tools:[{name:'薬草',kind:'herb',price:8}] };
+function openShop(which,greet){ const list=SHOP[which];
+  menu(['買う','売る','やめる'],greet||'お店',(k)=>{
+    if(k===0) menu(list.map(it=>it.name+'　'+it.price+'G').concat(['戻る']),'買う（所持金 '+BAG.gold+'G）',(i)=>{
+      if(i>=list.length){ openShop(which,greet); return; } const it=list[i];
+      if(BAG.gold<it.price){ closeMenu(); say(['お金が 足りない。'],()=>openShop(which,greet)); return; }
+      BAG.gold-=it.price; if(it.kind==='herb') BAG.herbs++; else BAG.gear.push({name:it.name,kind:it.kind,v:it.v,price:it.price});
+      closeMenu(); se('ok'); say([it.name+'を 買った。'+(it.kind!=='herb'?'（メニューの 装備で 付け替えられる）':'')],()=>openShop(which,greet)); },()=>openShop(which,greet));
+    else if(k===1){ const sell=BAG.gear.map((g,i)=>({label:g.name+'　'+Math.floor(g.price/2)+'G',i})); if(BAG.herbs>0) sell.push({label:'薬草　4G',i:-1});
+      if(!sell.length){ closeMenu(); say(['売れる ものが ない。'],()=>openShop(which,greet)); return; }
+      menu(sell.map(x=>x.label).concat(['戻る']),'売る',(j)=>{ if(j>=sell.length){ openShop(which,greet); return; } const x=sell[j];
+        if(x.i<0){ BAG.herbs--; BAG.gold+=4; } else { BAG.gold+=Math.floor(BAG.gear[x.i].price/2); BAG.gear.splice(x.i,1); }
+        closeMenu(); se('ok'); say(['売った。所持金 '+BAG.gold+'G'],()=>openShop(which,greet)); },()=>openShop(which,greet)); }
+    else closeMenu(); },()=>closeMenu()); }
+// ---- 宿屋 ----
+function openInn(){ const price=10; menu(['泊まる（'+price+'G）','やめる'],'宿屋（所持金 '+BAG.gold+'G）',(k)=>{ closeMenu();
+  if(k!==0){ say(['娘「また どうぞ」']); return; } if(BAG.gold<price){ say(['娘「お金が 足りないみたい……」']); return; }
+  BAG.gold-=price; go(()=>{ STATS.elt.hp=STATS.elt.max; STATS.elt.mp=STATS.elt.maxmp; }); setTimeout(()=>say(['ぐっすり 眠った。','HPと MPが すっかり 回復した！']),500); },()=>closeMenu()); }
+// ---- 装備の 付け替え（ふくろから）----
+function openEquip(){ const e=EQUIP.elt;
+  menu(['右手：'+(e.weapon?e.weapon.name:'なし'),'体　：'+(e.armor?e.armor.name:'なし'),'戻る'],'装備（攻撃力 '+STATS.elt.atk+'・守備力 '+STATS.elt.defT+'）',(k)=>{
+    if(k>1){ openFieldMenu(); return; } const slot=k===0?'weapon':'armor'; const cands=BAG.gear.map((g,i)=>({g,i})).filter(x=>x.g.kind===slot);
+    if(!cands.length){ closeMenu(); say(['ふくろに 付けられる ものが ない。'],openEquip); return; }
+    menu(cands.map(x=>x.g.name+'（+'+x.g.v+'）').concat(['戻る']),(slot==='weapon'?'右手':'体')+'に なにを？',(j)=>{ if(j>=cands.length){ openEquip(); return; }
+      const x=cands[j], old=e[slot]; e[slot]=x.g; BAG.gear.splice(x.i,1); if(old) BAG.gear.push(old); syncAtk(); closeMenu(); se('ok');
+      say([x.g.name+'を 装備した。','攻撃力 '+STATS.elt.atk+'・守備力 '+STATS.elt.defT],openEquip); },()=>openEquip()); },()=>openFieldMenu()); }
+// ---- 地図（外の 世界の とき だけ）----
+function openMap(){ closeMenu(); if(cur.kind!=='world'){ say(['ここでは 地図を 広げられない。'],openFieldMenu); return; }
+  const mv=document.getElementById('mapview'); mv.style.display='flex'; mv.innerHTML=''; const c=document.createElement('canvas'); const img=WORLD_IMG||bakeWorld32();
+  c.width=img.width; c.height=img.height; const g=c.getContext('2d'); g.drawImage(img,0,0); g.fillStyle='#ff3030'; g.strokeStyle='#fff'; g.lineWidth=3;
+  g.beginPath(); g.arc(hero.x*32,hero.z*32,9,0,Math.PI*2); g.fill(); g.stroke(); mv.appendChild(c); const t=document.createElement('div'); t.textContent='赤い 印が いまの 場所（Aか Bで 閉じる）'; mv.appendChild(t); mapOpen=true; }
+let mapOpen=false;
+function closeMap(){ document.getElementById('mapview').style.display='none'; mapOpen=false; openFieldMenu(); }
+// ---- 作戦（Ⅳと 同じ 4つ。仲間が 加わると 仲間の 動きに 効く）----
+const TACTICS={gungan:'ガンガン いこうぜ', balance:'バランス よく', inochi:'いのち だいじに', jumon:'じゅもん つかうな'};
+let tactic='balance';
+function openTactics(){ const ks=Object.keys(TACTICS); menu(ks.map(k=>(k===tactic?'▶':'')+TACTICS[k]).concat(['戻る']),'作戦',(i)=>{ if(i>=ks.length){ openFieldMenu(); return; } tactic=ks[i]; closeMenu(); say(['作戦を 「'+TACTICS[ks[i]]+'」に した。','（序章は エルト 1人なので、仲間が 加わってから 効く）'],openFieldMenu); },()=>openFieldMenu()); }
+// ---- 音（効果音。Ⅳと 同じく 短い 電子音）----
+let SND={se:true}; let actx=null;
+function se(kind){ if(!SND.se) return; try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); const o=actx.createOscillator(), g=actx.createGain(); o.type='square';
+  const f={cursor:880,ok:1320,hit:220,win:660}[kind]||880; o.frequency.value=f; g.gain.value=.05; o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+(kind==='hit'?.12:.06)); }catch(e){} }
+function openSound(){ menu(['効果音：'+(SND.se?'あり':'なし'),'曲：（まだ ない）','戻る'],'音',(k)=>{ if(k===0){ SND.se=!SND.se; openSound(); } else openFieldMenu(); },()=>openFieldMenu()); }
+// ---- 宝箱 ----
+const CHESTS={town:[{x:20.5,z:17.5,gold:25,id:'c1'}], farm:[{x:2.5,z:12.5,herb:1,id:'c2'}]};
 
 function resize(){ const v=document.getElementById('view'); const w=v.clientWidth,h=v.clientHeight; R.setSize(w,h,false); C.aspect=w/h; C.updateProjectionMatrix(); batCam.aspect=w/h; batCam.updateProjectionMatrix(); }
 addEventListener('resize',()=>{resize(); if(cur.kind==='world') resize2();}); resize();
