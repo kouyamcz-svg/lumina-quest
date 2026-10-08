@@ -303,14 +303,14 @@ let msgDone=null;
 function say(lines,done){msgQ=lines.slice();msgDone=done||null;msgEl.style.display='block';msgEl.textContent=msgQ.shift();}
 function closeMsg(){ msgQ=null; msgEl.style.display='none'; const d=msgDone; msgDone=null; d&&d(); }
 function pressA(){ if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='menu'){ se('ok'); battleCmd(); } return; }
-  if(MENU){ MENU.onPick(MENU.sel); return; }
+  if(MENU){ se('ok'); MENU.onPick(MENU.sel); return; }
   if(msgQ){ if(msgQ.length) msgEl.textContent=msgQ.shift(); else closeMsg(); return; }
   const fx=Math.sin(hero.ang), fz=Math.cos(hero.ang); let best=null,bd=1e9;
   cur.npcs.forEach(n=>{const dx=n.x-hero.x,dz=n.y-hero.z;const d=Math.hypot(dx,dz);const dot=(dx*fx+dz*fz)/(d||1);if(d<1.5&&dot>0.4&&d<bd){bd=d;best=n;}});
-  if(best){ best.ang=Math.atan2(hero.x-best.x,hero.z-best.y); if(best.talk){ best.talk(best); return; } say([best.name+'：'].concat(best.lines)); return; }
+  if(best){ se('cue'); best.ang=Math.atan2(hero.x-best.x,hero.z-best.y); if(best.talk){ best.talk(best); return; } say([best.name+'：'].concat(best.lines)); return; }
   if(examine()) return;
   say(['……なにも ない。']); }
-function pressB(){ if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='item'){ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); } return; } if(MENU){ MENU.onBack&&MENU.onBack(); return; } if(msgQ){ closeMsg(); } }
+function pressB(){ if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='item'){ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); } return; } if(MENU){ se('cancel'); MENU.onBack&&MENU.onBack(); return; } if(msgQ){ closeMsg(); } }
 // ================= 動き =================
 const SPEED=3.2, DASH=1.8, RADT=0.38;   // DASH：町の 中で Bを 押して いる 間の 速さの 倍
 const at=(x,y)=>{ const r=cur.rows; return (y<0||y>=r.length||x<0||x>=r[0].length)?'#':r[y][x]; };
@@ -347,9 +347,9 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
     if(cur.kind==='world'){ const c=at(Math.floor(hero.x),Math.floor(hero.z)); if(c==='V' && iz<0) go(()=>leaveWorldToTown());
       if(c==='C') { if(ST.phase==='road') go(()=>enterCastle()); else { hero.z+=0.6; say(['王都 アルディア。今は 用が ない。']); } } }
     else if(cur.kind==='town'){ DOORS.forEach(([dx,dy],i)=>{ if(!busyDoor && Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2 && iz<0){   // ★扉の すぐ 前だけ（前は 扉より 北なら どこでも 入って しまった） busyDoor=1;
-        swing(doorPiv[i],0,OPEN,.28,0,()=>go(()=>{ lastDoor=i; enterRoom(i); swing(roomDoor,OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }); }
+        se('door'); swing(doorPiv[i],0,OPEN,.28,0,()=>go(()=>{ lastDoor=i; enterRoom(i); swing(roomDoor,OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }); }
     else if(cur.kind==='room'){ const r=ROOMS[cur.room]; const xi=r.rows[r.rows.length-1].indexOf('X'); if(!busyDoor && Math.abs(hero.x-(xi+.5))<.4 && hero.z>r.rows.length-1.45 && iz>0){ busyDoor=1;
-        swing(roomDoor,0,OPEN,.28,0,()=>go(()=>{ const [dx,dy]=DOORS[lastDoor]; enterTown([dx+.5, dy+.95]); swing(doorPiv[lastDoor],OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }
+        se('door'); swing(roomDoor,0,OPEN,.28,0,()=>go(()=>{ const [dx,dy]=DOORS[lastDoor]; enterTown([dx+.5, dy+.95]); swing(doorPiv[lastDoor],OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }
   }
   let acc=0,k=1; followers.forEach((f,i)=>{ const want=.85*(i+1); while(k<trail.length-1){ const d=Math.hypot(trail[k][0]-trail[k-1][0],trail[k][1]-trail[k-1][1]); if(acc+d>=want) break; acc+=d; k++; } const t=trail[Math.min(k,trail.length-1)]; f.x+=(t[0]-f.x)*.5; f.z+=(t[1]-f.z)*.5; f.ang=t[2]; });
   if(cur.kind==='world'){ const moving=!!(ix||iz); if(moving) walkT+=dt; const fr=moving?[1,0,2,0][Math.floor(walkT*8)%4]:0; drawWorld(fr,now);
@@ -579,21 +579,21 @@ function startBattle(def,onWin){ def=def||FOES.nousagi;
   Object.keys(def.frames).forEach(k=>{ if(!enemyTex[def.key+k]){ const t=new THREE.TextureLoader().load(def.frames[k]); t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter; enemyTex[def.key+k]=t; } enemyTex[k]=enemyTex[def.key+k]; });
   setEnemyFrame('idle'); enemyMesh.position.set(0,0,0); enemyMesh.material.opacity=1; enemyMesh.visible=true; enemyMesh.userData.sh.visible=true;
   cv.style.display='block'; c2.style.display='none'; btEl.style.display='block'; document.getElementById('place').style.display='none'; document.getElementById('hint').style.display='none'; resize();
-  bsay(def.name+'が あらわれた！'); drawBattleUI();
+  bsay(def.name+'が あらわれた！'); drawBattleUI(); se('encounter');
   queue([()=>{ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; }],1.0); }
 function queue(fns,delay){ BT.steps=fns.slice(); BT.st=delay||0; }
 function enemyTurn(){ const alive=BT.party.filter(m=>m.hp>0); const t=alive[Math.floor(Math.random()*alive.length)];
   return [
    ()=>{ bsay(BT.ename+BT.def.wind); setEnemyFrame('wind'); BT.shake=.55; return .65; },         // 構え（震える）
-   ()=>{ setEnemyFrame('atk'); BT.lunge=1; BT.flash=1; BT.quake=.35; let d=BT.def.atk[0]+Math.floor(Math.random()*(BT.def.atk[1]-BT.def.atk[0]+1)); d=Math.max(1,d-Math.floor((t.defT||0)/4)); if(BT.guard) d=Math.ceil(d/2); se('hit');
+   ()=>{ setEnemyFrame('atk'); BT.lunge=1; BT.flash=1; BT.quake=.35; let d=BT.def.atk[0]+Math.floor(Math.random()*(BT.def.atk[1]-BT.def.atk[0]+1)); d=Math.max(1,d-Math.floor((t.defT||0)/4)); if(BT.guard) d=Math.ceil(d/2); se('ehit');
          t.hp=Math.max(0,t.hp-d); BT.hitIdx=BT.party.indexOf(t); bsay(BT.ename+'の '+BT.def.verb+'！ '+t.name+'に '+d+'の ダメージ！'); drawBattleUI(); return .45; },  // 攻撃（飛びかかる）
    ()=>{ setEnemyFrame('idle'); BT.hitIdx=-1; drawBattleUI(); return .6; },
-   ()=>{ BT.guard=false; if(BT.party.every(m=>m.hp<=0)){ bsay('目の 前が まっくらに なった……（体力を 戻して 続けます）'); BT.party.forEach(m=>m.hp=m.max); drawBattleUI(); return 1.4; } return 0; },
+   ()=>{ BT.guard=false; if(BT.party.every(m=>m.hp<=0)){ bsay('目の 前が まっくらに なった……（体力を 戻して 続けます）'); se('lose'); BT.party.forEach(m=>m.hp=m.max); drawBattleUI(); return 1.4; } return 0; },
    ()=>{ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; } ]; }
 function partyAttacks(){ const steps=[];
-  BT.party.forEach(m=>{ if(m.hp<=0) return; steps.push(()=>{ if(BT.ehp<=0) return 0; const d=m.atk+Math.floor(Math.random()*4); BT.ehp=Math.max(0,BT.ehp-d); BT.hurt=.35; bsay(m.name+'の こうげき！ '+BT.ename+'に '+d+'の ダメージ！'); return .75; }); });
-  steps.push(()=>{ if(BT.ehp<=0){ bsay(BT.ename+'を たおした！'); BT.ex=1; BT.dead=true; se('win'); return 1.3; } return 0; });
-  steps.push(()=>{ if(BT.ehp<=0){ const ex=BT.def.exp||0, gd=BT.def.gold||0; BAG.gold+=gd; const ups=gainExp(ex); bsay('経験値 '+ex+'、'+gd+'ゴールドを 手に 入れた！'+(ups.length?'　'+ups.join('　'):'')); return ups.length?2.2:1.4; } return 0; });
+  BT.party.forEach(m=>{ if(m.hp<=0) return; steps.push(()=>{ if(BT.ehp<=0) return 0; const d=m.atk+Math.floor(Math.random()*4); BT.ehp=Math.max(0,BT.ehp-d); BT.hurt=.35; se('hit'); bsay(m.name+'の こうげき！ '+BT.ename+'に '+d+'の ダメージ！'); return .75; }); });
+  steps.push(()=>{ if(BT.ehp<=0){ bsay(BT.ename+'を たおした！'); BT.ex=1; BT.dead=true; se('defeat'); setTimeout(()=>se('win'),500); return 1.3; } return 0; });
+  steps.push(()=>{ if(BT.ehp<=0){ const ex=BT.def.exp||0, gd=BT.def.gold||0; BAG.gold+=gd; const ups=gainExp(ex); if(ups.length) setTimeout(()=>se('lvup'),300); bsay('経験値 '+ex+'、'+gd+'ゴールドを 手に 入れた！'+(ups.length?'　'+ups.join('　'):'')); return ups.length?2.2:1.4; } return 0; });
   steps.push(()=>{ if(BT.ehp<=0){ endBattle(); return 99; } BT.steps.push(...enemyTurn()); return 0; });
   return steps; }
 function battleCmd(){ const c=CMDS[BT.sel]; BT.phase='act'; drawBattleUI();
@@ -602,7 +602,7 @@ function battleCmd(){ const c=CMDS[BT.sel]; BT.phase='act'; drawBattleUI();
   if(c==='どうぐ'){ if(BAG.herbs<=0){ BT.phase='menu'; bsay('道具を なにも もって いない。'); drawBattleUI(); return; }
     const m=BT.party[0]; queue([()=>{ const r=useHerb(m); bsay(r.join(' ')); drawBattleUI(); return .9; }, ...enemyTurn()],0); return; }
   if(c==='にげる' && BT.def.boss){ queue([()=>{ bsay('逃げられない！'); return .8; }, ...enemyTurn()],0); return; }
-  if(c==='にげる') queue([()=>{ bsay('エルトたちは 逃げだした！'); return .7; }, ()=>{ if(Math.random()<.75){ endBattle(); return 99; } bsay('しかし まわりこまれて しまった！'); BT.steps.push(...enemyTurn()); return .7; }],0); }
+  if(c==='にげる') queue([()=>{ bsay('エルトたちは 逃げだした！'); se('flee'); return .7; }, ()=>{ if(Math.random()<.75){ endBattle(); return 99; } bsay('しかし まわりこまれて しまった！'); BT.steps.push(...enemyTurn()); return .7; }],0); }
 function endBattle(){ const win=BT&&BT.ehp<=0, cb=BT&&BT.onWin; BT=null; btEl.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display=''; if(cur.kind==='world'){ cv.style.display='none'; c2.style.display='block'; resize2(); } else { cv.style.display='block'; c2.style.display='none'; resize(); }
   if(win && cb) cb(); }
 let lastDirY=0;
@@ -714,7 +714,7 @@ function enterFarm(){ if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]
   hero.x=12; hero.z=FARM.length-1.6; hero.ang=Math.PI; resetTrail(); wWalk=0; wEnc=6+Math.random()*6;
   document.getElementById('place').textContent='村の 北の 畑'; }
 function examine(){   // 向いて いる 先の 物を 調べる（宝箱・畑の 倉）
-  for(const c of (CHESTS[cur.kind]||[])){ if(Math.hypot(c.x-hero.x,c.z-hero.z)<1.1){ if(BAG.opened[c.id]){ say(['空っぽだ。']); return true; } BAG.opened[c.id]=1; se('ok');
+  for(const c of (CHESTS[cur.kind]||[])){ if(Math.hypot(c.x-hero.x,c.z-hero.z)<1.1){ if(BAG.opened[c.id]){ say(['空っぽだ。']); return true; } BAG.opened[c.id]=1; se('chest');
       if(c.gold){ BAG.gold+=c.gold; say(['宝箱を 開けた。',c.gold+'ゴールドを 手に 入れた！']); } else { BAG.herbs+=c.herb; say(['宝箱を 開けた。','薬草を 手に 入れた！']); } chestMesh(cur.kind); return true; } }
   if(cur.kind==='farm' && Math.abs(hero.x-19)<1.4 && hero.z<8.9 && hero.z>8 && Math.cos(hero.ang)<-.5){
     if(ST.phase==='field'){ say(['古い 倉の 扉を 開けた。','埃を かぶった 麦袋が 積まれて いる。','袋には、色あせた 紋。……ヴェルナの 紋だ。','エルト「昔、ヴェルナが 贈って くれた 麦……？」','そのとき、村の 方角から 鐘の 音が 鳴り響いた。','エルト「……警鐘！」'],()=>{ ST.phase='raid'; say(['＊ 急いで 村へ 戻ろう（南の 出口） ＊']); }); }
@@ -782,13 +782,13 @@ function openFieldMenu(){ if(msgQ||BT||fading||ST.phase==='end') return;
 function openItems(){ const opts=[]; if(BAG.herbs>0) opts.push('薬草　'+BAG.herbs); opts.push('戻る');
   if(BAG.herbs<=0){ closeMenu(); say(['道具を なにも もって いない。'],openFieldMenu); return; }
   menu(opts,'道具',(k)=>{ if(k===0&&BAG.herbs>0){ closeMenu(); say(useHerb(STATS.elt),openItems); } else openFieldMenu(); }, ()=>openFieldMenu()); }
-function useHerb(m){ if(m.hp>=m.max) return [m.name+'の HPは 減って いない。']; BAG.herbs--; const h=Math.min(30,m.max-m.hp); m.hp+=h; return [m.name+'は 薬草を 使った。','HPが '+h+' 回復した！']; }
+function useHerb(m){ if(m.hp>=m.max) return [m.name+'の HPは 減って いない。']; BAG.herbs--; const h=Math.min(30,m.max-m.hp); m.hp+=h; se('item'); return [m.name+'は 薬草を 使った。','HPが '+h+' 回復した！']; }
 function menuInput(iy){ if(!MENU) return; if(iy!==0 && iy!==menuLastY){ se('cursor'); MENU.sel=(MENU.sel+(iy>0?1:-1)+MENU.items.length)%MENU.items.length; drawMenu(); } menuLastY=iy; }
 let menuLastY=0;
 // ---- セーブ（この 端末の ブラウザに 残す）----
 function saveGame(){ try{ localStorage.setItem('lq5save', JSON.stringify({ST,STATS,BAG,EQUIP,tactic,SND,at:{kind:cur.kind,x:hero.x,z:hero.z}})); return true; }catch(e){ return false; } }
 function loadGame(){ try{ const d=JSON.parse(localStorage.getItem('lq5save')||'null'); if(!d) return false;
-  Object.assign(ST,d.ST); Object.assign(STATS.elt,d.STATS.elt); Object.assign(BAG,d.BAG); Object.assign(EQUIP.elt,d.EQUIP.elt); if(!BAG.gear) BAG.gear=[]; if(!BAG.opened) BAG.opened={}; if(d.tactic) tactic=d.tactic; if(d.SND) SND=Object.assign({se:true,bgm:true},d.SND); if(STATS.elt.lv===undefined){ Object.assign(STATS.elt,{lv:1,exp:0,maxmp:6,batk:3,def:3,agi:6}); } syncAtk();
+  Object.assign(ST,d.ST); Object.assign(STATS.elt,d.STATS.elt); Object.assign(BAG,d.BAG); Object.assign(EQUIP.elt,d.EQUIP.elt); if(!BAG.gear) BAG.gear=[]; if(!BAG.opened) BAG.opened={}; if(d.tactic) tactic=d.tactic; if(d.SND){ const o=d.SND; SND={bgm: typeof o.bgm==='number'?o.bgm:(o.bgm===false?0:.6), se: typeof o.se==='number'?o.se:(o.se===false?0:.6), mix:!!o.mix}; } if(STATS.elt.lv===undefined){ Object.assign(STATS.elt,{lv:1,exp:0,maxmp:6,batk:3,def:3,agi:6}); } syncAtk();
   const k=d.at.kind; if(k==='world') enterWorld([d.at.x,d.at.z]); else if(k==='farm'){ enterFarm(); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='castle'){ enterCastle(); } else enterTown([d.at.x,d.at.z]);
   return true; }catch(e){ return false; } }
 function hasSave(){ try{ return !!localStorage.getItem('lq5save'); }catch(e){ return false; } }
@@ -810,7 +810,7 @@ function openShop(which,greet){ const list=SHOP[which];
       if(i>=list.length){ openShop(which,greet); return; } const it=list[i];
       if(BAG.gold<it.price){ closeMenu(); say(['お金が 足りない。'],()=>openShop(which,greet)); return; }
       BAG.gold-=it.price; if(it.kind==='herb') BAG.herbs++; else BAG.gear.push({name:it.name,kind:it.kind,v:it.v,price:it.price});
-      closeMenu(); se('ok'); say([it.name+'を 買った。'+(it.kind!=='herb'?'（メニューの 装備で 付け替えられる）':'')],()=>openShop(which,greet)); },()=>openShop(which,greet));
+      closeMenu(); se('buy'); say([it.name+'を 買った。'+(it.kind!=='herb'?'（メニューの 装備で 付け替えられる）':'')],()=>openShop(which,greet)); },()=>openShop(which,greet));
     else if(k===1){ const sell=BAG.gear.map((g,i)=>({label:g.name+'　'+Math.floor(g.price/2)+'G',i})); if(BAG.herbs>0) sell.push({label:'薬草　4G',i:-1});
       if(!sell.length){ closeMenu(); say(['売れる ものが ない。'],()=>openShop(which,greet)); return; }
       menu(sell.map(x=>x.label).concat(['戻る']),'売る',(j)=>{ if(j>=sell.length){ openShop(which,greet); return; } const x=sell[j];
@@ -840,11 +840,45 @@ function closeMap(){ document.getElementById('mapview').style.display='none'; ma
 const TACTICS={gungan:'ガンガン いこうぜ', balance:'バランス よく', inochi:'いのち だいじに', jumon:'じゅもん つかうな'};
 let tactic='balance';
 function openTactics(){ const ks=Object.keys(TACTICS); menu(ks.map(k=>(k===tactic?'▶':'')+TACTICS[k]).concat(['戻る']),'作戦',(i)=>{ if(i>=ks.length){ openFieldMenu(); return; } tactic=ks[i]; closeMenu(); say(['作戦を 「'+TACTICS[ks[i]]+'」に した。','（序章は エルト 1人なので、仲間が 加わってから 効く）'],openFieldMenu); },()=>openFieldMenu()); }
-// ---- 音（効果音。Ⅳと 同じく 短い 電子音）----
-let SND={se:true, bgm:true}; let actx=null;
-function se(kind){ if(!SND.se) return; try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); const o=actx.createOscillator(), g=actx.createGain(); o.type='square';
-  const f={cursor:880,ok:1320,hit:220,win:660}[kind]||880; o.frequency.value=f; g.gain.value=.05; o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+(kind==='hit'?.12:.06)); }catch(e){} }
-function openSound(){ menu(['効果音：'+(SND.se?'あり':'なし'),'曲：'+(SND.bgm?'あり':'なし'),'戻る'],'音',(k)=>{ if(k===0){ SND.se=!SND.se; openSound(); } else if(k===1){ SND.bgm=!SND.bgm; bgmUpdate(); openSound(); } else openFieldMenu(); },()=>openFieldMenu()); }
+// ---- 音（Ⅳの 効果音と 音の 設定を そのまま 写した もの）----
+let SND={bgm:.6, se:.6, mix:false}; let actx=null, noiseB=null;
+function sctx(){ try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); if(actx.state!=='running') actx.resume(); return actx; }catch(e){ return null; } }
+function tone(f,d,type,v,w,f2){ const ac=sctx(); if(!ac||SND.se<=0) return; v*=SND.se/.6; const t0=ac.currentTime+(w||0); const o=ac.createOscillator(), g=ac.createGain(); o.type=type||'square';
+  o.frequency.setValueAtTime(f,t0); if(f2) o.frequency.exponentialRampToValueAtTime(Math.max(20,f2),t0+d);
+  g.gain.setValueAtTime(.0001,t0); g.gain.exponentialRampToValueAtTime(Math.max(.0002,v),t0+.004); g.gain.exponentialRampToValueAtTime(.0008,t0+d);
+  o.connect(g); g.connect(ac.destination); o.start(t0); o.stop(t0+d+.02); }
+function noise(d,v,w,hp,lp){ const ac=sctx(); if(!ac||SND.se<=0) return; v*=SND.se/.6;
+  if(!noiseB){ noiseB=ac.createBuffer(1,ac.sampleRate*.6,ac.sampleRate); const a=noiseB.getChannelData(0); for(let i=0;i<a.length;i++) a[i]=Math.random()*2-1; }
+  const t0=ac.currentTime+(w||0); const sN=ac.createBufferSource(); sN.buffer=noiseB; const g=ac.createGain(); let node=sN;
+  if(hp){ const f=ac.createBiquadFilter(); f.type='highpass'; f.frequency.setValueAtTime(hp,t0); node.connect(f); node=f; }
+  if(lp){ const f=ac.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(lp,t0); f.frequency.exponentialRampToValueAtTime(Math.max(200,lp*.25),t0+d); node.connect(f); node=f; }
+  g.gain.setValueAtTime(v,t0); g.gain.exponentialRampToValueAtTime(.0008,t0+d); node.connect(g); g.connect(ac.destination); sN.start(t0); sN.stop(t0+d+.02); }
+function arp(fs,step,dur,type,v,w){ fs.forEach((f,i)=>tone(f,dur,type,v,(w||0)+i*step)); }
+const SE={
+  cursor(){ tone(880,.05,'square',.05); }, ok(){ tone(880,.05,'square',.06); tone(1319,.09,'square',.055,.045); }, cancel(){ tone(660,.06,'square',.05); tone(440,.09,'square',.045,.05); },
+  cue(){ tone(523,.06,'square',.05); tone(784,.08,'square',.045,.05); }, door(){ tone(392,.07,'square',.05); tone(523,.07,'square',.05,.06); noise(.10,.05,0,900,3000); },
+  chest(){ arp([523,659,784,1047],.055,.13,'square',.055); tone(1568,.22,'triangle',.05,.24); }, item(){ tone(784,.08,'triangle',.06); tone(1047,.12,'triangle',.05,.07); },
+  buy(){ tone(1047,.06,'square',.055); tone(1319,.06,'square',.05,.05); tone(1568,.10,'square',.045,.10); },
+  encounter(){ tone(196,.10,'square',.07); tone(262,.10,'square',.07,.09); tone(392,.16,'square',.07,.18); noise(.20,.05,.18,600,4000); },
+  hit(){ noise(.10,.10,0,300,2600); tone(160,.13,'square',.08,0,60); }, ehit(){ noise(.12,.11,.16,180,1600); tone(110,.20,'triangle',.09,.17,45); },
+  defeat(){ tone(300,.22,'square',.06,0,90); noise(.22,.05,.02,300,2200); }, flee(){ tone(880,.10,'square',.05,0,300); tone(660,.14,'square',.045,.08,220); },
+  win(){ arp([523,659,784,1047],.09,.20,'square',.055); tone(1319,.40,'square',.05,.36); },
+  lvup(){ arp([523,659,784,1047,1319],.085,.18,'square',.055); tone(1568,.45,'square',.05,.43); tone(1047,.45,'square',.035,.43); },
+  lose(){ [392,349,294,247,196].forEach((f,i)=>tone(f,.34,'triangle',.06,i*.20)); noise(.5,.03,.9,120,900); },
+};
+function se(kind){ try{ (SE[kind]||SE.cursor)(); }catch(e){} }
+const bar=(v)=>{ const n=Math.round(v*10); return '■'.repeat(n)+'□'.repeat(10-n)+' '+n; };
+const mixOK=()=>{ try{ return !!(navigator.audioSession && 'type' in navigator.audioSession); }catch(e){ return false; } };
+function applyMix(){ if(mixOK() && actx){ try{ navigator.audioSession.type = SND.mix ? 'ambient' : 'auto'; }catch(e){} } }
+function openSound(){ const mixLabel=!mixOK()?'ほかの 音楽と 混ぜる　（使えません）':(SND.mix?'ほかの 音楽と 混ぜる　オン':'ほかの 音楽と 混ぜる　オフ');
+  menu(['音楽　'+bar(SND.bgm),'効果音　'+bar(SND.se),mixLabel,'戻る'],'音の 設定',(k)=>{
+    if(k===0) tuneSound('bgm','音楽'); else if(k===1) tuneSound('se','効果音'); else if(k===2) toggleMix(); else openFieldMenu(); },()=>openFieldMenu()); }
+function tuneSound(key,label){ const items=['小さく　◀','大きく　▶','消す','戻る'];
+  const show=()=>menu(items,label+'　'+bar(SND[key]),(k)=>{ if(k===0) SND[key]=Math.max(0,Math.round(SND[key]*10-1)/10); else if(k===1) SND[key]=Math.min(1,Math.round(SND[key]*10+1)/10); else if(k===2) SND[key]=0; else { openSound(); return; }
+    if(key==='se') se('ok'); bgmUpdate(); show(); },()=>openSound()); show(); }
+function toggleMix(){ closeMenu(); if(!mixOK()){ say(['この ブラウザでは まだ 使えません。','ほかの アプリの 音楽は 止まって しまいます。','（iOS 16.4 より あとの Safari で 使えます）'],openSound); return; }
+  SND.mix=!SND.mix; const lines=[]; if(SND.mix){ if(SND.bgm>0){ SND.bgm=0; lines.push('ゲームの 音楽を 消しました。'); } lines.unshift('ほかの アプリの 音楽を 止めなく なりました。'); lines.push('効果音は そのまま 鳴ります。','両方 聞きたい ときは 「音楽」を 上げて ください。'); }
+  else lines.push('ほかの アプリの 音楽を 止める ように 戻しました。'); applyMix(); bgmUpdate(); say(lines,openSound); }
 // ---- 宝箱 ----
 const CHESTS={town:[{x:20.5,z:17.5,gold:25,id:'c1'}], farm:[{x:2.5,z:12.5,herb:1,id:'c2'}]};
 
@@ -856,11 +890,11 @@ let bgmEl=null, bgmNow='', bgmUnlocked=false;
 function bgmFor(){ if(BT) return BT.def.boss?'boss':'battle';
   if(cur.kind==='world') return 'field'; if(cur.kind==='farm') return 'field'; if(cur.kind==='castle') return 'castle';
   if(cur.kind==='town' && (ST.phase==='burn')) return 'dungeon'; return 'town'; }
-function bgmUpdate(){ if(!SND.bgm || !bgmUnlocked){ if(bgmEl && !bgmEl.paused) bgmEl.pause(); return; }
-  const want=bgmFor(); if(want===bgmNow && bgmEl && !bgmEl.paused) return;
+function bgmUpdate(){ if(SND.bgm<=0 || !bgmUnlocked){ if(bgmEl && !bgmEl.paused) bgmEl.pause(); return; }
+  const want=bgmFor(); if(want===bgmNow && bgmEl && !bgmEl.paused){ bgmEl.volume=Math.min(1,(BGM_VOL[want]||.5)*SND.bgm/.6); return; }   // ★大きさは 毎回 合わせる
   try{ if(!bgmEl){ bgmEl=new Audio(); bgmEl.loop=true; }
     if(want!==bgmNow){ bgmEl.src=BGM_FILES[want]; bgmNow=want; }
-    bgmEl.volume=BGM_VOL[want]||.5; const p=bgmEl.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
+    bgmEl.volume=Math.min(1,(BGM_VOL[want]||.5)*SND.bgm/.6); const p=bgmEl.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
 // iPhone などは 画面に 触れた 後で ないと 音が 出せない
 ['touchstart','mousedown','keydown'].forEach(ev=>addEventListener(ev,()=>{ if(!bgmUnlocked){ bgmUnlocked=true; bgmUpdate(); } },{passive:true}));
 setInterval(bgmUpdate,500);
