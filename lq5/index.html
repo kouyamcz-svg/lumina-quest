@@ -316,7 +316,9 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   if(ix||iz){ const l=Math.hypot(ix,iz), vx=ix/l, vz=iz/l; hero.ang=Math.atan2(vx,vz);
     const dash = cur.kind==='town' && (holdB || keys.x || keys.Shift);
     const st=SPEED*(dash?DASH:1)*(cur.kind==='world'?.8:1)*dt, ox=hero.x, oz=hero.z;
-    if(freeCircle(hero.x+vx*st,hero.z)) hero.x+=vx*st; if(freeCircle(hero.x,hero.z+vz*st)) hero.z+=vz*st;
+    // ★今いる 場所が 人や 物と 重なって いる（はじまりの 位置・人が 現れた 直後）ときは、当たりを 見ずに 動かして 抜け出させる
+    const stuck=!freeCircle(hero.x,hero.z);
+    if(stuck||freeCircle(hero.x+vx*st,hero.z)) hero.x+=vx*st; if(stuck||freeCircle(hero.x,hero.z+vz*st)) hero.z+=vz*st;
     const mv=Math.hypot(hero.x-ox,hero.z-oz);
     if(mv>.001){ trail.unshift([hero.x,hero.z,hero.ang]); if(trail.length>400) trail.pop(); }
     if(cur.kind==='world' && mv>.001){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))===','?1.5:1);
@@ -732,7 +734,7 @@ function showEnd(){ ST.phase='end'; const c=document.getElementById('card'); c.i
 
 function resize(){ const v=document.getElementById('view'); const w=v.clientWidth,h=v.clientHeight; R.setSize(w,h,false); C.aspect=w/h; C.updateProjectionMatrix(); batCam.aspect=w/h; batCam.updateProjectionMatrix(); }
 addEventListener('resize',()=>{resize(); if(cur.kind==='world') resize2();}); resize();
-loadImgs(()=>{ hero.p=person('elt'); followers=PARTY.slice(1).map(k=>({p:person(k),x:hero.x,z:hero.z,ang:Math.PI})); hero.x=12; hero.z=3.2; hero.ang=0; enterTown(null);
+loadImgs(()=>{ hero.p=person('elt'); followers=PARTY.slice(1).map(k=>({p:person(k),x:hero.x,z:hero.z,ang:Math.PI})); hero.x=12; hero.z=4.4; hero.ang=Math.PI; enterTown(null);   // ★ガイル（12.5,2.6）と 重ならない 位置から
   C.position.set(hero.x,10.5,hero.z+6.2); requestAnimationFrame(tick);
   setTimeout(()=>say(['── 国境の村 ルーエ ──','見張り櫓の 当番を 終えた 朝。','エルトは、師匠 ガイルに 呼ばれて いた。','＊ 村の 北の 入口に いる ガイルに 話しかけよう ＊']),300); });
 </script></body></html>
