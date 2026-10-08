@@ -36,6 +36,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 @keyframes hit{0%{transform:translateY(0)}30%{transform:translateY(5px)}60%{transform:translateY(-3px)}100%{transform:translateY(0)}}
 #bmenu{position:absolute;left:6px;bottom:84px;width:44%;border:2px solid var(--line);background:rgba(10,8,18,.92);border-radius:6px;padding:8px 10px;font-size:16px;line-height:1.9}
 #bmenu .on{color:var(--gold)}
+#bmenu .mt{font-size:12px;color:var(--dim);border-bottom:1px solid #4a4070;margin-bottom:2px}
 #bmsg{position:absolute;left:6px;right:6px;bottom:6px;min-height:3.2em;border:2px solid var(--line);background:rgba(10,8,18,.92);border-radius:6px;padding:10px 12px;font-size:15px;line-height:1.6}
 #card{position:absolute;inset:0;background:#000;color:#f4efe0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:18px;opacity:0;transition:opacity 1.5s;pointer-events:none;letter-spacing:.2em}
 #card .t{font-size:30px}
@@ -47,7 +48,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 </style></head><body>
 <div id="wrap">
  <div id="view"><canvas id="c"></canvas><canvas id="c2" style="display:none"></canvas><div id="place">国境の村 ルーエ</div>
-  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="flash"></div><div id="bmark">▼</div><div id="mapview"></div><div id="fmenu"></div><div id="card"></div>
+  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="flash"></div><div id="mapview"></div><div id="fmenu"></div><div id="card"></div>
   <div id="bt"><div id="bparty"></div><div id="bmenu"></div><div id="bmsg"></div></div></div>
  <div id="pad">
   <div id="dpad"><div class="k u">▲</div><div class="k l">◀</div><div class="k r">▶</div><div class="k d">▼</div></div>
@@ -585,12 +586,13 @@ function buildBattleBg(){
 const FM=[];
 function foeTex(def,k){ const key=def.key+k; if(!enemyTex[key]){ const t=new THREE.TextureLoader().load(def.frames[k]); t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter; enemyTex[key]=t; } return enemyTex[key]; }
 function setFoeFrame(f,k){ if(!f.def.frames[k]) k='idle'; f.frame=k; const t=foeTex(f.def,k); f.mesh.material.map=t; f.mesh.material.needsUpdate=true; const img=t.image; f.ar=img&&img.width?img.width/img.height:.8; }
-const btEl=document.getElementById('bt'), bmsg=document.getElementById('bmsg'), bmenu=document.getElementById('bmenu'), bparty=document.getElementById('bparty'), flashEl=document.getElementById('flash'), bmark=document.getElementById('bmark');
+const btEl=document.getElementById('bt'), bmsg=document.getElementById('bmsg'), bmenu=document.getElementById('bmenu'), bparty=document.getElementById('bparty'), flashEl=document.getElementById('flash'), bmark={style:{}};
 const CMDS=['たたかう','ぼうぎょ','どうぐ','にげる'];
 function partyHtml(){ return BT.party.map((m,i)=>`<div class="pm${m.hp<=0?' down':''}${BT.hitIdx===i?' hit':''}"><b>${m.name}</b><br>HP ${m.hp}<br>MP ${m.mp}</div>`).join(''); }
-function drawBattleUI(){ bparty.innerHTML=partyHtml(); bmenu.style.display = BT.phase==='menu' ? 'block':'none';
-  bmenu.innerHTML=CMDS.map((c,i)=>`<div class="${i===BT.sel?'on':''}">${i===BT.sel?'▶':'　'}${c}</div>`).join('');
-  bmark.style.display = BT.phase==='target' ? 'block':'none'; }
+function drawBattleUI(){ bparty.innerHTML=partyHtml(); bmenu.style.display = (BT.phase==='menu'||BT.phase==='target') ? 'block':'none';
+  // ★ねらう 魔物は 名前の 一覧から 選ぶ（前は 魔物の 頭の 上に ▼ を 出して いた）
+  if(BT.phase==='target'){ const al=alive(); bmenu.innerHTML='<div class="mt">ねらう 魔物</div>'+al.map(f=>{ const on=BT.foes.indexOf(f)===BT.tsel; return `<div class="${on?'on':''}">${on?'▶':'　'}${f.name}</div>`; }).join(''); }
+  else bmenu.innerHTML=CMDS.map((c,i)=>`<div class="${i===BT.sel?'on':''}">${i===BT.sel?'▶':'　'}${c}</div>`).join(''); }
 function bsay(t){ bmsg.textContent=t; }
 const alive=()=>BT.foes.filter(f=>!f.dead);
 // ★出る 数の 上限：仲間 1人＝2体、2人＝3体、3人 以上＝4体
@@ -639,7 +641,7 @@ function partyAttacks(target){ const steps=[];
   steps.push(()=>{ if(!alive().length){ BT.steps=winSteps(); return 0; } BT.steps.push(...enemyTurn()); return 0; });
   return steps; }
 function battleCmd(){ const c=CMDS[BT.sel];
-  if(c==='たたかう'){ if(alive().length>1){ BT.phase='target'; BT.tsel=BT.foes.indexOf(alive()[0]); bsay('どの 魔物を ねらう？（十字の 左右で 選び、Aで 決定）'); drawBattleUI(); return; }
+  if(c==='たたかう'){ if(alive().length>1){ BT.phase='target'; BT.tsel=BT.foes.indexOf(alive()[0]); bsay('どの 魔物を ねらう？'); drawBattleUI(); return; }
     BT.phase='act'; drawBattleUI(); queue(partyAttacks(alive()[0]),0); return; }
   BT.phase='act'; drawBattleUI();
   if(c==='ぼうぎょ'){ BT.guard=true; queue([()=>{ bsay('みんなは 身を 守って いる。'); return .7; }, ...enemyTurn()],0); }
@@ -653,7 +655,7 @@ function endBattle(){ const win=BT&&BT.foes.every(f=>f.dead), cb=BT&&BT.onWin; B
 let lastDirY=0, lastDirX=0;
 function battleInput(iy,ix){ if(!BT) return;
   if(BT.phase==='menu'){ if(iy!==0 && iy!==lastDirY){ se('cursor'); BT.sel=(BT.sel+(iy>0?1:-1)+CMDS.length)%CMDS.length; drawBattleUI(); } }
-  if(BT.phase==='target' && ix!==0 && ix!==lastDirX){ const al=alive(); let k=al.indexOf(BT.foes[BT.tsel]); k=(k+(ix>0?1:-1)+al.length)%al.length; BT.tsel=BT.foes.indexOf(al[k]); se('cursor'); }
+  if(BT.phase==='target' && iy!==0 && iy!==lastDirY){ const al=alive(); let k=al.indexOf(BT.foes[BT.tsel]); k=(k+(iy>0?1:-1)+al.length)%al.length; BT.tsel=BT.foes.indexOf(al[k]); se('cursor'); drawBattleUI(); }
   lastDirY=iy; lastDirX=ix; }
 const EZ=-1.1;   // ★魔物の 立つ 位置（奥へ。前は 0 で 大きく 映りすぎた）
 const _v=new THREE.Vector3();
@@ -680,9 +682,6 @@ function battleTick(dt,now){
   flashEl.style.opacity=BT.flash*.7;
   const q=BT.quake>0?Math.sin(now/18)*.06:0;
   batCam.position.set(q,1.25,4.3); batCam.lookAt(0,.95,0);
-  // ねらう 印（魔物の 頭の 上）
-  if(BT.phase==='target'){ const f=BT.foes[BT.tsel]; _v.set(f.mesh.position.x, f.mesh.position.y+f.mesh.scale.y+.1, f.mesh.position.z).project(batCam);
-    const r=cv.getBoundingClientRect(); bmark.style.left=((_v.x+1)/2*r.width-10)+'px'; bmark.style.top=((1-_v.y)/2*r.height-26+Math.sin(now/150)*3)+'px'; }
   R.render(batScene,batCam); }
 
 // ================= 序章「燃える国境」 =================
