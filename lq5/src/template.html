@@ -929,7 +929,7 @@ function bgmUpdate(){ if(SND.bgm<=0 || !bgmUnlocked){ if(bgmEl && !bgmEl.paused)
 setInterval(bgmUpdate,500);
 
 // ================= 第1章「和平の 使者」 =================
-//  c1_castle（王に 呼ばれる。使者 オルト（仮）の 護衛を 命じられる）→ c1_road（街道を 東の 国境の 砦へ）
+//  c1_castle（王に 呼ばれる。使者 ハーヴェン（仮）の 護衛を 命じられる）→ c1_road（街道を 東の 国境の 砦へ）
 //  → c1_fort（砦の 中。奥の 番兵を 倒す）→ c1_east（砦を 抜け、ヴェルナの 鉱山の 町へ）→ c1_town（町の 人と 話す）→ c1_end
 let TOWN_NOW='rue';
 FOES.haiusagi={key:'haiusagi', name:'砦ネズミ（仮の 絵）', hp:26, exp:10, gold:6, atk:[4,7], wind:'は 歯を むいた！', verb:'かみつき', tint:0x9a9aa8, frames:{idle:RAB.idle,wind:RAB.wind,atk:RAB.atk}};
@@ -940,7 +940,7 @@ function startCh1(){ const c=document.getElementById('card'); c.style.opacity=0;
 function setEscort(on){ followers.forEach(f=>{ S.remove(f.p.m); S.remove(f.p.sh); }); followers=[];
   if(on){ followers=[{p:person('elder'),x:hero.x,z:hero.z,ang:hero.ang}]; } resetTrail(); }
 const ESCORT=()=>/^c1_(road|fort|east|town)$/.test(ST.phase);
-function kingCh1(){ say(['アルディア王「エルト。そなたに 頼みが ある」','アルディア王「ヴェルナへ 送る 和平の 使者、オルトの 護衛だ」','使者 オルト「……よろしく 頼みますぞ、若い 兵士どの」','アルディア王「国境の 砦を 抜け、ヴェルナの 鉱山の 町 ドルムへ。そこで 帝国の 迎えを 待て」','＊ 使者 オルト（仮の 絵）が ついて くる ＊'],()=>{ ST.phase='c1_road'; setEscort(true); say(['＊ 王都を 出て、街道を 東の 国境の 砦へ ＊']); }); }
+function kingCh1(){ say(['アルディア王「エルト。そなたに 頼みが ある」','アルディア王「ヴェルナへ 送る 和平の 使者、ハーヴェンの 護衛だ」','使者 ハーヴェン「……よろしく 頼みますぞ、若い 兵士どの」','アルディア王「国境の 砦を 抜け、ヴェルナの 鉱山の 町 ドルムへ。そこで 帝国の 迎えを 待て」','＊ 使者 ハーヴェン（仮の 絵）が ついて くる ＊'],()=>{ ST.phase='c1_road'; setEscort(true); say(['＊ 王都を 出て、街道を 東の 国境の 砦へ ＊']); }); }
 // ---- 国境の 砦（3D の 迷路。奥に 番兵）----
 const FORT=[
 "###############",
@@ -966,14 +966,14 @@ function enterFort(fromEast){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m
   if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; fireMeshes=[]; buildFort();
   cur={kind:'fort', rows:FORT, solid:new Set(['#']), npcs:cur.npcs, room:null};
   setNpcs(ST.phase==='c1_fort'||ST.phase==='c1_road' ? [{x:13.5,y:3.4,spr:'vsoldier',name:'砦の 番兵（仮の 絵）',talk:()=>{
-    say(['番兵「…………」','鎧の 中から、人の 声では ない 音が した。','使者 オルト「こ、これは 人では ないぞ！」'],()=>startBattle(FOES.banpei,()=>{ ST.phase='c1_east'; setNpcs([]); say(['番兵の 鎧が 崩れ落ちた。中は からっぽだった。','使者 オルト「……ヴェルナの 砦に、なぜ こんな ものが」','＊ 奥の 出口から、ヴェルナ側へ 抜けられる ＊']); })); }}] : []);
+    say(['番兵「…………」','鎧の 中から、人の 声では ない 音が した。','使者 ハーヴェン「こ、これは 人では ないぞ！」'],()=>startBattle(FOES.banpei,()=>{ ST.phase='c1_east'; setNpcs([]); say(['番兵の 鎧が 崩れ落ちた。中は からっぽだった。','使者 ハーヴェン「……ヴェルナの 砦に、なぜ こんな ものが」','＊ 奥の 出口から、ヴェルナ側へ 抜けられる ＊']); })); }}] : []);
   if(ST.phase==='c1_road') ST.phase='c1_fort';
   if(fromEast){ hero.x=13.5; hero.z=1.6; hero.ang=Math.PI; } else { hero.x=6.5; hero.z=FORT.length-1.6; hero.ang=Math.PI; } resetTrail(); wWalk=0; wEnc=6+Math.random()*6;
   document.getElementById('place').textContent='国境の 砦'; resize(); }
 // ---- ヴェルナの 鉱山の 町 ドルム（村の 形を 使い回す）----
 function velnaNpcs(){ return [
   {x:12.5,y:6.2,spr:'elder',name:'町の 長',talk:()=>{ if(!ST.c1old){ say(['町の 長「アルディアの 使者どのか。……よく 来なさった」','町の 長「この 町の 者は、誰も 戦など 望んで おらん」','町の 長「南の 広場に いる 古い 兵の 話も、聞いて やって くだされ」']); return; }
-    say(['町の 長「帝都からの 迎えは、明日の 朝に 着く そうじゃ」','使者 オルト「……王が 人が 変わった、か」','使者 オルト「エルトどの。帝都で 何が 起きて いるのか、この目で 確かめねば なりませんな」'],()=>showEnd1()); }},
+    say(['町の 長「帝都からの 迎えは、明日の 朝に 着く そうじゃ」','使者 ハーヴェン「……王が 人が 変わった、か」','使者 ハーヴェン「エルトどの。帝都で 何が 起きて いるのか、この目で 確かめねば なりませんな」'],()=>showEnd1()); }},
   {x:17.5,y:11.5,spr:'vsoldier',name:'古い 兵',talk:()=>{ ST.c1old=1; say(['古い 兵「アルディアの 兵か。……昔、王は 国境の 村に 麦を 贈って いた」','古い 兵「飢えた 年に、隣の 国を 見捨てなかった 王だ」','古い 兵「それが 数年前から、まるで 人が 変わった ように……」']); }},
   {x:6.5,y:11.5,spr:'girl',name:'町の 娘',lines:['娘「戦なんて、誰も 望んで ないのに」']},
   {x:9.5,y:14.5,spr:'child',name:'町の 子',lines:['子「アルディアの 人？　ぜんぜん こわく ないや」']},
