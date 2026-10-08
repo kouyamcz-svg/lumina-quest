@@ -332,7 +332,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
     if(cur.kind==='castle' && hero.z>cur.rows.length-1.2 && iz>0){ go(()=>enterWorld([22.5,4.4])); }
     if(cur.kind==='world'){ const c=at(Math.floor(hero.x),Math.floor(hero.z)); if(c==='V' && iz<0) go(()=>leaveWorldToTown());
       if(c==='C') { if(ST.phase==='road') go(()=>enterCastle()); else { hero.z+=0.6; say(['王都 アルディア。今は 用が ない。']); } } }
-    else if(cur.kind==='town'){ DOORS.forEach(([dx,dy],i)=>{ if(!busyDoor && Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && iz<0){ busyDoor=1;
+    else if(cur.kind==='town'){ DOORS.forEach(([dx,dy],i)=>{ if(!busyDoor && Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2 && iz<0){   // ★扉の すぐ 前だけ（前は 扉より 北なら どこでも 入って しまった） busyDoor=1;
         swing(doorPiv[i],0,OPEN,.28,0,()=>go(()=>{ lastDoor=i; enterRoom(i); swing(roomDoor,OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }); }
     else if(cur.kind==='room'){ const r=ROOMS[cur.room]; const xi=r.rows[r.rows.length-1].indexOf('X'); if(!busyDoor && Math.abs(hero.x-(xi+.5))<.4 && hero.z>r.rows.length-1.45 && iz>0){ busyDoor=1;
         swing(roomDoor,0,OPEN,.28,0,()=>go(()=>{ const [dx,dy]=DOORS[lastDoor]; enterTown([dx+.5, dy+.95]); swing(doorPiv[lastDoor],OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }
