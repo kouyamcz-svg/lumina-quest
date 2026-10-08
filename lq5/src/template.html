@@ -51,6 +51,8 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 const SPR=__SPR__;
 // ★絵の 向きが 左向きで 描かれて いる こま（反転の 向きを 逆に する）。ドルガンの 描き直しの 斜め後ろは 左上を 向いて いた（横顔の 絵との 似かたで 確かめた）
 const MIRROR={dolgan:{diagB:true}};
+// ★人ごとの 背の 高さ（1＝大人）
+const SIZE={child:.72, elder:.9, girl:.92};
 // ================= 地図（ますの 並び。その 上を 自由に 動く）=================
 //  # 崖・外壁  H 家（ひとかたまりで 1けん）  D 家の 扉  t 木  F 噴水  w 井戸  = 石畳の 広場  g 村の 門
 const TOWN=[
@@ -248,7 +250,7 @@ function place(p,x,z,faceAng,step){
   if(SPR[p.k].diagF){ const e=Math.PI/8; pose = a<e?'front':a<3*e?'diagF':a<5*e?'side':a<7*e?'diagB':'back'; flip=(pose!=='front'&&pose!=='back')&&rel<0; if(MIRROR[p.k]&&MIRROR[p.k][pose]) flip=!flip; }
   else { if(a<Math.PI/4) pose='front'; else if(a>3*Math.PI/4) pose='back'; else { pose='side'; flip=rel<0; } }
   const f=step||0; if(p.pose!==pose||p.f!==f){ p.m.material.map=sprTex(p.k,pose,f); p.m.material.needsUpdate=true; p.pose=pose; p.f=f; }
-  const img=p.m.material.map.image; const ar=img&&img.width?img.width/img.height:.7; const hgt=1.35;
+  const img=p.m.material.map.image; const ar=img&&img.width?img.width/img.height:.7; const hgt=1.35*(SIZE[p.k]||1);
   p.m.scale.set((flip?-1:1)*hgt*ar,hgt,1); p.m.position.set(x,hgt/2+.02,z); p.m.quaternion.copy(C.quaternion); p.sh.position.set(x,.02,z); }
 // ================= 地図の 出入り =================
 let cur={kind:'town', rows:TOWN, solid:new Set(['#','H','t','F','w']), npcs:[], room:null};
@@ -547,7 +549,7 @@ function buildBattleBg(){
   batScene.add(enemyMesh);
   const sh=new THREE.Mesh(new THREE.CircleGeometry(.55,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.28,depthWrite:false})); sh.rotation.x=-Math.PI/2; sh.position.y=.02; batScene.add(sh); enemyMesh.userData.sh=sh;
   batBuilt=true; }
-function setEnemyFrame(k){ enemyMesh.material.map=enemyTex[k]; enemyMesh.material.needsUpdate=true; const img=enemyTex[k].image; const ar=img&&img.width?img.width/img.height:.8; enemyMesh.userData.ar=ar; }
+function setEnemyFrame(k){ if(BT) BT.frame=k; enemyMesh.material.map=enemyTex[k]; enemyMesh.material.needsUpdate=true; const img=enemyTex[k].image; const ar=img&&img.width?img.width/img.height:.8; enemyMesh.userData.ar=ar; }
 const btEl=document.getElementById('bt'), bmsg=document.getElementById('bmsg'), bmenu=document.getElementById('bmenu'), bparty=document.getElementById('bparty'), flashEl=document.getElementById('flash');
 const CMDS=['たたかう','ぼうぎょ','にげる'];
 function partyHtml(){ return BT.party.map((m,i)=>`<div class="pm${m.hp<=0?' down':''}${BT.hitIdx===i?' hit':''}"><b>${m.name}</b><br>HP ${m.hp}<br>MP ${m.mp}</div>`).join(''); }
@@ -558,7 +560,7 @@ function startBattle(def,onWin){ def=def||FOES.nousagi;
   if(!batBuilt) buildBattleBg();
   BT={ehp:def.hp, emax:def.hp, ename:def.name, def, onWin, party:PARTY.map(k=>STATS[k]),
       phase:'intro', sel:0, steps:[], st:0, guard:false, hitIdx:-1, lunge:0, shake:0, quake:0, flash:0, hurt:0, ex:0 };
-  ['idle','wind','atk'].forEach(k=>{ if(!enemyTex[def.key+k]){ const t=new THREE.TextureLoader().load(def.frames[k]); t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter; enemyTex[def.key+k]=t; } enemyTex[k]=enemyTex[def.key+k]; });
+  Object.keys(def.frames).forEach(k=>{ if(!enemyTex[def.key+k]){ const t=new THREE.TextureLoader().load(def.frames[k]); t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter; enemyTex[def.key+k]=t; } enemyTex[k]=enemyTex[def.key+k]; });
   setEnemyFrame('idle'); enemyMesh.position.set(0,0,0); enemyMesh.material.opacity=1; enemyMesh.visible=true; enemyMesh.userData.sh.visible=true;
   cv.style.display='block'; c2.style.display='none'; btEl.style.display='block'; document.getElementById('place').style.display='none'; document.getElementById('hint').style.display='none'; resize();
   bsay(def.name+'が あらわれた！'); drawBattleUI();
@@ -595,6 +597,8 @@ function battleTick(dt,now){
   if(BT.shake>0) sx=Math.sin(now/22)*.05;
   const lz=Math.sin(Math.min(1,BT.lunge)*Math.PI)*1.6; sc=1+Math.sin(Math.min(1,BT.lunge)*Math.PI)*.18;
   const breath=1+Math.sin(now/380)*.02;
+  // ★待機2の こまが ある 敵（ボス）は、待機の 間 2こまを 交互に（息づかい）
+  if(BT.def.frames.idle2 && (BT.frame==='idle'||BT.frame==='idle2')){ const k=Math.floor(now/550)%2?'idle2':'idle'; if(BT.frame!==k){ enemyTex[k]=enemyTex[BT.def.key+k]; setEnemyFrame(k); } }
   enemyMesh.scale.set(H*ar*sc, H*sc*(BT.shake>0?1:breath), 1); enemyMesh.position.set(sx,0,lz); enemyMesh.userData.sh.position.set(sx,.02,lz);
   enemyMesh.visible = !(BT.hurt>0 && Math.floor(now/60)%2===0);
   // ★倒した とき：速く 点滅して から 消える（前は 縦に しぼみながら 薄く なって いた）
@@ -612,30 +616,30 @@ const PARTY=['elt'];                                   // ★序章〜第1章は
 const STATS={ elt:{name:'エルト',hp:34,max:34,mp:6,atk:9} };
 const FOES={
   nousagi:{key:'nousagi', name:'野ウサギ', hp:16, atk:[2,4], wind:'は 口を 大きく 開けた！', verb:'かみつき', frames:{idle:RAB.idle,wind:RAB.wind,atk:RAB.atk}},
-  // ★部隊長の 絵は 仮（ヴェルナ王の 正面を 赤黒く した もの。3こまとも 同じ）
-  taicho:{key:'taicho', name:'ヴェルナの 部隊長', hp:52, atk:[4,7], wind:'は 剣を 振りかぶった！', verb:'斬りつけ', boss:true, frames:{idle:RAB.bossTmp,wind:RAB.bossTmp,atk:RAB.bossTmp}},
+  // ★部隊長：ボスの 5こま（待機1・待機2・構え・攻撃・大技）。大技は まだ 使わない
+  taicho:{key:'taicho', name:'ヴェルナの 部隊長', hp:52, atk:[4,7], wind:'は 剣を 振りかぶった！', verb:'斬りつけ', boss:true, frames:{idle:RAB.tc_idle,idle2:RAB.tc_idle2,wind:RAB.tc_wind,atk:RAB.tc_atk,big:RAB.tc_big}},
 };
 let fires=[], fireMeshes=[];
 function townNpcs(){
   const P=ST.phase, list=[];
   if(P==='morning'||P==='field'||P==='raid'){
-    list.push({x:12.5,y:2.6,spr:'dolgan',name:'師匠 ガイル（仮の 絵）',talk:()=>{
+    list.push({x:12.5,y:2.6,spr:'gail',name:'師匠 ガイル',talk:()=>{
       if(ST.phase==='morning'){ say(['ガイル「来たか、エルト。今朝の 見張りは 静かだった」','ガイル「だが 国境の 砦が 落ちたと いう 噂が ある」','ガイル「北の 畑を 見回って こい。魔物が 出たら 追い払え」'],()=>{ ST.phase='field'; }); }
       else say(['ガイル「北の 畑だ。外れの 古い 倉も 見て こい」']); }});
-    list.push({x:6.5,y:5.6,spr:'king',name:'村の 長老（仮の 絵）',lines:['長老「エルト、見張りの 当番か。ご苦労だな」','長老「この 村の 麦は、昔 ヴェルナから 贈られた 種から 育った」']});
-    list.push({x:17.5,y:11.5,spr:'lidia',name:'村の 娘（仮の 絵）',lines:['娘「国境の 砦が 落ちたって 本当？」','娘「ヴェルナの 兵は、目が 死んで いたって……」']});
+    list.push({x:6.5,y:5.6,spr:'elder',name:'村の 長老',lines:['長老「エルト、見張りの 当番か。ご苦労だな」','長老「この 村の 麦は、昔 ヴェルナから 贈られた 種から 育った」']});
+    list.push({x:17.5,y:11.5,spr:'girl',name:'村の 娘',lines:['娘「国境の 砦が 落ちたって 本当？」','娘「ヴェルナの 兵は、目が 死んで いたって……」']});
   }
   if(P==='burn'){
-    [[5.5,6.2,'lidia','逃げ遅れた 娘'],[18.5,6.2,'king','逃げ遅れた 老人'],[4.5,12.4,'lidia','逃げ遅れた 子']].forEach(([x,y,spr,name],i)=>{ if(ST.rescued[i]) return;
-      list.push({x,y,spr,name:name+'（仮の 絵）',talk:(n)=>{ say([name+'「た、助けて……！」','エルト「村の 南の 林へ！ 振り返らずに 走って！」'],()=>{ ST.rescued[i]=1; setNpcs(townNpcs()); if(Object.keys(ST.rescued).length===3) say(['広場の ほうから、低い 号令が 聞こえる。','……あそこに 部隊の 頭が いる。']); }); }}); });
-    [[9.6,12.6],[14.4,12.6]].forEach(([x,y])=>list.push({x,y,spr:'velna',name:'ヴェルナの 兵（仮の 絵）',lines:['兵の 目は うつろで、呼びかけても 答えない。']}));
-    list.push({x:12,y:11.9,spr:'velna',name:'ヴェルナの 部隊長（仮の 絵）',talk:()=>{
+    [[5.5,6.2,'girl','逃げ遅れた 娘'],[18.5,6.2,'elder','逃げ遅れた 老人'],[4.5,12.4,'child','逃げ遅れた 子']].forEach(([x,y,spr,name],i)=>{ if(ST.rescued[i]) return;
+      list.push({x,y,spr,name,talk:(n)=>{ say([name+'「た、助けて……！」','エルト「村の 南の 林へ！ 振り返らずに 走って！」'],()=>{ ST.rescued[i]=1; setNpcs(townNpcs()); if(Object.keys(ST.rescued).length===3) say(['広場の ほうから、低い 号令が 聞こえる。','……あそこに 部隊の 頭が いる。']); }); }}); });
+    [[9.6,12.6],[14.4,12.6]].forEach(([x,y])=>list.push({x,y,spr:'vsoldier',name:'ヴェルナの 兵',lines:['兵の 目は うつろで、呼びかけても 答えない。']}));
+    list.push({x:12,y:11.9,spr:'taicho',name:'ヴェルナの 部隊長',talk:()=>{
       if(Object.keys(ST.rescued).length<3){ say(['部隊長は 炎の 中で 動かない。','……逃げ遅れた 人が まだ いる。先に 助けよう。']); return; }
       say(['部隊長「…………」','うつろな 目が、エルトを 見た。','部隊長「……命令だ。……すべて 焼け」'],()=>startBattle(FOES.taicho,()=>{
         say(['部隊長は 剣を 落とした。','部隊長「……なぜ、わたしは ここに……」','部隊長は 崩れるように 倒れた。'],()=>{ ST.phase='after'; setNpcs(townNpcs()); }); })); }});
   }
   if(P==='after'){
-    list.push({x:12,y:12.3,spr:'dolgan',name:'師匠 ガイル（仮の 絵）',talk:()=>say(['ガイル「……エルト。無事か」','ガイルの 脇腹が、赤く 染まって いる。','ガイル「村の 者を 逃がすのに、少し しくじった」','ガイル「この 剣を 持って いけ。……おれには もう 重い」','ガイル「王都へ 行け。王に、このことを 伝えろ」','エルト「師匠……！」','ガイル「行け。……振り返るな」'],()=>{ ST.phase='road'; STATS.elt.atk+=3; setNpcs(townNpcs()); say(['＊ ガイルの 剣を 受け取った（こうげき＋3） ＊','南の 門から、夜の 街道へ。王都は 北東。']); })});
+    list.push({x:12,y:12.3,spr:'gail',name:'師匠 ガイル',talk:()=>say(['ガイル「……エルト。無事か」','ガイルの 脇腹が、赤く 染まって いる。','ガイル「村の 者を 逃がすのに、少し しくじった」','ガイル「この 剣を 持って いけ。……おれには もう 重い」','ガイル「王都へ 行け。王に、このことを 伝えろ」','エルト「師匠……！」','ガイル「行け。……振り返るな」'],()=>{ ST.phase='road'; STATS.elt.atk+=3; setNpcs(townNpcs()); say(['＊ ガイルの 剣を 受け取った（こうげき＋3） ＊','南の 門から、夜の 街道へ。王都は 北東。']); })});
   }
   return list; }
 function burnTown(){   // ★燃える 夜の 村
