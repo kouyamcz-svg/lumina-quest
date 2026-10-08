@@ -743,7 +743,15 @@ function startBattle(defs,onWin){ if(!Array.isArray(defs)) defs=[defs||FOES.nous
   const names=[...new Set(defs.map(d=>d.name))]; bsay(defs.length>1 ? names.join('と ')+'が あらわれた！' : defs[0].name+'が あらわれた！'); drawBattleUI(); se('encounter');
   queue([()=>{ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; }],1.0); }
 function queue(fns,delay){ BT.steps=fns.slice(); BT.st=delay||0; }
-function backToMenu(){ return ()=>{ BT.guard=false; if(BT.party.every(m=>m.hp<=0)){ bsay('目の 前が まっくらに なった……（体力を 戻して 続けます）'); se('lose'); BT.party.forEach(m=>m.hp=m.max); drawBattleUI(); return 1.4; } BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; }; }
+function backToMenu(){ return ()=>{ BT.guard=false;
+  // ★全滅：前は 体力を 戻すだけで 選ぶ欄に 戻らず、操作 できなく なった。Ⅳと 同じく 町へ 戻され、所持金が 半分に なる
+  if(BT.party.every(m=>m.hp<=0)){ bsay('エルトたちは 全滅した……'); se('lose'); BT.steps.push(()=>{ wipeOut(); return 99; }); return 2.0; }
+  BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; }; }
+function wipeOut(){ BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display='';
+  BAG.gold=Math.floor(BAG.gold/2); PARTY.forEach(k=>{ STATS[k].hp=STATS[k].max; STATS[k].mp=STATS[k].maxmp||STATS[k].mp; });
+  const inCh1=/^c1_/.test(ST.phase) && ST.phase!=='c1_castle';
+  go(()=>{ if(inCh1) enterTown([3.5,18.4],'cap'); else enterTown([12,6],'rue'); hero.ang=0;
+    say([inCh1?'……気が つくと、王都の 教会の 前に いた。':'……気が つくと、村の 広場に 倒れて いた。','所持金が 半分に なった。']); }); }
 function foeAct(f){ let t=null;
   return [
    // ★通常の 攻撃は その場で 動く（はねる）。前へ 飛び出すのは 痛恨の 一撃（1/16）と 大技（大技の こまが ある 敵、毎回 1/4）だけ
@@ -1082,7 +1090,7 @@ let bgmEl=null, bgmNow='', bgmUnlocked=false;
 function bgmFor(){ if(BT) return BT.def.boss?'boss':'battle';
   if(cur.kind==='world') return 'field'; if(cur.kind==='farm') return 'field'; if(cur.kind==='castle') return 'castle';
   if(cur.kind==='town' && (ST.phase==='burn')) return 'dungeon'; return 'town'; }
-function bgmUpdate(){ if(SND.bgm<=0 || !bgmUnlocked){ if(bgmEl && !bgmEl.paused) bgmEl.pause(); return; }
+function bgmUpdate(){ if(SND.bgm<=0 || !bgmUnlocked || (typeof bgmHidden==='function' && bgmHidden())){ if(bgmEl && !bgmEl.paused) bgmEl.pause(); return; }
   const want=bgmFor(); if(want===bgmNow && bgmEl && !bgmEl.paused){ bgmEl.volume=Math.min(1,(BGM_VOL[want]||.5)*SND.bgm/.6); return; }   // ★大きさは 毎回 合わせる
   try{ if(!bgmEl){ bgmEl=new Audio(); bgmEl.loop=true; }
     if(want!==bgmNow){ bgmEl.src=BGM_FILES[want]; bgmNow=want; }
@@ -1090,6 +1098,10 @@ function bgmUpdate(){ if(SND.bgm<=0 || !bgmUnlocked){ if(bgmEl && !bgmEl.paused)
 // iPhone などは 画面に 触れた 後で ないと 音が 出せない
 ['touchstart','mousedown','keydown'].forEach(ev=>addEventListener(ev,()=>{ if(!bgmUnlocked){ bgmUnlocked=true; bgmUpdate(); } },{passive:true}));
 setInterval(bgmUpdate,500);
+// ★アプリを 閉じる・別の アプリへ 移る・画面を 消す ときは 曲を 止める（前は 流れ続けた）
+function bgmHidden(){ return document.hidden || document.visibilityState==='hidden'; }
+addEventListener('pagehide',()=>{ if(bgmEl) bgmEl.pause(); try{ actx&&actx.suspend(); }catch(e){} });
+document.addEventListener('visibilitychange',()=>{ if(bgmHidden()){ if(bgmEl) bgmEl.pause(); try{ actx&&actx.suspend(); }catch(e){} } else { try{ actx&&actx.resume(); }catch(e){} bgmUpdate(); } });
 
 // ================= 第1章「和平の 使者」 =================
 //  c1_castle（王に 呼ばれる。使者 ハーヴェン（仮）の 護衛を 命じられる）→ c1_road（街道を 東の 国境の 砦へ）
