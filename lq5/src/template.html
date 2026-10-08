@@ -642,7 +642,7 @@ function battleTick(dt,now){
   let sx=0, sc=1; BT.hop=Math.max(0,(BT.hop||0)-dt*3.2); BT.lunge=Math.max(0,BT.lunge-dt*2.6); BT.shake=Math.max(0,BT.shake-dt); BT.hurt=Math.max(0,BT.hurt-dt); BT.flash=Math.max(0,BT.flash-dt*5); BT.quake=Math.max(0,BT.quake-dt);
   if(BT.shake>0) sx=Math.sin(now/22)*.05;
   const lz=Math.sin(Math.min(1,BT.lunge)*Math.PI)*1.6; sc=1+Math.sin(Math.min(1,BT.lunge)*Math.PI)*.18 + Math.sin(Math.min(1,BT.hop)*Math.PI)*.05;
-  const hy=Math.sin(Math.min(1,BT.hop)*Math.PI)*.22;   // ★その場で 小さく はねる（通常の 攻撃）
+  const hy=Math.sin(Math.min(1,BT.hop)*Math.PI)*.22 + (BT.def.float ? .35+Math.sin(now/420)*.08 : 0);   // ★その場で 小さく はねる（通常の 攻撃）。宙に 浮く 魔物は 浮かせて ゆらす
   const breath=1+Math.sin(now/380)*.02;
   // ★待機2の こまが ある 敵（ボス）は、待機の 間 2こまを 交互に（息づかい）
   if(BT.def.frames.idle2 && (BT.frame==='idle'||BT.frame==='idle2')){ const k=Math.floor(now/550)%2?'idle2':'idle'; if(BT.frame!==k){ enemyTex[k]=enemyTex[BT.def.key+k]; setEnemyFrame(k); } }
@@ -933,13 +933,13 @@ setInterval(bgmUpdate,500);
 //  → c1_fort（砦の 中。奥の 番兵を 倒す）→ c1_east（砦を 抜け、ヴェルナの 鉱山の 町へ）→ c1_town（町の 人と 話す）→ c1_end
 let TOWN_NOW='rue';
 FOES.haiusagi={key:'haiusagi', name:'砦ネズミ', hp:26, exp:10, gold:6, atk:[4,7], wind:'は 口を 大きく 開けた！', verb:'かみつき', frames:{idle:RAB.nz_idle,wind:RAB.nz_wind,atk:RAB.nz_atk}};
-// ★魔物の 種類を 増やす：同じ 絵の 色違い（Ⅳと 同じ 考え方）。強さも 変える
-FOES.ikari={key:'ikari', name:'いかりウサギ', hp:30, exp:12, gold:8, atk:[5,8], wind:'は 毛を 逆立てた！', verb:'かみつき', tint:0xff8a7a, frames:{idle:RAB.idle,wind:RAB.wind,atk:RAB.atk}};
-FOES.yamiusagi={key:'yamiusagi', name:'やみウサギ', hp:22, exp:9, gold:7, atk:[4,6], wind:'は 闇の 中から 跳ねた！', verb:'かみつき', tint:0x8a7ab8, frames:{idle:RAB.idle,wind:RAB.wind,atk:RAB.atk}};
-FOES.kuronezumi={key:'kuronezumi', name:'黒ネズミ', hp:34, exp:14, gold:10, atk:[5,9], wind:'は 歯を むいた！', verb:'かみつき', tint:0x6a6a7a, frames:{idle:RAB.nz_idle,wind:RAB.nz_wind,atk:RAB.nz_atk}};
-FOES.hinezumi={key:'hinezumi', name:'火ネズミ', hp:30, exp:13, gold:9, atk:[6,9], wind:'の 毛が 赤く 燃えた！', verb:'かみつき', tint:0xffa060, frames:{idle:RAB.nz_idle,wind:RAB.nz_wind,atk:RAB.nz_atk}};
+// ★第1章の 新しい 魔物（色違いは やめ、違う 形の 魔物を 足す）
+FOES.waradokuro={key:'waradokuro', name:'ワラドクロ', hp:20, exp:7, gold:5, atk:[3,6], wind:'は わらの 腕を ぐるぐる 回した！', verb:'鎌の 腕', frames:{idle:RAB.wd_idle,wind:RAB.wd_wind,atk:RAB.wd_atk}};
+FOES.yomiakari={key:'yomiakari', name:'ヨミアカリ', float:true, hp:18, exp:7, gold:6, atk:[3,6], wind:'の 扉が 開き、中の 目が 見開かれた！', verb:'光の 手', frames:{idle:RAB.ya_idle,wind:RAB.ya_wind,atk:RAB.ya_atk}};
+FOES.ishikurage={key:'ishikurage', name:'イシクラゲ', float:true, hp:34, exp:14, gold:10, atk:[5,9], wind:'の 岩の 傘が 光りだした！', verb:'鉱石の 触手', frames:{idle:RAB.ik_idle,wind:RAB.ik_wind,atk:RAB.ik_atk}};
+FOES.kabenome={key:'kabenome', name:'カベノメ', hp:36, exp:14, gold:10, atk:[5,8], wind:'の 石の すきまが 裂けた！', verb:'かみつき', scale:.9, frames:{idle:RAB.kb_idle,wind:RAB.kb_wind,atk:RAB.kb_atk}};
 // ★出る 場所ごとの 魔物（重みつき）
-const ENC={ farm:[['nousagi',1]], west:[['nousagi',3],['yamiusagi',1]], westNight:[['nousagi',1],['yamiusagi',2]], east:[['ikari',2],['haiusagi',1],['hinezumi',1]], fort:[['haiusagi',3],['kuronezumi',2]] };
+const ENC={ farm:[['nousagi',2],['waradokuro',1]], west:[['nousagi',1],['waradokuro',1]], westNight:[['nousagi',1],['yomiakari',2]], east:[['ishikurage',2],['haiusagi',1]], fort:[['haiusagi',1],['kabenome',1]] };
 function pickFoe(area){ const t=ENC[area]; let sum=t.reduce((a,b)=>a+b[1],0), r=Math.random()*sum; for(const [k,w] of t){ if((r-=w)<0) return FOES[k]; } return FOES[t[0][0]]; }
 FOES.banpei={key:'banpei', name:'砦の 番兵', scale:1.35, hp:110, exp:80, gold:120, atk:[6,10], wind:'は 大剣を 振りかぶった！', verb:'なぎ払い', boss:true,
   bigWind:'の 鎧の すきまから 黒い 霧が 噴きだした！', bigName:'黒い 霧の 斬撃', frames:{idle:RAB.bp_idle,idle2:RAB.bp_idle2,wind:RAB.bp_wind,atk:RAB.bp_atk,big:RAB.bp_big}};
