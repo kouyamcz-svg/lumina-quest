@@ -912,8 +912,8 @@ function toggleMix(){ closeMenu(); if(!mixOK()){ say(['この ブラウザでは
 const CHESTS={town:[{x:20.5,z:17.5,gold:25,id:'c1'}], farm:[{x:2.5,z:12.5,herb:1,id:'c2'}]};
 
 // ================= 曲（Ⅳの 曲の ファイルを そのまま 使う。../lq4/ の mp3）=================
-//  村・家＝town、外の 世界・畑＝field、王都＝castle、燃える 村＝dungeon、戦闘＝battle3、ボス＝boss
-const BGM_FILES={town:'../lq4/town.mp3', field:'../lq4/field.mp3', castle:'../lq4/castle.mp3', dungeon:'../lq4/dungeon.mp3', battle:'../lq4/battle3.mp3', boss:'../lq4/boss.mp3'};
+//  村・家＝town、外の 世界・畑＝field、王都＝castle、燃える 村＝dungeon、戦闘＝battle_sky（Ⅳの 後半の 戦闘の 曲）、ボス＝boss
+const BGM_FILES={town:'../lq4/town.mp3', field:'../lq4/field.mp3', castle:'../lq4/castle.mp3', dungeon:'../lq4/dungeon.mp3', battle:'../lq4/battle_sky.mp3', boss:'../lq4/boss.mp3'};
 const BGM_VOL={town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, boss:.5};
 let bgmEl=null, bgmNow='', bgmUnlocked=false;
 function bgmFor(){ if(BT) return BT.def.boss?'boss':'battle';
