@@ -634,6 +634,7 @@ function endBattle(){ const win=BT&&BT.ehp<=0, cb=BT&&BT.onWin; BT=null; btEl.st
   if(win && cb) cb(); }
 let lastDirY=0;
 function battleInput(iy){ if(!BT||BT.phase!=='menu') return; if(iy!==0 && iy!==lastDirY){ BT.sel=(BT.sel+(iy>0?1:-1)+CMDS.length)%CMDS.length; drawBattleUI(); } lastDirY=iy; }
+const EZ=-1.1;   // ★魔物の 立つ 位置（奥へ。前は 0 で 大きく 映りすぎた）
 function battleTick(dt,now){
   if(BT.steps.length){ BT.st-=dt; while(BT && BT.st<=0 && BT.steps.length){ const f=BT.steps.shift(); BT.st=f(); } }
   if(!BT){ return; }
@@ -646,7 +647,7 @@ function battleTick(dt,now){
   const breath=1+Math.sin(now/380)*.02;
   // ★待機2の こまが ある 敵（ボス）は、待機の 間 2こまを 交互に（息づかい）
   if(BT.def.frames.idle2 && (BT.frame==='idle'||BT.frame==='idle2')){ const k=Math.floor(now/550)%2?'idle2':'idle'; if(BT.frame!==k){ enemyTex[k]=enemyTex[BT.def.key+k]; setEnemyFrame(k); } }
-  enemyMesh.scale.set(H*ar*sc, H*sc*(BT.shake>0?1:breath), 1); enemyMesh.position.set(sx,hy,lz); enemyMesh.userData.sh.position.set(sx,.02,lz);
+  enemyMesh.scale.set(H*ar*sc, H*sc*(BT.shake>0?1:breath), 1); enemyMesh.position.set(sx,hy,EZ+lz); enemyMesh.userData.sh.position.set(sx,.02,EZ+lz);
   enemyMesh.visible = !(BT.hurt>0 && Math.floor(now/60)%2===0);
   // ★倒した とき：速く 点滅して から 消える（前は 縦に しぼみながら 薄く なって いた）
   if(BT.dead){ BT.ex=Math.max(0,BT.ex-dt*1.25); enemyMesh.visible = BT.ex>0.08 && Math.floor(now/70)%2===0; enemyMesh.userData.sh.visible = BT.ex>0.08; }
