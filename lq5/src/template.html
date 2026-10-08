@@ -42,11 +42,12 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #fmenu{position:absolute;left:8px;top:52px;min-width:46%;display:none;border:2px solid var(--line);background:rgba(10,8,18,.94);border-radius:6px;padding:8px 12px;font-size:16px;line-height:1.85}
 #fmenu .mt{font-size:12px;color:var(--dim);border-bottom:1px solid #4a4070;margin-bottom:4px}
 #fmenu .on{color:var(--gold)}
+#bmark{position:absolute;display:none;color:#ffe060;font-size:20px;text-shadow:0 0 3px #000;pointer-events:none}
 #hint{position:absolute;left:10px;bottom:10px;font-size:12px;color:var(--dim);background:rgba(18,15,28,.7);padding:3px 8px;border-radius:4px}
 </style></head><body>
 <div id="wrap">
  <div id="view"><canvas id="c"></canvas><canvas id="c2" style="display:none"></canvas><div id="place">国境の村 ルーエ</div>
-  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="flash"></div><div id="mapview"></div><div id="fmenu"></div><div id="card"></div>
+  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="flash"></div><div id="bmark">▼</div><div id="mapview"></div><div id="fmenu"></div><div id="card"></div>
   <div id="bt"><div id="bparty"></div><div id="bmenu"></div><div id="bmsg"></div></div></div>
  <div id="pad">
   <div id="dpad"><div class="k u">▲</div><div class="k l">◀</div><div class="k r">▶</div><div class="k d">▼</div></div>
@@ -311,7 +312,7 @@ let msgDone=null;
 function say(lines,done){msgQ=lines.slice();msgDone=done||null;msgEl.style.display='block';msgEl.textContent=msgQ.shift();}
 function closeMsg(){ msgQ=null; msgEl.style.display='none'; const d=msgDone; msgDone=null; d&&d(); }
 function pressA(){ if(ST.phase==='end'){ startCh1(); return; }
-  if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='menu'){ se('ok'); battleCmd(); } return; }
+  if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='menu'){ se('ok'); battleCmd(); } else if(BT.phase==='target') targetPick(); return; }
   if(MENU){ se('ok'); MENU.onPick(MENU.sel); return; }
   if(msgQ){ if(msgQ.length) msgEl.textContent=msgQ.shift(); else closeMsg(); return; }
   const fx=Math.sin(hero.ang), fz=Math.cos(hero.ang); let best=null,bd=1e9;
@@ -319,7 +320,7 @@ function pressA(){ if(ST.phase==='end'){ startCh1(); return; }
   if(best){ se('cue'); best.ang=Math.atan2(hero.x-best.x,hero.z-best.y); if(best.talk){ best.talk(best); return; } say([best.name+'：'].concat(best.lines)); return; }
   if(examine()) return;
   say(['……なにも ない。']); }
-function pressB(){ if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='item'){ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); } return; } if(MENU){ se('cancel'); MENU.onBack&&MENU.onBack(); return; } if(msgQ){ closeMsg(); } }
+function pressB(){ if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='target'){ se('cancel'); BT.phase='menu'; bsay('どうする？'); drawBattleUI(); } return; } if(MENU){ se('cancel'); MENU.onBack&&MENU.onBack(); return; } if(msgQ){ closeMsg(); } }
 // ================= 動き =================
 const SPEED=3.2, DASH=1.8, RADT=0.38;   // DASH：町の 中で Bを 押して いる 間の 速さの 倍
 const at=(x,y)=>{ const r=cur.rows; return (y<0||y>=r.length||x<0||x>=r[0].length)?'#':r[y][x]; };
@@ -331,7 +332,7 @@ function blockedAt(x,z){ const c=at(Math.floor(x),Math.floor(z)); if(cur.solid.h
 function freeCircle(x,z){ const RAD = cur.kind==='world' ? 0.3 : RADT; for(const [ox,oz] of [[RAD,0],[-RAD,0],[0,RAD],[0,-RAD],[RAD*.7,RAD*.7],[-RAD*.7,RAD*.7],[RAD*.7,-RAD*.7],[-RAD*.7,-RAD*.7]]) if(blockedAt(x+ox,z+oz)) return false; return true; }
 let walkT=0, last=performance.now(), lastDoor=-1, busyDoor=0;
 function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
-  if(BT){ let iy=dir[1]; if(keys.ArrowUp)iy=-1; if(keys.ArrowDown)iy=1; battleInput(iy); battleTick(dt,now); requestAnimationFrame(tick); return; }
+  if(BT){ let iy=dir[1], ix=dir[0]; if(keys.ArrowUp)iy=-1; if(keys.ArrowDown)iy=1; if(keys.ArrowLeft)ix=-1; if(keys.ArrowRight)ix=1; battleInput(iy,ix); battleTick(dt,now); requestAnimationFrame(tick); return; }
   let ix=dir[0], iz=dir[1]; if(keys.ArrowLeft)ix=-1; if(keys.ArrowRight)ix=1; if(keys.ArrowUp)iz=-1; if(keys.ArrowDown)iz=1;
   if(MENU){ menuInput(iz); ix=0; iz=0; }
   if(ix||iz) bMoved=true;
@@ -345,9 +346,9 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
     const mv=Math.hypot(hero.x-ox,hero.z-oz);
     if(mv>.001){ trail.unshift([hero.x,hero.z,hero.ang]); if(trail.length>400) trail.pop(); }
     if(cur.kind==='world' && mv>.001){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))===','?1.5:1);
-      if(wWalk>wEnc){ wWalk=0; wEnc=12+Math.random()*10; startBattle(pickFoe(hero.x>30?'east':(ST.phase==='road'?'westNight':'west'))); } }
-    if(cur.kind==='fort' && mv>.001 && !msgQ && ST.phase==='c1_fort'){ wWalk+=mv; if(wWalk>wEnc){ wWalk=0; wEnc=8+Math.random()*8; startBattle(pickFoe('fort')); } }
-    if(cur.kind==='farm' && mv>.001 && !msgQ){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))==='f'?1.4:1); if(wWalk>wEnc){ wWalk=0; wEnc=10+Math.random()*8; startBattle(pickFoe('farm'),()=>{ if(ST.phase==='field') ST.kills=(ST.kills||0)+1; }); } } }
+      if(wWalk>wEnc){ wWalk=0; wEnc=12+Math.random()*10; startEnc(hero.x>30?'east':(ST.phase==='road'?'westNight':'west')); } }
+    if(cur.kind==='fort' && mv>.001 && !msgQ && ST.phase==='c1_fort'){ wWalk+=mv; if(wWalk>wEnc){ wWalk=0; wEnc=8+Math.random()*8; startEnc('fort'); } }
+    if(cur.kind==='farm' && mv>.001 && !msgQ){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))==='f'?1.4:1); if(wWalk>wEnc){ wWalk=0; wEnc=10+Math.random()*8; startEnc('farm'); } } }
   // 出入口の 範囲（町：家の 扉の 前に 上へ 進む と 入る／家：出口の 前で 下へ 進む と 出る）
   if(!fading && !msgQ){
     if(cur.kind==='town' && TOWN_NOW==='velna' && hero.z>18.9 && iz>0 && Math.abs(hero.x-11.5)<1.3){ go(()=>enterWorld([38.5,10.45])); }
@@ -531,7 +532,7 @@ function bakeWorld32(){
 // ================= 戦闘（仕組みは Ⅳ と 同じ。背景は 3D、敵は 3こまの 絵で 動く）=================
 const RAB=__RAB__;
 const batScene=new THREE.Scene(), batCam=new THREE.PerspectiveCamera(50,1,.1,200);
-let BT=null, batBuilt=false, enemyMesh=null, enemyTex={};
+let BT=null, batBuilt=false, enemyTex={};
 function buildBattleBg(){
   // ★よりリアルに：空の グラデーションと 雲、細かい 草地と 土の 道、草むら・岩・花、木の 種類と かたまり、丘と 遠くの 山
   const cvs=(w,h,draw)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; draw(c.getContext('2d'),w,h); return c; };
@@ -576,84 +577,112 @@ function buildBattleBg(){
   [[-18,-34,14,4],[2,-38,18,5],[22,-33,13,4],[-34,-40,16,6],[38,-42,18,6]].forEach(([x,z,r,h])=>{ const m=new THREE.Mesh(new THREE.SphereGeometry(r,20,10,0,Math.PI*2,0,Math.PI/2),new THREE.MeshLambertMaterial({map:GRAIN,color:0x5f9a48})); m.scale.y=h/r; m.position.set(x,-.2,z); batScene.add(m); });
   [[-26,-62,16],[-6,-66,20],[16,-63,17],[36,-60,13]].forEach(([x,z,h])=>{ const m=new THREE.Mesh(new THREE.ConeGeometry(h*.95,h,9),new THREE.MeshLambertMaterial({map:GRAIN,color:0x7d8fae,flatShading:true})); m.position.set(x,h/2-.5,z); batScene.add(m);
     const cap=new THREE.Mesh(new THREE.ConeGeometry(h*.34,h*.36,9),new THREE.MeshLambertMaterial({map:GRAIN,color:0xf4f8fc,flatShading:true})); cap.position.set(x,h-.5-h*.18,z); batScene.add(cap); });
-  const TL=new THREE.TextureLoader();
-  ['idle','wind','atk'].forEach(k=>{ const t=TL.load(RAB[k]); t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter; enemyTex[k]=t; });
+  // ★複数体の 魔物（最大 4体）。1体ごとに 板と 影を 用意して おく
   const geo=new THREE.PlaneGeometry(1,1); geo.translate(0,.5,0);
-  enemyMesh=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({map:enemyTex.idle,transparent:true,alphaTest:.3,color:0xffffff}));
-  batScene.add(enemyMesh);
-  const sh=new THREE.Mesh(new THREE.CircleGeometry(.55,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.28,depthWrite:false})); sh.rotation.x=-Math.PI/2; sh.position.y=.02; batScene.add(sh); enemyMesh.userData.sh=sh;
+  for(let i=0;i<4;i++){ const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({transparent:true,alphaTest:.3,color:0xffffff})); m.visible=false; batScene.add(m);
+    const sh=new THREE.Mesh(new THREE.CircleGeometry(.55,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.28,depthWrite:false})); sh.rotation.x=-Math.PI/2; sh.position.y=.02; sh.visible=false; batScene.add(sh); FM.push({m,sh}); }
   batBuilt=true; }
-function setEnemyFrame(k){ if(BT) BT.frame=k; enemyMesh.material.map=enemyTex[k]; enemyMesh.material.needsUpdate=true; const img=enemyTex[k].image; const ar=img&&img.width?img.width/img.height:.8; enemyMesh.userData.ar=ar; }
-const btEl=document.getElementById('bt'), bmsg=document.getElementById('bmsg'), bmenu=document.getElementById('bmenu'), bparty=document.getElementById('bparty'), flashEl=document.getElementById('flash');
+const FM=[];
+function foeTex(def,k){ const key=def.key+k; if(!enemyTex[key]){ const t=new THREE.TextureLoader().load(def.frames[k]); t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter; enemyTex[key]=t; } return enemyTex[key]; }
+function setFoeFrame(f,k){ if(!f.def.frames[k]) k='idle'; f.frame=k; const t=foeTex(f.def,k); f.mesh.material.map=t; f.mesh.material.needsUpdate=true; const img=t.image; f.ar=img&&img.width?img.width/img.height:.8; }
+const btEl=document.getElementById('bt'), bmsg=document.getElementById('bmsg'), bmenu=document.getElementById('bmenu'), bparty=document.getElementById('bparty'), flashEl=document.getElementById('flash'), bmark=document.getElementById('bmark');
 const CMDS=['たたかう','ぼうぎょ','どうぐ','にげる'];
 function partyHtml(){ return BT.party.map((m,i)=>`<div class="pm${m.hp<=0?' down':''}${BT.hitIdx===i?' hit':''}"><b>${m.name}</b><br>HP ${m.hp}<br>MP ${m.mp}</div>`).join(''); }
 function drawBattleUI(){ bparty.innerHTML=partyHtml(); bmenu.style.display = BT.phase==='menu' ? 'block':'none';
-  bmenu.innerHTML=CMDS.map((c,i)=>`<div class="${i===BT.sel?'on':''}">${i===BT.sel?'▶':'　'}${c}</div>`).join(''); }
+  bmenu.innerHTML=CMDS.map((c,i)=>`<div class="${i===BT.sel?'on':''}">${i===BT.sel?'▶':'　'}${c}</div>`).join('');
+  bmark.style.display = BT.phase==='target' ? 'block':'none'; }
 function bsay(t){ bmsg.textContent=t; }
-function startBattle(def,onWin){ def=def||FOES.nousagi;
+const alive=()=>BT.foes.filter(f=>!f.dead);
+// ★出る 数の 上限：仲間 1人＝2体、2人＝3体、3人 以上＝4体
+const maxFoes=()=>PARTY.length>=3?4:PARTY.length===2?3:2;
+function startEnc(area){ const first=pickFoe(area); const max=maxFoes(); const r=Math.random(); let n=1; for(let k=2;k<=max;k++){ if(r<(max-k+1)/(max+1.5)) n=k; }
+  const defs=[first]; for(let i=1;i<n;i++) defs.push(Math.random()<.6?first:pickFoe(area)); startBattle(defs); }
+const FORMS={1:[[0,0]],2:[[-.95,0],[.95,0]],3:[[-1.55,-.1],[0,-.45],[1.55,-.1]],4:[[-2.1,-.35],[-.72,0],[.72,0],[2.1,-.35]]};
+function startBattle(defs,onWin){ if(!Array.isArray(defs)) defs=[defs||FOES.nousagi];
   if(!batBuilt) buildBattleBg();
-  BT={ehp:def.hp, emax:def.hp, ename:def.name, def, onWin, party:PARTY.map(k=>STATS[k]),
-      phase:'intro', sel:0, steps:[], st:0, guard:false, hitIdx:-1, lunge:0, shake:0, quake:0, flash:0, hurt:0, ex:0 };
-  Object.keys(def.frames).forEach(k=>{ if(!enemyTex[def.key+k]){ const t=new THREE.TextureLoader().load(def.frames[k]); t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter; enemyTex[def.key+k]=t; } enemyTex[k]=enemyTex[def.key+k]; });
-  enemyMesh.material.color.setHex(def.tint||0xffffff);
-  setEnemyFrame('idle'); enemyMesh.position.set(0,0,0); enemyMesh.material.opacity=1; enemyMesh.visible=true; enemyMesh.userData.sh.visible=true;
+  const cnt={}, idx={}; defs.forEach(d=>cnt[d.name]=(cnt[d.name]||0)+1);
+  const form=FORMS[defs.length];
+  const foes=defs.map((d,i)=>{ const fm=FM[i]; let name=d.name; if(cnt[d.name]>1){ idx[d.name]=(idx[d.name]||0)+1; name+='ABCD'[idx[d.name]-1]; }
+    const f={def:d, hp:d.hp, max:d.hp, name, mesh:fm.m, sh:fm.sh, slot:i, x:form[i][0], z:form[i][1], hurt:0, lunge:0, hop:0, shake:0, ex:0, dead:false, frame:'idle', ar:.8};
+    f.mesh.material.color.setHex(d.tint||0xffffff); f.mesh.material.opacity=1; f.mesh.visible=true; f.sh.visible=true; setFoeFrame(f,'idle'); return f; });
+  FM.slice(defs.length).forEach(fm=>{ fm.m.visible=false; fm.sh.visible=false; });
+  BT={foes, def:defs[0], onWin, party:PARTY.map(k=>STATS[k]), phase:'intro', sel:0, tsel:0, steps:[], st:0, guard:false, hitIdx:-1, quake:0, flash:0};
   cv.style.display='block'; c2.style.display='none'; btEl.style.display='block'; document.getElementById('place').style.display='none'; document.getElementById('hint').style.display='none'; resize();
-  bsay(def.name+'が あらわれた！'); drawBattleUI(); se('encounter');
+  const names=[...new Set(defs.map(d=>d.name))]; bsay(defs.length>1 ? names.join('と ')+'が あらわれた！' : defs[0].name+'が あらわれた！'); drawBattleUI(); se('encounter');
   queue([()=>{ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; }],1.0); }
 function queue(fns,delay){ BT.steps=fns.slice(); BT.st=delay||0; }
-function enemyTurn(){ const alive=BT.party.filter(m=>m.hp>0); const t=alive[Math.floor(Math.random()*alive.length)];
+function backToMenu(){ return ()=>{ BT.guard=false; if(BT.party.every(m=>m.hp<=0)){ bsay('目の 前が まっくらに なった……（体力を 戻して 続けます）'); se('lose'); BT.party.forEach(m=>m.hp=m.max); drawBattleUI(); return 1.4; } BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; }; }
+function foeAct(f){ let t=null;
   return [
-   // ★通常の 攻撃は その場で 動く（はねる）。前へ 飛び出すのは 痛恨の 一撃（1/16）と 大技（大技の こまが ある 敵、1/4）だけ
-   // ★大技は 毎回 1/4（続けて 出る ことも ある。間を あける 案は 指示で 取りやめ）
-   ()=>{ BT.kind = (BT.def.frames.big && BT.def.bigName && Math.random()<.25) ? 'big' : (Math.random()<1/16 ? 'crit' : 'normal');
-         if(BT.kind==='big'){ bsay(BT.ename+BT.def.bigWind); setEnemyFrame('big'); BT.shake=.9; return .9; }
-         bsay(BT.ename+BT.def.wind); setEnemyFrame('wind'); BT.shake=.55; return .65; },         // 構え（震える）
-   ()=>{ let d=BT.def.atk[0]+Math.floor(Math.random()*(BT.def.atk[1]-BT.def.atk[0]+1)); let head='';
-         if(BT.kind==='big'){ d=Math.round(d*1.6); BT.lunge=1; BT.flash=1; BT.quake=.5; head=BT.ename+'の '+BT.def.bigName+'！ '; }
-         else if(BT.kind==='crit'){ d=Math.round(d*2); BT.lunge=1; BT.flash=1; BT.quake=.45; setEnemyFrame('atk'); head='つうこんの いちげき！ '; }
-         else { setEnemyFrame('atk'); BT.hop=1; BT.flash=.45; BT.quake=.15; d=Math.max(1,d-Math.floor((t.defT||0)/4)); head=BT.ename+'の '+BT.def.verb+'！ '; }
+   // ★通常の 攻撃は その場で 動く（はねる）。前へ 飛び出すのは 痛恨の 一撃（1/16）と 大技（大技の こまが ある 敵、毎回 1/4）だけ
+   ()=>{ if(f.dead || BT.party.every(m=>m.hp<=0)) return 0; const al=BT.party.filter(m=>m.hp>0); t=al[Math.floor(Math.random()*al.length)];
+         f.kind = (f.def.frames.big && f.def.bigName && Math.random()<.25) ? 'big' : (Math.random()<1/16 ? 'crit' : 'normal');
+         if(f.kind==='big'){ bsay(f.name+f.def.bigWind); setFoeFrame(f,'big'); f.shake=.9; return .9; }
+         bsay(f.name+f.def.wind); setFoeFrame(f,'wind'); f.shake=.55; return .65; },
+   ()=>{ if(f.dead||!t) return 0; let d=f.def.atk[0]+Math.floor(Math.random()*(f.def.atk[1]-f.def.atk[0]+1)); let head='';
+         if(f.kind==='big'){ d=Math.round(d*1.6); f.lunge=1; BT.flash=1; BT.quake=.5; head=f.name+'の '+f.def.bigName+'！ '; }
+         else if(f.kind==='crit'){ d=Math.round(d*2); f.lunge=1; BT.flash=1; BT.quake=.45; setFoeFrame(f,'atk'); head='つうこんの いちげき！ '; }
+         else { setFoeFrame(f,'atk'); f.hop=1; BT.flash=.45; BT.quake=.15; d=Math.max(1,d-Math.floor((t.defT||0)/4)); head=f.name+'の '+f.def.verb+'！ '; }
          if(BT.guard) d=Math.ceil(d/2); se('ehit');
-         t.hp=Math.max(0,t.hp-d); BT.hitIdx=BT.party.indexOf(t); bsay(head+t.name+'に '+d+'の ダメージ！'); drawBattleUI(); return BT.kind==='normal'?.4:.5; },
-   ()=>{ setEnemyFrame('idle'); BT.hitIdx=-1; drawBattleUI(); return .6; },
-   ()=>{ BT.guard=false; if(BT.party.every(m=>m.hp<=0)){ bsay('目の 前が まっくらに なった……（体力を 戻して 続けます）'); se('lose'); BT.party.forEach(m=>m.hp=m.max); drawBattleUI(); return 1.4; } return 0; },
-   ()=>{ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; } ]; }
-function partyAttacks(){ const steps=[];
-  BT.party.forEach(m=>{ if(m.hp<=0) return; steps.push(()=>{ if(BT.ehp<=0) return 0; const d=m.atk+Math.floor(Math.random()*4); BT.ehp=Math.max(0,BT.ehp-d); BT.hurt=.35; se('hit'); bsay(m.name+'の こうげき！ '+BT.ename+'に '+d+'の ダメージ！'); return .75; }); });
-  steps.push(()=>{ if(BT.ehp<=0){ bsay(BT.ename+'を たおした！'); BT.ex=1; BT.dead=true; se('defeat'); setTimeout(()=>se('win'),500); return 1.3; } return 0; });
-  steps.push(()=>{ if(BT.ehp<=0){ const ex=BT.def.exp||0, gd=BT.def.gold||0; BAG.gold+=gd; const ups=gainExp(ex); if(ups.length) setTimeout(()=>se('lvup'),300); bsay('経験値 '+ex+'、'+gd+'ゴールドを 手に 入れた！'+(ups.length?'　'+ups.join('　'):'')); return ups.length?2.2:1.4; } return 0; });
-  steps.push(()=>{ if(BT.ehp<=0){ endBattle(); return 99; } BT.steps.push(...enemyTurn()); return 0; });
+         t.hp=Math.max(0,t.hp-d); BT.hitIdx=BT.party.indexOf(t); bsay(head+t.name+'に '+d+'の ダメージ！'); drawBattleUI(); return f.kind==='normal'?.4:.5; },
+   ()=>{ if(!f.dead) setFoeFrame(f,'idle'); BT.hitIdx=-1; drawBattleUI(); return t?.45:0; } ]; }
+function enemyTurn(){ const st=[]; alive().forEach(f=>st.push(...foeAct(f))); st.push(backToMenu()); return st; }
+function winSteps(){ return [
+  ()=>{ const ex=BT.foes.reduce((a,f)=>a+(f.def.exp||0),0), gd=BT.foes.reduce((a,f)=>a+(f.def.gold||0),0); BAG.gold+=gd; const ups=gainExp(ex); setTimeout(()=>se('win'),100); if(ups.length) setTimeout(()=>se('lvup'),400);
+        bsay((BT.foes.length>1?'魔物たちを やっつけた！ ':'')+'経験値 '+ex+'、'+gd+'ゴールドを 手に 入れた！'+(ups.length?'　'+ups.join('　'):'')); return ups.length?2.4:1.6; },
+  ()=>{ endBattle(); return 99; } ]; }
+function hitFoe(m,f){ return ()=>{ if(!alive().length) return 0; if(f.dead) f=alive()[0];
+  const d=m.atk+Math.floor(Math.random()*4); f.hp=Math.max(0,f.hp-d); f.hurt=.35; se('hit'); bsay(m.name+'の こうげき！ '+f.name+'に '+d+'の ダメージ！');
+  if(f.hp<=0){ BT.steps.unshift(()=>{ f.dead=true; f.ex=1; se('defeat'); bsay(f.name+'を たおした！'); return 1.0; }); } return .75; }; }
+function partyAttacks(target){ const steps=[];
+  BT.party.forEach((m,i)=>{ if(m.hp<=0) return; steps.push(()=>{ const al=alive(); if(!al.length) return 0; const f = (i===0 && !target.dead) ? target : al[Math.floor(Math.random()*al.length)]; BT.steps.unshift(hitFoe(m,f)); return 0; }); });
+  steps.push(()=>{ if(!alive().length){ BT.steps=winSteps(); return 0; } BT.steps.push(...enemyTurn()); return 0; });
   return steps; }
-function battleCmd(){ const c=CMDS[BT.sel]; BT.phase='act'; drawBattleUI();
-  if(c==='たたかう') queue(partyAttacks(),0);
+function battleCmd(){ const c=CMDS[BT.sel];
+  if(c==='たたかう'){ if(alive().length>1){ BT.phase='target'; BT.tsel=BT.foes.indexOf(alive()[0]); bsay('どの 魔物を ねらう？（十字の 左右で 選び、Aで 決定）'); drawBattleUI(); return; }
+    BT.phase='act'; drawBattleUI(); queue(partyAttacks(alive()[0]),0); return; }
+  BT.phase='act'; drawBattleUI();
   if(c==='ぼうぎょ'){ BT.guard=true; queue([()=>{ bsay('みんなは 身を 守って いる。'); return .7; }, ...enemyTurn()],0); }
   if(c==='どうぐ'){ if(BAG.herbs<=0){ BT.phase='menu'; bsay('道具を なにも もって いない。'); drawBattleUI(); return; }
     const m=BT.party[0]; queue([()=>{ const r=useHerb(m); bsay(r.join(' ')); drawBattleUI(); return .9; }, ...enemyTurn()],0); return; }
-  if(c==='にげる' && BT.def.boss){ queue([()=>{ bsay('逃げられない！'); return .8; }, ...enemyTurn()],0); return; }
+  if(c==='にげる' && BT.foes.some(f=>f.def.boss)){ queue([()=>{ bsay('逃げられない！'); return .8; }, ...enemyTurn()],0); return; }
   if(c==='にげる') queue([()=>{ bsay('エルトたちは 逃げだした！'); se('flee'); return .7; }, ()=>{ if(Math.random()<.75){ endBattle(); return 99; } bsay('しかし まわりこまれて しまった！'); BT.steps.push(...enemyTurn()); return .7; }],0); }
-function endBattle(){ const win=BT&&BT.ehp<=0, cb=BT&&BT.onWin; BT=null; btEl.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display=''; if(cur.kind==='world'){ cv.style.display='none'; c2.style.display='block'; resize2(); } else { cv.style.display='block'; c2.style.display='none'; resize(); }
+function targetPick(){ const f=BT.foes[BT.tsel]; BT.phase='act'; drawBattleUI(); se('ok'); queue(partyAttacks(f),0); }
+function endBattle(){ const win=BT&&BT.foes.every(f=>f.dead), cb=BT&&BT.onWin; BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display=''; if(cur.kind==='world'){ cv.style.display='none'; c2.style.display='block'; resize2(); } else { cv.style.display='block'; c2.style.display='none'; resize(); }
   if(win && cb) cb(); }
-let lastDirY=0;
-function battleInput(iy){ if(!BT||BT.phase!=='menu') return; if(iy!==0 && iy!==lastDirY){ BT.sel=(BT.sel+(iy>0?1:-1)+CMDS.length)%CMDS.length; drawBattleUI(); } lastDirY=iy; }
+let lastDirY=0, lastDirX=0;
+function battleInput(iy,ix){ if(!BT) return;
+  if(BT.phase==='menu'){ if(iy!==0 && iy!==lastDirY){ se('cursor'); BT.sel=(BT.sel+(iy>0?1:-1)+CMDS.length)%CMDS.length; drawBattleUI(); } }
+  if(BT.phase==='target' && ix!==0 && ix!==lastDirX){ const al=alive(); let k=al.indexOf(BT.foes[BT.tsel]); k=(k+(ix>0?1:-1)+al.length)%al.length; BT.tsel=BT.foes.indexOf(al[k]); se('cursor'); }
+  lastDirY=iy; lastDirX=ix; }
 const EZ=-1.1;   // ★魔物の 立つ 位置（奥へ。前は 0 で 大きく 映りすぎた）
+const _v=new THREE.Vector3();
 function battleTick(dt,now){
   if(BT.steps.length){ BT.st-=dt; while(BT && BT.st<=0 && BT.steps.length){ const f=BT.steps.shift(); BT.st=f(); } }
   if(!BT){ return; }
-  // 敵の 動き：待機の 息づかい・構えの 震え・攻撃の 飛びかかり・やられの 点滅・倒れて 消える
-  const ar=enemyMesh.userData.ar||.8, H=1.75*(BT.def.scale||1);   // ★大きな 敵は scale で 大きく
-  let sx=0, sc=1; BT.hop=Math.max(0,(BT.hop||0)-dt*3.2); BT.lunge=Math.max(0,BT.lunge-dt*2.6); BT.shake=Math.max(0,BT.shake-dt); BT.hurt=Math.max(0,BT.hurt-dt); BT.flash=Math.max(0,BT.flash-dt*5); BT.quake=Math.max(0,BT.quake-dt);
-  if(BT.shake>0) sx=Math.sin(now/22)*.05;
-  const lz=Math.sin(Math.min(1,BT.lunge)*Math.PI)*1.6; sc=1+Math.sin(Math.min(1,BT.lunge)*Math.PI)*.18 + Math.sin(Math.min(1,BT.hop)*Math.PI)*.05;
-  const hy=Math.sin(Math.min(1,BT.hop)*Math.PI)*.22 + (BT.def.float ? .35+Math.sin(now/420)*.08 : 0);   // ★その場で 小さく はねる（通常の 攻撃）。宙に 浮く 魔物は 浮かせて ゆらす
-  const breath=1+Math.sin(now/380)*.02;
-  // ★待機2の こまが ある 敵（ボス）は、待機の 間 2こまを 交互に（息づかい）
-  if(BT.def.frames.idle2 && (BT.frame==='idle'||BT.frame==='idle2')){ const k=Math.floor(now/550)%2?'idle2':'idle'; if(BT.frame!==k){ enemyTex[k]=enemyTex[BT.def.key+k]; setEnemyFrame(k); } }
-  enemyMesh.scale.set(H*ar*sc, H*sc*(BT.shake>0?1:breath), 1); enemyMesh.position.set(sx,hy,EZ+lz); enemyMesh.userData.sh.position.set(sx,.02,EZ+lz);
-  enemyMesh.visible = !(BT.hurt>0 && Math.floor(now/60)%2===0);
-  // ★倒した とき：速く 点滅して から 消える（前は 縦に しぼみながら 薄く なって いた）
-  if(BT.dead){ BT.ex=Math.max(0,BT.ex-dt*1.25); enemyMesh.visible = BT.ex>0.08 && Math.floor(now/70)%2===0; enemyMesh.userData.sh.visible = BT.ex>0.08; }
+  BT.flash=Math.max(0,BT.flash-dt*5); BT.quake=Math.max(0,BT.quake-dt);
+  // ★画面の 横幅に 収める：魔物の 立つ 奥行きで 見える 横の 半分の 幅を 求め、数に 合わせて 並べ、はみ出す ときは 小さく する（縦長の スマホでは 横が せまい）
+  const n=BT.foes.length, depth=4.3-EZ, halfW=Math.tan(batCam.fov*Math.PI/360)*depth*batCam.aspect*.92, cell=2*halfW/n;
+  BT.foes.forEach(f=>{
+    f.x = -halfW + cell*(f.slot+.5);
+    const H0=1.75*(f.def.scale||1), fit=Math.min(1, cell*.95/(H0*f.ar)), H=H0*fit;
+    f.hop=Math.max(0,f.hop-dt*3.2); f.lunge=Math.max(0,f.lunge-dt*2.6); f.shake=Math.max(0,f.shake-dt); f.hurt=Math.max(0,f.hurt-dt);
+    const sx=f.shake>0?Math.sin(now/22)*.05:0;
+    const lz=Math.sin(Math.min(1,f.lunge)*Math.PI)*1.6, sc=1+Math.sin(Math.min(1,f.lunge)*Math.PI)*.18+Math.sin(Math.min(1,f.hop)*Math.PI)*.05;
+    const hy=Math.sin(Math.min(1,f.hop)*Math.PI)*.22+(f.def.float?.35+Math.sin(now/420+f.x)*.08:0);
+    const breath=1+Math.sin(now/380+f.x*2)*.02;
+    if(f.def.frames.idle2 && (f.frame==='idle'||f.frame==='idle2')){ const k=Math.floor(now/550)%2?'idle2':'idle'; if(f.frame!==k) setFoeFrame(f,k); }
+    f.mesh.scale.set(H*f.ar*sc, H*sc*(f.shake>0?1:breath), 1); f.mesh.position.set(f.x+sx,hy,EZ+f.z+lz); f.sh.position.set(f.x+sx,.02,EZ+f.z+lz);
+    f.mesh.visible = !(f.hurt>0 && Math.floor(now/60)%2===0);
+    // ★倒した とき：速く 点滅して から 消える
+    if(f.dead){ f.ex=Math.max(0,f.ex-dt*1.25); f.mesh.visible = f.ex>0.08 && Math.floor(now/70)%2===0; f.sh.visible = f.ex>0.08; }
+  });
   flashEl.style.opacity=BT.flash*.7;
   const q=BT.quake>0?Math.sin(now/18)*.06:0;
   batCam.position.set(q,1.25,4.3); batCam.lookAt(0,.95,0);
+  // ねらう 印（魔物の 頭の 上）
+  if(BT.phase==='target'){ const f=BT.foes[BT.tsel]; _v.set(f.mesh.position.x, f.mesh.position.y+f.mesh.scale.y+.1, f.mesh.position.z).project(batCam);
+    const r=cv.getBoundingClientRect(); bmark.style.left=((_v.x+1)/2*r.width-10)+'px'; bmark.style.top=((1-_v.y)/2*r.height-26+Math.sin(now/150)*3)+'px'; }
   R.render(batScene,batCam); }
 
 // ================= 序章「燃える国境」 =================
