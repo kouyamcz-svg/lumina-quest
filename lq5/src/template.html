@@ -80,11 +80,11 @@ const TOWN=[
 //  W 壁  s 棚  b 寝台  T 机  c 椅子  f 暖炉  p 鉢植え  X 出口
 const ROOMS=[
  {name:'長老の 家', rows:["WWWWWWWWW","WsW.f..bW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"],
-  npc:{x:6.5,y:3.5,spr:'king',name:'長老',lines:['長老「よく 来たな、エルト」','長老「この 村の 麦は、昔 ヴェルナから 贈られた 種から 育った」']}},
+  npc:{x:6.5,y:3.5,spr:'elder',name:'長老',lines:['長老「よく 来たな、エルト」','長老「この 村の 麦は、昔 ヴェルナから 贈られた 種から 育った」']}},
  {name:'鍛冶屋', rows:["WWWWWWWWW","Wf..s..sW","W.......W","W.T...T.W","W.......W","Wp......W","WWWWXWWWW"],
   npc:{x:2.5,y:2.5,spr:'dolgan',name:'鍛冶屋の 親方',lines:['親方「剣の 手入れか？　国境が きな臭い。いつでも 来い」']}},
- {name:'宿屋', rows:["WWWWWWWWW","Wb.b.b.sW","W.......W","W..cTc..W","W.......W","Wp..f..pW","WWWWXWWWW"],
-  npc:{x:4.5,y:2.2,spr:'lidia',name:'宿の 娘',lines:['娘「いらっしゃい。今夜は 旅の 人が 多いの」','（試作：宿で 泊まる 仕組みは まだ ありません）']}},
+ {name:'宿屋', rows:["WWWWWWWWW","Wb.bfb.sW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"],   // ★暖炉は 奥の 壁へ（前は 出口の すぐ 前に あった）
+  npc:{x:2.5,y:2.4,spr:'girl',name:'宿の 娘',lines:['娘「いらっしゃい。今夜は 旅の 人が 多いの」','（試作：宿で 泊まる 仕組みは まだ ありません）']}},
  {name:'道具屋', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.TTT...W","W.......W","Wp.....pW","WWWWXWWWW"],
   npc:{x:3.5,y:2.5,spr:'zf',name:'古道具屋の からくり',lines:['からくり「……ふむ。いらっしゃいませ」']}},
  {name:'兵舎', rows:["WWWWWWWWW","Wbb...bbW","W.......W","W..cTc..W","W.......W","Ws.....sW","WWWWXWWWW"],
