@@ -65,6 +65,8 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('攻撃の 呪文は 3段階', await E(()=>{ const fam=[['tsuyogiri','blaze2','blaze3'],['volt','voltra','voltrion'],['hono','flare2','flare3'],['raigeki','thunder2','thunder3']]; return fam.every(f=>f.every(id=>SKILLS[id])); }));
   T('Lv28で ブレイズカリバーまで 覚える', await E(()=>{ const lv=STATS.elt.lv; STATS.elt.lv=28; const n=skillsOf('elt').map(k=>k.name); STATS.elt.lv=lv; return ['ブレイズエッジ','ブレイズセイバー','ブレイズカリバー','ヴォルト','ヴォルトラ'].every(x=>n.includes(x)) && !n.includes('ヴォルトリオン'); }));
   T('ヴォルトリオンは 物語で 授かる', await E(()=>{ STATS.elt.extra=['voltrion']; const ok=skillsOf('elt').some(k=>k.name==='ヴォルトリオン'); STATS.elt.extra=[]; return ok; }));
+  T('ドルガンの 技（兜割り・大魔神斬り・ダブルファングは Lv28）', await E(()=>{ STATS.dolgan={name:'ドルガン',lv:27,hp:60,max:60,mp:10,atk:20,defT:8}; const a=skillsOf('dolgan').map(k=>k.name); STATS.dolgan.lv=28; const b=skillsOf('dolgan').map(k=>k.name); return a.includes('兜割り')&&a.includes('大魔神斬り')&&!a.includes('ダブルファング')&&b.includes('ダブルファング'); }));
+  T('大魔神斬り：はずれ／当たれば 会心', await E(()=>{ PARTY.push('dolgan'); startBattle([FOES.banpei]); const m=BT.party[1], f=BT.foes[0]; const r=Math.random; Math.random=()=>.9; actOf(m,{kind:'skill',sk:Object.assign({id:'daimajin'},SKILLS.daimajin),target:f})(); const miss=f.hp===f.max; Math.random=()=>.1; actOf(m,{kind:'skill',sk:Object.assign({id:'daimajin'},SKILLS.daimajin),target:f})(); const hit=f.max-f.hp; Math.random=r; endBattle(); PARTY.length=1; return miss && hit===Math.min(f.max,Math.round((20+3)*2.4)); }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
