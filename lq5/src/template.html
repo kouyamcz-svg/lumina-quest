@@ -590,9 +590,16 @@ function startBattle(def,onWin){ def=def||FOES.nousagi;
 function queue(fns,delay){ BT.steps=fns.slice(); BT.st=delay||0; }
 function enemyTurn(){ const alive=BT.party.filter(m=>m.hp>0); const t=alive[Math.floor(Math.random()*alive.length)];
   return [
-   ()=>{ bsay(BT.ename+BT.def.wind); setEnemyFrame('wind'); BT.shake=.55; return .65; },         // 構え（震える）
-   ()=>{ setEnemyFrame('atk'); BT.lunge=1; BT.flash=1; BT.quake=.35; let d=BT.def.atk[0]+Math.floor(Math.random()*(BT.def.atk[1]-BT.def.atk[0]+1)); d=Math.max(1,d-Math.floor((t.defT||0)/4)); if(BT.guard) d=Math.ceil(d/2); se('ehit');
-         t.hp=Math.max(0,t.hp-d); BT.hitIdx=BT.party.indexOf(t); bsay(BT.ename+'の '+BT.def.verb+'！ '+t.name+'に '+d+'の ダメージ！'); drawBattleUI(); return .45; },  // 攻撃（飛びかかる）
+   // ★通常の 攻撃は その場で 動く（はねる）。前へ 飛び出すのは 痛恨の 一撃（1/16）と 大技（大技の こまが ある 敵、1/4）だけ
+   ()=>{ BT.kind = (BT.def.frames.big && BT.def.bigName && Math.random()<.25) ? 'big' : (Math.random()<1/16 ? 'crit' : 'normal');
+         if(BT.kind==='big'){ bsay(BT.ename+BT.def.bigWind); setEnemyFrame('big'); BT.shake=.9; return .9; }
+         bsay(BT.ename+BT.def.wind); setEnemyFrame('wind'); BT.shake=.55; return .65; },         // 構え（震える）
+   ()=>{ let d=BT.def.atk[0]+Math.floor(Math.random()*(BT.def.atk[1]-BT.def.atk[0]+1)); let head='';
+         if(BT.kind==='big'){ d=Math.round(d*1.6); BT.lunge=1; BT.flash=1; BT.quake=.5; head=BT.ename+'の '+BT.def.bigName+'！ '; }
+         else if(BT.kind==='crit'){ d=Math.round(d*2); BT.lunge=1; BT.flash=1; BT.quake=.45; setEnemyFrame('atk'); head='つうこんの いちげき！ '; }
+         else { setEnemyFrame('atk'); BT.hop=1; BT.flash=.45; BT.quake=.15; d=Math.max(1,d-Math.floor((t.defT||0)/4)); head=BT.ename+'の '+BT.def.verb+'！ '; }
+         if(BT.guard) d=Math.ceil(d/2); se('ehit');
+         t.hp=Math.max(0,t.hp-d); BT.hitIdx=BT.party.indexOf(t); bsay(head+t.name+'に '+d+'の ダメージ！'); drawBattleUI(); return BT.kind==='normal'?.4:.5; },
    ()=>{ setEnemyFrame('idle'); BT.hitIdx=-1; drawBattleUI(); return .6; },
    ()=>{ BT.guard=false; if(BT.party.every(m=>m.hp<=0)){ bsay('目の 前が まっくらに なった……（体力を 戻して 続けます）'); se('lose'); BT.party.forEach(m=>m.hp=m.max); drawBattleUI(); return 1.4; } return 0; },
    ()=>{ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; } ]; }
@@ -618,13 +625,14 @@ function battleTick(dt,now){
   if(!BT){ return; }
   // 敵の 動き：待機の 息づかい・構えの 震え・攻撃の 飛びかかり・やられの 点滅・倒れて 消える
   const ar=enemyMesh.userData.ar||.8, H=1.75;
-  let sx=0, sc=1; BT.lunge=Math.max(0,BT.lunge-dt*2.6); BT.shake=Math.max(0,BT.shake-dt); BT.hurt=Math.max(0,BT.hurt-dt); BT.flash=Math.max(0,BT.flash-dt*5); BT.quake=Math.max(0,BT.quake-dt);
+  let sx=0, sc=1; BT.hop=Math.max(0,(BT.hop||0)-dt*3.2); BT.lunge=Math.max(0,BT.lunge-dt*2.6); BT.shake=Math.max(0,BT.shake-dt); BT.hurt=Math.max(0,BT.hurt-dt); BT.flash=Math.max(0,BT.flash-dt*5); BT.quake=Math.max(0,BT.quake-dt);
   if(BT.shake>0) sx=Math.sin(now/22)*.05;
-  const lz=Math.sin(Math.min(1,BT.lunge)*Math.PI)*1.6; sc=1+Math.sin(Math.min(1,BT.lunge)*Math.PI)*.18;
+  const lz=Math.sin(Math.min(1,BT.lunge)*Math.PI)*1.6; sc=1+Math.sin(Math.min(1,BT.lunge)*Math.PI)*.18 + Math.sin(Math.min(1,BT.hop)*Math.PI)*.05;
+  const hy=Math.sin(Math.min(1,BT.hop)*Math.PI)*.22;   // ★その場で 小さく はねる（通常の 攻撃）
   const breath=1+Math.sin(now/380)*.02;
   // ★待機2の こまが ある 敵（ボス）は、待機の 間 2こまを 交互に（息づかい）
   if(BT.def.frames.idle2 && (BT.frame==='idle'||BT.frame==='idle2')){ const k=Math.floor(now/550)%2?'idle2':'idle'; if(BT.frame!==k){ enemyTex[k]=enemyTex[BT.def.key+k]; setEnemyFrame(k); } }
-  enemyMesh.scale.set(H*ar*sc, H*sc*(BT.shake>0?1:breath), 1); enemyMesh.position.set(sx,0,lz); enemyMesh.userData.sh.position.set(sx,.02,lz);
+  enemyMesh.scale.set(H*ar*sc, H*sc*(BT.shake>0?1:breath), 1); enemyMesh.position.set(sx,hy,lz); enemyMesh.userData.sh.position.set(sx,.02,lz);
   enemyMesh.visible = !(BT.hurt>0 && Math.floor(now/60)%2===0);
   // ★倒した とき：速く 点滅して から 消える（前は 縦に しぼみながら 薄く なって いた）
   if(BT.dead){ BT.ex=Math.max(0,BT.ex-dt*1.25); enemyMesh.visible = BT.ex>0.08 && Math.floor(now/70)%2===0; enemyMesh.userData.sh.visible = BT.ex>0.08; }
@@ -642,7 +650,7 @@ const STATS={ elt:{name:'エルト',lv:1,exp:0,hp:34,max:34,mp:6,maxmp:6,batk:3,
 const FOES={
   nousagi:{key:'nousagi', name:'野ウサギ', hp:16, exp:4, gold:3, atk:[2,4], wind:'は 口を 大きく 開けた！', verb:'かみつき', frames:{idle:RAB.idle,wind:RAB.wind,atk:RAB.atk}},
   // ★部隊長：ボスの 5こま（待機1・待機2・構え・攻撃・大技）。大技は まだ 使わない
-  taicho:{key:'taicho', name:'ヴェルナの 部隊長', hp:52, exp:30, gold:60, atk:[4,7], wind:'は 剣を 振りかぶった！', verb:'斬りつけ', boss:true, frames:{idle:RAB.tc_idle,idle2:RAB.tc_idle2,wind:RAB.tc_wind,atk:RAB.tc_atk,big:RAB.tc_big}},
+  taicho:{key:'taicho', name:'ヴェルナの 部隊長', hp:52, exp:30, gold:60, atk:[4,7], wind:'は 剣を 振りかぶった！', verb:'斬りつけ', bigWind:'は 剣を 地に 突き立てた！ 足もとから 赤い 炎が 立ちのぼる！', bigName:'炎の 剣', boss:true, frames:{idle:RAB.tc_idle,idle2:RAB.tc_idle2,wind:RAB.tc_wind,atk:RAB.tc_atk,big:RAB.tc_big}},
 };
 let fires=[], fireMeshes=[];
 function townNpcs(){
