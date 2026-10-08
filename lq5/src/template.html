@@ -787,7 +787,7 @@ function battleInput(iy,ix){ if(!BT) return;
   if(BT.phase==='menu'){ if(iy!==0 && iy!==lastDirY){ se('cursor'); BT.sel=(BT.sel+(iy>0?1:-1)+CMDS.length)%CMDS.length; drawBattleUI(); } }
   if(BT.phase==='target' && iy!==0 && iy!==lastDirY){ const al=alive(); let k=al.indexOf(BT.foes[BT.tsel]); k=(k+(iy>0?1:-1)+al.length)%al.length; BT.tsel=BT.foes.indexOf(al[k]); se('cursor'); drawBattleUI(); }
   lastDirY=iy; lastDirX=ix; }
-const EZ=-1.1;   // ★魔物の 立つ 位置（奥へ。前は 0 で 大きく 映りすぎた）
+const EZ=-2.0;   // ★魔物の 立つ 位置（奥へ。0 → -1.1 → -2.0。指示で 少しずつ 下げた）
 const _v=new THREE.Vector3();
 function battleTick(dt,now){
   if(BT.steps.length){ BT.st-=dt; while(BT && BT.st<=0 && BT.steps.length){ const f=BT.steps.shift(); BT.st=f(); } }
