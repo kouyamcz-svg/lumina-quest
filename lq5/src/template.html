@@ -59,7 +59,7 @@ const SPR=__SPR__;
 // ★絵の 向きが 左向きで 描かれて いる こま（反転の 向きを 逆に する）。ドルガンの 描き直しの 斜め後ろは 左上を 向いて いた（横顔の 絵との 似かたで 確かめた）
 const MIRROR={dolgan:{diagB:true}};
 // ★人ごとの 背の 高さ（1＝大人）
-const SIZE={child:.72, elder:.9, girl:.92};
+const SIZE={child:.72, elder:.9, girl:.92, banpei:1.4};
 // ================= 地図（ますの 並び。その 上を 自由に 動く）=================
 //  # 崖・外壁  H 家（ひとかたまりで 1けん）  D 家の 扉  t 木  F 噴水  w 井戸  = 石畳の 広場  g 村の 門
 const TOWN=[
@@ -345,9 +345,9 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
     const mv=Math.hypot(hero.x-ox,hero.z-oz);
     if(mv>.001){ trail.unshift([hero.x,hero.z,hero.ang]); if(trail.length>400) trail.pop(); }
     if(cur.kind==='world' && mv>.001){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))===','?1.5:1);
-      if(wWalk>wEnc){ wWalk=0; wEnc=12+Math.random()*10; startBattle(FOES.nousagi); } }
-    if(cur.kind==='fort' && mv>.001 && !msgQ && ST.phase==='c1_fort'){ wWalk+=mv; if(wWalk>wEnc){ wWalk=0; wEnc=8+Math.random()*8; startBattle(FOES.haiusagi); } }
-    if(cur.kind==='farm' && mv>.001 && !msgQ){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))==='f'?1.4:1); if(wWalk>wEnc){ wWalk=0; wEnc=10+Math.random()*8; startBattle(FOES.nousagi,()=>{ if(ST.phase==='field') ST.kills=(ST.kills||0)+1; }); } } }
+      if(wWalk>wEnc){ wWalk=0; wEnc=12+Math.random()*10; startBattle(pickFoe(hero.x>30?'east':(ST.phase==='road'?'westNight':'west'))); } }
+    if(cur.kind==='fort' && mv>.001 && !msgQ && ST.phase==='c1_fort'){ wWalk+=mv; if(wWalk>wEnc){ wWalk=0; wEnc=8+Math.random()*8; startBattle(pickFoe('fort')); } }
+    if(cur.kind==='farm' && mv>.001 && !msgQ){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))==='f'?1.4:1); if(wWalk>wEnc){ wWalk=0; wEnc=10+Math.random()*8; startBattle(pickFoe('farm'),()=>{ if(ST.phase==='field') ST.kills=(ST.kills||0)+1; }); } } }
   // 出入口の 範囲（町：家の 扉の 前に 上へ 進む と 入る／家：出口の 前で 下へ 進む と 出る）
   if(!fading && !msgQ){
     if(cur.kind==='town' && TOWN_NOW==='velna' && hero.z>18.9 && iz>0 && Math.abs(hero.x-11.5)<1.3){ go(()=>enterWorld([38.5,10.45])); }
@@ -638,7 +638,7 @@ function battleTick(dt,now){
   if(BT.steps.length){ BT.st-=dt; while(BT && BT.st<=0 && BT.steps.length){ const f=BT.steps.shift(); BT.st=f(); } }
   if(!BT){ return; }
   // 敵の 動き：待機の 息づかい・構えの 震え・攻撃の 飛びかかり・やられの 点滅・倒れて 消える
-  const ar=enemyMesh.userData.ar||.8, H=1.75;
+  const ar=enemyMesh.userData.ar||.8, H=1.75*(BT.def.scale||1);   // ★大きな 敵は scale で 大きく
   let sx=0, sc=1; BT.hop=Math.max(0,(BT.hop||0)-dt*3.2); BT.lunge=Math.max(0,BT.lunge-dt*2.6); BT.shake=Math.max(0,BT.shake-dt); BT.hurt=Math.max(0,BT.hurt-dt); BT.flash=Math.max(0,BT.flash-dt*5); BT.quake=Math.max(0,BT.quake-dt);
   if(BT.shake>0) sx=Math.sin(now/22)*.05;
   const lz=Math.sin(Math.min(1,BT.lunge)*Math.PI)*1.6; sc=1+Math.sin(Math.min(1,BT.lunge)*Math.PI)*.18 + Math.sin(Math.min(1,BT.hop)*Math.PI)*.05;
@@ -932,15 +932,23 @@ setInterval(bgmUpdate,500);
 //  c1_castle（王に 呼ばれる。使者 ハーヴェン（仮）の 護衛を 命じられる）→ c1_road（街道を 東の 国境の 砦へ）
 //  → c1_fort（砦の 中。奥の 番兵を 倒す）→ c1_east（砦を 抜け、ヴェルナの 鉱山の 町へ）→ c1_town（町の 人と 話す）→ c1_end
 let TOWN_NOW='rue';
-FOES.haiusagi={key:'haiusagi', name:'砦ネズミ（仮の 絵）', hp:26, exp:10, gold:6, atk:[4,7], wind:'は 歯を むいた！', verb:'かみつき', tint:0x9a9aa8, frames:{idle:RAB.idle,wind:RAB.wind,atk:RAB.atk}};
-FOES.banpei={key:'banpei', name:'砦の 番兵（仮の 絵）', hp:110, exp:80, gold:120, atk:[6,10], wind:'は 剣を 振りかぶった！', verb:'斬りつけ', boss:true, tint:0x9ab8a0,
-  bigWind:'の 鎧の すきまから 黒い 霧が 噴きだした！', bigName:'黒い 霧の 斬撃', frames:{idle:RAB.tc_idle,idle2:RAB.tc_idle2,wind:RAB.tc_wind,atk:RAB.tc_atk,big:RAB.tc_big}};
+FOES.haiusagi={key:'haiusagi', name:'砦ネズミ', hp:26, exp:10, gold:6, atk:[4,7], wind:'は 口を 大きく 開けた！', verb:'かみつき', frames:{idle:RAB.nz_idle,wind:RAB.nz_wind,atk:RAB.nz_atk}};
+// ★魔物の 種類を 増やす：同じ 絵の 色違い（Ⅳと 同じ 考え方）。強さも 変える
+FOES.ikari={key:'ikari', name:'いかりウサギ', hp:30, exp:12, gold:8, atk:[5,8], wind:'は 毛を 逆立てた！', verb:'かみつき', tint:0xff8a7a, frames:{idle:RAB.idle,wind:RAB.wind,atk:RAB.atk}};
+FOES.yamiusagi={key:'yamiusagi', name:'やみウサギ', hp:22, exp:9, gold:7, atk:[4,6], wind:'は 闇の 中から 跳ねた！', verb:'かみつき', tint:0x8a7ab8, frames:{idle:RAB.idle,wind:RAB.wind,atk:RAB.atk}};
+FOES.kuronezumi={key:'kuronezumi', name:'黒ネズミ', hp:34, exp:14, gold:10, atk:[5,9], wind:'は 歯を むいた！', verb:'かみつき', tint:0x6a6a7a, frames:{idle:RAB.nz_idle,wind:RAB.nz_wind,atk:RAB.nz_atk}};
+FOES.hinezumi={key:'hinezumi', name:'火ネズミ', hp:30, exp:13, gold:9, atk:[6,9], wind:'の 毛が 赤く 燃えた！', verb:'かみつき', tint:0xffa060, frames:{idle:RAB.nz_idle,wind:RAB.nz_wind,atk:RAB.nz_atk}};
+// ★出る 場所ごとの 魔物（重みつき）
+const ENC={ farm:[['nousagi',1]], west:[['nousagi',3],['yamiusagi',1]], westNight:[['nousagi',1],['yamiusagi',2]], east:[['ikari',2],['haiusagi',1],['hinezumi',1]], fort:[['haiusagi',3],['kuronezumi',2]] };
+function pickFoe(area){ const t=ENC[area]; let sum=t.reduce((a,b)=>a+b[1],0), r=Math.random()*sum; for(const [k,w] of t){ if((r-=w)<0) return FOES[k]; } return FOES[t[0][0]]; }
+FOES.banpei={key:'banpei', name:'砦の 番兵', scale:1.35, hp:110, exp:80, gold:120, atk:[6,10], wind:'は 大剣を 振りかぶった！', verb:'なぎ払い', boss:true,
+  bigWind:'の 鎧の すきまから 黒い 霧が 噴きだした！', bigName:'黒い 霧の 斬撃', frames:{idle:RAB.bp_idle,idle2:RAB.bp_idle2,wind:RAB.bp_wind,atk:RAB.bp_atk,big:RAB.bp_big}};
 function startCh1(){ const c=document.getElementById('card'); c.style.opacity=0; ST.phase='c1_castle'; enterCastle();
   say(['── 第1章　和平の 使者 ──','三日後。エルトは 王に 呼ばれ、謁見の 間に いた。']); }
 function setEscort(on){ followers.forEach(f=>{ S.remove(f.p.m); S.remove(f.p.sh); }); followers=[];
-  if(on){ followers=[{p:person('elder'),x:hero.x,z:hero.z,ang:hero.ang}]; } resetTrail(); }
+  if(on){ followers=[{p:person('haven'),x:hero.x,z:hero.z,ang:hero.ang}]; } resetTrail(); }
 const ESCORT=()=>/^c1_(road|fort|east|town)$/.test(ST.phase);
-function kingCh1(){ say(['アルディア王「エルト。そなたに 頼みが ある」','アルディア王「ヴェルナへ 送る 和平の 使者、ハーヴェンの 護衛だ」','使者 ハーヴェン「……よろしく 頼みますぞ、若い 兵士どの」','アルディア王「国境の 砦を 抜け、ヴェルナの 鉱山の 町 ドルムへ。そこで 帝国の 迎えを 待て」','＊ 使者 ハーヴェン（仮の 絵）が ついて くる ＊'],()=>{ ST.phase='c1_road'; setEscort(true); say(['＊ 王都を 出て、街道を 東の 国境の 砦へ ＊']); }); }
+function kingCh1(){ say(['アルディア王「エルト。そなたに 頼みが ある」','アルディア王「ヴェルナへ 送る 和平の 使者、ハーヴェンの 護衛だ」','使者 ハーヴェン「……よろしく 頼みますぞ、若い 兵士どの」','アルディア王「国境の 砦を 抜け、ヴェルナの 鉱山の 町 ドルムへ。そこで 帝国の 迎えを 待て」','＊ 使者 ハーヴェンが ついて くる ＊'],()=>{ ST.phase='c1_road'; setEscort(true); say(['＊ 王都を 出て、街道を 東の 国境の 砦へ ＊']); }); }
 // ---- 国境の 砦（3D の 迷路。奥に 番兵）----
 const FORT=[
 "###############",
@@ -965,7 +973,7 @@ function buildFort(){
 function enterFort(fromEast){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); cv.style.display='block'; c2.style.display='none';
   if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; fireMeshes=[]; buildFort();
   cur={kind:'fort', rows:FORT, solid:new Set(['#']), npcs:cur.npcs, room:null};
-  setNpcs(ST.phase==='c1_fort'||ST.phase==='c1_road' ? [{x:13.5,y:3.4,spr:'vsoldier',name:'砦の 番兵（仮の 絵）',talk:()=>{
+  setNpcs(ST.phase==='c1_fort'||ST.phase==='c1_road' ? [{x:13.5,y:3.4,spr:'banpei',name:'砦の 番兵',talk:()=>{
     say(['番兵「…………」','鎧の 中から、人の 声では ない 音が した。','使者 ハーヴェン「こ、これは 人では ないぞ！」'],()=>startBattle(FOES.banpei,()=>{ ST.phase='c1_east'; setNpcs([]); say(['番兵の 鎧が 崩れ落ちた。中は からっぽだった。','使者 ハーヴェン「……ヴェルナの 砦に、なぜ こんな ものが」','＊ 奥の 出口から、ヴェルナ側へ 抜けられる ＊']); })); }}] : []);
   if(ST.phase==='c1_road') ST.phase='c1_fort';
   if(fromEast){ hero.x=13.5; hero.z=1.6; hero.ang=Math.PI; } else { hero.x=6.5; hero.z=FORT.length-1.6; hero.ang=Math.PI; } resetTrail(); wWalk=0; wEnc=6+Math.random()*6;
