@@ -788,7 +788,7 @@ let menuLastY=0;
 // ---- セーブ（この 端末の ブラウザに 残す）----
 function saveGame(){ try{ localStorage.setItem('lq5save', JSON.stringify({ST,STATS,BAG,EQUIP,tactic,SND,at:{kind:cur.kind,x:hero.x,z:hero.z}})); return true; }catch(e){ return false; } }
 function loadGame(){ try{ const d=JSON.parse(localStorage.getItem('lq5save')||'null'); if(!d) return false;
-  Object.assign(ST,d.ST); Object.assign(STATS.elt,d.STATS.elt); Object.assign(BAG,d.BAG); Object.assign(EQUIP.elt,d.EQUIP.elt); if(!BAG.gear) BAG.gear=[]; if(!BAG.opened) BAG.opened={}; if(d.tactic) tactic=d.tactic; if(d.SND) SND=d.SND; if(STATS.elt.lv===undefined){ Object.assign(STATS.elt,{lv:1,exp:0,maxmp:6,batk:3,def:3,agi:6}); } syncAtk();
+  Object.assign(ST,d.ST); Object.assign(STATS.elt,d.STATS.elt); Object.assign(BAG,d.BAG); Object.assign(EQUIP.elt,d.EQUIP.elt); if(!BAG.gear) BAG.gear=[]; if(!BAG.opened) BAG.opened={}; if(d.tactic) tactic=d.tactic; if(d.SND) SND=Object.assign({se:true,bgm:true},d.SND); if(STATS.elt.lv===undefined){ Object.assign(STATS.elt,{lv:1,exp:0,maxmp:6,batk:3,def:3,agi:6}); } syncAtk();
   const k=d.at.kind; if(k==='world') enterWorld([d.at.x,d.at.z]); else if(k==='farm'){ enterFarm(); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='castle'){ enterCastle(); } else enterTown([d.at.x,d.at.z]);
   return true; }catch(e){ return false; } }
 function hasSave(){ try{ return !!localStorage.getItem('lq5save'); }catch(e){ return false; } }
@@ -841,12 +841,29 @@ const TACTICS={gungan:'ガンガン いこうぜ', balance:'バランス よく'
 let tactic='balance';
 function openTactics(){ const ks=Object.keys(TACTICS); menu(ks.map(k=>(k===tactic?'▶':'')+TACTICS[k]).concat(['戻る']),'作戦',(i)=>{ if(i>=ks.length){ openFieldMenu(); return; } tactic=ks[i]; closeMenu(); say(['作戦を 「'+TACTICS[ks[i]]+'」に した。','（序章は エルト 1人なので、仲間が 加わってから 効く）'],openFieldMenu); },()=>openFieldMenu()); }
 // ---- 音（効果音。Ⅳと 同じく 短い 電子音）----
-let SND={se:true}; let actx=null;
+let SND={se:true, bgm:true}; let actx=null;
 function se(kind){ if(!SND.se) return; try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); const o=actx.createOscillator(), g=actx.createGain(); o.type='square';
   const f={cursor:880,ok:1320,hit:220,win:660}[kind]||880; o.frequency.value=f; g.gain.value=.05; o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+(kind==='hit'?.12:.06)); }catch(e){} }
-function openSound(){ menu(['効果音：'+(SND.se?'あり':'なし'),'曲：（まだ ない）','戻る'],'音',(k)=>{ if(k===0){ SND.se=!SND.se; openSound(); } else openFieldMenu(); },()=>openFieldMenu()); }
+function openSound(){ menu(['効果音：'+(SND.se?'あり':'なし'),'曲：'+(SND.bgm?'あり':'なし'),'戻る'],'音',(k)=>{ if(k===0){ SND.se=!SND.se; openSound(); } else if(k===1){ SND.bgm=!SND.bgm; bgmUpdate(); openSound(); } else openFieldMenu(); },()=>openFieldMenu()); }
 // ---- 宝箱 ----
 const CHESTS={town:[{x:20.5,z:17.5,gold:25,id:'c1'}], farm:[{x:2.5,z:12.5,herb:1,id:'c2'}]};
+
+// ================= 曲（Ⅳの 曲の ファイルを そのまま 使う。../lq4/ の mp3）=================
+//  村・家＝town、外の 世界・畑＝field、王都＝castle、燃える 村＝dungeon、戦闘＝battle3、ボス＝boss
+const BGM_FILES={town:'../lq4/town.mp3', field:'../lq4/field.mp3', castle:'../lq4/castle.mp3', dungeon:'../lq4/dungeon.mp3', battle:'../lq4/battle3.mp3', boss:'../lq4/boss.mp3'};
+const BGM_VOL={town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, boss:.5};
+let bgmEl=null, bgmNow='', bgmUnlocked=false;
+function bgmFor(){ if(BT) return BT.def.boss?'boss':'battle';
+  if(cur.kind==='world') return 'field'; if(cur.kind==='farm') return 'field'; if(cur.kind==='castle') return 'castle';
+  if(cur.kind==='town' && (ST.phase==='burn')) return 'dungeon'; return 'town'; }
+function bgmUpdate(){ if(!SND.bgm || !bgmUnlocked){ if(bgmEl && !bgmEl.paused) bgmEl.pause(); return; }
+  const want=bgmFor(); if(want===bgmNow && bgmEl && !bgmEl.paused) return;
+  try{ if(!bgmEl){ bgmEl=new Audio(); bgmEl.loop=true; }
+    if(want!==bgmNow){ bgmEl.src=BGM_FILES[want]; bgmNow=want; }
+    bgmEl.volume=BGM_VOL[want]||.5; const p=bgmEl.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
+// iPhone などは 画面に 触れた 後で ないと 音が 出せない
+['touchstart','mousedown','keydown'].forEach(ev=>addEventListener(ev,()=>{ if(!bgmUnlocked){ bgmUnlocked=true; bgmUpdate(); } },{passive:true}));
+setInterval(bgmUpdate,500);
 
 function resize(){ const v=document.getElementById('view'); const w=v.clientWidth,h=v.clientHeight; R.setSize(w,h,false); C.aspect=w/h; C.updateProjectionMatrix(); batCam.aspect=w/h; batCam.updateProjectionMatrix(); }
 addEventListener('resize',()=>{resize(); if(cur.kind==='world') resize2();}); resize();
