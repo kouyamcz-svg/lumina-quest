@@ -591,7 +591,10 @@ function queue(fns,delay){ BT.steps=fns.slice(); BT.st=delay||0; }
 function enemyTurn(){ const alive=BT.party.filter(m=>m.hp>0); const t=alive[Math.floor(Math.random()*alive.length)];
   return [
    // ★通常の 攻撃は その場で 動く（はねる）。前へ 飛び出すのは 痛恨の 一撃（1/16）と 大技（大技の こまが ある 敵、1/4）だけ
-   ()=>{ BT.kind = (BT.def.frames.big && BT.def.bigName && Math.random()<.25) ? 'big' : (Math.random()<1/16 ? 'crit' : 'normal');
+   // ★大技は 続けて 出さない（使った 後 2回は 出ない）。前は 毎回 1/4 で、3回 続く ことが あった（実機で 報告）
+   ()=>{ BT.bigCool=Math.max(0,(BT.bigCool||0)-1);
+         BT.kind = (BT.def.frames.big && BT.def.bigName && BT.bigCool===0 && Math.random()<.25) ? 'big' : (Math.random()<1/16 ? 'crit' : 'normal');
+         if(BT.kind==='big') BT.bigCool=3;
          if(BT.kind==='big'){ bsay(BT.ename+BT.def.bigWind); setEnemyFrame('big'); BT.shake=.9; return .9; }
          bsay(BT.ename+BT.def.wind); setEnemyFrame('wind'); BT.shake=.55; return .65; },         // 構え（震える）
    ()=>{ let d=BT.def.atk[0]+Math.floor(Math.random()*(BT.def.atk[1]-BT.def.atk[0]+1)); let head='';
