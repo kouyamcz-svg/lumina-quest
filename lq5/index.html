@@ -723,13 +723,13 @@ const FM=[];
 function foeTex(def,k){ const key=def.key+k; if(!enemyTex[key]){ const t=new THREE.TextureLoader().load(def.frames[k]); t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter; enemyTex[key]=t; } return enemyTex[key]; }
 function setFoeFrame(f,k){ if(!f.def.frames[k]) k='idle'; f.frame=k; const t=foeTex(f.def,k); f.mesh.material.map=t; f.mesh.material.needsUpdate=true; const img=t.image; f.ar=img&&img.width?img.width/img.height:.8; }
 const btEl=document.getElementById('bt'), bmsg=document.getElementById('bmsg'), bmenu=document.getElementById('bmenu'), bparty=document.getElementById('bparty'), flashEl=document.getElementById('flash'), bmark=document.getElementById('bmark');
-const CMDS=['たたかう','技','ぼうぎょ','どうぐ','にげる'];
+const CMDS=['たたかう','呪文','ぼうぎょ','どうぐ','にげる'];
 function partyHtml(){ return BT.party.map((m,i)=>`<div class="pm${m.hp<=0?' down':''}${BT.hitIdx===i?' hit':''}"><b>${m.name}</b>${m.status?'<span class="st">'+STNAME[m.status]+'</span>':''}<br>HP ${m.hp}<br>MP ${m.mp}</div>`).join(''); }
 function drawBattleUI(){ bparty.innerHTML=partyHtml(); bmenu.style.display = (BT.phase==='menu'||BT.phase==='target'||BT.phase==='skill') ? 'block':'none';
   // ★ねらう 魔物は 名前の 一覧から 選ぶ（前は 魔物の 頭の 上に ▼ を 出して いた）
   bmark.style.display = BT.phase==='target' ? 'block':'none';   // ★▼は 一覧で 選んで いる 魔物の 頭の 上（一覧と 連動）
   if(BT.phase==='target'){ const al=alive(); bmenu.innerHTML='<div class="mt">ねらう 魔物</div>'+al.map(f=>{ const on=BT.foes.indexOf(f)===BT.tsel; return `<div class="${on?'on':''}">${on?'▶':'　'}${f.name}</div>`; }).join(''); }
-  else if(BT.phase==='skill'){ bmenu.innerHTML='<div class="mt">技（MP '+BT.party[0].mp+'）</div>'+BT.sks.map((k,i)=>`<div class="${i===BT.ssel?'on':''}">${i===BT.ssel?'▶':'　'}${k.name}　${k.mp}</div>`).join(''); }
+  else if(BT.phase==='skill'){ bmenu.innerHTML='<div class="mt">呪文（MP '+BT.party[0].mp+'）</div>'+BT.sks.map((k,i)=>`<div class="${i===BT.ssel?'on':''}">${i===BT.ssel?'▶':'　'}${k.name}　${k.mp}</div>`).join(''); }
   else bmenu.innerHTML=CMDS.map((c,i)=>`<div class="${i===BT.sel?'on':''}">${i===BT.sel?'▶':'　'}${c}</div>`).join(''); }
 function bsay(t){ bmsg.textContent=t; }
 const alive=()=>BT.foes.filter(f=>!f.dead);
@@ -761,23 +761,24 @@ function wipeOut(){ BT=null; btEl.style.display='none'; bmark.style.display='non
   const inCh1=/^c1_/.test(ST.phase) && ST.phase!=='c1_castle';
   go(()=>{ if(inCh1) enterTown([3.5,18.4],'cap'); else enterTown([12,6],'rue'); hero.ang=0;
     say([inCh1?'……気が つくと、王都の 教会の 前に いた。':'……気が つくと、村の 広場に 倒れて いた。','所持金が 半分に なった。']); }); }
-// ================= 技・呪文・状態異常・会心・作戦（Ⅳの 仕組みを 写した もの）=================
+// ================= 呪文・状態異常・会心・作戦（Ⅳの 仕組みを 写した もの）=================
+//  ★名前は 横文字の 呪文名（指示）。メニューと 戦闘の 欄も「技」ではなく「呪文」
 //  type：atk1（1体）・atkAll（全体）・heal（味方1人）・healAll・escape（ダンジョンから 出る）・sleep（眠らせる）・conf（混乱）・defdown（守備を 下げる）・atkdown・double（2回 攻撃）・steal（盗む）
 const SKILLS={
-  tsuyogiri:{name:'つよぎり', mp:3, type:'atk1', mul:1.6, battle:true},
-  michishirube:{name:'みちしるべ', mp:4, type:'escape', field:true},
-  iyashi:{name:'いやし', mp:3, type:'heal', amt:28, battle:true, field:true},
+  tsuyogiri:{name:'ブレイズエッジ', mp:3, type:'atk1', mul:1.6, battle:true},
+  michishirube:{name:'エスケイル', mp:4, type:'escape', field:true},
+  iyashi:{name:'キュアル', mp:3, type:'heal', amt:28, battle:true, field:true},
   volt:{name:'ヴォルト', mp:8, type:'atk1', power:42, spell:true, battle:true},
   voltra:{name:'ヴォルトラ', mp:18, type:'atkAll', power:46, spell:true, battle:true},
-  hono:{name:'ほのお', mp:5, type:'atkAll', power:18, spell:true, battle:true},
-  nemuri:{name:'ねむりの 霧', mp:4, type:'sleep', rate:.6, battle:true},
-  kaifuku:{name:'かいふく', mp:4, type:'heal', amt:40, battle:true, field:true},
-  minnakaifuku:{name:'みんな かいふく', mp:10, type:'healAll', amt:30, battle:true, field:true},
-  raigeki:{name:'らいげき', mp:5, type:'atk1', power:30, spell:true, battle:true},
-  hibiware:{name:'ひびわれ', mp:3, type:'defdown', battle:true},
-  shibire:{name:'しびれ', mp:3, type:'atkdown', battle:true},
-  nirengeki:{name:'二連撃', mp:0, type:'double', battle:true},
-  nusumu:{name:'ぬすむ', mp:0, type:'steal', battle:true},
+  hono:{name:'フレアス', mp:5, type:'atkAll', power:18, spell:true, battle:true},
+  nemuri:{name:'スリーピア', mp:4, type:'sleep', rate:.6, battle:true},
+  kaifuku:{name:'キュアラ', mp:4, type:'heal', amt:40, battle:true, field:true},
+  minnakaifuku:{name:'キュアルス', mp:10, type:'healAll', amt:30, battle:true, field:true},
+  raigeki:{name:'サンダリス', mp:5, type:'atk1', power:30, spell:true, battle:true},
+  hibiware:{name:'ブレイクス', mp:3, type:'defdown', battle:true},
+  shibire:{name:'ウィークン', mp:3, type:'atkdown', battle:true},
+  nirengeki:{name:'ダブルファング', mp:0, type:'double', battle:true},
+  nusumu:{name:'スティール', mp:0, type:'steal', battle:true},
 };
 const LEARN={ elt:[[3,'michishirube'],[4,'tsuyogiri'],[6,'iyashi'],[12,'volt'],[24,'voltra']],
   lidia:[[1,'kaifuku'],[1,'hono'],[4,'nemuri'],[10,'minnakaifuku']], zf:[[1,'raigeki'],[1,'hibiware'],[5,'shibire']], dolgan:[[1,'nirengeki'],[3,'nusumu']] };
@@ -828,7 +829,7 @@ function actOf(m,act){ return ()=>{ if(m.hp<=0 || !alive().length) return 0;
   if(a.kind==='guard'){ bsay(m.name+'は 身を 守って いる。'); return .5; }
   const sk=a.sk; if(m.mp<sk.mp){ bsay(m.name+'は '+sk.name+'を 唱えようと したが、MPが 足りない！'); return .8; } m.mp-=sk.mp;
   if(sk.type==='atk1'){ const f=a.target&&!a.target.dead?a.target:al[0];
-    if(sk.mul){ BT.steps.unshift(hitFoe(m,f,sk.mul,sk.name)); return 0; }
+    if(sk.mul){ bsay(m.name+'は '+sk.name+'を 唱えた！ 剣が 炎を まとう！'); BT.steps.unshift(hitFoe(m,f,sk.mul,sk.name)); return .6; }
     const d=Math.round(sk.power*(.9+Math.random()*.2)+(STATS[PARTY[BT.party.indexOf(m)]]?.lv||1)*1.5); f.hp=Math.max(0,f.hp-d); f.hurt=.4; BT.flash=.6; se('hit'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+f.name+'に '+d+'の ダメージ！'); killCheck(f); drawBattleUI(); return .9; }
   if(sk.type==='atkAll'){ const parts=[]; al.forEach(f=>{ const d=Math.round(sk.power*(.85+Math.random()*.3)); f.hp=Math.max(0,f.hp-d); f.hurt=.4; parts.push(f.name+'に '+d); killCheck(f); }); BT.flash=.8; BT.quake=.3; se('hit'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+parts.join('、')+'の ダメージ！'); drawBattleUI(); return 1.1; }
   if(sk.type==='heal'){ const t=a.ally||BT.party.filter(x=>x.hp>0).sort((p,q)=>p.hp/p.max-q.hp/q.max)[0]; const h=Math.min(sk.amt,t.max-t.hp); t.hp+=h; se('item'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+t.name+'の HPが '+h+' 回復した！'); drawBattleUI(); return .9; }
@@ -852,7 +853,7 @@ function partyAttacks(target){ return partyTurn({kind:'atk',target}); }
 function battleCmd(){ const c=CMDS[BT.sel];
   if(c==='たたかう'){ if(alive().length>1){ BT.phase='target'; BT.pend={kind:'atk'}; BT.tsel=BT.foes.indexOf(alive()[0]); bsay('どの 魔物を ねらう？'); drawBattleUI(); return; }
     BT.phase='act'; drawBattleUI(); queue(partyTurn({kind:'atk',target:alive()[0]}),0); return; }
-  if(c==='技'){ const sks=skillsOf(PARTY[0]).filter(s=>s.battle); if(!sks.length){ bsay(BT.party[0].name+'は まだ 技を 覚えて いない。'); return; } BT.phase='skill'; BT.ssel=0; BT.sks=sks; bsay('どの 技を 使う？'); drawBattleUI(); return; }
+  if(c==='呪文'){ const sks=skillsOf(PARTY[0]).filter(s=>s.battle); if(!sks.length){ bsay(BT.party[0].name+'は まだ 呪文を 覚えて いない。'); return; } BT.phase='skill'; BT.ssel=0; BT.sks=sks; bsay('どの 呪文を 唱える？'); drawBattleUI(); return; }
   BT.phase='act'; drawBattleUI();
   if(c==='ぼうぎょ'){ BT.guard=true; queue(partyTurn({kind:'guard'}),0); }
   if(c==='どうぐ'){ const m=BT.party[0]; const it=m.status==='poison'&&BAG.antidote>0?'antidote':(BAG.herbs>0?'herb':null); if(!it){ BT.phase='menu'; bsay('使える 道具を もって いない。'); drawBattleUI(); return; }
@@ -1046,12 +1047,12 @@ function closeMenu(){ MENU=null; drawMenu(); }
 function goalText(){ return ({morning:'村の 北の 入口に いる ガイルに 話す', field:'北の 畑を 見回り、外れの 古い 倉を 調べる', raid:'南の 出口から 村へ 戻る',
   burn:'逃げ遅れた 村の 人を 助ける（'+Object.keys(ST.rescued).length+'／3）。そして 広場の 部隊長', after:'広場の ガイルの もとへ', road:'夜の 街道を 北東へ。王都 アルディアの 王に 会う', end:'（序章 完）', c1_castle:'王の 話を 聞く', c1_road:'使者を 連れて、街道を 東の 国境の 砦へ', c1_fort:'砦の 奥へ 進む（灯りを ふたつ ともすと 鉄格子が 開く）', c1_east:'砦を 抜け、東の ヴェルナの 鉱山の 町 ドルムへ', c1_town:'ドルムの 人たちと 話し、町の 長に 会う', c1_end:'（第1章 完）'})[ST.phase]; }
 function openFieldMenu(){ if(msgQ||BT||fading||ST.phase==='end') return;
-  const items=['強さ','技','道具','装備','地図','作戦'].concat(RESERVE.length?['入れ替え']:[]).concat(['クエスト','音','セーブ','とじる']);
+  const items=['強さ','呪文','道具','装備','地図','作戦'].concat(RESERVE.length?['入れ替え']:[]).concat(['クエスト','音','セーブ','とじる']);
   menu(items,'メニュー',(sel)=>{ const pick=items[sel];
     if(pick==='強さ'){ const m=STATS.elt; closeMenu(); say([m.name+'　Lv'+m.lv+'　見習い兵士','HP '+m.hp+' / '+m.max+'　　MP '+m.mp+' / '+m.maxmp,'攻撃力 '+m.atk+'　守備力 '+m.defT+'　素早さ '+m.agi+(m.status?'　状態：'+STNAME[m.status]:''),'次の レベルまで あと '+(expNeed(m.lv)-m.exp)+'　所持金 '+BAG.gold+'G'],openFieldMenu); }
-    else if(pick==='技'){ const sks=skillsOf('elt'); if(!sks.length){ closeMenu(); say(['エルトは まだ 技を 覚えて いない。'],openFieldMenu); return; }
-      menu(sks.map(k=>k.name+'　'+k.mp+(k.field?'':'（戦闘）')).concat(['戻る']),'技（MP '+STATS.elt.mp+'）',(i)=>{ if(i>=sks.length){ openFieldMenu(); return; } const k=sks[i]; closeMenu();
-        if(!k.field){ say([k.name+'は 戦闘で 使う 技だ。'],openFieldMenu); return; } if(STATS.elt.mp<k.mp){ say(['MPが 足りない。'],openFieldMenu); return; }
+    else if(pick==='呪文'){ const sks=skillsOf('elt'); if(!sks.length){ closeMenu(); say(['エルトは まだ 呪文を 覚えて いない。'],openFieldMenu); return; }
+      menu(sks.map(k=>k.name+'　'+k.mp+(k.field?'':'（戦闘）')).concat(['戻る']),'呪文（MP '+STATS.elt.mp+'）',(i)=>{ if(i>=sks.length){ openFieldMenu(); return; } const k=sks[i]; closeMenu();
+        if(!k.field){ say([k.name+'は 戦闘で 唱える 呪文だ。'],openFieldMenu); return; } if(STATS.elt.mp<k.mp){ say(['MPが 足りない。'],openFieldMenu); return; }
         if(k.type==='heal'){ const m=STATS.elt; if(m.hp>=m.max){ say(['HPは 減って いない。'],openFieldMenu); return; } m.mp-=k.mp; const h=Math.min(k.amt,m.max-m.hp); m.hp+=h; se('item'); say([m.name+'は '+k.name+'を 唱えた！','HPが '+h+' 回復した！'],openFieldMenu); return; }
         if(k.type==='escape'){ if(cur.kind!=='fort'){ say(['ここでは 使えない。','（ダンジョンの 中で 使う）'],openFieldMenu); return; } STATS.elt.mp-=k.mp; se('ok'); say(['来た 道の 光が ひとつずつ ともり、入口へ 導かれた——'],()=>go(()=>enterWorld([27.5,8.5]))); return; }
       },()=>openFieldMenu()); }
@@ -1087,7 +1088,7 @@ const expNeed=(lv)=>lv*lv*6;                       // Ⅳと 同じ：次の レ
 const GROW={elt:{hp:5,mp:2,atk:2,def:1,agi:1}};     // 1レベルごとの 伸び
 function gainExp(n){ const m=STATS.elt, out=[]; m.exp=(m.exp||0)+n;
   while(m.exp>=expNeed(m.lv)){ m.exp-=expNeed(m.lv); m.lv++; const g=GROW.elt; m.max+=g.hp; m.hp+=g.hp; m.maxmp+=g.mp; m.mp+=g.mp; m.batk+=g.atk; m.def+=g.def; m.agi+=g.agi;
-    out.push(m.name+'は レベル '+m.lv+' に 上がった！'); if(m.lv===12) out.push('＊ '+m.name+'は ヴォルトを 覚えた！ ＊'); }
+    out.push(m.name+'は レベル '+m.lv+' に 上がった！'); (LEARN.elt||[]).filter(([lv])=>lv===m.lv).forEach(([,id])=>out.push('＊ '+m.name+'は '+SKILLS[id].name+'を 覚えた！ ＊')); }
   syncAtk(); return out; }
 function syncAtk(){ const m=STATS.elt, e=EQUIP.elt; m.atk=m.batk+(e.weapon?e.weapon.v:0); m.defT=m.def+(e.armor?e.armor.v:0)+(e.helm?e.helm.v:0); }
 // ---- お店（鍛冶屋＝武器と 防具、道具屋＝道具）----

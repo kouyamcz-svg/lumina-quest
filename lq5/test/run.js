@@ -50,9 +50,9 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   for(let i=0;i<3;i++){ await E(()=>{ enterWorld([12.5,15.5]); startBattle([FOES.waradokuro]); }); await winBattle(); }
   await E(()=>enterTown([12,10],'cap')); await talk('王都の 男'); await flush(); T('頼みごとの お礼', await E(()=>ST.q.wara==='済み'));
   await E(()=>{ STATS.elt.lv=5; STATS.elt.mp=20; enterWorld([12.5,15.5]); startBattle([FOES.nousagi]); }); await waitMenu();
-  await E(()=>{ BT.sel=CMDS.indexOf('技'); pressA(); }); T('技の 一覧', await E(()=>BT.phase==='skill'&&BT.sks.some(k=>k.name==='つよぎり')));
-  await E(()=>{ BT.ssel=BT.sks.findIndex(k=>k.name==='つよぎり'); pressA(); }); for(let i=0;i<40;i++){ await W(100); if(await E(()=>BT&&BT.phase==='menu')||await E(()=>!BT)) break; }
-  T('つよぎりで MPが 減る', await E(()=>STATS.elt.mp===17));
+  await E(()=>{ BT.sel=CMDS.indexOf('呪文'); pressA(); }); T('呪文の 一覧', await E(()=>BT.phase==='skill'&&BT.sks.some(k=>k.name==='ブレイズエッジ')));
+  await E(()=>{ BT.ssel=BT.sks.findIndex(k=>k.name==='ブレイズエッジ'); pressA(); }); for(let i=0;i<40;i++){ await W(100); if(await E(()=>BT&&BT.phase==='menu')||await E(()=>!BT)) break; }
+  T('ブレイズエッジで MPが 減る', await E(()=>STATS.elt.mp===17));
   await E(()=>{ if(BT) endBattle(); STATS.elt.status=null; inflictOn(STATS.elt,'poison'); BAG.antidote=1; }); T('毒に なる', await E(()=>STATS.elt.status==='poison'));
   await E(()=>say(useAntidote(STATS.elt))); await flush(); T('どくけし草で 治る', await E(()=>!STATS.elt.status));
   T('作戦：いのちだいじに で 回復を 選ぶ', await E(()=>{ STATS.lidia={name:'リディア',lv:5,hp:5,max:30,mp:20,atk:6,defT:3}; PARTY.push('lidia'); startBattle([FOES.nousagi]); tactic='inochi'; const a=autoAct(BT.party[1]); endBattle(); PARTY.length=1; return a.kind==='skill'&&a.sk.type==='heal'; }));
