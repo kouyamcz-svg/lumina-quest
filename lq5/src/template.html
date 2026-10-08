@@ -786,12 +786,10 @@ const SKILLS={
   hibiware:{name:'ブレイクス', mp:3, type:'defdown', battle:true},
   shibire:{name:'ウィークン', mp:3, type:'atkdown', battle:true},
   nirengeki:{name:'ダブルファング', mp:0, type:'double', hits:2, battle:true},
-  fang2:{name:'トライファング', mp:4, type:'double', hits:3, battle:true},
-  fang3:{name:'ファングストーム', mp:10, type:'double', hits:4, battle:true},
   nusumu:{name:'スティール', mp:0, type:'steal', battle:true},
 };
 const LEARN={ elt:[[3,'michishirube'],[4,'tsuyogiri'],[6,'iyashi'],[12,'volt'],[14,'blaze2'],[24,'voltra'],[28,'blaze3']],
-  lidia:[[1,'kaifuku'],[1,'hono'],[4,'nemuri'],[10,'minnakaifuku'],[12,'flare2'],[26,'flare3']], zf:[[1,'raigeki'],[1,'hibiware'],[5,'shibire'],[11,'thunder2'],[25,'thunder3']], dolgan:[[1,'nirengeki'],[3,'nusumu'],[12,'fang2'],[25,'fang3']] };
+  lidia:[[1,'kaifuku'],[1,'hono'],[4,'nemuri'],[10,'minnakaifuku'],[12,'flare2'],[26,'flare3']], zf:[[1,'raigeki'],[1,'hibiware'],[5,'shibire'],[11,'thunder2'],[25,'thunder3']], dolgan:[[1,'nirengeki'],[3,'nusumu']] };   // ★ドルガンの 技は ダブルファングの 1段階だけ（指示）
 const skillsOf=(k)=>(LEARN[k]||[]).filter(([lv])=>(STATS[k].lv||1)>=lv).map(([,id])=>id).concat(STATS[k].extra||[]).map(id=>Object.assign({id},SKILLS[id]));   // ★extra：物語で 授かる 呪文（ヴォルトリオン）
 const STNAME={sleep:'眠り', conf:'混乱', poison:'毒'};
 function inflictOn(t,kind,who){ if(!kind || t.status) return ''; t.status=kind; t.stTurns=kind==='sleep'?2+Math.floor(Math.random()*2):3; return t.name+(kind==='sleep'?'は 眠って しまった！':kind==='conf'?'は 混乱した！':'は 毒に おかされた！'); }
