@@ -765,24 +765,34 @@ function wipeOut(){ BT=null; btEl.style.display='none'; bmark.style.display='non
 //  ★名前は 横文字の 呪文名（指示）。メニューと 戦闘の 欄も「技」ではなく「呪文」
 //  type：atk1（1体）・atkAll（全体）・heal（味方1人）・healAll・escape（ダンジョンから 出る）・sleep（眠らせる）・conf（混乱）・defdown（守備を 下げる）・atkdown・double（2回 攻撃）・steal（盗む）
 const SKILLS={
+  // ★攻撃の 呪文は すべて 3段階（指示）
   tsuyogiri:{name:'ブレイズエッジ', mp:3, type:'atk1', mul:1.6, battle:true},
+  blaze2:{name:'ブレイズセイバー', mp:7, type:'atk1', mul:2.2, battle:true},
+  blaze3:{name:'ブレイズカリバー', mp:14, type:'atk1', mul:3.0, battle:true},
   michishirube:{name:'エスケイル', mp:4, type:'escape', field:true},
   iyashi:{name:'キュアル', mp:3, type:'heal', amt:28, battle:true, field:true},
   volt:{name:'ヴォルト', mp:8, type:'atk1', power:42, spell:true, battle:true},
   voltra:{name:'ヴォルトラ', mp:18, type:'atkAll', power:46, spell:true, battle:true},
+  voltrion:{name:'ヴォルトリオン', mp:36, type:'atkAll', power:110, spell:true, battle:true},   // ★奥義（終章で 授かる。LEARN には 入れず、物語で 足す）
   hono:{name:'フレアス', mp:5, type:'atkAll', power:18, spell:true, battle:true},
+  flare2:{name:'フレアストーム', mp:12, type:'atkAll', power:40, spell:true, battle:true},
+  flare3:{name:'フレアノヴァ', mp:24, type:'atkAll', power:78, spell:true, battle:true},
   nemuri:{name:'スリーピア', mp:4, type:'sleep', rate:.6, battle:true},
   kaifuku:{name:'キュアラ', mp:4, type:'heal', amt:40, battle:true, field:true},
   minnakaifuku:{name:'キュアルス', mp:10, type:'healAll', amt:30, battle:true, field:true},
   raigeki:{name:'サンダリス', mp:5, type:'atk1', power:30, spell:true, battle:true},
+  thunder2:{name:'サンダリアス', mp:11, type:'atk1', power:62, spell:true, battle:true},
+  thunder3:{name:'サンダリオン', mp:22, type:'atk1', power:120, spell:true, battle:true},
   hibiware:{name:'ブレイクス', mp:3, type:'defdown', battle:true},
   shibire:{name:'ウィークン', mp:3, type:'atkdown', battle:true},
-  nirengeki:{name:'ダブルファング', mp:0, type:'double', battle:true},
+  nirengeki:{name:'ダブルファング', mp:0, type:'double', hits:2, battle:true},
+  fang2:{name:'トライファング', mp:4, type:'double', hits:3, battle:true},
+  fang3:{name:'ファングストーム', mp:10, type:'double', hits:4, battle:true},
   nusumu:{name:'スティール', mp:0, type:'steal', battle:true},
 };
-const LEARN={ elt:[[3,'michishirube'],[4,'tsuyogiri'],[6,'iyashi'],[12,'volt'],[24,'voltra']],
-  lidia:[[1,'kaifuku'],[1,'hono'],[4,'nemuri'],[10,'minnakaifuku']], zf:[[1,'raigeki'],[1,'hibiware'],[5,'shibire']], dolgan:[[1,'nirengeki'],[3,'nusumu']] };
-const skillsOf=(k)=>(LEARN[k]||[]).filter(([lv])=>(STATS[k].lv||1)>=lv).map(([,id])=>Object.assign({id},SKILLS[id]));
+const LEARN={ elt:[[3,'michishirube'],[4,'tsuyogiri'],[6,'iyashi'],[12,'volt'],[14,'blaze2'],[24,'voltra'],[28,'blaze3']],
+  lidia:[[1,'kaifuku'],[1,'hono'],[4,'nemuri'],[10,'minnakaifuku'],[12,'flare2'],[26,'flare3']], zf:[[1,'raigeki'],[1,'hibiware'],[5,'shibire'],[11,'thunder2'],[25,'thunder3']], dolgan:[[1,'nirengeki'],[3,'nusumu'],[12,'fang2'],[25,'fang3']] };
+const skillsOf=(k)=>(LEARN[k]||[]).filter(([lv])=>(STATS[k].lv||1)>=lv).map(([,id])=>id).concat(STATS[k].extra||[]).map(id=>Object.assign({id},SKILLS[id]));   // ★extra：物語で 授かる 呪文（ヴォルトリオン）
 const STNAME={sleep:'眠り', conf:'混乱', poison:'毒'};
 function inflictOn(t,kind,who){ if(!kind || t.status) return ''; t.status=kind; t.stTurns=kind==='sleep'?2+Math.floor(Math.random()*2):3; return t.name+(kind==='sleep'?'は 眠って しまった！':kind==='conf'?'は 混乱した！':'は 毒に おかされた！'); }
 function foeAct(f){ let t=null, line='';
@@ -837,7 +847,7 @@ function actOf(m,act){ return ()=>{ if(m.hp<=0 || !alive().length) return 0;
   if(sk.type==='sleep'){ const got=al.filter(f=>!f.def.boss && Math.random()<sk.rate); got.forEach(f=>{ f.status='sleep'; f.stTurns=2; }); bsay(m.name+'は '+sk.name+'を 唱えた！ '+(got.length?got.map(f=>f.name).join('と ')+'は 眠った！':'しかし 効かなかった！')); return 1.0; }
   if(sk.type==='defdown'){ const f=a.target||al[0]; f.defDown=true; bsay(m.name+'は '+sk.name+'を 唱えた！ '+f.name+'の 守りが 下がった！'); return .9; }
   if(sk.type==='atkdown'){ const f=a.target||al[0]; f.atkDown=true; bsay(m.name+'は '+sk.name+'を 唱えた！ '+f.name+'の 攻撃が 弱まった！'); return .9; }
-  if(sk.type==='double'){ const f=a.target&&!a.target.dead?a.target:al[0]; BT.steps.unshift(hitFoe(m,f,.8,sk.name)); BT.steps.unshift(hitFoe(m,f,.8,sk.name)); return 0; }
+  if(sk.type==='double'){ const f=a.target&&!a.target.dead?a.target:al[0]; for(let i=0;i<(sk.hits||2);i++) BT.steps.unshift(hitFoe(m,f,.8,sk.name)); return 0; }
   if(sk.type==='steal'){ const f=a.target||al[0]; if(Math.random()<.4){ BAG.herbs++; bsay(m.name+'は '+f.name+'から 薬草を 盗んだ！'); } else bsay(m.name+'は 盗みに 失敗した！'); return .9; }
   return 0; }; }
 // ★作戦（仲間の 自動の 動き）
