@@ -534,13 +534,28 @@ function bakeWorld32(){
 const RAB=__RAB__;
 const batScene=new THREE.Scene(), batCam=new THREE.PerspectiveCamera(50,1,.1,200);
 let BT=null, batBuilt=false, enemyTex={};
+const BG={}, BGL={};
+// ★戦闘の 背景を 場面に 合わせる：草原（昼）／夜の 街道／鉱山の 岩場（東）／砦の 中／燃える 村
+const BG_LOOK={
+  field:{grp:'field', bg:0xbfdcf2, fog:[0xc8e0f2,18,70], hemi:[0xcfe8ff,0x5a7a3a,.75], sun:[0xfff0d8,.7], sky:true},
+  night:{grp:'field', extra:'nightX', bg:0x0a1028, fog:[0x0e1430,10,46], hemi:[0x6a7ab8,0x1a2a20,.42], sun:[0x8aa0e0,.3], sky:false},
+  rock:{grp:'rock', bg:0xc8d4e0, fog:[0xd0d4d8,16,64], hemi:[0xe0e0e8,0x6a5a48,.75], sun:[0xfff0d8,.7], sky:true},
+  fort:{grp:'fort', bg:0x0c0a10, fog:[0x0c0a10,8,26], hemi:[0x8a7a70,0x2a2018,.4], sun:[0xffd0a0,.18], sky:false},
+  burn:{grp:'burn', bg:0x1e0c10, fog:[0x2a1210,10,40], hemi:[0xff9a70,0x2a1010,.5], sun:[0xff7040,.35], sky:false},
+};
+function sceneLook(){ if(cur.kind==='fort') return 'fort'; if(cur.kind==='town' && ST.phase==='burn') return 'burn';
+  if(cur.kind==='world'){ if(hero.x>30) return 'rock'; if(ST.phase==='road') return 'night'; } return 'field'; }
+function applyLook(k){ const L_=BG_LOOK[k]||BG_LOOK.field; ['field','nightX','rock','fort','burn'].forEach(n=>{ if(BG[n]) BG[n].visible = (n===L_.grp || n===L_.extra); });
+  if(BG.sky) BG.sky.visible=L_.sky;
+  if(BG.field) BG.field.children.forEach(o=>{ if(o!==BG.sky && o.material && o.material.fog===false && o.material.transparent) o.visible=L_.sky; });   // ★雲は 昼だけ batScene.background=new THREE.Color(L_.bg); batScene.fog=new THREE.Fog(L_.fog[0],L_.fog[1],L_.fog[2]);
+  BGL.hemi.color.setHex(L_.hemi[0]); BGL.hemi.groundColor.setHex(L_.hemi[1]); BGL.hemi.intensity=L_.hemi[2]; BGL.sun.color.setHex(L_.sun[0]); BGL.sun.intensity=L_.sun[1]; BT && (BT.look=k); }
 function buildBattleBg(){
   // ★よりリアルに：空の グラデーションと 雲、細かい 草地と 土の 道、草むら・岩・花、木の 種類と かたまり、丘と 遠くの 山
   const cvs=(w,h,draw)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; draw(c.getContext('2d'),w,h); return c; };
   const ctex=(c,rep)=>{ const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; if(rep) t.repeat.set(rep[0],rep[1]); t.anisotropy=4; return t; };
   batScene.background=new THREE.Color(0xbfdcf2); batScene.fog=new THREE.Fog(0xc8e0f2,18,70);
-  batScene.add(new THREE.HemisphereLight(0xcfe8ff,0x5a7a3a,.75));
-  const sl=new THREE.DirectionalLight(0xfff0d8,.7); sl.position.set(-6,12,8); batScene.add(sl);
+  BGL.hemi=new THREE.HemisphereLight(0xcfe8ff,0x5a7a3a,.75); batScene.add(BGL.hemi);
+  const sl=new THREE.DirectionalLight(0xfff0d8,.7); sl.position.set(-6,12,8); batScene.add(sl); BGL.sun=sl;
   // 空（上は 濃い 青、地平は 白っぽく）
   const skyT=ctex(cvs(4,256,(g,w,h)=>{ const gr=g.createLinearGradient(0,0,0,h); gr.addColorStop(0,'#3d7cd0'); gr.addColorStop(.55,'#8ec2ee'); gr.addColorStop(1,'#e6f2fa'); g.fillStyle=gr; g.fillRect(0,0,w,h); }));
   const sky=new THREE.Mesh(new THREE.SphereGeometry(90,24,12,0,Math.PI*2,0,Math.PI/2),new THREE.MeshBasicMaterial({map:skyT,side:THREE.BackSide,fog:false})); batScene.add(sky);
@@ -578,6 +593,50 @@ function buildBattleBg(){
   [[-18,-34,14,4],[2,-38,18,5],[22,-33,13,4],[-34,-40,16,6],[38,-42,18,6]].forEach(([x,z,r,h])=>{ const m=new THREE.Mesh(new THREE.SphereGeometry(r,20,10,0,Math.PI*2,0,Math.PI/2),new THREE.MeshLambertMaterial({map:GRAIN,color:0x5f9a48})); m.scale.y=h/r; m.position.set(x,-.2,z); batScene.add(m); });
   [[-26,-62,16],[-6,-66,20],[16,-63,17],[36,-60,13]].forEach(([x,z,h])=>{ const m=new THREE.Mesh(new THREE.ConeGeometry(h*.95,h,9),new THREE.MeshLambertMaterial({map:GRAIN,color:0x7d8fae,flatShading:true})); m.position.set(x,h/2-.5,z); batScene.add(m);
     const cap=new THREE.Mesh(new THREE.ConeGeometry(h*.34,h*.36,9),new THREE.MeshLambertMaterial({map:GRAIN,color:0xf4f8fc,flatShading:true})); cap.position.set(x,h-.5-h*.18,z); batScene.add(cap); });
+  // ★ここまでが 草原の 背景。場面ごとの 背景を 足し、戦闘の はじめに 切り替える
+  BG.field=new THREE.Group(); batScene.children.slice().forEach(o=>{ if(o!==BGL.hemi && o!==BGL.sun){ batScene.remove(o); BG.field.add(o); } }); batScene.add(BG.field);
+  BG.sky=sky;
+  const keepG2=G;
+  // 夜の 街道：草原を 使い、月と 星を 足す（光と 空は 切り替えで 暗く する）
+  BG.nightX=new THREE.Group(); G=BG.nightX;
+  add(new THREE.CircleGeometry(3,24),new THREE.MeshBasicMaterial({color:0xfff6d0,fog:false}),18,28,-75); 
+  for(let i=0;i<120;i++){ const a=Math.random()*Math.PI-Math.PI, h=8+Math.random()*50; const st=add(new THREE.PlaneGeometry(.35,.35),new THREE.MeshBasicMaterial({color:0xffffff,fog:false}),Math.cos(a)*80,h,Math.sin(a)*80-10); st.lookAt(0,0,0); }
+  batScene.add(BG.nightX);
+  // 鉱山の 岩場（東の ヴェルナ側）
+  BG.rock=new THREE.Group(); G=BG.rock;
+  const dirtC=document.createElement('canvas'); dirtC.width=dirtC.height=64; { const g=dirtC.getContext('2d'); for(let y=0;y<64;y++)for(let x=0;x<64;x++){ const v=Math.random(); g.fillStyle=v<.15?'#6e5a44':v<.6?'#8a7258':v<.95?'#977e62':'#b09878'; g.fillRect(x,y,1,1);} }
+  const dirtT=new THREE.CanvasTexture(dirtC); dirtT.wrapS=dirtT.wrapT=THREE.RepeatWrapping; dirtT.repeat.set(50,50); dirtT.magFilter=THREE.NearestFilter;
+  const rg=new THREE.Mesh(new THREE.PlaneGeometry(160,160),new THREE.MeshLambertMaterial({map:dirtT})); rg.rotation.x=-Math.PI/2; BG.rock.add(rg);
+  for(let i=0;i<26;i++){ const side=i%2?1:-1, x=side*(2.6+Math.random()*12), z=-1-Math.random()*26, s=.4+Math.random()*1.6;
+    const r=add(new THREE.DodecahedronGeometry(s,0),L(null,[0x7a7268,0x8a8276,0x6a6258][i%3],{flatShading:true}),x,s*.5,z); r.rotation.set(Math.random(),Math.random(),Math.random()); r.scale.y=.75; }
+  for(let i=0;i<10;i++){ const x=(i%2?1:-1)*(5+Math.random()*10), z=-8-Math.random()*20, h=3+Math.random()*4; add(new THREE.ConeGeometry(1.4,h,5),L(null,0x6a5a48,{flatShading:true}),x,h/2,z); }   // とがった 岩山
+  for(let i=0;i<14;i++){ const x=(Math.random()-.5)*14, z=-2-Math.random()*14; if(Math.abs(x)<1.8) continue; add(new THREE.OctahedronGeometry(.12,0),L(null,0x6ac8ff,{emissive:0x2a6aa0}),x,.12,z); }   // 光る 鉱石
+  [[-4.5,-6],[5.5,-9]].forEach(([x,z])=>{ add(new THREE.CylinderGeometry(.08,.12,2.2,6),L(null,0x5a4a3a),x,1.1,z); add(new THREE.CylinderGeometry(.04,.06,1,5),L(null,0x5a4a3a),x+.35,1.7,z).rotation.z=-.9; });   // 枯れ木
+  [[-20,-60,18],[0,-66,24],[22,-58,16]].forEach(([x,z,h])=>add(new THREE.ConeGeometry(h*.9,h,7),L(null,0x6a6272,{flatShading:true}),x,h/2-.5,z));
+  batScene.add(BG.rock);
+  // 国境の 砦の 中（石の 床と 壁、柱、たいまつ）
+  BG.fort=new THREE.Group(); G=BG.fort;
+  const fs=T.stone.clone(); fs.needsUpdate=true; fs.repeat.set(30,30);
+  const ff=new THREE.Mesh(new THREE.PlaneGeometry(60,60),new THREE.MeshLambertMaterial({map:fs,color:0xa09888})); ff.rotation.x=-Math.PI/2; BG.fort.add(ff);
+  const wt=T.cliff.clone(); wt.needsUpdate=true; wt.repeat.set(16,4);
+  const bw=add(box,new THREE.MeshLambertMaterial({map:wt,color:0xb0a898}),0,3,-9,30,6,1); 
+  [-1,1].forEach(sd=>{ const sw=add(box,new THREE.MeshLambertMaterial({map:wt,color:0xa8a090}),sd*7,3,-2,1,6,16); });
+  [[-4,-6],[4,-6],[-4,-1],[4,-1]].forEach(([x,z])=>{ add(new THREE.CylinderGeometry(.45,.5,6,8),L(T.stone,0xb0a898),x,3,z); });
+  BG.fortFires=[];
+  [[-6.4,-5],[6.4,-5],[-2,-8.4],[2,-8.4]].forEach(([x,z])=>{ add(box,L(null,0x4a3020),x,2.1,z,.15,.5,.15); const f=add(new THREE.ConeGeometry(.16,.4,6),L(null,0xff8a30,{emissive:0xff5010}),x,2.55,z); f.userData.ph=Math.random()*6; BG.fortFires.push(f);
+    const l=new THREE.PointLight(0xff9040,1.1,9); l.position.set(x,2.6,z+.4); BG.fort.add(l); });
+  batScene.add(BG.fort);
+  // 燃える 村（夜。家と 炎）
+  BG.burn=new THREE.Group(); G=BG.burn;
+  const bs=T.stone.clone(); bs.needsUpdate=true; bs.repeat.set(30,30);
+  const bf=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshLambertMaterial({map:bs,color:0x9a7a60})); bf.rotation.x=-Math.PI/2; BG.burn.add(bf);
+  BG.burnFires=[];
+  [[-5.5,-6,3,2],[5.8,-7,3,2],[-2,-12,3,2],[4,-14,3,2],[-8,-11,3,2]].forEach(([x,z,w,h],i)=>{ add(box,L(T.plaster,0x8a6a58),x,.9,z,w,1.8,h);
+    const roof=new THREE.Mesh(roofGeo(w+.4,h+.5,1),L([T.roofR,T.roofB,T.roofG][i%3],0x7a5a50,{side:THREE.DoubleSide})); roof.position.set(x,1.8,z); BG.burn.add(roof);
+    for(let k=0;k<4;k++){ const f=add(new THREE.ConeGeometry(.35-k*.05,1.1-k*.15,6),L(null,k%2?0xffd060:0xff6a20,{emissive:k%2?0xffb020:0xff4010}),x+(k-1.5)*.5,2.4+(k%2)*.2,z); f.userData.ph=Math.random()*6; BG.burnFires.push(f); }
+    const l=new THREE.PointLight(0xff7030,1.4,12); l.position.set(x,3,z+1.5); BG.burn.add(l); });
+  batScene.add(BG.burn);
+  G=keepG2;
   // ★複数体の 魔物（最大 4体）。1体ごとに 板と 影を 用意して おく
   const geo=new THREE.PlaneGeometry(1,1); geo.translate(0,.5,0);
   for(let i=0;i<4;i++){ const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({transparent:true,alphaTest:.3,color:0xffffff})); m.visible=false; batScene.add(m);
@@ -609,7 +668,8 @@ function startBattle(defs,onWin){ if(!Array.isArray(defs)) defs=[defs||FOES.nous
     const f={def:d, hp:d.hp, max:d.hp, name, mesh:fm.m, sh:fm.sh, slot:i, x:form[i][0], z:form[i][1], hurt:0, lunge:0, hop:0, shake:0, ex:0, dead:false, frame:'idle', ar:.8};
     f.mesh.material.color.setHex(d.tint||0xffffff); f.mesh.material.opacity=1; f.mesh.visible=true; f.sh.visible=true; setFoeFrame(f,'idle'); return f; });
   FM.slice(defs.length).forEach(fm=>{ fm.m.visible=false; fm.sh.visible=false; });
-  BT={foes, def:defs[0], onWin, party:PARTY.map(k=>STATS[k]), phase:'intro', sel:0, tsel:0, steps:[], st:0, guard:false, hitIdx:-1, quake:0, flash:0};
+  const look=sceneLook(); applyLook(look);
+  BT={look, foes, def:defs[0], onWin, party:PARTY.map(k=>STATS[k]), phase:'intro', sel:0, tsel:0, steps:[], st:0, guard:false, hitIdx:-1, quake:0, flash:0};
   cv.style.display='block'; c2.style.display='none'; btEl.style.display='block'; document.getElementById('place').style.display='none'; document.getElementById('hint').style.display='none'; resize();
   const names=[...new Set(defs.map(d=>d.name))]; bsay(defs.length>1 ? names.join('と ')+'が あらわれた！' : defs[0].name+'が あらわれた！'); drawBattleUI(); se('encounter');
   queue([()=>{ BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; }],1.0); }
@@ -681,6 +741,7 @@ function battleTick(dt,now){
     if(f.dead){ f.ex=Math.max(0,f.ex-dt*1.25); f.mesh.visible = f.ex>0.08 && Math.floor(now/70)%2===0; f.sh.visible = f.ex>0.08; }
   });
   flashEl.style.opacity=BT.flash*.7;
+  (BG.fortFires||[]).concat(BG.burnFires||[]).forEach(m=>{ m.scale.y=1+Math.sin(now/90+m.userData.ph)*.18; });
   const q=BT.quake>0?Math.sin(now/18)*.06:0;
   batCam.position.set(q,1.25,4.3); batCam.lookAt(0,.95,0);
   // ねらう 印（一覧で 選んで いる 魔物の 頭の 上）
