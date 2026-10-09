@@ -41,15 +41,21 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #bmsg{position:absolute;left:6px;right:6px;bottom:6px;min-height:3.2em;border:2px solid var(--line);background:rgba(10,8,18,.92);border-radius:6px;padding:10px 12px;font-size:15px;line-height:1.6}
 #card{position:absolute;inset:0;background:#000;color:#f4efe0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:18px;opacity:0;transition:opacity 1.5s;pointer-events:none;letter-spacing:.2em}
 #card .t{font-size:30px}
-#fmenu{position:absolute;left:8px;top:52px;min-width:46%;display:none;border:2px solid var(--line);background:rgba(10,8,18,.94);border-radius:6px;padding:8px 12px;font-size:16px;line-height:1.85}
+#fmenu{position:absolute;left:8px;top:52px;min-width:46%;max-width:calc(50% - 12px);box-sizing:border-box;display:none;border:2px solid var(--line);background:rgba(10,8,18,.94);border-radius:6px;padding:8px 12px;font-size:16px;line-height:1.85}
 #fmenu .mt{font-size:12px;color:var(--dim);border-bottom:1px solid #4a4070;margin-bottom:4px}
 #fmenu .on{color:var(--gold)}
+#fstat{position:absolute;right:8px;top:52px;width:calc(50% - 12px);box-sizing:border-box;display:none;border:2px solid var(--line);background:rgba(10,8,18,.94);border-radius:6px;padding:6px 10px;font-size:13px;line-height:1.5}
+#fstat .pm{border-bottom:1px solid #4a4070;padding:3px 0}
+#fstat .pm:last-of-type{border-bottom:none}
+#fstat .pm.down b{color:#e05050}
+#fstat .st{margin-left:4px;font-size:11px;color:#ffb060}
+#fstat .g{margin-top:4px;border-top:1px solid #4a4070;padding-top:4px;color:var(--gold);text-align:right}
 #bmark{position:absolute;display:none;color:#ffe060;font-size:20px;text-shadow:0 0 3px #000;pointer-events:none}
 #hint{position:absolute;left:10px;bottom:10px;font-size:12px;color:var(--dim);background:rgba(18,15,28,.7);padding:3px 8px;border-radius:4px}
 </style></head><body>
 <div id="wrap">
  <div id="view"><canvas id="c"></canvas><canvas id="c2" style="display:none"></canvas><div id="place">国境の村 ルーエ</div>
-  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="flash"></div><div id="bmark">▼</div><div id="mapview"></div><div id="fmenu"></div><div id="card"></div>
+  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="flash"></div><div id="bmark">▼</div><div id="fstat"></div><div id="mapview"></div><div id="fmenu"></div><div id="card"></div>
   <div id="bt"><div id="bparty"></div><div id="bmenu"></div><div id="bmsg"></div></div></div>
  <div id="pad">
   <div id="dpad"><div class="k u">▲</div><div class="k l">◀</div><div class="k r">▶</div><div class="k d">▼</div></div>
@@ -1147,7 +1153,11 @@ const BAG={gold:30, herbs:1, antidote:0, gear:[], opened:{}, keys:[]};   // ★k
 const EQUIP={elt:{weapon:{name:'見習いの 剣',v:6,price:20},armor:{name:'革の 胸当て',v:4,price:20},helm:null}};   // ★兜の 枠（Ⅳと 同じ）
 let MENU=null;   // {title, items, sel, onPick, onBack}
 const menuEl=document.getElementById('fmenu');
-function drawMenu(){ if(!MENU){ menuEl.style.display='none'; return; } menuEl.style.display='block';
+// ★メニューを 開いて いる 間は、右に 仲間の 状態と 所持金を 出す（指示）
+const fstatEl=document.getElementById('fstat');
+function drawStat(){ if(!MENU || BT){ fstatEl.style.display='none'; return; } fstatEl.style.display='block';
+  fstatEl.innerHTML=PARTY.map(k=>{ const m=STATS[k]; return `<div class="pm${m.hp<=0?' down':''}"><b>${m.name}</b>　Lv ${m.lv||1}${m.status?'<span class="st">'+STNAME[m.status]+'</span>':''}<br>HP ${m.hp}／${m.max}<br>MP ${m.mp}／${m.maxmp||m.mp}</div>`; }).join('')+`<div class="g">${BAG.gold} G</div>`; }
+function drawMenu(){ drawStat(); if(!MENU){ menuEl.style.display='none'; return; } menuEl.style.display='block';
   menuEl.innerHTML='<div class="mt">'+MENU.title+'</div>'+MENU.items.map((t,i)=>`<div class="${i===MENU.sel?'on':''}">${i===MENU.sel?'▶':'　'}${t}</div>`).join(''); }
 function menu(items,title,onPick,onBack){ MENU={items,title,sel:0,onPick,onBack}; drawMenu(); }
 function closeMenu(){ MENU=null; drawMenu(); }
