@@ -321,7 +321,7 @@ function house(x,y,w,h,idx){
   }
 }
 function buildTown(){
-  S.background=new THREE.Color(0x9fd0f0); S.fog=new THREE.Fog(0x9fd0f0,14,34); amb.intensity=.72; sun.intensity=.6;
+  S.background=new THREE.Color(0x9fd0f0); S.fog=new THREE.Fog(0x9fd0f0,16,38); amb.intensity=.72; sun.intensity=.6;
   const mG=L(T.grass), mS=L(T.stone), mC=L(T.cliff);
   const TR=TL().rows, isCap=!!TL().castle;
   for(let y=0;y<TR.length;y++)for(let x=0;x<TR[0].length;x++){
@@ -510,7 +510,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   if(cur.kind==='world'){ const moving=!!(ix||iz); if(moving) walkT+=dt; const fr=moving?[1,0,2,0][Math.floor(walkT*8)%4]:0; drawWorld(fr,now);
     anims=[]; requestAnimationFrame(tick); return; }
   // カメラ（真上寄り。家の 中は 少し 近く）
-  const ch = cur.kind==='town' ? [10.5,6.2] : [7.2,4.4];
+  const ch = cur.kind==='town' ? [12.1,7.1] : [7.2,4.4];   // ★町は 少し 引き（前は 10.5,6.2。指示）
   C.position.lerp(new THREE.Vector3(hero.x, ch[0], hero.z+ch[1]),.18); C.lookAt(hero.x,0,hero.z-.4);
   const moving=!!(ix||iz); if(moving) walkT+=dt*((cur.kind==='town'&&(holdB||keys.x||keys.Shift))?DASH:1); /* ダッシュ中は 足も 速く */ const seq=[1,0,2,0], fr=moving?seq[Math.floor(walkT*8)%4]:0;
   place(hero.p,hero.x,hero.z,hero.ang,fr); followers.forEach(f=>place(f.p,f.x,f.z,f.ang,fr)); cur.npcs.forEach(n=>place(n.p,n.x,n.y,n.ang,0));
@@ -1075,8 +1075,8 @@ function townNpcs(){
   return list; }
 const RUE_BURNT=()=>/^(burn|after|road|end|c1_)/.test(ST.phase);
 function burnTown(){   // ★燃える 夜の 村（第1章からは 火の 消えた 焼け跡）
-  if(/^(end|c1_)/.test(ST.phase)){ S.background=new THREE.Color(0x8a8a92); S.fog=new THREE.Fog(0x8a8a92,12,30); amb.intensity=.55; amb.color.setHex(0xd8d4d0); sun.intensity=.35; sun.color.setHex(0xe0d8d0); fires=[]; fireMeshes=[]; return; }
-  S.background=new THREE.Color(0x1a0f18); S.fog=new THREE.Fog(0x2a1418,10,26); amb.intensity=.38; amb.color.setHex(0xffc0a0); sun.intensity=.25; sun.color.setHex(0xff8a50);
+  if(/^(end|c1_)/.test(ST.phase)){ S.background=new THREE.Color(0x8a8a92); S.fog=new THREE.Fog(0x8a8a92,14,33); amb.intensity=.55; amb.color.setHex(0xd8d4d0); sun.intensity=.35; sun.color.setHex(0xe0d8d0); fires=[]; fireMeshes=[]; return; }
+  S.background=new THREE.Color(0x1a0f18); S.fog=new THREE.Fog(0x2a1418,12,29); amb.intensity=.38; amb.color.setHex(0xffc0a0); sun.intensity=.25; sun.color.setHex(0xff8a50);
   fires=[[8.5,7.4],[16.5,13.4],[3.5,11.5],[20.5,5.4],[10.5,16.6]]; fireMeshes=[];
   const fm=L(null,0xff7a28,{emissive:0xff5010}), fm2=L(null,0xffd060,{emissive:0xffb020});
   const spots=fires.concat([[5,3.1],[14,3.1],[4,9.1],[19,9.1],[8,15.1],[17,15.1]]);   // 通りの 火と、家の 屋根の 火
