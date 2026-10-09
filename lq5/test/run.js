@@ -105,6 +105,9 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('鍛冶屋で いまの 装備が 出る', await E(()=>{ if(BT) endBattle(); if(msgQ) closeMsg(); openShop('smith','鍛冶屋'); const el=document.getElementById('fequip'); const ok=el.style.display==='block' && el.textContent.includes(EQUIP.elt.weapon.name); closeMenu(); return ok && el.style.display==='none'; }));
   T('メニューの 字が 2段に ならない', await E(()=>{ const tests=[()=>openFieldMenu(),()=>openSound(),()=>openTactics(),()=>openShop('smith','鍛冶屋'),()=>{ openShop('smith','鍛冶屋'); MENU.onPick(0); },()=>openItems()]; let ok=true;
     tests.forEach(f=>{ if(msgQ) closeMsg(); f(); [...document.querySelectorAll('#fmenu > div:not(.mt):not(.mdesc)')].forEach(d=>{ const lh=parseFloat(getComputedStyle(d).lineHeight)||20; if(d.getBoundingClientRect().height>lh*1.5) ok=false; }); closeMenu(); }); return ok; }));
+  T('ドルムの 教会で セーブ → 再開も ドルムの 教会', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); ST.phase='c2_dolm'; enterTown([11.5,15.5],'velna'); lastDoor=3; enterRoom(3); hero.x=4.5; hero.z=4.5; saveGame(); enterTown([12,6],'rue'); }); await pg.reload({waitUntil:'load'}); await W(1800);
+    for(let i=0;i<40 && !(await E(()=>typeof MENU!=='undefined'));i++) await W(100); await W(600); await E(()=>{ if(MENU) closeMenu(); loadGame(); }); await W(800);
+    return await E(()=>TOWN_NOW==='velna' && cur.kind==='room' && TROOMS()[cur.room].name==='教会'); })());
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
