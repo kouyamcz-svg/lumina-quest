@@ -1189,12 +1189,13 @@ const CHESTS={town:[{x:20.5,z:17.5,gold:25,id:'c1'}], farm:[{x:2.5,z:12.5,herb:1
 
 // ================= 曲（Ⅳの 曲の ファイルを そのまま 使う。../lq4/ の mp3）=================
 //  村・家＝town、外の 世界・畑＝field、王都＝castle、燃える 村＝dungeon、戦闘＝battle_sky（Ⅳの 後半の 戦闘の 曲）、ボス＝boss
-const BGM_FILES={town:'../lq4/town.mp3', field:'../lq4/field.mp3', castle:'../lq4/castle.mp3', dungeon:'../lq4/dungeon.mp3', battle:'../lq4/battle_sky.mp3', boss:'../lq4/boss.mp3'};
-const BGM_VOL={town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, boss:.5};
+// ★燃える 村：いただいた 曲（lq5/burned_village.mp3、約2分。Ⅳの 曲より 約4dB 小さい ので 音量を 上げて ある）
+const BGM_FILES={burn:'burned_village.mp3', town:'../lq4/town.mp3', field:'../lq4/field.mp3', castle:'../lq4/castle.mp3', dungeon:'../lq4/dungeon.mp3', battle:'../lq4/battle_sky.mp3', boss:'../lq4/boss.mp3'};
+const BGM_VOL={burn:.78, town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, boss:.5};
 let bgmEl=null, bgmNow='', bgmUnlocked=false;
 function bgmFor(){ if(BT) return BT.def.boss?'boss':'battle';
   if(cur.kind==='world') return 'field'; if(cur.kind==='farm') return 'field'; if(cur.kind==='castle') return 'castle';
-  if(cur.kind==='town' && (ST.phase==='burn')) return 'dungeon'; return 'town'; }
+  if(cur.kind==='town' && TOWN_NOW==='rue' && (ST.phase==='burn'||ST.phase==='after')) return 'burn'; return 'town'; }
 function bgmUpdate(){ if(SND.bgm<=0 || !bgmUnlocked || (typeof bgmHidden==='function' && bgmHidden())){ if(bgmEl && !bgmEl.paused) bgmEl.pause(); return; }
   const want=bgmFor(); if(want===bgmNow && bgmEl && !bgmEl.paused){ bgmEl.volume=Math.min(1,(BGM_VOL[want]||.5)*SND.bgm/.6); return; }   // ★大きさは 毎回 合わせる
   try{ if(!bgmEl){ bgmEl=new Audio(); bgmEl.loop=true; }
