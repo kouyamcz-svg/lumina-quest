@@ -501,7 +501,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
       if(c==='W'){ if(/^c1_(east|town|end)$/.test(ST.phase)){ if(ST.phase==='c1_east') ST.phase='c1_town'; go(()=>enterTown([11.5,18.2],'velna')); } else { hero.x-=.6; say(['まだ 行けない。']); } }
       if(c==='C') { if(/^(road|c1_)/.test(ST.phase)) go(()=>enterTown([12,20.2],'cap')); else { hero.z+=0.6; say(['王都 アルディア。今は 用が ない。']); } } }
     else if(cur.kind==='town' && TOWN_NOW==='velna'){ DOORS.forEach(([dx,dy])=>{ if(Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2 && iz<0 && !msgQ){ say(['戸は 閉まって いる。']); hero.z=dy+.75; } }); }
-    else if(cur.kind==='town'){ TDOORS().forEach(([dx,dy],i)=>{ if(!busyDoor && Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2 && iz<0){   // ★扉の すぐ 前だけ（前は 扉より 北なら どこでも 入って しまった） busyDoor=1;
+    else if(cur.kind==='town'){ TDOORS().forEach(([dx,dy],i)=>{ if(!busyDoor && Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2 && iz<0){ busyDoor=1;   /* ★扉の すぐ 前だけ。busyDoor=1 が 説明の 中に 入って 効かず、毎こま 扉の 音が 鳴って 重なって いた */
         se('door'); swing(doorPiv[i],0,OPEN,.28,0,()=>go(()=>{ lastDoor=i; enterRoom(i); swing(roomDoor,OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }); }
     else if(cur.kind==='room'){ const r=TROOMS()[cur.room]; const xi=r.rows[r.rows.length-1].indexOf('X'); if(!busyDoor && Math.abs(hero.x-(xi+.5))<.4 && hero.z>r.rows.length-1.45 && iz>0){ busyDoor=1;
         se('door'); swing(roomDoor,0,OPEN,.28,0,()=>go(()=>{ const [dx,dy]=TDOORS()[lastDoor]; enterTown([dx+.5, dy+.95], TOWN_NOW); swing(doorPiv[lastDoor],OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }
@@ -510,7 +510,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   if(cur.kind==='world'){ const moving=!!(ix||iz); if(moving) walkT+=dt; const fr=moving?[1,0,2,0][Math.floor(walkT*8)%4]:0; drawWorld(fr,now);
     anims=[]; requestAnimationFrame(tick); return; }
   // カメラ（真上寄り。家の 中は 少し 近く）
-  const ch = cur.kind==='town' ? [12.1,7.1] : [7.2,4.4];   // ★町は 少し 引き（前は 10.5,6.2。指示）
+  const ch = cur.kind==='town' ? [12.1,7.1] : [8.3,5.1];   // ★町は 少し 引き（前は 10.5,6.2）。家・城・砦も 同じ 割合で 引き（前は 7.2,4.4。指示）
   C.position.lerp(new THREE.Vector3(hero.x, ch[0], hero.z+ch[1]),.18); C.lookAt(hero.x,0,hero.z-.4);
   const moving=!!(ix||iz); if(moving) walkT+=dt*((cur.kind==='town'&&(holdB||keys.x||keys.Shift))?DASH:1); /* ダッシュ中は 足も 速く */ const seq=[1,0,2,0], fr=moving?seq[Math.floor(walkT*8)%4]:0;
   place(hero.p,hero.x,hero.z,hero.ang,fr); followers.forEach(f=>place(f.p,f.x,f.z,f.ang,fr)); cur.npcs.forEach(n=>place(n.p,n.x,n.y,n.ang,0));
@@ -744,7 +744,7 @@ function sceneLook(){ if(cur.kind==='fort') return 'fort'; if(cur.kind==='town' 
   if(cur.kind==='world'){ if(hero.x>40) return 'rock'; if(ST.phase==='road') return 'night'; } return 'field'; }
 function applyLook(k){ const L_=BG_LOOK[k]||BG_LOOK.field; ['field','nightX','rock','fort','burn'].forEach(n=>{ if(BG[n]) BG[n].visible = (n===L_.grp || n===L_.extra); });
   if(BG.sky) BG.sky.visible=L_.sky;
-  if(BG.field) BG.field.children.forEach(o=>{ if(o!==BG.sky && o.material && o.material.fog===false && o.material.transparent) o.visible=L_.sky; });   // ★雲は 昼だけ batScene.background=new THREE.Color(L_.bg); batScene.fog=new THREE.Fog(L_.fog[0],L_.fog[1],L_.fog[2]);
+  if(BG.field) BG.field.children.forEach(o=>{ if(o!==BG.sky && o.material && o.material.fog===false && o.material.transparent) o.visible=L_.sky; });   /* ★雲は 昼だけ */ batScene.background=new THREE.Color(L_.bg); batScene.fog=new THREE.Fog(L_.fog[0],L_.fog[1],L_.fog[2]);
   BGL.hemi.color.setHex(L_.hemi[0]); BGL.hemi.groundColor.setHex(L_.hemi[1]); BGL.hemi.intensity=L_.hemi[2]; BGL.sun.color.setHex(L_.sun[0]); BGL.sun.intensity=L_.sun[1]; BT && (BT.look=k); }
 function buildBattleBg(){
   // ★よりリアルに：空の グラデーションと 雲、細かい 草地と 土の 道、草むら・岩・花、木の 種類と かたまり、丘と 遠くの 山

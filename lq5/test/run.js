@@ -74,6 +74,8 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('夜の 街道の 戦闘は 戦闘の 曲（燃える 村の 曲では ない）', await E(()=>{ TOWN_NOW='rue'; ST.phase='road'; enterWorld([30.5,25.5]); startBattle([FOES.yomiakari]); const k=bgmFor(); endBattle(); enterTown([12,10],'rue'); const k2=bgmFor(); return k==='battle' && k2==='burn'; }));
   T('メニューで 仲間の 状態と 所持金', await E(()=>{ if(BT) endBattle(); enterTown([12,10],'cap'); BAG.gold=123; openFieldMenu(); const el=document.getElementById('fstat'); const ok=el.style.display==='block' && el.textContent.includes('エルト') && el.textContent.includes('123 G') && el.textContent.includes('HP'); closeMenu(); return ok && el.style.display==='none'; }));
   T('メニューの 頼まれごと', await E(()=>{ const l=requestList().join(' '); return /畑の ワラドクロ退治/.test(l) && /済み/.test(l); }));
+  T('扉の 音は 1回だけ', await (async()=>{ await E(()=>{ if(BT) endBattle(); ST.phase='c1_road'; enterTown([12,10],'cap'); window.__door=0; const o=SE.door; SE.door=()=>{ window.__door++; }; window.__oDoor=o; const [dx,dy]=TDOORS()[0]; hero.x=dx+.5; hero.z=dy+.9; hero.ang=Math.PI; }); await pg.keyboard.down('ArrowUp'); await W(1500); await pg.keyboard.up('ArrowUp'); await W(600); return E(()=>{ SE.door=window.__oDoor; return window.__door===1 && cur.kind==='room'; }); })());
+  T('戦闘の 背景の 空の 色が 切り替わる', await E(()=>{ ST.phase='road'; enterWorld([30.5,25.5]); startBattle([FOES.yomiakari]); const c=batScene.background.getHex(); endBattle(); return c===0x0a1028; }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
