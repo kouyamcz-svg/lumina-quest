@@ -437,7 +437,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
     if(cur.kind==='castle' && hero.z>cur.rows.length-1.2 && iz>0){ if(ST.phase==='c1_castle'){ say(['まずは 王の 話を 聞こう。']); hero.z-=.4; } else go(()=>{ enterTown([12,4.7],'cap'); hero.ang=0; }); }
     if(cur.kind==='fort' && hero.z>cur.rows.length-1.2 && iz>0){ go(()=>enterWorld([27.5,8.5])); }
     if(cur.kind==='fort' && hero.z<1.9 && hero.x>13 && iz<0 && /^c1_(east|town|end)$/.test(ST.phase)){ go(()=>enterWorld([31.6,9.5])); }
-    if(cur.kind==='world'){ const c=at(Math.floor(hero.x),Math.floor(hero.z)); if(c==='V' && iz<0) go(()=>leaveWorldToTown());
+    if(cur.kind==='world'){ const c=at(Math.floor(hero.x),Math.floor(hero.z)); if(c==='V' && (ix||iz)) go(()=>leaveWorldToTown());   /* ★どの 向きから 入っても 村に 入る（前は 南から 上へ 進む ときだけ） */
       if(c==='S'){ const east=hero.x>30; if(ST.phase==='c1_road'||ST.phase==='c1_fort') go(()=>enterFort(false)); else if(/^c1_(east|town|end)$/.test(ST.phase)) go(()=>{ enterWorld(east?[27.5,8.5]:[31.6,9.5]); }); else { hero.x+= east?.6:-.6; say(['国境の 砦。ヴェルナの 兵が 門を 閉ざして いる。']); } }
       if(c==='W'){ if(/^c1_(east|town|end)$/.test(ST.phase)){ if(ST.phase==='c1_east') ST.phase='c1_town'; go(()=>enterTown([11.5,18.2],'velna')); } else { hero.x-=.6; say(['まだ 行けない。']); } }
       if(c==='C') { if(/^(road|c1_)/.test(ST.phase)) go(()=>enterTown([12,20.2],'cap')); else { hero.z+=0.6; say(['王都 アルディア。今は 用が ない。']); } } }
