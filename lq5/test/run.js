@@ -99,6 +99,9 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('呪文に すべて 解説が ある', await E(()=>Object.values(SKILLS).every(k=>k.desc&&k.desc.length>5)));
   T('呪文の 一覧で 解説が 出る', await E(()=>{ if(BT) endBattle(); if(msgQ) closeMsg(); openSpells('elt'); const ok=!!document.querySelector('#fmenu .mdesc'); closeMenu(); return ok; }));
   T('戦闘中に 魔物の 名前が 出る', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); startBattle([FOES.nousagi,FOES.nousagi]); }); await W(1500); const t=await E(()=>{ const el=document.getElementById('bfoes'); return el.style.display==='block' ? el.textContent : ''; }); await E(()=>{ if(BT) endBattle(); }); return /野ウサギA/.test(t) && /野ウサギB/.test(t); })());
+  T('ドルムは 鉱山の 町の 並び（ルーエと 別）で、家に 入れる', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); ST.phase='c2_dolm'; enterTown([11.5,18.2],'velna'); }); await W(400); const ok1=await E(()=>cur.rows===DOLM && DOLM!==TOWN && DOLM.join('').includes('M') && DOLM.join('').includes('K'));
+    await E(()=>{ if(msgQ) closeMsg(); hero.x=19.5; hero.z=10.9; hero.ang=Math.PI; resetTrail(); }); await pg.keyboard.down('ArrowUp'); await W(500); await pg.keyboard.up('ArrowUp'); await W(1500); const ok2=await E(()=>cur.kind==='room' && TROOMS()[cur.room].name==='鍛冶屋');
+    await E(()=>{ busyDoor=0; enterTown([11.5,18.2],'velna'); }); await W(300); return ok1&&ok2; })());
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
