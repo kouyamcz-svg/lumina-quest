@@ -637,7 +637,7 @@ function drawCastle(sx,sy,s){ // 2×2 ますの 王都の 城
   R_(13,8,2,3,'#9fd8ff'); R_(17,8,2,3,'#9fd8ff'); R_(13,22,6,8,'#3a2e24'); R_(14,21,4,1,'#e8c048');
   R_(15,-6,1,4,'#8a8a8a'); R_(16,-6,4,2,'#c03030'); }
 function enterWorld(at){ if(G) S.remove(G); G=null; applyWorldState();
-  cur={kind:'world', rows:WORLD, solid:WSOLID, npcs:[], room:null}; clearNpcs();
+  clearNpcs(); cur={kind:'world', rows:WORLD, solid:WSOLID, npcs:[], room:null};   /* ★先に 前の 場所の 人を 消す（前は 消し忘れて、王都の 門番が 砦の 壁に 残った） */
   hero.x=at[0]; hero.z=at[1]; hero.ang=0; resetTrail();
   [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=false; p.sh.visible=false; });
   cv.style.display='none'; c2.style.display='block'; resize2();
