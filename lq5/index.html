@@ -1258,7 +1258,8 @@ const BGM_VOL={burn:.78, town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, b
 let bgmEl=null, bgmNow='', bgmUnlocked=false;
 function bgmFor(){
   // ★燃える 村（村が 焼かれてから 村を 出るまで）は、家の 中でも 曲を 変えない。部隊長戦（ボス）だけは ボスの 曲（指示）
-  if(TOWN_NOW==='rue' && /^(burn|after|road)$/.test(ST.phase) && (cur.kind==='town'||cur.kind==='room'||BT) && !(BT && BT.def.boss)) return 'burn';
+  // ★村の 中（町・家）に いる ときだけ。前は 村を 出た 後も TOWN_NOW が rue の ままで、夜の 街道の 戦闘でも 燃える 村の 曲が 流れた
+  if(TOWN_NOW==='rue' && /^(burn|after|road)$/.test(ST.phase) && (cur.kind==='town'||cur.kind==='room') && !(BT && BT.def.boss)) return 'burn';
   if(BT) return BT.def.boss?'boss':'battle';
   if(cur.kind==='world') return 'field'; if(cur.kind==='farm') return 'field'; if(cur.kind==='castle') return 'castle';
   if(cur.kind==='town' && TOWN_NOW==='rue' && (ST.phase==='burn'||ST.phase==='after')) return 'burn'; return 'town'; }
