@@ -756,7 +756,7 @@ function backToMenu(){ return ()=>{ BT.guard=false;
   // ★全滅：前は 体力を 戻すだけで 選ぶ欄に 戻らず、操作 できなく なった。Ⅳと 同じく 町へ 戻され、所持金が 半分に なる
   if(BT.party.every(m=>m.hp<=0)){ bsay('エルトたちは 全滅した……'); se('lose'); BT.steps.push(()=>{ wipeOut(); return 99; }); return 2.0; }
   BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; }; }
-function wipeOut(){ BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display='';
+function wipeOut(){ PARTY.forEach(k=>{ STATS[k].status=null; }); BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display='';
   BAG.gold=Math.floor(BAG.gold/2); PARTY.forEach(k=>{ STATS[k].hp=STATS[k].max; STATS[k].mp=STATS[k].maxmp||STATS[k].mp; });
   const inCh1=/^c1_/.test(ST.phase) && ST.phase!=='c1_castle';
   go(()=>{ if(inCh1) enterTown([3.5,18.4],'cap'); else enterTown([12,6],'rue'); hero.ang=0;
@@ -821,7 +821,7 @@ function turnEnd(){ return ()=>{ const lines=[]; BT.party.forEach(m=>{ if(m.hp>0
 function enemyTurn(){ const st=[]; alive().forEach(f=>st.push(...foeAct(f))); st.push(turnEnd()); st.push(backToMenu()); return st; }
 function winSteps(){ return [
   ()=>{ const ex=BT.foes.reduce((a,f)=>a+(f.def.exp||0),0), gd=BT.foes.reduce((a,f)=>a+(f.def.gold||0),0); BAG.gold+=gd; const ups=gainExp(ex); setTimeout(()=>se('win'),100); if(ups.length) setTimeout(()=>se('lvup'),400);
-        BT.party.forEach(m=>{ if(m.status==='sleep'||m.status==='conf') m.status=null; }); ST.kill=ST.kill||{}; BT.foes.forEach(f=>{ ST.kill[f.def.key]=(ST.kill[f.def.key]||0)+1; });   // ★眠りと 混乱は 戦闘が 終わると 治る（毒は 残る）
+ ST.kill=ST.kill||{}; BT.foes.forEach(f=>{ ST.kill[f.def.key]=(ST.kill[f.def.key]||0)+1; });   // ★眠りと 混乱は 戦闘が 終わると 治る（毒は 残る）
         bsay((BT.foes.length>1?'魔物たちを やっつけた！ ':'')+'経験値 '+ex+'、'+gd+'ゴールドを 手に 入れた！'+(ups.length?'　'+ups.join('　'):'')); return ups.length?2.4:1.6; },
   ()=>{ endBattle(); return 99; } ]; }
 function killCheck(f){ if(f.hp<=0 && !f.dead){ BT.steps.unshift(()=>{ f.dead=true; f.ex=1; se('defeat'); bsay(f.name+'を たおした！'); return 1.0; }); } }
@@ -879,7 +879,8 @@ function skillPick(){ const sk=BT.sks[BT.ssel]; if(BT.party[0].mp<sk.mp){ bsay('
   if(sk.type==='escape'){ bsay('ここでは 使えない。'); return; }
   BT.phase='act'; drawBattleUI(); queue(partyTurn({kind:'skill',sk,target:alive()[0]}),0); }
 function targetPick(){ const f=BT.foes[BT.tsel]; BT.phase='act'; drawBattleUI(); se('ok'); queue(partyTurn(Object.assign({},BT.pend||{kind:'atk'},{target:f})),0); }
-function endBattle(){ const win=BT&&BT.foes.every(f=>f.dead), cb=BT&&BT.onWin; BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display=''; if(cur.kind==='world'){ cv.style.display='none'; c2.style.display='block'; resize2(); } else { cv.style.display='block'; c2.style.display='none'; resize(); }
+function endBattle(){ const win=BT&&BT.foes.every(f=>f.dead), cb=BT&&BT.onWin;
+  if(BT) BT.party.forEach(m=>{ m.status=null; m.stTurns=0; }); /* ★状態異常は 戦闘が 終わると すべて 治る（毒も。指示） */ BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display=''; if(cur.kind==='world'){ cv.style.display='none'; c2.style.display='block'; resize2(); } else { cv.style.display='block'; c2.style.display='none'; resize(); }
   if(win && cb) cb(); }
 let lastDirY=0, lastDirX=0;
 function battleInput(iy,ix){ if(!BT) return;
