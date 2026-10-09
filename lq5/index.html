@@ -348,10 +348,10 @@ function setNpcs(list){ clearNpcs(); cur.npcs=list.map(n=>({...n,ang:0,p:person(
 function resetTrail(){ trail=[]; for(let i=0;i<200;i++) trail.push([hero.x,hero.z,hero.ang]); followers.forEach(f=>{f.x=hero.x;f.z=hero.z;f.ang=hero.ang;}); }   // ★みんな 先頭と 同じ 場所（重なる）
 function enterTown(at,which){ TOWN_NOW=which||'rue';
   // ★外の 世界から 直接 入る ときも 3Dの 画面に 戻す（前は ドルムに 入っても 2Dの 地図の まま だった）
-  if(hero.p){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); } cv.style.display='block'; c2.style.display='none'; if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildTown(); if(ST.phase==='burn'||ST.phase==='after') burnTown();
+  if(hero.p){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); } cv.style.display='block'; c2.style.display='none'; if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildTown(); if(TOWN_NOW==='rue' && RUE_BURNT()) burnTown();   /* ★ガイルとの 別れの 後（road）や 第1章でも 焼けた 村の まま（前は road で 昼の 村に 戻った） */
   cur={kind:'town', rows:TL().rows, solid:new Set(['#','H','t','F','w','K']), npcs:cur.npcs, room:null};
   setNpcs(TOWN_NOW==='velna'?velnaNpcs():TOWN_NOW==='cap'?capNpcs():townNpcs()); chestMesh(TOWN_NOW==='velna'?'none':'town'); if(at){ hero.x=at[0]; hero.z=at[1]; hero.ang=0; } resetTrail();
-  document.getElementById('place').textContent= TOWN_NOW==='cap' ? '王都 アルディア' : TOWN_NOW==='velna' ? 'ヴェルナの 鉱山の 町 ドルム' : ST.phase==='burn' ? '燃える 村 ルーエ' : '国境の村 ルーエ'; }
+  document.getElementById('place').textContent= TOWN_NOW==='cap' ? '王都 アルディア' : TOWN_NOW==='velna' ? 'ヴェルナの 鉱山の 町 ドルム' : /^(burn|after|road)/.test(ST.phase) ? '燃える 村 ルーエ' : /^(end|c1_)/.test(ST.phase) ? '焼け跡の 村 ルーエ' : '国境の村 ルーエ'; }
 function enterRoom(i){ const r=TROOMS()[i]; if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildRoom(r);
   cur={kind:'room', rows:r.rows, solid:new Set(['W','s','b','T','f','p','A','Q']), npcs:cur.npcs, room:i};
   setNpcs(r.npc?[r.npc]:[]);
@@ -459,7 +459,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   drops.forEach(d=>{ d.userData.t=(d.userData.t+dt*.7)%1; const t=d.userData.t, r=.15+t*.95, a=d.userData.a; d.position.set(12+Math.cos(a)*r, 1.62+t*.55-t*t*1.5, 8.5+Math.sin(a)*r); });
   if(fountainWater) fountainWater.material.map.offset.set(now/9000, now/13000);
   if(fireLight){ fireLight.intensity=1+Math.sin(now/90)*.15+Math.sin(now/37)*.1; }
-  fireMeshes.forEach(m=>{ const k=(ST.phase==='after'?.5:1); m.scale.set(k,k*(1+Math.sin(now/90+m.userData.ph)*.18),k); });
+  fireMeshes.forEach(m=>{ const k=(ST.phase==='burn'?1:.5); m.scale.set(k,k*(1+Math.sin(now/90+m.userData.ph)*.18),k); });
   anims=anims.filter(a=>{ if(a.delay>0){ a.delay-=dt; return true; } a.t+=dt; const k=Math.min(1,a.t/a.dur), e=1-Math.pow(1-k,2); a.obj.rotation.y=a.from+(a.to-a.from)*e; if(k>=1){ a.done&&a.done(); return false; } return true; });
   R.render(S,C); requestAnimationFrame(tick); }
 // ================= 外の 世界（2D・自由に 動く）=================
@@ -953,7 +953,9 @@ function townNpcs(){
     list.push({x:12,y:12.3,spr:'gail',name:'師匠 ガイル',talk:()=>say(['ガイル「……エルト。無事か」','ガイルの 脇腹が、赤く 染まって いる。','ガイル「村の 者を 逃がすのに、少し しくじった」','ガイル「この 剣を 持って いけ。……おれには もう 重い」','ガイル「王都へ 行け。王に、このことを 伝えろ」','エルト「師匠……！」','ガイル「行け。……振り返るな」'],()=>{ ST.phase='road'; if(EQUIP.elt.weapon) BAG.gear.push(EQUIP.elt.weapon); EQUIP.elt.weapon={name:'ガイルの 剣',v:12,price:0}; syncAtk(); setNpcs(townNpcs()); say(['＊ ガイルの 剣を 受け取り、装備した ＊','南の 門から、夜の 街道へ。王都は 北東。']); })});
   }
   return list; }
-function burnTown(){   // ★燃える 夜の 村
+const RUE_BURNT=()=>/^(burn|after|road|end|c1_)/.test(ST.phase);
+function burnTown(){   // ★燃える 夜の 村（第1章からは 火の 消えた 焼け跡）
+  if(/^(end|c1_)/.test(ST.phase)){ S.background=new THREE.Color(0x8a8a92); S.fog=new THREE.Fog(0x8a8a92,12,30); amb.intensity=.55; amb.color.setHex(0xd8d4d0); sun.intensity=.35; sun.color.setHex(0xe0d8d0); fires=[]; fireMeshes=[]; return; }
   S.background=new THREE.Color(0x1a0f18); S.fog=new THREE.Fog(0x2a1418,10,26); amb.intensity=.38; amb.color.setHex(0xffc0a0); sun.intensity=.25; sun.color.setHex(0xff8a50);
   fires=[[8.5,7.4],[16.5,13.4],[3.5,11.5],[20.5,5.4],[10.5,16.6]]; fireMeshes=[];
   const fm=L(null,0xff7a28,{emissive:0xff5010}), fm2=L(null,0xffd060,{emissive:0xffb020});
@@ -961,7 +963,7 @@ function burnTown(){   // ★燃える 夜の 村
   spots.forEach(([x,z],i)=>{ const roof=i>=fires.length, y=roof?2.3:0;
     for(let k=0;k<3;k++){ const m=add(new THREE.ConeGeometry(.22-k*.05,.7-k*.15,6),k?fm2:fm,x+(k-1)*.18,y+.35,z+(k%2)*.1); m.userData.ph=Math.random()*6; fireMeshes.push(m); } });
   [[8.5,7.4],[16.5,13.4],[12,4],[12,15]].forEach(([x,z])=>{ const l=new THREE.PointLight(0xff8a40,1.2,7); l.position.set(x,1.2,z); G.add(l); });
-  if(ST.phase==='after') fireMeshes.forEach(m=>m.scale.setScalar(.5)); }
+  if(ST.phase!=='burn') fireMeshes.forEach(m=>m.scale.setScalar(.5)); }
 function startRaid(){ ST.phase='burn'; enterTown([hero.x,hero.z]);
   say(['畑から 戻ると、村の 空が 赤かった。','家々から 火の手が 上がって いる。','ヴェルナの 兵が、松明を 手に 歩いて いる。','エルト「……村が！」','＊ 逃げ遅れた 村の 人を 助けよう（3人） ＊']); }
 // ---- 村の 北の 畑と 古い 倉 ----
@@ -1195,7 +1197,7 @@ const BGM_VOL={burn:.78, town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, b
 let bgmEl=null, bgmNow='', bgmUnlocked=false;
 function bgmFor(){
   // ★燃える 村（村が 焼かれてから 村を 出るまで）は、家の 中でも 曲を 変えない。部隊長戦（ボス）だけは ボスの 曲（指示）
-  if(TOWN_NOW==='rue' && (ST.phase==='burn'||ST.phase==='after') && (cur.kind==='town'||cur.kind==='room'||BT) && !(BT && BT.def.boss)) return 'burn';
+  if(TOWN_NOW==='rue' && /^(burn|after|road)$/.test(ST.phase) && (cur.kind==='town'||cur.kind==='room'||BT) && !(BT && BT.def.boss)) return 'burn';
   if(BT) return BT.def.boss?'boss':'battle';
   if(cur.kind==='world') return 'field'; if(cur.kind==='farm') return 'field'; if(cur.kind==='castle') return 'castle';
   if(cur.kind==='town' && TOWN_NOW==='rue' && (ST.phase==='burn'||ST.phase==='after')) return 'burn'; return 'town'; }
