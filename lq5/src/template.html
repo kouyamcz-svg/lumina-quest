@@ -422,23 +422,23 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
     if(mv>.001){ trail.unshift([hero.x,hero.z,hero.ang]); if(trail.length>400) trail.pop(); }
     if(mv>.001 && STATS.elt.status==='poison'){ ST.pz=(ST.pz||0)+mv; if(ST.pz>6){ ST.pz=0; if(STATS.elt.hp>1){ STATS.elt.hp--; flashEl.style.opacity=.35; setTimeout(()=>flashEl.style.opacity=0,120); } } }   // ★毒：歩くと 少しずつ 減る（1までで 止まる）
     if(cur.kind==='world' && mv>.001){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))===','?1.5:1);
-      if(wWalk>wEnc){ wWalk=0; wEnc=12+Math.random()*10; startEnc(hero.x>30?'east':(ST.phase==='road'?'westNight':'west')); } }
+      if(wWalk>wEnc){ wWalk=0; wEnc=12+Math.random()*10; startEnc(hero.x>40?'east':(ST.phase==='road'?'westNight':'west')); } }
     if(cur.kind==='fort' && mv>.001 && !msgQ && ST.phase==='c1_fort'){ wWalk+=mv; if(wWalk>wEnc){ wWalk=0; wEnc=8+Math.random()*8; startEnc('fort'); } }
     if(cur.kind==='farm' && mv>.001 && !msgQ){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))==='f'?1.4:1); if(wWalk>wEnc){ wWalk=0; wEnc=10+Math.random()*8; startEnc('farm'); } } }
   // 出入口の 範囲（町：家の 扉の 前に 上へ 進む と 入る／家：出口の 前で 下へ 進む と 出る）
   if(!fading && !msgQ){
-    if(cur.kind==='town' && TOWN_NOW==='cap' && hero.z>20.9 && iz>0 && Math.abs(hero.x-12)<1.3){ go(()=>enterWorld([22.5,4.4])); }
+    if(cur.kind==='town' && TOWN_NOW==='cap' && hero.z>20.9 && iz>0 && Math.abs(hero.x-12)<1.3){ go(()=>enterWorld([12.5,25.45])); }
     else if(cur.kind==='town' && TOWN_NOW==='cap' && hero.z<4.0 && iz<0 && Math.abs(hero.x-12)<1.1){ go(()=>enterCastle()); }
-    else if(cur.kind==='town' && TOWN_NOW==='velna' && hero.z>18.9 && iz>0 && Math.abs(hero.x-11.5)<1.3){ go(()=>enterWorld([38.5,10.45])); }
+    else if(cur.kind==='town' && TOWN_NOW==='velna' && hero.z>18.9 && iz>0 && Math.abs(hero.x-11.5)<1.3){ go(()=>enterWorld([48.5,26.45])); }
     else if(cur.kind==='town' && TOWN_NOW==='velna' && hero.z<0.75 && iz<0){ say(['北は 鉱山へ 続く 道。今は 用が ない。']); hero.z=1.0; }
-    else if(cur.kind==='town' && TOWN_NOW==='rue' && hero.z>18.9 && iz>0 && Math.abs(hero.x-11.5)<1.3){ /* ★ルーエの 南の 門（前は 町を 問わず 効いて、城下町の 南で ルーエの 外へ 出た） */ if(ST.phase==='burn') say(['村の 人たちを 置いては 行けない。']); else if(ST.phase==='morning'||ST.phase==='field') say(['ガイル「どこへ 行く。見回りは 北の 畑だ」']); else go(()=>enterWorld([4.5,18.45])); hero.z=18.6; }
+    else if(cur.kind==='town' && TOWN_NOW==='rue' && hero.z>18.9 && iz>0 && Math.abs(hero.x-11.5)<1.3){ /* ★ルーエの 南の 門（前は 町を 問わず 効いて、城下町の 南で ルーエの 外へ 出た） */ if(ST.phase==='burn') say(['村の 人たちを 置いては 行けない。']); else if(ST.phase==='morning'||ST.phase==='field') say(['ガイル「どこへ 行く。見回りは 北の 畑だ」']); else go(()=>enterWorld([34.5,32.45])); hero.z=18.6; }
     if(cur.kind==='town' && TOWN_NOW==='rue' && hero.z<0.75 && iz<0 && Math.abs(hero.x-12)<1.3){ if(ST.phase==='morning') { say(['まずは ガイル師匠に 声を かけよう。']); hero.z=1.0; } else if(ST.phase==='field') go(()=>enterFarm()); else { say(['畑の ほうは、もう 火が 回って いる。']); hero.z=1.0; } }
     if(cur.kind==='farm' && hero.z>cur.rows.length-1.2 && iz>0 && Math.abs(hero.x-12)<1.3){ go(()=>{ enterTown([12,1.2]); hero.ang=0; if(ST.phase==='raid') startRaid(); }); }
     if(cur.kind==='castle' && hero.z>cur.rows.length-1.2 && iz>0){ if(ST.phase==='c1_castle'){ say(['まずは 王の 話を 聞こう。']); hero.z-=.4; } else go(()=>{ enterTown([12,4.7],'cap'); hero.ang=0; }); }
-    if(cur.kind==='fort' && hero.z>cur.rows.length-1.2 && iz>0){ go(()=>enterWorld([27.5,8.5])); }
-    if(cur.kind==='fort' && hero.z<1.9 && hero.x>13 && iz<0 && /^c1_(east|town|end)$/.test(ST.phase)){ go(()=>enterWorld([31.6,9.5])); }
+    if(cur.kind==='fort' && hero.z>cur.rows.length-1.2 && iz>0){ go(()=>enterWorld([37.5,24.5])); }
+    if(cur.kind==='fort' && hero.z<1.9 && hero.x>13 && iz<0 && /^c1_(east|town|end)$/.test(ST.phase)){ go(()=>enterWorld([41.6,25.5])); }
     if(cur.kind==='world'){ const c=at(Math.floor(hero.x),Math.floor(hero.z)); if(c==='V' && (ix||iz)) go(()=>leaveWorldToTown());   /* ★どの 向きから 入っても 村に 入る（前は 南から 上へ 進む ときだけ） */
-      if(c==='S'){ const east=hero.x>30; if(ST.phase==='c1_road'||ST.phase==='c1_fort') go(()=>enterFort(false)); else if(/^c1_(east|town|end)$/.test(ST.phase)) go(()=>{ enterWorld(east?[27.5,8.5]:[31.6,9.5]); }); else { hero.x+= east?.6:-.6; say(['国境の 砦。ヴェルナの 兵が 門を 閉ざして いる。']); } }
+      if(c==='S'){ const east=hero.x>40; if(ST.phase==='c1_road'||ST.phase==='c1_fort') go(()=>enterFort(false)); else if(/^c1_(east|town|end)$/.test(ST.phase)) go(()=>{ enterWorld(east?[37.5,24.5]:[41.6,25.5]); }); else { hero.x+= east?.6:-.6; say(['国境の 砦。ヴェルナの 兵が 門を 閉ざして いる。']); } }
       if(c==='W'){ if(/^c1_(east|town|end)$/.test(ST.phase)){ if(ST.phase==='c1_east') ST.phase='c1_town'; go(()=>enterTown([11.5,18.2],'velna')); } else { hero.x-=.6; say(['まだ 行けない。']); } }
       if(c==='C') { if(/^(road|c1_)/.test(ST.phase)) go(()=>enterTown([12,20.2],'cap')); else { hero.z+=0.6; say(['王都 アルディア。今は 用が ない。']); } } }
     else if(cur.kind==='town' && TOWN_NOW==='velna'){ DOORS.forEach(([dx,dy])=>{ if(Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2 && iz<0 && !msgQ){ say(['戸は 閉まって いる。']); hero.z=dy+.75; } }); }
@@ -464,27 +464,82 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   R.render(S,C); requestAnimationFrame(tick); }
 // ================= 外の 世界（2D・自由に 動く）=================
 //  ~ 海  . 草原  , 森  ^ 山  = 街道  r 川  b 橋  V 国境の 村ルーエ  C 王都（2×2）
+// ★外の 世界：全体の 地図（112×72）。アルディア王国を 作り直した（王都は 西、ルーエは 国境の 山並みの すぐ 西）。
+//  まだ 行けない 場所は 山並み（x62-63）と 海で 区切って ある。配置図は docs/map/
 const WORLD=[
-"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
-"~~~..,,,,......^^^^.......~~~^^............~~~",
-"~~..,,,,,,....^^^^^^...CC..~~^^..............~",
-"~..,,,,,,,,...^^^^^...=CC...~^^..,,,.........~",
-"~..,,,,,,.....^^^.....=......^^..,,,.........~",
-"~...,,,......====.....=..,,..^^..,,,...,.....~",
-"~.........====..=======..,,,.^^.........,....~",
-"~......====...........=.,,,,.^^..............~",
-"~.....==.......,,.....=======SS..............~",
-"~....==......,,,,,...........SS=======W......~",
-"~rrrrbrrrrrrrrrrrrrrrrrrrrrrr^^..............~",
-"~....=.......,,,.......^^^...^^..............~",
-"~....=......,,,,,.....^^^^^..^^..............~",
-"~....=.......,,,.....^^^^^^..^^.....,,..^^^..~",
-"~...,=,,..............^^^^...^^.....,...^^^..~",
-"~..,,=,,,,...................^^.........^^^..~",
-"~..,,=,,,,....,,,............^^..............~",
-"~...V=........,,,,.......~~~~^^..........~~~~~",
-"~.....................~~~~~~~~~~~~~~~~~~~~~~~~",
-"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"];
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xxxxx~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xxxxx~~x^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xxxxxxxx^^x~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xxxxxxxx^^xx~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xxxxx.xxx^^xxx~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xxxxxxxxxx^^xxxx~~~~~~~~~~~~~~~~......~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xxxxxxxxx^^xxx~~~~~~~~~~~~~~~.........~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xxxxxxx~~~~~~~~~~~~~~~~~~~~...........~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xxx~~~~~~~~~~~~~~~~~~~~~~~............~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xx~~~~~~~~~~~~~~~~~~~~~~~...............~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~...................~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~........................~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~.....~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.......~~~~~~~..........................~~~~~~~~",
+"~~~~~~~~~~~~~~~~~............~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^..........~~~.............................~~~~~~",
+"~~~~~~~~~~~~~~~~............~~~......~~~~~~~~~~~~~~~~~~~~~~~~.^^..........................................~~~~~~",
+"~~~~~~~~~~~~~~~~^^^^...................^^............~~~~~~~..^^.............................,,,,,,,.......~~~~~",
+"~~~~~~~~~~~~~~^^^^^^^^....^^^..........^^..............~~~~...^^............................,,,,,,,,,......~~~~~",
+"~~~~~~~......^^^^^^^....^^^^^^^........^^..,,,.........~~.....^^.......,,,,,,,..............,,,,.,,,,......~~~~~",
+"~~~~~...,.................^^^..........^^..,,,................^^.....,,,,,,,,,,,............,,,,,,,,,......~~~~~",
+"~~~~~.,,,,,.........,,,,,....,,,.......^^..,,,...,............^^.....,,,,,,,,,,,............,,,,,,,,,......~~~~~",
+"~~~~.,,,,,,,.......,,,,,,,..,,,,,......^^.........,...........^^.....,,,,,.,,,,,............,,,,,,,,,.....~~~~~~",
+"~~~~..,,,,,.CC......,,,,,....,,,.......^^.....................^^.....,,,,,,,,,,,.............,,,,,,,......~~~~~~",
+"~~~~....,...CC.........................SS.....................^^.....,,,,,,,,,,,.........................~~~~~~~",
+"~~~.........===========================SS=======W=============^^============================............~~~~~~~~",
+"~~~...............rrrrrrrrrrrrr...=....^^.....................^^........................................~~~~~~~~",
+"~~rr...,......rrrrr...........rrrr=....^^.....................^^.......................................~~~~~~~~~",
+"~~.rrrrrrrrrrrr..................rbrrrr^^.....................^^......................................~~~~~~~~~~",
+"~~...,,,,,........................=....^^.....,,..^^^.........^^......................................~~~~~~~~~~",
+"~~....,,,.........................=....^^.....,...^^^.........^^...................................^^^~~~~~~~~~~",
+"~~.....,..........,...............V....^^.........^^^.........^^..................................^^^^~~~~~~~~~~",
+"~~~............,,,,,,,.................^^.....................^^.................................^^^^^^~~~~~~~~~",
+"~~~~...........,,,,,,,.................^^.....................^^..................................^^^^^~~~~~~~~~",
+"~~~~~~.........,,,,,,,.................^^~~...................^^...,,,,,,,.............^^^.........^^^..~~~~~~~~",
+"~~~~~~~~~^^^......,...........^^^......^^~~~..................^^..,,,,,,,,,...........^^^^^..............~~~~~~~",
+"~~~~~~~~~~~^^^...............^^^^^.....^^~~...................^^..,,,,,,,,,..........^^^^^^^.............~~~~~~~",
+"~~~~~~~~~~~^............,,,,,.^^^......^^~....................^^..,,,,,,,,,...........^^^^^...............~~~~~~",
+"~~~~~~~~~~~~...........,,,,,,,.........^^~....................^^...,,,,,,,.............^^^................~~~~~~",
+"~~~~~~~~~~~~............,,,,,..........^^~....................^^..............d...........................~~~~~~",
+"~~~~~~~~~~~~~..............~~~~~~~~~~~~^^~....................^^............dddddd........................~~~~~~",
+"~~~~~~~~~~~~~~~~~~........~~~~~~~~~~~~~^^~....................^^...........ddddddddd.dddd.....ddd.........~~~~~~",
+"~~~~~~~~~~~~~~~~~~~......~~~~~~~~~~~~~~^^~....................^^........ddddddddddddddddddddddddddddd.....~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~..~~~~~~~~~~~~~~~~^^~....................^^......ddddddddddddddddddddddddddddddddd...~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^~....................^^....ddddddddddddddddddddddddddddddddddd..~~~~~~~",
+"~~~~~~~..~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^~....................^^...ddddddddddddddddddddddddddddddddddddd~~~~~~~~",
+"~~~.......~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~....................^^...ddddddddddddddddddddddddddddddddddddd~~~~~~~~",
+"~~~~......~..~~~~~~~~~~~~~~~~~~~~~~~~~~~~~....................^^...ddddddddddddddddddddddddddddddddddddd~~~~~~~~",
+"~~~~..........~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.......~~~.........^^...dddddddddddddddddddddddddddddddddddd~~~~~~~~~",
+"~~~~~.........~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~..~~~..^^....dddddddddddddddddddddddddddddddddd~~~~~~~~~~",
+"~~~~~..........~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^....~ddddddddddddddddddddddddddddddddd~~~~~~~~~~",
+"~~~~...........~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~dddddddddddddddddddddddddddddd~~~~~~~~~~~",
+"~~~~~.........~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ddddddd.ddddddddddddddddddd~~~~~~~~~~~~",
+"~~~~~......~~~~~~~~~~~~~~~~~~~~~...~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~dddddddddddddddddddddddd~~~~~~~~~~~~~~",
+"~~~~~......~~~~~~~~~~~~~~~~~~~~.....~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ddddddddddddddddddddd~~~~~~~~~~~~~~~~",
+"~~~~~...~~~~~~~~~~~~~~~~~~~.........~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~dddddddddddd~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~..~~~~~~~~~~~~~~~~~~~............~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~dddddddddd~~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~......................~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~d~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~.......................~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~~~~~~~..~~",
+"~~~~~~~~~~~~~~~~~...............^^^^^...~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~....~.......~",
+"~~~~~~~~~~~~~~~~~......................~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~............~",
+"~~~~~~~~~~~~~~~~~~....................~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~............~~",
+"~~~~~~~~~~~~~~~~~~~...................~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~............~~~",
+"~~~~~~~~~~~~~~~~~~~~~..................~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~............~~",
+"~~~~~~~~~~~~~~~~~~~~~~......~..........~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.......~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~...~~~..........~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.....~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~........~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.....~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~..~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+];
 const WSOLID=new Set(['~','^','r']);   // ★S＝国境の 砦（2×2）、W＝ヴェルナの 鉱山の 町
 const c2=document.getElementById('c2'), g2=c2.getContext('2d');
 function tile16(draw){ const c=document.createElement('canvas'); c.width=c.height=16; const g=c.getContext('2d'); draw(g); return c; }
@@ -516,7 +571,7 @@ function enterWorld(at){ if(G) S.remove(G); G=null;
   hero.x=at[0]; hero.z=at[1]; hero.ang=0; resetTrail();
   [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=false; p.sh.visible=false; });
   cv.style.display='none'; c2.style.display='block'; resize2();
-  document.getElementById('place').textContent= ST.phase==='road' ? '夜の 街道' : (at[0]>30 ? 'ヴェルナ帝国' : 'アルディア王国'); wWalk=0; }
+  document.getElementById('place').textContent= ST.phase==='road' ? '夜の 街道' : (at[0]>40 ? 'ヴェルナ帝国' : 'アルディア王国'); wWalk=0; }
 function leaveWorldToTown(){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; });
   cv.style.display='block'; c2.style.display='none'; enterTown([11.5,18.3]); hero.ang=Math.PI; }
 let wWalk=0, wEnc=12+Math.random()*10;
@@ -554,10 +609,10 @@ function bakeWorld32(){
   const P=(g,x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h);};
   // 浜辺：海に 面した 陸
   const terr=(x,y)=>{ if(x<0||y<0||x>=MW||y>=MH) return 'sea'; const c=WORLD[y][x];
-    if(c==='~') return 'sea'; if(c==='r') return 'lake'; if(c==='b') return 'lake'; if(c==='=') return 'road';
+    if(c==='~') return 'sea'; if(c==='r') return 'lake'; if(c==='b') return 'lake'; if(c==='=') return 'road'; if(c==='d') return 'desert'; if(c==='x') return 'dark';
     for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]){ const nx=x+dx, ny=y+dy; if(nx>=0&&ny>=0&&nx<MW&&ny<MH&&WORLD[ny][nx]==='~' && (c==='.'||c===',')) return 'beach'; }
     return 'plain'; };
-  const RANK={sea:0,lake:0,beach:1,plain:3,road:5};
+  const RANK={sea:0,lake:0,beach:1,desert:2,dark:2,plain:3,road:5};
   // 地形ごとの 32ドットの 絵（それぞれ 3種）
   const base={};
   function grass(v){ const c=mk(TS,TS),g=c.getContext('2d'); for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){ const r=hsh(x,y,v); P(g,x,y,1,1, r<.08?'#4f8a32':r<.5?'#5f9e3c':r<.9?'#68a843':'#7cba52'); }
@@ -571,6 +626,10 @@ function bakeWorld32(){
     for(let i=0;i<5;i++) P(g,Math.floor(hsh(i,v,7)*30),Math.floor(hsh(v,i,8)*30),2,1,'#b89858'); return c; }
   function road(v){ const c=mk(TS,TS),g=c.getContext('2d'); for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){ const r=hsh(x,y,v+39); P(g,x,y,1,1, r<.12?'#b08c58':r<.6?'#c8a46a':r<.95?'#d2ae74':'#dcbc86'); }
     for(let i=0;i<6;i++){ const x=Math.floor(hsh(i,v,9)*29)+1, y=Math.floor(hsh(v,i,10)*29)+1; P(g,x,y,2,2,'#9a7a4a'); P(g,x,y,1,1,'#e2c696'); } return c; }
+  function desert(v){ const c=mk(TS,TS),g=c.getContext('2d'); for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){ const r=hsh(x,y,v+49); P(g,x,y,1,1, r<.12?'#c8a060':r<.6?'#dab878':r<.95?'#e2c286':'#ecd29c'); }
+    for(let i=0;i<4;i++){ const x=Math.floor(hsh(i,v,11)*26), y=Math.floor(hsh(v,i,12)*28)+2; P(g,x,y,5,1,'#c09858'); } return c; }
+  function dark(v){ const c=mk(TS,TS),g=c.getContext('2d'); for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){ const r=hsh(x,y,v+59); P(g,x,y,1,1, r<.15?'#2a1e30':r<.7?'#3a2a42':r<.95?'#463452':'#5a4466'); } return c; }
+  base.desert=[0,1,2].map(desert); base.dark=[0,1,2].map(dark);
   base.plain=[0,1,2].map(grass); base.sea=[0,1,2].map(sea); base.lake=[0,1,2].map(lake); base.beach=[0,1,2].map(beach); base.road=[0,1,2].map(road);
   // 境目の ぎざぎざ（となりの 地形を 少し はみ出させる）
   const DIRS=[['n',0,-1],['s',0,1],['w',-1,0],['e',1,0],['nw',-1,-1],['ne',1,-1],['sw',-1,1],['se',1,1]];
@@ -582,7 +641,8 @@ function bakeWorld32(){
     const cr=(x0,y0)=>{ for(let y=0;y<10;y++)for(let x=0;x<10;x++){ if(x+y<9-((x*y)%3)) g.fillRect(x0?TS-1-x:x, y0?TS-1-y:y,1,1); } };
     if(dir==='nw') cr(0,0); if(dir==='ne') cr(1,0); if(dir==='sw') cr(0,1); if(dir==='se') cr(1,1);
     return maskCache[dir]=c; }
-  function edged(src,dir){ const c=mk(TS,TS),g=c.getContext('2d'); g.drawImage(mask(dir),0,0); g.globalCompositeOperation='source-in'; g.drawImage(src,0,0); return c; }
+  const edgeCache=new Map();
+  function edged(src,dir){ const key=dir+'|'+(src.__id||(src.__id=Math.random())); if(edgeCache.has(key)) return edgeCache.get(key); const c=mk(TS,TS),g=c.getContext('2d'); g.drawImage(mask(dir),0,0); g.globalCompositeOperation='source-in'; g.drawImage(src,0,0); edgeCache.set(key,c); return c; }
   const out=mk(MW*TS,MH*TS), G2=out.getContext('2d'); G2.imageSmoothingEnabled=false;
   const pick=(t,x,y)=>base[t][Math.floor(hsh(x,y,77)*3)];
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){ const t=terr(x,y), sx=x*TS, sy=y*TS;
@@ -621,7 +681,7 @@ const BG_LOOK={
   burn:{grp:'burn', bg:0x1e0c10, fog:[0x2a1210,10,40], hemi:[0xff9a70,0x2a1010,.5], sun:[0xff7040,.35], sky:false},
 };
 function sceneLook(){ if(cur.kind==='fort') return 'fort'; if(cur.kind==='town' && ST.phase==='burn') return 'burn';
-  if(cur.kind==='world'){ if(hero.x>30) return 'rock'; if(ST.phase==='road') return 'night'; } return 'field'; }
+  if(cur.kind==='world'){ if(hero.x>40) return 'rock'; if(ST.phase==='road') return 'night'; } return 'field'; }
 function applyLook(k){ const L_=BG_LOOK[k]||BG_LOOK.field; ['field','nightX','rock','fort','burn'].forEach(n=>{ if(BG[n]) BG[n].visible = (n===L_.grp || n===L_.extra); });
   if(BG.sky) BG.sky.visible=L_.sky;
   if(BG.field) BG.field.children.forEach(o=>{ if(o!==BG.sky && o.material && o.material.fog===false && o.material.transparent) o.visible=L_.sky; });   // ★雲は 昼だけ batScene.background=new THREE.Color(L_.bg); batScene.fog=new THREE.Fog(L_.fog[0],L_.fog[1],L_.fog[2]);
@@ -1071,7 +1131,7 @@ function openFieldMenu(){ if(msgQ||BT||fading||ST.phase==='end') return;
       menu(sks.map(k=>k.name+'　'+k.mp+(k.field?'':'（戦闘）')).concat(['戻る']),'呪文（MP '+STATS.elt.mp+'）',(i)=>{ if(i>=sks.length){ openFieldMenu(); return; } const k=sks[i]; closeMenu();
         if(!k.field){ say([k.name+'は 戦闘で 唱える 呪文だ。'],openFieldMenu); return; } if(STATS.elt.mp<k.mp){ say(['MPが 足りない。'],openFieldMenu); return; }
         if(k.type==='heal'){ const m=STATS.elt; if(m.hp>=m.max){ say(['HPは 減って いない。'],openFieldMenu); return; } m.mp-=k.mp; const h=Math.min(k.amt,m.max-m.hp); m.hp+=h; se('item'); say([m.name+'は '+k.name+'を 唱えた！','HPが '+h+' 回復した！'],openFieldMenu); return; }
-        if(k.type==='escape'){ if(cur.kind!=='fort'){ say(['ここでは 使えない。','（ダンジョンの 中で 使う）'],openFieldMenu); return; } STATS.elt.mp-=k.mp; se('ok'); say(['来た 道の 光が ひとつずつ ともり、入口へ 導かれた——'],()=>go(()=>enterWorld([27.5,8.5]))); return; }
+        if(k.type==='escape'){ if(cur.kind!=='fort'){ say(['ここでは 使えない。','（ダンジョンの 中で 使う）'],openFieldMenu); return; } STATS.elt.mp-=k.mp; se('ok'); say(['来た 道の 光が ひとつずつ ともり、入口へ 導かれた——'],()=>go(()=>enterWorld([37.5,24.5]))); return; }
       },()=>openFieldMenu()); }
     else if(pick==='道具'){ openItems(); }
     else if(pick==='装備'){ openEquip(); }
@@ -1092,11 +1152,11 @@ function useHerb(m){ if(m.hp>=m.max) return [m.name+'の HPは 減って いな�
 function menuInput(iy){ if(!MENU) return; if(iy!==0 && iy!==menuLastY){ se('cursor'); MENU.sel=(MENU.sel+(iy>0?1:-1)+MENU.items.length)%MENU.items.length; drawMenu(); } menuLastY=iy; }
 let menuLastY=0;
 // ---- セーブ（この 端末の ブラウザに 残す）----
-function saveGame(){ try{ localStorage.setItem('lq5save', JSON.stringify({ST,STATS,BAG,EQUIP,tactic,SND,town:TOWN_NOW,at:{kind:cur.kind,x:hero.x,z:hero.z}})); return true; }catch(e){ return false; } }
+function saveGame(){ try{ localStorage.setItem('lq5save', JSON.stringify({wv:2,ST,STATS,BAG,EQUIP,tactic,SND,town:TOWN_NOW,at:{kind:cur.kind,x:hero.x,z:hero.z}})); return true; }catch(e){ return false; } }
 function loadGame(){ try{ const d=JSON.parse(localStorage.getItem('lq5save')||'null'); if(!d) return false;
   Object.assign(ST,d.ST); Object.assign(STATS.elt,d.STATS.elt); Object.assign(BAG,d.BAG); Object.assign(EQUIP.elt,d.EQUIP.elt); if(!BAG.gear) BAG.gear=[]; if(!BAG.opened) BAG.opened={}; if(!BAG.keys) BAG.keys=[]; if(BAG.antidote===undefined) BAG.antidote=0; if(!('helm' in EQUIP.elt)) EQUIP.elt.helm=null; if(!ST.q) ST.q={}; if(!ST.lamps) ST.lamps={}; if(d.tactic) tactic=d.tactic; if(d.SND){ const o=d.SND; SND={bgm: typeof o.bgm==='number'?o.bgm:(o.bgm===false?0:.6), se: typeof o.se==='number'?o.se:(o.se===false?0:.6), mix:!!o.mix, speed:o.speed||1}; } if(ESCORT()) setEscort(true);
   if(STATS.elt.lv===undefined){ Object.assign(STATS.elt,{lv:1,exp:0,maxmp:6,batk:3,def:3,agi:6}); } syncAtk();
-  const k=d.at.kind; if(k==='fort'){ enterFort(false); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='town' && (d.town==='velna'||d.town==='cap')){ enterTown([d.at.x,d.at.z],d.town); } else if(k==='world') enterWorld([d.at.x,d.at.z]); else if(k==='farm'){ enterFarm(); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='castle'){ enterCastle(); } else enterTown([d.at.x,d.at.z]);
+  const k=d.at.kind; if(k==='fort'){ enterFort(false); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='town' && (d.town==='velna'||d.town==='cap')){ enterTown([d.at.x,d.at.z],d.town); } else if(k==='world'){ if(d.wv===2) enterWorld([d.at.x,d.at.z]); else enterWorld(/^c1_(east|town|end)$/.test(ST.phase)?[41.6,25.5]:/^c1_/.test(ST.phase)?[37.5,24.5]:[34.5,32.45]); }   /* ★前の 地図の セーブは 近くの 場所へ */ else if(k==='farm'){ enterFarm(); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='castle'){ enterCastle(); } else enterTown([d.at.x,d.at.z]);
   return true; }catch(e){ return false; } }
 function hasSave(){ try{ return !!localStorage.getItem('lq5save'); }catch(e){ return false; } }
 
