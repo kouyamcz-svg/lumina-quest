@@ -483,6 +483,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
     if(mv>.001 && STATS.elt.status==='poison'){ ST.pz=(ST.pz||0)+mv; if(ST.pz>6){ ST.pz=0; if(STATS.elt.hp>1){ STATS.elt.hp--; flashEl.style.opacity=.35; setTimeout(()=>flashEl.style.opacity=0,120); } } }   // ★毒：歩くと 少しずつ 減る（1までで 止まる）
     if(cur.kind==='world' && mv>.001){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))===','?1.5:1);
       if(wWalk>wEnc){ wWalk=0; wEnc=12+Math.random()*10; startEnc(hero.x>63?velnaArea(hero.x,hero.z):hero.x>40?'east':(ST.phase==='road'?'westNight':'west')); } }
+    if(cur.kind==='fort' && mv>.001) lampHint();
     if(cur.kind==='dun' && mv>.001 && !msgQ){ wWalk+=mv; if(wWalk>wEnc){ wWalk=0; wEnc=8+Math.random()*8; startEnc(DUNS[DUN_NOW].enc); } }
     if(cur.kind==='fort' && mv>.001 && !msgQ && ST.phase==='c1_fort'){ wWalk+=mv; if(wWalk>wEnc){ wWalk=0; wEnc=8+Math.random()*8; startEnc('fort'); } }
     if(cur.kind==='farm' && mv>.001 && !msgQ){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))==='f'?1.4:1); if(wWalk>wEnc){ wWalk=0; wEnc=10+Math.random()*8; startEnc('farm'); } } }
@@ -1432,20 +1433,21 @@ function buildFort(){ fortLamps=[];
   S.background=new THREE.Color(0x141018); S.fog=new THREE.Fog(0x141018,6,18); amb.intensity=.5; amb.color.setHex(0xffe0c0); sun.intensity=.25; sun.color.setHex(0xffd0a0);
   const fl=L(T.stone,0xb0a890), wl=L(T.cliff,0xb8b0a0);
   for(let y=0;y<FORT.length;y++)for(let x=0;x<FORT[0].length;x++){ const c=FORT[y][x];
-    add(box,fl,x+.5,-.5,y+.5); if(c==='#') add(box,wl,x+.5,1.1,y+.5,1,2.2,1);
+    add(box,fl,x+.5,-.5,y+.5); if(c==='#') add(box,wl,x+.5,.6,y+.5,1,1.2,1);   /* ★壁を 低く（前は 2.2 で、手前の 壁に 通路と 主人公が 隠れた） */
     if(c==='E'){ add(box,L(null,0x2a1a10),x+.5,.02,y+.5,.8,.04,.8); } }
   // ★灯り（ふたつ）と 鉄格子（番兵の 手前）
-  [[0,9],[5,0]].forEach(([x,y])=>{ add(new THREE.CylinderGeometry(.18,.24,1.1,8),L(T.stone,0x908878),x+.5,.55,y+.5); const lit=!!ST.lamps[x+','+y];
-    const o=add(new THREE.SphereGeometry(.2,10,8),L(null,lit?0xffd070:0x3a3440,lit?{emissive:0xffa030}:{}),x+.5,1.25,y+.5); fortLamps.push(o); if(lit){ const l=new THREE.PointLight(0xffc060,.9,6); l.position.set(x+.5,1.4,y+.5); G.add(l); } });
-  if(!fortGateOpen()) for(let k=0;k<5;k++) add(box,L(null,0x5a5a62),12.12+k*.19,1.1,3.5,.06,2.2,.06);
-  [[1.5,9.5],[7.5,9.5],[13.5,5.5],[3.5,1.5],[9.5,3.5]].forEach(([x,z])=>{ const t=add(new THREE.ConeGeometry(.12,.3,6),L(null,0xff8a30,{emissive:0xff5010}),x,1.4,z); t.userData.ph=Math.random()*6; fireMeshes.push(t);
+  [[0,9],[5,0]].forEach(([x,y])=>{ const fx=x+.5+(x===0?.55:0), fz=y+.5+(y===0?.55:0);   /* ★壁から 通路へ 張り出させて 見える ように */
+    add(new THREE.CylinderGeometry(.22,.3,1.2,8),L(T.stone,0xb0a898),fx,.6,fz); add(new THREE.CylinderGeometry(.34,.24,.22,10),L(null,0x6a5a48),fx,1.3,fz); const lit=!!ST.lamps[x+','+y];
+    const o=add(new THREE.SphereGeometry(.2,10,8),L(null,lit?0xffd070:0x5a6aa0,lit?{emissive:0xffa030}:{emissive:0x182040}),fx,1.5,fz); fortLamps.push(o); if(lit){ const l=new THREE.PointLight(0xffc060,.9,6); l.position.set(x+.5,1.4,y+.5); G.add(l); } });
+  if(!fortGateOpen()) for(let k=0;k<5;k++) add(box,L(null,0x5a5a62),12.12+k*.19,.75,3.5,.06,1.5,.06);
+  [[1.5,9.5],[7.5,9.5],[13.5,5.5],[3.5,1.5],[9.5,3.5]].forEach(([x,z])=>{ const t=add(new THREE.ConeGeometry(.12,.3,6),L(null,0xff8a30,{emissive:0xff5010}),x,1.0,z); t.userData.ph=Math.random()*6; fireMeshes.push(t);
     const l=new THREE.PointLight(0xff9040,.9,6); l.position.set(x,1.5,z); G.add(l); }); }
 function enterFort(fromEast){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); cv.style.display='block'; c2.style.display='none';
   if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; fireMeshes=[]; buildFort();
   cur={kind:'fort', rows:FORT, solid:new Set(['#']), npcs:cur.npcs, room:null};
   setNpcs(ST.phase==='c1_fort'||ST.phase==='c1_road' ? [{x:13.5,y:3.4,spr:'banpei',name:'砦の 番兵',talk:()=>{
     say(['番兵「…………」','鎧の 中から、人の 声では ない 音が した。','使者 ハーヴェン「こ、これは 人では ないぞ！」'],()=>startBattle(FOES.banpei,()=>{ ST.phase='c1_east'; setNpcs([]); say(['番兵の 鎧が 崩れ落ちた。中は からっぽだった。','使者 ハーヴェン「……ヴェルナの 砦に、なぜ こんな ものが」','＊ 奥の 出口から、ヴェルナ側へ 抜けられる ＊']); })); }}] : []);
-  if(ST.phase==='c1_road') ST.phase='c1_fort';
+  if(ST.phase==='c1_road'){ ST.phase='c1_fort'; setTimeout(()=>say(['使者 ハーヴェン「この 砦の 奥には、鉄格子が あると 聞きます」','使者 ハーヴェン「昔の 守り手は、壁の 古い 灯りを ふたつ ともして 格子を 上げた そうですな」','（灯りの 台の 前で Aを 押すと 火を ともせる）']),500); }   /* ★仕掛けの 手がかり（指示：わからなくて 進めなかった） */
   if(fromEast){ hero.x=13.5; hero.z=1.6; hero.ang=Math.PI; } else { hero.x=6.5; hero.z=FORT.length-1.6; hero.ang=Math.PI; } resetTrail(); wWalk=0; wEnc=6+Math.random()*6;
   document.getElementById('place').textContent='国境の 砦'; resize(); }
 // ---- ヴェルナの 鉱山の 町 ドルム（村の 形を 使い回す）----
@@ -1500,6 +1502,7 @@ function openTrade(){ const m=MARKET[TOWN_NOW]; BAG.goods=BAG.goods||{}; const k
 function canSail(){ return !!ST.ship; }
 // ---- 仕掛け：砦の 灯り（ふたつ ともすと 奥の 鉄格子が 開く）----
 ST.lamps=ST.lamps||{};
+function lampHint(){ if(cur.kind!=='fort'||msgQ||BT) return; const l=lampAt(hero.x,hero.z); if(!l) return; const k=l.join(','); if(ST.lamps[k]||(ST.lampSeen||{})[k]) return; ST.lampSeen=ST.lampSeen||{}; ST.lampSeen[k]=1; say(['古い 灯りの 台が ある。','火を ともせそうだ。（Aで 調べる）']); }
 function lampAt(x,z){ return [[0,9],[5,0]].find(([lx,lz])=>Math.abs(lx+.5-x)<1.1&&Math.abs(lz+.5-z)<1.1); }
 function fortGateOpen(){ return ST.lamps['0,9'] && ST.lamps['5,0'] || PAST_FORT.test(ST.phase); }
 // ---- 章ごとの 台詞（人に byPhase を 持たせると、物語の 進みで 台詞が 変わる）----
@@ -1540,7 +1543,7 @@ const DUNS={
 "#.#.....#.......#...#...#",
 "#...#########.#.#.#####.#",
 "#####.........#...#.....#",
-"#########################"], enc:'pass', bg:0x9ab0c8, fog:[0x9ab0c8,9,26], floor:0x9a8468, wall:0x8a7a68, wallH:1.8, look:'rock'},
+"#########################"], enc:'pass', bg:0x9ab0c8, fog:[0x9ab0c8,9,26], floor:0x9a8468, wall:0x8a7a68, wallH:1.15, look:'rock'},
  ruins:{name:'森の 遺跡', rows:[
 "###################",
 "#.......#Z#.......#",
@@ -1556,7 +1559,7 @@ const DUNS={
 "#.#M....#.#....M#.#",
 "#.#####.#.#.#####.#",
 "#.........#.......#",
-"#########S#########"], enc:'ruins', bg:0x0e1a16, fog:[0x0e1a16,6,18], floor:0x7a8a80, wall:0x6a7a70, wallH:2.2, look:'fort'},
+"#########S#########"], enc:'ruins', bg:0x0e1a16, fog:[0x0e1a16,8,22], floor:0x7a8a80, wall:0x6a7a70, wallH:1.25, look:'fort'},
 };
 let DUN_NOW='pass';
 function buildDun(d){ S.background=new THREE.Color(d.bg); S.fog=new THREE.Fog(d.fog[0],d.fog[1],d.fog[2]);

@@ -91,6 +91,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   await E(()=>enterCastle('velna')); await talk('ヴェルナ王'); await flush(); await W(300); T('第2章 完', await E(()=>ST.phase==='c2_end'));
   T('仲間も 経験値を もらう', await E(()=>{ const a=STATS.lidia.exp; gainExp(5); return STATS.lidia.exp===a+5; }));
   T('レベルが 上がると HPと MPが 全回復', await E(()=>{ const m=STATS.elt; m.hp=1; m.mp=0; m.exp=0; gainExp(expNeed(m.lv)); return m.hp===m.max && m.mp===m.maxmp; }));
+  T('砦の 灯りに 近づくと 知らせが 出る', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); ST.lamps={}; ST.lampSeen={}; ST.phase='c1_fort'; enterFort(false); }); await W(900); await flush(); await E(()=>{ hero.x=2.5; hero.z=9.5; hero.ang=-Math.PI/2; resetTrail(); }); await pg.keyboard.down('ArrowLeft'); await W(400); await pg.keyboard.up('ArrowLeft'); await W(200); const ok=await E(()=>!!msgQ && /灯りの 台/.test(msgEl.textContent)); await flush(); await E(()=>pressA()); await W(100); await flush(); return ok && await E(()=>!!ST.lamps['0,9']); })());
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
