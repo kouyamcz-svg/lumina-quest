@@ -93,6 +93,8 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('レベルが 上がると HPと MPが 全回復', await E(()=>{ const m=STATS.elt; m.hp=1; m.mp=0; m.exp=0; gainExp(expNeed(m.lv)); return m.hp===m.max && m.mp===m.maxmp; }));
   T('砦の 灯りに 近づくと 知らせが 出る', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); ST.lamps={}; ST.lampSeen={}; ST.phase='c1_fort'; enterFort(false); }); await W(900); await flush(); await E(()=>{ hero.x=2.5; hero.z=9.5; hero.ang=-Math.PI/2; resetTrail(); }); await pg.keyboard.down('ArrowLeft'); await W(400); await pg.keyboard.up('ArrowLeft'); await W(200); const ok=await E(()=>!!msgQ && /灯りの 台/.test(msgEl.textContent)); await flush(); await E(()=>pressA()); await W(100); await flush(); return ok && await E(()=>!!ST.lamps['0,9']); })());
   T('町の 人が 外へ 出ても 残らない（砦の 壁の 門番）', await (async()=>{ await flush(); return E(()=>{ if(BT) endBattle(); ST.phase='c1_road'; enterTown([12,20.2],'cap'); const ms=cur.npcs.map(n=>n.p.m); enterWorld([12.5,25.45]); enterFort(false); return ms.length>0 && ms.every(m=>!S.children.includes(m)); }); })());
+  T('戦闘で ダメージの 数字が 出る（Ⅳと 同じ）', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); startBattle([FOES.nousagi]); }); await W(1500); await E(()=>{ BT.foes[0].hp-=5; }); await W(120);
+    const ok=await E(()=>[...document.querySelectorAll('.bpop')].some(e=>e.textContent==='5')); await E(()=>{ if(BT) endBattle(); }); await W(100); return ok && await E(()=>document.querySelectorAll('.bpop').length===0); })());
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });

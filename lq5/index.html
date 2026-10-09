@@ -34,6 +34,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #bparty .pm.down{color:#e05050}
 #bparty .st{margin-left:4px;font-size:10px;color:#ffb060}
 #bparty .pm.hit{animation:hit .3s}
+.bpop{position:absolute;transform:translate(-50%,-50%);font-weight:bold;pointer-events:none;white-space:nowrap;z-index:5;-webkit-text-stroke:0;text-shadow:0 0 3px #0c0e16,2px 0 0 #0c0e16,-2px 0 0 #0c0e16,0 2px 0 #0c0e16,0 -2px 0 #0c0e16,2px 2px 0 #0c0e16,-2px -2px 0 #0c0e16,2px -2px 0 #0c0e16,-2px 2px 0 #0c0e16}
 @keyframes hit{0%{transform:translateY(0)}30%{transform:translateY(5px)}60%{transform:translateY(-3px)}100%{transform:translateY(0)}}
 #bmenu{position:absolute;left:6px;bottom:84px;width:44%;border:2px solid var(--line);background:rgba(10,8,18,.92);border-radius:6px;padding:8px 10px;font-size:16px;line-height:1.9}
 #bmenu .on{color:var(--gold)}
@@ -944,7 +945,7 @@ function backToMenu(){ return ()=>{ BT.guard=false;
   // ★全滅：前は 体力を 戻すだけで 選ぶ欄に 戻らず、操作 できなく なった。Ⅳと 同じく 町へ 戻され、所持金が 半分に なる
   if(BT.party.every(m=>m.hp<=0)){ bsay('エルトたちは 全滅した……'); se('lose'); BT.steps.push(()=>{ wipeOut(); return 99; }); return 2.0; }
   BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; }; }
-function wipeOut(){ PARTY.forEach(k=>{ STATS[k].status=null; }); BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display='';
+function wipeOut(){ PARTY.forEach(k=>{ STATS[k].status=null; }); clearPops(); BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display='';
   BAG.gold=Math.floor(BAG.gold/2); PARTY.forEach(k=>{ STATS[k].hp=STATS[k].max; STATS[k].mp=STATS[k].maxmp||STATS[k].mp; });
   const inCh1=/^c1_/.test(ST.phase) && ST.phase!=='c1_castle', inV=/^c2_(capital|inn|tower|ruins|back)$/.test(ST.phase), inD=/^c2_(dolm|pass|road)$/.test(ST.phase);
   go(()=>{ if(inV) enterTown([3.5,18.4],'vcap'); else if(inD) enterTown([11.5,15.5],'velna'); else if(inCh1) enterTown([3.5,18.4],'cap'); else enterTown([12,6],'rue'); hero.ang=0;
@@ -996,7 +997,7 @@ function foeAct(f){ let t=null, line='';
    ()=>{ if(f.dead||!t||f.status==='sleep') return 0; let d=f.def.atk[0]+Math.floor(Math.random()*(f.def.atk[1]-f.def.atk[0]+1)); let head='';
          if(f.atkDown) d=Math.ceil(d*.7);
          if(f.kind==='big'){ d=Math.round(d*1.6); f.lunge=1; BT.flash=1; BT.quake=.5; head=f.name+'の '+f.def.bigName+'！ '; }
-         else if(f.kind==='crit'){ d=Math.round(d*2); f.lunge=1; BT.flash=1; BT.quake=.45; setFoeFrame(f,'atk'); head='つうこんの いちげき！ '; }
+         else if(f.kind==='crit'){ t.popCrit=1; d=Math.round(d*2); f.lunge=1; BT.flash=1; BT.quake=.45; setFoeFrame(f,'atk'); head='つうこんの いちげき！ '; }
          else { setFoeFrame(f,'atk'); f.hop=1; BT.flash=.45; BT.quake=.15; d=Math.max(1,d-Math.floor((t.defT||0)/4)); head=f.name+'の '+f.def.verb+'！ '; }
          if(BT.guard) d=Math.ceil(d/2); se('ehit');
          t.hp=Math.max(0,t.hp-d); BT.hitIdx=BT.party.indexOf(t);
@@ -1015,7 +1016,7 @@ function winSteps(){ return [
 function killCheck(f){ if(f.hp<=0 && !f.dead){ BT.steps.unshift(()=>{ f.dead=true; f.ex=1; se('defeat'); bsay(f.name+'を たおした！'); return 1.0; }); } }
 function hitFoe(m,f,mul,label){ return ()=>{ if(!alive().length) return 0; if(f.dead) f=alive()[0];
   let d=m.atk+Math.floor(Math.random()*4); if(f.defDown) d=Math.round(d*1.3); d=Math.round(d*(mul||1));
-  const crit=Math.random()<1/32; if(crit){ d=Math.round((m.atk+3)*2*(mul||1)); BT.flash=.8; }   // ★味方の 会心の 一撃（1/32、2倍）
+  const crit=Math.random()<1/32; if(crit){ d=Math.round((m.atk+3)*2*(mul||1)); BT.flash=.8; f.popCrit=1; }   // ★味方の 会心の 一撃（1/32、2倍）
   f.hp=Math.max(0,f.hp-d); f.hurt=.35; se('hit'); if(f.status==='sleep' && Math.random()<.5) f.status=null;
   bsay((crit?'会心の 一撃！ ':'')+m.name+'の '+(label||'こうげき')+'！ '+f.name+'に '+d+'の ダメージ！'); killCheck(f); return .75; }; }
 // ★1人ぶんの 行動（エルトは 選んだ もの、仲間は 作戦で 自動）
@@ -1037,8 +1038,8 @@ function actOf(m,act){ return ()=>{ if(m.hp<=0 || !alive().length) return 0;
   if(sk.type==='defdown'){ const f=a.target||al[0]; f.defDown=true; bsay(m.name+'は '+sk.name+'を 唱えた！ '+f.name+'の 守りが 下がった！'); return .9; }
   if(sk.type==='atkdown'){ const f=a.target||al[0]; f.atkDown=true; bsay(m.name+'は '+sk.name+'を 唱えた！ '+f.name+'の 攻撃が 弱まった！'); return .9; }
   if(sk.type==='double'){ const f=a.target&&!a.target.dead?a.target:al[0]; for(let i=0;i<(sk.hits||2);i++) BT.steps.unshift(hitFoe(m,f,.8,sk.name)); return 0; }
-  if(sk.type==='gamble'){ const f=a.target&&!a.target.dead?a.target:al[0]; if(Math.random()>=sk.hit){ bsay(m.name+'の '+sk.name+'！ しかし ミス！ '+f.name+'は ひらりと かわした！'); return .9; }
-    const d=Math.round((m.atk+3)*2.4); f.hp=Math.max(0,f.hp-d); f.hurt=.45; BT.flash=1; BT.quake=.5; se('hit'); bsay(m.name+'の '+sk.name+'！ 会心の 一撃！ '+f.name+'に '+d+'の ダメージ！'); killCheck(f); drawBattleUI(); return 1.0; }
+  if(sk.type==='gamble'){ const f=a.target&&!a.target.dead?a.target:al[0]; if(Math.random()>=sk.hit){ popAt({foe:f},'ミス','miss'); bsay(m.name+'の '+sk.name+'！ しかし ミス！ '+f.name+'は ひらりと かわした！'); return .9; }
+    const d=Math.round((m.atk+3)*2.4); f.popCrit=1; f.hp=Math.max(0,f.hp-d); f.hurt=.45; BT.flash=1; BT.quake=.5; se('hit'); bsay(m.name+'の '+sk.name+'！ 会心の 一撃！ '+f.name+'に '+d+'の ダメージ！'); killCheck(f); drawBattleUI(); return 1.0; }
   if(sk.type==='atkdef'){ const f=a.target&&!a.target.dead?a.target:al[0]; BT.steps.unshift(()=>{ if(!f.dead){ f.defDown=true; bsay(f.name+'の 守りが 下がった！'); return .7; } return 0; }); BT.steps.unshift(hitFoe(m,f,1,sk.name)); return 0; }
   if(sk.type==='steal'){ const f=a.target||al[0]; if(Math.random()<.4){ BAG.herbs++; bsay(m.name+'は '+f.name+'から 薬草を 盗んだ！'); } else bsay(m.name+'は 盗みに 失敗した！'); return .9; }
   return 0; }; }
@@ -1068,7 +1069,7 @@ function skillPick(){ const sk=BT.sks[BT.ssel]; if(BT.party[0].mp<sk.mp){ bsay('
   BT.phase='act'; drawBattleUI(); queue(partyTurn({kind:'skill',sk,target:alive()[0]}),0); }
 function targetPick(){ const f=BT.foes[BT.tsel]; BT.phase='act'; drawBattleUI(); se('ok'); queue(partyTurn(Object.assign({},BT.pend||{kind:'atk'},{target:f})),0); }
 function endBattle(){ const win=BT&&BT.foes.every(f=>f.dead), cb=BT&&BT.onWin;
-  if(BT) BT.party.forEach(m=>{ m.status=null; m.stTurns=0; }); /* ★状態異常は 戦闘が 終わると すべて 治る（毒も。指示） */ BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display=''; if(cur.kind==='world'){ cv.style.display='none'; c2.style.display='block'; resize2(); } else { cv.style.display='block'; c2.style.display='none'; resize(); }
+  if(BT) BT.party.forEach(m=>{ m.status=null; m.stTurns=0; }); /* ★状態異常は 戦闘が 終わると すべて 治る（毒も。指示） */ clearPops(); BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display=''; if(cur.kind==='world'){ cv.style.display='none'; c2.style.display='block'; resize2(); } else { cv.style.display='block'; c2.style.display='none'; resize(); }
   if(win && cb) cb(); }
 let lastDirY=0, lastDirX=0;
 function battleInput(iy,ix){ if(!BT) return;
@@ -1078,6 +1079,25 @@ function battleInput(iy,ix){ if(!BT) return;
   lastDirY=iy; lastDirX=ix; }
 const EZ=-2.0;   // ★魔物の 立つ 位置（奥へ。0 → -1.1 → -2.0。指示で 少しずつ 下げた）
 const _v=new THREE.Vector3();
+// ★ダメージの 数字（Ⅳと 同じ：白＝ダメージ、金で 大きい＝会心／痛恨、緑＝回復、赤みの 白＝味方が 受けた ダメージ、灰＝ミス）
+//   HPの 増減を 毎こま 見て 出す ので、攻撃・呪文・毒・道具 どれでも 出る
+let bPops=[];
+const POP_COL={dmg:'#ffffff', crit:'#ffd257', heal:'#7ef0a0', miss:'#b8c0cc', pdmg:'#ff8a7a'};
+function popXY(who){ const br=btEl.getBoundingClientRect();
+  if(who.foe){ const f=who.foe, r=cv.getBoundingClientRect(); _v.set(f.mesh.position.x, f.mesh.position.y+f.mesh.scale.y*.7, f.mesh.position.z).project(batCam);
+    return [r.left-br.left+(_v.x+1)/2*r.width, r.top-br.top+(1-_v.y)/2*r.height]; }
+  const el=bparty.children[who.idx]; if(!el) return [br.width/2, br.height*.2]; const r=el.getBoundingClientRect(); return [r.left-br.left+r.width/2, r.bottom-br.top+18]; }
+function popAt(who,text,kind){ const [x,y]=popXY(who); const e=document.createElement('div'); e.className='bpop'; e.textContent=text;
+  const base=Math.max(15,Math.round(btEl.clientHeight*.042)); e.style.color=POP_COL[kind]||'#fff'; btEl.appendChild(e);
+  bPops.push({e,x,y,base:base*(kind==='crit'?1.5:1),t:0,life:kind==='crit'?1.0:.8,vx:(Math.random()-.5)*26,vy:-(kind==='crit'?150:118)}); if(bPops.length>24) bPops.shift().e.remove(); }
+function popTick(dt){
+  BT.foes.forEach(f=>{ if(f._php===undefined) f._php=f.hp; if(f.hp!==f._php){ const d=f.hp-f._php; popAt({foe:f}, String(Math.abs(d)), d>0?'heal':(f.popCrit?'crit':'dmg')); f._php=f.hp; } f.popCrit=0; });
+  BT.party.forEach((m,i)=>{ if(m._php===undefined||!BT.popInit) m._php=m.hp; if(m.hp!==m._php){ const d=m.hp-m._php; popAt({idx:i}, String(Math.abs(d)), d>0?'heal':(m.popCrit?'crit':'pdmg')); m._php=m.hp; } m.popCrit=0; }); BT.popInit=1;
+  for(let i=bPops.length-1;i>=0;i--){ const p=bPops[i]; p.t+=dt; if(p.t>=p.life){ p.e.remove(); bPops.splice(i,1); continue; }
+    const k=p.t/p.life, y=p.y+p.vy*p.t+210*p.t*p.t, x=p.x+p.vx*p.t, size=p.base*(1+Math.max(0,.35-k*1.6));
+    p.e.style.left=x+'px'; p.e.style.top=y+'px'; p.e.style.fontSize=Math.round(size)+'px'; p.e.style.opacity=k<.75?1:1-(k-.75)/.25; } }
+function clearPops(){ bPops.forEach(p=>p.e.remove()); bPops=[]; }
+
 function battleTick(dt,now){
   if(BT.steps.length){ BT.st-=dt*(SND.speed||1); while(BT && BT.st<=0 && BT.steps.length){ const f=BT.steps.shift(); BT.st=f(); } }
   if(!BT){ return; }
@@ -1099,6 +1119,7 @@ function battleTick(dt,now){
     // ★倒した とき：速く 点滅して から 消える
     if(f.dead){ f.ex=Math.max(0,f.ex-dt*1.25); f.mesh.visible = f.ex>0.08 && Math.floor(now/70)%2===0; f.sh.visible = f.ex>0.08; }
   });
+  popTick(dt);
   flashEl.style.opacity=BT.flash*.7;
   (BG.fortFires||[]).concat(BG.burnFires||[]).forEach(m=>{ m.scale.y=1+Math.sin(now/90+m.userData.ph)*.18; });
   const q=BT.quake>0?Math.sin(now/18)*.06:0;
