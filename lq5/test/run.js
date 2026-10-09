@@ -95,6 +95,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('町の 人が 外へ 出ても 残らない（砦の 壁の 門番）', await (async()=>{ await flush(); return E(()=>{ if(BT) endBattle(); ST.phase='c1_road'; enterTown([12,20.2],'cap'); const ms=cur.npcs.map(n=>n.p.m); enterWorld([12.5,25.45]); enterFort(false); return ms.length>0 && ms.every(m=>!S.children.includes(m)); }); })());
   T('戦闘で ダメージの 数字が 出る（Ⅳと 同じ）', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); startBattle([FOES.nousagi]); }); await W(1500); await E(()=>{ BT.foes[0].hp-=5; }); await W(120);
     const ok=await E(()=>[...document.querySelectorAll('.bpop')].some(e=>e.textContent==='5')); await E(()=>{ if(BT) endBattle(); }); await W(100); return ok && await E(()=>document.querySelectorAll('.bpop').length===0); })());
+  T('攻撃の 種類ごとに 当たった 見た目が 違う', await E(()=>{ const k=['w_elt','w_dolgan','tsuyogiri','volt','hono','raigeki','kabutowari','daimajin','e_hit','heal']; return k.every(x=>FXS_DEF[x]) && new Set(k.map(x=>JSON.stringify(FXS_DEF[x]))).size===k.length; }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
