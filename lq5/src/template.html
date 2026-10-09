@@ -243,15 +243,39 @@ function fountain(cx,cz){
   const dm=L(null,0xcfeaff,{transparent:true,opacity:.85});
   for(let i=0;i<14;i++){ const d=add(new THREE.SphereGeometry(.05,5,4),dm,cx,1.6,cz); d.userData={a:i/14*Math.PI*2, t:i/14}; drops.push(d); }
 }
+// ★お店と 教会の 看板（外から 一目で わかる ように。指示）
+const SIGN_TEX={};
+function signTex(kind){ if(SIGN_TEX[kind]) return SIGN_TEX[kind]; const c=document.createElement('canvas'); c.width=64; c.height=32; const g=c.getContext('2d');
+  const P=(x,y,w,h,col)=>{ g.fillStyle=col; g.fillRect(x,y,w,h); };
+  P(0,0,64,32,'#4a2e18'); P(2,2,60,28, kind==='church'?'#f4f0e4':'#d8b878');
+  if(kind==='weapon'){ // 剣と 盾
+    P(14,5,4,18,'#e8eef4'); P(15,5,2,18,'#ffffff'); P(10,21,12,3,'#c8a030'); P(14,24,4,4,'#6a4024');   // 剣
+    P(36,6,18,14,'#3a5aa8'); P(38,20,14,4,'#3a5aa8'); P(41,24,8,3,'#3a5aa8'); P(44,6,2,21,'#d8b040'); P(36,12,18,2,'#d8b040'); }   // 盾
+  if(kind==='item'){ // 薬の びん
+    P(28,4,8,4,'#8a5a32'); P(29,8,6,4,'#cfe8f0'); P(23,12,18,15,'#cfe8f0'); P(25,16,14,10,'#3ab060'); P(27,17,4,3,'#a0f0b0'); P(23,27,18,1,'#7a9aa8'); }
+  if(kind==='church'){ P(29,3,6,26,'#d8b040'); P(20,10,24,6,'#d8b040'); }   // 十字
+  const t=new THREE.CanvasTexture(c); t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter; return SIGN_TEX[kind]=t; }
+function houseKind(x,y,w,h){ if(!(TOWN_NOW==='rue'||TOWN_NOW==='cap')) return null;
+  const di=TDOORS().findIndex(([dx,dy])=>dx>=x&&dx<x+w&&dy===y+h); const r=di>=0?TROOMS()[di]:null; if(!r) return null;
+  if(/鍛冶屋|武器/.test(r.name)) return 'weapon'; if(/道具屋/.test(r.name)) return 'item'; if(/教会/.test(r.name)) return 'church'; return null; }
 function house(x,y,w,h,idx){
-  const cx=x+w/2, cz=y+h/2, wallH=1.7;
+  const kind=houseKind(x,y,w,h);
+  const cx=x+w/2, cz=y+h/2, wallH=kind==='church'?2.2:1.7;
   add(box,L(T.found),cx,.12,cz,w+.08,.24,h+.08);
-  const wm=L(T.plaster); wm.map=T.plaster.clone(); wm.map.needsUpdate=true; wm.map.repeat.set(w/2,1);
+  const wm=L(T.plaster, kind==='church'?0xffffff:kind==='weapon'?0xb8b4ac:0xffffff); wm.map=T.plaster.clone(); wm.map.needsUpdate=true; wm.map.repeat.set(w/2,1);
   add(box,wm,cx,.24+wallH/2,cz,w,wallH,h);
-  const roofs=[T.roofR,T.roofB,T.roofG]; const rt=roofs[idx%3];
-  const roof=new THREE.Mesh(roofGeo(w+.5,h+.6,1.05),L(rt,0xffffff,{side:THREE.DoubleSide})); roof.position.set(cx,.24+wallH,cz); G.add(roof);
+  const roofs=[T.roofR,T.roofB,T.roofG]; const rt=kind==='church'?T.roofB:kind==='item'?T.roofG:kind==='weapon'?T.roofR:roofs[idx%3];
+  const roof=new THREE.Mesh(roofGeo(w+.5,h+.6,1.05),L(kind==='weapon'?T.roofB:rt,kind==='weapon'?0x585a62:0xffffff,{side:THREE.DoubleSide}));   /* 武器屋は 鉄色の 屋根 */ roof.position.set(cx,.24+wallH,cz); G.add(roof);
   add(box,L(null,0x5a3a22),cx,.24+wallH+1.06,cz,w+.55,.08,.12);                          // 棟
-  add(box,L(T.found),cx+w/2-.5,.24+wallH+.9,cz-.2,.32,.9,.32);                             // 煙突
+  if(kind!=='church') add(box,L(T.found),cx+w/2-.5,.24+wallH+.9,cz-.2,.32,.9,.32);       // 煙突
+  if(kind==='weapon'){ const sm=add(new THREE.SphereGeometry(.22,8,6),L(null,0xff7a20,{emissive:0xff5010}),cx+w/2-.5,.24+wallH+1.42,cz-.2); }   // 鍛冶の 炉の 火
+  if(kind==='church'){ // ★鐘の 塔と 十字、丸い 色ガラスの 窓
+    const tw=L(T.plaster,0xffffff), tx=cx, tz=cz+.1, base=.24+wallH;
+    add(box,tw,tx,base+.9,tz,.9,1.8,.9); add(new THREE.PlaneGeometry(.4,.5),L(null,0x2a2030),tx,base+1.2,tz+.452);
+    add(new THREE.ConeGeometry(.75,1.4,4),L(null,0x3a5aa8),tx,base+2.5,tz).rotation.y=Math.PI/4;
+    add(box,L(null,0xe0b840,{emissive:0x403010}),tx,base+3.55,tz,.1,.8,.1); add(box,L(null,0xe0b840,{emissive:0x403010}),tx,base+3.65,tz,.5,.1,.1);
+    add(new THREE.CircleGeometry(.3,16),L(null,0x2a4a9a),cx,1.9,y+h+.012); add(new THREE.CircleGeometry(.22,16),L(null,0xd84a5a,{emissive:0x301010}),cx,1.9,y+h+.014);
+    add(box,L(null,0xe0b840),cx,1.9,y+h+.016,.06,.4,.01); add(box,L(null,0xe0b840),cx,1.9,y+h+.016,.4,.06,.01); }
   // 窓（正面＝南面に 2つ、扉の 位置を よけて）
   const dX = TDOORS().find(([dx,dy])=>dx>=x&&dx<x+w&&dy===y+h);
   for(let i=0;i<w;i++){ const wx=x+i+.5; if(dX && Math.abs(wx-(dX[0]+.5))<.6) continue;
@@ -265,6 +289,12 @@ function house(x,y,w,h,idx){
     doorPiv[TDOORS().findIndex(([a,b])=>a===dX[0]&&b===dX[1])]=piv;
     add(box,L(null,0x4a2e18),dx,1.33,dz+.03,.8,.1,.08);                                   // 扉の 上の 梁
     add(box,L(T.found),dx,.06,dz+.22,.8,.12,.36);                                         // 踏み石
+    if(kind){ // ★看板：扉の 上の 壁と、扉の 横の 立て看板（真上寄りの カメラから 見える よう 上を 向ける）
+      const sx=dx+.95, sz=dz+.45; add(box,L(null,0x5a3a22),sx,.45,sz,.07,.9,.07);
+      const sg=add(new THREE.PlaneGeometry(1.1,.55),L(signTex(kind),0xffffff,{side:THREE.DoubleSide}),sx,1.0,sz+.02); sg.rotation.x=-.8;
+      if(kind==='weapon'){ [[-.25],[0],[.25]].forEach(([o])=>{ add(box,L(null,0xd8dee6),dx-.95+o,.45,dz+.3,.05,.7,.05); add(box,L(null,0x6a4024),dx-.95+o,.12,dz+.3,.12,.06,.12); }); add(box,L(null,0x6a4024),dx-.95,.62,dz+.3,.7,.06,.06); }   // 剣立て
+      if(kind==='item'){ add(new THREE.CylinderGeometry(.2,.22,.45,10),L(null,0x8a5a32),dx-.9,.22,dz+.32); add(new THREE.CylinderGeometry(.18,.2,.4,10),L(null,0x7a4a2a),dx-1.3,.2,dz+.32); add(box,L(null,0xa07040),dx-1.1,.18,dz+.72,.36,.36,.36); }   // たる と 木箱
+    }
   }
 }
 function buildTown(){
@@ -1164,7 +1194,7 @@ function closeMenu(){ MENU=null; drawMenu(); }
 function goalText(){ return ({morning:'村の 北の 入口に いる ガイルに 話す', field:'北の 畑を 見回り、外れの 古い 倉を 調べる', raid:'南の 出口から 村へ 戻る',
   burn:'逃げ遅れた 村の 人を 助ける（'+Object.keys(ST.rescued).length+'／3）。そして 広場の 部隊長', after:'広場の ガイルの もとへ', road:'夜の 街道を 北東へ。王都 アルディアの 王に 会う', end:'（序章 完）', c1_castle:'王の 話を 聞く', c1_road:'使者を 連れて、街道を 東の 国境の 砦へ', c1_fort:'砦の 奥へ 進む（灯りを ふたつ ともすと 鉄格子が 開く）', c1_east:'砦を 抜け、東の ヴェルナの 鉱山の 町 ドルムへ', c1_town:'ドルムの 人たちと 話し、町の 長に 会う', c1_end:'（第1章 完）'})[ST.phase]; }
 function openFieldMenu(){ if(msgQ||BT||fading||ST.phase==='end') return;
-  const items=['強さ','呪文','道具','装備','地図','作戦'].concat(RESERVE.length?['入れ替え']:[]).concat(['クエスト','音','セーブ','とじる']);
+  const items=['強さ','呪文','道具','装備','地図','作戦'].concat(RESERVE.length?['入れ替え']:[]).concat(['クエスト','頼まれごと','音','セーブ','とじる']);
   menu(items,'メニュー',(sel)=>{ const pick=items[sel];
     if(pick==='強さ'){ const m=STATS.elt; closeMenu(); say([m.name+'　Lv'+m.lv+'　見習い兵士','HP '+m.hp+' / '+m.max+'　　MP '+m.mp+' / '+m.maxmp,'攻撃力 '+m.atk+'　守備力 '+m.defT+'　素早さ '+m.agi+(m.status?'　状態：'+STNAME[m.status]:''),'次の レベルまで あと '+(expNeed(m.lv)-m.exp)+'　所持金 '+BAG.gold+'G'],openFieldMenu); }
     else if(pick==='呪文'){ const sks=skillsOf('elt'); if(!sks.length){ closeMenu(); say(['エルトは まだ 呪文を 覚えて いない。'],openFieldMenu); return; }
@@ -1178,7 +1208,8 @@ function openFieldMenu(){ if(msgQ||BT||fading||ST.phase==='end') return;
     else if(pick==='地図'){ openMap(); }
     else if(pick==='作戦'){ openTactics(); }
     else if(pick==='音'){ openSound(); }
-    else if(pick==='クエスト'){ closeMenu(); say(questList(),openFieldMenu); }
+    else if(pick==='クエスト'){ closeMenu(); say(['【目的】','　'+goalText()],openFieldMenu); }
+    else if(pick==='頼まれごと'){ closeMenu(); say(requestList(),openFieldMenu); }   /* ★頼まれごとの 一覧（指示） */
     else if(pick==='入れ替え'){ openSwap(); }
     else if(pick==='セーブ'){ closeMenu(); const ok=saveGame(); say([ok?'ぼうけんの きろくを つけた。':'きろくに しっぱいした…'],openFieldMenu); }
     else closeMenu(); }, ()=>closeMenu()); }
@@ -1398,6 +1429,10 @@ function questTalk(id,lines){ const q=QUESTS[id], st=ST.q[id];
   const done = q.foe ? ((ST.kill||{})[q.foe]||0)-((ST.qbase||{})[id]||0)>=q.need : (BAG[q.item]>0);
   if(!done) return say([q.from+'「'+q.text+'……頼んだよ」']);
   if(q.item) BAG[q.item]--; BAG.gold+=q.reward.gold; ST.q[id]='済み'; se('chest'); say([q.from+'「ありがとう！ これは お礼だ」','＊ '+q.reward.gold+'ゴールドを 受け取った ＊']); }
+function requestList(){ const ids=Object.keys(ST.q||{}); if(!ids.length) return ['頼まれごとは まだ ない。','（町の 人の 中に、困って いる 人が いる かも しれない）'];
+  const out=[]; ids.forEach(id=>{ const q=QUESTS[id], done=ST.q[id]==='済み'; const n=q.foe?Math.min(q.need,((ST.kill||{})[q.foe]||0)-((ST.qbase||{})[id]||0)):null;
+    const ready=!done && (q.foe ? n>=q.need : BAG[q.item]>0);
+    out.push((done?'【済み】':ready?'【報告へ】':'【受けた】')+q.name, '　頼んだ人：'+q.from+'　内容：'+q.text+(n!==null&&!done?'（'+n+'／'+q.need+'）':'')+'　お礼：'+q.reward.gold+'G'); }); return out; }
 function questList(){ const out=['【目的】','　'+goalText()]; const ids=Object.keys(ST.q||{}); if(ids.length){ out.push('【頼みごと】'); ids.forEach(id=>{ const q=QUESTS[id]; const n=q.foe?Math.min(q.need,((ST.kill||{})[q.foe]||0)-((ST.qbase||{})[id]||0)):null;
   out.push('　'+(ST.q[id]==='済み'?'（済）':'')+q.name+'：'+q.text+(n!==null&&ST.q[id]!=='済み'?'（'+n+'／'+q.need+'）':'')); }); } return out; }
 // ---- 交易（町ごとに 値段が 違う 品）----
