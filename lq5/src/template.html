@@ -139,7 +139,7 @@ const CAP_ROOMS=[
  {name:'道具屋', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.TTT...W","W.......W","Wp.....pW","WWWWXWWWW"],
   npc:{x:4.5,y:2.5,spr:'okami',name:'道具屋の 主人',talk:()=>say(['主人「薬草は 旅の おともだよ」'],()=>openShop('tools','道具屋（所持金 '+BAG.gold+'G）'))}},
  {name:'教会', rows:["WWWWWWWWW","W...A...W","W.......W","W.QQ.QQ.W","W.......W","W.QQ.QQ.W","WWWWXWWWW"],
-  npc:{x:4.5,y:2.3,spr:'elder',name:'神父（仮の 絵）',talk:()=>openChurch()}},
+  npc:{x:4.5,y:2.3,spr:'priest',name:'神父',talk:()=>openChurch()}},
  {name:'民家', rows:["WWWWWWWWW","Wb.f...sW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"],
   npc:{x:6.5,y:3.5,spr:'girl',name:'王都の 娘',lines:['娘「ヴェルナとの 和平が かなえば いいのに」']}},
  {name:'民家', rows:["WWWWWWWWW","Wbb..f.sW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"],
@@ -1189,10 +1189,10 @@ function enterCastle(){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visib
   cur.npcs.push(...[
     {x:10.2,y:4.2,spr:'asoldier',name:'近衛兵',lines:['近衛兵「王の 御前だ。礼を 欠かぬ ように」']},
     {x:14.8,y:4.2,spr:'asoldier',name:'近衛兵',byPhase:{road:['近衛兵「国境の 村が 焼かれたと？ ……王が お聞きに なる」'],'*':['近衛兵「陛下は、戦を 望んで おられない」']}},
-    {x:3.5,y:6.5,spr:'elder',name:'書庫番',lines:['書庫番「この 書庫には、アルディアと ヴェルナの 古い 約束の 記録が 残って おる」','書庫番「昔は 二つの 国の 間に、麦と 鉄の 行き来が あったのじゃ」']},
-    {x:21.5,y:6.5,spr:'elder',name:'大臣',byPhase:{c1:['大臣「使者どのを 頼むぞ。和平が 成れば、国境の 村も 建て直せる」'],'*':['大臣「ヴェルナ王は、穏やかな 方だった はずだが……」']}},
+    {x:3.5,y:6.5,spr:'librarian',name:'書庫番',lines:['書庫番「この 書庫には、アルディアと ヴェルナの 古い 約束の 記録が 残って おる」','書庫番「昔は 二つの 国の 間に、麦と 鉄の 行き来が あったのじゃ」']},
+    {x:21.5,y:6.5,spr:'minister',name:'大臣',byPhase:{c1:['大臣「使者どのを 頼むぞ。和平が 成れば、国境の 村も 建て直せる」'],'*':['大臣「ヴェルナ王は、穏やかな 方だった はずだが……」']}},
     {x:3.5,y:13.2,spr:'asoldier',name:'城の 兵',lines:['兵「国境の 砦は、ヴェルナとの 境の 山並みに ある。王都から 街道を 東へ まっすぐだ」']},
-    {x:21.5,y:12.2,spr:'girl',name:'城の 給仕',lines:['給仕「お腹が すいたら いつでも どうぞ。……と 言いたい ところだけど、料理番は いま 出かけて いるの」']},
+    {x:21.5,y:12.2,spr:'maid',name:'城の 給仕',lines:['給仕「お腹が すいたら いつでも どうぞ。……と 言いたい ところだけど、料理番は いま 出かけて いるの」']},
     {x:10.2,y:19.4,spr:'asoldier',name:'城の 門番',lines:['門番「ここは アルディア城。北の 奥が 謁見の 間だ」']},
   ].map(n=>({...n,ang:0,p:person(n.spr)})));
   hero.x=12.5; hero.z=CASTLE.length-1.6; hero.ang=Math.PI; resetTrail();
