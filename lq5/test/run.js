@@ -102,6 +102,9 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('ドルムは 鉱山の 町の 並び（ルーエと 別）で、家に 入れる', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); ST.phase='c2_dolm'; enterTown([11.5,18.2],'velna'); }); await W(400); const ok1=await E(()=>cur.rows===DOLM && DOLM!==TOWN && DOLM.join('').includes('M') && DOLM.join('').includes('K'));
     await E(()=>{ if(msgQ) closeMsg(); hero.x=19.5; hero.z=10.9; hero.ang=Math.PI; resetTrail(); }); await pg.keyboard.down('ArrowUp'); await W(500); await pg.keyboard.up('ArrowUp'); await W(1500); const ok2=await E(()=>cur.kind==='room' && TROOMS()[cur.room].name==='鍛冶屋');
     await E(()=>{ busyDoor=0; enterTown([11.5,18.2],'velna'); }); await W(300); return ok1&&ok2; })());
+  T('鍛冶屋で いまの 装備が 出る', await E(()=>{ if(BT) endBattle(); if(msgQ) closeMsg(); openShop('smith','鍛冶屋'); const el=document.getElementById('fequip'); const ok=el.style.display==='block' && el.textContent.includes(EQUIP.elt.weapon.name); closeMenu(); return ok && el.style.display==='none'; }));
+  T('メニューの 字が 2段に ならない', await E(()=>{ const tests=[()=>openFieldMenu(),()=>openSound(),()=>openTactics(),()=>openShop('smith','鍛冶屋'),()=>{ openShop('smith','鍛冶屋'); MENU.onPick(0); },()=>openItems()]; let ok=true;
+    tests.forEach(f=>{ if(msgQ) closeMsg(); f(); [...document.querySelectorAll('#fmenu > div:not(.mt):not(.mdesc)')].forEach(d=>{ const lh=parseFloat(getComputedStyle(d).lineHeight)||20; if(d.getBoundingClientRect().height>lh*1.5) ok=false; }); closeMenu(); }); return ok; }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });

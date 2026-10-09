@@ -46,23 +46,26 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #bmsg{position:absolute;left:6px;right:6px;bottom:6px;min-height:3.2em;border:2px solid var(--line);background:rgba(10,8,18,.92);border-radius:6px;padding:10px 12px;font-size:15px;line-height:1.6}
 #card{position:absolute;inset:0;background:#000;color:#f4efe0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:18px;opacity:0;transition:opacity 1.5s;pointer-events:none;letter-spacing:.2em}
 #card .t{font-size:30px}
-#fmenu{position:absolute;left:8px;top:52px;min-width:46%;max-width:calc(50% - 12px);box-sizing:border-box;display:none;border:2px solid var(--line);background:rgba(10,8,18,.94);border-radius:6px;padding:8px 12px;font-size:16px;line-height:1.85}
+#fmenu{position:absolute;left:8px;top:52px;min-width:40%;max-width:calc(100% - 16px);white-space:nowrap;box-sizing:border-box;display:none;border:2px solid var(--line);background:rgba(10,8,18,.94);border-radius:6px;padding:8px 12px;font-size:16px;line-height:1.85}
 #fmenu .mt{font-size:12px;color:var(--dim);border-bottom:1px solid #4a4070;margin-bottom:4px}
 #fmenu .on{color:var(--gold)}
-#fmenu .mdesc{font-size:12px;line-height:1.6;color:#d8d0f0;border-top:1px solid #4a4070;margin-top:6px;padding-top:5px}
+#fmenu .mdesc{white-space:normal;font-size:12px;line-height:1.6;color:#d8d0f0;border-top:1px solid #4a4070;margin-top:6px;padding-top:5px}
 #fmenu.wide{max-width:calc(100% - 16px)}
-#fstat{position:absolute;right:8px;top:52px;width:calc(50% - 12px);box-sizing:border-box;display:none;border:2px solid var(--line);background:rgba(10,8,18,.94);border-radius:6px;padding:6px 10px;font-size:13px;line-height:1.5}
+#fstat{position:absolute;right:8px;top:52px;width:36%;box-sizing:border-box;display:none;border:2px solid var(--line);background:rgba(10,8,18,.94);border-radius:6px;padding:6px 10px;font-size:13px;line-height:1.5}
 #fstat .pm{border-bottom:1px solid #4a4070;padding:3px 0}
 #fstat .pm:last-of-type{border-bottom:none}
 #fstat .pm.down b{color:#e05050}
 #fstat .st{margin-left:4px;font-size:11px;color:#ffb060}
+#fequip{position:absolute;left:8px;right:8px;bottom:10px;display:none;border:2px solid var(--line);background:rgba(10,8,18,.94);border-radius:6px;padding:6px 10px;font-size:12px;line-height:1.6}
+#fequip .mt{font-size:12px;color:var(--dim);border-bottom:1px solid #4a4070;margin-bottom:3px}
+#fequip table{width:100%;border-collapse:collapse}#fequip td{padding:1px 4px 1px 0;white-space:nowrap;vertical-align:top}#fequip td.n{color:var(--gold);width:1%}#fequip .k{color:var(--dim);font-size:10px;margin-right:2px}
 #fstat .g{margin-top:4px;border-top:1px solid #4a4070;padding-top:4px;color:var(--gold);text-align:right}
 #bmark{position:absolute;display:none;color:#ffe060;font-size:20px;text-shadow:0 0 3px #000;pointer-events:none}
 #hint{display:none!important;position:absolute;left:10px;bottom:10px;font-size:12px;color:var(--dim);background:rgba(18,15,28,.7);padding:3px 8px;border-radius:4px}
 </style></head><body>
 <div id="wrap">
  <div id="view"><canvas id="c"></canvas><canvas id="c2" style="display:none"></canvas><div id="place">国境の村 ルーエ</div>
-  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="flash"></div><div id="bmark">▼</div><div id="fstat"></div><div id="mapview"></div><div id="fmenu"></div><div id="card"></div>
+  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="flash"></div><div id="bmark">▼</div><div id="fstat"></div><div id="mapview"></div><div id="fmenu"></div><div id="fequip"></div><div id="card"></div>
   <div id="bt"><div id="bparty"></div><div id="bmenu"></div><div id="bfoes"></div><div id="bmsg"></div></div></div>
  <div id="pad">
   <div id="dpad"><div class="k u">▲</div><div class="k l">◀</div><div class="k r">▶</div><div class="k d">▼</div></div>
@@ -1484,10 +1487,17 @@ let MENU=null;   // {title, items, sel, onPick, onBack}
 const menuEl=document.getElementById('fmenu');
 // ★メニューを 開いて いる 間は、右に 仲間の 状態と 所持金を 出す（指示）
 const fstatEl=document.getElementById('fstat');
-function drawStat(){ if(!MENU || BT || MENU.notes){ /* ★呪文の 解説の 間は 横幅を 使う ため 隠す */ fstatEl.style.display='none'; return; } fstatEl.style.display='block';
+function drawEquipPanel(){ const el=document.getElementById('fequip'); if(!MENU||BT||!MENU.equip){ el.style.display='none'; return; } el.style.display='block';
+  const nm=it=>it?it.name:'なし'; el.innerHTML='<div class="mt">いまの 装備</div><table>'+PARTY.map(k=>{ const e=EQUIP[k]||{}, m=STATS[k]; return `<tr><td class="n">${m.name}</td><td><span class="k">武器</span>${nm(e.weapon)}</td><td><span class="k">体</span>${nm(e.armor)}</td><td><span class="k">頭</span>${nm(e.helm)}</td></tr>`; }).join('')+'</table>'; }   /* ★鍛冶屋で いまの 装備を 見せる（指示） */
+function drawStat(){ drawEquipPanel(); if(!MENU || BT || MENU.notes || MENU.wideOnly){ /* ★呪文の 解説の 間は 横幅を 使う ため 隠す */ fstatEl.style.display='none'; return; } fstatEl.style.display='block';
   fstatEl.innerHTML=PARTY.map(k=>{ const m=STATS[k]; return `<div class="pm${m.hp<=0?' down':''}"><b>${m.name}</b>　Lv ${m.lv||1}${m.status?'<span class="st">'+STNAME[m.status]+'</span>':''}<br>HP ${m.hp}／${m.max}<br>MP ${m.mp}／${m.maxmp||m.mp}</div>`; }).join('')+`<div class="g">${BAG.gold} G</div>`; }
 function drawMenu(){ drawStat(); if(!MENU){ menuEl.style.display='none'; return; } menuEl.style.display='block';
-  menuEl.innerHTML='<div class="mt">'+MENU.title+'</div>'+MENU.items.map((t,i)=>`<div class="${i===MENU.sel?'on':''}">${i===MENU.sel?'▶':'　'}${t}</div>`).join('')+(MENU.notes&&MENU.notes[MENU.sel]?'<div class="mdesc">'+MENU.notes[MENU.sel]+'</div>':''); }
+  menuEl.innerHTML='<div class="mt">'+MENU.title+'</div>'+MENU.items.map((t,i)=>`<div class="${i===MENU.sel?'on':''}">${i===MENU.sel?'▶':'　'}${t}</div>`).join('')+(MENU.notes&&MENU.notes[MENU.sel]?'<div class="mdesc">'+MENU.notes[MENU.sel]+'</div>':'');
+  fitMenu(); }
+// ★メニューの 字が 2段に ならない ように（指示）：横に 収まらない ときは 右の 仲間の 欄を 隠して 横幅を 使い、それでも 収まらなければ 字を 少し 小さく する
+function fitMenu(){ const vw=menuEl.parentElement.clientWidth; menuEl.style.fontSize=''; menuEl.style.whiteSpace=''; if(MENU.notes) return;
+  if(fstatEl.style.display==='block' && menuEl.offsetWidth > vw*.64-22) fstatEl.style.display='none';
+  if(menuEl.offsetWidth > vw-16){ menuEl.style.fontSize='14px'; if(menuEl.offsetWidth > vw-16) menuEl.style.whiteSpace='normal'; } }
 function menu(items,title,onPick,onBack){ MENU={items,title,sel:0,onPick,onBack}; menuEl.classList.remove('wide'); drawMenu(); }
 // ★呪文の 一覧と 解説（指示）。選んで いる 呪文の 説明を 下に 出す。戦闘の 外で 使える 呪文は ここで 唱えられる
 function openSpells(ck){ const c=STATS[ck], sks=skillsOf(ck);
@@ -1552,19 +1562,19 @@ function syncAtk(){ PARTY.forEach(k=>{ const m=STATS[k], e=EQUIP[k]||{}; if(!m) 
 // ---- お店（鍛冶屋＝武器と 防具、道具屋＝道具）----
 const SHOP={ smith:[{name:'銅の 剣',kind:'weapon',v:6,price:60},{name:'鉄の 剣',kind:'weapon',v:10,price:180},{name:'皮の よろい',kind:'armor',v:6,price:70},{name:'くさりかたびら',kind:'armor',v:10,price:200},{name:'革の 帽子',kind:'helm',v:2,price:30},{name:'鉄の 兜',kind:'helm',v:5,price:130}],
              tools:[{name:'薬草',kind:'herb',price:8},{name:'どくけし草',kind:'antidote',price:10}] };
-function openShop(which,greet){ const list=SHOP[which];
+function openShop(which,greet){ const list=SHOP[which]; const eq=()=>{ if(which==='smith'&&MENU){ MENU.equip=1; drawMenu(); } };   /* ★鍛冶屋では 下に いまの 装備 */
   menu(['買う','売る','やめる'],greet||'お店',(k)=>{
-    if(k===0) menu(list.map(it=>it.name+'　'+it.price+'G').concat(['戻る']),'買う（所持金 '+BAG.gold+'G）',(i)=>{
+    if(k===0){ menu(list.map(it=>it.name+'　'+it.price+'G').concat(['戻る']),'買う（所持金 '+BAG.gold+'G）',(i)=>{
       if(i>=list.length){ openShop(which,greet); return; } const it=list[i];
       if(BAG.gold<it.price){ closeMenu(); say(['お金が 足りない。'],()=>openShop(which,greet)); return; }
       BAG.gold-=it.price; if(it.kind==='herb') BAG.herbs++; else if(it.kind==='antidote') BAG.antidote++; else BAG.gear.push({name:it.name,kind:it.kind,v:it.v,price:it.price});
-      closeMenu(); se('buy'); say([it.name+'を 買った。'+(it.kind!=='herb'&&it.kind!=='antidote'?'（メニューの 装備で 付け替えられる）':'')],()=>openShop(which,greet)); },()=>openShop(which,greet));
+      closeMenu(); se('buy'); say([it.name+'を 買った。'+(it.kind!=='herb'&&it.kind!=='antidote'?'（メニューの 装備で 付け替えられる）':'')],()=>openShop(which,greet)); },()=>openShop(which,greet)); eq(); }
     else if(k===1){ const sell=BAG.gear.map((g,i)=>({label:g.name+'　'+Math.floor(g.price/2)+'G',i})); if(BAG.herbs>0) sell.push({label:'薬草　4G',i:-1});
       if(!sell.length){ closeMenu(); say(['売れる ものが ない。'],()=>openShop(which,greet)); return; }
       menu(sell.map(x=>x.label).concat(['戻る']),'売る',(j)=>{ if(j>=sell.length){ openShop(which,greet); return; } const x=sell[j];
         if(x.i<0){ BAG.herbs--; BAG.gold+=4; } else { BAG.gold+=Math.floor(BAG.gear[x.i].price/2); BAG.gear.splice(x.i,1); }
-        closeMenu(); se('ok'); say(['売った。所持金 '+BAG.gold+'G'],()=>openShop(which,greet)); },()=>openShop(which,greet)); }
-    else closeMenu(); },()=>closeMenu()); }
+        closeMenu(); se('ok'); say(['売った。所持金 '+BAG.gold+'G'],()=>openShop(which,greet)); },()=>openShop(which,greet)); eq(); }
+    else closeMenu(); },()=>closeMenu()); eq(); }
 // ---- 宿屋 ----
 function openInn(){ const price=10; menu(['泊まる（'+price+'G）','やめる'],'宿屋（所持金 '+BAG.gold+'G）',(k)=>{ closeMenu();
   if(k!==0){ say(['娘「また どうぞ」']); return; } if(BAG.gold<price){ say(['娘「お金が 足りないみたい……」']); return; }
