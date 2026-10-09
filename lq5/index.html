@@ -46,6 +46,8 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #fmenu{position:absolute;left:8px;top:52px;min-width:46%;max-width:calc(50% - 12px);box-sizing:border-box;display:none;border:2px solid var(--line);background:rgba(10,8,18,.94);border-radius:6px;padding:8px 12px;font-size:16px;line-height:1.85}
 #fmenu .mt{font-size:12px;color:var(--dim);border-bottom:1px solid #4a4070;margin-bottom:4px}
 #fmenu .on{color:var(--gold)}
+#fmenu .mdesc{font-size:12px;line-height:1.6;color:#d8d0f0;border-top:1px solid #4a4070;margin-top:6px;padding-top:5px}
+#fmenu.wide{max-width:calc(100% - 16px)}
 #fstat{position:absolute;right:8px;top:52px;width:calc(50% - 12px);box-sizing:border-box;display:none;border:2px solid var(--line);background:rgba(10,8,18,.94);border-radius:6px;padding:6px 10px;font-size:13px;line-height:1.5}
 #fstat .pm{border-bottom:1px solid #4a4070;padding:3px 0}
 #fstat .pm:last-of-type{border-bottom:none}
@@ -915,6 +917,7 @@ function setFoeFrame(f,k){ if(!f.def.frames[k]) k='idle'; f.frame=k; const t=foe
 const btEl=document.getElementById('bt'), bmsg=document.getElementById('bmsg'), bmenu=document.getElementById('bmenu'), bparty=document.getElementById('bparty'), flashEl=document.getElementById('flash'), bmark=document.getElementById('bmark');
 const CMDS=['たたかう','呪文','ぼうぎょ','どうぐ','にげる'];
 function partyHtml(){ return BT.party.map((m,i)=>`<div class="pm${m.hp<=0?' down':''}${BT.hitIdx===i?' hit':''}"><b>${m.name}</b>${m.status?'<span class="st">'+STNAME[m.status]+'</span>':''}<br>HP ${m.hp}<br>MP ${m.mp}</div>`).join(''); }
+function skDesc(){ const k=BT.sks[BT.ssel]; bsay(k.desc||'どの 呪文を 唱える？'); }   /* ★呪文の 解説（指示）：選んで いる 呪文の 説明を 下の 欄に */
 function drawBattleUI(){ bparty.innerHTML=partyHtml(); bmenu.style.display = (BT.phase==='menu'||BT.phase==='target'||BT.phase==='skill') ? 'block':'none';
   // ★ねらう 魔物は 名前の 一覧から 選ぶ（前は 魔物の 頭の 上に ▼ を 出して いた）
   bmark.style.display = BT.phase==='target' ? 'block':'none';   // ★▼は 一覧で 選んで いる 魔物の 頭の 上（一覧と 連動）
@@ -956,30 +959,30 @@ function wipeOut(){ PARTY.forEach(k=>{ STATS[k].status=null; }); clearPops(); BT
 //  type：atk1（1体）・atkAll（全体）・heal（味方1人）・healAll・escape（ダンジョンから 出る）・sleep（眠らせる）・conf（混乱）・defdown（守備を 下げる）・atkdown・double（2回 攻撃）・steal（盗む）
 const SKILLS={
   // ★攻撃の 呪文は すべて 3段階（指示）
-  tsuyogiri:{name:'ブレイズエッジ', mp:3, type:'atk1', mul:1.6, battle:true},
-  blaze2:{name:'ブレイズセイバー', mp:7, type:'atk1', mul:2.2, battle:true},
-  blaze3:{name:'ブレイズカリバー', mp:14, type:'atk1', mul:3.0, battle:true},
-  michishirube:{name:'エスケイル', mp:4, type:'escape', field:true},
-  iyashi:{name:'キュアル', mp:3, type:'heal', amt:28, battle:true, field:true},
-  volt:{name:'ヴォルト', mp:8, type:'atk1', power:42, spell:true, battle:true},
-  voltra:{name:'ヴォルトラ', mp:18, type:'atkAll', power:46, spell:true, battle:true},
-  voltrion:{name:'ヴォルトリオン', mp:36, type:'atkAll', power:110, spell:true, battle:true},   // ★奥義（終章で 授かる。LEARN には 入れず、物語で 足す）
-  hono:{name:'フレアス', mp:5, type:'atkAll', power:18, spell:true, battle:true},
-  flare2:{name:'フレアストーム', mp:12, type:'atkAll', power:40, spell:true, battle:true},
-  flare3:{name:'フレアノヴァ', mp:24, type:'atkAll', power:78, spell:true, battle:true},
-  nemuri:{name:'スリーピア', mp:4, type:'sleep', rate:.6, battle:true},
-  kaifuku:{name:'キュアラ', mp:4, type:'heal', amt:40, battle:true, field:true},
-  minnakaifuku:{name:'キュアルス', mp:10, type:'healAll', amt:30, battle:true, field:true},
-  raigeki:{name:'サンダリス', mp:5, type:'atk1', power:30, spell:true, battle:true},
-  thunder2:{name:'サンダリアス', mp:11, type:'atk1', power:62, spell:true, battle:true},
-  thunder3:{name:'サンダリオン', mp:22, type:'atk1', power:120, spell:true, battle:true},
-  hibiware:{name:'ブレイクス', mp:3, type:'defdown', battle:true},
-  shibire:{name:'ウィークン', mp:3, type:'atkdown', battle:true},
-  nirengeki:{name:'ダブルファング', mp:0, type:'double', hits:2, battle:true},
-  nusumu:{name:'スティール', mp:0, type:'steal', battle:true},
-  daimajin:{name:'大魔神斬り', mp:0, type:'gamble', hit:.35, battle:true},   // ★ミスしやすいが、当たれば 会心の 一撃
-  kabutowari:{name:'兜割り', mp:2, type:'atkdef', battle:true},             // ★通常の 攻撃＋相手の 守りを 下げる
-  kaenkiri:{name:'火炎斬り', mp:2, type:'atk1', mul:1.3, waza:true, battle:true},   // ★通常の 攻撃に 倍率（1.3倍）を かける 技（1.5倍・MP3は 強すぎる ため 下げた）
+  tsuyogiri:{name:'ブレイズエッジ', desc:'剣に 炎を まとわせて 斬る。敵1体に 通常の 1.6倍の ダメージ。', mp:3, type:'atk1', mul:1.6, battle:true},
+  blaze2:{name:'ブレイズセイバー', desc:'剣に 強い 炎を まとわせて 斬る。敵1体に 通常の 2.2倍の ダメージ。', mp:7, type:'atk1', mul:2.2, battle:true},
+  blaze3:{name:'ブレイズカリバー', desc:'剣が 燃えさかる 聖なる 炎の 刃に なる。敵1体に 通常の 3倍の ダメージ。', mp:14, type:'atk1', mul:3.0, battle:true},
+  michishirube:{name:'エスケイル', desc:'来た 道の 光を たどり、ダンジョンの 入口へ 戻る。戦闘では 使えない。', mp:4, type:'escape', field:true},
+  iyashi:{name:'キュアル', desc:'味方1人の HPを 28ほど 回復する。戦闘の 外でも 使える。', mp:3, type:'heal', amt:28, battle:true, field:true},
+  volt:{name:'ヴォルト', desc:'雷を 落とす。敵1体に 40前後の ダメージ。', mp:8, type:'atk1', power:42, spell:true, battle:true},
+  voltra:{name:'ヴォルトラ', desc:'いくつもの 雷を 落とす。敵 全体に 45前後の ダメージ。', mp:18, type:'atkAll', power:46, spell:true, battle:true},
+  voltrion:{name:'ヴォルトリオン', desc:'天の 雷を すべて 呼ぶ 奥義。敵 全体に 110前後の ダメージ。', mp:36, type:'atkAll', power:110, spell:true, battle:true},   // ★奥義（終章で 授かる。LEARN には 入れず、物語で 足す）
+  hono:{name:'フレアス', desc:'炎を 巻き起こす。敵 全体に 18前後の ダメージ。', mp:5, type:'atkAll', power:18, spell:true, battle:true},
+  flare2:{name:'フレアストーム', desc:'炎の 嵐を 起こす。敵 全体に 40前後の ダメージ。', mp:12, type:'atkAll', power:40, spell:true, battle:true},
+  flare3:{name:'フレアノヴァ', desc:'炎を 爆ぜさせる。敵 全体に 78前後の ダメージ。', mp:24, type:'atkAll', power:78, spell:true, battle:true},
+  nemuri:{name:'スリーピア', desc:'敵 全体を 眠りに さそう（効く 見込みは 6割ほど）。ボスには 効かない。', mp:4, type:'sleep', rate:.6, battle:true},
+  kaifuku:{name:'キュアラ', desc:'味方1人の HPを 40ほど 回復する。戦闘の 外でも 使える。', mp:4, type:'heal', amt:40, battle:true, field:true},
+  minnakaifuku:{name:'キュアルス', desc:'味方 全員の HPを 30ずつ 回復する。戦闘の 外でも 使える。', mp:10, type:'healAll', amt:30, battle:true, field:true},
+  raigeki:{name:'サンダリス', desc:'紫の 雷を 撃つ。敵1体に 30前後の ダメージ。', mp:5, type:'atk1', power:30, spell:true, battle:true},
+  thunder2:{name:'サンダリアス', desc:'強い 紫の 雷を 撃つ。敵1体に 62前後の ダメージ。', mp:11, type:'atk1', power:62, spell:true, battle:true},
+  thunder3:{name:'サンダリオン', desc:'紫の 大雷を 撃つ。敵1体に 120前後の ダメージ。', mp:22, type:'atk1', power:120, spell:true, battle:true},
+  hibiware:{name:'ブレイクス', desc:'敵1体の 守りを 下げる。以後 その 敵への ダメージが 1.3倍に なる。', mp:3, type:'defdown', battle:true},
+  shibire:{name:'ウィークン', desc:'敵1体の 力を 弱める。以後 その 敵から 受ける ダメージが 0.7倍に なる。', mp:3, type:'atkdown', battle:true},
+  nirengeki:{name:'ダブルファング', desc:'すばやく 2回 斬りつける。1回ごとの 威力は 通常の 0.8倍。', mp:0, type:'double', hits:2, battle:true},
+  nusumu:{name:'スティール', desc:'敵から 薬草を 盗む（成功は 4割ほど）。', mp:0, type:'steal', battle:true},
+  daimajin:{name:'大魔神斬り', desc:'渾身の 一撃。当たるのは 3割5分ほどだが、当たれば 会心の 一撃に なる。', mp:0, type:'gamble', hit:.35, battle:true},   // ★ミスしやすいが、当たれば 会心の 一撃
+  kabutowari:{name:'兜割り', desc:'通常の 攻撃を して、さらに その 敵の 守りを 下げる。', mp:2, type:'atkdef', battle:true},             // ★通常の 攻撃＋相手の 守りを 下げる
+  kaenkiri:{name:'火炎斬り', desc:'炎の 刃で 斬る。敵1体に 通常の 1.3倍の ダメージ。', mp:2, type:'atk1', mul:1.3, waza:true, battle:true},   // ★通常の 攻撃に 倍率（1.3倍）を かける 技（1.5倍・MP3は 強すぎる ため 下げた）
 };
 const LEARN={ elt:[[3,'michishirube'],[4,'tsuyogiri'],[6,'iyashi'],[12,'volt'],[14,'blaze2'],[24,'voltra'],[28,'blaze3']],
   lidia:[[1,'kaifuku'],[1,'hono'],[4,'nemuri'],[10,'minnakaifuku'],[12,'flare2'],[26,'flare3']], zf:[[1,'raigeki'],[1,'hibiware'],[5,'shibire'],[11,'thunder2'],[25,'thunder3']], dolgan:[[1,'kabutowari'],[3,'nusumu'],[8,'kaenkiri'],[20,'daimajin'],[28,'nirengeki']] };   // ★ダブルファングは 中盤の Lv28（指示）。大魔神斬りは Lv20
@@ -1057,7 +1060,7 @@ function partyAttacks(target){ return partyTurn({kind:'atk',target}); }
 function battleCmd(){ const c=CMDS[BT.sel];
   if(c==='たたかう'){ if(alive().length>1){ BT.phase='target'; BT.pend={kind:'atk'}; BT.tsel=BT.foes.indexOf(alive()[0]); bsay('どの 魔物を ねらう？'); drawBattleUI(); return; }
     BT.phase='act'; drawBattleUI(); queue(partyTurn({kind:'atk',target:alive()[0]}),0); return; }
-  if(c==='呪文'){ const sks=skillsOf(PARTY[0]).filter(s=>s.battle); if(!sks.length){ bsay(BT.party[0].name+'は まだ 呪文を 覚えて いない。'); return; } BT.phase='skill'; BT.ssel=0; BT.sks=sks; bsay('どの 呪文を 唱える？'); drawBattleUI(); return; }
+  if(c==='呪文'){ const sks=skillsOf(PARTY[0]).filter(s=>s.battle); if(!sks.length){ bsay(BT.party[0].name+'は まだ 呪文を 覚えて いない。'); return; } BT.phase='skill'; BT.ssel=0; BT.sks=sks; skDesc(); drawBattleUI(); return; }
   BT.phase='act'; drawBattleUI();
   if(c==='ぼうぎょ'){ BT.guard=true; queue(partyTurn({kind:'guard'}),0); }
   if(c==='どうぐ'){ const m=BT.party[0]; const it=m.status==='poison'&&BAG.antidote>0?'antidote':(BAG.herbs>0?'herb':null); if(!it){ BT.phase='menu'; bsay('使える 道具を もって いない。'); drawBattleUI(); return; }
@@ -1075,7 +1078,7 @@ function endBattle(){ const win=BT&&BT.foes.every(f=>f.dead), cb=BT&&BT.onWin;
 let lastDirY=0, lastDirX=0;
 function battleInput(iy,ix){ if(!BT) return;
   if(BT.phase==='menu'){ if(iy!==0 && iy!==lastDirY){ se('cursor'); BT.sel=(BT.sel+(iy>0?1:-1)+CMDS.length)%CMDS.length; drawBattleUI(); } }
-  if(BT.phase==='skill' && iy!==0 && iy!==lastDirY){ se('cursor'); BT.ssel=(BT.ssel+(iy>0?1:-1)+BT.sks.length)%BT.sks.length; drawBattleUI(); }
+  if(BT.phase==='skill' && iy!==0 && iy!==lastDirY){ se('cursor'); BT.ssel=(BT.ssel+(iy>0?1:-1)+BT.sks.length)%BT.sks.length; skDesc(); drawBattleUI(); }
   if(BT.phase==='target' && iy!==0 && iy!==lastDirY){ const al=alive(); let k=al.indexOf(BT.foes[BT.tsel]); k=(k+(iy>0?1:-1)+al.length)%al.length; BT.tsel=BT.foes.indexOf(al[k]); se('cursor'); drawBattleUI(); }
   lastDirY=iy; lastDirX=ix; }
 const EZ=-2.0;   // ★魔物の 立つ 位置（奥へ。0 → -1.1 → -2.0。指示で 少しずつ 下げた）
@@ -1365,11 +1368,25 @@ let MENU=null;   // {title, items, sel, onPick, onBack}
 const menuEl=document.getElementById('fmenu');
 // ★メニューを 開いて いる 間は、右に 仲間の 状態と 所持金を 出す（指示）
 const fstatEl=document.getElementById('fstat');
-function drawStat(){ if(!MENU || BT){ fstatEl.style.display='none'; return; } fstatEl.style.display='block';
+function drawStat(){ if(!MENU || BT || MENU.notes){ /* ★呪文の 解説の 間は 横幅を 使う ため 隠す */ fstatEl.style.display='none'; return; } fstatEl.style.display='block';
   fstatEl.innerHTML=PARTY.map(k=>{ const m=STATS[k]; return `<div class="pm${m.hp<=0?' down':''}"><b>${m.name}</b>　Lv ${m.lv||1}${m.status?'<span class="st">'+STNAME[m.status]+'</span>':''}<br>HP ${m.hp}／${m.max}<br>MP ${m.mp}／${m.maxmp||m.mp}</div>`; }).join('')+`<div class="g">${BAG.gold} G</div>`; }
 function drawMenu(){ drawStat(); if(!MENU){ menuEl.style.display='none'; return; } menuEl.style.display='block';
-  menuEl.innerHTML='<div class="mt">'+MENU.title+'</div>'+MENU.items.map((t,i)=>`<div class="${i===MENU.sel?'on':''}">${i===MENU.sel?'▶':'　'}${t}</div>`).join(''); }
-function menu(items,title,onPick,onBack){ MENU={items,title,sel:0,onPick,onBack}; drawMenu(); }
+  menuEl.innerHTML='<div class="mt">'+MENU.title+'</div>'+MENU.items.map((t,i)=>`<div class="${i===MENU.sel?'on':''}">${i===MENU.sel?'▶':'　'}${t}</div>`).join('')+(MENU.notes&&MENU.notes[MENU.sel]?'<div class="mdesc">'+MENU.notes[MENU.sel]+'</div>':''); }
+function menu(items,title,onPick,onBack){ MENU={items,title,sel:0,onPick,onBack}; menuEl.classList.remove('wide'); drawMenu(); }
+// ★呪文の 一覧と 解説（指示）。選んで いる 呪文の 説明を 下に 出す。戦闘の 外で 使える 呪文は ここで 唱えられる
+function openSpells(ck){ const c=STATS[ck], sks=skillsOf(ck);
+  menu(sks.map(k=>k.name+'　'+k.mp+(k.field?'':'（戦闘）')).concat(['戻る']),c.name+'の 呪文（MP '+c.mp+'）',(i)=>{ if(i>=sks.length){ openFieldMenu(); return; } const k=sks[i]; closeMenu();
+    const back=()=>openSpells(ck);
+    if(!k.field){ say([k.name+'は 戦闘で 唱える 呪文だ。'],back); return; } if(c.mp<k.mp){ say(['MPが 足りない。'],back); return; }
+    if(k.type==='heal'){ const al=PARTY.filter(p=>STATS[p].hp>0&&STATS[p].hp<STATS[p].max); if(!al.length){ say(['みんなの HPは 減って いない。'],back); return; }
+      const cast=(tk)=>{ const m=STATS[tk]; c.mp-=k.mp; const h=Math.min(k.amt,m.max-m.hp); m.hp+=h; se('item'); say([c.name+'は '+k.name+'を 唱えた！',m.name+'の HPが '+h+' 回復した！'],back); };
+      if(PARTY.length===1) return cast(PARTY[0]);
+      menu(PARTY.map(p=>STATS[p].name+'　HP '+STATS[p].hp+'/'+STATS[p].max).concat(['やめる']),'誰に？',(t)=>{ closeMenu(); if(t>=PARTY.length) return back(); const m=STATS[PARTY[t]]; if(m.hp<=0){ say([m.name+'は 倒れて いる。'],back); return; } if(m.hp>=m.max){ say([m.name+'の HPは 減って いない。'],back); return; } cast(PARTY[t]); },back); return; }
+    if(k.type==='healAll'){ const al=PARTY.filter(p=>STATS[p].hp>0&&STATS[p].hp<STATS[p].max); if(!al.length){ say(['みんなの HPは 減って いない。'],back); return; } c.mp-=k.mp; al.forEach(p=>{ const m=STATS[p]; m.hp=Math.min(m.max,m.hp+k.amt); }); se('item'); say([c.name+'は '+k.name+'を 唱えた！','みんなの HPが 回復した！'],back); return; }
+    if(k.type==='escape'){ if(cur.kind!=='fort'){ say(['ここでは 使えない。','（ダンジョンの 中で 使う）'],back); return; } c.mp-=k.mp; se('ok'); say(['来た 道の 光が ひとつずつ ともり、入口へ 導かれた——'],()=>go(()=>enterWorld([37.5,24.5]))); return; }
+  },()=>openFieldMenu());
+  MENU.notes=sks.map(k=>k.desc||''); menuEl.classList.add('wide'); drawMenu(); }
+
 function closeMenu(){ MENU=null; drawMenu(); }
 function goalText(){ return ({ c2_dolm:'ドルムの 広場で 帝国の 迎えの 騎士に 話す', c2_pass:'ドルムの 東の 峠の 山道を 抜ける（出口に 魔物が いる）', c2_road:'街道を 東へ。帝都 ヴェルナの 城へ', c2_capital:'帝都の 城の 北の 謁見の 間で ヴェルナ王に 会う', c2_inn:'帝都の 城下町の 宿屋で 休む', c2_tower:'塔の 王女に 話す', c2_ruins:'リディアと 北西の 森の 遺跡へ。奥を 調べる', c2_back:'帝都の 城の ヴェルナ王に 会う', c2_end:'第2章 完',morning:'村の 北の 入口に いる ガイルに 話す', field:'北の 畑を 見回り、外れの 古い 倉を 調べる', raid:'南の 出口から 村へ 戻る',
   burn:'逃げ遅れた 村の 人を 助ける（'+Object.keys(ST.rescued).length+'／3）。そして 広場の 部隊長', after:'広場の ガイルの もとへ', road:'夜の 街道を 北東へ。王都 アルディアの 王に 会う', end:'（序章 完）', c1_castle:'王の 話を 聞く', c1_road:'使者を 連れて、街道を 東の 国境の 砦へ', c1_fort:'砦の 奥へ 進む（灯りを ふたつ ともすと 鉄格子が 開く）', c1_east:'砦を 抜け、東の ヴェルナの 鉱山の 町 ドルムへ', c1_town:'ドルムの 人たちと 話し、町の 長に 会う', c1_end:'（第1章 完）'})[ST.phase]; }
@@ -1377,12 +1394,8 @@ function openFieldMenu(){ if(msgQ||BT||fading||ST.phase==='end') return;
   const items=['強さ','呪文','道具','装備','地図','作戦'].concat(RESERVE.length?['入れ替え']:[]).concat(['クエスト','頼まれごと','音','セーブ','とじる']);
   menu(items,'メニュー',(sel)=>{ const pick=items[sel];
     if(pick==='強さ'){ const m=STATS.elt; closeMenu(); say([m.name+'　Lv'+m.lv+'　見習い兵士','HP '+m.hp+' / '+m.max+'　　MP '+m.mp+' / '+m.maxmp,'攻撃力 '+m.atk+'　守備力 '+m.defT+'　素早さ '+m.agi+(m.status?'　状態：'+STNAME[m.status]:''),'次の レベルまで あと '+(expNeed(m.lv)-m.exp)+'　所持金 '+BAG.gold+'G'],openFieldMenu); }
-    else if(pick==='呪文'){ const sks=skillsOf('elt'); if(!sks.length){ closeMenu(); say(['エルトは まだ 呪文を 覚えて いない。'],openFieldMenu); return; }
-      menu(sks.map(k=>k.name+'　'+k.mp+(k.field?'':'（戦闘）')).concat(['戻る']),'呪文（MP '+STATS.elt.mp+'）',(i)=>{ if(i>=sks.length){ openFieldMenu(); return; } const k=sks[i]; closeMenu();
-        if(!k.field){ say([k.name+'は 戦闘で 唱える 呪文だ。'],openFieldMenu); return; } if(STATS.elt.mp<k.mp){ say(['MPが 足りない。'],openFieldMenu); return; }
-        if(k.type==='heal'){ const m=STATS.elt; if(m.hp>=m.max){ say(['HPは 減って いない。'],openFieldMenu); return; } m.mp-=k.mp; const h=Math.min(k.amt,m.max-m.hp); m.hp+=h; se('item'); say([m.name+'は '+k.name+'を 唱えた！','HPが '+h+' 回復した！'],openFieldMenu); return; }
-        if(k.type==='escape'){ if(cur.kind!=='fort'){ say(['ここでは 使えない。','（ダンジョンの 中で 使う）'],openFieldMenu); return; } STATS.elt.mp-=k.mp; se('ok'); say(['来た 道の 光が ひとつずつ ともり、入口へ 導かれた——'],()=>go(()=>enterWorld([37.5,24.5]))); return; }
-      },()=>openFieldMenu()); }
+    else if(pick==='呪文'){ const who=PARTY.filter(k=>skillsOf(k).length); if(!who.length){ closeMenu(); say(['まだ 誰も 呪文を 覚えて いない。'],openFieldMenu); return; }
+      if(who.length===1) openSpells(who[0]); else menu(who.map(k=>STATS[k].name).concat(['戻る']),'誰の 呪文？',(i)=>{ if(i>=who.length){ openFieldMenu(); return; } openSpells(who[i]); },()=>openFieldMenu()); }
     else if(pick==='道具'){ openItems(); }
     else if(pick==='装備'){ openEquip(); }
     else if(pick==='地図'){ openMap(); }
