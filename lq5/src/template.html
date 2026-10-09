@@ -1080,16 +1080,31 @@ function examine(){   // 向いて いる 先の 物を 調べる（宝箱・畑
     return true; }
   return false; }
 // ---- 王都の 謁見の 間 ----
+// ★アルディア城（広く した。指示）：北に 謁見の 間、西に 書庫、東に 大臣の 部屋。南の 大広間の 西に 兵の 詰め所、東に 食堂
+//  B 本棚  T 机  K 寝台  P 柱  U 玉座の 段  r じゅうたん
 const CASTLE=[
-"#############",
-"#....UUU....#",
-"#.P..rrr..P.#",
-"#....rrr....#",
-"#.P..rrr..P.#",
-"#....rrr....#",
-"#.P..rrr..P.#",
-"#....rrr....#",
-"######.######"];
+"#########################",
+"#BBBB#.....UUU.....#TT..#",
+"#....#.....rrr.....#....#",
+"#BB..#.P...rrr...P.#....#",
+"#....#.....rrr.....#.TT.#",
+"#BB..#.P...rrr...P.#....#",
+"#....#.....rrr.....#....#",
+"#....#.P...rrr...P.#....#",
+"#....#.....rrr.....#....#",
+"###.#######rrr#######.###",
+"#K..K.#....rrr....#.....#",
+"#.....#.P..rrr..P.#.TT..#",
+"#K..K......rrr..........#",
+"#.....#....rrr....#.TT..#",
+"#K....#.P..rrr..P.#.....#",
+"#######....rrr....#######",
+"#..........rrr..........#",
+"#.......P..rrr..P.......#",
+"#..........rrr..........#",
+"#..........rrr..........#",
+"#..........rrr..........#",
+"############.############"];
 function buildCastle(){
   S.background=new THREE.Color(0x1a1420); S.fog=null; amb.intensity=.7; amb.color.setHex(0xfff0e0); sun.intensity=.4; sun.color.setHex(0xfff0d0);
   const st=L(T.stone,0xe8e0d0), carpet=L(T.rug), wall=L(T.inwall,0xf0e8d8);
@@ -1098,17 +1113,31 @@ function buildCastle(){
     if(c==='#') add(box,wall,x+.5,1.2,y+.5,1,2.4,1);
     if(c==='P'){ add(new THREE.CylinderGeometry(.28,.32,2.6,10),L(T.stone,0xffffff),x+.5,1.3,y+.5); add(box,L(null,0xd8c070),x+.5,2.62,y+.5,.7,.12,.7); }
     if(c==='U'){ add(box,L(null,0x8a2a2a),x+.5,.15,y+.5,1,.3,1); }
+    if(c==='B'){ add(box,L(null,0x6a4528),x+.5,1.0,y+.35,.96,2.0,.4); for(let k=0;k<4;k++) for(let j=0;j<5;j++) add(box,L(null,[0xa83a3a,0x3a5aa8,0x3a8a4a,0xc89a3a,0x6a3a8a][(j+k+x)%5]),x+.14+j*.18,.3+k*.46,y+.58,.13,.34,.06); }
+    if(c==='T'){ add(box,L(null,0x8a5a32),x+.5,.72,y+.5,1,.08,.9); [[-.4,-.35],[.4,-.35],[-.4,.35],[.4,.35]].forEach(([a,b])=>add(box,L(null,0x6a4528),x+.5+a,.35,y+.5+b,.07,.7,.07)); }
+    if(c==='K'){ add(box,L(null,0x7a4a2a),x+.5,.25,y+.5,.9,.5,1); add(box,L(null,0xeeeeff),x+.5,.52,y+.55,.8,.08,.88); add(box,L(null,0x3a5aa0),x+.5,.57,y+.7,.82,.04,.56); }
   }
-  add(box,L(null,0xd8b040),6.5,.8,1.4,1.1,1.0,.5); add(box,L(null,0xb02020),6.5,.75,1.6,.8,.6,.3); add(box,L(null,0xd8b040),6.5,1.6,1.25,1.0,.9,.15);   // 玉座
-  [[2.5,0.6],[10.5,0.6]].forEach(([x,z])=>{ add(new THREE.PlaneGeometry(.9,1.8),L(null,0x3050a0),x,1.4,z+.42); });   // 王国の 旗
-  const l=new THREE.PointLight(0xffe0b0,.8,10); l.position.set(6.5,2.5,3); G.add(l); }
+  [[6.5,12],[18.5,12],[12.5,15.5]].forEach(([x,z])=>{ const l=new THREE.PointLight(0xffe0b0,.6,9); l.position.set(x,2.2,z); G.add(l); });
+  add(box,L(null,0xd8b040),12.5,.8,1.4,1.1,1.0,.5); add(box,L(null,0xb02020),12.5,.75,1.6,.8,.6,.3); add(box,L(null,0xd8b040),12.5,1.6,1.25,1.0,.9,.15);   // 玉座
+  [[8.5,0.6],[16.5,0.6]].forEach(([x,z])=>{ add(new THREE.PlaneGeometry(.9,1.8),L(null,0x3050a0),x,1.4,z+.42); });   // 王国の 旗
+  const l=new THREE.PointLight(0xffe0b0,.8,10); l.position.set(12.5,2.5,3); G.add(l); }
 function enterCastle(){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); cv.style.display='block'; c2.style.display='none';
   if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; fireMeshes=[]; buildCastle();
-  cur={kind:'castle', rows:CASTLE, solid:new Set(['#','P','U']), npcs:cur.npcs, room:null};
-  setNpcs([{x:6.5,y:2.4,spr:'king',name:'アルディア王',talk:()=>{ if(ST.phase==='c1_castle'){ kingCh1(); return; } if(ST.phase!=='road'){ say(['アルディア王「頼んだぞ、エルト」']); return; }
+  cur={kind:'castle', rows:CASTLE, solid:new Set(['#','P','U','B','T','K']), npcs:cur.npcs, room:null};
+  setNpcs([{x:12.5,y:2.4,spr:'king',name:'アルディア王',talk:()=>{ if(ST.phase==='c1_castle'){ kingCh1(); return; } if(ST.phase!=='road'){ say(['アルディア王「頼んだぞ、エルト」']); return; }
     say(['アルディア王「……そなたは、国境の 村の 者か」','エルトは、村で 起きた ことを 話した。','うつろな 目の 兵。燃える 家。倒れた 部隊長の 最後の 言葉。','アルディア王「……なぜ、わたしは ここに、と」','アルディア王「よく 生きて 戻った」','アルディア王「今日から、そなたは 王国の 兵士だ」','＊ エルトは 兵士の 鎧を 受け取った ＊','アルディア王「ヴェルナに、和平の 使者を 送る」','アルディア王「……あの 国で 何が 起きて いるのか、確かめねば ならぬ」'],()=>showEnd()); }}]);
-  hero.x=6.5; hero.z=CASTLE.length-1.6; hero.ang=Math.PI; resetTrail();
-  document.getElementById('place').textContent='王都 アルディア 謁見の 間'; resize(); }
+  // ★城の 人（王の ほか）
+  cur.npcs.push(...[
+    {x:10.2,y:4.2,spr:'asoldier',name:'近衛兵',lines:['近衛兵「王の 御前だ。礼を 欠かぬ ように」']},
+    {x:14.8,y:4.2,spr:'asoldier',name:'近衛兵',byPhase:{road:['近衛兵「国境の 村が 焼かれたと？ ……王が お聞きに なる」'],'*':['近衛兵「陛下は、戦を 望んで おられない」']}},
+    {x:3.5,y:6.5,spr:'elder',name:'書庫番',lines:['書庫番「この 書庫には、アルディアと ヴェルナの 古い 約束の 記録が 残って おる」','書庫番「昔は 二つの 国の 間に、麦と 鉄の 行き来が あったのじゃ」']},
+    {x:21.5,y:6.5,spr:'elder',name:'大臣',byPhase:{c1:['大臣「使者どのを 頼むぞ。和平が 成れば、国境の 村も 建て直せる」'],'*':['大臣「ヴェルナ王は、穏やかな 方だった はずだが……」']}},
+    {x:3.5,y:13.2,spr:'asoldier',name:'城の 兵',lines:['兵「国境の 砦は、ヴェルナとの 境の 山並みに ある。王都から 街道を 東へ まっすぐだ」']},
+    {x:21.5,y:12.2,spr:'girl',name:'城の 給仕',lines:['給仕「お腹が すいたら いつでも どうぞ。……と 言いたい ところだけど、料理番は いま 出かけて いるの」']},
+    {x:10.2,y:19.4,spr:'asoldier',name:'城の 門番',lines:['門番「ここは アルディア城。北の 奥が 謁見の 間だ」']},
+  ].map(n=>({...n,ang:0,p:person(n.spr)})));
+  hero.x=12.5; hero.z=CASTLE.length-1.6; hero.ang=Math.PI; resetTrail();
+  document.getElementById('place').textContent='王都 アルディア城'; resize(); }
 function showEnd(){ ST.phase='end'; const c=document.getElementById('card'); c.innerHTML='<div>序章</div><div class="t">燃える国境</div><div>完</div><div style="font-size:13px;margin-top:20px">Ａで 第1章へ</div>'; c.style.opacity=1; }
 
 // ================= メニュー（Ⅳの メニューの 作りを 写した もの）=================
