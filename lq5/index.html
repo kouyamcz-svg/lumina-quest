@@ -342,14 +342,69 @@ function buildTown(){
   if(isCap){   // ★城下町の 城壁（周り）と、北の アルディア城
     for(let y=0;y<TR.length;y++)for(let x=0;x<TR[0].length;x++){ if(TR[y][x]==='#') add(box,L(T.found,0xd8d0c0),x+.5,1.0,y+.5,1,2.0,1); }
     const vel=!!TL().velna, wm=L(T.stone,vel?0x8a8890:0xf2f0ea), rf=L(null,vel?0x5a1e24:0x3a5aa8), gd=L(null,vel?0x9a9aa8:0xd8b040);   /* ★帝都は 暗い 石と 赤黒の 屋根 */
-    add(box,wm,12,1.6,1.9,20.5,3.2,3.6);                                     // 城の 正面の 壁
+    add(box,wm,6.2,1.6,1.9,8.9,3.2,3.6); add(box,wm,17.8,1.6,1.9,8.9,3.2,3.6);   // 城の 正面の 壁（まん中は 門の 建物）
     for(let x=2;x<22;x+=1.2) add(box,wm,x+.3,3.35,3.6,.6,.4,.3);             // ぎざぎざ
     [[3,2],[21,2]].forEach(([x,z])=>{ add(new THREE.CylinderGeometry(1.1,1.2,5,12),wm,x,2.5,z); add(new THREE.ConeGeometry(1.4,2.2,12),rf,x,6.1,z); });
     add(box,wm,12,3.8,1.4,7,7.6,2.6); add(new THREE.ConeGeometry(2.2,3,12),rf,12,9.1,1.4);   // 天守
     [[8.6,1.5],[15.4,1.5]].forEach(([x,z])=>{ add(new THREE.CylinderGeometry(.7,.75,6.4,10),wm,x,3.2,z); add(new THREE.ConeGeometry(.95,1.8,10),rf,x,7.3,z); });
-    add(box,L(null,0x3a2a1e),12,1.1,3.72,2.2,2.2,.1); add(box,gd,12,2.35,3.74,2.5,.18,.12);  // 門
-    [[9.8],[14.2]].forEach(([x])=>{ add(new THREE.PlaneGeometry(.9,1.8),L(null,vel?0x7a1a20:0x3050a0),x,2.2,3.72); });   // 王国の 旗
+    castleGate(vel,wm,rf,gd);   // ★門（指示：しっかり デザイン）
   }
+}
+// ★城の 門：左右の 門塔・アーチの 門・開いた 両扉・上げた 落とし格子・紋章・灯り・垂れ幕
+function castleGate(vel,wm,rf,gd){
+  const dark=L(null,0x120c0a), wood=L(T.door||null,vel?0x6a4a3a:0x8a5a34), iron=L(null,0x34343c), cloth=vel?0x7a1a20:0x2a4a9a, trim=L(null,vel?0x9a9aa8:0xd8b040);
+  const stone2=L(T.stone,vel?0x74727a:0xdedad0);
+  const FZ=3.75;                                   // 門の 正面の 位置（ここより 手前に 来ると 城に 入る）
+  // アーチ形の 穴の あいた 門の 壁（押し出し）
+  const sh=new THREE.Shape(); sh.moveTo(-1.35,0); sh.lineTo(1.35,0); sh.lineTo(1.35,4.0); sh.lineTo(-1.35,4.0); sh.lineTo(-1.35,0);
+  const hole=new THREE.Path(); hole.moveTo(-1,0); hole.lineTo(-1,1.7); hole.absarc(0,1.7,1,Math.PI,0,true); hole.lineTo(1,0); hole.lineTo(-1,0); sh.holes.push(hole);
+  const gw=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:1.3,bevelEnabled:false,curveSegments:16}),stone2); gw.position.set(12,0,FZ-1.3); G.add(gw);
+  // アーチの 縁石（迫石）と 要石
+  for(let k=0;k<=10;k++){ const a=Math.PI*k/10, r=1.1; const m=add(box,wm,12+Math.cos(a)*r,1.7+Math.sin(a)*r,FZ+.04,.26,.36,.1); m.rotation.z=a-Math.PI/2; }
+  [-1.1,1.1].forEach(dx=>add(box,wm,12+dx,.85,FZ+.04,.26,1.7,.1));
+  add(box,trim,12,2.86,FZ+.08,.32,.42,.12);
+  // 門の 奥（暗い 通路）と 赤い じゅうたん
+  add(box,dark,12,1.35,FZ-.95,2.02,2.75,.1); add(box,dark,10.98,1.35,FZ-.5,.04,2.7,.9); add(box,dark,13.02,1.35,FZ-.5,.04,2.7,.9); add(box,dark,12,2.72,FZ-.5,2.02,.04,.9);
+  const rg=add(new THREE.PlaneGeometry(.9,1.3),L(null,vel?0x6a1a1a:0x9a2a2a),12,.015,FZ-.3); add(box,trim,11.53,.012,FZ-.3,.05,.01,1.3); add(box,trim,12.47,.012,FZ-.3,.05,.01,1.3); rg.rotation.x=-Math.PI/2;
+  // 内へ 開いた 両扉（鉄の 帯と 鋲）
+  [-1,1].forEach(sd=>{ const piv=new THREE.Group(); piv.position.set(12+sd*1.0,0,FZ-.25); piv.rotation.y=sd*-1.15; G.add(piv);
+    const leaf=new THREE.Mesh(box,wood); leaf.scale.set(1.0,2.4,.08); leaf.position.set(-sd*.5,1.2,0); piv.add(leaf);
+    [.45,1.2,1.95].forEach(h=>{ const b=new THREE.Mesh(box,iron); b.scale.set(1.0,.08,.1); b.position.set(-sd*.5,h,.0); piv.add(b);
+      [.15,.5,.85].forEach(t=>{ const st=new THREE.Mesh(new THREE.SphereGeometry(.035,6,4),trim); st.position.set(-sd*t,h,.06); piv.add(st); }); });
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(.09,.02,6,12),trim); ring.position.set(-sd*.82,1.15,.07); piv.add(ring); });
+  // 上げた 落とし格子（下の 歯だけ 見える）
+  for(let k=0;k<7;k++){ const x=11.25+k*.25; add(box,iron,x,2.45,FZ-.18,.06,.5,.06); const t=add(new THREE.ConeGeometry(.04,.14,4),iron,x,2.14,FZ-.18); t.rotation.x=Math.PI; }
+  add(box,iron,12,2.3,FZ-.18,1.8,.05,.05);
+  // 門の 上：紋章の 盾と 冠、張り出しの 回廊、ぎざぎざ
+  add(box,trim,12,3.42,FZ+.06,.9,.82,.06); add(box,L(null,cloth),12,3.44,FZ+.1,.76,.68,.06);
+  add(new THREE.ConeGeometry(.38,.3,3),L(null,cloth),12,2.98,FZ+.1,1,1,.15).rotation.z=Math.PI;
+  add(box,trim,12,3.44,FZ+.14,.08,.5,.03); add(box,trim,12,3.52,FZ+.14,.4,.07,.03);
+  [-.18,0,.18].forEach(dx=>add(new THREE.ConeGeometry(.06,.18,4),trim,12+dx,3.98,FZ+.1));
+  add(box,trim,12,3.86,FZ+.1,.5,.06,.06);
+  add(box,wm,12,4.1,FZ-.5,2.9,.2,1.7);
+  for(let k=0;k<6;k++){ add(box,wm,10.85+k*.46,4.35,FZ+.25,.24,.32,.3); add(box,wm,10.85+k*.46,3.95,FZ+.22,.14,.18,.14); }
+  // 左右の 門塔
+  [-1,1].forEach(sd=>{ const tx=12+sd*2.1, tz=3.4;
+    add(box,stone2,tx,2.4,tz,1.5,4.8,1.6);
+    add(box,wm,tx,.25,tz+.05,1.66,.5,1.76);                                         // 台石
+    [1.0,2.2,3.4].forEach(h=>add(box,wm,tx,h,tz+.81,1.52,.06,.04));                 // 石の 段の 線
+    add(box,wm,tx,4.9,tz,1.8,.2,1.9);                                                // 張り出し
+    for(let i=0;i<3;i++) for(let j=0;j<2;j++){ add(box,wm,tx-.6+i*.6,5.18,tz-.65+j*1.3,.34,.38,.34); }
+    add(box,wm,tx-.6,5.18,tz,.34,.38,.3); add(box,wm,tx+.6,5.18,tz,.34,.38,.3);
+    add(new THREE.ConeGeometry(.95,1.6,4),rf,tx,5.95,tz,1,1,1,Math.PI/4);           // とんがり屋根
+    add(new THREE.SphereGeometry(.08,8,6),trim,tx,6.8,tz);
+    add(box,dark,tx,3.4,tz+.81,.12,.55,.03); add(box,dark,tx,3.4,tz+.81,.36,.1,.03); // 矢狭間（十字）
+    // 垂れ幕
+    add(box,trim,tx,2.92,tz+.84,.8,.07,.07);
+    add(new THREE.PlaneGeometry(.66,1.5),L(null,cloth,{side:THREE.DoubleSide}),tx,2.15,tz+.83);
+    add(new THREE.ConeGeometry(.33,.25,3),L(null,cloth),tx,1.33,tz+.83,1,1,.1).rotation.z=Math.PI;
+    add(box,trim,tx,2.25,tz+.85,.07,.5,.02); add(box,trim,tx,2.32,tz+.85,.3,.06,.02);
+    // 灯り（門の 両わき）
+    const lx=12+sd*1.45;
+    add(box,iron,lx,2.0,FZ+.18,.05,.05,.32); add(box,iron,lx,1.88,FZ+.32,.2,.2,.2);
+    add(new THREE.ConeGeometry(.07,.18,6),L(null,0xffb040,{emissive:0xff8020}),lx,1.92,FZ+.32);
+    add(new THREE.ConeGeometry(.15,.12,4),iron,lx,2.04,FZ+.32,1,1,1,Math.PI/4);
+    const pl=new THREE.PointLight(0xffb060,ST.phase==='road'?1.0:.45,4.5); pl.position.set(lx,1.9,FZ+.6); G.add(pl); });
 }
 function buildRoom(r){
   S.background=new THREE.Color(0x1a1420); S.fog=null; amb.intensity=.62; sun.intensity=.35;
