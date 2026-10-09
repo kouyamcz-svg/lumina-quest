@@ -482,7 +482,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
     if(mv>.001){ trail.unshift([hero.x,hero.z,hero.ang]); if(trail.length>400) trail.pop(); }
     if(mv>.001 && STATS.elt.status==='poison'){ ST.pz=(ST.pz||0)+mv; if(ST.pz>6){ ST.pz=0; if(STATS.elt.hp>1){ STATS.elt.hp--; flashEl.style.opacity=.35; setTimeout(()=>flashEl.style.opacity=0,120); } } }   // ★毒：歩くと 少しずつ 減る（1までで 止まる）
     if(cur.kind==='world' && mv>.001){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))===','?1.5:1);
-      if(wWalk>wEnc){ wWalk=0; wEnc=12+Math.random()*10; startEnc(hero.x>63?'velnaE':hero.x>40?'east':(ST.phase==='road'?'westNight':'west')); } }
+      if(wWalk>wEnc){ wWalk=0; wEnc=12+Math.random()*10; startEnc(hero.x>63?velnaArea(hero.x,hero.z):hero.x>40?'east':(ST.phase==='road'?'westNight':'west')); } }
     if(cur.kind==='dun' && mv>.001 && !msgQ){ wWalk+=mv; if(wWalk>wEnc){ wWalk=0; wEnc=8+Math.random()*8; startEnc(DUNS[DUN_NOW].enc); } }
     if(cur.kind==='fort' && mv>.001 && !msgQ && ST.phase==='c1_fort'){ wWalk+=mv; if(wWalk>wEnc){ wWalk=0; wEnc=8+Math.random()*8; startEnc('fort'); } }
     if(cur.kind==='farm' && mv>.001 && !msgQ){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))==='f'?1.4:1); if(wWalk>wEnc){ wWalk=0; wEnc=10+Math.random()*8; startEnc('farm'); } } }
@@ -1030,14 +1030,15 @@ function battleTick(dt,now){
   const n=BT.foes.length, depth=4.3-EZ, halfW=Math.tan(batCam.fov*Math.PI/360)*depth*batCam.aspect*.92, cell=2*halfW/n;
   BT.foes.forEach(f=>{
     f.x = -halfW + cell*(f.slot+.5);
-    const H0=1.75*(f.def.scale||1), fit=Math.min(1, cell*.95/(H0*f.ar)), H=H0*fit;
+    if(f.frame==='idle') f.idleAr=f.ar; const H0=1.75*(f.def.scale||1), fit=Math.min(1, cell*.95/(H0*(f.idleAr||f.ar))), H=H0*fit;   /* ★大きさは 待機の こまの 幅で 決める（攻撃の こまが 横に 長くても 小さく ならない） */
+    const off=(f.frame==='atk'&&f.def.atkOff)?H*f.ar*f.def.atkOff:0;   /* ★攻撃の こまが 右へ 伸びる 絵は、体の 位置が 動かない よう ずらす */
     f.hop=Math.max(0,f.hop-dt*3.2); f.lunge=Math.max(0,f.lunge-dt*2.6); f.shake=Math.max(0,f.shake-dt); f.hurt=Math.max(0,f.hurt-dt);
     const sx=f.shake>0?Math.sin(now/22)*.05:0;
     const lz=Math.sin(Math.min(1,f.lunge)*Math.PI)*1.6, sc=1+Math.sin(Math.min(1,f.lunge)*Math.PI)*.18+Math.sin(Math.min(1,f.hop)*Math.PI)*.05;
     const hy=Math.sin(Math.min(1,f.hop)*Math.PI)*.22+(f.def.float?.35+Math.sin(now/420+f.x)*.08:0);
     const breath=1+Math.sin(now/380+f.x*2)*.02;
     if(f.def.frames.idle2 && (f.frame==='idle'||f.frame==='idle2')){ const k=Math.floor(now/550)%2?'idle2':'idle'; if(f.frame!==k) setFoeFrame(f,k); }
-    f.mesh.scale.set(H*f.ar*sc, H*sc*(f.shake>0?1:breath), 1); f.mesh.position.set(f.x+sx,hy,EZ+f.z+lz); f.sh.position.set(f.x+sx,.02,EZ+f.z+lz);
+    f.mesh.scale.set(H*f.ar*sc, H*sc*(f.shake>0?1:breath), 1); f.mesh.position.set(f.x+sx+off,hy,EZ+f.z+lz); f.sh.position.set(f.x+sx,.02,EZ+f.z+lz);
     f.mesh.visible = !(f.hurt>0 && Math.floor(now/60)%2===0);
     // ★倒した とき：速く 点滅して から 消える
     if(f.dead){ f.ex=Math.max(0,f.ex-dt*1.25); f.mesh.visible = f.ex>0.08 && Math.floor(now/70)%2===0; f.sh.visible = f.ex>0.08; }
@@ -1397,11 +1398,15 @@ FOES.ishikurage={key:'ishikurage', name:'イシクラゲ', float:true, inflict:{
 FOES.kabenome={key:'kabenome', name:'カベノメ', hp:36, exp:14, gold:10, atk:[5,8], wind:'の 石の すきまが 裂けた！', verb:'かみつき', scale:.9, frames:{idle:RAB.kb_idle,wind:RAB.kb_wind,atk:RAB.kb_atk}};
 // ★出る 場所ごとの 魔物（重みつき）
 // ★第2章の 魔物（絵が 届いた）。経験値は ZF戦で Lv15 前後に なるよう 多め
-FOES.yamabiko={key:'yamabiko', name:'ヤマビコダマ', float:true, inflict:{type:'conf',rate:.2}, hp:44, exp:38, gold:14, atk:[7,11], wind:'の 口が 大きく 開いた！', verb:'音の 輪', frames:{idle:RAB.ym_idle,wind:RAB.ym_wind,atk:RAB.ym_atk}};
+FOES.yamabiko={key:'yamabiko', name:'ヤマビコダマ', float:true, atkOff:.163, inflict:{type:'conf',rate:.2}, hp:44, exp:38, gold:14, atk:[7,11], wind:'の 口が 大きく 開いた！', verb:'音の 輪', frames:{idle:RAB.ym_idle,wind:RAB.ym_wind,atk:RAB.ym_atk}};
 FOES.tetsukui={key:'tetsukui', name:'テツクイムシ', hp:58, exp:46, gold:16, atk:[8,13], wind:'は 体を 後ろへ 引いた！', verb:'歯の 輪', frames:{idle:RAB.tk_idle,wind:RAB.tk_wind,atk:RAB.tk_atk}};
 FOES.zenmai={key:'zenmai', name:'ゼンマイヘイ', hp:52, exp:52, gold:18, atk:[8,12], wind:'の 目が 強く 光った！', verb:'槍の 腕', frames:{idle:RAB.zm_idle,wind:RAB.zm_wind,atk:RAB.zm_atk}};
 FOES.tsutanozoki={key:'tsutanozoki', name:'ツタノゾキ', inflict:{type:'sleep',rate:.2}, hp:48, exp:50, gold:18, atk:[7,11], wind:'の つぼみが 開いた！', verb:'ツタの 鞭', frames:{idle:RAB.tn_idle,wind:RAB.tn_wind,atk:RAB.tn_atk}};
-const ENC={ pass:[['yamabiko',2],['tetsukui',1]], velnaE:[['tetsukui',2],['yamabiko',1]], ruins:[['zenmai',1],['tsutanozoki',1]], farm:[['nousagi',2],['waradokuro',1]], west:[['nousagi',1],['waradokuro',1]], westNight:[['nousagi',1],['yomiakari',2]], east:[['ishikurage',2],['haiusagi',1]], fort:[['haiusagi',1],['kabenome',1]] };
+FOES.kemurikujira={key:'kemurikujira', name:'ケムリクジラ', float:true, atkOff:.172, inflict:{type:'poison',rate:.25}, hp:50, exp:44, gold:16, atk:[7,12], wind:'の おなかの 炉が 赤く 光った！', verb:'煙と 火の粉', frames:{idle:RAB.kj_idle,wind:RAB.kj_wind,atk:RAB.kj_atk}};
+FOES.nakidake={key:'nakidake', name:'ナキダケ', inflict:{type:'sleep',rate:.25}, hp:54, exp:46, gold:16, atk:[7,11], wind:'の かさの 斑点が 光った！', verb:'胞子の 粉', frames:{idle:RAB.nk_idle,wind:RAB.nk_wind,atk:RAB.nk_atk}};
+// ★ヴェルナの 外の 世界は 3つに 分ける：峠から 帝都までの 道＝velnaE、帝都の まわり＝vcapArea、遺跡の まわりの 森＝ruinsForest
+function velnaArea(x,z){ if(Math.hypot(x-92.5,z-24)<11) return 'vcapArea'; if(Math.hypot(x-74.5,z-22)<8) return 'ruinsForest'; return 'velnaE'; }
+const ENC={ pass:[['yamabiko',2],['tetsukui',1]], velnaE:[['tetsukui',2],['yamabiko',1]], vcapArea:[['kemurikujira',2],['tetsukui',1]], ruinsForest:[['nakidake',2],['tsutanozoki',1]], ruins:[['zenmai',1],['tsutanozoki',1]], farm:[['nousagi',2],['waradokuro',1]], west:[['nousagi',1],['waradokuro',1]], westNight:[['nousagi',1],['yomiakari',2]], east:[['ishikurage',2],['haiusagi',1]], fort:[['haiusagi',1],['kabenome',1]] };
 function pickFoe(area){ const t=ENC[area]; let sum=t.reduce((a,b)=>a+b[1],0), r=Math.random()*sum; for(const [k,w] of t){ if((r-=w)<0) return FOES[k]; } return FOES[t[0][0]]; }
 FOES.banpei={key:'banpei', name:'砦の 番兵', scale:1.35, bigInflict:{type:'sleep',rate:.5}, hp:110, exp:80, gold:120, atk:[6,10], wind:'は 大剣を 振りかぶった！', verb:'なぎ払い', boss:true,
   bigWind:'の 鎧の すきまから 黒い 霧が 噴きだした！', bigName:'黒い 霧の 斬撃', frames:{idle:RAB.bp_idle,idle2:RAB.bp_idle2,wind:RAB.bp_wind,atk:RAB.bp_atk,big:RAB.bp_big}};
