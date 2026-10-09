@@ -76,6 +76,20 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('メニューの 頼まれごと', await E(()=>{ const l=requestList().join(' '); return /畑の ワラドクロ退治/.test(l) && /済み/.test(l); }));
   T('扉の 音は 1回だけ', await (async()=>{ await E(()=>{ if(BT) endBattle(); ST.phase='c1_road'; enterTown([12,10],'cap'); window.__door=0; const o=SE.door; SE.door=()=>{ window.__door++; }; window.__oDoor=o; const [dx,dy]=TDOORS()[0]; hero.x=dx+.5; hero.z=dy+.9; hero.ang=Math.PI; }); await pg.keyboard.down('ArrowUp'); await W(1500); await pg.keyboard.up('ArrowUp'); await W(600); return E(()=>{ SE.door=window.__oDoor; return window.__door===1 && cur.kind==='room'; }); })());
   T('戦闘の 背景の 空の 色が 切り替わる', await E(()=>{ ST.phase='road'; enterWorld([30.5,25.5]); startBattle([FOES.yomiakari]); const c=batScene.background.getHex(); endBattle(); return c===0x0a1028; }));
+  // ---- 第2章 ----
+  await E(()=>{ if(BT) endBattle(); PARTY.length=1; STATS.elt.hp=STATS.elt.max; ST.phase='c1_town'; setEscort(true); enterTown([11.5,15.5],'velna'); showEnd1(); });
+  await E(()=>pressA()); await W(500); await flush(); T('第2章へ', await E(()=>ST.phase==='c2_dolm' && TOWN_NOW==='velna' && followers.length===1));
+  await talk('迎えの 騎士'); await flush(); T('峠が 開く', await E(()=>ST.phase==='c2_pass' && WORLD[25][62]==='G'));
+  await E(()=>enterWorld([60.5,25.5])); await W(800); await pg.keyboard.down('ArrowRight'); for(let i=0;i<30;i++){ await W(100); if(await E(()=>cur.kind==='dun')) break; } await pg.keyboard.up('ArrowRight'); await W(500);
+  T('峠の 山道に 入る', await E(()=>cur.kind==='dun' && DUN_NOW==='pass' && freeCircle(hero.x,hero.z)));
+  await talk('関所荒らし'); await flush(); await winBattle(); await flush(); T('中ボスの 後', await E(()=>ST.phase==='c2_road' && !cur.npcs.some(n=>n.foe)));
+  await E(()=>{ ST.phase='c2_road'; enterTown([12,20.2],'vcap'); ST.phase='c2_capital'; enterCastle('velna'); }); await talk('ヴェルナ王'); await flush(); T('謁見で ハーヴェンが 外れる', await E(()=>ST.phase==='c2_inn' && followers.length===0));
+  await E(()=>{ enterTown([12,10],'vcap'); lastDoor=3; enterRoom(3); }); await talk('宿の 娘'); await flush(); await E(()=>{ MENU.sel=0; pressA(); }); await W(1400); await flush(); await W(700);
+  T('宿で 夜の 塔へ', await E(()=>ST.phase==='c2_tower' && cur.kind==='tower'));
+  await talk('リディア'); await flush(); await W(800); await flush(); T('リディアが 加わる', await E(()=>ST.phase==='c2_ruins' && PARTY.includes('lidia') && STATS.lidia.lv>=10));
+  await E(()=>enterDun('ruins')); await talk('からくり'); await flush(); await winBattle(); await flush(); await W(300); await flush(); T('ZFが 加わる', await E(()=>ST.phase==='c2_back' && PARTY.includes('zf')));
+  await E(()=>enterCastle('velna')); await talk('ヴェルナ王'); await flush(); await W(300); T('第2章 完', await E(()=>ST.phase==='c2_end'));
+  T('仲間も 経験値を もらう', await E(()=>{ const a=STATS.lidia.exp; gainExp(5); return STATS.lidia.exp===a+5; }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });

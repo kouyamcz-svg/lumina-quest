@@ -163,9 +163,9 @@ function openChurch(){ say(['神父「神の 家へ ようこそ。何を 望ま
   if(k===0){ const ok=saveGame(); say([ok?'神父「あなたの ぼうけんを、神に 伝えました」':'神父「……祈りが 届かなかった ようです」']); } else say(['神父「あなたに 神の ご加護を」']); },()=>closeMenu())); }
 
 // ★町ごとの 地図・扉・部屋・噴水
-const TOWNS={ rue:{rows:TOWN,doors:DOORS,rooms:null,fountain:[12,8.5],gate:true}, velna:{rows:TOWN,doors:DOORS,rooms:null,fountain:[12,8.5],gate:true}, cap:{rows:CAP,doors:CAP_DOORS,rooms:CAP_ROOMS,fountain:[12,11],gate:false,castle:true} };
+const TOWNS={ rue:{rows:TOWN,doors:DOORS,rooms:null,fountain:[12,8.5],gate:true}, velna:{rows:TOWN,doors:DOORS,rooms:null,fountain:[12,8.5],gate:true}, vcap:{rows:CAP,doors:CAP_DOORS,rooms:null,fountain:[12,11],gate:false,castle:true,velna:true}, cap:{rows:CAP,doors:CAP_DOORS,rooms:CAP_ROOMS,fountain:[12,11],gate:false,castle:true} };
 const TL=()=>TOWNS[typeof TOWN_NOW==='undefined'?'rue':TOWN_NOW];
-const TDOORS=()=>TL().doors, TROOMS=()=>TL().rooms||ROOMS;
+const TDOORS=()=>TL().doors, TROOMS=()=>TOWN_NOW==='vcap'?VCAP_ROOMS:(TL().rooms||ROOMS);
 const TOWN_NPCS=[
  {x:6.5,y:5.6,spr:'king',name:'村の 長老',lines:['長老「昔、ヴェルナの 王が 飢えた 年に 麦を 贈って くれた」','長老「……その 国が、なぜ 今に なって」']},
  {x:17.5,y:11.5,spr:'dolgan',name:'旅の 男',lines:['男「国境の 砦が 落ちたって 話だ」','男「ヴェルナの 兵は、目が 死んで いたそうだぜ」']},
@@ -281,7 +281,7 @@ function churchBody(x,y,w,h){ const cx=x+w/2, cz=y+h/2, H=2.1, base=.24, fz=y+h;
   const sp=add(new THREE.ConeGeometry(.78,1.9,4),L(T.roofB,0xc8d0ff),tx,base+4.75,tz); sp.rotation.y=Math.PI/4;          // とがった 屋根
   add(box,gold,tx,base+6.0,tz,.1,.75,.1); add(box,gold,tx,base+6.1,tz,.46,.1,.1);                                         // 十字
   return true; }
-function houseKind(x,y,w,h){ if(!(TOWN_NOW==='rue'||TOWN_NOW==='cap')) return null;
+function houseKind(x,y,w,h){ if(!(TOWN_NOW==='rue'||TOWN_NOW==='cap'||TOWN_NOW==='vcap')) return null;
   const di=TDOORS().findIndex(([dx,dy])=>dx>=x&&dx<x+w&&dy===y+h); const r=di>=0?TROOMS()[di]:null; if(!r) return null;
   if(/鍛冶屋|武器/.test(r.name)) return 'weapon'; if(/道具屋/.test(r.name)) return 'item'; if(/教会/.test(r.name)) return 'church'; return null; }
 function house(x,y,w,h,idx){
@@ -290,10 +290,10 @@ function house(x,y,w,h,idx){
   if(kind==='church'){ churchBody(x,y,w,h); }
   else {
   add(box,L(T.found),cx,.12,cz,w+.08,.24,h+.08);
-  const wm=L(T.plaster, kind==='weapon'?0xb8b4ac:0xffffff); wm.map=T.plaster.clone(); wm.map.needsUpdate=true; wm.map.repeat.set(w/2,1);
+  const vel=!!TL().velna; const wm=L(T.plaster, kind==='weapon'?0xb8b4ac:vel?0xb8b4bc:0xffffff);   /* ★帝都の 家は 鉄の 煙で くすんだ 色 */ wm.map=T.plaster.clone(); wm.map.needsUpdate=true; wm.map.repeat.set(w/2,1);
   add(box,wm,cx,.24+wallH/2,cz,w,wallH,h);
   const roofs=[T.roofR,T.roofB,T.roofG]; const rt=kind==='item'?T.roofG:kind==='weapon'?T.roofB:roofs[idx%3];
-  const roof=new THREE.Mesh(roofGeo(w+.5,h+.6,1.05),L(rt,kind==='weapon'?0x585a62:0xffffff,{side:THREE.DoubleSide}));   /* 武器屋は 鉄色の 屋根 */ roof.position.set(cx,.24+wallH,cz); G.add(roof);
+  const roof=new THREE.Mesh(roofGeo(w+.5,h+.6,1.05),L(vel&&kind!=='item'?T.roofR:rt,kind==='weapon'?0x585a62:vel?0x7a5a60:0xffffff,{side:THREE.DoubleSide}));   /* 武器屋は 鉄色の 屋根 */ roof.position.set(cx,.24+wallH,cz); G.add(roof);
   add(box,L(null,0x5a3a22),cx,.24+wallH+1.06,cz,w+.55,.08,.12);                          // 棟
   add(box,L(T.found),cx+w/2-.5,.24+wallH+.9,cz-.2,.32,.9,.32);                             // 煙突
   if(kind==='weapon'){ add(new THREE.SphereGeometry(.22,8,6),L(null,0xff7a20,{emissive:0xff5010}),cx+w/2-.5,.24+wallH+1.42,cz-.2); }   // 鍛冶の 炉の 火
@@ -341,14 +341,14 @@ function buildTown(){
   if(TL().gate){ [[10.2],[13.8]].forEach(([gx])=>{ add(box,L(T.found),gx,.9,19.5,.5,1.8,.5); }); add(box,L(null,0x6a4528),12,1.9,19.5,4.2,.25,.4); }
   if(isCap){   // ★城下町の 城壁（周り）と、北の アルディア城
     for(let y=0;y<TR.length;y++)for(let x=0;x<TR[0].length;x++){ if(TR[y][x]==='#') add(box,L(T.found,0xd8d0c0),x+.5,1.0,y+.5,1,2.0,1); }
-    const wm=L(T.stone,0xf2f0ea), rf=L(null,0x3a5aa8), gd=L(null,0xd8b040);
+    const vel=!!TL().velna, wm=L(T.stone,vel?0x8a8890:0xf2f0ea), rf=L(null,vel?0x5a1e24:0x3a5aa8), gd=L(null,vel?0x9a9aa8:0xd8b040);   /* ★帝都は 暗い 石と 赤黒の 屋根 */
     add(box,wm,12,1.6,1.9,20.5,3.2,3.6);                                     // 城の 正面の 壁
     for(let x=2;x<22;x+=1.2) add(box,wm,x+.3,3.35,3.6,.6,.4,.3);             // ぎざぎざ
     [[3,2],[21,2]].forEach(([x,z])=>{ add(new THREE.CylinderGeometry(1.1,1.2,5,12),wm,x,2.5,z); add(new THREE.ConeGeometry(1.4,2.2,12),rf,x,6.1,z); });
     add(box,wm,12,3.8,1.4,7,7.6,2.6); add(new THREE.ConeGeometry(2.2,3,12),rf,12,9.1,1.4);   // 天守
     [[8.6,1.5],[15.4,1.5]].forEach(([x,z])=>{ add(new THREE.CylinderGeometry(.7,.75,6.4,10),wm,x,3.2,z); add(new THREE.ConeGeometry(.95,1.8,10),rf,x,7.3,z); });
     add(box,L(null,0x3a2a1e),12,1.1,3.72,2.2,2.2,.1); add(box,gd,12,2.35,3.74,2.5,.18,.12);  // 門
-    [[9.8],[14.2]].forEach(([x])=>{ add(new THREE.PlaneGeometry(.9,1.8),L(null,0x3050a0),x,2.2,3.72); });   // 王国の 旗
+    [[9.8],[14.2]].forEach(([x])=>{ add(new THREE.PlaneGeometry(.9,1.8),L(null,vel?0x7a1a20:0x3050a0),x,2.2,3.72); });   // 王国の 旗
   }
 }
 function buildRoom(r){
@@ -391,6 +391,7 @@ function bbGeo(){ const g=new THREE.PlaneGeometry(1,1); const p=g.attributes.pos
 function person(k){const mat=new THREE.MeshBasicMaterial({map:sprTex(k,'front'),transparent:true,alphaTest:.3});const m=new THREE.Mesh(bbGeo(),mat);S.add(m);
   const sh=new THREE.Mesh(new THREE.CircleGeometry(.28,12),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.25,depthWrite:false}));sh.rotation.x=-Math.PI/2;S.add(sh);return {m,sh,k,pose:'front',f:0};}
 function place(p,x,z,faceAng,step){
+  if(p.noAnim){ const img=p.m.material.map.image; const ar=img&&img.width?img.width/img.height:1; const hgt=1.9; p.m.scale.set(hgt*ar,hgt,1); p.m.position.set(x,hgt/2+.02,z); p.m.quaternion.copy(C.quaternion); p.sh.position.set(x,.02,z); return; }
   const camAng=Math.atan2(C.position.x-x, C.position.z-z);
   let rel=faceAng-camAng; rel=Math.atan2(Math.sin(rel),Math.cos(rel)); const a=Math.abs(rel);
   let pose, flip=false;
@@ -409,8 +410,8 @@ function enterTown(at,which){ TOWN_NOW=which||'rue';
   // ★外の 世界から 直接 入る ときも 3Dの 画面に 戻す（前は ドルムに 入っても 2Dの 地図の まま だった）
   if(hero.p){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); } cv.style.display='block'; c2.style.display='none'; if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildTown(); if(TOWN_NOW==='rue' && RUE_BURNT()) burnTown();   /* ★ガイルとの 別れの 後（road）や 第1章でも 焼けた 村の まま（前は road で 昼の 村に 戻った） */
   cur={kind:'town', rows:TL().rows, solid:new Set(['#','H','t','F','w','K']), npcs:cur.npcs, room:null};
-  setNpcs(TOWN_NOW==='velna'?velnaNpcs():TOWN_NOW==='cap'?capNpcs():townNpcs()); chestMesh(TOWN_NOW==='velna'?'none':'town'); if(at){ hero.x=at[0]; hero.z=at[1]; hero.ang=0; } resetTrail();
-  document.getElementById('place').textContent= TOWN_NOW==='cap' ? '王都 アルディア' : TOWN_NOW==='velna' ? 'ヴェルナの 鉱山の 町 ドルム' : /^(burn|after|road)/.test(ST.phase) ? '燃える 村 ルーエ' : /^(end|c1_)/.test(ST.phase) ? '焼け跡の 村 ルーエ' : '国境の村 ルーエ'; }
+  setNpcs(TOWN_NOW==='velna'?velnaNpcs():TOWN_NOW==='cap'?capNpcs():TOWN_NOW==='vcap'?vcapNpcs():townNpcs()); chestMesh(TOWN_NOW==='rue'?'town':'none'); if(at){ hero.x=at[0]; hero.z=at[1]; hero.ang=0; } resetTrail();
+  document.getElementById('place').textContent= TOWN_NOW==='vcap' ? '帝都 ヴェルナ' : TOWN_NOW==='cap' ? '王都 アルディア' : TOWN_NOW==='velna' ? 'ヴェルナの 鉱山の 町 ドルム' : /^(burn|after|road)/.test(ST.phase) ? '燃える 村 ルーエ' : /^(end|c1_)/.test(ST.phase) ? '焼け跡の 村 ルーエ' : '国境の村 ルーエ'; }
 function enterRoom(i){ const r=TROOMS()[i]; if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildRoom(r);
   cur={kind:'room', rows:r.rows, solid:new Set(['W','s','b','T','f','p','A','Q']), npcs:cur.npcs, room:i};
   setNpcs(r.npc?[r.npc]:[]);
@@ -444,7 +445,7 @@ const msgEl=document.getElementById('msg'); let msgQ=null;
 let msgDone=null;
 function say(lines,done){msgQ=lines.slice();msgDone=done||null;msgEl.style.display='block';msgEl.textContent=msgQ.shift();}
 function closeMsg(){ msgQ=null; msgEl.style.display='none'; const d=msgDone; msgDone=null; d&&d(); }
-function pressA(){ if(ST.phase==='end'){ startCh1(); return; }
+function pressA(){ if(ST.phase==='end'){ startCh1(); return; } if(ST.phase==='c1_end'){ startCh2(); return; } if(ST.phase==='c2_end') return;
   if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='menu'){ se('ok'); battleCmd(); } else if(BT.phase==='target') targetPick(); else if(BT.phase==='skill'){ se('ok'); skillPick(); } return; }
   if(MENU){ se('ok'); MENU.onPick(MENU.sel); return; }
   if(msgQ){ if(msgQ.length) msgEl.textContent=msgQ.shift(); else closeMsg(); return; }
@@ -470,7 +471,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   let ix=dir[0], iz=dir[1]; if(keys.ArrowLeft)ix=-1; if(keys.ArrowRight)ix=1; if(keys.ArrowUp)iz=-1; if(keys.ArrowDown)iz=1;
   if(MENU){ menuInput(iz); ix=0; iz=0; }
   if(ix||iz) bMoved=true;
-  if(msgQ||fading||busyDoor||ST.phase==='end'||ST.phase==='c1_end'){ix=0;iz=0;}
+  if(msgQ||fading||busyDoor||ST.phase==='end'||ST.phase==='c1_end'||ST.phase==='c2_end'){ix=0;iz=0;}
   if(ix||iz){ const l=Math.hypot(ix,iz), vx=ix/l, vz=iz/l; hero.ang=Math.atan2(vx,vz);
     const dash = cur.kind==='town' && (holdB || keys.x || keys.Shift);
     const st=SPEED*(dash?DASH:1)*(cur.kind==='world'?.8:1)*dt, ox=hero.x, oz=hero.z;
@@ -481,25 +482,33 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
     if(mv>.001){ trail.unshift([hero.x,hero.z,hero.ang]); if(trail.length>400) trail.pop(); }
     if(mv>.001 && STATS.elt.status==='poison'){ ST.pz=(ST.pz||0)+mv; if(ST.pz>6){ ST.pz=0; if(STATS.elt.hp>1){ STATS.elt.hp--; flashEl.style.opacity=.35; setTimeout(()=>flashEl.style.opacity=0,120); } } }   // ★毒：歩くと 少しずつ 減る（1までで 止まる）
     if(cur.kind==='world' && mv>.001){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))===','?1.5:1);
-      if(wWalk>wEnc){ wWalk=0; wEnc=12+Math.random()*10; startEnc(hero.x>40?'east':(ST.phase==='road'?'westNight':'west')); } }
+      if(wWalk>wEnc){ wWalk=0; wEnc=12+Math.random()*10; startEnc(hero.x>63?'velnaE':hero.x>40?'east':(ST.phase==='road'?'westNight':'west')); } }
+    if(cur.kind==='dun' && mv>.001 && !msgQ){ wWalk+=mv; if(wWalk>wEnc){ wWalk=0; wEnc=8+Math.random()*8; startEnc(DUNS[DUN_NOW].enc); } }
     if(cur.kind==='fort' && mv>.001 && !msgQ && ST.phase==='c1_fort'){ wWalk+=mv; if(wWalk>wEnc){ wWalk=0; wEnc=8+Math.random()*8; startEnc('fort'); } }
     if(cur.kind==='farm' && mv>.001 && !msgQ){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))==='f'?1.4:1); if(wWalk>wEnc){ wWalk=0; wEnc=10+Math.random()*8; startEnc('farm'); } } }
   // 出入口の 範囲（町：家の 扉の 前に 上へ 進む と 入る／家：出口の 前で 下へ 進む と 出る）
   if(!fading && !msgQ){
-    if(cur.kind==='town' && TOWN_NOW==='cap' && hero.z>20.9 && iz>0 && Math.abs(hero.x-12)<1.3){ go(()=>enterWorld([12.5,25.45])); }
+    if(cur.kind==='town' && TOWN_NOW==='vcap' && hero.z>20.9 && iz>0 && Math.abs(hero.x-12)<1.3){ go(()=>enterWorld([92.5,26.4])); }
+    else if(cur.kind==='town' && TOWN_NOW==='vcap' && hero.z<4.0 && iz<0 && Math.abs(hero.x-12)<1.1){ go(()=>enterCastle('velna')); }
+    else if(cur.kind==='tower' && hero.z>cur.rows.length-1.45 && iz>0){ go(()=>{ enterCastle('velna'); hero.x=12.5; hero.z=8.6; }); }
+    else if(cur.kind==='dun'){ dunExits(iz,ix); }
+    else if(cur.kind==='town' && TOWN_NOW==='cap' && hero.z>20.9 && iz>0 && Math.abs(hero.x-12)<1.3){ go(()=>enterWorld([12.5,25.45])); }
     else if(cur.kind==='town' && TOWN_NOW==='cap' && hero.z<4.0 && iz<0 && Math.abs(hero.x-12)<1.1){ go(()=>enterCastle()); }
     else if(cur.kind==='town' && TOWN_NOW==='velna' && hero.z>18.9 && iz>0 && Math.abs(hero.x-11.5)<1.3){ go(()=>enterWorld([48.5,26.45])); }
     else if(cur.kind==='town' && TOWN_NOW==='velna' && hero.z<0.75 && iz<0){ say(['北は 鉱山へ 続く 道。今は 用が ない。']); hero.z=1.0; }
     else if(cur.kind==='town' && TOWN_NOW==='rue' && hero.z>18.9 && iz>0 && Math.abs(hero.x-11.5)<1.3){ /* ★ルーエの 南の 門（前は 町を 問わず 効いて、城下町の 南で ルーエの 外へ 出た） */ if(ST.phase==='burn') say(['村の 人たちを 置いては 行けない。']); else if(ST.phase==='morning'||ST.phase==='field') say(['ガイル「どこへ 行く。見回りは 北の 畑だ」']); else go(()=>enterWorld([34.5,32.45])); hero.z=18.6; }
     if(cur.kind==='town' && TOWN_NOW==='rue' && hero.z<0.75 && iz<0 && Math.abs(hero.x-12)<1.3){ if(ST.phase==='morning') { say(['まずは ガイル師匠に 声を かけよう。']); hero.z=1.0; } else if(ST.phase==='field') go(()=>enterFarm()); else { say(['畑の ほうは、もう 火が 回って いる。']); hero.z=1.0; } }
     if(cur.kind==='farm' && hero.z>cur.rows.length-1.2 && iz>0 && Math.abs(hero.x-12)<1.3){ go(()=>{ enterTown([12,1.2]); hero.ang=0; if(ST.phase==='raid') startRaid(); }); }
-    if(cur.kind==='castle' && hero.z>cur.rows.length-1.2 && iz>0){ if(ST.phase==='c1_castle'){ say(['まずは 王の 話を 聞こう。']); hero.z-=.4; } else go(()=>{ enterTown([12,4.7],'cap'); hero.ang=0; }); }
+    if(cur.kind==='castle' && hero.z>cur.rows.length-1.2 && iz>0){ if(ST.phase==='c1_castle'){ say(['まずは 王の 話を 聞こう。']); hero.z-=.4; } else if(CASTLE_NOW==='velna' && ST.phase==='c2_capital'){ say(['まずは 王に 会わなければ。']); hero.z-=.4; } else go(()=>{ enterTown([12,4.7],CASTLE_NOW==='velna'?'vcap':'cap'); hero.ang=0; }); }
     if(cur.kind==='fort' && hero.z>cur.rows.length-1.2 && iz>0){ go(()=>enterWorld([37.5,24.5])); }
-    if(cur.kind==='fort' && hero.z<1.9 && hero.x>13 && iz<0 && /^c1_(east|town|end)$/.test(ST.phase)){ go(()=>enterWorld([41.6,25.5])); }
+    if(cur.kind==='fort' && hero.z<1.9 && hero.x>13 && iz<0 && PAST_FORT.test(ST.phase)){ go(()=>enterWorld([41.6,25.5])); }
     if(cur.kind==='world'){ const c=at(Math.floor(hero.x),Math.floor(hero.z)); if(c==='V' && (ix||iz)) go(()=>leaveWorldToTown());   /* ★どの 向きから 入っても 村に 入る（前は 南から 上へ 進む ときだけ） */
-      if(c==='S'){ const east=hero.x>40; if(ST.phase==='c1_road'||ST.phase==='c1_fort') go(()=>enterFort(false)); else if(/^c1_(east|town|end)$/.test(ST.phase)) go(()=>{ enterWorld(east?[37.5,24.5]:[41.6,25.5]); }); else { hero.x+= east?.6:-.6; say(['国境の 砦。ヴェルナの 兵が 門を 閉ざして いる。']); } }
-      if(c==='W'){ if(/^c1_(east|town|end)$/.test(ST.phase)){ if(ST.phase==='c1_east') ST.phase='c1_town'; go(()=>enterTown([11.5,18.2],'velna')); } else { hero.x-=.6; say(['まだ 行けない。']); } }
-      if(c==='C') { if(/^(road|c1_)/.test(ST.phase)) go(()=>enterTown([12,20.2],'cap')); else { hero.z+=0.6; say(['王都 アルディア。今は 用が ない。']); } } }
+      if(c==='S'){ const east=hero.x>40; if(ST.phase==='c1_road'||ST.phase==='c1_fort') go(()=>enterFort(false)); else if(PAST_FORT.test(ST.phase)) go(()=>{ enterWorld(east?[37.5,24.5]:[41.6,25.5]); }); else { hero.x+= east?.6:-.6; say(['国境の 砦。ヴェルナの 兵が 門を 閉ざして いる。']); } }
+      if(c==='W'){ if(PAST_FORT.test(ST.phase)){ if(ST.phase==='c1_east') ST.phase='c1_town'; go(()=>enterTown([11.5,18.2],'velna')); } else { hero.x-=.6; say(['まだ 行けない。']); } }
+      if(c==='G'){ go(()=>enterDun('pass',hero.x>63)); }
+      if(c==='Y'){ go(()=>{ if(ST.phase==='c2_road') ST.phase='c2_capital'; enterTown([12,20.2],'vcap'); }); }
+      if(c==='R'){ if(/^c2_(ruins|back|end)$/.test(ST.phase)) go(()=>enterDun('ruins')); else { hero.z+=.6; say(['古い 遺跡の 入口だ。','……今は 入る 理由が ない。']); } }
+      if(c==='C') { if(/^(road|c1_|c2_)/.test(ST.phase)) go(()=>enterTown([12,20.2],'cap')); else { hero.z+=0.6; say(['王都 アルディア。今は 用が ない。']); } } }
     else if(cur.kind==='town' && TOWN_NOW==='velna'){ DOORS.forEach(([dx,dy])=>{ if(Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2 && iz<0 && !msgQ){ say(['戸は 閉まって いる。']); hero.z=dy+.75; } }); }
     else if(cur.kind==='town'){ TDOORS().forEach(([dx,dy],i)=>{ if(!busyDoor && Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2 && iz<0){ busyDoor=1;   /* ★扉の すぐ 前だけ。busyDoor=1 が 説明の 中に 入って 効かず、毎こま 扉の 音が 鳴って 重なって いた */
         se('door'); swing(doorPiv[i],0,OPEN,.28,0,()=>go(()=>{ lastDoor=i; enterRoom(i); swing(roomDoor,OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }); }
@@ -626,7 +635,7 @@ function drawCastle(sx,sy,s){ // 2×2 ますの 王都の 城
   R_(11,4,10,26,'#f4f6fa'); R_(20,4,1,26,'#b8c0d0'); for(let i=0;i<7;i++) R_(16-((i+1)>>1),-3+i,((i+1)>>1)*2+1,1,i<3?'#7d97cf':'#5470b0');
   R_(13,8,2,3,'#9fd8ff'); R_(17,8,2,3,'#9fd8ff'); R_(13,22,6,8,'#3a2e24'); R_(14,21,4,1,'#e8c048');
   R_(15,-6,1,4,'#8a8a8a'); R_(16,-6,4,2,'#c03030'); }
-function enterWorld(at){ if(G) S.remove(G); G=null;
+function enterWorld(at){ if(G) S.remove(G); G=null; applyWorldState();
   cur={kind:'world', rows:WORLD, solid:WSOLID, npcs:[], room:null}; clearNpcs();
   hero.x=at[0]; hero.z=at[1]; hero.ang=0; resetTrail();
   [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=false; p.sh.visible=false; });
@@ -669,7 +678,7 @@ function bakeWorld32(){
   const P=(g,x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h);};
   // 浜辺：海に 面した 陸
   const terr=(x,y)=>{ if(x<0||y<0||x>=MW||y>=MH) return 'sea'; const c=WORLD[y][x];
-    if(c==='~') return 'sea'; if(c==='r') return 'lake'; if(c==='b') return 'lake'; if(c==='=') return 'road'; if(c==='d') return 'desert'; if(c==='x') return 'dark';
+    if(c==='~') return 'sea'; if(c==='r') return 'lake'; if(c==='b') return 'lake'; if(c==='='||c==='G') return 'road'; if(c==='d') return 'desert'; if(c==='x') return 'dark';
     for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]){ const nx=x+dx, ny=y+dy; if(nx>=0&&ny>=0&&nx<MW&&ny<MH&&WORLD[ny][nx]==='~' && (c==='.'||c===',')) return 'beach'; }
     return 'plain'; };
   const RANK={sea:0,lake:0,beach:1,desert:2,dark:2,plain:3,road:5};
@@ -723,6 +732,9 @@ function bakeWorld32(){
     if(c==='V'||c==='W') put(WOBJ_IMG.village, sx+16, sy+31);
     if(c==='S' && WORLD[y][x-1]!=='S' && WORLD[y-1][x]!=='S') put(WOBJ_IMG.fort, sx+32, sy+63);   // ★国境の 砦（2×2）
     if(c==='C' && WORLD[y][x-1]!=='C' && WORLD[y-1][x]!=='C') put(WOBJ_IMG.castle, sx+32, sy+63);
+    if(c==='Y' && WORLD[y][x-1]!=='Y' && WORLD[y-1][x]!=='Y'){ const tmp=document.createElement('canvas'), im=WOBJ_IMG.castle; if(im){ tmp.width=im.width; tmp.height=im.height; const tg=tmp.getContext('2d'); tg.drawImage(im,0,0); tg.globalCompositeOperation='source-atop'; tg.fillStyle='rgba(60,20,30,.45)'; tg.fillRect(0,0,tmp.width,tmp.height); put(tmp, sx+32, sy+63); } }   // ★帝都（城の 絵を 暗く して 使う）
+    if(c==='R'){ P(G2,sx+4,sy+18,24,12,'#6a7068'); [6,14,22].forEach(px=>{ P(G2,sx+px,sy+4+((px*3)%5),5,16,'#9aa098'); P(G2,sx+px,sy+4+((px*3)%5),5,2,'#c0c8c0'); }); P(G2,sx+12,sy+20,8,10,'#1a1a1a'); }   // ★森の 遺跡（石の 柱と 入口）
+    if(c==='G'){ P(G2,sx,sy+2,32,3,'#7a6a58'); P(G2,sx,sy+27,32,3,'#7a6a58'); }   // ★峠の 道
   }
   return out;
 }
@@ -740,7 +752,7 @@ const BG_LOOK={
   fort:{grp:'fort', bg:0x0c0a10, fog:[0x0c0a10,8,26], hemi:[0x8a7a70,0x2a2018,.4], sun:[0xffd0a0,.18], sky:false},
   burn:{grp:'burn', bg:0x1e0c10, fog:[0x2a1210,10,40], hemi:[0xff9a70,0x2a1010,.5], sun:[0xff7040,.35], sky:false},
 };
-function sceneLook(){ if(cur.kind==='fort') return 'fort'; if(cur.kind==='town' && ST.phase==='burn') return 'burn';
+function sceneLook(){ if(cur.kind==='fort') return 'fort'; if(cur.kind==='dun') return DUNS[DUN_NOW].look; if(cur.kind==='town' && ST.phase==='burn') return 'burn';
   if(cur.kind==='world'){ if(hero.x>40) return 'rock'; if(ST.phase==='road') return 'night'; } return 'field'; }
 function applyLook(k){ const L_=BG_LOOK[k]||BG_LOOK.field; ['field','nightX','rock','fort','burn'].forEach(n=>{ if(BG[n]) BG[n].visible = (n===L_.grp || n===L_.extra); });
   if(BG.sky) BG.sky.visible=L_.sky;
@@ -878,9 +890,9 @@ function backToMenu(){ return ()=>{ BT.guard=false;
   BT.phase='menu'; bsay('どうする？'); drawBattleUI(); return 0; }; }
 function wipeOut(){ PARTY.forEach(k=>{ STATS[k].status=null; }); BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display='';
   BAG.gold=Math.floor(BAG.gold/2); PARTY.forEach(k=>{ STATS[k].hp=STATS[k].max; STATS[k].mp=STATS[k].maxmp||STATS[k].mp; });
-  const inCh1=/^c1_/.test(ST.phase) && ST.phase!=='c1_castle';
-  go(()=>{ if(inCh1) enterTown([3.5,18.4],'cap'); else enterTown([12,6],'rue'); hero.ang=0;
-    say([inCh1?'……気が つくと、王都の 教会の 前に いた。':'……気が つくと、村の 広場に 倒れて いた。','所持金が 半分に なった。']); }); }
+  const inCh1=/^c1_/.test(ST.phase) && ST.phase!=='c1_castle', inV=/^c2_(capital|inn|tower|ruins|back)$/.test(ST.phase), inD=/^c2_(dolm|pass|road)$/.test(ST.phase);
+  go(()=>{ if(inV) enterTown([3.5,18.4],'vcap'); else if(inD) enterTown([11.5,15.5],'velna'); else if(inCh1) enterTown([3.5,18.4],'cap'); else enterTown([12,6],'rue'); hero.ang=0;
+    say([inV?'……気が つくと、帝都の 教会の 前に いた。':inD?'……気が つくと、ドルムの 町に いた。':inCh1?'……気が つくと、王都の 教会の 前に いた。':'……気が つくと、村の 広場に 倒れて いた。','所持金が 半分に なった。']); }); }
 // ================= 呪文・状態異常・会心・作戦（Ⅳの 仕組みを 写した もの）=================
 //  ★名前は 横文字の 呪文名（指示）。メニューと 戦闘の 欄も「技」ではなく「呪文」
 //  type：atk1（1体）・atkAll（全体）・heal（味方1人）・healAll・escape（ダンジョンから 出る）・sleep（眠らせる）・conf（混乱）・defdown（守備を 下げる）・atkdown・double（2回 攻撃）・steal（盗む）
@@ -1164,9 +1176,9 @@ const CASTLE=[
 "#..........rrr..........#",
 "#..........rrr..........#",
 "############.############"];
-function buildCastle(){
-  S.background=new THREE.Color(0x1a1420); S.fog=null; amb.intensity=.7; amb.color.setHex(0xfff0e0); sun.intensity=.4; sun.color.setHex(0xfff0d0);
-  const st=L(T.stone,0xe8e0d0), carpet=L(T.rug), wall=L(T.inwall,0xf0e8d8);
+function buildCastle(){ const vel=CASTLE_NOW==='velna';
+  S.background=new THREE.Color(0x1a1420); S.fog=null; amb.intensity=vel?.55:.7; amb.color.setHex(vel?0xe0d8e8:0xfff0e0); sun.intensity=.4; sun.color.setHex(0xfff0d0);
+  const st=L(T.stone,vel?0x9a98a0:0xe8e0d0), carpet=L(T.rug,vel?0x8a4050:0xffffff), wall=L(T.inwall,vel?0x8a8890:0xf0e8d8);   /* ★帝都の 城は 暗い 石と 赤黒 */
   for(let y=0;y<CASTLE.length;y++)for(let x=0;x<CASTLE[0].length;x++){ const c=CASTLE[y][x];
     add(box, c==='r'?carpet:st, x+.5,-.5,y+.5);
     if(c==='#') add(box,wall,x+.5,1.2,y+.5,1,2.4,1);
@@ -1178,11 +1190,12 @@ function buildCastle(){
   }
   [[6.5,12],[18.5,12],[12.5,15.5]].forEach(([x,z])=>{ const l=new THREE.PointLight(0xffe0b0,.6,9); l.position.set(x,2.2,z); G.add(l); });
   add(box,L(null,0xd8b040),12.5,.8,1.4,1.1,1.0,.5); add(box,L(null,0xb02020),12.5,.75,1.6,.8,.6,.3); add(box,L(null,0xd8b040),12.5,1.6,1.25,1.0,.9,.15);   // 玉座
-  [[8.5,0.6],[16.5,0.6]].forEach(([x,z])=>{ add(new THREE.PlaneGeometry(.9,1.8),L(null,0x3050a0),x,1.4,z+.42); });   // 王国の 旗
+  [[8.5,0.6],[16.5,0.6]].forEach(([x,z])=>{ add(new THREE.PlaneGeometry(.9,1.8),L(null,vel?0x7a1a20:0x3050a0),x,1.4,z+.42); });   // 王国の 旗
   const l=new THREE.PointLight(0xffe0b0,.8,10); l.position.set(12.5,2.5,3); G.add(l); }
-function enterCastle(){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); cv.style.display='block'; c2.style.display='none';
+function enterCastle(which){ CASTLE_NOW=which||'ardia'; [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); cv.style.display='block'; c2.style.display='none';
   if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; fireMeshes=[]; buildCastle();
   cur={kind:'castle', rows:CASTLE, solid:new Set(['#','P','U','B','T','K']), npcs:cur.npcs, room:null};
+  if(CASTLE_NOW==='velna'){ setNpcs(velnaCastleNpcs()); hero.x=12.5; hero.z=CASTLE.length-1.6; hero.ang=Math.PI; resetTrail(); document.getElementById('place').textContent='帝都 ヴェルナの 城'; resize(); return; }
   setNpcs([{x:12.5,y:2.4,spr:'king',name:'アルディア王',talk:()=>{ if(ST.phase==='c1_castle'){ kingCh1(); return; } if(ST.phase!=='road'){ say(['アルディア王「頼んだぞ、エルト」']); return; }
     say(['アルディア王「……そなたは、国境の 村の 者か」','エルトは、村で 起きた ことを 話した。','うつろな 目の 兵。燃える 家。倒れた 部隊長の 最後の 言葉。','アルディア王「……なぜ、わたしは ここに、と」','アルディア王「よく 生きて 戻った」','アルディア王「今日から、そなたは 王国の 兵士だ」','＊ エルトは 兵士の 鎧を 受け取った ＊','アルディア王「ヴェルナに、和平の 使者を 送る」','アルディア王「……あの 国で 何が 起きて いるのか、確かめねば ならぬ」'],()=>showEnd()); }}]);
   // ★城の 人（王の ほか）
@@ -1214,7 +1227,7 @@ function drawMenu(){ drawStat(); if(!MENU){ menuEl.style.display='none'; return;
   menuEl.innerHTML='<div class="mt">'+MENU.title+'</div>'+MENU.items.map((t,i)=>`<div class="${i===MENU.sel?'on':''}">${i===MENU.sel?'▶':'　'}${t}</div>`).join(''); }
 function menu(items,title,onPick,onBack){ MENU={items,title,sel:0,onPick,onBack}; drawMenu(); }
 function closeMenu(){ MENU=null; drawMenu(); }
-function goalText(){ return ({morning:'村の 北の 入口に いる ガイルに 話す', field:'北の 畑を 見回り、外れの 古い 倉を 調べる', raid:'南の 出口から 村へ 戻る',
+function goalText(){ return ({ c2_dolm:'ドルムの 広場で 帝国の 迎えの 騎士に 話す', c2_pass:'ドルムの 東の 峠の 山道を 抜ける（出口に 魔物が いる）', c2_road:'街道を 東へ。帝都 ヴェルナの 城へ', c2_capital:'帝都の 城の 北の 謁見の 間で ヴェルナ王に 会う', c2_inn:'帝都の 城下町の 宿屋で 休む', c2_tower:'塔の 王女に 話す', c2_ruins:'リディアと 北西の 森の 遺跡へ。奥を 調べる', c2_back:'帝都の 城の ヴェルナ王に 会う', c2_end:'第2章 完',morning:'村の 北の 入口に いる ガイルに 話す', field:'北の 畑を 見回り、外れの 古い 倉を 調べる', raid:'南の 出口から 村へ 戻る',
   burn:'逃げ遅れた 村の 人を 助ける（'+Object.keys(ST.rescued).length+'／3）。そして 広場の 部隊長', after:'広場の ガイルの もとへ', road:'夜の 街道を 北東へ。王都 アルディアの 王に 会う', end:'（序章 完）', c1_castle:'王の 話を 聞く', c1_road:'使者を 連れて、街道を 東の 国境の 砦へ', c1_fort:'砦の 奥へ 進む（灯りを ふたつ ともすと 鉄格子が 開く）', c1_east:'砦を 抜け、東の ヴェルナの 鉱山の 町 ドルムへ', c1_town:'ドルムの 人たちと 話し、町の 長に 会う', c1_end:'（第1章 完）'})[ST.phase]; }
 function openFieldMenu(){ if(msgQ||BT||fading||ST.phase==='end') return;
   const items=['強さ','呪文','道具','装備','地図','作戦'].concat(RESERVE.length?['入れ替え']:[]).concat(['クエスト','頼まれごと','音','セーブ','とじる']);
@@ -1246,22 +1259,23 @@ function useHerb(m){ if(m.hp>=m.max) return [m.name+'の HPは 減って いな�
 function menuInput(iy){ if(!MENU) return; if(iy!==0 && iy!==menuLastY){ se('cursor'); MENU.sel=(MENU.sel+(iy>0?1:-1)+MENU.items.length)%MENU.items.length; drawMenu(); } menuLastY=iy; }
 let menuLastY=0;
 // ---- セーブ（この 端末の ブラウザに 残す）----
-function saveGame(){ try{ localStorage.setItem('lq5save', JSON.stringify({wv:2,ST,STATS,BAG,EQUIP,tactic,SND,town:TOWN_NOW,at:{kind:cur.kind,x:hero.x,z:hero.z}})); return true; }catch(e){ return false; } }
+function saveGame(){ try{ localStorage.setItem('lq5save', JSON.stringify({wv:2,ST,STATS,BAG,EQUIP,PARTY,tactic,SND,town:TOWN_NOW,castle:CASTLE_NOW,dun:DUN_NOW,at:{kind:cur.kind,x:hero.x,z:hero.z}})); return true; }catch(e){ return false; } }
 function loadGame(){ try{ const d=JSON.parse(localStorage.getItem('lq5save')||'null'); if(!d) return false;
-  Object.assign(ST,d.ST); Object.assign(STATS.elt,d.STATS.elt); Object.assign(BAG,d.BAG); Object.assign(EQUIP.elt,d.EQUIP.elt); if(!BAG.gear) BAG.gear=[]; if(!BAG.opened) BAG.opened={}; if(!BAG.keys) BAG.keys=[]; if(BAG.antidote===undefined) BAG.antidote=0; if(!('helm' in EQUIP.elt)) EQUIP.elt.helm=null; if(!ST.q) ST.q={}; if(!ST.lamps) ST.lamps={}; if(d.tactic) tactic=d.tactic; if(d.SND){ const o=d.SND; SND={bgm: typeof o.bgm==='number'?o.bgm:(o.bgm===false?0:.6), se: typeof o.se==='number'?o.se:(o.se===false?0:.6), mix:!!o.mix, speed:o.speed||1}; } if(ESCORT()) setEscort(true);
+  Object.assign(ST,d.ST); Object.assign(STATS.elt,d.STATS.elt); Object.assign(BAG,d.BAG); Object.assign(EQUIP.elt,d.EQUIP.elt);
+  if(d.PARTY){ PARTY.length=0; d.PARTY.forEach(k=>PARTY.push(k)); PARTY.slice(1).forEach(k=>{ STATS[k]=d.STATS[k]; if(d.EQUIP[k]) EQUIP[k]=d.EQUIP[k]; }); }   /* ★仲間も 戻す */ if(!BAG.gear) BAG.gear=[]; if(!BAG.opened) BAG.opened={}; if(!BAG.keys) BAG.keys=[]; if(BAG.antidote===undefined) BAG.antidote=0; if(!('helm' in EQUIP.elt)) EQUIP.elt.helm=null; if(!ST.q) ST.q={}; if(!ST.lamps) ST.lamps={}; if(d.tactic) tactic=d.tactic; if(d.SND){ const o=d.SND; SND={bgm: typeof o.bgm==='number'?o.bgm:(o.bgm===false?0:.6), se: typeof o.se==='number'?o.se:(o.se===false?0:.6), mix:!!o.mix, speed:o.speed||1}; } refreshFollowers();
   if(STATS.elt.lv===undefined){ Object.assign(STATS.elt,{lv:1,exp:0,maxmp:6,batk:3,def:3,agi:6}); } syncAtk();
-  const k=d.at.kind; if(k==='fort'){ enterFort(false); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='town' && (d.town==='velna'||d.town==='cap')){ enterTown([d.at.x,d.at.z],d.town); } else if(k==='world'){ if(d.wv===2) enterWorld([d.at.x,d.at.z]); else enterWorld(/^c1_(east|town|end)$/.test(ST.phase)?[41.6,25.5]:/^c1_/.test(ST.phase)?[37.5,24.5]:[34.5,32.45]); }   /* ★前の 地図の セーブは 近くの 場所へ */ else if(k==='farm'){ enterFarm(); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='castle'){ enterCastle(); } else enterTown([d.at.x,d.at.z]);
+  const k=d.at.kind; if(k==='fort'){ enterFort(false); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='town' && d.town && d.town!=='rue'){ enterTown([d.at.x,d.at.z],d.town); } else if(k==='dun'){ enterDun(d.dun||'pass'); hero.x=d.at.x; hero.z=d.at.z; resetTrail(); } else if(k==='tower'){ enterTower(); } else if(k==='world'){ if(d.wv===2) enterWorld([d.at.x,d.at.z]); else enterWorld(PAST_FORT.test(ST.phase)?[41.6,25.5]:/^c1_/.test(ST.phase)?[37.5,24.5]:[34.5,32.45]); }   /* ★前の 地図の セーブは 近くの 場所へ */ else if(k==='farm'){ enterFarm(); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='castle'){ enterCastle(d.castle); } else enterTown([d.at.x,d.at.z]);
   return true; }catch(e){ return false; } }
 function hasSave(){ try{ return !!localStorage.getItem('lq5save'); }catch(e){ return false; } }
 
 // ================= Ⅳの 仕組みを 写した もの（レベル・経験値・お店・宿屋・装備の 付け替え・地図・作戦・音）=================
 const expNeed=(lv)=>lv*lv*6;                       // Ⅳと 同じ：次の レベルまでの 経験値
 const GROW={elt:{hp:5,mp:2,atk:2,def:1,agi:1}};     // 1レベルごとの 伸び
-function gainExp(n){ const m=STATS.elt, out=[]; m.exp=(m.exp||0)+n;
-  while(m.exp>=expNeed(m.lv)){ m.exp-=expNeed(m.lv); m.lv++; const g=GROW.elt; m.max+=g.hp; m.hp+=g.hp; m.maxmp+=g.mp; m.mp+=g.mp; m.batk+=g.atk; m.def+=g.def; m.agi+=g.agi;
-    out.push(m.name+'は レベル '+m.lv+' に 上がった！'); (LEARN.elt||[]).filter(([lv])=>lv===m.lv).forEach(([,id])=>out.push('＊ '+m.name+'は '+SKILLS[id].name+'を 覚えた！ ＊')); }
+function gainExp(n){ const out=[]; PARTY.forEach(k=>{ const m=STATS[k]; if(!m || m.hp<=0) return; m.exp=(m.exp||0)+n;   /* ★仲間 みんなに（倒れて いる 者は もらえない） */
+  while(m.exp>=expNeed(m.lv)){ m.exp-=expNeed(m.lv); m.lv++; const g=GROW[k]; m.max+=g.hp; m.hp+=g.hp; m.maxmp+=g.mp; m.mp+=g.mp; m.batk+=g.atk; m.def+=g.def; m.agi+=g.agi;
+    out.push(m.name+'は レベル '+m.lv+' に 上がった！'); (LEARN[k]||[]).filter(([lv])=>lv===m.lv).forEach(([,id])=>out.push('＊ '+m.name+'は '+SKILLS[id].name+'を 覚えた！ ＊')); } });
   syncAtk(); return out; }
-function syncAtk(){ const m=STATS.elt, e=EQUIP.elt; m.atk=m.batk+(e.weapon?e.weapon.v:0); m.defT=m.def+(e.armor?e.armor.v:0)+(e.helm?e.helm.v:0); }
+function syncAtk(){ PARTY.forEach(k=>{ const m=STATS[k], e=EQUIP[k]||{}; if(!m) return; m.atk=m.batk+(e.weapon?e.weapon.v:0); m.defT=m.def+(e.armor?e.armor.v:0)+(e.helm?e.helm.v:0); }); }
 // ---- お店（鍛冶屋＝武器と 防具、道具屋＝道具）----
 const SHOP={ smith:[{name:'銅の 剣',kind:'weapon',v:6,price:60},{name:'鉄の 剣',kind:'weapon',v:10,price:180},{name:'皮の よろい',kind:'armor',v:6,price:70},{name:'くさりかたびら',kind:'armor',v:10,price:200},{name:'革の 帽子',kind:'helm',v:2,price:30},{name:'鉄の 兜',kind:'helm',v:5,price:130}],
              tools:[{name:'薬草',kind:'herb',price:8},{name:'どくけし草',kind:'antidote',price:10}] };
@@ -1281,7 +1295,9 @@ function openShop(which,greet){ const list=SHOP[which];
 // ---- 宿屋 ----
 function openInn(){ const price=10; menu(['泊まる（'+price+'G）','やめる'],'宿屋（所持金 '+BAG.gold+'G）',(k)=>{ closeMenu();
   if(k!==0){ say(['娘「また どうぞ」']); return; } if(BAG.gold<price){ say(['娘「お金が 足りないみたい……」']); return; }
-  BAG.gold-=price; go(()=>{ STATS.elt.hp=STATS.elt.max; STATS.elt.mp=STATS.elt.maxmp; }); setTimeout(()=>say(['ぐっすり 眠った。','HPと MPが すっかり 回復した！']),500); },()=>closeMenu()); }
+  BAG.gold-=price; go(()=>{ PARTY.forEach(k=>{ const m=STATS[k]; m.hp=m.max; m.mp=m.maxmp; m.status=null; }); });
+  if(ST.phase==='c2_inn'){ setTimeout(()=>say(['ぐっすり 眠った。……','真夜中。戸を たたく 音で 目が 覚めた。','侍女「アルディアの 兵士さま。……王女さまが、お会いしたいと」','侍女「どうか 静かに。城の 裏から 塔へ ご案内します」'],()=>{ ST.phase='c2_tower'; go(()=>enterTower()); }),500); return; }
+  setTimeout(()=>say(['ぐっすり 眠った。','HPと MPが すっかり 回復した！']),500); },()=>closeMenu()); }
 // ---- 装備の 付け替え（ふくろから）----
 function openEquip(){ const e=EQUIP.elt;
   menu(['右手：'+(e.weapon?e.weapon.name:'なし'),'体　：'+(e.armor?e.armor.name:'なし'),'頭　：'+(e.helm?e.helm.name:'なし'),'戻る'],'装備（攻撃力 '+STATS.elt.atk+'・守備力 '+STATS.elt.defT+'）',(k)=>{
@@ -1354,7 +1370,7 @@ function bgmFor(){
   // ★村の 中（町・家）に いる ときだけ。前は 村を 出た 後も TOWN_NOW が rue の ままで、夜の 街道の 戦闘でも 燃える 村の 曲が 流れた
   if(TOWN_NOW==='rue' && /^(burn|after|road)$/.test(ST.phase) && (cur.kind==='town'||cur.kind==='room') && !(BT && BT.def.boss)) return 'burn';
   if(BT) return BT.def.boss?'boss':'battle';
-  if(cur.kind==='world') return 'field'; if(cur.kind==='farm') return 'field'; if(cur.kind==='castle') return 'castle';
+  if(cur.kind==='world') return 'field'; if(cur.kind==='farm') return 'field'; if(cur.kind==='castle'||cur.kind==='tower') return 'castle'; if(cur.kind==='fort'||cur.kind==='dun') return 'dungeon';   /* ★ダンジョンは ダンジョンの 曲（前は 砦で 町の 曲が 流れた） */
   if(cur.kind==='town' && TOWN_NOW==='rue' && (ST.phase==='burn'||ST.phase==='after')) return 'burn'; return 'town'; }
 function bgmUpdate(){ if(SND.bgm<=0 || !bgmUnlocked || (typeof bgmHidden==='function' && bgmHidden())){ if(bgmEl && !bgmEl.paused) bgmEl.pause(); return; }
   const want=bgmFor(); if(want===bgmNow && bgmEl && !bgmEl.paused){ bgmEl.volume=Math.min(1,(BGM_VOL[want]||.5)*SND.bgm/.6); return; }   // ★大きさは 毎回 合わせる
@@ -1380,15 +1396,15 @@ FOES.yomiakari={key:'yomiakari', name:'ヨミアカリ', float:true, inflict:{ty
 FOES.ishikurage={key:'ishikurage', name:'イシクラゲ', float:true, inflict:{type:'sleep',rate:.2}, hp:34, exp:14, gold:10, atk:[5,9], wind:'の 岩の 傘が 光りだした！', verb:'鉱石の 触手', frames:{idle:RAB.ik_idle,wind:RAB.ik_wind,atk:RAB.ik_atk}};
 FOES.kabenome={key:'kabenome', name:'カベノメ', hp:36, exp:14, gold:10, atk:[5,8], wind:'の 石の すきまが 裂けた！', verb:'かみつき', scale:.9, frames:{idle:RAB.kb_idle,wind:RAB.kb_wind,atk:RAB.kb_atk}};
 // ★出る 場所ごとの 魔物（重みつき）
-const ENC={ farm:[['nousagi',2],['waradokuro',1]], west:[['nousagi',1],['waradokuro',1]], westNight:[['nousagi',1],['yomiakari',2]], east:[['ishikurage',2],['haiusagi',1]], fort:[['haiusagi',1],['kabenome',1]] };
+// ★第2章：新しい 魔物の 絵が 届くまで、第1章の 魔物で 代わりに する
+const ENC={ pass:[['ishikurage',2],['kabenome',1]], velnaE:[['ishikurage',1],['kabenome',1],['yomiakari',1]], ruins:[['kabenome',2],['yomiakari',1],['ishikurage',1]], farm:[['nousagi',2],['waradokuro',1]], west:[['nousagi',1],['waradokuro',1]], westNight:[['nousagi',1],['yomiakari',2]], east:[['ishikurage',2],['haiusagi',1]], fort:[['haiusagi',1],['kabenome',1]] };
 function pickFoe(area){ const t=ENC[area]; let sum=t.reduce((a,b)=>a+b[1],0), r=Math.random()*sum; for(const [k,w] of t){ if((r-=w)<0) return FOES[k]; } return FOES[t[0][0]]; }
 FOES.banpei={key:'banpei', name:'砦の 番兵', scale:1.35, bigInflict:{type:'sleep',rate:.5}, hp:110, exp:80, gold:120, atk:[6,10], wind:'は 大剣を 振りかぶった！', verb:'なぎ払い', boss:true,
   bigWind:'の 鎧の すきまから 黒い 霧が 噴きだした！', bigName:'黒い 霧の 斬撃', frames:{idle:RAB.bp_idle,idle2:RAB.bp_idle2,wind:RAB.bp_wind,atk:RAB.bp_atk,big:RAB.bp_big}};
 function startCh1(){ const c=document.getElementById('card'); c.style.opacity=0; ST.phase='c1_castle'; enterCastle();
   say(['── 第1章　和平の 使者 ──','三日後。エルトは 王に 呼ばれ、謁見の 間に いた。']); }
-function setEscort(on){ followers.forEach(f=>{ S.remove(f.p.m); S.remove(f.p.sh); }); followers=[];
-  if(on){ followers=[{p:person('haven'),x:hero.x,z:hero.z,ang:hero.ang}]; } resetTrail(); }
-const ESCORT=()=>/^c1_(road|fort|east|town)$/.test(ST.phase);
+function setEscort(on){ refreshFollowers(); }   // ★後ろの 人は 仲間＋護衛の 使者（refreshFollowers）
+const ESCORT=()=>/^(c1_(road|fort|east|town)|c2_(dolm|pass|road|capital))$/.test(ST.phase);
 function kingCh1(){ say(['アルディア王「エルト。そなたに 頼みが ある」','アルディア王「ヴェルナへ 送る 和平の 使者、ハーヴェンの 護衛だ」','使者 ハーヴェン「……よろしく 頼みますぞ、若い 兵士どの」','アルディア王「国境の 砦を 抜け、ヴェルナの 鉱山の 町 ドルムへ。そこで 帝国の 迎えを 待て」','＊ 使者 ハーヴェンが ついて くる ＊','＊ 和平の 書状の 写しを あずかった（だいじなもの） ＊'],()=>{ ST.phase='c1_road'; setEscort(true); if(!BAG.keys.includes('和平の 書状の 写し')) BAG.keys.push('和平の 書状の 写し'); say(['＊ 王都を 出て、街道を 東の 国境の 砦へ ＊']); }); }
 // ---- 国境の 砦（3D の 迷路。奥に 番兵）----
 const FORT=[
@@ -1424,7 +1440,13 @@ function enterFort(fromEast){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m
   if(fromEast){ hero.x=13.5; hero.z=1.6; hero.ang=Math.PI; } else { hero.x=6.5; hero.z=FORT.length-1.6; hero.ang=Math.PI; } resetTrail(); wWalk=0; wEnc=6+Math.random()*6;
   document.getElementById('place').textContent='国境の 砦'; resize(); }
 // ---- ヴェルナの 鉱山の 町 ドルム（村の 形を 使い回す）----
-function velnaNpcs(){ return [
+function velnaNpcs(){ if(/^c2_/.test(ST.phase)) return [
+  {x:11.5,y:12.5,spr:'vsoldier',name:'帝国の 迎えの 騎士',talk:()=>{ if(ST.phase!=='c2_dolm') return say(['騎士「峠の 関所は 開けた。帝都は 峠を 越えて 東だ」']);
+    say(['騎士「アルディアの 使者どのか。帝都より 迎えに 参った」','騎士「東の 峠の 関所を 開ける。……ただ、近ごろ 関所に 魔物が 居座って いてな」','騎士「峠の 山道を 抜ければ、帝都は 街道の 先だ」','使者 ハーヴェン「エルトどの、参りましょう」'],()=>{ ST.phase='c2_pass'; applyWorldState(); say(['＊ ドルムの 東の 峠が 開いた ＊']); }); }},
+  {x:12.5,y:6.2,spr:'elder',name:'町の 長',lines:['町の 長「帝都で 王に 会われるのか。……どうか、昔の 王に 戻って くだされば』'.replace('』','」')]},
+  {x:6.5,y:11.5,spr:'girl',name:'町の 娘',lines:['娘「峠の 先は 帝都よ。鉄の 煙で いつも 空が 灰色なの」']},
+  {x:15.5,y:5.6,spr:'smith',name:'鉱夫',talk:()=>say(['鉱夫「帝都へ 行くなら 気を つけな。近ごろ 城の 中は おかしい」'],openTrade)},
+]; return [
   {x:12.5,y:6.2,spr:'elder',name:'町の 長',talk:()=>{ if(!ST.c1old){ say(['町の 長「アルディアの 使者どのか。……よく 来なさった」','町の 長「この 町の 者は、誰も 戦など 望んで おらん」','町の 長「南の 広場に いる 古い 兵の 話も、聞いて やって くだされ」']); return; }
     say(['町の 長「帝都からの 迎えは、明日の 朝に 着く そうじゃ」','使者 ハーヴェン「……王が 人が 変わった、か」','使者 ハーヴェン「エルトどの。帝都で 何が 起きて いるのか、この目で 確かめねば なりませんな」'],()=>showEnd1()); }},
   {x:17.5,y:11.5,spr:'vsoldier',name:'古い 兵',talk:()=>{ ST.c1old=1; say(['古い 兵「アルディアの 兵か。……昔、王は 国境の 村に 麦を 贈って いた」','古い 兵「飢えた 年に、隣の 国を 見捨てなかった 王だ」','古い 兵「それが 数年前から、まるで 人が 変わった ように……」']); }},
@@ -1432,7 +1454,7 @@ function velnaNpcs(){ return [
   {x:9.5,y:14.5,spr:'child',name:'町の 子',lines:['子「アルディアの 人？　ぜんぜん こわく ないや」']},
   {x:15.5,y:5.6,spr:'smith',name:'鉱夫',talk:()=>say(['鉱夫「掘った 鉄は ぜんぶ 帝都に 取られる。剣に するんだとさ」','鉱夫「少しなら 鉄鉱石を 分けて やるよ」'],openTrade)},
 ]; }
-function showEnd1(){ ST.phase='c1_end'; const c=document.getElementById('card'); c.innerHTML='<div>第1章</div><div class="t">和平の 使者</div><div>完</div>'; c.style.opacity=1; }
+function showEnd1(){ ST.phase='c1_end'; const c=document.getElementById('card'); c.innerHTML='<div>第1章</div><div class="t">和平の 使者</div><div>完</div><div style="font-size:13px;margin-top:20px">Ａで 第2章へ</div>'; c.style.opacity=1; }
 
 // ================= Ⅳの 仕組みの 残り：入れ替え・頼みごと・交易・船・仕掛け・章ごとの 台詞 =================
 // ---- 入れ替え（控えの 仲間）----
@@ -1470,9 +1492,166 @@ function canSail(){ return !!ST.ship; }
 // ---- 仕掛け：砦の 灯り（ふたつ ともすと 奥の 鉄格子が 開く）----
 ST.lamps=ST.lamps||{};
 function lampAt(x,z){ return [[0,9],[5,0]].find(([lx,lz])=>Math.abs(lx+.5-x)<1.1&&Math.abs(lz+.5-z)<1.1); }
-function fortGateOpen(){ return ST.lamps['0,9'] && ST.lamps['5,0'] || /^c1_(east|town|end)$/.test(ST.phase); }
+function fortGateOpen(){ return ST.lamps['0,9'] && ST.lamps['5,0'] || PAST_FORT.test(ST.phase); }
 // ---- 章ごとの 台詞（人に byPhase を 持たせると、物語の 進みで 台詞が 変わる）----
 function linesByPhase(n){ if(!n.byPhase) return null; const k=Object.keys(n.byPhase).find(k=>ST.phase.startsWith(k)); return k?n.byPhase[k]:(n.byPhase['*']||null); }
+
+// ================= 第2章「操られた王」 =================
+//  c2_dolm（ドルムで 帝国の 迎え）→ c2_pass（峠の 山道。出口に 中ボス）→ c2_road（帝都へ）→ c2_capital（帝都の 城で 謁見）
+//  → c2_inn（帝都の 宿屋で 休む）→ c2_tower（夜、城の 塔で 王女）→ c2_ruins（王女と 森の 遺跡へ。奥で ZF）→ c2_back（帝都の 城の 王へ）→ c2_end
+const PAST_FORT=/^(c1_(east|town|end)|c2_)/;
+// ---- 仲間（リディア・ZF）。加わる ときの レベルは エルトに 合わせる ----
+const BASE={ lidia:{name:'リディア',hp:20,mp:10,batk:2,def:2,agi:6}, zf:{name:'ZF',hp:30,mp:12,batk:3,def:4,agi:3}, dolgan:{name:'ドルガン',hp:36,mp:3,batk:5,def:4,agi:4} };
+GROW.lidia={hp:4,mp:3,atk:1,def:1,agi:1}; GROW.zf={hp:5,mp:3,atk:2,def:2,agi:1}; GROW.dolgan={hp:7,mp:1,atk:3,def:2,agi:1};
+EQUIP.lidia={weapon:{name:'樫の 杖',v:4,price:40},armor:{name:'絹の ローブ',v:3,price:40},helm:null};
+EQUIP.zf={weapon:{name:'腕の 刃',v:8,price:0},armor:{name:'古代の 装甲',v:8,price:0},helm:null};
+function joinParty(k,lv){ const b=BASE[k], g=GROW[k], n=lv-1;
+  STATS[k]={name:b.name,lv,exp:0,max:b.hp+g.hp*n,hp:b.hp+g.hp*n,maxmp:b.mp+g.mp*n,mp:b.mp+g.mp*n,batk:b.batk+g.atk*n,def:b.def+g.def*n,agi:b.agi+g.agi*n};
+  if(!PARTY.includes(k)) PARTY.push(k); syncAtk(); refreshFollowers(); }
+// ★後ろに ついて 歩く 人：仲間（2人目から）と、護衛の 使者
+function refreshFollowers(){ followers.forEach(f=>{ S.remove(f.p.m); S.remove(f.p.sh); }); followers=[];
+  PARTY.slice(1).forEach(k=>followers.push({p:person(k),x:hero.x,z:hero.z,ang:hero.ang}));
+  if(ESCORT()) followers.push({p:person('haven'),x:hero.x,z:hero.z,ang:hero.ang});
+  if(cur.kind==='world') followers.forEach(f=>{ f.p.m.visible=false; f.p.sh.visible=false; });
+  resetTrail(); }
+// ---- 外の 世界の 移り変わり：峠（ドルムの 東の 山並み）を 開ける、帝都と 遺跡の 印 ----
+function applyWorldState(){ const open=/^c2_(pass|road|capital|inn|tower|ruins|back|end)$/.test(ST.phase);
+  const setc=(x,y,c)=>{ if(WORLD[y][x]===c) return false; WORLD[y]=WORLD[y].slice(0,x)+c+WORLD[y].slice(x+1); return true; };
+  let ch=false; ch=setc(62,25,open?'G':'^')||ch; ch=setc(63,25,open?'G':'^')||ch;
+  [[92,23],[93,23],[92,24],[93,24]].forEach(([x,y])=>{ ch=setc(x,y,'Y')||ch; }); ch=setc(74,22,'R')||ch; ch=setc(92,25,'=')||ch; ch=setc(93,25,'=')||ch;
+  if(ch) WORLD_IMG=null; }
+// ---- 3Dの ダンジョン（峠の 山道・森の 遺跡）----
+const DUNS={
+ pass:{name:'峠の 山道', rows:[
+"#########################",
+"#####.......#####.......#",
+"#####.#####.#####.#####.#",
+"#.....#...#.......#...#.#",
+"W.#####.#.#########.#.#BE",
+"#.#.....#.......#...#...#",
+"#...#########.#.#.#####.#",
+"#####.........#...#.....#",
+"#########################"], enc:'pass', bg:0x9ab0c8, fog:[0x9ab0c8,9,26], floor:0x9a8468, wall:0x8a7a68, wallH:1.8, look:'rock'},
+ ruins:{name:'森の 遺跡', rows:[
+"###################",
+"#.......#Z#.......#",
+"#.M###.#...#.###M.#",
+"#.#...........#...#",
+"#.#.#####.#####.#.#",
+"#...#..M#.#M..#.#.#",
+"###.#.###.###.#.#.#",
+"#...#.....#.....#.#",
+"#.#####.#####.###.#",
+"#.....#...#...#...#",
+"#.###.###.#.###.#.#",
+"#.#M....#.#....M#.#",
+"#.#####.#.#.#####.#",
+"#.........#.......#",
+"#########S#########"], enc:'ruins', bg:0x0e1a16, fog:[0x0e1a16,6,18], floor:0x7a8a80, wall:0x6a7a70, wallH:2.2, look:'fort'},
+};
+let DUN_NOW='pass';
+function buildDun(d){ S.background=new THREE.Color(d.bg); S.fog=new THREE.Fog(d.fog[0],d.fog[1],d.fog[2]);
+  amb.intensity=d.look==='rock'?.72:.45; amb.color.setHex(d.look==='rock'?0xffffff:0xc8ffe8); sun.intensity=d.look==='rock'?.55:.2; sun.color.setHex(0xfff0d8);
+  const fl=L(T.stone,d.floor), wl=L(T.cliff,d.wall);
+  d.rows.forEach((r,y)=>[...r].forEach((c,x)=>{ add(box,fl,x+.5,-.5,y+.5);
+    if(c==='#'){ const h=d.wallH*(d.look==='rock'?(.8+((x*7+y*3)%5)*.12):1); add(box,wl,x+.5,h/2,y+.5,1,h,1); }
+    if(c==='M'){ // 古代の 機械
+      add(new THREE.CylinderGeometry(.34,.4,1.3,10),L(null,0x5a6a72),x+.5,.65,y+.5); add(new THREE.TorusGeometry(.32,.06,6,16),L(null,0x40e0d0,{emissive:0x20a0a0}),x+.5,1.0,y+.5).rotation.x=Math.PI/2;
+      add(new THREE.SphereGeometry(.14,10,8),L(null,0x80fff0,{emissive:0x40c0c0}),x+.5,1.45,y+.5); }
+    if(c==='W'||c==='E'||c==='S') add(box,L(null,0x2a1a10),x+.5,.02,y+.5,.9,.04,.9);
+  }));
+  if(DUN_NOW==='ruins'){ [[4.5,3.4],[13.5,9.4],[8.5,13.4]].forEach(([x,z])=>{ add(new THREE.CylinderGeometry(.42,.42,.06,14),L(null,0x3a2a1a),x,.02,z); add(box,L(null,0x6a5040),x+.55,.12,z,.3,.24,.2); });   // 掘り返した 跡
+    [[2.5,1.5],[16.5,1.5],[9.5,7.5],[3.5,11.5],[15.5,11.5]].forEach(([x,z])=>{ const l=new THREE.PointLight(0x60ffe0,.7,6); l.position.set(x,1.4,z); G.add(l); }); }
+  else { [[6,4],[18,2],[12,7]].forEach(([x,z])=>{ add(new THREE.DodecahedronGeometry(.3,0),L(null,0x8a8276,{flatShading:true}),x+.5,.25,z+.5); }); } }
+function enterDun(which,fromEnd){ DUN_NOW=which; const d=DUNS[which];
+  [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); cv.style.display='block'; c2.style.display='none';
+  if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; fireMeshes=[]; buildDun(d);
+  cur={kind:'dun', rows:d.rows, solid:new Set(['#','M']), npcs:cur.npcs, room:null};
+  const npcs=[];
+  if(which==='pass' && ST.phase==='c2_pass') npcs.push({x:23.5,y:4.5,spr:null,foe:'sekisho',name:'関所荒らし',talk:()=>sekishoFight()});
+  if(which==='ruins' && ST.phase==='c2_ruins') npcs.push({x:9.5,y:1.5,spr:'zf',name:'からくりの 番兵',talk:()=>zfFight()});
+  setNpcs(npcs.filter(n=>n.spr)); if(npcs.some(n=>!n.spr)){ const n=npcs.find(n=>!n.spr); cur.npcs.push({...n,ang:0,p:foeStand(n.foe)}); }
+  const R=d.rows; const find=(ch)=>{ for(let y=0;y<R.length;y++){ const x=R[y].indexOf(ch); if(x>=0) return [x,y]; } };
+  let st;
+  if(which==='pass'){ const [x,y]=find(fromEnd?'E':'W'); st=[x+(fromEnd?-.6:.6)+.5,y+.5]; hero.ang=fromEnd?-Math.PI/2:Math.PI/2; }
+  else { const [x,y]=find('S'); st=[x+.5,y-.1]; hero.ang=Math.PI; }
+  hero.x=st[0]; hero.z=st[1]; resetTrail(); wWalk=0; wEnc=7+Math.random()*6;
+  document.getElementById('place').textContent=d.name; resize(); }
+// ★中ボスの 姿（3Dの 中に 立たせる：戦闘の 絵を 板に して 置く）
+function foeStand(key){ const def=FOES[key]; const t=new THREE.TextureLoader().load(def.frames.idle); t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter;
+  const m=new THREE.Mesh(bbGeo(),new THREE.MeshBasicMaterial({map:t,transparent:true,alphaTest:.3,color:def.tint||0xffffff})); m.scale.set(1.5,1.5,1); S.add(m);
+  const sh=new THREE.Mesh(new THREE.CircleGeometry(.45,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.28,depthWrite:false})); sh.rotation.x=-Math.PI/2; S.add(sh);
+  return {m,sh,noAnim:true}; }
+function dunExits(iz,ix){ if(cur.kind!=='dun') return; const R=cur.rows, cx=Math.floor(hero.x), cz=Math.floor(hero.z), c=at(cx,cz);
+  if(DUN_NOW==='pass'){ if(c==='W' && ix<0) go(()=>enterWorld([61.4,25.5])); if(c==='E' && ix>0) go(()=>{ if(ST.phase==='c2_pass') ST.phase='c2_road'; enterWorld([64.6,25.5]); }); }
+  if(DUN_NOW==='ruins' && c==='S' && iz>0) go(()=>enterWorld([74.5,23.5])); }
+// ---- 中ボス：関所荒らし（★絵は 仮：カベノメの 絵を 大きく、色を 変えて 使う）----
+FOES.sekisho={key:'sekisho', name:'関所荒らし', scale:1.55, tint:0xd89070, hp:240, exp:220, gold:160, atk:[9,14], wind:'は 岩の 体を 揺らした！', verb:'岩の 牙', boss:true,
+  frames:{idle:RAB.kb_idle,wind:RAB.kb_wind,atk:RAB.kb_atk}};
+function sekishoFight(){ say(['関所の 前に、岩の 塊の ような 魔物が 居座って いる。','迎えの 騎士「こいつが 関所を 荒らして いた 魔物だ！」'],()=>startBattle(FOES.sekisho,()=>{ ST.phase='c2_road'; cur.npcs.filter(n=>n.foe).forEach(n=>{ S.remove(n.p.m); S.remove(n.p.sh); }); cur.npcs=cur.npcs.filter(n=>!n.foe);
+  say(['関所荒らしは 崩れて、ただの 岩に 戻った。','使者 ハーヴェン「道が 開けた。帝都は この 先、東ですな」']); })); }
+// ---- ボス：魔導からくり ZF（★戦闘の 絵は 仮：ZFの 正面の 絵を 使う）----
+FOES.zfboss={key:'zfboss', name:'魔導からくり', scale:1.25, hp:520, exp:700, gold:300, atk:[12,18], wind:'の 腕の 刃が 開いた！', verb:'腕の 刃', boss:true,
+  bigWind:'の 胸の 核が 青く 光った！', bigName:'魔導の 光線', frames:{idle:SPR.zf.front,wind:SPR.zf.front,atk:SPR.zf.front,big:SPR.zf.front}};
+function zfFight(){ say(['遺跡の 奥に、あの からくりが 立って いた。','からくりの 番兵「……王女ヲ 確認。連レ 戻ス」','リディア「下がって、エルト！ ……来るわ！」'],()=>startBattle(FOES.zfboss,()=>{
+  setNpcs([]); say(['からくりの 体から、黒い 霧が 抜けて いった。','からくり「…………。ワタシハ……」','からくり「命令ノ 主ハ……人ノ 形ヲ シタ、別ノ 何カ」','リディア「別の 何か……？」',
+    'からくり「ワタシハ ZF。古イ 時代ノ 魔導からくり。魔力ヲ 見ル 目ヲ 持ツ」','ZF「アノ 者ニハ、人デハ ナイ 魔力ガ 渦巻イテ イタ」','ZF「……オマエタチト 行コウ。アノ 者ノ 正体ヲ 確カメル」','＊ ZFが 仲間に 加わった！ ＊'],
+    ()=>{ joinParty('zf',Math.max(STATS.elt.lv,12)); ST.phase='c2_back'; say(['リディア「帝都へ 戻りましょう。……父に、もう一度 会いたい」']); }); })); }
+// ---- 帝都 ヴェルナ（城下町は 王都と 同じ 形。色と 人が 違う）----
+const VCAP_ROOMS=[
+ {name:'武器と 防具の 店', rows:CAP_ROOMS[0].rows, npc:{x:4.5,y:2.5,spr:'smith',name:'帝都の 鍛冶',talk:()=>say(['鍛冶「帝都の 鉄は 硬いぞ。……剣ばかり 打たされて いるがな」'],()=>openShop('smith2','武器と 防具の 店（所持金 '+BAG.gold+'G）'))}},
+ {name:'道具屋', rows:CAP_ROOMS[1].rows, npc:{x:4.5,y:2.5,spr:'okami',name:'道具屋の 主人',talk:()=>say(['主人「旅の 方かい。薬草なら たんと あるよ」'],()=>openShop('tools','道具屋（所持金 '+BAG.gold+'G）'))}},
+ {name:'教会', rows:CAP_ROOMS[2].rows, npc:{x:4.5,y:2.3,spr:'priest',name:'帝都の 神父',talk:()=>openChurch()}},
+ {name:'宿屋', rows:["WWWWWWWWW","Wb.bfb.sW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"], npc:{x:2.5,y:2.4,spr:'girl',name:'宿の 娘',talk:()=>say(['娘「帝都の 宿へ ようこそ」'],openInn)}},
+ {name:'民家', rows:CAP_ROOMS[4].rows, npc:{x:2.5,y:4.4,spr:'child',name:'帝都の 子',lines:['子「お城の からくり、夜に なると 目が 光るんだ」']}},
+ {name:'民家', rows:CAP_ROOMS[5].rows, npc:{x:6.5,y:2.5,spr:'elder',name:'帝都の 老人',lines:['老人「王さまは 昔、よく 町を 歩かれて おった」','老人「この 数年、お姿を 見た 者は おらん」']}},
+];
+SHOP.smith2=[{name:'鋼の 剣',kind:'weapon',v:16,price:420},{name:'鋼の よろい',kind:'armor',v:15,price:480},{name:'鋼の 兜',kind:'helm',v:8,price:260},{name:'鉄の 剣',kind:'weapon',v:10,price:180}];
+function vcapNpcs(){ return [
+  {x:10.4,y:4.7,spr:'vsoldier',name:'城の 門番',byPhase:{c2_road:['門番「アルディアの 使者か。……話は 聞いて いる。城へ 入れ」'],'*':['門番「ここは 帝都 ヴェルナの 城だ」']}},
+  {x:13.6,y:4.7,spr:'vsoldier',name:'城の 門番',lines:['門番「……近ごろ 城の 中は 静かすぎる」']},
+  {x:9.2,y:12.6,spr:'girl',name:'帝都の 娘',lines:['娘「戦なんて 誰も 望んで ないのに」','娘「鉄は 剣に なって、麦は 兵の ものに なるの」']},
+  {x:16.5,y:9.6,spr:'smith',name:'鉱山の 男',lines:['男「側近の セルヴィスさまが 来てから、王さまは 変わった」','男「……大きな 声じゃ 言えないがな」']},
+  {x:6.5,y:13.6,spr:'child',name:'帝都の 子',lines:['子「王女さまは やさしいんだ。でも 最近 お城から 出て こない」']},
+  {x:16.5,y:15.6,spr:'okami',name:'交易商',talk:()=>say(['交易商「帝都は 麦が 高い。アルディアの 麦なら 高く 買うよ」'],openTrade)},
+]; }
+MARKET.vcap={wheat:[36,28], ore:[22,15]};
+// ---- 帝都の 城（アルディア城と 同じ 形。色と 人が 違う）----
+let CASTLE_NOW='ardia';
+function velnaCastleNpcs(){ const L_=[]; const ph=ST.phase;
+  if(ph!=='c2_back' && ph!=='c2_end'){
+    L_.push({x:12.5,y:2.4,spr:'velna',name:'ヴェルナ王',talk:()=>velnaKing()});
+    L_.push({x:14.4,y:2.8,spr:'servis',name:'側近 セルヴィス',lines:ph==='c2_capital'?['セルヴィス「陛下の お言葉を 待たれよ」']:['セルヴィス「……まだ 何か ご用か、アルディアの 兵士どの」']});
+  } else L_.push({x:12.5,y:2.4,spr:'velna',name:'ヴェルナ王',talk:()=>velnaKing()});
+  if(/^c2_(capital|inn|tower)$/.test(ph)) L_.push({x:12.5,y:9.4,spr:'zf',name:'からくりの 番兵',lines:['からくりの 番兵「…………」','冷たい 目が、こちらを 見て いる。']});
+  if(/^c2_(inn|tower|ruins|back|end)$/.test(ph)) L_.push({x:9.5,y:12.5,spr:'haven',name:'使者 ハーヴェン',byPhase:{c2_inn:['ハーヴェン「わたしは ここに 留め置かれる らしい。エルトどのは 町の 宿で 休まれよ」'],c2_back:['ハーヴェン「王女さまと……ZFどの、か。王に お会いに なるのですな」'],'*':['ハーヴェン「王の あの 目……ただ事では ありません」']}});
+  L_.push({x:10.2,y:19.4,spr:'vsoldier',name:'城の 門番',lines:['門番「北の 奥が 謁見の 間だ」']});
+  L_.push({x:3.5,y:13.2,spr:'vsoldier',name:'城の 兵',lines:['兵「北西の 森に 古い 遺跡が ある。セルヴィスさまが よく 通われて いる」']});
+  return L_; }
+function velnaKing(){ const ph=ST.phase;
+  if(ph==='c2_capital'){ say(['ヴェルナ王は、うつろな 目で 玉座に 座って いた。','使者 ハーヴェン「アルディア王より、和平の 書状を お持ちしました」','セルヴィス「……陛下、アルディアの 申し出に ございます」','ヴェルナ王「……和平は 受けられぬ」',
+      'セルヴィス「国境を 荒らしたのは アルディアの 側。そう 申されて おります」','ヴェルナ王「……国境を 荒らしたのは、アルディアの 側」','（王は、側近の 言葉を そのまま くり返して いる……）',
+      'セルヴィス「使者どのは 城に 留まられよ。兵士どのは 町の 宿へ」','セルヴィスが 衛兵に 何かを 告げに、席を 外した。','ヴェルナ王「…………」','ヴェルナ王「……国境の 村に、麦は 届いたか」','エルト「……え？」','ヴェルナ王の 目は、もう 何も 映して いなかった。'],
+      ()=>{ ST.phase='c2_inn'; refreshFollowers(); setNpcs(velnaCastleNpcs()); say(['＊ 使者 ハーヴェンは 城に 留め置かれた ＊']); }); return; }
+  if(ph==='c2_back'){ say(['謁見の 間に、セルヴィスの 姿は なかった。','リディア「お父さま」','ヴェルナ王「……リディア、か」','ヴェルナ王の 目に、わずかに 光が 戻って いた。','ヴェルナ王「長い 夢を 見て いた ようだ。……あの 者が そばに いると、霧の 中に いる ようで」',
+      'ヴェルナ王「アルディアの 兵士よ。国境の 村の こと……すまなかった」','ヴェルナ王「和平の 席を 設けよ。アルディアの 使者と、わたしが 直に 話す」','ヴェルナ王「……あの 者の 戻らぬ うちに」'],()=>showEnd2()); return; }
+  say(['ヴェルナ王「…………」','うつろな 目は、どこも 見て いない。']); }
+// ---- 夜の 塔（王女）----
+const TOWER_ROOM={name:'城の 塔', rows:["WWWWWWWWW","W.f...b.W","W.......W","W...T...W","W.......W","Wp.....pW","WWWWXWWWW"]};
+function enterTower(){ if(G) S.remove(G); G=new THREE.Group(); S.add(G); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildRoom(TOWER_ROOM);
+  S.background=new THREE.Color(0x0a0c1a); amb.intensity=.4; amb.color.setHex(0xa0b0ff);
+  cur={kind:'tower', rows:TOWER_ROOM.rows, solid:new Set(['W','s','b','T','f','p']), npcs:cur.npcs, room:null};
+  setNpcs([{x:4.5,y:2.3,spr:'lidia',name:'王女 リディア',talk:()=>lidiaTalk()}]);
+  hero.x=4.5; hero.z=TOWER_ROOM.rows.length-1.6; hero.ang=Math.PI; resetTrail();
+  document.getElementById('place').textContent='帝都の 城の 塔（夜）'; resize(); }
+function lidiaTalk(){ if(ST.phase!=='c2_tower') return say(['リディア「行きましょう」']);
+  say(['リディア「来て くれて ありがとう。わたしは リディア。この 国の 王女です」','リディア「謁見の 間で 見たでしょう。……父は、数年前から 人が 変わりました」','リディア「側近の セルヴィスの 言うことしか 聞かない。まるで 人形の ように」',
+    'リディア「セルヴィスは、わたしの 教育係でした。幼い ころから ずっと」','リディア「なのに……昔 一緒に 摘んだ 花の 話を しても、何も 覚えて いないの」','リディア「あの 人は、本当に セルヴィスなのか……」',
+    'リディア「セルヴィスは 夜ごと、北西の 森の 遺跡へ 通って います。そこに 何かが ある」','リディア「わたしは 城の からくりに 見張られて いて、一人では 出られない」','リディア「エルト。……わたしと 一緒に 遺跡へ 行って くれませんか」','＊ リディアが 仲間に 加わった！ ＊'],
+    ()=>{ joinParty('lidia',Math.max(STATS.elt.lv,10)); ST.phase='c2_ruins'; say(['からくりの 見張りが 向こうを 向いた すきに、2人は 城を 抜け出した。'],()=>go(()=>enterWorld([92.5,26.4]))); }); }
+function startCh2(){ const c=document.getElementById('card'); c.style.opacity=0; ST.phase='c2_dolm'; refreshFollowers(); enterTown([11.5,15.5],'velna');
+  say(['── 第2章　操られた王 ──','次の 朝。ドルムの 町に、帝国の 迎えが 着いた。']); }
+function showEnd2(){ ST.phase='c2_end'; const c=document.getElementById('card'); c.innerHTML='<div>第2章</div><div class="t">操られた 王</div><div>完</div><div style="font-size:13px;margin-top:20px">第3章は これから 作ります</div>'; c.style.opacity=1; }
 
 function resize(){ const v=document.getElementById('view'); const w=v.clientWidth,h=v.clientHeight; R.setSize(w,h,false); C.aspect=w/h; C.updateProjectionMatrix(); batCam.aspect=w/h; batCam.updateProjectionMatrix(); }
 addEventListener('resize',()=>{resize(); if(cur.kind==='world') resize2();}); resize();
