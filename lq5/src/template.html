@@ -1194,8 +1194,8 @@ const BGM_FILES={burn:'burned_village.mp3', town:'../lq4/town.mp3', field:'../lq
 const BGM_VOL={burn:.78, town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, boss:.5};
 let bgmEl=null, bgmNow='', bgmUnlocked=false;
 function bgmFor(){
-  // ★燃える 村（村が 焼かれてから 村を 出るまで）は、戦闘（部隊長戦）や 家の 中でも 曲を 変えない（指示）
-  if(TOWN_NOW==='rue' && (ST.phase==='burn'||ST.phase==='after') && (cur.kind==='town'||cur.kind==='room'||BT)) return 'burn';
+  // ★燃える 村（村が 焼かれてから 村を 出るまで）は、家の 中でも 曲を 変えない。部隊長戦（ボス）だけは ボスの 曲（指示）
+  if(TOWN_NOW==='rue' && (ST.phase==='burn'||ST.phase==='after') && (cur.kind==='town'||cur.kind==='room'||BT) && !(BT && BT.def.boss)) return 'burn';
   if(BT) return BT.def.boss?'boss':'battle';
   if(cur.kind==='world') return 'field'; if(cur.kind==='farm') return 'field'; if(cur.kind==='castle') return 'castle';
   if(cur.kind==='town' && TOWN_NOW==='rue' && (ST.phase==='burn'||ST.phase==='after')) return 'burn'; return 'town'; }
