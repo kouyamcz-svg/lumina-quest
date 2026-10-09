@@ -1396,8 +1396,12 @@ FOES.yomiakari={key:'yomiakari', name:'ヨミアカリ', float:true, inflict:{ty
 FOES.ishikurage={key:'ishikurage', name:'イシクラゲ', float:true, inflict:{type:'sleep',rate:.2}, hp:34, exp:14, gold:10, atk:[5,9], wind:'の 岩の 傘が 光りだした！', verb:'鉱石の 触手', frames:{idle:RAB.ik_idle,wind:RAB.ik_wind,atk:RAB.ik_atk}};
 FOES.kabenome={key:'kabenome', name:'カベノメ', hp:36, exp:14, gold:10, atk:[5,8], wind:'の 石の すきまが 裂けた！', verb:'かみつき', scale:.9, frames:{idle:RAB.kb_idle,wind:RAB.kb_wind,atk:RAB.kb_atk}};
 // ★出る 場所ごとの 魔物（重みつき）
-// ★第2章：新しい 魔物の 絵が 届くまで、第1章の 魔物で 代わりに する
-const ENC={ pass:[['ishikurage',2],['kabenome',1]], velnaE:[['ishikurage',1],['kabenome',1],['yomiakari',1]], ruins:[['kabenome',2],['yomiakari',1],['ishikurage',1]], farm:[['nousagi',2],['waradokuro',1]], west:[['nousagi',1],['waradokuro',1]], westNight:[['nousagi',1],['yomiakari',2]], east:[['ishikurage',2],['haiusagi',1]], fort:[['haiusagi',1],['kabenome',1]] };
+// ★第2章の 魔物（絵が 届いた）。経験値は ZF戦で Lv15 前後に なるよう 多め
+FOES.yamabiko={key:'yamabiko', name:'ヤマビコダマ', float:true, inflict:{type:'conf',rate:.2}, hp:44, exp:38, gold:14, atk:[7,11], wind:'の 口が 大きく 開いた！', verb:'音の 輪', frames:{idle:RAB.ym_idle,wind:RAB.ym_wind,atk:RAB.ym_atk}};
+FOES.tetsukui={key:'tetsukui', name:'テツクイムシ', hp:58, exp:46, gold:16, atk:[8,13], wind:'は 体を 後ろへ 引いた！', verb:'歯の 輪', frames:{idle:RAB.tk_idle,wind:RAB.tk_wind,atk:RAB.tk_atk}};
+FOES.zenmai={key:'zenmai', name:'ゼンマイヘイ', hp:52, exp:52, gold:18, atk:[8,12], wind:'の 目が 強く 光った！', verb:'槍の 腕', frames:{idle:RAB.zm_idle,wind:RAB.zm_wind,atk:RAB.zm_atk}};
+FOES.tsutanozoki={key:'tsutanozoki', name:'ツタノゾキ', inflict:{type:'sleep',rate:.2}, hp:48, exp:50, gold:18, atk:[7,11], wind:'の つぼみが 開いた！', verb:'ツタの 鞭', frames:{idle:RAB.tn_idle,wind:RAB.tn_wind,atk:RAB.tn_atk}};
+const ENC={ pass:[['yamabiko',2],['tetsukui',1]], velnaE:[['tetsukui',2],['yamabiko',1]], ruins:[['zenmai',1],['tsutanozoki',1]], farm:[['nousagi',2],['waradokuro',1]], west:[['nousagi',1],['waradokuro',1]], westNight:[['nousagi',1],['yomiakari',2]], east:[['ishikurage',2],['haiusagi',1]], fort:[['haiusagi',1],['kabenome',1]] };
 function pickFoe(area){ const t=ENC[area]; let sum=t.reduce((a,b)=>a+b[1],0), r=Math.random()*sum; for(const [k,w] of t){ if((r-=w)<0) return FOES[k]; } return FOES[t[0][0]]; }
 FOES.banpei={key:'banpei', name:'砦の 番兵', scale:1.35, bigInflict:{type:'sleep',rate:.5}, hp:110, exp:80, gold:120, atk:[6,10], wind:'は 大剣を 振りかぶった！', verb:'なぎ払い', boss:true,
   bigWind:'の 鎧の すきまから 黒い 霧が 噴きだした！', bigName:'黒い 霧の 斬撃', frames:{idle:RAB.bp_idle,idle2:RAB.bp_idle2,wind:RAB.bp_wind,atk:RAB.bp_atk,big:RAB.bp_big}};
@@ -1585,14 +1589,14 @@ function foeStand(key){ const def=FOES[key]; const t=new THREE.TextureLoader().l
 function dunExits(iz,ix){ if(cur.kind!=='dun') return; const R=cur.rows, cx=Math.floor(hero.x), cz=Math.floor(hero.z), c=at(cx,cz);
   if(DUN_NOW==='pass'){ if(c==='W' && ix<0) go(()=>enterWorld([61.4,25.5])); if(c==='E' && ix>0) go(()=>{ if(ST.phase==='c2_pass') ST.phase='c2_road'; enterWorld([64.6,25.5]); }); }
   if(DUN_NOW==='ruins' && c==='S' && iz>0) go(()=>enterWorld([74.5,23.5])); }
-// ---- 中ボス：関所荒らし（★絵は 仮：カベノメの 絵を 大きく、色を 変えて 使う）----
-FOES.sekisho={key:'sekisho', name:'関所荒らし', scale:1.55, tint:0xd89070, hp:240, exp:220, gold:160, atk:[9,14], wind:'は 岩の 体を 揺らした！', verb:'岩の 牙', boss:true,
-  frames:{idle:RAB.kb_idle,wind:RAB.kb_wind,atk:RAB.kb_atk}};
+// ---- 中ボス：関所荒らし ----
+FOES.sekisho={key:'sekisho', name:'関所荒らし', scale:1.35, hp:260, exp:400, gold:160, atk:[10,15], wind:'は 両腕を 振り上げた！', verb:'岩の 拳', boss:true,
+  bigWind:'は 両腕を 地面へ 振りかぶった！', bigName:'岩くだき', frames:{idle:RAB.sk_idle,idle2:RAB.sk_idle2,wind:RAB.sk_wind,atk:RAB.sk_atk,big:RAB.sk_big}};
 function sekishoFight(){ say(['関所の 前に、岩の 塊の ような 魔物が 居座って いる。','迎えの 騎士「こいつが 関所を 荒らして いた 魔物だ！」'],()=>startBattle(FOES.sekisho,()=>{ ST.phase='c2_road'; cur.npcs.filter(n=>n.foe).forEach(n=>{ S.remove(n.p.m); S.remove(n.p.sh); }); cur.npcs=cur.npcs.filter(n=>!n.foe);
   say(['関所荒らしは 崩れて、ただの 岩に 戻った。','使者 ハーヴェン「道が 開けた。帝都は この 先、東ですな」']); })); }
-// ---- ボス：魔導からくり ZF（★戦闘の 絵は 仮：ZFの 正面の 絵を 使う）----
-FOES.zfboss={key:'zfboss', name:'魔導からくり', scale:1.25, hp:520, exp:700, gold:300, atk:[12,18], wind:'の 腕の 刃が 開いた！', verb:'腕の 刃', boss:true,
-  bigWind:'の 胸の 核が 青く 光った！', bigName:'魔導の 光線', frames:{idle:SPR.zf.front,wind:SPR.zf.front,atk:SPR.zf.front,big:SPR.zf.front}};
+// ---- ボス：魔導からくり ZF ----
+FOES.zfboss={key:'zfboss', name:'魔導からくり', scale:1.4, hp:560, exp:900, gold:300, atk:[12,18], wind:'の 杖の 玉が 青く 光った！', verb:'杖の 一撃', boss:true,
+  bigWind:'の 胸の 装甲が 開いた！', bigName:'魔導の 光線', frames:{idle:RAB.zfb_idle,idle2:RAB.zfb_idle2,wind:RAB.zfb_wind,atk:RAB.zfb_atk,big:RAB.zfb_big}};
 function zfFight(){ say(['遺跡の 奥に、あの からくりが 立って いた。','からくりの 番兵「……王女ヲ 確認。連レ 戻ス」','リディア「下がって、エルト！ ……来るわ！」'],()=>startBattle(FOES.zfboss,()=>{
   setNpcs([]); say(['からくりの 体から、黒い 霧が 抜けて いった。','からくり「…………。ワタシハ……」','からくり「命令ノ 主ハ……人ノ 形ヲ シタ、別ノ 何カ」','リディア「別の 何か……？」',
     'からくり「ワタシハ ZF。古イ 時代ノ 魔導からくり。魔力ヲ 見ル 目ヲ 持ツ」','ZF「アノ 者ニハ、人デハ ナイ 魔力ガ 渦巻イテ イタ」','ZF「……オマエタチト 行コウ。アノ 者ノ 正体ヲ 確カメル」','＊ ZFが 仲間に 加わった！ ＊'],
