@@ -90,6 +90,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   await E(()=>enterDun('ruins')); await talk('からくり'); await flush(); await winBattle(); await flush(); await W(300); await flush(); T('ZFが 加わる', await E(()=>ST.phase==='c2_back' && PARTY.includes('zf')));
   await E(()=>enterCastle('velna')); await talk('ヴェルナ王'); await flush(); await W(300); T('第2章 完', await E(()=>ST.phase==='c2_end'));
   T('仲間も 経験値を もらう', await E(()=>{ const a=STATS.lidia.exp; gainExp(5); return STATS.lidia.exp===a+5; }));
+  T('レベルが 上がると HPと MPが 全回復', await E(()=>{ const m=STATS.elt; m.hp=1; m.mp=0; m.exp=0; gainExp(expNeed(m.lv)); return m.hp===m.max && m.mp===m.maxmp; }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });

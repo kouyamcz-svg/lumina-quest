@@ -1273,7 +1273,7 @@ function hasSave(){ try{ return !!localStorage.getItem('lq5save'); }catch(e){ re
 const expNeed=(lv)=>lv*lv*6;                       // Ⅳと 同じ：次の レベルまでの 経験値
 const GROW={elt:{hp:5,mp:2,atk:2,def:1,agi:1}};     // 1レベルごとの 伸び
 function gainExp(n){ const out=[]; PARTY.forEach(k=>{ const m=STATS[k]; if(!m || m.hp<=0) return; m.exp=(m.exp||0)+n;   /* ★仲間 みんなに（倒れて いる 者は もらえない） */
-  while(m.exp>=expNeed(m.lv)){ m.exp-=expNeed(m.lv); m.lv++; const g=GROW[k]; m.max+=g.hp; m.hp+=g.hp; m.maxmp+=g.mp; m.mp+=g.mp; m.batk+=g.atk; m.def+=g.def; m.agi+=g.agi;
+  while(m.exp>=expNeed(m.lv)){ m.exp-=expNeed(m.lv); m.lv++; const g=GROW[k]; m.max+=g.hp; m.maxmp+=g.mp; m.hp=m.max; m.mp=m.maxmp;   /* ★レベルが 上がると HPと MPが 全回復（指示） */ m.batk+=g.atk; m.def+=g.def; m.agi+=g.agi;
     out.push(m.name+'は レベル '+m.lv+' に 上がった！'); (LEARN[k]||[]).filter(([lv])=>lv===m.lv).forEach(([,id])=>out.push('＊ '+m.name+'は '+SKILLS[id].name+'を 覚えた！ ＊')); } });
   syncAtk(); return out; }
 function syncAtk(){ PARTY.forEach(k=>{ const m=STATS[k], e=EQUIP[k]||{}; if(!m) return; m.atk=m.batk+(e.weapon?e.weapon.v:0); m.defT=m.def+(e.armor?e.armor.v:0)+(e.helm?e.helm.v:0); }); }
