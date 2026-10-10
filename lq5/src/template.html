@@ -711,7 +711,7 @@ function pressA(){ if(ST.phase==='end'){ startCh1(); return; } if(ST.phase==='c1
   if(MENU){ se('ok'); MENU.onPick(MENU.sel); return; }
   if(msgQ){ if(msgQ.length) msgEl.textContent=msgQ.shift(); else closeMsg(); return; }
   const fx=Math.sin(hero.ang), fz=Math.cos(hero.ang); let best=null,bd=1e9;
-  cur.npcs.forEach(n=>{const dx=n.x-hero.x,dz=n.y-hero.z;const d=Math.hypot(dx,dz);const dot=(dx*fx+dz*fz)/(d||1);if((d<1.5||(cur.kind==='room'&&d<2.2&&dot>0.8))&&dot>0.4&&d<bd){bd=d;best=n;}   /* ★部屋では カウンター越しに 話せる */});
+  cur.npcs.forEach(n=>{const dx=n.x-hero.x,dz=n.y-hero.z;const d=Math.hypot(dx,dz);const dot=(dx*fx+dz*fz)/(d||1);if((d<1.5||(n.foe&&d<2.1)||(cur.kind==='room'&&d<2.2&&dot>0.8))&&dot>0.4&&d<bd){bd=d;best=n;}   /* ★部屋では カウンター越しに 話せる */});
   if(best){ se('cue'); best.ang=Math.atan2(hero.x-best.x,hero.z-best.y); const bl=linesByPhase(best); if(bl){ say(bl); return; } if(best.talk){ best.talk(best); return; } say([best.name+'：'].concat(best.lines)); return; }
   if(examine()) return;
   say(['……なにも ない。']); }
@@ -725,7 +725,7 @@ function blockedAt(x,z){ const c=at(Math.floor(x),Math.floor(z)); if(cur.kind===
   if(cur.kind==='fort'){ if(!fortGateOpen() && x>12 && x<13 && z>3 && z<4) return true; }
   if(cur.kind==='town' && TL().fountain && Math.hypot(x-TL().fountain[0],z-TL().fountain[1])<1.62) return true;
   if(PROPS.some(p=>Math.hypot(p.x-x,p.z-z)<p.r)) return true;
-  return cur.npcs.some(n=>Math.hypot(n.x-x,n.y-z)<0.55); }
+  return cur.npcs.some(n=>Math.hypot(n.x-x,n.y-z)<(n.foe?1.0:0.55)); }
 function blockedCount(x,z){ const RAD = cur.kind==='world' ? 0.3 : RADT; let n=blockedAt(x,z)?3:0; for(const [ox,oz] of [[RAD,0],[-RAD,0],[0,RAD],[0,-RAD],[RAD*.7,RAD*.7],[-RAD*.7,RAD*.7],[RAD*.7,-RAD*.7],[-RAD*.7,-RAD*.7]]) if(blockedAt(x+ox,z+oz)) n++; return n; }
 // ★重なった 場所から 近くの 空いた 所へ（扉を 出た 位置が 壁に 重なると、壁の 中を 歩けて しまった）
 function safeSpot(x,z){ if(freeCircle(x,z)) return [x,z]; for(let r=.05;r<1.2;r+=.05) for(const [a,b] of [[0,-1],[0,1],[-1,0],[1,0],[-.7,-.7],[.7,-.7],[-.7,.7],[.7,.7]]) if(freeCircle(x+a*r,z+b*r)) return [x+a*r,z+b*r]; return [x,z]; }
@@ -779,6 +779,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
       if(c==='S'){ const east=hero.x>40; if(ST.phase==='c1_road'||ST.phase==='c1_fort') go(()=>enterFort(false)); else if(PAST_FORT.test(ST.phase)) go(()=>{ enterWorld(east?[37.5,24.5]:[41.6,25.5]); }); else { hero.x+= east?.6:-.6; say(['国境の 砦。ヴェルナの 兵が 門を 閉ざして いる。']); } }
       if(c==='W'){ if(PAST_FORT.test(ST.phase)){ if(ST.phase==='c1_east') ST.phase='c1_town'; go(()=>enterTown([11.5,18.2],'velna')); } else { hero.x-=.6; say(['まだ 行けない。']); } }
       if(c==='G'){ go(()=>enterDun('pass',hero.x>63)); }
+      if((ix||iz) && !msgQ && at(Math.floor(hero.x+ix*.6),Math.floor(hero.z+iz*.6))==='Q'){ say(['峠の 関所だ。門は 固く 閉ざされて いる。']); hero.x-=ix*.25; hero.z-=iz*.25; }   /* ★閉じた 関所に ぶつかった とき */
       if(c==='Y'){ go(()=>{ if(ST.phase==='c2_road') ST.phase='c2_capital'; enterTown([12,20.2],'vcap'); }); }
       if(c==='R'){ if(/^c2_(ruins|back|end)$/.test(ST.phase)) go(()=>enterDun('ruins')); else { hero.z+=.6; say(['古い 遺跡の 入口だ。','……今は 入る 理由が ない。']); } }
       if(c==='C') { if(/^(road|c1_|c2_)/.test(ST.phase)) go(()=>enterTown([12,20.2],'cap')); else { hero.z+=0.6; say(['王都 アルディア。今は 用が ない。']); } } }
@@ -885,7 +886,7 @@ const WORLD=[
 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 ];
-const WSOLID=new Set(['~','^','r']);   // ★S＝国境の 砦（2×2）、W＝ヴェルナの 鉱山の 町
+const WSOLID=new Set(['~','^','r','Q']);   // ★S＝国境の 砦（2×2）、W＝ヴェルナの 鉱山の 町
 const c2=document.getElementById('c2'), g2=c2.getContext('2d');
 function tile16(draw){ const c=document.createElement('canvas'); c.width=c.height=16; const g=c.getContext('2d'); draw(g); return c; }
 const P=(g,x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h);};
@@ -954,7 +955,7 @@ function bakeWorld32(){
   const P=(g,x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h);};
   // 浜辺：海に 面した 陸
   const terr=(x,y)=>{ if(x<0||y<0||x>=MW||y>=MH) return 'sea'; const c=WORLD[y][x];
-    if(c==='~') return 'sea'; if(c==='r') return 'lake'; if(c==='b') return 'lake'; if(c==='='||c==='G') return 'road'; if(c==='d') return 'desert'; if(c==='x') return 'dark';
+    if(c==='~') return 'sea'; if(c==='r') return 'lake'; if(c==='b') return 'lake'; if(c==='='||c==='G'||c==='Q') return 'road'; if(c==='d') return 'desert'; if(c==='x') return 'dark';
     for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]){ const nx=x+dx, ny=y+dy; if(nx>=0&&ny>=0&&nx<MW&&ny<MH&&WORLD[ny][nx]==='~' && (c==='.'||c===',')) return 'beach'; }
     return 'plain'; };
   const RANK={sea:0,lake:0,beach:1,desert:2,dark:2,plain:3,road:5};
@@ -1010,7 +1011,7 @@ function bakeWorld32(){
     if(c==='C' && WORLD[y][x-1]!=='C' && WORLD[y-1][x]!=='C') put(WOBJ_IMG.castle, sx+32, sy+63);
     if(c==='Y' && WORLD[y][x-1]!=='Y' && WORLD[y-1][x]!=='Y') put(WOBJ_IMG.vcastle||WOBJ_IMG.castle, sx+32, sy+63);   // ★帝都（専用の 絵：すすけた 石・赤黒い 屋根・煙突と 煙）
     if(c==='R'){ P(G2,sx+4,sy+18,24,12,'#6a7068'); [6,14,22].forEach(px=>{ P(G2,sx+px,sy+4+((px*3)%5),5,16,'#9aa098'); P(G2,sx+px,sy+4+((px*3)%5),5,2,'#c0c8c0'); }); P(G2,sx+12,sy+20,8,10,'#1a1a1a'); }   // ★森の 遺跡（石の 柱と 入口）
-    if(c==='G'){ P(G2,sx,sy+2,32,3,'#7a6a58'); P(G2,sx,sy+27,32,3,'#7a6a58'); }   // ★峠の 道
+    if((c==='G'||c==='Q') && WORLD[y][x-1]!==c) put(WOBJ_IMG[c==='G'?'pass_open':'pass_closed'], sx+32, sy+31);   // ★峠の 山道の 印（開いた 関所／閉じた 関所）
   }
   return out;
 }
@@ -2000,7 +2001,7 @@ function refreshFollowers(){ followers.forEach(f=>{ S.remove(f.p.m); S.remove(f.
 // ---- 外の 世界の 移り変わり：峠（ドルムの 東の 山並み）を 開ける、帝都と 遺跡の 印 ----
 function applyWorldState(){ const open=/^c2_(pass|road|capital|inn|tower|ruins|back|end)$/.test(ST.phase);
   const setc=(x,y,c)=>{ if(WORLD[y][x]===c) return false; WORLD[y]=WORLD[y].slice(0,x)+c+WORLD[y].slice(x+1); return true; };
-  let ch=false; ch=setc(62,25,open?'G':'^')||ch; ch=setc(63,25,open?'G':'^')||ch;
+  let ch=false; ch=setc(62,25,open?'G':'Q')||ch; ch=setc(63,25,open?'G':'Q')||ch;   /* ★閉じた 関所は Q（絵は 閉じた 門。前は ただの 山で 場所が わからなかった） */
   [[92,23],[93,23],[92,24],[93,24]].forEach(([x,y])=>{ ch=setc(x,y,'Y')||ch; }); ch=setc(74,22,'R')||ch; ch=setc(92,25,'=')||ch; ch=setc(93,25,'=')||ch;
   if(ch) WORLD_IMG=null; }
 // ---- 3Dの ダンジョン（峠の 山道・森の 遺跡）----
@@ -2014,7 +2015,8 @@ const DUNS={
 "#.#.....#.......#...#...#",
 "#...#########.#.#.#####.#",
 "#####.........#...#.....#",
-"#########################"], enc:'pass', bg:0x9ab0c8, fog:[0x9ab0c8,9,26], floor:0x9a8468, wall:0x8a7a68, wallH:1.15, look:'rock'},
+"#########################"].flatMap(r=>{ const a=[...r].map(c=>c==='B'?'..':c==='W'?'W.':c==='E'?'.E':c+c).join(''), b=[...r].map(c=>c==='B'?'.B':c==='W'?'W.':c==='E'?'.E':c+c).join(''); return [a,b]; }),   /* ★2倍の 広さに（通路も 壁も 2ます。指示：高く 広く） */
+   enc:'pass', bg:0x9ab0c8, fog:[0x9ab0c8,12,34], floor:0x9a8468, wall:0x8a7a68, wallH:3.0, look:'rock', cliff:true},
  ruins:{name:'森の 遺跡', rows:[
 "###################",
 "#.......#Z#.......#",
@@ -2037,7 +2039,10 @@ function buildDun(d){ S.background=new THREE.Color(d.bg); S.fog=new THREE.Fog(d.
   amb.intensity=d.look==='rock'?.72:.45; amb.color.setHex(d.look==='rock'?0xffffff:0xc8ffe8); sun.intensity=d.look==='rock'?.55:.2; sun.color.setHex(0xfff0d8);
   const fl=L(T.stone,d.floor), wl=L(T.cliff,d.wall);
   d.rows.forEach((r,y)=>[...r].forEach((c,x)=>{ add(box,fl,x+.5,-.5,y+.5);
-    if(c==='#'){ const h=d.wallH*(d.look==='rock'?(.8+((x*7+y*3)%5)*.12):1); add(box,wl,x+.5,h/2,y+.5,1,h,1); }
+    if(c==='#'){ let h=d.wallH*(d.look==='rock'?(.8+((x*7+y*3)%5)*.12):1);
+      if(d.cliff){ const op=(yy,xx)=>d.rows[yy]&&d.rows[yy][xx]&&d.rows[yy][xx]!=='#', open=(yy)=>op(yy,x), near=(yy)=>op(yy,x-1)||op(yy,x)||op(yy,x+1); if(open(y-1)) h=.55+((x*5)%3)*.12; else if(near(y-1)||open(y-2)) h=1.1+((x*3)%3)*.15; else if(near(y-2)||near(y-3)) h=1.9+((x*3)%3)*.15; }   /* ★手前（南）の 崖は 段々に 低く（高い 崖に 主人公が 隠れない） */
+      add(box,wl,x+.5,h/2,y+.5,1,h,1);
+      if(d.cliff && h>2.2){ const r=add(new THREE.DodecahedronGeometry(.3+((x+y)%3)*.1,0),L(null,[0x7a6e60,0x8a7e6c,0x6a6052][(x+y)%3],{flatShading:true}),x+.5,h+.1,y+.5); r.rotation.set(x,y,x*y); } }
     if(c==='M'){ // 古代の 機械
       add(new THREE.CylinderGeometry(.34,.4,1.3,10),L(null,0x5a6a72),x+.5,.65,y+.5); add(new THREE.TorusGeometry(.32,.06,6,16),L(null,0x40e0d0,{emissive:0x20a0a0}),x+.5,1.0,y+.5).rotation.x=Math.PI/2;
       add(new THREE.SphereGeometry(.14,10,8),L(null,0x80fff0,{emissive:0x40c0c0}),x+.5,1.45,y+.5); }
@@ -2052,12 +2057,13 @@ function enterDun(which,fromEnd){ DUN_NOW=which; const d=DUNS[which];
   newG(); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; fireMeshes=[]; buildDun(d);
   cur={kind:'dun', rows:d.rows, solid:new Set(['#','M']), npcs:cur.npcs, room:null, fromEnd:!!fromEnd};
   const npcs=[];
-  if(which==='pass' && ST.phase==='c2_pass') npcs.push({x:23.5,y:4.5,spr:null,foe:'sekisho',name:'関所荒らし',talk:()=>sekishoFight()});
+  const bp=(()=>{ for(let y=0;y<d.rows.length;y++){ const x=d.rows[y].indexOf('B'); if(x>=0) return [x,y]; } return [23.5,4.5]; })();
+  if(which==='pass' && ST.phase==='c2_pass') npcs.push({x:bp[0],y:bp[1],spr:null,foe:'sekisho',name:'関所荒らし',talk:()=>sekishoFight()});
   if(which==='ruins' && ST.phase==='c2_ruins') npcs.push({x:9.5,y:1.5,spr:'zf',name:'からくりの 番兵',talk:()=>zfFight()});
   setNpcs(npcs.filter(n=>n.spr)); if(npcs.some(n=>!n.spr)){ const n=npcs.find(n=>!n.spr); cur.npcs.push({...n,ang:0,p:foeStand(n.foe)}); }
   const R=d.rows; const find=(ch)=>{ for(let y=0;y<R.length;y++){ const x=R[y].indexOf(ch); if(x>=0) return [x,y]; } };
   let st;
-  if(which==='pass'){ const [x,y]=find(fromEnd?'E':'W'); st=[x+(fromEnd?-.6:.6)+.5,y+.5]; hero.ang=fromEnd?-Math.PI/2:Math.PI/2; }
+  if(which==='pass'){ const [x,y]=find(fromEnd?'E':'W'); st=[x+(fromEnd?-.6:.6)+.5,y+1.0]; hero.ang=fromEnd?-Math.PI/2:Math.PI/2; }
   else { const [x,y]=find('S'); st=[x+.5,y-.1]; hero.ang=Math.PI; }
   hero.x=st[0]; hero.z=st[1]; resetTrail(); wWalk=0; wEnc=7+Math.random()*6;
   document.getElementById('place').textContent=d.name; resize(); }
@@ -2067,7 +2073,7 @@ function foeStand(key){ const def=FOES[key]; const t=new THREE.TextureLoader().l
   const sh=new THREE.Mesh(new THREE.CircleGeometry(.45,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.28,depthWrite:false})); sh.rotation.x=-Math.PI/2; S.add(sh);
   return {m,sh,noAnim:true}; }
 function dunExits(iz,ix){ if(cur.kind!=='dun') return; const R=cur.rows, cx=Math.floor(hero.x), cz=Math.floor(hero.z), c=at(cx,cz);
-  if(DUN_NOW==='pass'){ if(c==='W' && ix<0) go(()=>enterWorld([61.4,25.5])); if(c==='E' && ix>0) go(()=>{ if(ST.phase==='c2_pass') ST.phase='c2_road'; enterWorld([64.6,25.5]); }); }
+  if(DUN_NOW==='pass'){ if(c==='W' && ix<0) go(()=>enterWorld([61.4,25.5])); if(c==='E' && ix>0 && ST.phase==='c2_pass'){ if(!msgQ && !BT && !fading) sekishoFight(); hero.x-=.4; } else if(c==='E' && ix>0) go(()=>{   /* ★関所荒らしを 倒すまで 抜けられない（広い 道で 横を すり抜けられた） */ if(ST.phase==='c2_pass') ST.phase='c2_road'; enterWorld([64.6,25.5]); }); }
   if(DUN_NOW==='ruins' && c==='S' && iz>0) go(()=>enterWorld([74.5,23.5])); }
 // ---- 中ボス：関所荒らし ----
 FOES.sekisho={key:'sekisho', name:'関所荒らし', scale:1.35, hp:260, exp:400, gold:160, atk:[10,15], wind:'は 両腕を 振り上げた！', verb:'岩の 拳', boss:true,
