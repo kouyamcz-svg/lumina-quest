@@ -131,6 +131,9 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     await E(()=>{ if(msgQ) closeMsg(); hero.x=5.5; hero.z=19.9; hero.ang=Math.PI; resetTrail(); busyDoor=0; }); await pg.keyboard.down('ArrowUp'); await W(500); await pg.keyboard.up('ArrowUp'); await W(1500); const ok2=await E(()=>cur.kind==='room' && TROOMS()[cur.room].name==='教会');
     await E(()=>{ busyDoor=0; enterTown([12,5.5],'vcap'); if(msgQ) closeMsg(); }); await pg.keyboard.down('ArrowUp'); await W(900); await pg.keyboard.up('ArrowUp'); await W(1500); const ok3=await E(()=>cur.kind==='castle');
     await flush(); return ok1&&ok2&&ok3; })());
+  T('帝都の 城は アルディア城と 別の 並びで、王・侍女が いる', await E(()=>{ if(BT) endBattle(); ST.phase='c2_inn'; enterCastle('velna'); const ok=cur.rows===VCASTLE && VCASTLE!==CASTLE && cur.npcs.some(n=>n.name==='侍女') && cur.npcs.some(n=>n.name==='ヴェルナ王') && cur.npcs.every(n=>!cur.solid.has(cur.rows[Math.floor(n.y)][Math.floor(n.x)])); enterCastle(); const ok2=cur.rows===CASTLE; return ok&&ok2; }));
+  T('外の 地図の 帝都は 専用の 絵', await E(()=>!!WOBJ_IMG.vcastle));
+  T('経験値は 1.25倍', await E(()=>EXP_RATE===1.25));
   T('ドルムの 教会で セーブ → 再開も ドルムの 教会', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); ST.phase='c2_dolm'; enterTown([11.5,15.5],'velna'); lastDoor=3; enterRoom(3); hero.x=4.5; hero.z=4.5; saveGame(); enterTown([12,6],'rue'); }); await pg.reload({waitUntil:'load'}); await W(1800);
     for(let i=0;i<40 && !(await E(()=>typeof MENU!=='undefined'));i++) await W(100); await W(600); await E(()=>{ if(MENU) closeMenu(); loadGame(); }); await W(800);
     return await E(()=>TOWN_NOW==='velna' && cur.kind==='room' && TROOMS()[cur.room].name==='教会'); })());

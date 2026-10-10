@@ -1000,7 +1000,7 @@ function bakeWorld32(){
     if(c==='V'||c==='W') put(WOBJ_IMG.village, sx+16, sy+31);
     if(c==='S' && WORLD[y][x-1]!=='S' && WORLD[y-1][x]!=='S') put(WOBJ_IMG.fort, sx+32, sy+63);   // ★国境の 砦（2×2）
     if(c==='C' && WORLD[y][x-1]!=='C' && WORLD[y-1][x]!=='C') put(WOBJ_IMG.castle, sx+32, sy+63);
-    if(c==='Y' && WORLD[y][x-1]!=='Y' && WORLD[y-1][x]!=='Y'){ const tmp=document.createElement('canvas'), im=WOBJ_IMG.castle; if(im){ tmp.width=im.width; tmp.height=im.height; const tg=tmp.getContext('2d'); tg.drawImage(im,0,0); tg.globalCompositeOperation='source-atop'; tg.fillStyle='rgba(60,20,30,.45)'; tg.fillRect(0,0,tmp.width,tmp.height); put(tmp, sx+32, sy+63); } }   // ★帝都（城の 絵を 暗く して 使う）
+    if(c==='Y' && WORLD[y][x-1]!=='Y' && WORLD[y-1][x]!=='Y') put(WOBJ_IMG.vcastle||WOBJ_IMG.castle, sx+32, sy+63);   // ★帝都（専用の 絵：すすけた 石・赤黒い 屋根・煙突と 煙）
     if(c==='R'){ P(G2,sx+4,sy+18,24,12,'#6a7068'); [6,14,22].forEach(px=>{ P(G2,sx+px,sy+4+((px*3)%5),5,16,'#9aa098'); P(G2,sx+px,sy+4+((px*3)%5),5,2,'#c0c8c0'); }); P(G2,sx+12,sy+20,8,10,'#1a1a1a'); }   // ★森の 遺跡（石の 柱と 入口）
     if(c==='G'){ P(G2,sx,sy+2,32,3,'#7a6a58'); P(G2,sx,sy+27,32,3,'#7a6a58'); }   // ★峠の 道
   }
@@ -1227,8 +1227,9 @@ function foeAct(f){ let t=null, line='';
 // ★ターンの 終わり：毒の ダメージ、混乱・眠りの 残り
 function turnEnd(){ return ()=>{ const lines=[]; BT.party.forEach(m=>{ if(m.hp>0 && m.status==='poison'){ const d=Math.max(1,Math.floor(m.max/12)); m.hp=Math.max(1,m.hp-d); lines.push(m.name+'は 毒で '+d+'の ダメージ'); } }); drawBattleUI(); if(lines.length){ bsay(lines.join('　')); return .9; } return 0; }; }
 function enemyTurn(){ const st=[]; alive().forEach(f=>st.push(...foeAct(f))); st.push(turnEnd()); st.push(backToMenu()); return st; }
+const EXP_RATE=1.25;   // ★経験値を 少し 上げる（指示。前は 1倍）
 function winSteps(){ return [
-  ()=>{ const ex=BT.foes.reduce((a,f)=>a+(f.def.exp||0),0), gd=BT.foes.reduce((a,f)=>a+(f.def.gold||0),0); BAG.gold+=gd; const ups=gainExp(ex); setTimeout(()=>se('win'),100); if(ups.length) setTimeout(()=>se('lvup'),400);
+  ()=>{ const ex=Math.round(BT.foes.reduce((a,f)=>a+(f.def.exp||0),0)*EXP_RATE), gd=BT.foes.reduce((a,f)=>a+(f.def.gold||0),0); BAG.gold+=gd; const ups=gainExp(ex); setTimeout(()=>se('win'),100); if(ups.length) setTimeout(()=>se('lvup'),400);
  ST.kill=ST.kill||{}; BT.foes.forEach(f=>{ ST.kill[f.def.key]=(ST.kill[f.def.key]||0)+1; });   // ★眠りと 混乱は 戦闘が 終わると 治る（毒は 残る）
         bsay((BT.foes.length>1?'魔物たちを やっつけた！ ':'')+'経験値 '+ex+'、'+gd+'ゴールドを 手に 入れた！'+(ups.length?'　'+ups.join('　'):'')); return ups.length?2.4:1.6; },
   ()=>{ endBattle(); return 99; } ]; }
@@ -1545,7 +1546,50 @@ const CASTLE=[
 "#..........rrr..........#",
 "#..........rrr..........#",
 "############.############"];
-function buildCastle(){ const vel=CASTLE_NOW==='velna';
+// ★帝都の 城の 中（指示：アルディア城と 同じ 並び だった）。A 武器棚の 武器庫・M 進軍の 地図の 机・Z からくりの 像・I 鉄の 柱・E からくりの 大きな 機械・S 塔への 階段
+const VCASTLE=[
+"#########################",
+"#AAAA#..Z..UUU..Z..#....#",
+"#....#.....rrr.....#.MM.#",
+"#AA..#.I...rrr...I.#.MM.#",
+"#....#.....rrr.....#....#",
+"#AA..#.I...rrr...I.#.MM.#",
+"#....#.....rrr.....#.MM.#",
+"#....#.I...rrr...I.#....#",
+"#....#.....rrr.....#....#",
+"###.#######rrr#######.###",
+"#K..K.#....rrr....#.....#",
+"#.....#.I..rrr..I.#.EEE.#",
+"#K..K......rrr......EEE.#",
+"#.....#....rrr....#.EEE.#",
+"#K....#.I..rrr..I.#.....#",
+"#######....rrr....#######",
+"#..........rrr..........#",
+"#.S.....I..rrr..I.......#",
+"#..........rrr..........#",
+"#..........rrr..........#",
+"#..........rrr..........#",
+"############.############"];
+const CR=()=>CASTLE_NOW==='velna'?VCASTLE:CASTLE;
+function velnaCastleProps(CS){ const iron=L(null,0x34343c), dark=L(null,0x1e1e24), gold=L(null,0xc8a040,{emissive:0x302010}), red=0x7a1a20, done={};
+  for(let y=0;y<CS.length;y++)for(let x=0;x<CS[0].length;x++){ const c=CS[y][x], X=x+.5, Z=y+.5;
+    if(c==='I'){ add(new THREE.CylinderGeometry(.26,.3,2.6,8),L(null,0x4a4a54),X,1.3,Z); [.4,1.3,2.2].forEach(h=>add(new THREE.CylinderGeometry(.33,.33,.1,8),iron,X,h,Z)); add(box,gold,X,2.65,Z,.6,.1,.6); }   // 鉄の 柱
+    if(c==='Z'){ add(box,L(null,0x5a5a64),X,.2,Z,.9,.4,.9); const st=L(null,0x6a6a74,{flatShading:true}); add(box,st,X,1.1,Z,.55,1.0,.4); add(new THREE.SphereGeometry(.22,8,6),st,X,1.85,Z);   // からくりの 像
+      add(box,L(null,0x6ac8ff,{emissive:0x2a6aa0}),X,1.88,Z+.2,.26,.06,.02); add(box,st,X-.38,1.1,Z,.18,.8,.2); add(box,st,X+.38,1.1,Z,.18,.8,.2); }
+    if(c==='A'){ add(box,L(null,0x4a3a2a),X,.9,y+.3,.96,1.8,.3); for(let k=0;k<4;k++){ add(box,L(null,0xd0d4dc),X-.33+k*.22,1.05,y+.5,.05,1.1,.05); add(box,L(null,0x6a4024),X-.33+k*.22,.42,y+.5,.12,.06,.12); } add(box,iron,X,1.7,y+.5,.9,.06,.06); }   // 武器棚
+    if(c==='M' && !done[x+','+y]){ done[x+','+y]=done[(x+1)+','+y]=done[x+','+(y+1)]=done[(x+1)+','+(y+1)]=1;   // 進軍の 地図の 机
+      add(box,L(null,0x5a3a22),x+1,.7,y+1,1.9,.1,1.7); [[-.85,-.75],[.85,-.75],[-.85,.75],[.85,.75]].forEach(([a,b])=>add(box,L(null,0x4a2e18),x+1+a,.35,y+1+b,.1,.7,.1));
+      add(box,L(null,0xd8c8a0),x+1,.76,y+1,1.6,.02,1.3); add(box,L(null,0x8a2a2a),x+1,.78,y+1,1.0,.01,.06).rotation.y=.5; [[-.4,.2],[.2,-.3],[.5,.3]].forEach(([a,b])=>add(new THREE.ConeGeometry(.06,.18,4),L(null,0x2a2a30),x+1+a,.86,y+1+b)); }
+    if(c==='E' && !done.E){ done.E=1; const ex=x+1.5, ez=y+1.5;   // からくりの 大きな 機械（歯車と 管と 光る 核）
+      add(box,L(null,0x3a3a44),ex,1.0,ez,2.8,2.0,2.8); const core=add(new THREE.SphereGeometry(.45,12,10),L(null,0x6ac8ff,{emissive:0x3a8ad0}),ex,1.2,ez+1.42); core.scale.z=.4;
+      [[-.9,1.5,.5],[.9,1.2,.35],[0,2.2,.4]].forEach(([dx,gy,r])=>{ const g=add(new THREE.CylinderGeometry(r,r,.12,12),iron,ex+dx,gy,ez+1.45); g.rotation.x=Math.PI/2; for(let k=0;k<8;k++){ const a=k*Math.PI/4; add(box,iron,ex+dx+Math.cos(a)*r,gy+Math.sin(a)*r,ez+1.45,.12,.12,.12).rotation.z=a; } });
+      [-1.2,1.2].forEach(dx=>add(new THREE.CylinderGeometry(.1,.1,2.6,8),L(null,0x6a6a74),ex+dx,1.3,ez+1.3)); add(new THREE.CylinderGeometry(.1,.1,2.6,8),L(null,0x6a6a74),ex,2.1,ez+1.3).rotation.z=Math.PI/2;
+      const pl=new THREE.PointLight(0x6ac8ff,1.0,6); pl.position.set(ex,1.3,ez+2.2); G.add(pl); }
+    if(c==='S'){ for(let k=0;k<5;k++) add(box,L(T.stone,0x8a8890),X,.1+k*.22,Z+.4-k*.2,.9,.2,.3); add(box,iron,X+.45,1.0,Z,.06,2.0,.06); }   // 塔への 階段
+  }
+  [[3.5,0.6],[21.5,0.6]].forEach(([x,z])=>add(new THREE.PlaneGeometry(.8,1.6),L(null,red,{side:THREE.DoubleSide}),x,1.4,z+.42));
+  [[2,15.6],[23,15.6]].forEach(([x,z])=>{ add(box,L(null,0x6ac8ff,{emissive:0x2a6aa0}),x,1.6,z,.16,.24,.06); }); }
+function buildCastle(){ const vel=CASTLE_NOW==='velna'; const CASTLE=CR();
   S.background=new THREE.Color(0x1a1420); S.fog=null; amb.intensity=vel?.55:.7; amb.color.setHex(vel?0xe0d8e8:0xfff0e0); sun.intensity=.4; sun.color.setHex(0xfff0d0);
   const st=L(T.stone,vel?0x9a98a0:0xe8e0d0), carpet=L(T.rug,vel?0x8a4050:0xffffff), wall=L(T.inwall,vel?0x8a8890:0xf0e8d8);   /* ★帝都の 城は 暗い 石と 赤黒 */
   for(let y=0;y<CASTLE.length;y++)for(let x=0;x<CASTLE[0].length;x++){ const c=CASTLE[y][x];
@@ -1560,11 +1604,12 @@ function buildCastle(){ const vel=CASTLE_NOW==='velna';
   [[6.5,12],[18.5,12],[12.5,15.5]].forEach(([x,z])=>{ const l=new THREE.PointLight(0xffe0b0,.6,9); l.position.set(x,2.2,z); G.add(l); });
   add(box,L(null,0xd8b040),12.5,.8,1.4,1.1,1.0,.5); add(box,L(null,0xb02020),12.5,.75,1.6,.8,.6,.3); add(box,L(null,0xd8b040),12.5,1.6,1.25,1.0,.9,.15);   // 玉座
   [[8.5,0.6],[16.5,0.6]].forEach(([x,z])=>{ add(new THREE.PlaneGeometry(.9,1.8),L(null,vel?0x7a1a20:0x3050a0),x,1.4,z+.42); });   // 王国の 旗
-  const l=new THREE.PointLight(0xffe0b0,.8,10); l.position.set(12.5,2.5,3); G.add(l); }
+  const l=new THREE.PointLight(0xffe0b0,.8,10); l.position.set(12.5,2.5,3); G.add(l);
+  if(vel) velnaCastleProps(CASTLE); }
 function enterCastle(which){ CASTLE_NOW=which||'ardia'; [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); cv.style.display='block'; c2.style.display='none';
   newG(); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; fireMeshes=[]; buildCastle();
-  cur={kind:'castle', rows:CASTLE, solid:new Set(['#','P','U','B','T','K']), npcs:cur.npcs, room:null};
-  if(CASTLE_NOW==='velna'){ setNpcs(velnaCastleNpcs()); hero.x=12.5; hero.z=CASTLE.length-1.6; hero.ang=Math.PI; resetTrail(); document.getElementById('place').textContent='帝都 ヴェルナの 城'; resize(); return; }
+  cur={kind:'castle', rows:CR(), solid:new Set(['#','P','U','B','T','K','A','I','Z','M','E','S']), npcs:cur.npcs, room:null};
+  if(CASTLE_NOW==='velna'){ setNpcs(velnaCastleNpcs()); hero.x=12.5; hero.z=VCASTLE.length-1.6; hero.ang=Math.PI; resetTrail(); document.getElementById('place').textContent='帝都 ヴェルナの 城'; resize(); return; }
   setNpcs([{x:12.5,y:2.4,spr:'king',name:'アルディア王',talk:()=>{ if(ST.phase==='c1_castle'){ kingCh1(); return; } if(ST.phase!=='road'){ say(['アルディア王「頼んだぞ、エルト」']); return; }
     (()=>{ if(!ST.gotArmor){ ST.gotArmor=1; BAG.gear.push({name:'兵士の 鎧',kind:'armor',v:8,price:80}); } })(), say(['アルディア王「……そなたは、国境の 村の 者か」','エルトは、村で 起きた ことを 話した。','うつろな 目の 兵。燃える 家。倒れた 部隊長の 最後の 言葉。','アルディア王「……なぜ、わたしは ここに、と」','アルディア王「よく 生きて 戻った」','アルディア王「今日から、そなたは 王国の 兵士だ」','＊ エルトは 兵士の 鎧を 受け取った ＊（メニューの 装備で 付けられる）','アルディア王「ヴェルナに、和平の 使者を 送る」','アルディア王「……あの 国で 何が 起きて いるのか、確かめねば ならぬ」'],()=>showEnd()); }}]);
   // ★城の 人（王の ほか）
@@ -2059,6 +2104,10 @@ function velnaCastleNpcs(){ const L_=[]; const ph=ST.phase;
   if(/^c2_(capital|inn|tower)$/.test(ph)) L_.push({x:12.5,y:9.4,spr:'zf',name:'からくりの 番兵',lines:['からくりの 番兵「…………」','冷たい 目が、こちらを 見て いる。']});
   if(/^c2_(inn|tower|ruins|back|end)$/.test(ph)) L_.push({x:9.5,y:12.5,spr:'haven',name:'使者 ハーヴェン',byPhase:{c2_inn:['使者 ハーヴェン「わたしは ここに 留め置かれる らしいですな。エルトどのは 町の 宿で 休んで くだされ」'],c2_back:['使者 ハーヴェン「王女さまと……ZFどの、か。王に お会いに なるのですな」'],'*':['使者 ハーヴェン「王の あの 目……ただ事では ありませんぞ」']}});
   L_.push({x:10.2,y:19.4,spr:'vsoldier',name:'城の 門番',lines:['門番「北の 奥が 謁見の 間だ」']});
+  L_.push({x:21.5,y:4.4,spr:'vsoldier',name:'作戦室の 兵',lines:['兵「この 地図か？ ……アルディアへ 攻めこむ 道筋だ」','兵「セルヴィスさまの お考えだ。陛下は 何も おっしゃらない」']});
+  L_.push({x:2.5,y:4.4,spr:'vsoldier',name:'武器庫の 番',lines:['番「剣も 槍も、毎日 工房から 運ばれて くる」','番「これほどの 数、何と 戦う つもりなのか」']});
+  L_.push({x:21.5,y:15.2-.6,spr:'librarian',name:'からくり番',lines:['からくり番「この 機械が 城の からくりの 兵を 動かして いる」','からくり番「……設計図は セルヴィスさましか 知らん」']});
+  if(/^c2_(capital|inn)$/.test(ph)) L_.push({x:3.5,y:18.4,spr:'maid',name:'侍女',lines:['侍女「王女さまは、北の 塔に こもって おいでです」','侍女「……あの 方が 笑った お顔を、もう ずっと 見て おりません」']});   /* ★侍女の 姿（前は 台詞だけ） */
   L_.push({x:3.5,y:13.2,spr:'vsoldier',name:'城の 兵',lines:['兵「西の 森に 古い 遺跡が ある。セルヴィスさまが よく 通われて いる」']});
   return L_; }
 function velnaKing(){ const ph=ST.phase;
@@ -2071,10 +2120,10 @@ function velnaKing(){ const ph=ST.phase;
   say(['ヴェルナ王「…………」','うつろな 目は、どこも 見て いない。']); }
 // ---- 夜の 塔（王女）----
 const TOWER_ROOM={name:'城の 塔', rows:["WWWWWWWWW","W.f...b.W","W.......W","W...T...W","W.......W","Wp.....pW","WWWWXWWWW"]};
-function enterTower(){ newG(); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildRoom(TOWER_ROOM);
+function enterTower(){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); cv.style.display='block'; c2.style.display='none'; newG(); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildRoom(TOWER_ROOM);
   S.background=new THREE.Color(0x0a0c1a); amb.intensity=.4; amb.color.setHex(0xa0b0ff);
   cur={kind:'tower', rows:TOWER_ROOM.rows, solid:new Set(['W','s','b','T','f','p']), npcs:cur.npcs, room:null};
-  setNpcs([{x:4.5,y:2.3,spr:'lidia',name:'王女 リディア',talk:()=>lidiaTalk()}]);
+  setNpcs([{x:4.5,y:2.3,spr:'lidia',name:'王女 リディア',talk:()=>lidiaTalk()}].concat(ST.phase==='c2_tower'?[{x:6.5,y:4.6,spr:'maid',name:'侍女',lines:['侍女「見張りの からくりが 回って くるまで、少しの 間です」','侍女「どうか 王女さまの お話を」']}]:[]));
   hero.x=4.5; hero.z=TOWER_ROOM.rows.length-2.3; hero.ang=Math.PI; resetTrail();
   document.getElementById('place').textContent='帝都の 城の 塔（夜）'; resize(); }
 function lidiaTalk(){ if(ST.phase!=='c2_tower') return say(['リディア「行きましょう」']);
