@@ -148,7 +148,7 @@ const CAP_ROOMS=[
   npc:{x:4.5,y:2.5,spr:'smith',name:'店の 主人',talk:()=>say(['主人「いらっしゃい。王都いちの 品ぞろえだ」'],()=>openShop('smith','武器と 防具の 店（所持金 '+BAG.gold+'G）'))}},
  {name:'道具屋', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.TTT...W","W.......W","Wp.....pW","WWWWXWWWW"],
   npc:{x:4.5,y:2.5,spr:'okami',name:'道具屋の 主人',talk:()=>say(['主人「薬草は 旅の おともだよ」'],()=>openShop('tools','道具屋（所持金 '+BAG.gold+'G）'))}},
- {name:'教会', rows:["WWWWWWWWW","W...A...W","W.......W","W.QQ.QQ.W","W.......W","W.QQ.QQ.W","WWWWXWWWW"],
+ {name:'教会', rows:["WWWWWWWWW","W...A...W","W.......W","WQQ...QQW","W.......W","WQQ...QQW","WWWWXWWWW"],
   npc:{x:4.5,y:2.3,spr:'priest',name:'神父',talk:()=>openChurch()}},
  {name:'民家', rows:["WWWWWWWWW","Wb.f...sW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"],
   npc:{x:6.5,y:3.5,spr:'girl',name:'王都の 娘',lines:['娘「ヴェルナとの 和平が かなえば いいのに」']}},
@@ -203,7 +203,7 @@ const DOLM_ROOMS=[
   npc:{x:2.5,y:2.4,spr:'girl',name:'宿の 娘',talk:()=>say(['娘「鉱山の 宿へ ようこそ。すすで 汚れた 服は 外で はたいてね」'],openInn)}},
  {name:'鍛冶屋', rows:["WWWWWWWWW","Wf..s..sW","W.......W","W.T...T.W","W.......W","Ws......W","WWWWXWWWW"],
   npc:{x:2.5,y:2.5,spr:'smith',name:'鍛冶屋の 親方',talk:()=>say(['親方「掘りたての ドルムの 鉄で 打った 品だ。……いい 鉄は みんな 帝都へ 持って いかれるがな」'],()=>openShop('smith','鍛冶屋（所持金 '+BAG.gold+'G）'))}},
- {name:'教会', rows:["WWWWWWWWW","W...A...W","W.......W","W.QQ.QQ.W","W.......W","W.QQ.QQ.W","WWWWXWWWW"],
+ {name:'教会', rows:["WWWWWWWWW","W...A...W","W.......W","WQQ...QQW","W.......W","WQQ...QQW","WWWWXWWWW"],
   npc:{x:4.5,y:2.3,spr:'priest',name:'神父',talk:()=>openChurch()}},
  {name:'道具屋', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.TTT...W","W.......W","Wp.....pW","WWWWXWWWW"],
   npc:{x:4.5,y:2.5,spr:'okami',name:'道具屋の 主人',talk:()=>say(['主人「坑道に 入る 者は、薬草を 切らすと 命取りだよ」'],()=>openShop('tools','道具屋（所持金 '+BAG.gold+'G）'))}},
@@ -744,7 +744,10 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
     // ★今いる 場所が 人や 物と 重なって いる（はじまりの 位置・人が 現れた 直後）ときは、当たりを 見ずに 動かして 抜け出させる
     const stuck=!freeCircle(hero.x,hero.z);
     if(stuck){ const b0=blockedCount(hero.x,hero.z); if(blockedCount(hero.x+vx*st,hero.z)<=b0) hero.x+=vx*st; if(blockedCount(hero.x,hero.z+vz*st)<=blockedCount(hero.x,hero.z)) hero.z+=vz*st; }   /* ★重なって いる ときは 抜ける 向きだけ（奥へ 入りこまない） */
-    else { if(freeCircle(hero.x+vx*st,hero.z)) hero.x+=vx*st; if(freeCircle(hero.x,hero.z+vz*st)) hero.z+=vz*st; }
+    else { if(freeCircle(hero.x+vx*st,hero.z)) hero.x+=vx*st; if(freeCircle(hero.x,hero.z+vz*st)) hero.z+=vz*st;
+      /* ★細い 通路の 手前で 少し ずれて いても 通れる よう、ますの 真ん中へ 寄せる（角で 引っかからない） */
+      if(cur.kind!=='world' && hero.x===ox && hero.z===oz){ if(Math.abs(vz)>.5){ const cx=Math.floor(hero.x)+.5, dx=cx-hero.x; if(Math.abs(dx)>.02 && freeCircle(cx,hero.z+vz*st*3)){ const m=Math.sign(dx)*Math.min(Math.abs(dx),st); if(freeCircle(hero.x+m,hero.z)) hero.x+=m; } }
+        else if(Math.abs(vx)>.5){ const cz=Math.floor(hero.z)+.5, dz=cz-hero.z; if(Math.abs(dz)>.02 && freeCircle(hero.x+vx*st*3,cz)){ const m=Math.sign(dz)*Math.min(Math.abs(dz),st); if(freeCircle(hero.x,hero.z+m)) hero.z+=m; } } } }
     const mv=Math.hypot(hero.x-ox,hero.z-oz);
     if(mv>.001){ trail.unshift([hero.x,hero.z,hero.ang]); if(trail.length>400) trail.pop(); }
     if(mv>.001 && STATS.elt.status==='poison'){ ST.pz=(ST.pz||0)+mv; if(ST.pz>6){ ST.pz=0; if(STATS.elt.hp>1){ STATS.elt.hp--; flashEl.style.opacity=.35; setTimeout(()=>flashEl.style.opacity=0,120); } } }   // ★毒：歩くと 少しずつ 減る（1までで 止まる）
@@ -782,7 +785,9 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
     else if(cur.kind==='town' && TOWN_NOW==='rue' && /^(burn|after|road)$/.test(ST.phase) && !msgQ && TDOORS().some(([dx,dy])=>Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2) && iz<0){ say(['家の 中まで 火が 回って いる。入れない！']); hero.z+=.35; }   /* ★燃えて いる 家には 入れない */
     else if(cur.kind==='town'){ TDOORS().forEach(([dx,dy],i)=>{ if(!busyDoor && Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2 && iz<0){ busyDoor=1;   /* ★扉の すぐ 前だけ。busyDoor=1 が 説明の 中に 入って 効かず、毎こま 扉の 音が 鳴って 重なって いた */
         se('door'); swing(doorPiv[i],0,OPEN,.28,0,()=>goDoor(()=>{ lastDoor=i; enterRoom(i); swing(roomDoor,OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }); }
-    else if(cur.kind==='room'){ const r=TROOMS()[cur.room]; const xi=r.rows[r.rows.length-1].indexOf('X'); if(!busyDoor && Math.abs(hero.x-(xi+.5))<.4 && hero.z>r.rows.length-1.45 && iz>0){ busyDoor=1;
+    else if(cur.kind==='room'){ const r=TROOMS()[cur.room]; const xi=r.rows[r.rows.length-1].indexOf('X');
+      if(!busyDoor && iz>0 && hero.z>r.rows.length-1.75){ const d=(xi+.5)-hero.x; if(Math.abs(d)>.05 && Math.abs(d)<1.6){ const m=Math.sign(d)*Math.min(Math.abs(d),SPEED*dt); if(freeCircle(hero.x+m,hero.z)) hero.x+=m; } }   /* ★出口の 近くで 下を 押すと 扉の 前へ 寄る */
+      if(!busyDoor && Math.abs(hero.x-(xi+.5))<.4 && hero.z>r.rows.length-1.45 && iz>0){ busyDoor=1;
         se('door'); swing(roomDoor,0,OPEN,.28,0,()=>goDoor(()=>{ const [dx,dy]=TDOORS()[lastDoor]; enterTown([dx+.5, dy+.95], TOWN_NOW); { const [sx,sz]=safeSpot(hero.x,hero.z); hero.x=sx; hero.z=sz; resetTrail(); } swing(doorPiv[lastDoor],OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }
   }
   let acc=0,k=1; followers.forEach((f,i)=>{ const want=.85*(i+1); while(k<trail.length-1){ const d=Math.hypot(trail[k][0]-trail[k-1][0],trail[k][1]-trail[k-1][1]); if(acc+d>=want) break; acc+=d; k++; } const t=trail[Math.min(k,trail.length-1)]; f.x+=(t[0]-f.x)*.5; f.z+=(t[1]-f.z)*.5; f.ang=t[2]; });
