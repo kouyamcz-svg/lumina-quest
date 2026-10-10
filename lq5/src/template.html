@@ -2130,6 +2130,7 @@ function ruinExamine(){ if(cur.kind!=='dun'||DUN_NOW!=='ruins') return false; co
       else say(['古代の 機械が 低い 音を 立てて 動き出した。','（あと '+(4-seq.length)+'つ）'],rebuildDun); }
     else { const had=seq.length; ST.ruinSeq=[]; se('cancel'); say(['機械が 一瞬 光り……すぐに 消えた。'].concat(had?['ほかの 機械の 光も 消えて しまった。……順番が 違う ようだ。']:['……順番が 違う ようだ。']),rebuildDun); }
     return true; }
+  if(ST.ruinsOpen && Math.hypot(hero.x-9.5,hero.z-1.5)<1.4){ if(ST.phase!=='c2_ruins'){ say(['砕けた 黒い 水晶だ。もう 何の 力も 感じない。']); return true; } crystalScene(); return true; }
   if(!ST.ruinsOpen && Math.abs(hero.x-9.5)<1.2 && hero.z<3.3 && hero.z>2.0){ say(['不思議な 光の 壁が 道を ふさいで いる。','……遺跡の 古い 機械と つながって いる ようだ。']); return true; }
   return false; }
 function rebuildDun(){ const px=hero.x, pz=hero.z, pa=hero.ang, npcs=cur.npcs; newG(); buildDun(DUNS[DUN_NOW]); chestMesh(chestKey()); hero.x=px; hero.z=pz; hero.ang=pa; }
@@ -2156,6 +2157,10 @@ function buildDun(d){ S.background=new THREE.Color(d.bg); S.fog=new THREE.Fog(d.
     add(new THREE.CylinderGeometry(.19,.19,.3,10),L(null,ST.passRocks?0x6a6050:0xc8b080),wx,.95,wz).rotation.z=Math.PI/2;   // 綱
     const sx=44.5, sz=11.1; add(new THREE.CylinderGeometry(.62,.66,.08,14),L(T.water,0x9ad0ff,{emissive:0x10304a}),sx,.05,sz); for(let k=0;k<7;k++){ const a=k/7*6.283; add(new THREE.DodecahedronGeometry(.16,0),L(null,0x8a8278,{flatShading:true}),sx+Math.cos(a)*.7,.1,sz+Math.sin(a)*.6); }
     const sl=new THREE.PointLight(0x9ad0ff,.6,3); sl.position.set(sx,.8,sz); G.add(sl); }
+  if(DUN_NOW==='ruins'){ const broken=/^c2_(back|end)$/.test(ST.phase)||ST.crystalBroken;   // ★奥の 間：黒い 魔法陣と 黒い 水晶
+    const mc=add(new THREE.RingGeometry(.55,.75,24),L(null,0x6a2a8a,{emissive:broken?0x100818:0x401060,side:THREE.DoubleSide}),9.5,.03,1.5); mc.rotation.x=-Math.PI/2;
+    const cr=add(new THREE.OctahedronGeometry(.32,0),L(null,broken?0x2a2a34:0x3a1a4a,{emissive:broken?0x000000:0x5a1a8a,flatShading:true}),9.5,broken?.25:1.05,1.5); cr.scale.y=broken?.6:1.6; if(broken) cr.rotation.z=.9;
+    if(!broken){ const cl=new THREE.PointLight(0xa040ff,1.0,4); cl.position.set(9.5,1.2,1.7); G.add(cl); } }
   if(DUN_NOW==='ruins' && !ST.ruinsOpen){ const bw=add(new THREE.PlaneGeometry(1,1.6),new THREE.MeshBasicMaterial({color:0xb080ff,transparent:true,opacity:.5,side:THREE.DoubleSide,depthWrite:false}),9.5,.8,2.02); bw.userData.barrier=1; [9.03,9.97].forEach(x=>add(box,L(null,0x8060c0,{emissive:0x402080}),x,.8,2.02,.06,1.6,.06)); const bl=new THREE.PointLight(0xb080ff,.7,3); bl.position.set(9.5,1,2.4); G.add(bl); }   /* ★奥の 部屋を ふさぐ 光の 壁 */
   if(DUN_NOW==='ruins'){ [[4.5,3.4],[13.5,9.4],[8.5,13.4]].forEach(([x,z])=>{ add(new THREE.CylinderGeometry(.42,.42,.06,14),L(null,0x3a2a1a),x,.02,z); const w=toWall(x,z); if(w) add(box,L(null,0x6a5040),w[0],.12,w[1],.3,.24,.2); });   // 掘り返した 跡
     [[2.5,1.5],[16.5,1.5],[9.5,7.5],[3.5,11.5],[15.5,11.5]].forEach(([x,z])=>{ const l=new THREE.PointLight(0x60ffe0,.7,6); l.position.set(x,1.4,z); G.add(l); }); }
@@ -2168,7 +2173,7 @@ function enterDun(which,fromEnd){ DUN_NOW=which; visit(which); const d=DUNS[whic
   const bp=(()=>{ for(let y=0;y<d.rows.length;y++){ const x=d.rows[y].indexOf('B'); if(x>=0) return [x,y]; } return [23.5,4.5]; })();
   if(which==='pass' && ST.phase==='c2_pass') npcs.push({x:bp[0],y:bp[1],spr:null,foe:'sekisho',name:'関所荒らし',talk:()=>sekishoFight()});
   if(which==='ruins' && ST.phase==='c2_ruins' && !ST.ruinsOpen && !ST.ruinsHint){ ST.ruinsHint=1; setTimeout(()=>{ if(!msgQ) say(['リディア「……遺跡の 奥から、強い 魔力を 感じる」','リディア「あちこちに ある 古い 機械。……何かの 仕掛けかも しれない。調べて みましょう」']); },600); }
-  if(which==='ruins' && ST.phase==='c2_ruins') npcs.push({x:9.5,y:1.5,spr:'zf',name:'からくりの 番兵',talk:()=>{ if(!ST.ruinsOpen) return say(['光の 壁の 向こうに、からくりが 立って いる。','……壁に 阻まれて 近づけない。遺跡の 古い 機械と つながって いる ようだ。']); zfFight(); }});
+  /* ★ZFは 初めから 奥の 間に いない（王女を 追って 来る。指示）。奥の 間には セルヴィスの 黒い 水晶。調べると 背後から ZFが 来る */
   chestMesh('dun_'+which);
   setNpcs(npcs.filter(n=>n.spr)); if(npcs.some(n=>!n.spr)){ const n=npcs.find(n=>!n.spr); cur.npcs.push({...n,ang:0,p:foeStand(n.foe)}); }
   const R=d.rows; const find=(ch)=>{ for(let y=0;y<R.length;y++){ const x=R[y].indexOf(ch); if(x>=0) return [x,y]; } };
@@ -2193,10 +2198,17 @@ function sekishoFight(){ say(['関所の 前に、岩の 塊の ような 魔物
 // ---- ボス：魔導からくり ZF ----
 FOES.zfboss={key:'zfboss', name:'魔導からくり ZF', scale:1.4, hp:560, exp:900, gold:300, atk:[12,18], wind:'の 杖の 玉が 青く 光った！', verb:'杖の 一撃', boss:true,
   bigWind:'の 胸の 装甲が 開いた！', bigName:'魔導の 光線', frames:{idle:RAB.zfb_idle,idle2:RAB.zfb_idle2,wind:RAB.zfb_wind,atk:RAB.zfb_atk,big:RAB.zfb_big}};
-function zfFight(){ say(['遺跡の 奥に、あの からくりが 立って いた。','からくりの 番兵「……王女ヲ 確認。連レ 戻ス」','胸を 見ると「ZF」と 書いて ある。','リディア「下がって、エルト！ ……来るわ！」'],()=>startBattle(FOES.zfboss,()=>{
+// ★奥の 間の 黒い 水晶を 調べる → 背後から ZFが 追って 来る → 戦闘
+function crystalScene(){ if(cur.npcs.some(n=>n.spr==='zf')) return;
+  say(['床に 黒い 魔法陣が 描かれ、その上で 黒い 水晶が 脈打って いる。','リディア「これ……セルヴィスの 魔力と 同じ 匂いが する」','リディア「父の 心を 縛って いるのは、これ……？」','……ガシャン。ガシャン。','背後から、重い 足音が 近づいて くる！'],()=>{
+    const m={x:9.5,y:6.8,spr:'zf',name:'からくりの 番兵',ang:Math.PI,walking:true,p:person('zf'),talk:()=>zfFight()}; cur.npcs.push(m);
+    const from=[9.5,6.8], to=[9.5,3.6], T0=performance.now(), dur=1800; hero.ang=0;
+    const step=()=>{ const k=Math.min(1,(performance.now()-T0)/dur); m.x=from[0]+(to[0]-from[0])*k; m.y=from[1]+(to[1]-from[1])*k; m.ang=Math.PI; if(k<1) return requestAnimationFrame(step); m.walking=false; zfFight(); };
+    requestAnimationFrame(step); }); }
+function zfFight(){ say(['振り返ると、城の あの からくりが 立って いた。','からくりの 番兵「……王女ヲ 発見。追跡 完了。連レ 戻ス」','胸を 見ると「ZF」と 書いて ある。','リディア「下がって、エルト！ ……来るわ！」'],()=>startBattle(FOES.zfboss,()=>{
   setNpcs([]); say(['からくりの 体から、黒い 霧が 抜けて いった。','からくり「…………。ワタシハ……」','からくり「命令ノ 主ハ……人ノ 形ヲ シタ、別ノ 何カ」','リディア「別の 何か……？」',
-    'からくり「ワタシハ ZF。古イ 時代ノ 魔導からくり。魔力ヲ 見ル 目ヲ 持ツ」','ZF「アノ 者ニハ、人デハ ナイ 魔力ガ 渦巻イテ イタ」','ZF「……オマエタチト 行コウ。アノ 者ノ 正体ヲ 確カメル」','＊ ZFが 仲間に 加わった！ ＊'],
-    ()=>{ joinParty('zf',Math.max(STATS.elt.lv,12)); ST.phase='c2_back'; say(['リディア「帝都へ 戻りましょう。……父に、もう一度 会いたい」']); }); })); }
+    'からくり「ワタシハ ZF。古イ 時代ノ 魔導からくり。魔力ヲ 見ル 目ヲ 持ツ」','ZF「アノ 者ニハ、人デハ ナイ 魔力ガ 渦巻イテ イタ」','ZF「……オマエタチト 行コウ。アノ 者ノ 正体ヲ 確カメル」','ZFが 腕の 刃を 振るうと、黒い 水晶は 音を 立てて 砕けた。','＊ ZFが 仲間に 加わった！ ＊'],
+    ()=>{ ST.crystalBroken=1; joinParty('zf',Math.max(STATS.elt.lv,12)); ST.phase='c2_back'; rebuildDun(); say(['リディア「帝都へ 戻りましょう。……父に、もう一度 会いたい」']); }); })); }
 // ---- 帝都 ヴェルナ（城下町は 王都と 同じ 形。色と 人が 違う）----
 const VCAP_ROOMS=[
  {name:'武器と 防具の 店', rows:CAP_ROOMS[0].rows, npc:{x:4.5,y:2.5,spr:'smith',name:'帝都の 鍛冶',talk:()=>{ EQUIP_TALK=1; drawEquipPanel(); say(['鍛冶「帝都の 鉄は 硬いぞ。……剣ばかり 打たされて いるがな」'],()=>{ EQUIP_TALK=0; openShop('smith2','武器と 防具の 店（所持金 '+BAG.gold+'G）'); }); }}},

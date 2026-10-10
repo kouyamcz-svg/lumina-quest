@@ -92,7 +92,9 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   for(const [x,z] of [[4.5,11.5],[1.5,2.5],[17.5,2.5],[14.5,11.5]]){ await E(([x,z])=>{ hero.x=x; hero.z=z; examine(); },[x,z]); await flush(); }
   T('遺跡の 機械を 正しい 順に 動かすと 光の 壁が 消える', await E(()=>ST.ruinsOpen===1));
   T('ダンジョンに 宝箱が ある', await E(()=>CHESTS.fort.length>=1 && CHESTS.dun_pass.length>=3 && CHESTS.dun_ruins.length>=4));
-  await E(()=>{ hero.x=9.5; hero.z=2.6; resetTrail(); }); await talk('からくり'); await flush(); await winBattle(); await flush(); await W(300); await flush(); T('ZFが 加わる', await E(()=>ST.phase==='c2_back' && PARTY.includes('zf')));
+  T('奥の 間には 初めは ZFが いない', await E(()=>!cur.npcs.some(n=>n.spr==='zf')));
+  await E(()=>{ hero.x=9.5; hero.z=2.4; resetTrail(); examine(); }); await flush(); for(let i=0;i<40 && !(await E(()=>!!BT));i++){ await W(150); await flush(); }
+  T('黒い 水晶を 調べると 背後から ZFが 来て 戦闘', await E(()=>!!BT && BT.foes[0].def.key==='zfboss')); await winBattle(); await flush(); await W(300); await flush(); T('ZFが 加わる', await E(()=>ST.phase==='c2_back' && PARTY.includes('zf')));
   await E(()=>enterCastle('velna')); await talk('ヴェルナ王'); await flush(); await W(300); T('第2章 完', await E(()=>ST.phase==='c2_end'));
   T('仲間も 経験値を もらう', await E(()=>{ const a=STATS.lidia.exp; gainExp(5); return STATS.lidia.exp===a+5; }));
   T('レベルが 上がると HPと MPが 全回復', await E(()=>{ const m=STATS.elt; m.hp=1; m.mp=0; m.exp=0; gainExp(expNeed(m.lv)); return m.hp===m.max && m.mp===m.maxmp; }));
