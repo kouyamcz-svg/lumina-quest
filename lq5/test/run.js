@@ -14,7 +14,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   const flush=async()=>{ for(let i=0;i<60;i++){ if(!(await E(()=>!!msgQ))) break; await E(()=>pressA()); await W(30);} };
   const talk=async(re)=>{ await E((re)=>{ const x=cur.npcs.find(n=>new RegExp(re).test(n.name)); if(!x) return; const bl=linesByPhase(x); if(bl) say(bl); else if(x.talk) x.talk(x); else say(x.lines); },re); await W(60); };
   const waitMenu=async()=>{ for(let i=0;i<80;i++){ await W(100); if(await E(()=>BT&&BT.phase==='menu')) return true; } return false; };
-  const winBattle=async()=>{ await waitMenu(); await E(()=>{ BT.foes.forEach(f=>f.hp=1); BT.sel=0; if(alive().length>1){ pressA(); pressA(); } else pressA(); }); for(let i=0;i<120;i++){ await W(100); if(await E(()=>!BT)) break; } await W(200); };
+  const winBattle=async()=>{ await waitMenu(); await E(()=>{ BT.foes.forEach(f=>f.hp=1); for(let k=0;k<12 && BT && BT.phase!=='act';k++){ if(BT.phase==='menu') BT.sel=0; pressA(); } }); for(let i=0;i<120;i++){ await W(100); if(await E(()=>!BT)) break; } await W(200); };
   const pick=async(l)=>{ await E((l)=>{ const i=MENU.items.findIndex(t=>t.indexOf(l)>=0); MENU.sel=i; pressA(); },l); await W(60); };
   await flush();
   // ---- 序章 ----
@@ -146,6 +146,8 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('リディアが 仲間に なると 1人だけ 見え、動くと ついて くる', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); const i=PARTY.indexOf('lidia'); if(i>0) PARTY.splice(i,1); refreshFollowers(); ST.phase='c2_tower'; enterTower(); const n=cur.npcs.find(n=>n.spr==='lidia'); n.talk(n); }); for(let i=0;i<30;i++){ const t=await E(()=>document.getElementById('msg').textContent); if(/抜け出した/.test(t)) break; await E(()=>pressA()); await W(60); }
     const one=await E(()=>cur.npcs.filter(n=>n.spr==='lidia').length===0 && followers.filter(f=>f.p.k==='lidia').length===1 && followers.find(f=>f.p.k==='lidia').hold===true); await flush(); await W(800); return one; })());
   T('ボスの 名前は 魔導からくり ZF、戦闘前に 胸の ZF', await E(()=>FOES.zfboss.name==='魔導からくり ZF' && zfFight.toString().includes('胸を 見ると「ZF」')));
+  T('作戦「めいれい させろ」で 仲間を 1人ずつ 操作できる', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); tactic='manual'; ['lidia','zf'].forEach(k=>{ if(!PARTY.includes(k)) joinParty(k,12); }); startBattle([FOES.nousagi]); }); for(let i=0;i<40 && !(await E(()=>BT&&BT.phase==='menu'));i++) await W(100);
+    const a=await E(()=>{ const r=[]; BT.sel=0; pressA(); r.push(BT.cur); BT.sel=2; pressA(); r.push(BT.cur); pressB(); r.push(BT.cur); BT.sel=2; pressA(); BT.sel=2; pressA(); r.push(BT.phase); return r.join(','); }); await W(300); await E(()=>{ if(BT) endBattle(); }); return a==='1,2,1,act'; })());
   T('ドルムの 教会で セーブ → 再開も ドルムの 教会', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); ST.phase='c2_dolm'; enterTown([11.5,15.5],'velna'); lastDoor=3; enterRoom(3); hero.x=4.5; hero.z=4.5; saveGame(); enterTown([12,6],'rue'); }); await pg.reload({waitUntil:'load'}); await W(1800);
     for(let i=0;i<40 && !(await E(()=>typeof MENU!=='undefined'));i++) await W(100); await W(600); await E(()=>{ if(MENU) closeMenu(); loadGame(); }); await W(800);
     return await E(()=>TOWN_NOW==='velna' && cur.kind==='room' && TROOMS()[cur.room].name==='教会'); })());
