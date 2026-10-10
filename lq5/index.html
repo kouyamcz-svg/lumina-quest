@@ -2205,7 +2205,7 @@ function crystalScene(){ if(cur.npcs.some(n=>n.spr==='zf')) return;
     const from=[9.5,6.8], to=[9.5,3.6], T0=performance.now(), dur=1800; hero.ang=0;
     const step=()=>{ const k=Math.min(1,(performance.now()-T0)/dur); m.x=from[0]+(to[0]-from[0])*k; m.y=from[1]+(to[1]-from[1])*k; m.ang=Math.PI; if(k<1) return requestAnimationFrame(step); m.walking=false; zfFight(); };
     requestAnimationFrame(step); }); }
-function zfFight(){ say(['振り返ると、城の あの からくりが 立って いた。','からくりの 番兵「……王女ヲ 発見。追跡 完了。連レ 戻ス」','胸を 見ると「ZF」と 書いて ある。','リディア「下がって、エルト！ ……来るわ！」'],()=>startBattle(FOES.zfboss,()=>{
+function zfFight(){ say(['振り返ると、城の あの からくりが 立って いた。','からくりの 番兵「……王女ヲ 発見。追跡 完了。連レ 戻ス」','胸には、城で 見た「ZF」の 文字が ある。','リディア「下がって、エルト！ ……来るわ！」'],()=>startBattle(FOES.zfboss,()=>{
   setNpcs([]); say(['からくりの 体から、黒い 霧が 抜けて いった。','からくり「…………。ワタシハ……」','からくり「命令ノ 主ハ……人ノ 形ヲ シタ、別ノ 何カ」','リディア「別の 何か……？」',
     'からくり「ワタシハ ZF。古イ 時代ノ 魔導からくり。魔力ヲ 見ル 目ヲ 持ツ」','ZF「アノ 者ニハ、人デハ ナイ 魔力ガ 渦巻イテ イタ」','ZF「……オマエタチト 行コウ。アノ 者ノ 正体ヲ 確カメル」','ZFが 腕の 刃を 振るうと、黒い 水晶は 音を 立てて 砕けた。','＊ ZFが 仲間に 加わった！ ＊'],
     ()=>{ ST.crystalBroken=1; joinParty('zf',Math.max(STATS.elt.lv,12)); ST.phase='c2_back'; rebuildDun(); say(['リディア「帝都へ 戻りましょう。……父に、もう一度 会いたい」']); }); })); }
@@ -2238,7 +2238,7 @@ function velnaCastleNpcs(){ const L_=[]; const ph=ST.phase;
     L_.push({x:12.5,y:2.4,spr:'velna',name:'ヴェルナ王',talk:()=>velnaKing()});
     L_.push({x:14.4,y:2.8,spr:'servis',name:'側近 セルヴィス',lines:ph==='c2_capital'?['セルヴィス「陛下の お言葉を 待たれよ」']:['セルヴィス「……まだ 何か ご用か、アルディアの 兵士どの」']});
   } else L_.push({x:12.5,y:2.4,spr:'velna',name:'ヴェルナ王',talk:()=>velnaKing()});
-  if(/^c2_(capital|inn|tower)$/.test(ph)) L_.push({x:12.5,y:9.4,spr:'zf',name:'からくりの 番兵',lines:['からくりの 番兵「…………」','冷たい 目が、こちらを 見て いる。']});
+  if(/^c2_(capital|inn|tower)$/.test(ph)) L_.push({x:12.5,y:9.4,spr:'zf',name:'からくりの 番兵',lines:['からくりの 番兵「…………」','冷たい 目が、こちらを 見て いる。','胸に「ZF」の 文字が 入って いる。']});
   if(/^c2_(inn|tower|ruins|back|end)$/.test(ph)) L_.push({x:9.5,y:12.5,spr:'haven',name:'使者 ハーヴェン',byPhase:{c2_inn:['使者 ハーヴェン「わたしは ここに 留め置かれる らしいですな。エルトどのは 町の 宿で 休んで くだされ」'],c2_back:['使者 ハーヴェン「王女さまと……ZFどの、か。王に お会いに なるのですな」'],'*':['使者 ハーヴェン「王の あの 目……ただ事では ありませんぞ」']}});
   L_.push({x:10.2,y:19.4,spr:'vsoldier',name:'城の 門番',lines:['門番「北の 奥が 謁見の 間だ」']});
   L_.push({x:21.5,y:4.4,spr:'vsoldier',name:'作戦室の 兵',lines:['兵「この 地図か？ ……アルディアへ 攻めこむ 道筋だ」','兵「セルヴィスさまの お考えだ。陛下は 何も おっしゃらない」']});
