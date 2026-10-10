@@ -87,7 +87,12 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   await E(()=>{ enterTown([12,10],'vcap'); lastDoor=3; enterRoom(3); }); await talk('宿の 娘'); await flush(); await E(()=>{ MENU.sel=0; pressA(); }); for(let i=0;i<40 && !(await E(()=>cur.kind==='tower'));i++){ await W(250); await flush(); } await W(400);
   T('宿で 夜の 塔へ', await E(()=>ST.phase==='c2_tower' && cur.kind==='tower'));
   await talk('リディア'); await flush(); await W(800); await flush(); T('リディアが 加わる', await E(()=>ST.phase==='c2_ruins' && PARTY.includes('lidia') && STATS.lidia.lv>=10));
-  await E(()=>enterDun('ruins')); await talk('からくり'); await flush(); await winBattle(); await flush(); await W(300); await flush(); T('ZFが 加わる', await E(()=>ST.phase==='c2_back' && PARTY.includes('zf')));
+  await E(()=>enterDun('ruins')); await W(900); await flush(); T('遺跡の 奥は 光の 壁で 閉じて いる', await E(()=>!ST.ruinsOpen && blockedAt(9.2,1.95) && !blockedAt(9.2,2.6)));
+  await E(()=>{ hero.x=1.5; hero.z=2.5; examine(); }); await flush(); T('遺跡の 機械：順番を 間違えると 戻る', await E(()=>!(ST.ruinSeq||[]).length));
+  for(const [x,z] of [[4.5,11.5],[1.5,2.5],[17.5,2.5],[14.5,11.5]]){ await E(([x,z])=>{ hero.x=x; hero.z=z; examine(); },[x,z]); await flush(); }
+  T('遺跡の 機械を 正しい 順に 動かすと 光の 壁が 消える', await E(()=>ST.ruinsOpen===1));
+  T('ダンジョンに 宝箱が ある', await E(()=>CHESTS.fort.length>=1 && CHESTS.dun_pass.length>=3 && CHESTS.dun_ruins.length>=4));
+  await E(()=>{ hero.x=9.5; hero.z=2.6; resetTrail(); }); await talk('からくり'); await flush(); await winBattle(); await flush(); await W(300); await flush(); T('ZFが 加わる', await E(()=>ST.phase==='c2_back' && PARTY.includes('zf')));
   await E(()=>enterCastle('velna')); await talk('ヴェルナ王'); await flush(); await W(300); T('第2章 完', await E(()=>ST.phase==='c2_end'));
   T('仲間も 経験値を もらう', await E(()=>{ const a=STATS.lidia.exp; gainExp(5); return STATS.lidia.exp===a+5; }));
   T('レベルが 上がると HPと MPが 全回復', await E(()=>{ const m=STATS.elt; m.hp=1; m.mp=0; m.exp=0; gainExp(expNeed(m.lv)); return m.hp===m.max && m.mp===m.maxmp; }));

@@ -726,6 +726,7 @@ function blockedAt(x,z){ const c=at(Math.floor(x),Math.floor(z)); if(cur.kind===
   if(cur.kind==='fort'){ if(!fortGateOpen() && x>12 && x<13 && z>3 && z<4) return true; }
   if(cur.kind==='town' && TL().fountain && Math.hypot(x-TL().fountain[0],z-TL().fountain[1])<1.62) return true;
   if(PROPS.some(p=>Math.hypot(p.x-x,p.z-z)<p.r)) return true;
+  if(cur.kind==='dun' && DUN_NOW==='ruins' && !ST.ruinsOpen && x>9 && x<10 && z<2.05 && z>0.5) return true;   /* ★光の 壁 */
   return cur.npcs.some(n=>Math.hypot(n.x-x,n.y-z)<(n.foe?1.0:0.55)); }
 function blockedCount(x,z){ const RAD = cur.kind==='world' ? 0.3 : RADT; let n=blockedAt(x,z)?3:0; for(const [ox,oz] of [[RAD,0],[-RAD,0],[0,RAD],[0,-RAD],[RAD*.7,RAD*.7],[-RAD*.7,RAD*.7],[RAD*.7,-RAD*.7],[-RAD*.7,-RAD*.7]]) if(blockedAt(x+ox,z+oz)) n++; return n; }
 // ★重なった 場所から 近くの 空いた 所へ（扉を 出た 位置が 壁に 重なると、壁の 中を 歩けて しまった）
@@ -1534,11 +1535,14 @@ function enterFarm(){ newG(); drops=[]; fireLight=null; doorPiv=[]; roomDoor=nul
   hero.x=12; hero.z=FARM.length-1.6; hero.ang=Math.PI; resetTrail(); wWalk=0; wEnc=6+Math.random()*6;
   document.getElementById('place').textContent='村の 北の 畑'; }
 function examine(){   // 向いて いる 先の 物を 調べる（宝箱・畑の 倉・砦の 灯り）
+  if(ruinExamine()) return true;
   if(cur.kind==='fort'){ const l=lampAt(hero.x,hero.z); if(l){ const k=l.join(','); if(ST.lamps[k]){ say(['灯りは ともって いる。']); return true; } ST.lamps[k]=1; se('ok');
       const both=fortGateOpen(); /* ★灯りは 壁に 取りつけ（通路を ふさがない） */ say(['古い 灯りに 火を ともした。'].concat(both?['どこかで 鉄格子の 上がる 音が した。']:['もう ひとつ、どこかに 灯りが ある ようだ。']),()=>{ const px=hero.x, pz=hero.z; enterFort(false); hero.x=px; hero.z=pz; resetTrail(); }); return true; }
     if(!fortGateOpen() && Math.hypot(hero.x-12.5,hero.z-3.5)<1.3){ say(['鉄格子が 下りて いる。','両脇に 灯りの 台の 跡が ある。……どこかの 灯りと つながって いるのか']); return true; } }
   for(const c of (CHESTS[chestKey()]||[])){ if(Math.hypot(c.x-hero.x,c.z-hero.z)<1.1){ if(BAG.opened[c.id]){ say(['空っぽだ。']); return true; } BAG.opened[c.id]=1; se('chest');
-      if(c.gold){ BAG.gold+=c.gold; say(['宝箱を 開けた。',c.gold+'ゴールドを 手に 入れた！']); } else { BAG.herbs+=c.herb; say(['宝箱を 開けた。','薬草を 手に 入れた！']); } chestMesh(cur.kind); return true; } }
+      const got=[]; if(c.gold){ BAG.gold+=c.gold; got.push(c.gold+'ゴールドを 手に 入れた！'); } if(c.herb){ BAG.herbs+=c.herb; got.push('薬草を '+c.herb+'つ 手に 入れた！'); } if(c.anti){ BAG.antidote+=c.anti; got.push('どくけし草を '+c.anti+'つ 手に 入れた！'); }
+      if(c.gear){ BAG.gear.push(Object.assign({},c.gear)); got.push(c.gear.name+'を 手に 入れた！（メニューの 装備で 付けられる）'); }
+      say(['宝箱を 開けた。'].concat(got)); chestMesh(chestKey()); return true; } }
   if(cur.kind==='farm' && Math.abs(hero.x-19)<1.4 && hero.z<8.9 && hero.z>8 && Math.cos(hero.ang)<-.5){
     if(ST.phase==='field'){ say(['古い 倉の 扉を 開けた。','埃を かぶった 麦袋が 積まれて いる。','袋には、色あせた 紋。……ヴェルナの 紋だ。','エルト「昔、ヴェルナが 贈って くれた 麦……？」','そのとき、村の 方角から 鐘の 音が 鳴り響いた。','エルト「……警鐘！」'],()=>{ ST.phase='raid'; say(['＊ 急いで 村へ 戻ろう（南の 出口） ＊']); }); }
     else say(['古い 倉。ヴェルナの 紋の 麦袋が 積まれて いる。']);
@@ -1879,8 +1883,12 @@ function toggleMix(){ closeMenu(); if(!mixOK()){ say(['この ブラウザでは
   SND.mix=!SND.mix; const lines=[]; if(SND.mix){ if(SND.bgm>0){ SND.bgm=0; lines.push('ゲームの 音楽を 消しました。'); } lines.unshift('ほかの アプリの 音楽を 止めなく なりました。'); lines.push('効果音は そのまま 鳴ります。','両方 聞きたい ときは 「音楽」を 上げて ください。'); }
   else lines.push('ほかの アプリの 音楽を 止める ように 戻しました。'); applyMix(); bgmUpdate(); say(lines,openSound); }
 // ---- 宝箱 ----
-const chestKey=()=>cur.kind==='town'?(TOWN_NOW==='rue'?'town':'none'):cur.kind;   /* ★ルーエの 宝箱は ルーエだけ（前は どの 町にも 見えない 箱が あった） */
-const CHESTS={town:[{x:20.5,z:17.5,gold:25,id:'c1'}], farm:[{x:2.5,z:12.5,herb:1,id:'c2'}]};
+const chestKey=()=>cur.kind==='town'?(TOWN_NOW==='rue'?'town':'none'):cur.kind==='dun'?'dun_'+DUN_NOW:cur.kind;   /* ★ルーエの 宝箱は ルーエだけ（前は どの 町にも 見えない 箱が あった） */
+const CHESTS={town:[{x:20.5,z:17.5,gold:25,id:'c1'}], farm:[{x:2.5,z:12.5,herb:1,id:'c2'}],
+  // ★ダンジョンの 宝箱（指示：少ない）。行き止まりに 置く
+  fort:[{x:9.5,z:7.5,gear:{name:'砦の 兜',kind:'helm',v:4,price:120},id:'f1'}],
+  dun_pass:[{x:10.6,z:15.0,gear:{name:'はがねの 胸当て',kind:'armor',v:13,price:300},id:'p1'},{x:38.6,z:15.0,gold:150,id:'p2'},{x:46.6,z:2.6,herb:3,anti:1,id:'p3'}],
+  dun_ruins:[{x:7.5,z:1.5,gear:{name:'遺跡の 剣',kind:'weapon',v:22,price:520},id:'r1'},{x:11.5,z:1.5,gear:{name:'古代の 法衣',kind:'armor',v:11,price:420,who:['lidia','elt']},id:'r2'},{x:11.5,z:7.5,gold:240,id:'r3'},{x:15.5,z:10.5,herb:3,anti:2,id:'r4'}]};
 
 // ================= 曲（Ⅳの 曲の ファイルを そのまま 使う。../lq4/ の mp3）=================
 //  村・家＝town、外の 世界・畑＝field、王都＝castle、燃える 村＝dungeon、戦闘＝battle_sky（Ⅳの 後半の 戦闘の 曲）、ボス＝boss
@@ -1963,7 +1971,7 @@ function buildFort(){ fortLamps=[];
   if(!fortGateOpen()) for(let k=0;k<5;k++) add(box,L(null,0x5a5a62),12.12+k*.19,.75,3.5,.06,1.5,.06);
   [[1.5,9.5],[7.5,9.5],[13.5,5.5],[3.5,1.5],[9.5,3.5]].forEach(([x,z])=>{ const t=add(new THREE.ConeGeometry(.12,.3,6),L(null,0xff8a30,{emissive:0xff5010}),x,1.0,z); t.userData.ph=Math.random()*6; fireMeshes.push(t);
     const l=new THREE.PointLight(0xff9040,.9,6); l.position.set(x,1.5,z); G.add(l); }); }
-function enterFort(fromEast){ visit('fort'); [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); cv.style.display='block'; c2.style.display='none';
+function enterFort(fromEast){ visit('fort'); setTimeout(()=>{ if(cur.kind==='fort') chestMesh('fort'); },0); [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); cv.style.display='block'; c2.style.display='none';
   newG(); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; fireMeshes=[]; buildFort();
   cur={kind:'fort', rows:FORT, solid:new Set(['#']), npcs:cur.npcs, room:null, fromEast:!!fromEast};
   setNpcs(ST.phase==='c1_fort'||ST.phase==='c1_road' ? [{x:13.5,y:3.4,spr:'banpei',name:'砦の 番兵',talk:()=>{
@@ -2086,6 +2094,25 @@ const DUNS={
 "#########S#########"], enc:'ruins', bg:0x0e1a16, fog:[0x0e1a16,8,22], floor:0x7a8a80, wall:0x6a7a70, wallH:1.25, look:'fort'},
 };
 let DUN_NOW='pass';
+// ★森の 遺跡の 仕掛け（指示：探索の 面白みが 少ない）
+//   四隅の 古代の 機械を 正しい 順に 動かすと、奥の 部屋の 光の 壁が 消える。順番の 手がかりは まん中の 2つの 機械が 語る
+const RUIN_ORDER=['3,11','2,2','16,2','15,11'];   // 南の 西 → 北の 西 → 北の 東 → 南の 東
+const RUIN_TALK={'7,5':['古い 機械に 文字が 浮かんだ。','「光は 南の 西で 生まれ、北の 西へ 昇る」','（古代の 民は、この 森で 魔力を 育てて いた らしい）'],
+                 '11,5':['古い 機械に 文字が 浮かんだ。','「北の 東を めぐり、南の 東で 眠る」','（……動かす 順番の ことだろうか）']};
+function ruinOn(k){ return !!ST.ruinsOpen || (ST.ruinSeq||[]).includes(k); }
+function ruinExamine(){ if(cur.kind!=='dun'||DUN_NOW!=='ruins') return false; const R=DUNS.ruins.rows;
+  for(let y=0;y<R.length;y++)for(let x=0;x<R[0].length;x++){ if(R[y][x]!=='M' || Math.hypot(x+.5-hero.x,y+.5-hero.z)>1.25) continue; const k=x+','+y;
+    if(RUIN_TALK[k]){ say(RUIN_TALK[k]); return true; }
+    if(ST.ruinsOpen){ say(['古代の 機械は 静かに 光って いる。']); return true; }
+    const seq=ST.ruinSeq=ST.ruinSeq||[]; if(seq.includes(k)){ say(['この 機械は もう 動いて いる。']); return true; }
+    if(RUIN_ORDER[seq.length]===k){ seq.push(k); se('ok');
+      if(seq.length===4){ ST.ruinsOpen=1; say(['古代の 機械が 低い 音を 立てて 動き出した。','……遺跡の 奥で、光の 壁が 砕ける 音が した！'],rebuildDun); }
+      else say(['古代の 機械が 低い 音を 立てて 動き出した。','（あと '+(4-seq.length)+'つ）'],rebuildDun); }
+    else { const had=seq.length; ST.ruinSeq=[]; se('cancel'); say(['機械が 一瞬 光り……すぐに 消えた。'].concat(had?['ほかの 機械の 光も 消えて しまった。……順番が 違う ようだ。']:['……順番が 違う ようだ。']),rebuildDun); }
+    return true; }
+  if(!ST.ruinsOpen && Math.abs(hero.x-9.5)<1.2 && hero.z<3.3 && hero.z>2.0){ say(['不思議な 光の 壁が 道を ふさいで いる。','……遺跡の 古い 機械と つながって いる ようだ。']); return true; }
+  return false; }
+function rebuildDun(){ const px=hero.x, pz=hero.z, pa=hero.ang, npcs=cur.npcs; newG(); buildDun(DUNS[DUN_NOW]); chestMesh(chestKey()); hero.x=px; hero.z=pz; hero.ang=pa; }
 function buildDun(d){ S.background=new THREE.Color(d.bg); S.fog=new THREE.Fog(d.fog[0],d.fog[1],d.fog[2]);
   amb.intensity=d.look==='rock'?.72:.45; amb.color.setHex(d.look==='rock'?0xffffff:0xc8ffe8); sun.intensity=d.look==='rock'?.55:.2; sun.color.setHex(0xfff0d8);
   const fl=L(T.stone,d.floor), wl=L(T.cliff,d.wall);
@@ -2094,12 +2121,16 @@ function buildDun(d){ S.background=new THREE.Color(d.bg); S.fog=new THREE.Fog(d.
       if(d.cliff){ const op=(yy,xx)=>d.rows[yy]&&d.rows[yy][xx]&&d.rows[yy][xx]!=='#', open=(yy)=>op(yy,x), near=(yy)=>op(yy,x-1)||op(yy,x)||op(yy,x+1); if(open(y-1)) h=.55+((x*5)%3)*.12; else if(near(y-1)||open(y-2)) h=1.1+((x*3)%3)*.15; else if(near(y-2)||near(y-3)) h=1.9+((x*3)%3)*.15; }   /* ★手前（南）の 崖は 段々に 低く（高い 崖に 主人公が 隠れない） */
       add(box,wl,x+.5,h/2,y+.5,1,h,1);
       if(d.cliff && h>2.2){ const r=add(new THREE.DodecahedronGeometry(.3+((x+y)%3)*.1,0),L(null,[0x7a6e60,0x8a7e6c,0x6a6052][(x+y)%3],{flatShading:true}),x+.5,h+.1,y+.5); r.rotation.set(x,y,x*y); } }
-    if(c==='M'){ // 古代の 機械
-      add(new THREE.CylinderGeometry(.34,.4,1.3,10),L(null,0x5a6a72),x+.5,.65,y+.5); add(new THREE.TorusGeometry(.32,.06,6,16),L(null,0x40e0d0,{emissive:0x20a0a0}),x+.5,1.0,y+.5).rotation.x=Math.PI/2;
-      add(new THREE.SphereGeometry(.14,10,8),L(null,0x80fff0,{emissive:0x40c0c0}),x+.5,1.45,y+.5); }
+    if(c==='M'){ // 古代の 機械（遺跡の 仕掛け：動いて いる ものは 青く 光る）
+      const k=x+','+y, on=ruinOn(k), talk=RUIN_TALK[k];
+      add(new THREE.CylinderGeometry(.34,.4,1.3,10),L(null,0x5a6a72),x+.5,.65,y+.5);
+      const ring=add(new THREE.TorusGeometry(.32,.06,6,16),L(null,on||talk?0x40e0d0:0x4a5a5a,{emissive:on||talk?0x20a0a0:0x0a1010}),x+.5,1.0,y+.5); ring.rotation.x=Math.PI/2;
+      const orb=add(new THREE.SphereGeometry(.14,10,8),L(null,on?0x80fff0:talk?0xf0d070:0x6a7a7a,{emissive:on?0x40c0c0:talk?0x806020:0x101818}),x+.5,1.45,y+.5);
+      if(on){ const l=new THREE.PointLight(0x60ffe0,.8,4); l.position.set(x+.5,1.5,y+.5); G.add(l); } }
     if(c==='W'||c==='E'||c==='S') add(box,L(null,0x2a1a10),x+.5,.02,y+.5,.9,.04,.9);
   }));
   const toWall=(x,z)=>{ const rows=DUNS[DUN_NOW].rows, cx=Math.floor(x), cz=Math.floor(z); for(const [a,b] of [[1,0],[-1,0],[0,-1],[0,1]]){ const c=rows[cz+b]&&rows[cz+b][cx+a]; if(c==='#'||c==='M') return [cx+.5+a*.42, cz+.5+b*.42]; } return null; };   /* ★小物は 壁ぎわへ（通路の 真ん中で すり抜けて 見えた） */
+  if(DUN_NOW==='ruins' && !ST.ruinsOpen){ const bw=add(new THREE.PlaneGeometry(1,1.6),new THREE.MeshBasicMaterial({color:0xb080ff,transparent:true,opacity:.5,side:THREE.DoubleSide,depthWrite:false}),9.5,.8,2.02); bw.userData.barrier=1; [9.03,9.97].forEach(x=>add(box,L(null,0x8060c0,{emissive:0x402080}),x,.8,2.02,.06,1.6,.06)); const bl=new THREE.PointLight(0xb080ff,.7,3); bl.position.set(9.5,1,2.4); G.add(bl); }   /* ★奥の 部屋を ふさぐ 光の 壁 */
   if(DUN_NOW==='ruins'){ [[4.5,3.4],[13.5,9.4],[8.5,13.4]].forEach(([x,z])=>{ add(new THREE.CylinderGeometry(.42,.42,.06,14),L(null,0x3a2a1a),x,.02,z); const w=toWall(x,z); if(w) add(box,L(null,0x6a5040),w[0],.12,w[1],.3,.24,.2); });   // 掘り返した 跡
     [[2.5,1.5],[16.5,1.5],[9.5,7.5],[3.5,11.5],[15.5,11.5]].forEach(([x,z])=>{ const l=new THREE.PointLight(0x60ffe0,.7,6); l.position.set(x,1.4,z); G.add(l); }); }
   else { [[6,4],[18,2],[12,7]].forEach(([x,z])=>{ const w=toWall(x+.5,z+.5); if(w) add(new THREE.DodecahedronGeometry(.3,0),L(null,0x8a8276,{flatShading:true}),w[0],.25,w[1]); }); } }
@@ -2110,7 +2141,9 @@ function enterDun(which,fromEnd){ DUN_NOW=which; visit(which); const d=DUNS[whic
   const npcs=[];
   const bp=(()=>{ for(let y=0;y<d.rows.length;y++){ const x=d.rows[y].indexOf('B'); if(x>=0) return [x,y]; } return [23.5,4.5]; })();
   if(which==='pass' && ST.phase==='c2_pass') npcs.push({x:bp[0],y:bp[1],spr:null,foe:'sekisho',name:'関所荒らし',talk:()=>sekishoFight()});
-  if(which==='ruins' && ST.phase==='c2_ruins') npcs.push({x:9.5,y:1.5,spr:'zf',name:'からくりの 番兵',talk:()=>zfFight()});
+  if(which==='ruins' && ST.phase==='c2_ruins' && !ST.ruinsOpen && !ST.ruinsHint){ ST.ruinsHint=1; setTimeout(()=>{ if(!msgQ) say(['リディア「……遺跡の 奥から、強い 魔力を 感じる」','リディア「あちこちに ある 古い 機械。……何かの 仕掛けかも しれない。調べて みましょう」']); },600); }
+  if(which==='ruins' && ST.phase==='c2_ruins') npcs.push({x:9.5,y:1.5,spr:'zf',name:'からくりの 番兵',talk:()=>{ if(!ST.ruinsOpen) return say(['光の 壁の 向こうに、からくりが 立って いる。','……壁に 阻まれて 近づけない。遺跡の 古い 機械と つながって いる ようだ。']); zfFight(); }});
+  chestMesh('dun_'+which);
   setNpcs(npcs.filter(n=>n.spr)); if(npcs.some(n=>!n.spr)){ const n=npcs.find(n=>!n.spr); cur.npcs.push({...n,ang:0,p:foeStand(n.foe)}); }
   const R=d.rows; const find=(ch)=>{ for(let y=0;y<R.length;y++){ const x=R[y].indexOf(ch); if(x>=0) return [x,y]; } };
   let st;
