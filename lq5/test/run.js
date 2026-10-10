@@ -110,6 +110,14 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('エスケイルは 峠と 遺跡でも 入口へ', await E(()=>{ ST.phase='c2_pass'; enterDun('pass',true); const a=escapeTo(); enterDun('ruins'); const b=escapeTo(); enterFort(true); const c=escapeTo(); enterFort(false); const d=escapeTo(); return a[0]===64.6 && b[0]===74.5 && c[0]===41.6 && d[0]===37.5; }));
   T('第2章の ルーエは 焼け跡', await E(()=>{ ST.phase='c2_road'; enterTown([12,6],'rue'); return RUE_BURNT() && /焼け跡/.test(document.getElementById('place').textContent); }));
   T('章の 終わりの 札の 間は メニューが 開かない', await E(()=>{ const p=ST.phase; ST.phase='c1_end'; openFieldMenu(); const ok=!MENU; ST.phase=p; return ok; }));
+  T('最初の 装備と ガイルの 剣は 外しても 付け直せる', await E(()=>{ fixGear(); const w=EQUIP.elt.weapon; return !!w.kind && canWear('elt',w); }));
+  T('倒れた 仲間は 薬草で 起きない', await E(()=>{ const m={name:'t',hp:0,max:10}; const n=BAG.herbs=3; useHerb(m); return m.hp===0 && BAG.herbs===3; }));
+  T('戦闘の 道具で 使う 相手を 選べる', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); ST.phase='c2_road'; if(!PARTY.includes('lidia')) joinParty('lidia',12); BAG.herbs=2; STATS.lidia.hp=5; startBattle([FOES.nousagi]); }); await W(1500); await E(()=>{ BT.phase='menu'; BT.sel=3; battleCmd(); }); const ph=await E(()=>BT.phase); await E(()=>{ itemPick(); BT.asel=BT.party.indexOf(STATS.lidia); allyPick(); }); await W(400); const ok=await E(()=>STATS.lidia.hp>5); await E(()=>{ if(BT) endBattle(); }); return ph==='item' && ok; })());
+  T('ほかの 町に ルーエの 宝箱が ない', await E(()=>{ enterTown([11.5,15.5],'velna'); return !(CHESTS[chestKey()]||[]).length; }));
+  T('町ごとに 鍛冶屋の 品が 違う', await E(()=>SHOP.smith_rue[0].name!==SHOP.smith_cap[0].name && SHOP.smith_cap[0].v>12 && SHOP.smith_velna[0].v>SHOP.smith_cap[0].v && SHOP.smith2[0].v>SHOP.smith_velna[0].v));
+  T('ぼうぎょは 本人だけ', await E(()=>{ const src=foeAct.toString(); return /t\.guard/.test(src) && !/if\(BT\.guard\)/.test(src); }));
+  T('仲間の 装備を 替えられる', await E(()=>{ BAG.gear.push({name:'魔導士の 杖',kind:'weapon',v:10,price:320}); openEquipOf('lidia'); MENU.onPick(0); const ok=MENU.items.some(t=>/魔導士の 杖/.test(t)); closeMenu(); return ok; }));
+  T('音の 設定が 残る', await E(()=>{ SND.bgm=.3; openSound(); closeMenu(); return JSON.parse(localStorage.getItem('lq5snd')).bgm===.3; }));
   T('ドルムの 教会で セーブ → 再開も ドルムの 教会', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); ST.phase='c2_dolm'; enterTown([11.5,15.5],'velna'); lastDoor=3; enterRoom(3); hero.x=4.5; hero.z=4.5; saveGame(); enterTown([12,6],'rue'); }); await pg.reload({waitUntil:'load'}); await W(1800);
     for(let i=0;i<40 && !(await E(()=>typeof MENU!=='undefined'));i++) await W(100); await W(600); await E(()=>{ if(MENU) closeMenu(); loadGame(); }); await W(800);
     return await E(()=>TOWN_NOW==='velna' && cur.kind==='room' && TROOMS()[cur.room].name==='教会'); })());
