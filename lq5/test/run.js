@@ -33,7 +33,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   // ---- 第1章 ----
   await E(()=>pressA()); await W(400); await flush(); T('第1章へ', await E(()=>ST.phase==='c1_castle'));
   await talk('アルディア王'); await flush(); T('使者と 書状', await E(()=>ST.phase==='c1_road'&&followers.length===1&&BAG.keys.includes('和平の 書状の 写し')));
-  await E(()=>enterFort(false)); T('砦の 入口で 重ならない', await E(()=>freeCircle(hero.x,hero.z)));
+  await E(()=>enterFort(false)); await W(800); await flush(); T('砦の 入口で 重ならない', await E(()=>freeCircle(hero.x,hero.z)));
   T('鉄格子は 閉じて いる', await E(()=>!fortGateOpen()));
   for(const [x,z] of [[1.5,9.5],[5.5,1.5]]){ await E(([x,z])=>{ hero.x=x; hero.z=z; examine(); },[x,z]); await flush(); }
   T('灯り ふたつで 鉄格子が 開く', await E(()=>fortGateOpen()));
@@ -74,7 +74,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('夜の 街道の 戦闘は 戦闘の 曲（燃える 村の 曲では ない）', await E(()=>{ TOWN_NOW='rue'; ST.phase='road'; enterWorld([30.5,25.5]); startBattle([FOES.yomiakari]); const k=bgmFor(); endBattle(); enterTown([12,10],'rue'); const k2=bgmFor(); return k==='battle' && k2==='burn'; }));
   T('メニューで 仲間の 状態と 所持金', await E(()=>{ if(BT) endBattle(); enterTown([12,10],'cap'); BAG.gold=123; openFieldMenu(); const el=document.getElementById('fstat'); const ok=el.style.display==='block' && el.textContent.includes('エルト') && el.textContent.includes('123 G') && el.textContent.includes('HP'); closeMenu(); return ok && el.style.display==='none'; }));
   T('メニューの 頼まれごと', await E(()=>{ const l=requestList().join(' '); return /畑の ワラドクロ退治/.test(l) && /済み/.test(l); }));
-  T('扉の 音は 1回だけ', await (async()=>{ await E(()=>{ if(BT) endBattle(); ST.phase='c1_road'; enterTown([12,10],'cap'); window.__door=0; const o=SE.door; SE.door=()=>{ window.__door++; }; window.__oDoor=o; const [dx,dy]=TDOORS()[0]; hero.x=dx+.5; hero.z=dy+.9; hero.ang=Math.PI; }); await pg.keyboard.down('ArrowUp'); await W(1500); await pg.keyboard.up('ArrowUp'); await W(600); return E(()=>{ SE.door=window.__oDoor; return window.__door===1 && cur.kind==='room'; }); })());
+  T('扉の 音は 1回だけ', await (async()=>{ await flush(); await E(()=>{ if(MENU) closeMenu(); if(BT) endBattle(); ST.phase='c1_road'; enterTown([12,10],'cap'); window.__door=0; const o=SE.door; SE.door=()=>{ window.__door++; }; window.__oDoor=o; const [dx,dy]=TDOORS()[0]; hero.x=dx+.5; hero.z=dy+.9; hero.ang=Math.PI; }); await pg.keyboard.down('ArrowUp'); await W(1500); await pg.keyboard.up('ArrowUp'); await W(600); return E(()=>{ SE.door=window.__oDoor; return window.__door===1 && cur.kind==='room'; }); })());
   T('戦闘の 背景の 空の 色が 切り替わる', await E(()=>{ ST.phase='road'; enterWorld([30.5,25.5]); startBattle([FOES.yomiakari]); const c=batScene.background.getHex(); endBattle(); return c===0x0a1028; }));
   // ---- 第2章 ----
   await E(()=>{ if(BT) endBattle(); PARTY.length=1; STATS.elt.hp=STATS.elt.max; ST.phase='c1_town'; setEscort(true); enterTown([11.5,15.5],'velna'); showEnd1(); });
@@ -136,6 +136,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('経験値は 1.25倍', await E(()=>EXP_RATE===1.25));
   T('扉の 出入りが 暗転と 重なっても 動けなく ならない', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); ST.phase='c1_road'; enterTown([12,10],'cap'); window.__ran=0; fading=1; goDoor(()=>{ window.__ran=1; }); setTimeout(()=>{ fading=0; },300); busyDoor=1; }); await W(3200); return await E(()=>window.__ran===1 && busyDoor===0); })());
   T('教会の 長いすの 横から 下を 押すと 出られる', await (async()=>{ await flush(); await E(()=>{ ST.phase='c1_road'; TOWN_NOW='cap'; lastDoor=2; enterRoom(2); hero.x=3.5; hero.z=2.6; resetTrail(); busyDoor=0; }); await W(400); await pg.keyboard.down('ArrowDown'); await W(3000); await pg.keyboard.up('ArrowDown'); await W(1200); return await E(()=>cur.kind==='town'); })());
+  T('鍛冶屋に 話しかけた ときから いまの 装備が 出る', await (async()=>{ await flush(); await E(()=>{ ST.phase='c2_road'; TOWN_NOW='velna'; lastDoor=2; enterRoom(2); const n=cur.npcs[0]; n.talk(n); }); await W(200); const ok=await E(()=>document.getElementById('fequip').style.display==='block' && !!msgQ); await flush(); await E(()=>{ if(MENU) closeMenu(); }); return ok; })());
   T('ドルムの 教会で セーブ → 再開も ドルムの 教会', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); ST.phase='c2_dolm'; enterTown([11.5,15.5],'velna'); lastDoor=3; enterRoom(3); hero.x=4.5; hero.z=4.5; saveGame(); enterTown([12,6],'rue'); }); await pg.reload({waitUntil:'load'}); await W(1800);
     for(let i=0;i<40 && !(await E(()=>typeof MENU!=='undefined'));i++) await W(100); await W(600); await E(()=>{ if(MENU) closeMenu(); loadGame(); }); await W(800);
     return await E(()=>TOWN_NOW==='velna' && cur.kind==='room' && TROOMS()[cur.room].name==='教会'); })());

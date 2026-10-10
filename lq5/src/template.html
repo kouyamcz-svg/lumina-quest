@@ -108,7 +108,7 @@ const ROOMS=[
  {name:'長老の 家', rows:["WWWWWWWWW","WsW.f..bW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"],
   npc:{x:6.5,y:3.5,spr:'okami',name:'長老の 妻',lines:['妻「おや エルト。うちの 人なら 広場に 出て いるよ」','妻「今年の 麦も よく 実った。ヴェルナの 種の おかげさ」']}},   /* ★長老が 広場と 家に 2人 いた */
  {name:'鍛冶屋', rows:["WWWWWWWWW","Wf..s..sW","W.......W","W.T...T.W","W.......W","Wp......W","WWWWXWWWW"],
-  npc:{x:2.5,y:2.5,spr:'smith',name:'鍛冶屋の 親方',talk:()=>say(['親方「剣の 手入れか？　国境が きな臭い」'],()=>openShop('smith','鍛冶屋（所持金 '+BAG.gold+'G）'))}},
+  npc:{x:2.5,y:2.5,spr:'smith',name:'鍛冶屋の 親方',talk:()=>{ EQUIP_TALK=1; drawEquipPanel(); say(['親方「剣の 手入れか？　国境が きな臭い」'],()=>{ EQUIP_TALK=0; openShop('smith','鍛冶屋（所持金 '+BAG.gold+'G）'); }); }}},
  {name:'宿屋', rows:["WWWWWWWWW","Wb.bfb.sW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"],   // ★暖炉は 奥の 壁へ（前は 出口の すぐ 前に あった）
   npc:{x:2.5,y:2.4,spr:'girl',name:'宿の 娘',talk:()=>say(['娘「いらっしゃい。宿屋へ ようこそ」'],openInn)}},
  {name:'道具屋', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.TTT...W","W.......W","Wp.....pW","WWWWXWWWW"],
@@ -145,7 +145,7 @@ const CAP=[
 const CAP_DOORS=[[3, 8], [20, 8], [3, 17], [20, 16], [8, 20], [15, 20]];
 const CAP_ROOMS=[
  {name:'武器と 防具の 店', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.TTT...W","W.......W","Wp.....pW","WWWWXWWWW"],
-  npc:{x:4.5,y:2.5,spr:'smith',name:'店の 主人',talk:()=>say(['主人「いらっしゃい。王都いちの 品ぞろえだ」'],()=>openShop('smith','武器と 防具の 店（所持金 '+BAG.gold+'G）'))}},
+  npc:{x:4.5,y:2.5,spr:'smith',name:'店の 主人',talk:()=>{ EQUIP_TALK=1; drawEquipPanel(); say(['主人「いらっしゃい。王都いちの 品ぞろえだ」'],()=>{ EQUIP_TALK=0; openShop('smith','武器と 防具の 店（所持金 '+BAG.gold+'G）'); }); }}},
  {name:'道具屋', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.TTT...W","W.......W","Wp.....pW","WWWWXWWWW"],
   npc:{x:4.5,y:2.5,spr:'okami',name:'道具屋の 主人',talk:()=>say(['主人「薬草は 旅の おともだよ」'],()=>openShop('tools','道具屋（所持金 '+BAG.gold+'G）'))}},
  {name:'教会', rows:["WWWWWWWWW","W...A...W","W.......W","WQQ...QQW","W.......W","WQQ...QQW","WWWWXWWWW"],
@@ -202,7 +202,7 @@ const DOLM_ROOMS=[
  {name:'宿屋', rows:["WWWWWWWWW","Wb.bfb.sW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"],
   npc:{x:2.5,y:2.4,spr:'girl',name:'宿の 娘',talk:()=>say(['娘「鉱山の 宿へ ようこそ。すすで 汚れた 服は 外で はたいてね」'],openInn)}},
  {name:'鍛冶屋', rows:["WWWWWWWWW","Wf..s..sW","W.......W","W.T...T.W","W.......W","Ws......W","WWWWXWWWW"],
-  npc:{x:2.5,y:2.5,spr:'smith',name:'鍛冶屋の 親方',talk:()=>say(['親方「掘りたての ドルムの 鉄で 打った 品だ。……いい 鉄は みんな 帝都へ 持って いかれるがな」'],()=>openShop('smith','鍛冶屋（所持金 '+BAG.gold+'G）'))}},
+  npc:{x:2.5,y:2.5,spr:'smith',name:'鍛冶屋の 親方',talk:()=>{ EQUIP_TALK=1; drawEquipPanel(); say(['親方「掘りたての ドルムの 鉄で 打った 品だ。……いい 鉄は みんな 帝都へ 持って いかれるがな」'],()=>{ EQUIP_TALK=0; openShop('smith','鍛冶屋（所持金 '+BAG.gold+'G）'); }); }}},
  {name:'教会', rows:["WWWWWWWWW","W...A...W","W.......W","WQQ...QQW","W.......W","WQQ...QQW","WWWWXWWWW"],
   npc:{x:4.5,y:2.3,spr:'priest',name:'神父',talk:()=>openChurch()}},
  {name:'道具屋', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.TTT...W","W.......W","Wp.....pW","WWWWXWWWW"],
@@ -1643,7 +1643,8 @@ let MENU=null;   // {title, items, sel, onPick, onBack}
 const menuEl=document.getElementById('fmenu');
 // ★メニューを 開いて いる 間は、右に 仲間の 状態と 所持金を 出す（指示）
 const fstatEl=document.getElementById('fstat');
-function drawEquipPanel(){ const el=document.getElementById('fequip'); if(!MENU||BT||!MENU.equip){ el.style.display='none'; return; } el.style.display='block';
+let EQUIP_TALK=0;   // ★鍛冶屋に 話しかけた ときから いまの 装備を 出す
+function drawEquipPanel(){ const el=document.getElementById('fequip'); if(BT||!(EQUIP_TALK||(MENU&&MENU.equip))){ el.style.display='none'; return; } el.style.display='block'; if(MENU){ el.style.top=''; el.style.bottom='10px'; } else { el.style.top='52px'; el.style.bottom='auto'; }   /* ★話しかけた ときは 上に（下の 話の 欄と 重ならない） */
   const nm=it=>it?it.name:'なし'; el.innerHTML='<div class="mt">いまの 装備</div><table>'+PARTY.map(k=>{ const e=EQUIP[k]||{}, m=STATS[k]; return `<tr><td class="n">${m.name}</td><td><span class="k">武器</span>${nm(e.weapon)}</td><td><span class="k">体</span>${nm(e.armor)}</td><td><span class="k">頭</span>${nm(e.helm)}</td></tr>`; }).join('')+'</table>'; }   /* ★鍛冶屋で いまの 装備を 見せる（指示） */
 function drawStat(){ drawEquipPanel(); if(!MENU || BT || MENU.notes || MENU.wideOnly){ /* ★呪文の 解説の 間は 横幅を 使う ため 隠す */ fstatEl.style.display='none'; return; } fstatEl.style.display='block';
   fstatEl.innerHTML=PARTY.map(k=>{ const m=STATS[k]; return `<div class="pm${m.hp<=0?' down':''}"><b>${m.name}</b>　Lv ${m.lv||1}${m.status?'<span class="st">'+STNAME[m.status]+'</span>':''}<br>HP ${m.hp}／${m.max}<br>MP ${m.mp}／${m.maxmp||m.mp}</div>`; }).join('')+`<div class="g">${BAG.gold} G</div>`; }
@@ -1915,7 +1916,7 @@ function enterFort(fromEast){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m
   cur={kind:'fort', rows:FORT, solid:new Set(['#']), npcs:cur.npcs, room:null, fromEast:!!fromEast};
   setNpcs(ST.phase==='c1_fort'||ST.phase==='c1_road' ? [{x:13.5,y:3.4,spr:'banpei',name:'砦の 番兵',talk:()=>{
     say(['番兵「…………」','鎧の 中から、人の 声では ない 音が した。','使者 ハーヴェン「こ、これは 人では ないぞ！」'],()=>startBattle(FOES.banpei,()=>{ ST.phase='c1_east'; setNpcs([]); say(['番兵の 鎧が 崩れ落ちた。中は からっぽだった。','使者 ハーヴェン「……ヴェルナの 砦に、なぜ こんな ものが」','＊ 奥の 出口から、ヴェルナ側へ 抜けられる ＊']); })); }}] : []);
-  if(ST.phase==='c1_road'){ ST.phase='c1_fort'; setTimeout(()=>say(['使者 ハーヴェン「この 砦の 奥には、鉄格子が あると 聞きます」','使者 ハーヴェン「昔の 守り手は、壁の 古い 灯りを ふたつ ともして 格子を 上げた そうですな」','（灯りの 台の 前で Aを 押すと 火を ともせる）']),500); }   /* ★仕掛けの 手がかり（指示：わからなくて 進めなかった） */
+  if(ST.phase==='c1_road'){ ST.phase='c1_fort'; setTimeout(()=>{ if(!msgQ) say(['使者 ハーヴェン「この 砦の 奥には、鉄格子が あると 聞きます」','使者 ハーヴェン「昔の 守り手は、壁の 古い 灯りを ふたつ ともして 格子を 上げた そうですな」','（灯りの 台の 前で Aを 押すと 火を ともせる）']); },500); }   /* ★仕掛けの 手がかり（指示：わからなくて 進めなかった） */
   if(fromEast){ hero.x=13.5; hero.z=1.6; hero.ang=Math.PI; } else { hero.x=6.5; hero.z=FORT.length-1.6; hero.ang=Math.PI; } resetTrail(); wWalk=0; wEnc=6+Math.random()*6;
   document.getElementById('place').textContent='国境の 砦'; resize(); }
 // ---- ヴェルナの 鉱山の 町 ドルム（村の 形を 使い回す）----
@@ -2082,7 +2083,7 @@ function zfFight(){ say(['遺跡の 奥に、あの からくりが 立って �
     ()=>{ joinParty('zf',Math.max(STATS.elt.lv,12)); ST.phase='c2_back'; say(['リディア「帝都へ 戻りましょう。……父に、もう一度 会いたい」']); }); })); }
 // ---- 帝都 ヴェルナ（城下町は 王都と 同じ 形。色と 人が 違う）----
 const VCAP_ROOMS=[
- {name:'武器と 防具の 店', rows:CAP_ROOMS[0].rows, npc:{x:4.5,y:2.5,spr:'smith',name:'帝都の 鍛冶',talk:()=>say(['鍛冶「帝都の 鉄は 硬いぞ。……剣ばかり 打たされて いるがな」'],()=>openShop('smith2','武器と 防具の 店（所持金 '+BAG.gold+'G）'))}},
+ {name:'武器と 防具の 店', rows:CAP_ROOMS[0].rows, npc:{x:4.5,y:2.5,spr:'smith',name:'帝都の 鍛冶',talk:()=>{ EQUIP_TALK=1; drawEquipPanel(); say(['鍛冶「帝都の 鉄は 硬いぞ。……剣ばかり 打たされて いるがな」'],()=>{ EQUIP_TALK=0; openShop('smith2','武器と 防具の 店（所持金 '+BAG.gold+'G）'); }); }}},
  {name:'道具屋', rows:CAP_ROOMS[1].rows, npc:{x:4.5,y:2.5,spr:'okami',name:'道具屋の 主人',talk:()=>say(['主人「旅の 方かい。薬草なら たんと あるよ」'],()=>openShop('tools','道具屋（所持金 '+BAG.gold+'G）'))}},
  {name:'教会', rows:CAP_ROOMS[2].rows, npc:{x:4.5,y:2.3,spr:'priest',name:'帝都の 神父',talk:()=>openChurch()}},
  {name:'宿屋', rows:["WWWWWWWWW","Wb.bfb.sW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"], npc:{x:2.5,y:2.4,spr:'girl',name:'宿の 娘',talk:()=>say(['娘「帝都の 宿へ ようこそ」'],openInn)}},
