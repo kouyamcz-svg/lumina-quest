@@ -676,6 +676,8 @@ function enterRoom(i){ const r=TROOMS()[i]; newG(); drops=[]; fireLight=null; do
   const xi=r.rows[r.rows.length-1].indexOf('X'); hero.x=xi+.5; hero.z=r.rows.length-1.6; hero.ang=Math.PI; resetTrail();
   document.getElementById('place').textContent=r.name; }
 let fading=0, pending=null; const fadeEl=document.getElementById('fade');
+// ★扉の 出入りは 暗転中でも 捨てずに 待つ（前は 捨てられて busyDoor が 1の まま 残り、動けなく なった）
+function goDoor(fn){ if(fading){ setTimeout(()=>goDoor(fn),80); return; } go(fn); }
 function go(fn){ if(fading) return; fading=1; fadeEl.style.opacity=1; setTimeout(()=>{ fn(); fadeEl.style.opacity=0; setTimeout(()=>{fading=0;},250); },220); }
 // ================= 入力 =================
 const dpad=document.getElementById('dpad'); let dir=[0,0];
@@ -728,12 +730,13 @@ function blockedCount(x,z){ const RAD = cur.kind==='world' ? 0.3 : RADT; let n=b
 // ★重なった 場所から 近くの 空いた 所へ（扉を 出た 位置が 壁に 重なると、壁の 中を 歩けて しまった）
 function safeSpot(x,z){ if(freeCircle(x,z)) return [x,z]; for(let r=.05;r<1.2;r+=.05) for(const [a,b] of [[0,-1],[0,1],[-1,0],[1,0],[-.7,-.7],[.7,-.7],[-.7,.7],[.7,.7]]) if(freeCircle(x+a*r,z+b*r)) return [x+a*r,z+b*r]; return [x,z]; }
 function freeCircle(x,z){ const RAD = cur.kind==='world' ? 0.3 : RADT; for(const [ox,oz] of [[RAD,0],[-RAD,0],[0,RAD],[0,-RAD],[RAD*.7,RAD*.7],[-RAD*.7,RAD*.7],[RAD*.7,-RAD*.7],[-RAD*.7,-RAD*.7]]) if(blockedAt(x+ox,z+oz)) return false; return true; }
-let walkT=0, last=performance.now(), lastDoor=-1, busyDoor=0;
+let walkT=0, last=performance.now(), lastDoor=-1, busyDoor=0, busyStuck=0;
 function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   if(BT){ let iy=dir[1], ix=dir[0]; if(keys.ArrowUp)iy=-1; if(keys.ArrowDown)iy=1; if(keys.ArrowLeft)ix=-1; if(keys.ArrowRight)ix=1; battleInput(iy,ix); battleTick(dt,now); requestAnimationFrame(tick); return; }
   let ix=dir[0], iz=dir[1]; if(keys.ArrowLeft)ix=-1; if(keys.ArrowRight)ix=1; if(keys.ArrowUp)iz=-1; if(keys.ArrowDown)iz=1;
   if(MENU){ menuInput(iz); ix=0; iz=0; }
   if(ix||iz) bMoved=true;
+  if(busyDoor && !fading && !anims.length){ busyStuck=(busyStuck||0)+dt; if(busyStuck>1.2){ busyDoor=0; busyStuck=0; } } else busyStuck=0;   /* ★念の ため：扉の 動きが 終わったのに 止まった ままなら 戻す */
   if(msgQ||fading||busyDoor||ST.phase==='end'||ST.phase==='c1_end'||ST.phase==='c2_end'){ix=0;iz=0;}
   if(ix||iz){ const l=Math.hypot(ix,iz), vx=ix/l, vz=iz/l; hero.ang=Math.atan2(vx,vz);
     const dash = cur.kind==='town' && (holdB || keys.x || keys.Shift);
@@ -778,9 +781,9 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
       if(c==='C') { if(/^(road|c1_|c2_)/.test(ST.phase)) go(()=>enterTown([12,20.2],'cap')); else { hero.z+=0.6; say(['王都 アルディア。今は 用が ない。']); } } }
     else if(cur.kind==='town' && TOWN_NOW==='rue' && /^(burn|after|road)$/.test(ST.phase) && !msgQ && TDOORS().some(([dx,dy])=>Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2) && iz<0){ say(['家の 中まで 火が 回って いる。入れない！']); hero.z+=.35; }   /* ★燃えて いる 家には 入れない */
     else if(cur.kind==='town'){ TDOORS().forEach(([dx,dy],i)=>{ if(!busyDoor && Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2 && iz<0){ busyDoor=1;   /* ★扉の すぐ 前だけ。busyDoor=1 が 説明の 中に 入って 効かず、毎こま 扉の 音が 鳴って 重なって いた */
-        se('door'); swing(doorPiv[i],0,OPEN,.28,0,()=>go(()=>{ lastDoor=i; enterRoom(i); swing(roomDoor,OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }); }
+        se('door'); swing(doorPiv[i],0,OPEN,.28,0,()=>goDoor(()=>{ lastDoor=i; enterRoom(i); swing(roomDoor,OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }); }
     else if(cur.kind==='room'){ const r=TROOMS()[cur.room]; const xi=r.rows[r.rows.length-1].indexOf('X'); if(!busyDoor && Math.abs(hero.x-(xi+.5))<.4 && hero.z>r.rows.length-1.45 && iz>0){ busyDoor=1;
-        se('door'); swing(roomDoor,0,OPEN,.28,0,()=>go(()=>{ const [dx,dy]=TDOORS()[lastDoor]; enterTown([dx+.5, dy+.95], TOWN_NOW); { const [sx,sz]=safeSpot(hero.x,hero.z); hero.x=sx; hero.z=sz; resetTrail(); } swing(doorPiv[lastDoor],OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }
+        se('door'); swing(roomDoor,0,OPEN,.28,0,()=>goDoor(()=>{ const [dx,dy]=TDOORS()[lastDoor]; enterTown([dx+.5, dy+.95], TOWN_NOW); { const [sx,sz]=safeSpot(hero.x,hero.z); hero.x=sx; hero.z=sz; resetTrail(); } swing(doorPiv[lastDoor],OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }
   }
   let acc=0,k=1; followers.forEach((f,i)=>{ const want=.85*(i+1); while(k<trail.length-1){ const d=Math.hypot(trail[k][0]-trail[k-1][0],trail[k][1]-trail[k-1][1]); if(acc+d>=want) break; acc+=d; k++; } const t=trail[Math.min(k,trail.length-1)]; f.x+=(t[0]-f.x)*.5; f.z+=(t[1]-f.z)*.5; f.ang=t[2]; });
   if(cur.kind==='world'){ const moving=!!(ix||iz); if(moving) walkT+=dt; const fr=moving?[1,0,2,0][Math.floor(walkT*8)%4]:0; drawWorld(fr,now);
