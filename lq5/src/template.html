@@ -792,7 +792,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
       if(!busyDoor && Math.abs(hero.x-(xi+.5))<.4 && hero.z>r.rows.length-1.45 && iz>0){ busyDoor=1;
         se('door'); swing(roomDoor,0,OPEN,.28,0,()=>goDoor(()=>{ const [dx,dy]=TDOORS()[lastDoor]; enterTown([dx+.5, dy+.95], TOWN_NOW); { const [sx,sz]=safeSpot(hero.x,hero.z); hero.x=sx; hero.z=sz; resetTrail(); } swing(doorPiv[lastDoor],OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }
   }
-  let acc=0,k=1; followers.forEach((f,i)=>{ const want=.85*(i+1); while(k<trail.length-1){ const d=Math.hypot(trail[k][0]-trail[k-1][0],trail[k][1]-trail[k-1][1]); if(acc+d>=want) break; acc+=d; k++; } const t=trail[Math.min(k,trail.length-1)]; f.x+=(t[0]-f.x)*.5; f.z+=(t[1]-f.z)*.5; f.ang=t[2]; });
+  let acc=0,k=1; followers.forEach((f,i)=>{ if(f.hold){ if(ix||iz) f.hold=false; else return; } const want=.85*(i+1); while(k<trail.length-1){ const d=Math.hypot(trail[k][0]-trail[k-1][0],trail[k][1]-trail[k-1][1]); if(acc+d>=want) break; acc+=d; k++; } const t=trail[Math.min(k,trail.length-1)]; f.x+=(t[0]-f.x)*.5; f.z+=(t[1]-f.z)*.5; f.ang=t[2]; });
   if(cur.kind==='world'){ const moving=!!(ix||iz); if(moving) walkT+=dt; const fr=moving?[1,0,2,0][Math.floor(walkT*8)%4]:0; drawWorld(fr,now);
     anims=[]; requestAnimationFrame(tick); return; }
   // カメラ（真上寄り。家の 中は 少し 近く）
@@ -2118,9 +2118,9 @@ FOES.sekisho={key:'sekisho', name:'関所荒らし', scale:1.35, hp:260, exp:400
 function sekishoFight(){ say(['関所の 前に、岩の 塊の ような 魔物が 居座って いる。','使者 ハーヴェン「こ、こやつが 騎士どのの 言って いた、関所を 荒らす 魔物ですな！」'],()=>startBattle(FOES.sekisho,()=>{ ST.phase='c2_road'; cur.npcs.filter(n=>n.foe).forEach(n=>{ S.remove(n.p.m); S.remove(n.p.sh); }); cur.npcs=cur.npcs.filter(n=>!n.foe);
   say(['関所荒らしは 崩れて、ただの 岩に 戻った。','使者 ハーヴェン「道が 開けた。帝都は この 先、東ですな」']); })); }
 // ---- ボス：魔導からくり ZF ----
-FOES.zfboss={key:'zfboss', name:'魔導からくり', scale:1.4, hp:560, exp:900, gold:300, atk:[12,18], wind:'の 杖の 玉が 青く 光った！', verb:'杖の 一撃', boss:true,
+FOES.zfboss={key:'zfboss', name:'魔導からくり ZF', scale:1.4, hp:560, exp:900, gold:300, atk:[12,18], wind:'の 杖の 玉が 青く 光った！', verb:'杖の 一撃', boss:true,
   bigWind:'の 胸の 装甲が 開いた！', bigName:'魔導の 光線', frames:{idle:RAB.zfb_idle,idle2:RAB.zfb_idle2,wind:RAB.zfb_wind,atk:RAB.zfb_atk,big:RAB.zfb_big}};
-function zfFight(){ say(['遺跡の 奥に、あの からくりが 立って いた。','からくりの 番兵「……王女ヲ 確認。連レ 戻ス」','リディア「下がって、エルト！ ……来るわ！」'],()=>startBattle(FOES.zfboss,()=>{
+function zfFight(){ say(['遺跡の 奥に、あの からくりが 立って いた。','からくりの 番兵「……王女ヲ 確認。連レ 戻ス」','胸を 見ると「ZF」と 書いて ある。','リディア「下がって、エルト！ ……来るわ！」'],()=>startBattle(FOES.zfboss,()=>{
   setNpcs([]); say(['からくりの 体から、黒い 霧が 抜けて いった。','からくり「…………。ワタシハ……」','からくり「命令ノ 主ハ……人ノ 形ヲ シタ、別ノ 何カ」','リディア「別の 何か……？」',
     'からくり「ワタシハ ZF。古イ 時代ノ 魔導からくり。魔力ヲ 見ル 目ヲ 持ツ」','ZF「アノ 者ニハ、人デハ ナイ 魔力ガ 渦巻イテ イタ」','ZF「……オマエタチト 行コウ。アノ 者ノ 正体ヲ 確カメル」','＊ ZFが 仲間に 加わった！ ＊'],
     ()=>{ joinParty('zf',Math.max(STATS.elt.lv,12)); ST.phase='c2_back'; say(['リディア「帝都へ 戻りましょう。……父に、もう一度 会いたい」']); }); })); }
@@ -2138,7 +2138,7 @@ function vcapNpcs(){ return [
   {x:10.4,y:4.7,spr:'vsoldier',name:'城の 門番',byPhase:{c2_capital:['門番「アルディアの 使者か。……話は 聞いて いる。城へ 入れ」'],'*':['門番「ここは 帝都 ヴェルナの 城だ」']}},
   {x:13.6,y:4.7,spr:'vsoldier',name:'城の 門番',lines:['門番「……近ごろ 城の 中は 静かすぎる」']},
   {x:9.2,y:12.6,spr:'girl',name:'帝都の 娘',lines:['娘「帝都の 空は いつも 煙で 灰色。昔は 青かったって 母さんが 言うの」','娘「鉄は 剣に なって、麦は 兵の ものに なるの」']},
-  {x:16.5,y:9.6,spr:'smith',name:'鉱山の 男',lines:['男「側近の セルヴィスさまが 来てから、王さまは 変わった」','男「……大きな 声じゃ 言えないがな」']},
+  {x:16.5,y:9.6,spr:'smith',name:'鉱山の 男',lines:['男「王さまが 変わったのは、数年前からだ。今は 側近の セルヴィスさまの 言う ことしか 聞かない」','男「セルヴィスさまは 王女さまの 教育係も して いた お方なんだが……大きな 声じゃ 言えないがな」']},
   {x:6.5,y:13.6,spr:'child',name:'帝都の 子',lines:['子「王女さまは やさしいんだ。でも 最近 お城から 出て こない」']},
   {x:7.5,y:8.3,spr:'smith',name:'工房の 職人',lines:['職人「この 工房で 鉄を 溶かして、毎日 剣と 鎧を 作って いる」','職人「……昔は 鋤や 鍋を 作って いたんだがな」']},
   {x:18.5,y:6.2,spr:'vsoldier',name:'訓練中の 兵',lines:['兵「はっ！ はっ！ ……休めと 言われるまで 振り続けろ、だとよ」','兵「戦が 近いって 噂だ。相手は アルディアだと」']},
@@ -2182,7 +2182,7 @@ function lidiaTalk(){ if(ST.phase!=='c2_tower') return say(['リディア「行�
   say(['リディア「来て くれて ありがとう。わたしは リディア。この 国の 王女です」','リディア「謁見の 間で 見たでしょう。……父は、数年前から 人が 変わりました」','リディア「側近の セルヴィスの 言うことしか 聞かない。まるで 人形の ように」',
     'リディア「セルヴィスは、わたしの 教育係でした。幼い ころから ずっと」','リディア「なのに……昔 一緒に 摘んだ 花の 話を しても、何も 覚えて いないの」','リディア「あの 人は、本当に セルヴィスなのか……」',
     'リディア「セルヴィスは 夜ごと、西の 森の 遺跡へ 通って います。そこに 何かが ある」','リディア「わたしは 城の からくりに 見張られて いて、一人では 出られない」','リディア「エルト。……わたしと 一緒に 遺跡へ 行って くれませんか」','＊ リディアが 仲間に 加わった！ ＊'],
-    ()=>{ joinParty('lidia',Math.max(STATS.elt.lv,10)); ST.phase='c2_ruins'; say(['からくりの 見張りが 向こうを 向いた すきに、2人は 城を 抜け出した。'],()=>go(()=>enterWorld([92.5,26.4]))); }); }
+    ()=>{ const ln=cur.npcs.find(n=>n.spr==='lidia'); joinParty('lidia',Math.max(STATS.elt.lv,10)); if(ln){ cur.npcs=cur.npcs.filter(n=>n!==ln); S.remove(ln.p.m); S.remove(ln.p.sh); const f=followers.find(f=>f.p.k==='lidia'); if(f){ f.x=ln.x; f.z=ln.y; f.ang=0; f.hold=true; } }   /* ★仲間に なった リディアが 2人 見えた。その場に 立ち、動き出すと ついて くる */ ST.phase='c2_ruins'; say(['からくりの 見張りが 向こうを 向いた すきに、2人は 城を 抜け出した。'],()=>go(()=>enterWorld([92.5,26.4]))); }); }
 function startCh2(){ const c=document.getElementById('card'); c.style.opacity=0; ST.phase='c2_dolm'; refreshFollowers(); enterTown([11.5,15.5],'velna');
   say(['── 第2章　操られた 王 ──','次の 朝。ドルムの 町に、帝国の 迎えが 着いた。']); }
 function showEnd2(){ ST.phase='c2_end'; const c=document.getElementById('card'); c.innerHTML='<div>第2章</div><div class="t">操られた 王</div><div>完</div><div style="font-size:13px;margin-top:20px">── 第3章へ つづく ──</div>'; c.style.opacity=1; }
