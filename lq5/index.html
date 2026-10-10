@@ -1665,7 +1665,7 @@ const menuEl=document.getElementById('fmenu');
 const fstatEl=document.getElementById('fstat');
 let EQUIP_TALK=0;   // ★鍛冶屋に 話しかけた ときから いまの 装備を 出す
 function drawEquipPanel(){ const el=document.getElementById('fequip'); if(BT||!(EQUIP_TALK||(MENU&&MENU.equip))){ el.style.display='none'; return; } el.style.display='block'; if(MENU){ el.style.top=''; el.style.bottom='10px'; } else { el.style.top='52px'; el.style.bottom='auto'; }   /* ★話しかけた ときは 上に（下の 話の 欄と 重ならない） */
-  const nm=it=>it?it.name:'なし'; el.innerHTML='<div class="mt">いまの 装備</div><table>'+PARTY.map(k=>{ const e=EQUIP[k]||{}, m=STATS[k]; return `<tr><td class="n">${m.name}</td><td><span class="k">武器</span>${nm(e.weapon)}</td><td><span class="k">体</span>${nm(e.armor)}</td><td><span class="k">頭</span>${nm(e.helm)}</td></tr>`; }).join('')+'</table>'; }   /* ★鍛冶屋で いまの 装備を 見せる（指示） */
+  const nm=it=>it?it.name+'<span class="k">+'+it.v+'</span>':'なし'; el.innerHTML='<div class="mt">いまの 装備</div><table>'+PARTY.map(k=>{ const e=EQUIP[k]||{}, m=STATS[k]; return `<tr><td class="n">${m.name}</td><td><span class="k">武器</span>${nm(e.weapon)}</td><td><span class="k">体</span>${nm(e.armor)}</td><td><span class="k">頭</span>${nm(e.helm)}</td></tr>`; }).join('')+'</table>'; }   /* ★鍛冶屋で いまの 装備を 見せる（指示） */
 function drawStat(){ drawEquipPanel(); if(!MENU || BT || MENU.notes || MENU.wideOnly){ /* ★呪文の 解説の 間は 横幅を 使う ため 隠す */ fstatEl.style.display='none'; return; } fstatEl.style.display='block';
   fstatEl.innerHTML=PARTY.map(k=>{ const m=STATS[k]; return `<div class="pm${m.hp<=0?' down':''}"><b>${m.name}</b>　Lv ${m.lv||1}${m.status?'<span class="st">'+STNAME[m.status]+'</span>':''}<br>HP ${m.hp}／${m.max}<br>MP ${m.mp}／${m.maxmp||m.mp}</div>`; }).join('')+`<div class="g">${BAG.gold} G</div>`; }
 function drawMenu(){ drawStat(); if(!MENU){ menuEl.style.display='none'; return; } menuEl.style.display='block';
@@ -1752,13 +1752,22 @@ const SHOP={ smith:[{name:'銅の 剣',kind:'weapon',v:6,price:60},{name:'鉄の
 SHOP.smith_rue=[{name:'銅の 剣',kind:'weapon',v:9,price:70},{name:'革の よろい',kind:'armor',v:7,price:70},{name:'革の 帽子',kind:'helm',v:2,price:30}];
 SHOP.smith_cap=[{name:'鉄の 剣',kind:'weapon',v:15,price:260},{name:'くさりかたびら',kind:'armor',v:11,price:220},{name:'鉄の 兜',kind:'helm',v:5,price:130},{name:'革の 帽子',kind:'helm',v:2,price:30}];
 SHOP.smith_velna=[{name:'鋼の 剣',kind:'weapon',v:19,price:430},{name:'鉄の よろい',kind:'armor',v:15,price:400},{name:'鋼の 兜',kind:'helm',v:8,price:260},{name:'鉱夫の 帽子',kind:'helm',v:4,price:90}];
+// ★買った 装備を その場で 付ける（指示）。付けられる 仲間と、付けた ときの 数字の 変わり方を 出す
+function askWear(g,back){ const slot=g.kind, lab=slot==='weapon'?'攻撃':'守り', who=PARTY.filter(k=>canWear(k,g));
+  if(!who.length){ say(['（今の 仲間は 装備できない。ふくろに しまった）'],back); return; }
+  const val=k=>{ const m=STATS[k]; return slot==='weapon'?m.atk:m.defT; }, cur=k=>((EQUIP[k]||{})[slot]||null), after=k=>val(k)-(cur(k)?cur(k).v:0)+g.v;
+  menu(who.map(k=>STATS[k].name+'に 装備する（'+lab+' '+val(k)+'→'+after(k)+'）').concat(['ふくろに しまう']),'いま 装備する？',(i)=>{ closeMenu(); if(i>=who.length){ say([g.name+'を ふくろに しまった。'],back); return; }
+    const k=who[i]; if(!EQUIP[k]) EQUIP[k]={weapon:null,armor:null,helm:null}; const e=EQUIP[k], old=e[slot]; const bi=BAG.gear.indexOf(g); if(bi>=0) BAG.gear.splice(bi,1); e[slot]=g; if(old) BAG.gear.push(old); syncAtk(); se('ok');
+    say([STATS[k].name+'は '+g.name+'を 装備した。'+(old?'（'+old.name+'は ふくろへ）':''),lab+' '+val(k)],back); },()=>{ closeMenu(); say([g.name+'を ふくろに しまった。'],back); });
+  MENU.equip=1; drawMenu(); }
 function openShop(which,greet){ const list=(which==='smith'&&SHOP['smith_'+TOWN_NOW])||SHOP[which]; const eq=()=>{ if((which==='smith'||which==='smith2')&&MENU){ MENU.equip=1; drawMenu(); } };   /* ★鍛冶屋では 下に いまの 装備 */
   menu(['買う','売る','やめる'],greet||'お店',(k)=>{
-    if(k===0){ menu(list.map(it=>it.name+'　'+it.price+'G').concat(['戻る']),'買う（所持金 '+BAG.gold+'G）',(i)=>{
+    if(k===0){ menu(list.map(it=>it.name+(it.v?'（+'+it.v+'）':'')+'　'+it.price+'G').concat(['戻る']),'買う（所持金 '+BAG.gold+'G）',(i)=>{
       if(i>=list.length){ openShop(which,greet); return; } const it=list[i];
       if(BAG.gold<it.price){ closeMenu(); say(['お金が 足りない。'],()=>openShop(which,greet)); return; }
-      BAG.gold-=it.price; if(it.kind==='herb') BAG.herbs++; else if(it.kind==='antidote') BAG.antidote++; else BAG.gear.push({name:it.name,kind:it.kind,v:it.v,price:it.price});
-      closeMenu(); se('buy'); say([it.name+'を 買った。'+(it.kind!=='herb'&&it.kind!=='antidote'?(w=>w.length?'（'+w.join('・')+'が 装備できる）':'（今の 仲間は 装備できない）')(PARTY.filter(k=>canWear(k,it)).map(k=>STATS[k].name)):'')],()=>openShop(which,greet)); },()=>openShop(which,greet)); eq(); }
+      BAG.gold-=it.price; const back=()=>openShop(which,greet); closeMenu(); se('buy');
+      if(it.kind==='herb'||it.kind==='antidote'){ if(it.kind==='herb') BAG.herbs++; else BAG.antidote++; say([it.name+'を 買った。'],back); return; }
+      const g={name:it.name,kind:it.kind,v:it.v,price:it.price}; if(it.who) g.who=it.who; BAG.gear.push(g); say([it.name+'を 買った。'],()=>askWear(g,back)); },()=>openShop(which,greet)); eq(); }
     else if(k===1){ const sell=BAG.gear.map((g,i)=>({label:g.name+'　'+Math.floor(g.price/2)+'G',i,g})).filter(x=>x.g.price>0);   /* ★ガイルの 剣（形見）は 売れない */ if(BAG.herbs>0) sell.push({label:'薬草　4G',i:-1});
       if(!sell.length){ closeMenu(); say(['売れる ものが ない。'],()=>openShop(which,greet)); return; }
       menu(sell.map(x=>x.label).concat(['戻る']),'売る',(j)=>{ if(j>=sell.length){ openShop(which,greet); return; } const x=sell[j];
@@ -1796,7 +1805,7 @@ function canWear(k,g){ if(k==='zf') return false; if(g.who) return g.who.include
 function openEquip(){ const who=PARTY.filter(k=>k!=='zf'); if(PARTY.length<=1) return openEquipOf('elt');
   menu(PARTY.map(k=>STATS[k].name).concat(['戻る']),'誰の 装備？',(i)=>{ if(i>=PARTY.length){ openFieldMenu(); return; } const k=PARTY[i]; if(k==='zf'){ closeMenu(); say(['ZFの 体は からくりで できて いる。装備は 付け替えられない。'],openEquip); return; } openEquipOf(k); },()=>openFieldMenu()); }
 function openEquipOf(ck){ fixGear(); if(!EQUIP[ck]) EQUIP[ck]={weapon:null,armor:null,helm:null}; const e=EQUIP[ck], m=STATS[ck], back=()=>PARTY.length>1?openEquip():openFieldMenu();
-  menu(['武器：'+(e.weapon?e.weapon.name:'なし'),'体　：'+(e.armor?e.armor.name:'なし'),'頭　：'+(e.helm?e.helm.name:'なし'),'戻る'],m.name+'（攻撃 '+m.atk+'・守り '+m.defT+'）',(k)=>{
+  const nv=it=>it?it.name+'（+'+it.v+'）':'なし'; menu(['武器：'+nv(e.weapon),'体　：'+nv(e.armor),'頭　：'+nv(e.helm),'戻る'],m.name+'（攻撃 '+m.atk+'・守り '+m.defT+'）',(k)=>{
     if(k>2){ back(); return; } const slot=['weapon','armor','helm'][k]; const cands=BAG.gear.map((g,i)=>({g,i})).filter(x=>x.g.kind===slot && canWear(ck,x.g));
     const opts=cands.map(x=>x.g.name+'（+'+x.g.v+'）'); if(e[slot]) opts.push('外す'); opts.push('戻る');
     if(!cands.length && !e[slot]){ closeMenu(); say(['ふくろに '+m.name+'が 付けられる ものが ない。'],()=>openEquipOf(ck)); return; }
