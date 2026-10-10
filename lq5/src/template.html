@@ -25,7 +25,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .b.m{position:absolute;top:10px;right:24px;width:84px;height:30px;border-radius:17px;font-size:13px;letter-spacing:.1em;background:#3a2f58}
 #pad{position:relative}
 #mapview{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(0,0,0,.85);font-size:13px;color:var(--dim)}
-#mapview canvas{width:94%;height:auto;image-rendering:pixelated;border:2px solid var(--line)}
+#mapview canvas{image-rendering:pixelated;border:2px solid var(--line)}
 #fade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .2s;pointer-events:none}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 #bt{position:absolute;inset:0;display:none;pointer-events:none}
@@ -707,7 +707,7 @@ let msgDone=null;
 function say(lines,done){msgQ=lines.slice();msgDone=done||null;msgEl.style.display='block';msgEl.textContent=msgQ.shift();}
 function closeMsg(){ msgQ=null; msgEl.style.display='none'; const d=msgDone; msgDone=null; d&&d(); }
 function pressA(){ if(ST.phase==='end'){ startCh1(); return; } if(ST.phase==='c1_end'){ startCh2(); return; } if(ST.phase==='c2_end') return;
-  if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='menu'){ se('ok'); battleCmd(); } else if(BT.phase==='target') targetPick(); else if(BT.phase==='skill'){ se('ok'); skillPick(); } else if(BT.phase==='item'){ se('ok'); itemPick(); } else if(BT.phase==='ally'){ allyPick(); } return; }
+  if(mapOpen){ se('cursor'); mapSt.zoom=mapSt.zoom?0:1; if(mapSt.zoom){ mapSt.cx=hero.x; mapSt.cz=hero.z; } drawMap(); return; } if(BT){ if(BT.phase==='menu'){ se('ok'); battleCmd(); } else if(BT.phase==='target') targetPick(); else if(BT.phase==='skill'){ se('ok'); skillPick(); } else if(BT.phase==='item'){ se('ok'); itemPick(); } else if(BT.phase==='ally'){ allyPick(); } return; }
   if(MENU){ se('ok'); MENU.onPick(MENU.sel); return; }
   if(msgQ){ if(msgQ.length) msgEl.textContent=msgQ.shift(); else closeMsg(); return; }
   const fx=Math.sin(hero.ang), fz=Math.cos(hero.ang); let best=null,bd=1e9;
@@ -734,6 +734,7 @@ let walkT=0, last=performance.now(), lastDoor=-1, busyDoor=0, busyStuck=0;
 function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   if(BT){ let iy=dir[1], ix=dir[0]; if(keys.ArrowUp)iy=-1; if(keys.ArrowDown)iy=1; if(keys.ArrowLeft)ix=-1; if(keys.ArrowRight)ix=1; battleInput(iy,ix); battleTick(dt,now); requestAnimationFrame(tick); return; }
   let ix=dir[0], iz=dir[1]; if(keys.ArrowLeft)ix=-1; if(keys.ArrowRight)ix=1; if(keys.ArrowUp)iz=-1; if(keys.ArrowDown)iz=1;
+  if(mapOpen){ mapInput(ix,iz,dt); ix=0; iz=0; }   /* ★地図を 開いて いる 間は 主人公は 動かず、地図が 動く */
   if(MENU){ menuInput(iz); ix=0; iz=0; }
   if(ix||iz) bMoved=true;
   if(busyDoor && !fading && !anims.length){ busyStuck=(busyStuck||0)+dt; if(busyStuck>1.2){ busyDoor=0; busyStuck=0; } } else busyStuck=0;   /* ★念の ため：扉の 動きが 終わったのに 止まった ままなら 戻す */
@@ -1777,12 +1778,30 @@ function openEquipOld(){ const e=EQUIP.elt;
       const x=cands[j], old=e[slot]; e[slot]=x.g; BAG.gear.splice(x.i,1); if(old) BAG.gear.push(old); syncAtk(); closeMenu(); se('ok');
       say([x.g.name+'を 装備した。','攻撃力 '+STATS.elt.atk+'・守備力 '+STATS.elt.defT],openEquip); },()=>openEquip()); },()=>openFieldMenu()); }
 // ---- 地図（外の 世界の とき だけ）----
+// ★地図：前は 世界 全体を 画面の 幅に 縮めて いて、1ますが 3ドットほどで 見づらかった。
+//   主人公の まわりを 大きく 出し、十字で 動かせる。Aで 拡大 ⇔ 全体、Bで 閉じる。町や 城の 名前も 出す
+const MAP_NAMES=[[34.5,30.6,'ルーエ'],[13,21.4,'王都 アルディア'],[40,22.6,'国境の 砦'],[48.5,24.2,'ドルム'],[63,23.6,'峠の 山道'],[93,21.4,'帝都 ヴェルナ'],[74.5,21.2,'森の 遺跡']];
+let mapSt=null;
 function openMap(){ closeMenu(); if(cur.kind!=='world'){ say(['ここでは 地図を 広げられない。'],openFieldMenu); return; }
-  const mv=document.getElementById('mapview'); mv.style.display='flex'; mv.innerHTML=''; const c=document.createElement('canvas'); const img=WORLD_IMG||bakeWorld32();
-  c.width=img.width; c.height=img.height; const g=c.getContext('2d'); g.drawImage(img,0,0); g.fillStyle='#ff3030'; g.strokeStyle='#fff'; g.lineWidth=3;
-  g.beginPath(); g.arc(hero.x*32,hero.z*32,9,0,Math.PI*2); g.fill(); g.stroke(); mv.appendChild(c); const t=document.createElement('div'); t.textContent='赤い 印が いまの 場所（Aか Bで 閉じる）'; mv.appendChild(t); mapOpen=true; }
+  const mv=document.getElementById('mapview'); mv.style.display='flex'; mv.innerHTML=''; const c=document.createElement('canvas'); c.id='mapcv';
+  const r=mv.getBoundingClientRect(), w=Math.round(r.width*.94), h=Math.round(Math.min(r.height-60, w*1.25)); const dpr=Math.min(2,window.devicePixelRatio||1);
+  c.width=w*dpr; c.height=h*dpr; c.style.width=w+'px'; c.style.height=h+'px'; mv.appendChild(c);
+  const t=document.createElement('div'); t.textContent='十字で 動かす・Aで 全体 ⇔ 拡大・Bで 閉じる'; mv.appendChild(t);
+  mapSt={cx:hero.x, cz:hero.z, zoom:1, c}; mapOpen=true; drawMap(); }
+function drawMap(){ if(!mapSt) return; const c=mapSt.c, g=c.getContext('2d'), img=WORLD_IMG||bakeWorld32(); const MW=WORLD[0].length, MH=WORLD.length;
+  g.imageSmoothingEnabled=false; g.fillStyle='#000'; g.fillRect(0,0,c.width,c.height);
+  let tw = mapSt.zoom ? 26 : MW;  const s=c.width/tw; let th=c.height/s; if(!mapSt.zoom && th<MH){ th=MH; } const sc=mapSt.zoom? s : Math.min(c.width/MW, c.height/MH);
+  const vw=c.width/sc, vh=c.height/sc; mapSt.cx=Math.max(vw/2,Math.min(MW-vw/2,mapSt.cx)); mapSt.cz=Math.max(vh/2,Math.min(MH-vh/2,mapSt.cz)); if(vw>=MW) mapSt.cx=MW/2; if(vh>=MH) mapSt.cz=MH/2;
+  const x0=mapSt.cx-vw/2, z0=mapSt.cz-vh/2; g.drawImage(img, x0*32, z0*32, vw*32, vh*32, 0, 0, c.width, c.height);
+  const dpr=c.width/(parseFloat(c.style.width)||c.width), P=(x,z)=>[(x-x0)*sc,(z-z0)*sc], fs=Math.round((mapSt.zoom?14:10)*dpr);
+  g.font='bold '+fs+'px sans-serif'; g.textAlign='center'; g.textBaseline='bottom'; g.lineWidth=Math.max(3,fs*.28); g.lineJoin='round'; g.strokeStyle='rgba(10,8,18,.9)'; g.fillStyle='#fff6d8';
+  g.font='bold '+Math.round(Math.max(12*(c.width/ (c.clientWidth||c.width)), fs))+'px sans-serif'; g.textAlign='center'; g.textBaseline='bottom'; g.lineWidth=Math.max(3,fs*.25); g.strokeStyle='rgba(10,8,18,.9)'; g.fillStyle='#fff6d8';
+  MAP_NAMES.forEach(([x,z,n],i)=>{ let [px,py]=P(x,z); if(px<-50||py<-20||px>c.width+50||py>c.height+20) return; if(!mapSt.zoom){ n=n.replace(/^(王都|帝都) /,''); g.textBaseline=i%2?'top':'bottom'; py=i%2?py+2.2*sc:py; }   /* ★全体の ときは 名前を 短く、上下に 互い違い */
+    g.strokeText(n,px,py); g.fillText(n,px,py); });
+  const [hx,hz]=P(hero.x,hero.z), rr=Math.max(6,sc*(mapSt.zoom?.35:1.2)); g.fillStyle='#ff3030'; g.strokeStyle='#fff'; g.lineWidth=Math.max(2,rr*.35); g.beginPath(); g.arc(hx,hz,rr,0,Math.PI*2); g.fill(); g.stroke(); }
+function mapInput(ix,iz,dt){ if(!mapSt||!mapSt.zoom||(!ix&&!iz)) return; mapSt.cx+=ix*dt*14; mapSt.cz+=iz*dt*14; drawMap(); }
 let mapOpen=false;
-function closeMap(){ document.getElementById('mapview').style.display='none'; mapOpen=false; openFieldMenu(); }
+function closeMap(){ document.getElementById('mapview').style.display='none'; mapOpen=false; mapSt=null; openFieldMenu(); }
 // ---- 作戦（Ⅳと 同じ 4つ。仲間が 加わると 仲間の 動きに 効く）----
 const TACTICS={gungan:'ガンガン いこうぜ', balance:'バランス よく', inochi:'いのち だいじに', jumon:'じゅもん つかうな'};
 let tactic='balance';
