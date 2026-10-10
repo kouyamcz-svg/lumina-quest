@@ -726,6 +726,7 @@ function blockedAt(x,z){ const c=at(Math.floor(x),Math.floor(z)); if(cur.kind===
   if(cur.kind==='fort'){ if(!fortGateOpen() && x>12 && x<13 && z>3 && z<4) return true; }
   if(cur.kind==='town' && TL().fountain && Math.hypot(x-TL().fountain[0],z-TL().fountain[1])<1.62) return true;
   if(PROPS.some(p=>Math.hypot(p.x-x,p.z-z)<p.r)) return true;
+  if(cur.kind==='dun' && DUN_NOW==='pass' && !ST.passRocks && x>11.9 && x<14 && z>13.9 && z<16) return true;   /* ★落石の 岩 */
   if(cur.kind==='dun' && DUN_NOW==='ruins' && !ST.ruinsOpen && x>9 && x<10 && z<2.05 && z>0.5) return true;   /* ★光の 壁 */
   return cur.npcs.some(n=>Math.hypot(n.x-x,n.y-z)<(n.foe?1.0:0.55)); }
 function blockedCount(x,z){ const RAD = cur.kind==='world' ? 0.3 : RADT; let n=blockedAt(x,z)?3:0; for(const [ox,oz] of [[RAD,0],[-RAD,0],[0,RAD],[0,-RAD],[RAD*.7,RAD*.7],[-RAD*.7,RAD*.7],[RAD*.7,-RAD*.7],[-RAD*.7,-RAD*.7]]) if(blockedAt(x+ox,z+oz)) n++; return n; }
@@ -1270,9 +1271,9 @@ function actOf(m,act){ return ()=>{ if(m.hp<=0 || !alive().length) return 0;
   const a=act||autoAct(m); const al=alive();
   if(a.kind==='atk'){ const f=a.target&&!a.target.dead?a.target:al[Math.floor(Math.random()*al.length)]; BT.steps.unshift(hitFoe(m,f)); return 0; }
   if(a.kind==='guard'){ m.guard=true; bsay(m.name+'は 身を 守って いる。'); return .5; }
-  if(a.kind==='item'){ const it=a.it, t=a.t; if((it.id==='herb'&&BAG.herbs<=0)||(it.id==='antidote'&&BAG.antidote<=0)){ bsay(m.name+'は '+it.name+'を 使おうと したが、もう ない！'); return .7; }
-    const hp0=t.hp, st0=t.status, r= it.id==='herb'?useHerb(t):useAntidote(t), ok=t.hp!==hp0||t.status!==st0;
-    if(ok){ fxAt({idx:BT.party.indexOf(t)},'heal'); bsay((m===t?m.name+'は '+it.name+'を 使った。':m.name+'は '+t.name+'に '+it.name+'を 使った。')+' '+(it.id==='herb'?t.name+'の HPが '+(t.hp-hp0)+' 回復した！':t.name+'の 毒が 消えた！')); } else bsay(r.join(' '));
+  if(a.kind==='item'){ const it=a.it, t=a.t, def=ITEMS[it.id]; if(BAG[def.bag]<=0){ bsay(m.name+'は '+it.name+'を 使おうと したが、もう ない！'); return .7; }
+    const hp0=t.hp, mp0=t.mp, st0=t.status, r=def.use(t), ok=t.hp!==hp0||t.mp!==mp0||t.status!==st0;
+    if(ok){ fxAt({idx:BT.party.indexOf(t)},'heal'); bsay((m===t?m.name+'は '+it.name+'を 使った。':m.name+'は '+t.name+'に '+it.name+'を 使った。')+' '+t.name+'の '+r.slice(1).join(' ')); } else bsay(r.join(' '));
     drawBattleUI(); return .9; }
   const sk=a.sk; if(m.mp<sk.mp){ bsay(m.name+'は '+sk.name+'を 唱えようと したが、MPが 足りない！'); return .8; } m.mp-=sk.mp;
   if(sk.type==='atk1'){ const f=a.target&&!a.target.dead?a.target:al[0];
@@ -1306,7 +1307,7 @@ function battleCmd(){ const c=CMDS[BT.sel];
     commit({kind:'atk',target:alive()[0]}); return; }
   if(c==='呪文'){ const sks=skillsOf(PARTY[BT.cur||0]).filter(s=>s.battle); if(!sks.length){ bsay(curM().name+'は まだ 呪文を 覚えて いない。'); return; } BT.phase='skill'; BT.ssel=0; BT.sks=sks; skDesc(); drawBattleUI(); return; }
   if(c==='ぼうぎょ'){ commit({kind:'guard'}); return; }
-  if(c==='どうぐ'){ const its=[]; if(BAG.herbs>0) its.push({id:'herb',name:'薬草',n:BAG.herbs}); if(BAG.antidote>0) its.push({id:'antidote',name:'どくけし草',n:BAG.antidote}); if(!its.length){ BT.phase='menu'; bsay('使える 道具を もって いない。'); drawBattleUI(); return; }
+  if(c==='どうぐ'){ const its=Object.entries(ITEMS).filter(([id,it])=>BAG[it.bag]>0).map(([id,it])=>({id,name:it.name,n:BAG[it.bag]})); if(!its.length){ BT.phase='menu'; bsay('使える 道具を もって いない。'); drawBattleUI(); return; }
     BT.items=its; BT.isel=0; BT.phase='item'; bsay('どの 道具を 使う？'); drawBattleUI(); return; }   /* ★道具と 使う 相手を 選ぶ（前は エルトに 決まって いた） */
   BT.phase='act'; drawBattleUI();
   if(c==='にげる' && BT.foes.some(f=>f.def.boss)){ queue([()=>{ bsay('逃げられない！'); return .8; }, ...enemyTurn()],0); return; }
@@ -1535,12 +1536,12 @@ function enterFarm(){ newG(); drops=[]; fireLight=null; doorPiv=[]; roomDoor=nul
   hero.x=12; hero.z=FARM.length-1.6; hero.ang=Math.PI; resetTrail(); wWalk=0; wEnc=6+Math.random()*6;
   document.getElementById('place').textContent='村の 北の 畑'; }
 function examine(){   // 向いて いる 先の 物を 調べる（宝箱・畑の 倉・砦の 灯り）
-  if(ruinExamine()) return true;
+  if(ruinExamine()||passExamine()) return true;
   if(cur.kind==='fort'){ const l=lampAt(hero.x,hero.z); if(l){ const k=l.join(','); if(ST.lamps[k]){ say(['灯りは ともって いる。']); return true; } ST.lamps[k]=1; se('ok');
       const both=fortGateOpen(); /* ★灯りは 壁に 取りつけ（通路を ふさがない） */ say(['古い 灯りに 火を ともした。'].concat(both?['どこかで 鉄格子の 上がる 音が した。']:['もう ひとつ、どこかに 灯りが ある ようだ。']),()=>{ const px=hero.x, pz=hero.z; enterFort(false); hero.x=px; hero.z=pz; resetTrail(); }); return true; }
     if(!fortGateOpen() && Math.hypot(hero.x-12.5,hero.z-3.5)<1.3){ say(['鉄格子が 下りて いる。','両脇に 灯りの 台の 跡が ある。……どこかの 灯りと つながって いるのか']); return true; } }
   for(const c of (CHESTS[chestKey()]||[])){ if(Math.hypot(c.x-hero.x,c.z-hero.z)<1.1){ if(BAG.opened[c.id]){ say(['空っぽだ。']); return true; } BAG.opened[c.id]=1; se('chest');
-      const got=[]; if(c.gold){ BAG.gold+=c.gold; got.push(c.gold+'ゴールドを 手に 入れた！'); } if(c.herb){ BAG.herbs+=c.herb; got.push('薬草を '+c.herb+'つ 手に 入れた！'); } if(c.anti){ BAG.antidote+=c.anti; got.push('どくけし草を '+c.anti+'つ 手に 入れた！'); }
+      const got=[]; if(c.gold){ BAG.gold+=c.gold; got.push(c.gold+'ゴールドを 手に 入れた！'); } if(c.herb){ BAG.herbs+=c.herb; got.push('薬草を '+c.herb+'つ 手に 入れた！'); } if(c.anti){ BAG.antidote+=c.anti; got.push('どくけし草を '+c.anti+'つ 手に 入れた！'); } if(c.ether){ BAG.ether+=c.ether; got.push('魔法の 小びんを '+c.ether+'つ 手に 入れた！'); } if(c.kitsuke){ BAG.kitsuke+=c.kitsuke; got.push('気つけ草を '+c.kitsuke+'つ 手に 入れた！'); }
       if(c.gear){ BAG.gear.push(Object.assign({},c.gear)); got.push(c.gear.name+'を 手に 入れた！（メニューの 装備で 付けられる）'); }
       say(['宝箱を 開けた。'].concat(got)); chestMesh(chestKey()); return true; } }
   if(cur.kind==='farm' && Math.abs(hero.x-19)<1.4 && hero.z<8.9 && hero.z>8 && Math.cos(hero.ang)<-.5){
@@ -1657,7 +1658,7 @@ function showEnd(){ ST.phase='end'; const c=document.getElementById('card'); c.i
 // ================= メニュー（Ⅳの メニューの 作りを 写した もの）=================
 //  Bを 短く 押して 離すと 開く（押した まま 歩くと ダッシュ）。十字の 上下で 選び、Aで 決定、Bで 戻る
 //  強さ・技・道具・装備・クエスト・セーブ・とじる（Ⅳの 地図・作戦・入れ替え・音は まだ ない）
-const BAG={gold:30, herbs:1, antidote:0, gear:[], opened:{}, keys:[]};   // ★keys：だいじなもの          // ★道具：薬草（HPを 30 回復）とゴールド
+const BAG={gold:30, herbs:1, antidote:0, ether:0, kitsuke:0, gear:[], opened:{}, keys:[]};   // ★keys：だいじなもの          // ★道具：薬草（HPを 30 回復）とゴールド
 const EQUIP={elt:{weapon:{name:'見習いの 剣',kind:'weapon',v:6,price:20},armor:{name:'革の 胸当て',kind:'armor',v:4,price:20},helm:null}};   // ★兜の 枠（Ⅳと 同じ）
 let MENU=null;   // {title, items, sel, onPick, onBack}
 const menuEl=document.getElementById('fmenu');
@@ -1718,11 +1719,14 @@ function openFieldMenu(){ if(msgQ||BT||fading||/^(end|c1_end|c2_end)$/.test(ST.p
     else if(pick==='セーブ'){ closeMenu(); const ok=saveGame(); say([ok?'ぼうけんの きろくを つけた。':'きろくに しっぱいした…'],openFieldMenu); }
     else closeMenu(); }, ()=>closeMenu()); }
 function itemTo(fn){ if(PARTY.length<=1) return say(fn(STATS.elt),openItems); menu(PARTY.map(k=>{ const m=STATS[k]; return m.name+'　HP '+m.hp+'/'+m.max+(m.status?'　'+STNAME[m.status]:''); }).concat(['やめる']),'誰に 使う？',(i)=>{ closeMenu(); if(i>=PARTY.length) return openItems(); say(fn(STATS[PARTY[i]]),openItems); },()=>openItems()); }   /* ★道具を 仲間にも 使える */
-function openItems(){ const opts=[], act=[]; if(BAG.herbs>0){ opts.push('薬草　'+BAG.herbs); act.push(()=>itemTo(useHerb)); }
-  if(BAG.antidote>0){ opts.push('どくけし草　'+BAG.antidote); act.push(()=>itemTo(useAntidote)); }
+function openItems(){ const opts=[], act=[]; Object.entries(ITEMS).forEach(([id,it])=>{ if(BAG[it.bag]>0){ opts.push(it.name+'　'+BAG[it.bag]); act.push(()=>itemTo(it.use)); } });
   opts.push('だいじなもの'); act.push(()=>say(BAG.keys.length?BAG.keys.map(k=>'・'+k):['だいじなものは もって いない。'],openItems));
   opts.push('戻る'); act.push(()=>openFieldMenu());
   menu(opts,'道具',(k)=>{ closeMenu(); act[k](); }, ()=>openFieldMenu()); }
+// ★道具の 一覧（指示：薬草と どくけし草だけ だった）。魔法の 小びん＝MPを 20 回復、気つけ草＝眠りと 混乱を 治す
+const ITEMS={herb:{name:'薬草',bag:'herbs',use:m=>useHerb(m)}, antidote:{name:'どくけし草',bag:'antidote',use:m=>useAntidote(m)}, ether:{name:'魔法の 小びん',bag:'ether',use:m=>useEther(m)}, kitsuke:{name:'気つけ草',bag:'kitsuke',use:m=>useKitsuke(m)}};
+function useEther(m){ if(m.hp<=0) return [m.name+'は 倒れて いる。']; const mx=m.maxmp||0; if(!mx) return [m.name+'は 魔力を 持って いない。']; if(m.mp>=mx) return [m.name+'の MPは 減って いない。']; BAG.ether--; const h=Math.min(20,mx-m.mp); m.mp+=h; se('item'); return [m.name+'は 魔法の 小びんを 使った。','MPが '+h+' 回復した！']; }
+function useKitsuke(m){ if(m.hp<=0) return [m.name+'は 倒れて いる。']; if(m.status!=='sleep'&&m.status!=='conf') return [m.name+'は 眠っても 混乱しても いない。']; BAG.kitsuke--; const was=m.status; m.status=null; m.stTurns=0; se('item'); return [m.name+'は 気つけ草を 使った。',was==='sleep'?'目が 覚めた！':'正気に 戻った！']; }
 function useAntidote(m){ if(m.hp<=0) return [m.name+'は 倒れて いる。']; if(m.status!=='poison') return [m.name+'は 毒に かかって いない。']; BAG.antidote--; m.status=null; se('item'); return [m.name+'は どくけし草を 使った。','毒が 消えた！']; }
 function useHerb(m){ if(m.hp<=0) return [m.name+'は 倒れて いる。薬草では 起こせない。']; if(m.hp>=m.max) return [m.name+'の HPは 減って いない。']; BAG.herbs--; const h=Math.min(30,m.max-m.hp); m.hp+=h; se('item'); return [m.name+'は 薬草を 使った。','HPが '+h+' 回復した！']; }
 function menuInput(iy){ if(!MENU) return; if(iy!==0 && iy!==menuLastY){ se('cursor'); MENU.sel=(MENU.sel+(iy>0?1:-1)+MENU.items.length)%MENU.items.length; drawMenu(); } menuLastY=iy; }
@@ -1731,7 +1735,7 @@ let menuLastY=0;
 function saveGame(){ ST.tacticV2=1; try{ localStorage.setItem('lq5save', JSON.stringify({wv:2,ST,STATS,BAG,EQUIP,PARTY,RESERVE,tactic,SND,town:TOWN_NOW,castle:CASTLE_NOW,dun:DUN_NOW,at:{kind:cur.kind,x:hero.x,z:hero.z,room:cur.room}})); return true; }catch(e){ return false; } }
 function loadGame(){ try{ const d=JSON.parse(localStorage.getItem('lq5save')||'null'); if(!d) return false;
   Object.assign(ST,d.ST); Object.assign(STATS.elt,d.STATS.elt); Object.assign(BAG,d.BAG); Object.assign(EQUIP.elt,d.EQUIP.elt);
-  if(d.PARTY){ PARTY.length=0; d.PARTY.forEach(k=>PARTY.push(k)); PARTY.slice(1).forEach(k=>{ STATS[k]=d.STATS[k]; if(d.EQUIP[k]) EQUIP[k]=d.EQUIP[k]; }); }   /* ★仲間も 戻す */ RESERVE.length=0; (d.RESERVE||[]).forEach(k=>{ RESERVE.push(k); if(d.STATS[k]) STATS[k]=d.STATS[k]; if(d.EQUIP[k]) EQUIP[k]=d.EQUIP[k]; }); fixGear();   /* ★控えの 仲間も 残す・装備の 種類を 直す */ if(!BAG.gear) BAG.gear=[]; if(!BAG.opened) BAG.opened={}; if(!BAG.keys) BAG.keys=[]; if(BAG.antidote===undefined) BAG.antidote=0; if(!('helm' in EQUIP.elt)) EQUIP.elt.helm=null; if(!ST.q) ST.q={}; if(!ST.gotArmor && /^(c1_|c2_)/.test(ST.phase)){ ST.gotArmor=1; if(!BAG.gear.some(g=>g.name==='兵士の 鎧') && !Object.values(EQUIP).some(e=>e&&e.armor&&e.armor.name==='兵士の 鎧')) BAG.gear.push({name:'兵士の 鎧',kind:'armor',v:8,price:80}); }   /* ★前の セーブにも 兵士の 鎧を */ if(!ST.lamps) ST.lamps={}; if(d.tactic) tactic=d.tactic; if(!ST.tacticV2){ tactic='manual'; ST.tacticV2=1; }   /* ★前の セーブも 仲間を 操作できる 作戦に */ if(d.SND && !localStorage.getItem('lq5snd')){ const o=d.SND; SND={bgm: typeof o.bgm==='number'?o.bgm:(o.bgm===false?0:.6), se: typeof o.se==='number'?o.se:(o.se===false?0:.6), mix:!!o.mix, speed:o.speed||1}; } refreshFollowers();
+  if(d.PARTY){ PARTY.length=0; d.PARTY.forEach(k=>PARTY.push(k)); PARTY.slice(1).forEach(k=>{ STATS[k]=d.STATS[k]; if(d.EQUIP[k]) EQUIP[k]=d.EQUIP[k]; }); }   /* ★仲間も 戻す */ RESERVE.length=0; (d.RESERVE||[]).forEach(k=>{ RESERVE.push(k); if(d.STATS[k]) STATS[k]=d.STATS[k]; if(d.EQUIP[k]) EQUIP[k]=d.EQUIP[k]; }); fixGear();   /* ★控えの 仲間も 残す・装備の 種類を 直す */ if(!BAG.gear) BAG.gear=[]; if(!BAG.opened) BAG.opened={}; if(!BAG.keys) BAG.keys=[]; if(BAG.antidote===undefined) BAG.antidote=0; if(BAG.ether===undefined) BAG.ether=0; if(BAG.kitsuke===undefined) BAG.kitsuke=0; if(!('helm' in EQUIP.elt)) EQUIP.elt.helm=null; if(!ST.q) ST.q={}; if(!ST.gotArmor && /^(c1_|c2_)/.test(ST.phase)){ ST.gotArmor=1; if(!BAG.gear.some(g=>g.name==='兵士の 鎧') && !Object.values(EQUIP).some(e=>e&&e.armor&&e.armor.name==='兵士の 鎧')) BAG.gear.push({name:'兵士の 鎧',kind:'armor',v:8,price:80}); }   /* ★前の セーブにも 兵士の 鎧を */ if(!ST.lamps) ST.lamps={}; if(d.tactic) tactic=d.tactic; if(!ST.tacticV2){ tactic='manual'; ST.tacticV2=1; }   /* ★前の セーブも 仲間を 操作できる 作戦に */ if(d.SND && !localStorage.getItem('lq5snd')){ const o=d.SND; SND={bgm: typeof o.bgm==='number'?o.bgm:(o.bgm===false?0:.6), se: typeof o.se==='number'?o.se:(o.se===false?0:.6), mix:!!o.mix, speed:o.speed||1}; } refreshFollowers();
   if(STATS.elt.lv===undefined){ Object.assign(STATS.elt,{lv:1,exp:0,maxmp:6,batk:3,def:3,agi:6}); } syncAtk();
   const k=d.at.kind; if(k==='fort'){ enterFort(false); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='town' && d.town && d.town!=='rue'){ enterTown([d.at.x,d.at.z],d.town); } else if(k==='dun'){ enterDun(d.dun||'pass'); hero.x=d.at.x; hero.z=d.at.z; resetTrail(); } else if(k==='tower'){ enterTower(); } else if(k==='world'){ if(d.wv===2) enterWorld([d.at.x,d.at.z]); else enterWorld(PAST_FORT.test(ST.phase)?[41.6,25.5]:/^c1_/.test(ST.phase)?[37.5,24.5]:[34.5,32.45]); }   /* ★前の 地図の セーブは 近くの 場所へ */ else if(k==='farm'){ enterFarm(); hero.x=d.at.x; hero.z=d.at.z; } else if(k==='castle'){ enterCastle(d.castle); } else if(k==='room'){ const t=d.town||'rue'; TOWN_NOW=t; if(d.at.room==null) d.at.room=Math.max(0,TROOMS().findIndex(r=>/教会/.test(r.name))); const dr=(TOWNS[t].doors||[])[d.at.room]; enterTown(dr?[dr[0]+.5,dr[1]+1.0]:null,t); if(dr){ lastDoor=d.at.room; enterRoom(d.at.room); hero.x=d.at.x; hero.z=d.at.z; resetTrail(); } }   /* ★家の 中（教会）で セーブした ときは、その 町の その 家の 中から 再開（前は いつも ルーエに 戻った） */ else enterTown([d.at.x,d.at.z],d.town||'rue');
   return true; }catch(e){ return false; } }
@@ -1747,7 +1751,7 @@ function gainExp(n){ const out=[]; PARTY.forEach(k=>{ const m=STATS[k]; if(!m ||
 function syncAtk(){ PARTY.forEach(k=>{ const m=STATS[k], e=EQUIP[k]||{}; if(!m) return; m.atk=m.batk+(e.weapon?e.weapon.v:0); m.defT=m.def+(e.armor?e.armor.v:0)+(e.helm?e.helm.v:0); }); }
 // ---- お店（鍛冶屋＝武器と 防具、道具屋＝道具）----
 const SHOP={ smith:[{name:'銅の 剣',kind:'weapon',v:6,price:60},{name:'鉄の 剣',kind:'weapon',v:10,price:180},{name:'革の よろい',kind:'armor',v:6,price:70},{name:'くさりかたびら',kind:'armor',v:10,price:200},{name:'革の 帽子',kind:'helm',v:2,price:30},{name:'鉄の 兜',kind:'helm',v:5,price:130}],
-             tools:[{name:'薬草',kind:'herb',price:8},{name:'どくけし草',kind:'antidote',price:10}] };
+             tools:[{name:'薬草',kind:'herb',price:8},{name:'どくけし草',kind:'antidote',price:10},{name:'気つけ草',kind:'kitsuke',price:14},{name:'魔法の 小びん',kind:'ether',price:40}] };
 // ★町ごとの 品ぞろえ（前は どの 町も 同じで、今の 装備より 弱い 品も あった）。旅の 順に 強く なる
 SHOP.smith_rue=[{name:'銅の 剣',kind:'weapon',v:9,price:70},{name:'革の よろい',kind:'armor',v:7,price:70},{name:'革の 帽子',kind:'helm',v:2,price:30}];
 SHOP.smith_cap=[{name:'鉄の 剣',kind:'weapon',v:15,price:260},{name:'くさりかたびら',kind:'armor',v:11,price:220},{name:'鉄の 兜',kind:'helm',v:5,price:130},{name:'革の 帽子',kind:'helm',v:2,price:30}];
@@ -1766,7 +1770,7 @@ function openShop(which,greet){ const list=(which==='smith'&&SHOP['smith_'+TOWN_
       if(i>=list.length){ openShop(which,greet); return; } const it=list[i];
       if(BAG.gold<it.price){ closeMenu(); say(['お金が 足りない。'],()=>openShop(which,greet)); return; }
       BAG.gold-=it.price; const back=()=>openShop(which,greet); closeMenu(); se('buy');
-      if(it.kind==='herb'||it.kind==='antidote'){ if(it.kind==='herb') BAG.herbs++; else BAG.antidote++; say([it.name+'を 買った。'],back); return; }
+      const ik=Object.keys(ITEMS).find(id=>id===it.kind); if(ik){ BAG[ITEMS[ik].bag]++; say([it.name+'を 買った。'],back); return; }
       const g={name:it.name,kind:it.kind,v:it.v,price:it.price}; if(it.who) g.who=it.who; BAG.gear.push(g); say([it.name+'を 買った。'],()=>askWear(g,back)); },()=>openShop(which,greet)); eq(); }
     else if(k===1){ const sell=BAG.gear.map((g,i)=>({label:g.name+'　'+Math.floor(g.price/2)+'G',i,g})).filter(x=>x.g.price>0);   /* ★ガイルの 剣（形見）は 売れない */ if(BAG.herbs>0) sell.push({label:'薬草　4G',i:-1});
       if(!sell.length){ closeMenu(); say(['売れる ものが ない。'],()=>openShop(which,greet)); return; }
@@ -1800,10 +1804,11 @@ function openInn(){ const price=10; menu(['泊まる（'+price+'G）','やめる
 function gearKind(g){ if(!g||g.kind) return g; g.kind=/兜|帽子/.test(g.name)?'helm':/胸当て|よろい|鎧|ローブ|かたびら|装甲|服/.test(g.name)?'armor':'weapon'; return g; }
 function fixGear(){ (BAG.gear||[]).forEach(gearKind); Object.values(EQUIP).forEach(e=>{ if(e) ['weapon','armor','helm'].forEach(k=>gearKind(e[k])); }); }
 // ★誰が 付けられるか：剣と 斧と 重い 鎧と 兜は エルト・ドルガン、杖と ローブは リディア、帽子は 誰でも。ZFは 付け替えられない
-function canWear(k,g){ if(k==='zf') return false; if(g.who) return g.who.includes(k);
+const ZF_GEAR=/腕刃|腕の 刃|装甲|からくり/;
+function canWear(k,g){ if(g.who) return g.who.includes(k); if(ZF_GEAR.test(g.name)) return k==='zf'; if(k==='zf') return false;   /* ★ZFは からくり用の 部品だけ 付けられる */
   if(/杖/.test(g.name)) return k==='lidia'; if(/ローブ|服/.test(g.name)) return k==='lidia'||k==='elt'; if(/帽子/.test(g.name)) return true; return k==='elt'||k==='dolgan'; }
 function openEquip(){ const who=PARTY.filter(k=>k!=='zf'); if(PARTY.length<=1) return openEquipOf('elt');
-  menu(PARTY.map(k=>STATS[k].name).concat(['戻る']),'誰の 装備？',(i)=>{ if(i>=PARTY.length){ openFieldMenu(); return; } const k=PARTY[i]; if(k==='zf'){ closeMenu(); say(['ZFの 体は からくりで できて いる。装備は 付け替えられない。'],openEquip); return; } openEquipOf(k); },()=>openFieldMenu()); }
+  menu(PARTY.map(k=>STATS[k].name).concat(['戻る']),'誰の 装備？',(i)=>{ if(i>=PARTY.length){ openFieldMenu(); return; } const k=PARTY[i]; openEquipOf(k); },()=>openFieldMenu()); }
 function openEquipOf(ck){ fixGear(); if(!EQUIP[ck]) EQUIP[ck]={weapon:null,armor:null,helm:null}; const e=EQUIP[ck], m=STATS[ck], back=()=>PARTY.length>1?openEquip():openFieldMenu();
   const nv=it=>it?it.name+'（+'+it.v+'）':'なし'; menu(['武器：'+nv(e.weapon),'体　：'+nv(e.armor),'頭　：'+nv(e.helm),'戻る'],m.name+'（攻撃 '+m.atk+'・守り '+m.defT+'）',(k)=>{
     if(k>2){ back(); return; } const slot=['weapon','armor','helm'][k]; const cands=BAG.gear.map((g,i)=>({g,i})).filter(x=>x.g.kind===slot && canWear(ck,x.g));
@@ -1896,8 +1901,8 @@ const chestKey=()=>cur.kind==='town'?(TOWN_NOW==='rue'?'town':'none'):cur.kind==
 const CHESTS={town:[{x:20.5,z:17.5,gold:25,id:'c1'}], farm:[{x:2.5,z:12.5,herb:1,id:'c2'}],
   // ★ダンジョンの 宝箱（指示：少ない）。行き止まりに 置く
   fort:[{x:9.5,z:7.5,gear:{name:'砦の 兜',kind:'helm',v:4,price:120},id:'f1'}],
-  dun_pass:[{x:10.6,z:15.0,gear:{name:'はがねの 胸当て',kind:'armor',v:13,price:300},id:'p1'},{x:38.6,z:15.0,gold:150,id:'p2'},{x:46.6,z:2.6,herb:3,anti:1,id:'p3'}],
-  dun_ruins:[{x:7.5,z:1.5,gear:{name:'遺跡の 剣',kind:'weapon',v:22,price:520},id:'r1'},{x:11.5,z:1.5,gear:{name:'古代の 法衣',kind:'armor',v:11,price:420,who:['lidia','elt']},id:'r2'},{x:11.5,z:7.5,gold:240,id:'r3'},{x:15.5,z:10.5,herb:3,anti:2,id:'r4'}]};
+  dun_pass:[{x:10.6,z:15.0,gear:{name:'はがねの 胸当て',kind:'armor',v:13,price:300},id:'p1'},{x:38.5,z:15.4,gold:150,id:'p2'},{x:46.6,z:2.6,herb:3,anti:1,kitsuke:2,ether:1,id:'p3'}],
+  dun_ruins:[{x:7.5,z:1.5,gear:{name:'遺跡の 剣',kind:'weapon',v:22,price:520},id:'r1'},{x:11.5,z:1.5,gear:{name:'古代の 法衣',kind:'armor',v:11,price:420,who:['lidia','elt']},id:'r2'},{x:11.5,z:7.5,gold:240,id:'r3'},{x:15.5,z:10.5,herb:3,anti:2,ether:2,id:'r4'}]};
 
 // ================= 曲（Ⅳの 曲の ファイルを そのまま 使う。../lq4/ の mp3）=================
 //  村・家＝town、外の 世界・畑＝field、王都＝castle、燃える 村＝dungeon、戦闘＝battle_sky（Ⅳの 後半の 戦闘の 曲）、ボス＝boss
@@ -2055,7 +2060,7 @@ const PAST_FORT=/^(c1_(east|town|end)|c2_)/;
 const BASE={ lidia:{name:'リディア',hp:20,mp:10,batk:2,def:2,agi:6}, zf:{name:'ZF',hp:30,mp:12,batk:3,def:4,agi:3}, dolgan:{name:'ドルガン',hp:36,mp:3,batk:5,def:4,agi:4} };
 GROW.lidia={hp:4,mp:3,atk:1,def:1,agi:1}; GROW.zf={hp:5,mp:3,atk:2,def:2,agi:1}; GROW.dolgan={hp:7,mp:1,atk:3,def:2,agi:1};
 EQUIP.lidia={weapon:{name:'樫の 杖',v:4,price:40},armor:{name:'絹の ローブ',v:3,price:40},helm:null};
-EQUIP.zf={weapon:{name:'腕の 刃',v:8,price:0},armor:{name:'古代の 装甲',v:8,price:0},helm:null};
+EQUIP.zf={weapon:{name:'腕の 刃',kind:'weapon',v:8,price:0,who:['zf']},armor:{name:'古代の 装甲',kind:'armor',v:8,price:0,who:['zf']},helm:null};
 function joinParty(k,lv){ const b=BASE[k], g=GROW[k], n=lv-1;
   STATS[k]={name:b.name,lv,exp:0,max:b.hp+g.hp*n,hp:b.hp+g.hp*n,maxmp:b.mp+g.mp*n,mp:b.mp+g.mp*n,batk:b.batk+g.atk*n,def:b.def+g.def*n,agi:b.agi+g.agi*n};
   if(!EQUIP[k]) EQUIP[k]=k==='dolgan'?{weapon:{name:'鉱夫の 斧',kind:'weapon',v:9,price:60},armor:{name:'革の 胸当て',kind:'armor',v:4,price:20},helm:null}:{weapon:null,armor:null,helm:null};   /* ★装備の 枠が ない 仲間を 作らない */
@@ -2109,6 +2114,12 @@ const RUIN_ORDER=['3,11','2,2','16,2','15,11'];   // 南の 西 → 北の 西 �
 const RUIN_TALK={'7,5':['古い 機械に 文字が 浮かんだ。','「光は 南の 西で 生まれ、北の 西へ 昇る」','（古代の 民は、この 森で 魔力を 育てて いた らしい）'],
                  '11,5':['古い 機械に 文字が 浮かんだ。','「北の 東を めぐり、南の 東で 眠る」','（……動かす 順番の ことだろうか）']};
 function ruinOn(k){ return !!ST.ruinsOpen || (ST.ruinSeq||[]).includes(k); }
+function passExamine(){ if(cur.kind!=='dun'||DUN_NOW!=='pass') return false;
+  if(Math.hypot(hero.x-39.6,hero.z-14.2)<1.0){ if(ST.passRocks){ say(['古い 巻き上げ機だ。綱は もう 巻き上げて ある。']); return true; }
+    say(['古い 巻き上げ機だ。綱は 崖の 上を 西へ 伸びて いる。','エルトは 力を こめて ハンドルを 回した……','ゴロゴロ……！ 遠くで 大きな 岩の 転がる 音が した！'],()=>{ ST.passRocks=1; se('ok'); rebuildDun(); }); return true; }
+  if(Math.hypot(hero.x-44.5,hero.z-11.1)<1.0){ PARTY.forEach(k=>{ const m=STATS[k]; if(m.hp>0){ m.hp=m.max; m.mp=m.maxmp||m.mp; m.status=null; } }); se('item'); say(['澄んだ 山の 泉だ。','冷たい 水を 飲むと、体の 疲れが すっと 消えた。','（HPと MPが 回復した）']); return true; }
+  if(!ST.passRocks && hero.x>13.6 && hero.x<15.2 && hero.z>13.8 && hero.z<16.2){ say(['大きな 落石の 岩が 道を ふさいで いる。','……岩には 古い 綱が 巻きつけて ある。どこかで 引けば 動かせ そうだ。']); return true; }
+  return false; }
 function ruinExamine(){ if(cur.kind!=='dun'||DUN_NOW!=='ruins') return false; const R=DUNS.ruins.rows;
   for(let y=0;y<R.length;y++)for(let x=0;x<R[0].length;x++){ if(R[y][x]!=='M' || Math.hypot(x+.5-hero.x,y+.5-hero.z)>1.25) continue; const k=x+','+y;
     if(RUIN_TALK[k]){ say(RUIN_TALK[k]); return true; }
@@ -2139,6 +2150,12 @@ function buildDun(d){ S.background=new THREE.Color(d.bg); S.fog=new THREE.Fog(d.
     if(c==='W'||c==='E'||c==='S') add(box,L(null,0x2a1a10),x+.5,.02,y+.5,.9,.04,.9);
   }));
   const toWall=(x,z)=>{ const rows=DUNS[DUN_NOW].rows, cx=Math.floor(x), cz=Math.floor(z); for(const [a,b] of [[1,0],[-1,0],[0,-1],[0,1]]){ const c=rows[cz+b]&&rows[cz+b][cx+a]; if(c==='#'||c==='M') return [cx+.5+a*.42, cz+.5+b*.42]; } return null; };   /* ★小物は 壁ぎわへ（通路の 真ん中で すり抜けて 見えた） */
+  if(DUN_NOW==='pass'){   // ★峠の 仕掛け：落石の 岩（巻き上げ機で どける）と 山の 泉
+    if(!ST.passRocks) [[12.5,14.4,.62],[13.4,15.3,.7],[12.6,15.5,.5],[13.3,14.3,.48]].forEach(([x,z,r],i)=>{ const m=add(new THREE.DodecahedronGeometry(r,0),L(null,[0x8a7e6c,0x7a6e5c,0x9a8e78][i%3],{flatShading:true}),x,r*.8,z); m.rotation.set(i,i*2,i); });
+    const tw=L(null,0x6a4528), wx=39.6, wz=14.2; [-.3,.3].forEach(o=>add(box,tw,wx+o,.5,wz,.1,1.0,.1)); const dr=add(new THREE.CylinderGeometry(.18,.18,.62,10),L(null,0x8a6a3a),wx,.95,wz); dr.rotation.z=Math.PI/2; add(box,tw,wx+.45,.95,wz,.4,.06,.06);
+    add(new THREE.CylinderGeometry(.19,.19,.3,10),L(null,ST.passRocks?0x6a6050:0xc8b080),wx,.95,wz).rotation.z=Math.PI/2;   // 綱
+    const sx=44.5, sz=11.1; add(new THREE.CylinderGeometry(.62,.66,.08,14),L(T.water,0x9ad0ff,{emissive:0x10304a}),sx,.05,sz); for(let k=0;k<7;k++){ const a=k/7*6.283; add(new THREE.DodecahedronGeometry(.16,0),L(null,0x8a8278,{flatShading:true}),sx+Math.cos(a)*.7,.1,sz+Math.sin(a)*.6); }
+    const sl=new THREE.PointLight(0x9ad0ff,.6,3); sl.position.set(sx,.8,sz); G.add(sl); }
   if(DUN_NOW==='ruins' && !ST.ruinsOpen){ const bw=add(new THREE.PlaneGeometry(1,1.6),new THREE.MeshBasicMaterial({color:0xb080ff,transparent:true,opacity:.5,side:THREE.DoubleSide,depthWrite:false}),9.5,.8,2.02); bw.userData.barrier=1; [9.03,9.97].forEach(x=>add(box,L(null,0x8060c0,{emissive:0x402080}),x,.8,2.02,.06,1.6,.06)); const bl=new THREE.PointLight(0xb080ff,.7,3); bl.position.set(9.5,1,2.4); G.add(bl); }   /* ★奥の 部屋を ふさぐ 光の 壁 */
   if(DUN_NOW==='ruins'){ [[4.5,3.4],[13.5,9.4],[8.5,13.4]].forEach(([x,z])=>{ add(new THREE.CylinderGeometry(.42,.42,.06,14),L(null,0x3a2a1a),x,.02,z); const w=toWall(x,z); if(w) add(box,L(null,0x6a5040),w[0],.12,w[1],.3,.24,.2); });   // 掘り返した 跡
     [[2.5,1.5],[16.5,1.5],[9.5,7.5],[3.5,11.5],[15.5,11.5]].forEach(([x,z])=>{ const l=new THREE.PointLight(0x60ffe0,.7,6); l.position.set(x,1.4,z); G.add(l); }); }
@@ -2189,7 +2206,7 @@ const VCAP_ROOMS=[
  {name:'民家', rows:CAP_ROOMS[4].rows, npc:{x:2.5,y:4.4,spr:'child',name:'帝都の 子',lines:['子「お城の からくり、夜に なると 目が 光るんだ」']}},
  {name:'民家', rows:CAP_ROOMS[5].rows, npc:{x:6.5,y:2.5,spr:'elder',name:'帝都の 老人',lines:['老人「王さまは 昔、よく 町を 歩かれて おった」','老人「この 数年、お姿を 見た 者は おらん」']}},
 ];
-SHOP.smith2=[{name:'帝国の 剣',kind:'weapon',v:24,price:700},{name:'鋼の よろい',kind:'armor',v:19,price:560},{name:'帝国の 兜',kind:'helm',v:11,price:380},{name:'魔導士の 杖',kind:'weapon',v:10,price:320},{name:'精霊の ローブ',kind:'armor',v:9,price:340}];   /* ★杖と ローブは リディア用 */
+SHOP.smith2=[{name:'帝国の 剣',kind:'weapon',v:24,price:700},{name:'鋼の よろい',kind:'armor',v:19,price:560},{name:'帝国の 兜',kind:'helm',v:11,price:380},{name:'魔導士の 杖',kind:'weapon',v:10,price:320},{name:'精霊の ローブ',kind:'armor',v:9,price:340},{name:'鋼の 腕刃',kind:'weapon',v:15,price:480,who:['zf']},{name:'強化装甲',kind:'armor',v:14,price:500,who:['zf']},{name:'からくりの 目当て',kind:'helm',v:6,price:260,who:['zf']}];   /* ★杖と ローブは リディア用 */
 function vcapNpcs(){ return [
   {x:10.4,y:4.7,spr:'vsoldier',name:'城の 門番',byPhase:{c2_capital:['門番「アルディアの 使者か。……話は 聞いて いる。城へ 入れ」'],'*':['門番「ここは 帝都 ヴェルナの 城だ」']}},
   {x:13.6,y:4.7,spr:'vsoldier',name:'城の 門番',lines:['門番「……近ごろ 城の 中は 静かすぎる」']},
@@ -2227,12 +2244,24 @@ function velnaKing(){ const ph=ST.phase;
       'ヴェルナ王「アルディアの 兵士よ。国境の 村の こと……すまなかった」','ヴェルナ王「和平の 席を 設けよ。アルディアの 使者と、わたしが 直に 話す」','ヴェルナ王「……あの 者の 戻らぬ うちに」'],()=>showEnd2()); return; }
   say(['ヴェルナ王「…………」','うつろな 目は、どこも 見て いない。']); }
 // ---- 夜の 塔（王女）----
-const TOWER_ROOM={name:'城の 塔', rows:["WWWWWWWWW","W.f...b.W","W.......W","W...T...W","W.......W","Wp.....pW","WWWWXWWWW"]};
+// ★王女の 塔の 部屋（指示：道具屋と 同じ 並び だった）。広めの 石の 部屋に 天蓋の 寝台・月明かりの 窓・本棚・鏡台・暖炉
+const TOWER_ROOM={name:'城の 塔', rows:["WWWWWWWWWWW","Ws.f...bb.W","W.........W","Wp..cTc..sW","W.........W","Ws.......pW","W.........W","Wp.......pW","WWWWWXWWWWW"]};
+function towerDecor(){ const W_=TOWER_ROOM.rows[0].length, H_=TOWER_ROOM.rows.length;
+  const stone=L(T.stone,0x8a88a0); for(let x=0;x<W_;x++) add(box,stone,x+.5,1.65,.5,1,.1,1.02);   // 石の 縁
+  [2.5,5.5,8.5].forEach(x=>{ add(box,L(null,0x2a2440),x,1.2,.98,.8,1.0,.04); add(new THREE.PlaneGeometry(.6,.8),L(null,0x8aa8ff,{emissive:0x3a4a90}),x,1.2,1.01); add(box,L(null,0x2a2440),x,1.2,1.02,.05,.82,.02); add(box,L(null,0x2a2440),x,1.2,1.02,.62,.05,.02); add(new THREE.CircleGeometry(.3,12,0,Math.PI),L(null,0x8aa8ff,{emissive:0x3a4a90}),x,1.6,1.01); });   // 月明かりの 窓
+  const ml=new THREE.PointLight(0x9ab0ff,.9,6); ml.position.set(5.5,1.6,1.8); G.add(ml);
+  const moon=add(new THREE.PlaneGeometry(3.2,1.8),new THREE.MeshBasicMaterial({color:0x8aa8ff,transparent:true,opacity:.12,depthWrite:false}),5.5,.02,2.2); moon.rotation.x=-Math.PI/2;   // 床に 落ちる 月の 光
+  const bx=8.0, bz=1.5, gold=L(null,0xd8b040); [[-.95,-.4],[.95,-.4],[-.95,.45],[.95,.45]].forEach(([a,b])=>add(box,gold,bx+a,.9,bz+b,.06,1.8,.06)); add(box,L(null,0x7a3a8a,{side:THREE.DoubleSide}),bx,1.82,bz,2.0,.06,1.0); [-.95,.95].forEach(a=>add(box,L(null,0x9a5aaa),bx+a,1.4,bz,.04,.8,.9));   // 天蓋
+  add(box,L(null,0x5a3a22),2.5,.7,7.25,.7,.06,.4); add(box,L(null,0xc8d8ff,{emissive:0x202840}),2.5,1.15,7.4,.5,.6,.03); add(box,L(null,0xd8b040),2.5,1.15,7.42,.56,.66,.01);   // 鏡台
+  add(new THREE.CylinderGeometry(.08,.06,.2,8),L(null,0xd0d8e8),5.5,.75,3.5); [0,1,2].forEach(k=>add(new THREE.SphereGeometry(.06,6,4),L(null,[0xe8a0c0,0xf0e080,0xa0c0f0][k]),5.45+k*.05,.9,3.48+k*.02));   // 花びん
+  const rug=add(new THREE.CircleGeometry(1.5,24),L(null,0x6a2a5a),5.5,.015,4.6); rug.rotation.x=-Math.PI/2; const rg2=add(new THREE.RingGeometry(1.35,1.45,24),L(null,0xd8b040),5.5,.02,4.6); rg2.rotation.x=-Math.PI/2;   // 丸い じゅうたん
+  [[1.3,4.5],[9.7,4.5]].forEach(([x,z])=>{ add(box,L(null,0x3a3a44),x,1.3,z,.08,.3,.08); add(new THREE.ConeGeometry(.06,.14,6),L(null,0xffd080,{emissive:0xffa030}),x,1.5,z); const l=new THREE.PointLight(0xffc080,.5,3.5); l.position.set(x+(x<5?.4:-.4),1.5,z); G.add(l); });   // 燭台
+}
 function enterTower(){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); cv.style.display='block'; c2.style.display='none'; newG(); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildRoom(TOWER_ROOM);
-  S.background=new THREE.Color(0x0a0c1a); amb.intensity=.4; amb.color.setHex(0xa0b0ff);
+  S.background=new THREE.Color(0x0a0c1a); amb.intensity=.4; amb.color.setHex(0xa0b0ff); towerDecor();
   cur={kind:'tower', rows:TOWER_ROOM.rows, solid:new Set(['W','s','b','T','f','p']), npcs:cur.npcs, room:null};
-  setNpcs([{x:4.5,y:2.3,spr:'lidia',name:'王女 リディア',talk:()=>lidiaTalk()}].concat(ST.phase==='c2_tower'?[{x:6.5,y:4.6,spr:'maid',name:'侍女',lines:['侍女「見張りの からくりが 回って くるまで、少しの 間です」','侍女「どうか 王女さまの お話を」']}]:[]));
-  hero.x=4.5; hero.z=TOWER_ROOM.rows.length-2.3; hero.ang=Math.PI; resetTrail();
+  setNpcs([{x:5.5,y:2.4,spr:'lidia',name:'王女 リディア',talk:()=>lidiaTalk()}].concat(ST.phase==='c2_tower'?[{x:8.5,y:6.3,spr:'maid',name:'侍女',lines:['侍女「見張りの からくりが 回って くるまで、少しの 間です」','侍女「どうか 王女さまの お話を」']}]:[]));
+  hero.x=5.5; hero.z=TOWER_ROOM.rows.length-2.3; hero.ang=Math.PI; resetTrail();
   document.getElementById('place').textContent='帝都の 城の 塔（夜）'; resize(); }
 function lidiaTalk(){ if(ST.phase!=='c2_tower') return say(['リディア「行きましょう」']);
   say(['リディア「来て くれて ありがとう。わたしは リディア。この 国の 王女です」','リディア「謁見の 間で 見たでしょう。……父は、数年前から 人が 変わりました」','リディア「側近の セルヴィスの 言うことしか 聞かない。まるで 人形の ように」',
