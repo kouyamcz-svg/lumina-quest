@@ -40,6 +40,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 @keyframes hit{0%{transform:translateY(0)}30%{transform:translateY(5px)}60%{transform:translateY(-3px)}100%{transform:translateY(0)}}
 #bmenu{position:absolute;left:6px;bottom:84px;width:44%;border:2px solid var(--line);background:rgba(10,8,18,.92);border-radius:6px;padding:8px 10px;font-size:16px;line-height:1.9}
 #bmenu .on{color:var(--gold)}
+#bmenu.wide{width:auto;min-width:44%;max-width:calc(100% - 12px);white-space:nowrap;z-index:3}
 #bfoes{position:absolute;right:6px;bottom:84px;width:calc(56% - 40px);box-sizing:border-box;border:2px solid var(--line);background:rgba(10,8,18,.92);border-radius:6px;padding:8px 10px;font-size:15px;line-height:1.9;display:none}
 #bfoes .mt{font-size:12px;color:var(--dim);border-bottom:1px solid #4a4070;margin-bottom:2px}
 #bfoes .zz{font-size:11px;color:#c8a8ff;margin-left:4px}
@@ -1157,7 +1158,7 @@ function partyTurnActs(){ const steps=[]; BT.party.forEach((m,i)=>{ const a=BT.a
   steps.push(()=>{ if(!alive().length){ BT.steps=winSteps(); return 0; } BT.steps.push(...enemyTurn()); return 0; }); return steps; }
 function partyHtml(){ return BT.party.map((m,i)=>`<div class="pm${m.hp<=0?' down':''}${BT.hitIdx===i?' hit':''}${MANUAL()&&BT.party.length>1&&(BT.cur||0)===i&&/menu|target|skill|item|ally/.test(BT.phase)?' cur':''}"><b>${m.name}</b>${m.status?'<span class="st">'+STNAME[m.status]+'</span>':''}<br>HP ${m.hp}<br>MP ${m.mp}</div>`).join(''); }
 function skDesc(){ const k=BT.sks[BT.ssel]; bsay(k.desc||'どの 呪文を 唱える？'); }   /* ★呪文の 解説（指示）：選んで いる 呪文の 説明を 下の 欄に */
-function drawBattleUI(){ bparty.innerHTML=partyHtml(); drawFoeNames(); bmenu.style.display = (BT.phase==='menu'||BT.phase==='target'||BT.phase==='skill'||BT.phase==='item'||BT.phase==='ally') ? 'block':'none';
+function drawBattleUI(){ bparty.innerHTML=partyHtml(); bmenu.classList.toggle('wide', BT.phase==='ally'); drawFoeNames(); bmenu.style.display = (BT.phase==='menu'||BT.phase==='target'||BT.phase==='skill'||BT.phase==='item'||BT.phase==='ally') ? 'block':'none';
   // ★ねらう 魔物は 名前の 一覧から 選ぶ（前は 魔物の 頭の 上に ▼ を 出して いた）
   bmark.style.display = BT.phase==='target' ? 'block':'none';   // ★▼は 一覧で 選んで いる 魔物の 頭の 上（一覧と 連動）
   if(BT.phase==='target'){ const al=alive(); bmenu.innerHTML='<div class="mt">ねらう 魔物</div>'+al.map(f=>{ const on=BT.foes.indexOf(f)===BT.tsel; return `<div class="${on?'on':''}">${on?'▶':'　'}${f.name}</div>`; }).join(''); }
@@ -1167,7 +1168,7 @@ function drawBattleUI(){ bparty.innerHTML=partyHtml(); drawFoeNames(); bmenu.sty
   else bmenu.innerHTML=CMDS.map((c,i)=>`<div class="${i===BT.sel?'on':''}">${i===BT.sel?'▶':'　'}${c}</div>`).join(''); }
 function bsay(t){ bmsg.textContent=t; }
 // ★相手の 魔物の 名前（指示：戦闘中に 名前が わからない）。コマンドを 選ぶ 間、右に 生きて いる 魔物の 名前を 出す
-function drawFoeNames(){ const el=document.getElementById('bfoes'); const show=BT && BT.phase!=='target' && alive().length>0; el.style.display=show?'block':'none'; if(!show) return;
+function drawFoeNames(){ const el=document.getElementById('bfoes'); const show=BT && BT.phase!=='target' && BT.phase!=='ally' && alive().length>0; el.style.display=show?'block':'none'; if(!show) return;
   el.innerHTML='<div class="mt">魔物</div>'+alive().map(f=>`<div>${f.name}${f.status?'<span class="zz">'+STNAME[f.status]+'</span>':''}</div>`).join(''); }
 const alive=()=>BT.foes.filter(f=>!f.dead);
 // ★出る 数の 上限：仲間 1人＝2体、2人＝3体、3人 以上＝4体
