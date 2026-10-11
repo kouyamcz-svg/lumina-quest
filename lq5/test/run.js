@@ -202,6 +202,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('出口の 手前で 騎士団長と 戦闘', await E(()=>!!BT && BT.foes[0].def.key==='general'));
   await winBattle(); await flush(); await W(400); await flush();
   T('騎士団長は 見逃して 去り、第3章 完', await E(()=>ST.phase==='c3_end' && !cur.npcs.some(n=>n.spr==='general') && /王殺しの 使者/.test(document.getElementById('card').textContent) && document.getElementById('card').style.opacity==='1'));
+  T('章の 終わりで 自動セーブ・再開すると 札が 出る', await E(()=>{ const d=JSON.parse(localStorage.getItem('lq5save')||'{}'); const ok1=d.ST && d.ST.phase==='c3_end'; const c=document.getElementById('card'); c.style.opacity=0; ST.phase='c3_exit'; loadGame(); return ok1 && ST.phase==='c3_end' && c.style.opacity==='1' && /王殺しの 使者/.test(c.textContent); }));
   await E(()=>{ document.getElementById('card').style.opacity=0; ST.phase='c2_dolm'; ST.fortDrop=0; ST.mineOpen=0; ST.kounushi=0; });
   T('固い 魔物：武器は 0か 1、呪文は 効かない。逃げると 経験値は 入らない', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); window._hd={...FOES.nousagi,key:'testhard',name:'試しの 固い 魔物',hard:true,flee:1,hp:6,exp:999,boss:false}; startBattle([window._hd]); }); for(let i=0;i<40 && !(await E(()=>BT&&BT.phase==='menu'));i++) await W(100);
     const r=await E(()=>{ const f=BT.foes[0], m=BT.party[0]; const lv=STATS.elt.lv, ex=STATS.elt.exp; let ok=true; for(let i=0;i<20;i++){ f.hp=6; f.popCrit=0; f.dead=false; hitFoe(m,f)(); if(6-f.hp>1 && !f.popCrit) ok=false; } BT.steps=[]; f.dead=false; f.ex=0; f.hp=6; return {ok,lv,ex}; });
