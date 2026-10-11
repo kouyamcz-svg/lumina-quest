@@ -207,6 +207,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     return r.ok && await E((r)=>!BT && STATS.elt.exp===r.ex && STATS.elt.lv===r.lv && !(ST.kill||{}).testhard, r); })());
   T('戦闘で 回復の 呪文を 誰に 唱えるか 選べる', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); tactic='manual'; ['lidia','zf'].forEach(k=>{ if(!PARTY.includes(k)) joinParty(k,15); }); STATS.elt.mp=50; startBattle([FOES.nousagi]); }); for(let i=0;i<40 && !(await E(()=>BT&&BT.phase==='menu'));i++) await W(100);
     const r=await E(()=>{ BT.sel=1; pressA(); const ph1=BT.phase; BT.ssel=BT.sks.findIndex(s=>s.type==='heal'); pressA(); const ph2=BT.phase, txt=bmenu.textContent; BT.asel=2; pressA(); const a=BT.acts[0]; const ok=ph1==='skill' && ph2==='ally' && /を 誰に/.test(txt) && a && a.kind==='skill' && a.ally===BT.party[2]; endBattle(); return ok; }); return r; })());
+  T('外の 世界の 戦闘の 背景：草原は 草原、山の そば・荒れ地は 岩場', await E(()=>{ if(BT) endBattle(); ST.phase='c2_road'; enterWorld([56.5,36.5]); const a=sceneLook(); enterWorld([41.5,30.5]); const b=sceneLook(); enterWorld([78.5,42.5]); const c=sceneLook(); enterWorld([20.5,30.5]); const d=sceneLook(); return a==='field' && b==='rock' && c==='rock' && d==='field'; }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });

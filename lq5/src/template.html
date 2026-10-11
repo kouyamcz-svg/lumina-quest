@@ -1037,7 +1037,9 @@ const BG_LOOK={
   burn:{grp:'burn', bg:0x1e0c10, fog:[0x2a1210,10,40], hemi:[0xff9a70,0x2a1010,.5], sun:[0xff7040,.35], sky:false},
 };
 function sceneLook(){ if(cur.kind==='fort') return 'fort'; if(cur.kind==='dun') return DUNS[DUN_NOW].look; if(cur.kind==='town' && ST.phase==='burn') return 'burn';
-  if(cur.kind==='world'){ if(hero.x>40) return 'rock'; if(ST.phase==='road') return 'night'; } return 'field'; }
+  if(cur.kind==='world'){ if(ST.phase==='road') return 'night';   /* ★外の 世界は 立って いる 所の まわりで 決める（前は 国境より 東なら いつも 岩場で、草原でも 地面の 背景だった） */
+    const hx=Math.floor(hero.x), hz=Math.floor(hero.z); let rock=0, n=0; for(let dz=-2;dz<=2;dz++) for(let dx=-2;dx<=2;dx++){ const c=WORLD[hz+dz]&&WORLD[hz+dz][hx+dx]; if(!c) continue; n++; if(c==='^'||c==='d'||c==='Q'||c==='G') rock++; }
+    if(WORLD[hz]&&WORLD[hz][hx]==='d') return 'rock'; return rock>=5 ? 'rock' : 'field'; } return 'field'; }
 function applyLook(k){ const L_=BG_LOOK[k]||BG_LOOK.field; ['field','nightX','rock','fort','burn'].forEach(n=>{ if(BG[n]) BG[n].visible = (n===L_.grp || n===L_.extra); });
   if(BG.sky) BG.sky.visible=L_.sky;
   if(BG.field) BG.field.children.forEach(o=>{ if(o!==BG.sky && o.material && o.material.fog===false && o.material.transparent) o.visible=L_.sky; });   /* ★雲は 昼だけ */ batScene.background=new THREE.Color(L_.bg); batScene.fog=new THREE.Fog(L_.fog[0],L_.fog[1],L_.fog[2]);
