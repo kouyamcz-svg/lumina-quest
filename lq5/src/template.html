@@ -2213,6 +2213,7 @@ function dunExits(iz,ix){ if(cur.kind!=='dun') return; const R=cur.rows, cx=Math
   if(DUN_NOW==='pass'){ if(c==='W' && ix<0) go(()=>enterWorld([61.4,25.5])); if(c==='E' && ix>0 && ST.phase==='c2_pass'){ if(!msgQ && !BT && !fading) sekishoFight(); hero.x-=.4; } else if(c==='E' && ix>0) go(()=>{   /* ★関所荒らしを 倒すまで 抜けられない（広い 道で 横を すり抜けられた） */ if(ST.phase==='c2_pass') ST.phase='c2_road'; enterWorld([64.6,25.5]); }); }
   if(DUN_NOW==='ruins' && c==='S' && iz>0) go(()=>enterWorld([74.5,23.5]));
   if(DUN_NOW==='mine' && c==='S' && iz>0) go(()=>{ enterTown([12,3.4],'velna'); const [sx,sz]=safeSpot(hero.x,hero.z); hero.x=sx; hero.z=sz; hero.ang=0; resetTrail(); });
+  if(DUN_NOW==='mine' && ST.phase==='c3_mine' && !ST.kounushi && Math.hypot(hero.x-7.5,hero.z-2.5)<1.7 && !msgQ && !BT && !CUT && !fading) kounushiFight();   /* ★近づくと 坑道の 主 */
   if(DUN_NOW==='mine' && ST.phase==='c3_exit' && ST.mineOpen && hero.z<3.2 && !msgQ && !BT && !CUT && !fading) generalFight(); }   /* ★坑道の 北の 出口の 手前で 騎士団長 */
 // ---- 中ボス：関所荒らし ----
 FOES.sekisho={key:'sekisho', name:'関所荒らし', scale:1.35, hp:260, exp:400, gold:160, atk:[10,15], wind:'は 両腕を 振り上げた！', verb:'岩の 拳', boss:true,
@@ -2319,7 +2320,12 @@ FOES.torokko={key:'torokko', name:'ボロトロッコ', atkOff:.077, hp:70, exp:
 FOES.kagekofu={key:'kagekofu', name:'カゲコウフ', float:true, atkOff:.124, inflict:{type:'conf',rate:.2}, hp:64, exp:92, gold:26, atk:[10,15], wind:'の 兜の 灯りが 青く 揺れた！', verb:'影の つるはし', frames:{idle:RAB.kk_idle,wind:RAB.kk_wind,atk:RAB.kk_atk}};
 FOES.general={key:'general', name:'ヴェルナの 騎士団長', scale:1.3, atkOff:.24, hp:980, exp:1600, gold:500, atk:[14,21], wind:'は 斧槍を 大きく 振りかぶった！', verb:'斧槍の 一撃', boss:true,
   bigWind:'は 斧槍を 頭上で 回しはじめた！ 青白い 旋風が 巻き起こる！', bigName:'旋風斬', frames:{idle:RAB.gn_idle,idle2:RAB.gn_idle2,wind:RAB.gn_wind,atk:RAB.gn_atk,big:RAB.gn_big}};
-ENC.pursuit=[['tsuite',2],['tetsukui',1],['yamabiko',1]]; ENC.mine=[['tsuruhashi',1],['torokko',1],['kagekofu',1]];
+FOES.gincoro={key:'gincoro', name:'ギンコロ', scale:.5, hard:true, flee:.45, atkOff:-.056, hp:6, exp:1500, gold:30, atk:[4,7], wind:'は 体を 丸めて 水晶を 逆立てた！', verb:'体当たり', frames:{idle:RAB.gc_idle,wind:RAB.gc_wind,atk:RAB.gc_atk}};   /* ★経験値の 多い 魔物：固くて すぐ 逃げる */
+FOES.kounushi={key:'kounushi', name:'坑道の 主', scale:1.35, hp:620, exp:3200, gold:260, atk:[13,19], wind:'は 両方の 爪を 振り上げた！', verb:'爪の 一撃', boss:true,
+  bigWind:'の 鼻の ドリルが うなりを 上げて 回りだした！', bigName:'岩盤くだき', frames:{idle:RAB.kn_idle,idle2:RAB.kn_idle2,wind:RAB.kn_wind,atk:RAB.kn_atk,big:RAB.kn_big}};
+ENC.pursuit=[['tsuite',4],['tetsukui',2],['yamabiko',2],['gincoro',1]]; ENC.mine=[['tsuruhashi',3],['torokko',3],['kagekofu',3],['gincoro',1]];
+function kounushiFight(){ if(ST.kounushi||BT) return; CUT=1; say(['坑道を ふさぐ ように、巨大な 魔物が うずくまって いる。','背中の 鉱石が、ぼうっと 光った……','リディア「この 奥に、誰か いる 気配が する」','ZF「……来ルゾ」'],()=>startBattle(FOES.kounushi,()=>{ ST.kounushi=1; const n=cur.npcs.find(n=>n.foe==='kounushi'); if(n) removeNpc(n); CUT=0;
+  say(['坑道の 主は 地響きを 立てて 倒れ、動かなく なった。','奥から 男の 声が した。「……おい、誰か いるのか？」']); })); }
 // ---- ドルムの 坑道（3Dの ダンジョン）。X＝崩れた 岩（ドルガンが 割る）、N＝北の 出口 ----
 DUNS.mine={name:'ドルムの 坑道', rows:[
 "###########N###########",
@@ -2419,7 +2425,8 @@ function mineDecor(){ const wood=L(null,0x6a4a2a), dark=L(null,0x4a3018), R=DUNS
   if(!ST.mineOpen) [[11.3,3.3,.42],[11.7,3.6,.38],[11.4,3.75,.3],[11.6,3.2,.3]].forEach(([x,z,r],i)=>{ const m=add(new THREE.DodecahedronGeometry(r,0),L(null,[0x7a6a58,0x6a5a48,0x8a7a64][i%3],{flatShading:true}),x,r*.8,z); m.rotation.set(i,i*2,i); });
   // 北の 出口の 光
   const ol=new THREE.PointLight(0xd8e8ff,.9,4); ol.position.set(11.5,1.2,.8); G.add(ol); }
-function mineNpcs(){ const L_=[]; if(ST.phase==='c3_mine' && !PARTY.includes('dolgan')) L_.push({x:DOLGAN_AT[0],y:DOLGAN_AT[1],spr:'dolgan',name:'傭兵の 男',talk:()=>dolganTalk()});
+function mineNpcs(){ const L_=[]; if(ST.phase==='c3_mine' && !ST.kounushi) L_.push({x:7.5,y:2.5,spr:null,foe:'kounushi',name:'坑道の 主',talk:()=>kounushiFight()});   /* ★中ボス：ドルガンの いる 奥への 道を ふさぐ */
+  if(ST.phase==='c3_mine' && !PARTY.includes('dolgan')) L_.push({x:DOLGAN_AT[0],y:DOLGAN_AT[1],spr:'dolgan',name:'傭兵の 男',talk:()=>dolganTalk()});
   if(ST.phase==='c3_exit' && ST.mineOpen) L_.push({x:11.5,y:1.6,spr:'general',name:'騎士団長',talk:()=>generalFight()}); return L_; }
 function mineExamine(){ if(cur.kind!=='dun'||DUN_NOW!=='mine') return false;
   if(!ST.mineOpen && Math.abs(hero.x-11.5)<1.2 && hero.z>3.6 && hero.z<5.2){ if(PARTY.includes('dolgan')){ mineBreak(); return true; } say(['崩れた 岩が 道を ふさいで いる。','……すきまから 冷たい 風が 吹いて くる。この 先は 外に つながって いる らしい。']); return true; }
@@ -2427,7 +2434,7 @@ function mineExamine(){ if(cur.kind!=='dun'||DUN_NOW!=='mine') return false;
 function mineBreak(){ CUT=1; say(['ドルガン「どいてな」','ドルガンが 斧を 振り下ろすと、岩は 音を 立てて 崩れた！'],()=>{ ST.mineOpen=1; se('hit'); rebuildDun(); setNpcs(mineNpcs()); CUT=0; say(['北の 出口から、外の 光が さしこんで くる。']); }); }
 function dolganTalk(){ if(ST.phase!=='c3_mine') return; CUT=1;
   say(['たき火の そばに、大きな 斧を 抱えた 男が 座って いた。','男「……誰だ。帝国の 犬か」','リディア「わたしは リディア。この 国の 王女です」','男「王女さま、だと？ ……それに アルディアの 兵と、からくり か」','男「国境の 砦で 王が 殺されたって 話は、坑夫から 聞いた。アルディアの 使者の しわざ だってな」','リディア「ちがう。父を 刺したのは セルヴィスよ」','男「…………」',
-    '男「俺は ドルガン。傭兵だ。……いや、だった」','ドルガン「数年前、俺は セルヴィスに 雇われた。屋敷の 番を する 仕事だ」','ドルガン「ある 夜、見ちまったのさ。あいつが……人じゃ ない 姿に 変わるのを」','ドルガン「影の かたまりに 角が 生えた ような 何かだ。……次の 朝、俺は 逃げた。それから ずっと 追われてる」',
+    '男「俺は ドルガン。傭兵だ。……いや、だった」','ドルガン「あの 化け物の せいで、ひと月 ここから 出られなかった。……助かったぜ」','ドルガン「数年前、俺は セルヴィスに 雇われた。屋敷の 番を する 仕事だ」','ドルガン「ある 夜、見ちまったのさ。あいつが……人じゃ ない 姿に 変わるのを」','ドルガン「影の かたまりに 角が 生えた ような 何かだ。……次の 朝、俺は 逃げた。それから ずっと 追われてる」',
     'ZF「……ソノ 話、ワタシノ 見タ 魔力ト 合ウ」','ドルガン「信じるのか？ 誰も 信じなかった 話だぜ」','リディア「信じるわ。父も 最後に 言ったの。『あれは セルヴィスでは ない』と」','ドルガン「……へっ。なら 決まりだ。あいつの 化けの皮を はがす なら、俺の 斧を 貸して やる」','＊ ドルガンが 仲間に 加わった！ ＊'],()=>{
     const n=cur.npcs.find(n=>n.spr==='dolgan'); if(!EQUIP.dolgan) EQUIP.dolgan={weapon:{name:'傭兵の 戦斧',kind:'weapon',v:20,price:400},armor:{name:'傭兵の 鎖かたびら',kind:'armor',v:12,price:300},helm:null};
     joinParty('dolgan',Math.max(STATS.elt.lv,16)); if(n){ removeNpc(n); const f=followers.find(f=>f.p.k==='dolgan'); if(f){ f.x=n.x; f.z=n.y; f.ang=0; f.hold=true; } }

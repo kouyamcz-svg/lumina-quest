@@ -184,9 +184,14 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('ドルムの 長に 話すと 坑道へ 入れる', await E(()=>ST.phase==='c3_mine'));
   T('第3章の ドルムの 鍛冶屋は 隠し品（4人 それぞれ）を 売る', await E(()=>{ lastDoor=2; enterRoom(2); const n=cur.npcs.find(n=>/鍛冶屋/.test(n.name)); n.talk(n); while(msgQ) pressA(); const ok=!!MENU && SHOP.smith3.length===8 && ['elt','lidia','zf','dolgan'].every(k=>SHOP.smith3.some(g=>canWear(k,g))); if(MENU) closeMenu(); EQUIP_TALK=0; enterTown([11.5,15.5],'velna'); return ok; }));
   await E(()=>{ hero.x=12; hero.z=3.0; hero.ang=Math.PI; resetTrail(); }); await pg.keyboard.down('ArrowUp'); for(let i=0;i<30;i++){ await W(100); if(await E(()=>cur.kind==='dun')) break; } await pg.keyboard.up('ArrowUp'); await W(800);
-  T('ドルムの 坑道（3D）と 新しい 魔物', await E(()=>cur.kind==='dun' && DUN_NOW==='mine' && ENC.mine.length===3 && ['tsuruhashi','torokko','kagekofu'].every(k=>FOES[k].frames.atk.startsWith('data:image/png')) && cur.npcs.some(n=>n.spr==='dolgan')));
+  T('ドルムの 坑道（3D）と 新しい 魔物', await E(()=>cur.kind==='dun' && DUN_NOW==='mine' && ENC.mine.length===4 && ['tsuruhashi','torokko','kagekofu'].every(k=>FOES[k].frames.atk.startsWith('data:image/png')) && cur.npcs.some(n=>n.spr==='dolgan')));
   T('坑道の 宝箱は 3つ、どれも 入口から 行ける', await E(()=>{ const R=DUNS.mine.rows, seen=new Set(['11,16']), q=[[11,16]]; while(q.length){ const [x,y]=q.shift(); for(const [a,c] of [[1,0],[-1,0],[0,1],[0,-1]]){ const nx=x+a, ny=y+c; if(ny<0||ny>=R.length||nx<0||nx>=R[0].length||'#X'.includes(R[ny][nx])) continue; const k=nx+','+ny; if(!seen.has(k)){ seen.add(k); q.push([nx,ny]); } } } return CHESTS.dun_mine.length===3 && CHESTS.dun_mine.every(c=>seen.has(Math.floor(c.x)+','+Math.floor(c.z))) && !seen.has('11,2'); }));
   T('崩れた 岩は ドルガンが いないと 通れない', await E(()=>{ ST.mineOpen=0; hero.x=11.5; hero.z=4.5; hero.ang=Math.PI; examine(); const ok=blockedAt(11.5,3.5) && !!msgQ && /崩れた 岩/.test(msgEl.textContent); while(msgQ) closeMsg(); return ok; }));
+  T('坑道の 主（中ボス）が ドルガンへの 道を ふさぐ', await E(()=>cur.npcs.some(n=>n.foe==='kounushi') && FOES.kounushi.frames.big.startsWith('data:image/png')));
+  await E(()=>{ hero.x=7.5; hero.z=4.5; hero.ang=Math.PI; resetTrail(); }); await pg.keyboard.down('ArrowUp'); for(let i=0;i<20;i++){ await W(100); if(await E(()=>!!msgQ)) break; } await pg.keyboard.up('ArrowUp'); await flush();
+  T('近づくと 坑道の 主と 戦闘', await E(()=>!!BT && BT.foes[0].def.key==='kounushi')); await winBattle(); await flush();
+  T('坑道の 主を 倒すと 道が 開く', await E(()=>ST.kounushi===1 && !cur.npcs.some(n=>n.foe) && !CUT));
+  T('ギンコロ：固くて 逃げる、坑道と 追っ手の 出る 所に いる', await E(()=>FOES.gincoro.hard && FOES.gincoro.flee>0 && FOES.gincoro.frames.atk.startsWith('data:image/png') && ENC.mine.some(([k])=>k==='gincoro') && ENC.pursuit.some(([k])=>k==='gincoro')));
   await E(()=>{ hero.x=5.5; hero.z=3.5; hero.ang=-Math.PI/2; resetTrail(); }); await W(300); await talk('傭兵'); await flush();
   T('坑道の 奥で ドルガンが 加わる', await E(()=>ST.phase==='c3_exit' && PARTY.includes('dolgan') && !cur.npcs.some(n=>n.spr==='dolgan') && EQUIP.dolgan.weapon.name==='傭兵の 戦斧'));
   await E(()=>{ hero.x=11.5; hero.z=4.5; hero.ang=Math.PI; resetTrail(); examine(); }); await W(200); await flush();
@@ -195,7 +200,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('出口の 手前で 騎士団長と 戦闘', await E(()=>!!BT && BT.foes[0].def.key==='general'));
   await winBattle(); await flush(); await W(400); await flush();
   T('騎士団長は 見逃して 去り、第3章 完', await E(()=>ST.phase==='c3_end' && !cur.npcs.some(n=>n.spr==='general') && /王殺しの 使者/.test(document.getElementById('card').textContent) && document.getElementById('card').style.opacity==='1'));
-  await E(()=>{ document.getElementById('card').style.opacity=0; ST.phase='c2_dolm'; ST.fortDrop=0; ST.mineOpen=0; });
+  await E(()=>{ document.getElementById('card').style.opacity=0; ST.phase='c2_dolm'; ST.fortDrop=0; ST.mineOpen=0; ST.kounushi=0; });
   T('固い 魔物：武器は 0か 1、呪文は 効かない。逃げると 経験値は 入らない', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); window._hd={...FOES.nousagi,key:'testhard',name:'試しの 固い 魔物',hard:true,flee:1,hp:6,exp:999,boss:false}; startBattle([window._hd]); }); for(let i=0;i<40 && !(await E(()=>BT&&BT.phase==='menu'));i++) await W(100);
     const r=await E(()=>{ const f=BT.foes[0], m=BT.party[0]; const lv=STATS.elt.lv, ex=STATS.elt.exp; let ok=true; for(let i=0;i<20;i++){ f.hp=6; f.popCrit=0; f.dead=false; hitFoe(m,f)(); if(6-f.hp>1 && !f.popCrit) ok=false; } BT.steps=[]; f.dead=false; f.ex=0; f.hp=6; return {ok,lv,ex}; });
     await E(()=>{ BT.steps=enemyTurn(); }); for(let i=0;i<60;i++){ await W(100); if(await E(()=>!BT)) break; }
