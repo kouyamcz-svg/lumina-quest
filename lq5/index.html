@@ -203,7 +203,8 @@ const DOLM_ROOMS=[
  {name:'宿屋', rows:["WWWWWWWWW","Wb.bfb.sW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"],
   npc:{x:2.5,y:2.4,spr:'girl',name:'宿の 娘',talk:()=>say(['娘「鉱山の 宿へ ようこそ。すすで 汚れた 服は 外で はたいてね」'],openInn)}},
  {name:'鍛冶屋', rows:["WWWWWWWWW","Wf..s..sW","W.......W","W.T...T.W","W.......W","Ws......W","WWWWXWWWW"],
-  npc:{x:2.5,y:2.5,spr:'smith',name:'鍛冶屋の 親方',talk:()=>{ EQUIP_TALK=1; drawEquipPanel(); say(['親方「掘りたての ドルムの 鉄で 打った 品だ。……いい 鉄は みんな 帝都へ 持って いかれるがな」'],()=>{ EQUIP_TALK=0; openShop('smith','鍛冶屋（所持金 '+BAG.gold+'G）'); }); }}},
+  npc:{x:2.5,y:2.5,spr:'smith',name:'鍛冶屋の 親方',talk:()=>{ EQUIP_TALK=1; drawEquipPanel(); if(/^c3_(flee|mine|exit|end)$/.test(ST.phase)){ const first=!ST.smith3Seen; ST.smith3Seen=1; say(first?['親方「……王女さま。話は 聞いた」','親方「これは 帝都へ 納める はずだった 品だ。ドルムの いちばん いい 鉄で 打った」','親方「どうせ 帝都に 取られるなら、王女さまの 役に 立てて くれ」']:['親方「奥の 品も 持って いきな。帝都の 連中には 内緒だぜ」'],()=>{ EQUIP_TALK=0; openShop('smith3','鍛冶屋（所持金 '+BAG.gold+'G）'); }); return; }   /* ★第3章：帝都に 入れない 間は、帝都へ 納める はずだった 品を 売る */
+    say(['親方「掘りたての ドルムの 鉄で 打った 品だ。……いい 鉄は みんな 帝都へ 持って いかれるがな」'],()=>{ EQUIP_TALK=0; openShop('smith','鍛冶屋（所持金 '+BAG.gold+'G）'); }); }}},
  {name:'教会', rows:["WWWWWWWWW","W...A...W","W.......W","WQQ...QQW","W.......W","WQQ...QQW","WWWWXWWWW"],
   npc:{x:4.5,y:2.3,spr:'priest',name:'神父',talk:()=>openChurch()}},
  {name:'道具屋', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.TTT...W","W.......W","Wp.....pW","WWWWXWWWW"],
@@ -1758,6 +1759,7 @@ const SHOP={ smith:[{name:'銅の 剣',kind:'weapon',v:6,price:60},{name:'鉄の
 // ★町ごとの 品ぞろえ（前は どの 町も 同じで、今の 装備より 弱い 品も あった）。旅の 順に 強く なる
 SHOP.smith_rue=[{name:'銅の 剣',kind:'weapon',v:9,price:70},{name:'革の よろい',kind:'armor',v:7,price:70},{name:'革の 帽子',kind:'helm',v:2,price:30}];
 SHOP.smith_cap=[{name:'鉄の 剣',kind:'weapon',v:15,price:260},{name:'くさりかたびら',kind:'armor',v:11,price:220},{name:'鉄の 兜',kind:'helm',v:5,price:130},{name:'革の 帽子',kind:'helm',v:2,price:30}];
+SHOP.smith3=[{name:'ドルム鋼の 剣',kind:'weapon',v:28,price:880},{name:'ドルム鋼の 大斧',kind:'weapon',v:30,price:920,who:['dolgan']},{name:'ドルム鋼の よろい',kind:'armor',v:22,price:760},{name:'ドルム鋼の 兜',kind:'helm',v:14,price:520},{name:'月長石の 杖',kind:'weapon',v:14,price:560},{name:'坑夫織りの ローブ',kind:'armor',v:12,price:520},{name:'ドルム鋼の 腕刃',kind:'weapon',v:20,price:700,who:['zf']},{name:'鉱石の 装甲',kind:'armor',v:18,price:720,who:['zf']}];   /* ★第3章の ドルムの 隠し品（帝都の 店より 少し 強い。4人 それぞれに） */
 SHOP.smith_velna=[{name:'鋼の 剣',kind:'weapon',v:19,price:430},{name:'鉄の よろい',kind:'armor',v:15,price:400},{name:'鋼の 兜',kind:'helm',v:8,price:260},{name:'鉱夫の 帽子',kind:'helm',v:4,price:90}];
 // ★買った 装備を その場で 付ける（指示）。付けられる 仲間と、付けた ときの 数字の 変わり方を 出す
 function askWear(g,back){ const slot=g.kind, lab=slot==='weapon'?'攻撃':'守り', who=PARTY.filter(k=>canWear(k,g));
@@ -1767,7 +1769,7 @@ function askWear(g,back){ const slot=g.kind, lab=slot==='weapon'?'攻撃':'守�
     const k=who[i]; if(!EQUIP[k]) EQUIP[k]={weapon:null,armor:null,helm:null}; const e=EQUIP[k], old=e[slot]; const bi=BAG.gear.indexOf(g); if(bi>=0) BAG.gear.splice(bi,1); e[slot]=g; if(old) BAG.gear.push(old); syncAtk(); se('ok');
     say([STATS[k].name+'は '+g.name+'を 装備した。'+(old?'（'+old.name+'は ふくろへ）':''),lab+' '+val(k)],back); },()=>{ closeMenu(); say([g.name+'を ふくろに しまった。'],back); });
   MENU.equip=1; drawMenu(); }
-function openShop(which,greet){ const list=(which==='smith'&&SHOP['smith_'+TOWN_NOW])||SHOP[which]; const eq=()=>{ if((which==='smith'||which==='smith2')&&MENU){ MENU.equip=1; drawMenu(); } };   /* ★鍛冶屋では 下に いまの 装備 */
+function openShop(which,greet){ const list=(which==='smith'&&SHOP['smith_'+TOWN_NOW])||SHOP[which]; const eq=()=>{ if((which==='smith'||which==='smith2'||which==='smith3')&&MENU){ MENU.equip=1; drawMenu(); } };   /* ★鍛冶屋では 下に いまの 装備 */
   menu(['買う','売る','やめる'],greet||'お店',(k)=>{
     if(k===0){ menu(list.map(it=>it.name+(it.v?'（+'+it.v+'）':'')+'　'+it.price+'G').concat(['戻る']),'買う（所持金 '+BAG.gold+'G）',(i)=>{
       if(i>=list.length){ openShop(which,greet); return; } const it=list[i];
