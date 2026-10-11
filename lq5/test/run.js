@@ -163,6 +163,38 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('ドルムの 教会で セーブ → 再開も ドルムの 教会', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); ST.phase='c2_dolm'; enterTown([11.5,15.5],'velna'); lastDoor=3; enterRoom(3); hero.x=4.5; hero.z=4.5; saveGame(); enterTown([12,6],'rue'); }); await pg.reload({waitUntil:'load'}); await W(1800);
     for(let i=0;i<40 && !(await E(()=>typeof MENU!=='undefined'));i++) await W(100); await W(600); await E(()=>{ if(MENU) closeMenu(); loadGame(); }); await W(800);
     return await E(()=>TOWN_NOW==='velna' && cur.kind==='room' && TROOMS()[cur.room].name==='教会'); })());
+  // ---- 第3章「王殺しの 使者」 ----
+  T('砦の 作り：入口から 灯り2つと 格子の 前へ。格子が 閉じて いると 広間に 入れない', await E(()=>{ if(BT) endBattle(); while(msgQ) closeMsg(); ST.lamps={}; ST.fortDrop=0; ST.phase='c1_fort'; enterFort(false); const R=FORT, seen=new Set(['5,11']), q=[[5,11]]; while(q.length){ const [x,y]=q.shift(); for(const [a,c] of [[1,0],[-1,0],[0,1],[0,-1]]){ const nx=x+a, ny=y+c; if(ny<0||ny>=R.length||nx<0||nx>=R[0].length||R[ny][nx]==='#') continue; if(nx===11&&ny===5&&!fortGateOpen()) continue; const k=nx+','+ny; if(!seen.has(k)){ seen.add(k); q.push([nx,ny]); } } }
+    return seen.has('1,9') && seen.has('5,1') && seen.has('10,5') && !seen.has('15,5') && blockedAt(11.5,5.5) && cur.npcs.some(n=>n.spr==='banpei'); }));
+  T('前の セーブで 砦の 中に いた ときは 入口へ', await E(()=>{ ST.phase='c1_fort'; localStorage.setItem('lq5save',JSON.stringify({wv:2,ST,STATS,BAG,EQUIP,PARTY,RESERVE,tactic,SND,town:TOWN_NOW,castle:CASTLE_NOW,dun:DUN_NOW,at:{kind:'fort',x:13.5,z:3.4}})); loadGame(); return cur.kind==='fort' && Math.abs(hero.x-5.5)<.01 && freeCircle(hero.x,hero.z); }));
+  await flush();
+  await E(()=>{ if(BT) endBattle(); STATS.elt.hp=STATS.elt.max=400; ['lidia','zf'].forEach(k=>{ if(!PARTY.includes(k)) joinParty(k,15); }); ST.fortDrop=0; showEnd2(); });
+  await E(()=>pressA()); await W(1300); await flush(); await W(300); await flush();
+  T('第2章の 札で Aを 押すと 第3章（帝都の 城で 席の 命令 → ハーヴェンが 同行）', await E(()=>ST.phase==='c3_road' && cur.kind==='castle' && followers.some(f=>f.p.k==='haven') && cur.npcs.some(n=>n.name==='近衛兵')));
+  await E(()=>enterWorld([41.6,25.5])); await W(700); await pg.keyboard.down('ArrowLeft'); for(let i=0;i<30;i++){ await W(100); if(await E(()=>cur.kind==='fort')) break; } await pg.keyboard.up('ArrowLeft'); await W(1200);
+  T('砦の 広間で 和平の 席（王・セルヴィス・騎士団長・ハーヴェン）', await E(()=>ST.phase==='c3_seat' && ['ヴェルナ王','側近 セルヴィス','騎士団長','使者 ハーヴェン'].every(nm=>cur.npcs.some(n=>n.name===nm)) && !followers.some(f=>f.p.k==='haven')));
+  for(let i=0;i<300;i++){ if(await E(()=>!!BT)) break; if(await E(()=>!!msgQ)) await E(()=>pressA()); await W(60); }
+  T('王殺し → ハーヴェンは 西へ → 格子が 落ちる → 追っ手と 戦闘', await E(()=>!!BT && BT.foes.length===3 && BT.foes.every(f=>f.def.key==='tsuite') && ST.fortDrop===1 && !fortGateOpen() && !cur.npcs.some(n=>n.name==='使者 ハーヴェン') && cur.npcs.find(n=>n.name==='ヴェルナ王').p.down===true));
+  await winBattle(); await flush(); await W(700); await flush();
+  T('追っ手を 退けて 東へ 逃げる（c3_flee）', await E(()=>ST.phase==='c3_flee' && cur.kind==='world' && hero.x>41 && !CUT));
+  T('逃げた 後は 砦に 近づけない', await (async()=>{ await E(()=>{ hero.x=41.6; hero.z=25.5; resetTrail(); }); await pg.keyboard.down('ArrowLeft'); await W(900); await pg.keyboard.up('ArrowLeft'); const ok=await E(()=>cur.kind==='world' && !!msgQ && /固められて/.test(msgEl.textContent)); await flush(); return ok; })());
+  T('王殺しの 後は 帝都に 入れない', await (async()=>{ await E(()=>{ enterWorld([92.5,26.6]); }); await W(300); await pg.keyboard.down('ArrowUp'); await W(900); await pg.keyboard.up('ArrowUp'); const ok=await E(()=>cur.kind==='world' && /閉ざされて/.test(msgEl.textContent)); await flush(); return ok; })());
+  T('外の 世界（ヴェルナ側）に 追っ手が 出る', await E(()=>ENC.pursuit.some(([k])=>k==='tsuite') && FOES.tsuite.frames.idle.startsWith('data:image/png')));
+  await E(()=>enterTown([11.5,15.5],'velna')); await W(500); await talk('町の 長'); await flush();
+  T('ドルムの 長に 話すと 坑道へ 入れる', await E(()=>ST.phase==='c3_mine'));
+  await E(()=>{ hero.x=12; hero.z=3.0; hero.ang=Math.PI; resetTrail(); }); await pg.keyboard.down('ArrowUp'); for(let i=0;i<30;i++){ await W(100); if(await E(()=>cur.kind==='dun')) break; } await pg.keyboard.up('ArrowUp'); await W(800);
+  T('ドルムの 坑道（3D）と 新しい 魔物', await E(()=>cur.kind==='dun' && DUN_NOW==='mine' && ENC.mine.length===3 && ['tsuruhashi','torokko','kagekofu'].every(k=>FOES[k].frames.atk.startsWith('data:image/png')) && cur.npcs.some(n=>n.spr==='dolgan')));
+  T('坑道の 宝箱は 3つ、どれも 入口から 行ける', await E(()=>{ const R=DUNS.mine.rows, seen=new Set(['11,16']), q=[[11,16]]; while(q.length){ const [x,y]=q.shift(); for(const [a,c] of [[1,0],[-1,0],[0,1],[0,-1]]){ const nx=x+a, ny=y+c; if(ny<0||ny>=R.length||nx<0||nx>=R[0].length||'#X'.includes(R[ny][nx])) continue; const k=nx+','+ny; if(!seen.has(k)){ seen.add(k); q.push([nx,ny]); } } } return CHESTS.dun_mine.length===3 && CHESTS.dun_mine.every(c=>seen.has(Math.floor(c.x)+','+Math.floor(c.z))) && !seen.has('11,2'); }));
+  T('崩れた 岩は ドルガンが いないと 通れない', await E(()=>{ ST.mineOpen=0; hero.x=11.5; hero.z=4.5; hero.ang=Math.PI; examine(); const ok=blockedAt(11.5,3.5) && !!msgQ && /崩れた 岩/.test(msgEl.textContent); while(msgQ) closeMsg(); return ok; }));
+  await E(()=>{ hero.x=5.5; hero.z=3.5; hero.ang=-Math.PI/2; resetTrail(); }); await W(300); await talk('傭兵'); await flush();
+  T('坑道の 奥で ドルガンが 加わる', await E(()=>ST.phase==='c3_exit' && PARTY.includes('dolgan') && !cur.npcs.some(n=>n.spr==='dolgan') && EQUIP.dolgan.weapon.name==='傭兵の 戦斧'));
+  await E(()=>{ hero.x=11.5; hero.z=4.5; hero.ang=Math.PI; resetTrail(); examine(); }); await W(200); await flush();
+  T('ドルガンが 岩を 割ると 北の 出口へ 行ける', await E(()=>ST.mineOpen===1 && !blockedAt(11.5,3.5) && cur.npcs.some(n=>n.spr==='general')));
+  await pg.keyboard.down('ArrowUp'); for(let i=0;i<20;i++){ await W(100); if(await E(()=>!!msgQ)) break; } await pg.keyboard.up('ArrowUp'); await flush();
+  T('出口の 手前で 騎士団長と 戦闘', await E(()=>!!BT && BT.foes[0].def.key==='general'));
+  await winBattle(); await flush(); await W(400); await flush();
+  T('騎士団長は 見逃して 去り、第3章 完', await E(()=>ST.phase==='c3_end' && !cur.npcs.some(n=>n.spr==='general') && /王殺しの 使者/.test(document.getElementById('card').textContent) && document.getElementById('card').style.opacity==='1'));
+  await E(()=>{ document.getElementById('card').style.opacity=0; ST.phase='c2_dolm'; ST.fortDrop=0; ST.mineOpen=0; });
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
