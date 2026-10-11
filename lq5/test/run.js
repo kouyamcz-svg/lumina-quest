@@ -31,7 +31,8 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   await E(()=>enterTown([12,20.2],'cap')); T('夜に 王都の 城下町', await E(()=>TOWN_NOW==='cap'));
   await E(()=>enterCastle()); await talk('アルディア王'); await flush(); await W(300); T('序章 完', await E(()=>ST.phase==='end'));
   // ---- 第1章 ----
-  await E(()=>pressA()); await W(400); await flush(); T('第1章へ', await E(()=>ST.phase==='c1_castle'));
+  await E(()=>pressA()); await W(200); T('章の 札は しばらく Aで 消えない・「Ａで 第○章へ」の 文字は ない', await E(()=>ST.phase==='end' && !/Ａで/.test(document.getElementById('card').textContent)));
+  await E(()=>{ CARD_T=0; pressA(); }); await W(400); await flush(); T('第1章へ', await E(()=>ST.phase==='c1_castle'));
   await talk('アルディア王'); await flush(); T('使者と 書状', await E(()=>ST.phase==='c1_road'&&followers.length===1&&BAG.keys.includes('和平の 書状の 写し')));
   await E(()=>enterFort(false)); await W(800); await flush(); T('砦の 入口で 重ならない', await E(()=>freeCircle(hero.x,hero.z)));
   T('鉄格子は 閉じて いる', await E(()=>!fortGateOpen()));
@@ -78,7 +79,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('戦闘の 背景の 空の 色が 切り替わる', await E(()=>{ ST.phase='road'; enterWorld([30.5,25.5]); startBattle([FOES.yomiakari]); const c=batScene.background.getHex(); endBattle(); return c===0x0a1028; }));
   // ---- 第2章 ----
   await E(()=>{ if(BT) endBattle(); PARTY.length=1; STATS.elt.hp=STATS.elt.max; ST.phase='c1_town'; setEscort(true); enterTown([11.5,15.5],'velna'); showEnd1(); });
-  await E(()=>pressA()); await W(500); await flush(); T('第2章へ', await E(()=>ST.phase==='c2_dolm' && TOWN_NOW==='velna' && followers.length===1));
+  await E(()=>{ CARD_T=0; pressA(); }); await W(500); await flush(); T('第2章へ', await E(()=>ST.phase==='c2_dolm' && TOWN_NOW==='velna' && followers.length===1));
   await talk('迎えの 騎士'); await flush(); T('峠が 開く', await E(()=>ST.phase==='c2_pass' && WORLD[25][62]==='G'));
   await E(()=>enterWorld([60.5,25.5])); await W(800); await pg.keyboard.down('ArrowRight'); for(let i=0;i<30;i++){ await W(100); if(await E(()=>cur.kind==='dun')) break; } await pg.keyboard.up('ArrowRight'); await W(500);
   T('峠の 山道に 入る', await E(()=>cur.kind==='dun' && DUN_NOW==='pass' && freeCircle(hero.x,hero.z)));
@@ -169,7 +170,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('前の セーブで 砦の 中に いた ときは 入口へ', await E(()=>{ ST.phase='c1_fort'; localStorage.setItem('lq5save',JSON.stringify({wv:2,ST,STATS,BAG,EQUIP,PARTY,RESERVE,tactic,SND,town:TOWN_NOW,castle:CASTLE_NOW,dun:DUN_NOW,at:{kind:'fort',x:13.5,z:3.4}})); loadGame(); return cur.kind==='fort' && Math.abs(hero.x-5.5)<.01 && freeCircle(hero.x,hero.z); }));
   await flush();
   await E(()=>{ if(BT) endBattle(); STATS.elt.hp=STATS.elt.max=400; ['lidia','zf'].forEach(k=>{ if(!PARTY.includes(k)) joinParty(k,15); }); ST.fortDrop=0; showEnd2(); });
-  await E(()=>pressA()); await W(1300); await flush(); await W(300); await flush();
+  await E(()=>{ CARD_T=0; pressA(); }); await W(1300); await flush(); await W(300); await flush();
   T('第2章の 札で Aを 押すと 第3章（帝都の 城で 席の 命令 → ハーヴェンが 同行）', await E(()=>ST.phase==='c3_road' && cur.kind==='castle' && followers.some(f=>f.p.k==='haven') && cur.npcs.some(n=>n.name==='近衛兵')));
   await E(()=>enterWorld([41.6,25.5])); await W(700); await pg.keyboard.down('ArrowLeft'); for(let i=0;i<30;i++){ await W(100); if(await E(()=>cur.kind==='fort')) break; } await pg.keyboard.up('ArrowLeft'); await W(1200);
   T('砦の 広間で 和平の 席（王・セルヴィス・騎士団長・ハーヴェン）', await E(()=>ST.phase==='c3_seat' && ['ヴェルナ王','側近 セルヴィス','騎士団長','使者 ハーヴェン'].every(nm=>cur.npcs.some(n=>n.name===nm)) && !followers.some(f=>f.p.k==='haven')));
@@ -208,6 +209,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('戦闘で 回復の 呪文を 誰に 唱えるか 選べる', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); tactic='manual'; ['lidia','zf'].forEach(k=>{ if(!PARTY.includes(k)) joinParty(k,15); }); STATS.elt.mp=50; startBattle([FOES.nousagi]); }); for(let i=0;i<40 && !(await E(()=>BT&&BT.phase==='menu'));i++) await W(100);
     const r=await E(()=>{ BT.sel=1; pressA(); const ph1=BT.phase; BT.ssel=BT.sks.findIndex(s=>s.type==='heal'); pressA(); const ph2=BT.phase, txt=bmenu.textContent; BT.asel=2; pressA(); const a=BT.acts[0]; const ok=ph1==='skill' && ph2==='ally' && /を 誰に/.test(txt) && a && a.kind==='skill' && a.ally===BT.party[2]; endBattle(); return ok; }); return r; })());
   T('外の 世界の 戦闘の 背景：草原は 草原、山の そば・荒れ地は 岩場', await E(()=>{ if(BT) endBattle(); ST.phase='c2_road'; enterWorld([56.5,36.5]); const a=sceneLook(); enterWorld([41.5,30.5]); const b=sceneLook(); enterWorld([78.5,42.5]); const c=sceneLook(); enterWorld([20.5,30.5]); const d=sceneLook(); return a==='field' && b==='rock' && c==='rock' && d==='field'; }));
+  T('ZFの 全体攻撃の 呪文（フリジス Lv7・フリジアス Lv17・フリジオン Lv29）', await E(()=>{ const L=LEARN.zf; return ['frigis','frigias','frigion'].every(id=>SKILLS[id].type==='atkAll' && L.some(([,k])=>k===id) && FXS_DEF[id]) && L.find(([,k])=>k==='frigis')[0]===7; }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });

@@ -708,7 +708,9 @@ const msgEl=document.getElementById('msg'); let msgQ=null;
 let msgDone=null;
 function say(lines,done){msgQ=lines.slice();msgDone=done||null;msgEl.style.display='block';msgEl.textContent=msgQ.shift();}
 function closeMsg(){ msgQ=null; msgEl.style.display='none'; const d=msgDone; msgDone=null; d&&d(); }
-function pressA(){ if(ST.phase==='end'){ startCh1(); return; } if(ST.phase==='c1_end'){ startCh2(); return; } if(ST.phase==='c2_end'){ startCh3(); return; } if(ST.phase==='c3_end') return;
+let CARD_T=0;   // ★章の 札を 出した 時刻（しばらくは Aで 消えない）
+function pressA(){ if(/^(end|c1_end|c2_end)$/.test(ST.phase) && performance.now()-CARD_T<3000) return;
+  if(ST.phase==='end'){ startCh1(); return; } if(ST.phase==='c1_end'){ startCh2(); return; } if(ST.phase==='c2_end'){ startCh3(); return; } if(ST.phase==='c3_end') return;
   if(mapOpen){ se('cursor'); mapSt.zoom=mapSt.zoom?0:1; if(mapSt.zoom){ mapSt.cx=hero.x; mapSt.cz=hero.z; } drawMap(); return; } if(BT){ if(BT.phase==='menu'){ se('ok'); battleCmd(); } else if(BT.phase==='target') targetPick(); else if(BT.phase==='skill'){ se('ok'); skillPick(); } else if(BT.phase==='item'){ se('ok'); itemPick(); } else if(BT.phase==='ally'){ allyPick(); } return; }
   if(MENU){ se('ok'); MENU.onPick(MENU.sel); return; }
   if(msgQ){ if(msgQ.length) msgEl.textContent=msgQ.shift(); else closeMsg(); return; }
@@ -1221,6 +1223,9 @@ const SKILLS={
   thunder2:{name:'サンダリアス', desc:'敵1体に 強い 紫の 雷を 撃つ。', mp:11, type:'atk1', power:62, spell:true, battle:true},
   thunder3:{name:'サンダリオン', desc:'敵1体に 紫の 大雷を 撃つ。', mp:22, type:'atk1', power:120, spell:true, battle:true},
   hibiware:{name:'ブレイクス', desc:'敵1体の 守りを 下げ、攻撃が 通りやすく なる。', mp:3, type:'defdown', battle:true},
+  frigis:{name:'フリジス', desc:'凍える 風で 敵 全体を 包む。', mp:7, type:'atkAll', power:26, spell:true, battle:true},
+  frigias:{name:'フリジアス', desc:'吹雪で 敵 全体を 凍てつかせる。', mp:15, type:'atkAll', power:50, spell:true, battle:true},
+  frigion:{name:'フリジオン', desc:'氷の 嵐を 呼び、敵 全体を 凍らせる。', mp:28, type:'atkAll', power:92, spell:true, battle:true},
   shibire:{name:'ウィークン', desc:'敵1体の 力を 弱め、受ける 攻撃が 軽く なる。', mp:3, type:'atkdown', battle:true},
   nirengeki:{name:'ダブルファング', desc:'すばやく 2回 斬りつける。', mp:0, type:'double', hits:2, battle:true},
   nusumu:{name:'スティール', desc:'敵から 薬草を 盗む。失敗する ことも ある。', mp:0, type:'steal', battle:true},
@@ -1229,7 +1234,7 @@ const SKILLS={
   kaenkiri:{name:'火炎斬り', desc:'炎の 刃で 敵1体を 斬る。', mp:2, type:'atk1', mul:1.3, waza:true, battle:true},   // ★通常の 攻撃に 倍率（1.3倍）を かける 技（1.5倍・MP3は 強すぎる ため 下げた）
 };
 const LEARN={ elt:[[3,'michishirube'],[4,'tsuyogiri'],[6,'iyashi'],[12,'volt'],[14,'blaze2'],[24,'voltra'],[28,'blaze3']],
-  lidia:[[1,'kaifuku'],[1,'hono'],[4,'nemuri'],[10,'minnakaifuku'],[12,'flare2'],[26,'flare3']], zf:[[1,'raigeki'],[1,'hibiware'],[5,'shibire'],[11,'thunder2'],[25,'thunder3']], dolgan:[[1,'kabutowari'],[3,'nusumu'],[8,'kaenkiri'],[20,'daimajin'],[28,'nirengeki']] };   // ★ダブルファングは 中盤の Lv28（指示）。大魔神斬りは Lv20
+  lidia:[[1,'kaifuku'],[1,'hono'],[4,'nemuri'],[10,'minnakaifuku'],[12,'flare2'],[26,'flare3']], zf:[[1,'raigeki'],[1,'hibiware'],[5,'shibire'],[7,'frigis'],[11,'thunder2'],[17,'frigias'],[25,'thunder3'],[29,'frigion']], dolgan:[[1,'kabutowari'],[3,'nusumu'],[8,'kaenkiri'],[20,'daimajin'],[28,'nirengeki']] };   // ★ダブルファングは 中盤の Lv28（指示）。大魔神斬りは Lv20
 const skillsOf=(k)=>(LEARN[k]||[]).filter(([lv])=>(STATS[k].lv||1)>=lv).map(([,id])=>id).concat(STATS[k].extra||[]).map(id=>Object.assign({id},SKILLS[id]));   // ★extra：物語で 授かる 呪文（ヴォルトリオン）
 const STNAME={sleep:'眠り', conf:'混乱', poison:'毒'};
 function inflictOn(t,kind,who){ if(!kind || t.status) return ''; t.status=kind; t.stTurns=kind==='sleep'?2+Math.floor(Math.random()*2):3; return t.name+(kind==='sleep'?'は 眠って しまった！':kind==='conf'?'は 混乱した！':'は 毒に おかされた！'); }
@@ -1381,6 +1386,9 @@ const FXS_DEF={
   raigeki: {col:['#e0c8ff','#9a7aff'], n:14, spread:220, up:200, slash:'bolt'},              // 紫の 雷（サンダリス）
   thunder2:{col:['#f0e0ff','#9a7aff'], n:20, spread:280, up:260, slash:'bolt', ring:1},
   thunder3:{col:['#ffffff','#b89aff'], n:30, spread:360, up:360, slash:'bolt', ring:1, big:1},
+  frigis:  {col:['#e8f8ff','#7ac8ff'], n:14, spread:200, up:140, slash:'none'},              // 氷の 呪文（ZFの 全体）
+  frigias: {col:['#ffffff','#7ac8ff'], n:20, spread:260, up:200, slash:'none', ring:1},
+  frigion: {col:['#ffffff','#a8e2ff'], n:30, spread:340, up:300, slash:'none', ring:1, big:1},
   hono:    {col:['#ffb040','#ff5a20'], n:8,  spread:120, up:120, slash:'none', flame:12},     // 炎の 呪文（全体）
   flare2:  {col:['#ffd060','#ff4a10'], n:12, spread:160, up:160, slash:'none', flame:18},
   flare3:  {col:['#ffffff','#ff6a10'], n:18, spread:220, up:220, slash:'none', flame:26, ring:1},
@@ -1664,7 +1672,7 @@ function enterCastle(which){ CASTLE_NOW=which||'ardia'; [hero.p,...followers.map
   ].map(n=>({...n,ang:0,p:person(n.spr)})));
   hero.x=12.5; hero.z=CASTLE.length-1.6; hero.ang=Math.PI; resetTrail();
   document.getElementById('place').textContent='王都 アルディア城'; resize(); }
-function showEnd(){ ST.phase='end'; const c=document.getElementById('card'); c.innerHTML='<div>序章</div><div class="t">燃える国境</div><div>完</div><div style="font-size:13px;margin-top:20px">Ａで 第1章へ</div>'; c.style.opacity=1; }
+function showEnd(){ CARD_T=performance.now(); ST.phase='end'; const c=document.getElementById('card'); c.innerHTML='<div>序章</div><div class="t">燃える国境</div><div>完</div>'; c.style.opacity=1; }
 
 // ================= メニュー（Ⅳの メニューの 作りを 写した もの）=================
 //  Bを 短く 押して 離すと 開く（押した まま 歩くと ダッシュ）。十字の 上下で 選び、Aで 決定、Bで 戻る
@@ -2031,7 +2039,7 @@ function velnaNpcs(){ if(/^c3_/.test(ST.phase)) return c3DolmNpcs(); if(/^c2_/.t
   {x:9.5,y:14.5,spr:'child',name:'町の 子',lines:['子「アルディアの 人？　ぜんぜん こわく ないや」']},
   {x:14.5,y:4.6,spr:'smith',name:'鉱夫',talk:()=>say(['鉱夫「掘った 鉄は ぜんぶ 帝都に 取られる。剣に するんだとさ」','鉱夫「少しなら 鉄鉱石を 分けて やるよ」'],openTrade)},
 ]; }
-function showEnd1(){ ST.phase='c1_end'; const c=document.getElementById('card'); c.innerHTML='<div>第1章</div><div class="t">和平の 使者</div><div>完</div><div style="font-size:13px;margin-top:20px">Ａで 第2章へ</div>'; c.style.opacity=1; }
+function showEnd1(){ CARD_T=performance.now(); ST.phase='c1_end'; const c=document.getElementById('card'); c.innerHTML='<div>第1章</div><div class="t">和平の 使者</div><div>完</div>'; c.style.opacity=1; }
 
 // ================= Ⅳの 仕組みの 残り：入れ替え・頼みごと・交易・船・仕掛け・章ごとの 台詞 =================
 // ---- 入れ替え（控えの 仲間）----
@@ -2311,7 +2319,7 @@ function lidiaTalk(){ if(ST.phase!=='c2_tower') return say(['リディア「行�
     ()=>{ const ln=cur.npcs.find(n=>n.spr==='lidia'); joinParty('lidia',Math.max(STATS.elt.lv,10)); if(ln){ cur.npcs=cur.npcs.filter(n=>n!==ln); S.remove(ln.p.m); S.remove(ln.p.sh); const f=followers.find(f=>f.p.k==='lidia'); if(f){ f.x=ln.x; f.z=ln.y; f.ang=0; f.hold=true; } }   /* ★仲間に なった リディアが 2人 見えた。その場に 立ち、動き出すと ついて くる */ ST.phase='c2_ruins'; say(['からくりの 見張りが 向こうを 向いた すきに、2人は 城を 抜け出した。'],()=>go(()=>enterWorld([92.5,26.4]))); }); }
 function startCh2(){ const c=document.getElementById('card'); c.style.opacity=0; ST.phase='c2_dolm'; refreshFollowers(); enterTown([11.5,15.5],'velna');
   say(['── 第2章　操られた 王 ──','次の 朝。ドルムの 町に、帝国の 迎えが 着いた。']); }
-function showEnd2(){ ST.phase='c2_end'; const c=document.getElementById('card'); c.innerHTML='<div>第2章</div><div class="t">操られた 王</div><div>完</div>'; c.style.opacity=1; }
+function showEnd2(){ CARD_T=performance.now(); ST.phase='c2_end'; const c=document.getElementById('card'); c.innerHTML='<div>第2章</div><div class="t">操られた 王</div><div>完</div>'; c.style.opacity=1; }
 
 // ================= 第3章「王殺しの 使者」 =================
 //  c3_order（帝都の 城で 和平の 席の 命令）→ c3_road（ハーヴェンと 国境の 砦へ）→ c3_seat（砦の 広間で 和平の 席 → 王殺し → 格子 → 追っ手）
@@ -2447,7 +2455,7 @@ function generalFight(){ if(ST.phase!=='c3_exit'||BT) return; CUT=1; const gn=cu
     ()=>startBattle(FOES.general,()=>{ say(['騎士団長は 斧槍を 地に 突き、ひざを ついた。','騎士団長「……強い。アルディアの 兵士、名は」','エルト「……エルト」','騎士団長「エルト、か。……王女殿下」','騎士団長「わたしは あの 席で、確かに 見た。セルヴィスどのの 短剣に、血が ついて いなかったのを」',
       '騎士団長「だが 今は まだ、何も 言えぬ。帝国の 兵は みな、あの 方の 言葉で 動いて いる」','騎士団長「行かれよ。わたしは ここで 誰にも 会わなかった」','リディア「団長……」','騎士団長「いつか 殿下が 真実を 示される 日が 来たら……その 時は」','騎士団長は 背を 向け、坑道の 闇へ 去って いった。'],()=>{ removeNpc(cur.npcs.find(n=>n.spr==='general'));
       say(['ドルガン「……甘い 騎士だぜ。だが、助かった」','リディア「セルヴィスの 正体を 確かめる 手がかりが 欲しい」','ドルガン「それなら 心当たりが ある。セルヴィスの 屋敷だ」','ドルガン「俺が 逃げた あと、数年前に 焼け落ちた らしい。帝都の 北東の 森の 中だ」','ZF「焼ケタ 屋敷……何カガ 残ッテ イルカモ シレナイ」','リディア「行きましょう。……父の ために」'],()=>{ CUT=0; showEnd3(); }); }); })); }
-function showEnd3(){ ST.phase='c3_end'; const c=document.getElementById('card'); c.innerHTML='<div>第3章</div><div class="t">王殺しの 使者</div><div>完</div><div style="font-size:13px;margin-top:20px">── 第4章へ つづく ──</div>'; c.style.opacity=1; }
+function showEnd3(){ CARD_T=performance.now(); ST.phase='c3_end'; const c=document.getElementById('card'); c.innerHTML='<div>第3章</div><div class="t">王殺しの 使者</div><div>完</div><div style="font-size:13px;margin-top:20px">── 第4章へ つづく ──</div>'; c.style.opacity=1; }
 
 function resize(){ const v=document.getElementById('view'); const w=v.clientWidth,h=v.clientHeight; R.setSize(w,h,false); C.aspect=w/h; C.updateProjectionMatrix(); batCam.aspect=w/h; batCam.updateProjectionMatrix(); }
 addEventListener('resize',()=>{resize(); if(cur.kind==='world') resize2();}); resize();
