@@ -1703,7 +1703,7 @@ function fitMenu(){ const vw=menuEl.parentElement.clientWidth; menuEl.style.font
 function menu(items,title,onPick,onBack){ MENU={items,title,sel:0,onPick,onBack}; menuEl.classList.remove('wide'); drawMenu(); }
 // ★呪文の 一覧と 解説（指示）。選んで いる 呪文の 説明を 下に 出す。戦闘の 外で 使える 呪文は ここで 唱えられる
 // ★エスケイルの 行き先：入った 側の 入口（前は 砦でしか 使えず、行き先も 砦の 西 だけ）
-function escapeTo(){ if(cur.kind==='fort') return cur.fromEast?[41.6,25.5]:[37.5,24.5]; if(cur.kind==='dun') return DUN_NOW==='pass'?(cur.fromEnd?[64.6,25.5]:[61.4,25.5]):[74.5,23.5]; return null; }
+function escapeTo(){ if(cur.kind==='fort') return cur.fromEast?[41.6,25.5]:[37.5,24.5]; if(cur.kind==='dun'){ if(DUN_NOW==='mine') return {town:'velna',at:[12,3.4]}; return DUN_NOW==='pass'?(cur.fromEnd?[64.6,25.5]:[61.4,25.5]):[74.5,23.5]; } return null; }   /* ★坑道は ドルムの 町の 坑道の 入口の 前へ（前は 遺跡の 前に 出た） */
 function openSpells(ck){ const c=STATS[ck], sks=skillsOf(ck);
   menu(sks.map(k=>k.name+'　'+k.mp+(k.field?'':'（戦闘）')).concat(['戻る']),c.name+'の 呪文（MP '+c.mp+'）',(i)=>{ if(i>=sks.length){ openFieldMenu(); return; } const k=sks[i]; closeMenu();
     const back=()=>openSpells(ck);
@@ -1713,7 +1713,7 @@ function openSpells(ck){ const c=STATS[ck], sks=skillsOf(ck);
       if(PARTY.length===1) return cast(PARTY[0]);
       menu(PARTY.map(p=>STATS[p].name+'　HP '+STATS[p].hp+'/'+STATS[p].max).concat(['やめる']),'誰に？',(t)=>{ closeMenu(); if(t>=PARTY.length) return back(); const m=STATS[PARTY[t]]; if(m.hp<=0){ say([m.name+'は 倒れて いる。'],back); return; } if(m.hp>=m.max){ say([m.name+'の HPは 減って いない。'],back); return; } cast(PARTY[t]); },back); return; }
     if(k.type==='healAll'){ const al=PARTY.filter(p=>STATS[p].hp>0&&STATS[p].hp<STATS[p].max); if(!al.length){ say(['みんなの HPは 減って いない。'],back); return; } c.mp-=k.mp; al.forEach(p=>{ const m=STATS[p]; m.hp=Math.min(m.max,m.hp+k.amt); }); se('item'); say([c.name+'は '+k.name+'を 唱えた！','みんなの HPが 回復した！'],back); return; }
-    if(k.type==='escape'){ const to=escapeTo(); if(!to){ say(['ここでは 使えない。','（砦や 山道、遺跡の 中で 使う）'],back); return; } c.mp-=k.mp; se('ok'); say(['来た 道の 光が ひとつずつ ともり、入口へ 導かれた——'],()=>go(()=>enterWorld(to))); return; }
+    if(k.type==='escape'){ const to=escapeTo(); if(!to){ say(['ここでは 使えない。','（砦や 山道、遺跡の 中で 使う）'],back); return; } c.mp-=k.mp; se('ok'); say(['来た 道の 光が ひとつずつ ともり、入口へ 導かれた——'],()=>go(()=>{ if(to.town){ enterTown(to.at,to.town); const [sx,sz]=safeSpot(hero.x,hero.z); hero.x=sx; hero.z=sz; hero.ang=0; resetTrail(); } else enterWorld(to); })); return; }
   },()=>openFieldMenu());
   MENU.notes=sks.map(k=>k.desc||''); menuEl.classList.add('wide'); drawMenu(); }
 
