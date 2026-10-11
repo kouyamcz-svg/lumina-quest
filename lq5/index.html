@@ -2309,7 +2309,7 @@ function lidiaTalk(){ if(ST.phase!=='c2_tower') return say(['リディア「行�
     ()=>{ const ln=cur.npcs.find(n=>n.spr==='lidia'); joinParty('lidia',Math.max(STATS.elt.lv,10)); if(ln){ cur.npcs=cur.npcs.filter(n=>n!==ln); S.remove(ln.p.m); S.remove(ln.p.sh); const f=followers.find(f=>f.p.k==='lidia'); if(f){ f.x=ln.x; f.z=ln.y; f.ang=0; f.hold=true; } }   /* ★仲間に なった リディアが 2人 見えた。その場に 立ち、動き出すと ついて くる */ ST.phase='c2_ruins'; say(['からくりの 見張りが 向こうを 向いた すきに、2人は 城を 抜け出した。'],()=>go(()=>enterWorld([92.5,26.4]))); }); }
 function startCh2(){ const c=document.getElementById('card'); c.style.opacity=0; ST.phase='c2_dolm'; refreshFollowers(); enterTown([11.5,15.5],'velna');
   say(['── 第2章　操られた 王 ──','次の 朝。ドルムの 町に、帝国の 迎えが 着いた。']); }
-function showEnd2(){ ST.phase='c2_end'; const c=document.getElementById('card'); c.innerHTML='<div>第2章</div><div class="t">操られた 王</div><div>完</div><div style="font-size:13px;margin-top:20px">Ａで 第3章へ</div>'; c.style.opacity=1; }
+function showEnd2(){ ST.phase='c2_end'; const c=document.getElementById('card'); c.innerHTML='<div>第2章</div><div class="t">操られた 王</div><div>完</div>'; c.style.opacity=1; }
 
 // ================= 第3章「王殺しの 使者」 =================
 //  c3_order（帝都の 城で 和平の 席の 命令）→ c3_road（ハーヴェンと 国境の 砦へ）→ c3_seat（砦の 広間で 和平の 席 → 王殺し → 格子 → 追っ手）
