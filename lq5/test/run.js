@@ -196,6 +196,10 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   await winBattle(); await flush(); await W(400); await flush();
   T('騎士団長は 見逃して 去り、第3章 完', await E(()=>ST.phase==='c3_end' && !cur.npcs.some(n=>n.spr==='general') && /王殺しの 使者/.test(document.getElementById('card').textContent) && document.getElementById('card').style.opacity==='1'));
   await E(()=>{ document.getElementById('card').style.opacity=0; ST.phase='c2_dolm'; ST.fortDrop=0; ST.mineOpen=0; });
+  T('固い 魔物：武器は 0か 1、呪文は 効かない。逃げると 経験値は 入らない', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); window._hd={...FOES.nousagi,key:'testhard',name:'試しの 固い 魔物',hard:true,flee:1,hp:6,exp:999,boss:false}; startBattle([window._hd]); }); for(let i=0;i<40 && !(await E(()=>BT&&BT.phase==='menu'));i++) await W(100);
+    const r=await E(()=>{ const f=BT.foes[0], m=BT.party[0]; const lv=STATS.elt.lv, ex=STATS.elt.exp; let ok=true; for(let i=0;i<20;i++){ f.hp=6; f.popCrit=0; f.dead=false; hitFoe(m,f)(); if(6-f.hp>1 && !f.popCrit) ok=false; } BT.steps=[]; f.dead=false; f.ex=0; f.hp=6; return {ok,lv,ex}; });
+    await E(()=>{ BT.steps=enemyTurn(); }); for(let i=0;i<60;i++){ await W(100); if(await E(()=>!BT)) break; }
+    return r.ok && await E((r)=>!BT && STATS.elt.exp===r.ex && STATS.elt.lv===r.lv && !(ST.kill||{}).testhard, r); })());
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
