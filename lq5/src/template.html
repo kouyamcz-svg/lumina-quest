@@ -786,7 +786,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
     if(cur.kind==='fort' && hero.z<1.9 && hero.x>17.6 && iz<0 && PAST_FORT.test(ST.phase)){ go(()=>enterWorld([41.6,25.5])); }
     if(cur.kind==='world'){ const c=at(Math.floor(hero.x),Math.floor(hero.z)); if(c==='V' && (ix||iz)) go(()=>leaveWorldToTown());   /* ★どの 向きから 入っても 村に 入る（前は 南から 上へ 進む ときだけ） */
       if(c==='S'){ const east=hero.x>40; if(ST.phase==='c3_road') go(()=>enterFort(east)); else if(/^c3_(flee|mine|exit|end)$/.test(ST.phase)){ hero.x+= east?.6:-.6; say(['国境の 砦。ヴェルナの 兵で 固められて いる。','……今は 近づけない。']); } else if(ST.phase==='c1_road'||ST.phase==='c1_fort') go(()=>enterFort(false)); else if(PAST_FORT.test(ST.phase)) go(()=>{ enterWorld(east?[37.5,24.5]:[41.6,25.5]); }); else { hero.x+= east?.6:-.6; say(['国境の 砦。ヴェルナの 兵が 門を 閉ざして いる。']); } }
-      if(c==='W'){ if(PAST_FORT.test(ST.phase)){ if(ST.phase==='c1_east') ST.phase='c1_town'; go(()=>enterTown([11.5,18.2],'velna')); } else { hero.x-=.6; say(['まだ 行けない。']); } }
+      if(c==='W'){ if(PAST_FORT.test(ST.phase)||/^c3_/.test(ST.phase)){   /* ★第3章の 王殺しの 後も ドルムには 入れる（前は 砦と 同じ 条件で 入れなかった） */ if(ST.phase==='c1_east') ST.phase='c1_town'; go(()=>enterTown([11.5,18.2],'velna')); } else { hero.x-=.6; say(['まだ 行けない。']); } }
       if(c==='G'){ go(()=>enterDun('pass',hero.x>63)); }
       if((ix||iz) && !msgQ && at(Math.floor(hero.x+ix*.6),Math.floor(hero.z+iz*.6))==='Q'){ say(['峠の 関所だ。門は 固く 閉ざされて いる。']); hero.x-=ix*.25; hero.z-=iz*.25; }   /* ★閉じた 関所に ぶつかった とき */
       if(c==='Y' && /^c3_(seat|flee|mine|exit|end)$/.test(ST.phase)){ hero.z+=.6; say(['帝都の 門は 固く 閉ざされて いる。','門の 前に ヴェルナの 兵が 並んで いる……。']); } else if(c==='Y'){ go(()=>{ if(ST.phase==='c2_road') ST.phase='c2_capital'; enterTown([12,20.2],'vcap'); }); }
