@@ -1020,7 +1020,7 @@ function bakeWorld32(){
     if(c==='C' && WORLD[y][x-1]!=='C' && WORLD[y-1][x]!=='C') put(WOBJ_IMG.castle, sx+32, sy+63);
     if(c==='Y' && WORLD[y][x-1]!=='Y' && WORLD[y-1][x]!=='Y') put(WOBJ_IMG.vcastle||WOBJ_IMG.castle, sx+32, sy+63);   // ★帝都（専用の 絵：すすけた 石・赤黒い 屋根・煙突と 煙）
     if(c==='R'){ P(G2,sx+4,sy+18,24,12,'#6a7068'); [6,14,22].forEach(px=>{ P(G2,sx+px,sy+4+((px*3)%5),5,16,'#9aa098'); P(G2,sx+px,sy+4+((px*3)%5),5,2,'#c0c8c0'); }); P(G2,sx+12,sy+20,8,10,'#1a1a1a'); }   // ★森の 遺跡（石の 柱と 入口）
-    if((c==='G'||c==='Q') && WORLD[y][x-1]!==c) put(WOBJ_IMG[c==='G'?'pass_open':'pass_closed'], sx+32, sy+31);   // ★峠の 山道の 印（開いた 関所／閉じた 関所）
+    if((c==='G'||c==='Q') && WORLD[y][x-1]!==c){ const im=WOBJ_IMG[c==='G'?'pass_open':'pass_closed']; if(im) put(im, sx+32, sy+16+Math.round(im.height*.41)); }   /* ★関所の 印（届いた 絵）：絵の 中の 道（上から 約6割）を 街道の 高さに 合わせる */   // ★峠の 山道の 印（開いた 関所／閉じた 関所）
   }
   return out;
 }
