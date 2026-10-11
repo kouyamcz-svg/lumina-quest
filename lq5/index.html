@@ -717,7 +717,7 @@ function pressA(){ if(ST.phase==='end'){ startCh1(); return; } if(ST.phase==='c1
   if(best){ se('cue'); best.ang=Math.atan2(hero.x-best.x,hero.z-best.y); const bl=linesByPhase(best); if(bl){ say(bl); return; } if(best.talk){ best.talk(best); return; } say([best.name+'：'].concat(best.lines)); return; }
   if(examine()) return;
   say(['……なにも ない。']); }
-function pressB(){ if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='menu' && (BT.cur||0)>0){ se('cancel'); cmdBack(); return; } if(BT.phase==='target'||BT.phase==='skill'||BT.phase==='item'||BT.phase==='ally'){ se('cancel'); BT.phase='menu'; bsay('どうする？'); drawBattleUI(); } return; } if(MENU){ se('cancel'); MENU.onBack&&MENU.onBack(); return; } if(msgQ){ closeMsg(); } }
+function pressB(){ if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='menu' && (BT.cur||0)>0){ se('cancel'); cmdBack(); return; } if(BT.phase==='target'||BT.phase==='skill'||BT.phase==='item'||BT.phase==='ally'){ se('cancel'); BT.pendSkill=null; BT.phase='menu'; bsay('どうする？'); drawBattleUI(); } return; } if(MENU){ se('cancel'); MENU.onBack&&MENU.onBack(); return; } if(msgQ){ closeMsg(); } }
 // ================= 動き =================
 const SPEED=3.2, DASH=1.8, RADT=0.38;   // DASH：町の 中で Bを 押して いる 間の 速さの 倍
 const at=(x,y)=>{ const r=cur.rows; return (y<0||y>=r.length||x<0||x>=r[0].length)?'#':r[y][x]; };
@@ -1158,7 +1158,7 @@ function drawBattleUI(){ bparty.innerHTML=partyHtml(); drawFoeNames(); bmenu.sty
   bmark.style.display = BT.phase==='target' ? 'block':'none';   // ★▼は 一覧で 選んで いる 魔物の 頭の 上（一覧と 連動）
   if(BT.phase==='target'){ const al=alive(); bmenu.innerHTML='<div class="mt">ねらう 魔物</div>'+al.map(f=>{ const on=BT.foes.indexOf(f)===BT.tsel; return `<div class="${on?'on':''}">${on?'▶':'　'}${f.name}</div>`; }).join(''); }
   else if(BT.phase==='item'){ bmenu.innerHTML='<div class="mt">道具</div>'+BT.items.map((it,i)=>`<div class="${i===BT.isel?'on':''}">${i===BT.isel?'▶':'　'}${it.name}　${it.n}</div>`).join(''); }
-  else if(BT.phase==='ally'){ bmenu.innerHTML='<div class="mt">'+BT.pendItem.name+'を 誰に？</div>'+BT.party.map((m,i)=>`<div class="${i===BT.asel?'on':''}">${i===BT.asel?'▶':'　'}${m.name}</div>`).join(''); }
+  else if(BT.phase==='ally'){ bmenu.innerHTML='<div class="mt">'+(BT.pendSkill?BT.pendSkill.name:BT.pendItem.name)+'を 誰に？</div>'+BT.party.map((m,i)=>`<div class="${i===BT.asel?'on':''}">${i===BT.asel?'▶':'　'}${m.name}　HP ${m.hp}/${m.max}</div>`).join(''); }
   else if(BT.phase==='skill'){ bmenu.innerHTML='<div class="mt">'+(BT.party.length>1?curM().name+'の ':'')+'呪文（MP '+curM().mp+'）</div>'+BT.sks.map((k,i)=>`<div class="${i===BT.ssel?'on':''}">${i===BT.ssel?'▶':'　'}${k.name}　${k.mp}</div>`).join(''); }
   else bmenu.innerHTML=CMDS.map((c,i)=>`<div class="${i===BT.sel?'on':''}">${i===BT.sel?'▶':'　'}${c}</div>`).join(''); }
 function bsay(t){ bmsg.textContent=t; }
@@ -1288,7 +1288,7 @@ function actOf(m,act){ return ()=>{ if(m.hp<=0 || !alive().length) return 0;
     if(f.def.hard){ fxAt({foe:f},'miss'); bsay(m.name+'は '+sk.name+'を 唱えた！ しかし '+f.name+'には 効かない！'); return .9; }
     const d=Math.round(sk.power*(.9+Math.random()*.2)+(STATS[PARTY[BT.party.indexOf(m)]]?.lv||1)*1.5); f.hp=Math.max(0,f.hp-d); f.hurt=.4; BT.flash=.6; se('hit'); fxAt({foe:f},sk.id); bsay(m.name+'は '+sk.name+'を 唱えた！ '+f.name+'に '+d+'の ダメージ！'); killCheck(f); drawBattleUI(); return .9; }
   if(sk.type==='atkAll'){ const parts=[]; al.forEach(f=>{ const d=f.def.hard?0:Math.round(sk.power*(.85+Math.random()*.3)); f.hp=Math.max(0,f.hp-d); f.hurt=.4; fxAt({foe:f},sk.id); parts.push(f.name+'に '+d); killCheck(f); }); BT.flash=.8; BT.quake=.3; se('hit'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+parts.join('、')+'の ダメージ！'); drawBattleUI(); return 1.1; }
-  if(sk.type==='heal'){ const t=a.ally||BT.party.filter(x=>x.hp>0).sort((p,q)=>p.hp/p.max-q.hp/q.max)[0]; const h=Math.min(sk.amt,t.max-t.hp); t.hp+=h; se('item'); fxAt({idx:BT.party.indexOf(t)},'heal'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+t.name+'の HPが '+h+' 回復した！'); drawBattleUI(); return .9; }
+  if(sk.type==='heal'){ const t=(a.ally&&a.ally.hp>0)?a.ally:BT.party.filter(x=>x.hp>0).sort((p,q)=>p.hp/p.max-q.hp/q.max)[0];   /* ★選んだ 相手が 先に 倒れたら、いちばん 弱って いる 者へ */ const h=Math.min(sk.amt,t.max-t.hp); t.hp+=h; se('item'); fxAt({idx:BT.party.indexOf(t)},'heal'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+t.name+'の HPが '+h+' 回復した！'); drawBattleUI(); return .9; }
   if(sk.type==='healAll'){ BT.party.filter(x=>x.hp>0).forEach(t=>{ t.hp=Math.min(t.max,t.hp+sk.amt); fxAt({idx:BT.party.indexOf(t)},'heal'); }); se('item'); bsay(m.name+'は '+sk.name+'を 唱えた！ みんなの HPが 回復した！'); drawBattleUI(); return .9; }
   if(sk.type==='sleep'){ const got=al.filter(f=>!f.def.boss && Math.random()<sk.rate); al.forEach(f=>fxAt({foe:f},'sleep')); got.forEach(f=>{ f.status='sleep'; f.stTurns=2; }); bsay(m.name+'は '+sk.name+'を 唱えた！ '+(got.length?got.map(f=>f.name).join('と ')+'は 眠った！':'しかし 効かなかった！')); return 1.0; }
   if(sk.type==='defdown'){ const f=a.target||al[0]; f.defDown=true; fxAt({foe:f},'down'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+f.name+'の 守りが 下がった！'); return .9; }
@@ -1320,11 +1320,12 @@ function battleCmd(){ const c=CMDS[BT.sel];
   BT.phase='act'; drawBattleUI();
   if(c==='にげる' && BT.foes.some(f=>f.def.boss)){ queue([()=>{ bsay('逃げられない！'); return .8; }, ...enemyTurn()],0); return; }
   if(c==='にげる') queue([()=>{ bsay('エルトたちは 逃げだした！'); se('flee'); return .7; }, ()=>{ if(Math.random()<.75){ endBattle(); return 99; } bsay('しかし まわりこまれて しまった！'); BT.steps.push(...enemyTurn()); return .7; }],0); }
-function itemPick(){ BT.pendItem=BT.items[BT.isel]; if(BT.party.length<=1){ BT.asel=0; return allyPick(); } BT.phase='ally'; BT.asel=0; bsay('誰に 使う？'); drawBattleUI(); }
-function allyPick(){ const it=BT.pendItem, t=BT.party[BT.asel]; if(t.hp<=0){ bsay(t.name+'は 倒れて いる。'); return; } se('ok'); commit({kind:'item',it,t}); }
+function itemPick(){ BT.pendSkill=null; BT.pendItem=BT.items[BT.isel]; if(BT.party.length<=1){ BT.asel=0; return allyPick(); } BT.phase='ally'; BT.asel=0; bsay('誰に 使う？'); drawBattleUI(); }
+function allyPick(){ const it=BT.pendItem, t=BT.party[BT.asel]; if(t.hp<=0){ bsay(t.name+'は 倒れて いる。'); return; } se('ok'); if(BT.pendSkill){ const sk=BT.pendSkill; BT.pendSkill=null; commit({kind:'skill',sk,ally:t}); return; } commit({kind:'item',it,t}); }
 function skillPick(){ const sk=BT.sks[BT.ssel]; if(curM().mp<sk.mp){ bsay('MPが 足りない。'); return; }
   if((sk.type==='atk1'||sk.type==='defdown'||sk.type==='atkdown'||sk.type==='double'||sk.type==='steal'||sk.type==='gamble'||sk.type==='atkdef') && alive().length>1){ BT.phase='target'; BT.pend={kind:'skill',sk}; BT.tsel=BT.foes.indexOf(alive()[0]); bsay('どの 魔物に？'); drawBattleUI(); return; }
   if(sk.type==='escape'){ bsay('ここでは 使えない。'); return; }
+  if(sk.type==='heal' && BT.party.length>1){ BT.pendSkill=sk; BT.phase='ally'; BT.asel=BT.party.indexOf(curM()); if(BT.asel<0) BT.asel=0; bsay('誰に 唱える？'); drawBattleUI(); return; }   /* ★回復の 呪文は 相手を 選ぶ */
   commit({kind:'skill',sk,target:alive()[0]}); }
 function targetPick(){ const f=BT.foes[BT.tsel]; se('ok'); commit(Object.assign({},BT.pend||{kind:'atk'},{target:f})); }
 function endBattle(){ const win=BT&&BT.foes.every(f=>f.dead), cb=BT&&BT.onWin; PARTY.forEach(k=>{ if(STATS[k]) STATS[k].guard=false; });   /* ★ぼうぎょは 戦闘の 外へ 残さない */
