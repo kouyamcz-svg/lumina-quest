@@ -1558,7 +1558,7 @@ function examine(){   // 向いて いる 先の 物を 調べる（宝箱・畑
   if(ruinExamine()||passExamine()||mineExamine()) return true;
   if(cur.kind==='fort'){ const l=lampAt(hero.x,hero.z); if(l){ const k=l.join(','); if(ST.lamps[k]){ say(['灯りは ともって いる。']); return true; } ST.lamps[k]=1; se('ok');
       const both=fortGateOpen(); /* ★灯りは 壁に 取りつけ（通路を ふさがない） */ say(['古い 灯りに 火を ともした。'].concat(both?['どこかで 鉄格子の 上がる 音が した。']:['もう ひとつ、どこかに 灯りが ある ようだ。']),()=>{ const px=hero.x, pz=hero.z; enterFort(false); hero.x=px; hero.z=pz; resetTrail(); }); return true; }
-    if(!fortGateOpen() && !ST.fortDrop && Math.hypot(hero.x-11.5,hero.z-5.5)<1.3){ say(['鉄格子が 下りて いる。','両脇に 灯りの 台の 跡が ある。……どこかの 灯りと つながって いるのか']); return true; } }
+    if(!fortGateOpen() && !ST.fortDrop && Math.hypot(hero.x-11.5,hero.z-5.5)<1.3){ say(['鉄格子が 下りて いる。','両脇に 灯りの 台の 跡が ある。……どこかの 灯りと つながって いるのだろうか']); return true; } }
   for(const c of (CHESTS[chestKey()]||[])){ if(Math.hypot(c.x-hero.x,c.z-hero.z)<1.1){ if(BAG.opened[c.id]){ say(['空っぽだ。']); return true; } BAG.opened[c.id]=1; se('chest');
       const got=[]; if(c.gold){ BAG.gold+=c.gold; got.push(c.gold+'ゴールドを 手に 入れた！'); } if(c.herb){ BAG.herbs+=c.herb; got.push('薬草を '+c.herb+'つ 手に 入れた！'); } if(c.anti){ BAG.antidote+=c.anti; got.push('どくけし草を '+c.anti+'つ 手に 入れた！'); } if(c.ether){ BAG.ether+=c.ether; got.push('魔法の 小びんを '+c.ether+'つ 手に 入れた！'); } if(c.kitsuke){ BAG.kitsuke+=c.kitsuke; got.push('気つけ草を '+c.kitsuke+'つ 手に 入れた！'); }
       if(c.gear){ BAG.gear.push(Object.assign({},c.gear)); got.push(c.gear.name+'を 手に 入れた！（メニューの 装備で 付けられる）'); }
@@ -2028,7 +2028,7 @@ function enterFort(fromEast){ visit('fort'); setTimeout(()=>{ if(cur.kind==='for
 function velnaNpcs(){ if(/^c3_/.test(ST.phase)) return c3DolmNpcs(); if(/^c2_/.test(ST.phase)) return [
   {x:11.5,y:12.5,spr:'vsoldier',name:'帝国の 迎えの 騎士',talk:()=>{ if(ST.phase!=='c2_dolm') return say(['騎士「峠の 関所は 開けた。帝都は 峠を 越えて 東だ」']);
     say(['騎士「アルディアの 使者どのか。帝都より 迎えに 参った」','騎士「東の 峠の 関所を 開ける。……ただ、近ごろ 関所に 魔物が 居座って いてな」','騎士「峠の 山道を 抜ければ、帝都は 街道の 先だ」','使者 ハーヴェン「エルトどの、参りましょう」'],()=>{ ST.phase='c2_pass'; applyWorldState(); say(['＊ ドルムの 東の 峠が 開いた ＊']); }); }},
-  {x:12.5,y:6.2,spr:'elder',name:'町の 長',lines:['町の 長「帝都で 王に 会われるのか。……どうか、昔の 王に 戻って くだされば』'.replace('』','」')]},
+  {x:12.5,y:6.2,spr:'elder',name:'町の 長',lines:['町の 長「帝都で 王に 会われるのか。……どうか、昔の 王に 戻って くだされば よいのじゃが』'.replace('』','」')]},
   {x:6.5,y:11.5,spr:'girl',name:'町の 娘',lines:['娘「峠の 先は 帝都よ。鉄の 煙で いつも 空が 灰色なの」']},
   {x:14.5,y:4.6,spr:'smith',name:'鉱夫',talk:()=>say(['鉱夫「帝都へ 行くなら 気を つけな。近ごろ 城の 中は おかしい」'],openTrade)},
 ]; return [
@@ -2367,13 +2367,13 @@ function walkNpc(n,pts,dur,done){ const segs=[]; let total=0; for(let k=1;k<pts.
     if(t<total) return requestAnimationFrame(step); n.walking=false; done&&done(); };
   requestAnimationFrame(step); }
 function startCh3(){ const c=document.getElementById('card'); c.style.opacity=0; ST.phase='c3_order'; refreshFollowers(); enterCastle('velna'); hero.x=12.5; hero.z=5.2; hero.ang=Math.PI; resetTrail();
-  CUT=1; setTimeout(()=>say(['── 第3章　王殺しの 使者 ──','翌朝。謁見の 間に、セルヴィスの 姿が あった。','セルヴィス「陛下。和平の 席の こと、うかがいました」','ヴェルナ王「うむ。……わし自ら 国境へ 出向く」','ヴェルナ王「焼いた 村の 地を、この目で 見たいのだ」',
+  CUT=1; setTimeout(()=>say(['── 第3章　王殺しの 使者 ──','翌朝。謁見の 間に、セルヴィスの 姿が あった。','セルヴィス「陛下。和平の 席の こと、うかがいました」','ヴェルナ王「うむ。……わたし自ら 国境へ 出向く」','ヴェルナ王「焼いた 村の 地を、この目で 見たいのだ」',
     'セルヴィス「では 席は 国境の 砦に。……日取りは 三日後と いたしましょう」','リディア「三日後？ それでは アルディアの 王が 間に 合わないわ」','使者 ハーヴェン「アルディア王を 待つべきでは ありませんか」',
     'セルヴィス「陛下の お心が 変わらぬ うちに。……使者どのは 書状を お持ちだ。名代で 足りましょう」','ヴェルナ王「……よかろう。ハーヴェンどの、頼む」','使者 ハーヴェン「……承知 いたしました。エルトどの、また 護衛を 頼みますぞ」',
     'セルヴィス「わたしは 陛下と 先に 参ります。……道中、お気を つけて」','セルヴィスは 薄く 笑い、王と ともに 謁見の 間を 出て いった。','ZF「……アノ 者ノ 魔力、昨夜ヨリ 強イ」','リディア「……いやな 予感が する。急ぎましょう」'],
     ()=>{ CUT=0; ST.phase='c3_road'; refreshFollowers(); setNpcs(velnaCastleNpcs()); say(['＊ 使者 ハーヴェンが ふたたび 同行する ＊','（国境の 砦は、峠と ドルムを 越えた 西）']); }),500); }
-function c3CastleNpcs(ph){ if(ph==='c3_order') return [{x:12.5,y:2.4,spr:'velna',name:'ヴェルナ王',lines:['ヴェルナ王「……国境の 村の こと、わしの 口から 詫びねば」']},{x:14.4,y:2.8,spr:'servis',name:'側近 セルヴィス',lines:['セルヴィス「…………」']},{x:10.6,y:3.6,spr:'haven',name:'使者 ハーヴェン',lines:['使者 ハーヴェン「…………」']}];
-  return [{x:12.5,y:3.2,spr:'vsoldier',name:'近衛兵',lines:['近衛兵「陛下は セルヴィスさまと 国境の 砦へ 発たれた」','近衛兵「……王女さまも お連れ するのか？ 気を つけて 行かれよ」']}]; }
+function c3CastleNpcs(ph){ if(ph==='c3_order') return [{x:12.5,y:2.4,spr:'velna',name:'ヴェルナ王',lines:['ヴェルナ王「……国境の 村の こと、わたしの 口から 詫びねば」']},{x:14.4,y:2.8,spr:'servis',name:'側近 セルヴィス',lines:['セルヴィス「…………」']},{x:10.6,y:3.6,spr:'haven',name:'使者 ハーヴェン',lines:['使者 ハーヴェン「…………」']}];
+  return [{x:12.5,y:3.2,spr:'vsoldier',name:'近衛兵',lines:['近衛兵「陛下は セルヴィスさまと 国境の 砦へ 発たれた」','近衛兵「王女さまも 砦へ 向かわれるのですか。……どうか お気を つけて」']}]; }
 // ---- 砦の 和平の 席 ----
 function c3SeatNpcs(){ return [
   {x:15.5,y:4.05,spr:'velna',name:'ヴェルナ王',lines:['ヴェルナ王「……よく 来て くれた」']},
@@ -2388,13 +2388,13 @@ function seatScene(){ if(cur.kind!=='fort'||ST.phase!=='c3_seat') return; CUT=1;
   const N=nm=>cur.npcs.find(n=>n.name===nm), king=N('ヴェルナ王'), sv=N('側近 セルヴィス'), hv=N('使者 ハーヴェン'), gn=N('騎士団長'), sol=cur.npcs.filter(n=>n.name==='ヴェルナの 兵');
   [king,sv,gn].forEach(n=>{ if(n) n.ang=0; }); if(hv) hv.ang=Math.PI; sol.forEach(n=>n.ang=Math.PI);
   say(['国境の 砦の 広間に、和平の 席が 設けられて いた。','ヴェルナ王「アルディアの 使者どの。……よく 来て くれた」','使者 ハーヴェン「アルディア王に 代わり、和平の 書状を お渡し いたします」',
-    'ヴェルナ王「国境の 村の こと、わしの 名で 詫びよう。……麦を 贈った あの 頃に 戻りたい」','リディア「お父さま……」','王が 書状に 名を 記そうと、筆を 取った その時──','セルヴィス「陛下」'],()=>{
+    'ヴェルナ王「国境の 村の こと、わたしの 名で 詫びよう。……麦を 贈った あの 頃に 戻りたい」','リディア「お父さま……」','王が 書状に 名を 記そうと、筆を 取った その時──','セルヴィス「陛下」'],()=>{
     walkNpc(sv,[[sv.x,sv.y],[16.2,4.1]],450,()=>{ sv.ang=-Math.PI/2;
       say(['セルヴィスの 短剣が、王の 胸を 貫いた。','ヴェルナ王「……う……ぐ……」','王は その場に 崩れ落ちた。'],()=>{ king.p.down=true; se('hit');
         say(['リディア「お父さまっ！！」','セルヴィス「──アルディアの 使者が、王を 殺した！」','セルヴィス「書状に 刃を 隠して いたのだ！ 皆、見たで あろう！」','……セルヴィスの 手の 短剣には、血が 一滴も ついて いなかった。',
           'ZF「……王ノ 頭ニ、黒イ 糸ノ ヨウナ 魔力。心ヲ 操ル 術ノ 跡ダ」','ZF「遺跡ノ 黒イ 水晶ト、同ジ 魔力」','リディアは 王の そばに ひざを ついた。','ヴェルナ王「……リディア……」','ヴェルナ王「……あれは、セルヴィスでは ない……」','ヴェルナ王の 目から、光が 消えた。','リディア「……お父さま……」'],()=>{
           sol.forEach((n,i)=>walkNpc(n,[[n.x,n.y],[i?15.6:13.7,i?6.9:6.6]],500));
-          say(['セルヴィス「王殺しの 使者を 捕らえよ。手向かう なら 斬って かまわぬ」','兵たちが 槍を 構え、ハーヴェンに 襲いかかった！','使者 ハーヴェン「ぐっ……！」','兵の 槍が、ハーヴェンの 肩を 深く 裂いた。','使者 ハーヴェン「エルトどの……！ 私は 西へ 走る。王に 真実を 伝える」','使者 ハーヴェン「きみは 王女殿下を！」'],()=>{
+          say(['セルヴィス「王殺しの 使者を 捕らえよ。手向かう なら 斬って かまわぬ」','兵たちが 槍を 構え、ハーヴェンに 襲いかかった！','使者 ハーヴェン「ぐっ……！」','兵の 槍が、ハーヴェンの 肩を 深く 裂いた。','使者 ハーヴェン「エルトどの……！ わたしは 西へ 走ります。王に 真実を 伝えねば」','使者 ハーヴェン「エルトどのは 王女殿下を！」'],()=>{
             walkNpc(hv,[[hv.x,hv.y],[12.7,5.5],[11.5,5.5],[9.6,5.5],[9.5,6.7]],1600,()=>{ removeNpc(hv);
               hero.x=12.5; hero.z=6.15; hero.ang=-Math.PI/2; resetTrail(); followers.forEach((f,i)=>{ f.x=13.4+i*.8; f.z=6.5; f.hold=true; });
               say(['ハーヴェンは 鉄格子を くぐり、西の 通路へ 消えた。','兵たちが 後を 追おうと 格子へ 走る──','エルトは 格子の 脇の 灯りの 台を 蹴り倒した！'],()=>{ ST.fortDrop=1; se('door'); fortRebuild();
@@ -2404,7 +2404,7 @@ function seatEscape(){ say(['追っ手を 退けた！','騎士団長は 動か�
   say(['リディア「……父は 最後に 言ったわ。あれは セルヴィスでは ない、と」','ZF「王ノ 頭ノ 術ノ 跡ハ、遺跡ノ 水晶ト 同ジ。……アノ 者ガ 王ヲ 操ッテ イタ」','リディア「わたしは 逃げない。父を 殺した 者の 正体を 暴くまで」','リディア「……東の ドルムへ。あの 町の 人たちなら、きっと」']); }); }); }
 // ---- ドルム（第3章）----
 function c3DolmNpcs(){ const ph=ST.phase; if(/^c3_(order|road)$/.test(ph)) return [
-  {x:12.5,y:6.2,spr:'elder',name:'町の 長',lines:['町の 長「王が 自ら 国境の 砦へ 向かわれたと 聞いた」','町の 長「……和平が なれば よいが」']},
+  {x:12.5,y:6.2,spr:'elder',name:'町の 長',lines:['町の 長「王が 自ら 国境の 砦へ 向かわれたと 聞いた」','町の 長「……和平が 結ばれれば よいが」']},
   {x:17.5,y:11.5,spr:'vsoldier',name:'古い 兵',lines:['古い 兵「王が 自ら 国境へ……。昔の 王が 戻られたのか」']},
   {x:6.5,y:11.5,spr:'girl',name:'町の 娘',lines:['娘「和平の 席が 開かれるって ほんと？ 戦が 終わるの？」']},
   {x:14.5,y:4.6,spr:'smith',name:'鉱夫',talk:()=>say(['鉱夫「砦は 西だ。……今日は 帝都の 兵が やけに 多く 通ったな」'],openTrade)}];
@@ -2452,9 +2452,9 @@ function dolganTalk(){ if(ST.phase!=='c3_mine') return; CUT=1;
     ST.phase='c3_exit'; CUT=0; say(['ドルガン「北の 出口は 崩れて ふさがってる。……だが、俺の 斧なら 割れる」','ドルガン「行こうぜ。山の 向こうへ 抜けりゃ、追っ手も まける」']); }); }
 function generalFight(){ if(ST.phase!=='c3_exit'||BT) return; CUT=1; const gn=cur.npcs.find(n=>n.spr==='general'); if(gn) gn.ang=0;
   say(['北の 出口の 光を 背に、一人の 騎士が 立って いた。','騎士団長「……やはり ここか。坑夫どもは 口を 割らなかったが、風の 流れで わかる」','騎士団長「王女殿下。お戻り ください。……ほかの 者は、ここで 斬る」','リディア「団長。あなたも 見たでしょう。父を 刺したのが 誰か」','騎士団長「…………」','騎士団長「わたしは 帝国の 騎士。命令に 従う までだ」','騎士団長「──参る！」'],
-    ()=>startBattle(FOES.general,()=>{ say(['騎士団長は 斧槍を 地に 突き、ひざを ついた。','騎士団長「……強い。アルディアの 兵士、名は」','エルト「……エルト」','騎士団長「エルト、か。……王女殿下」','騎士団長「わたしは あの 席で、確かに 見た。セルヴィスどのの 短剣に、血が ついて いなかったのを」',
+    ()=>startBattle(FOES.general,()=>{ say(['騎士団長は 斧槍を 地に 突き、ひざを ついた。','騎士団長「……強い。アルディアの 兵士よ、名は 何と いう」','エルト「……エルト」','騎士団長「エルト、か。……王女殿下」','騎士団長「わたしは あの 席で、確かに 見た。セルヴィスどのの 短剣に、血が ついて いなかったのを」',
       '騎士団長「だが 今は まだ、何も 言えぬ。帝国の 兵は みな、あの 方の 言葉で 動いて いる」','騎士団長「行かれよ。わたしは ここで 誰にも 会わなかった」','リディア「団長……」','騎士団長「いつか 殿下が 真実を 示される 日が 来たら……その 時は」','騎士団長は 背を 向け、坑道の 闇へ 去って いった。'],()=>{ removeNpc(cur.npcs.find(n=>n.spr==='general'));
-      say(['ドルガン「……甘い 騎士だぜ。だが、助かった」','リディア「セルヴィスの 正体を 確かめる 手がかりが 欲しい」','ドルガン「それなら 心当たりが ある。セルヴィスの 屋敷だ」','ドルガン「俺が 逃げた あと、数年前に 焼け落ちた らしい。帝都の 北東の 森の 中だ」','ZF「焼ケタ 屋敷……何カガ 残ッテ イルカモ シレナイ」','リディア「行きましょう。……父の ために」'],()=>{ CUT=0; showEnd3(); }); }); })); }
+      say(['ドルガン「……甘い 騎士だぜ。だが、助かった」','リディア「セルヴィスの 正体を 確かめる 手がかりが 欲しい」','ドルガン「それなら 心当たりが ある。セルヴィスの 屋敷だ」','ドルガン「俺が 逃げた すぐ あとに 焼け落ちた らしい。帝都の 北東の 森の 中だ」','ZF「焼ケタ 屋敷……何カガ 残ッテ イルカモ シレナイ」','リディア「行きましょう。……父の ために」'],()=>{ CUT=0; showEnd3(); }); }); })); }
 function showEnd3(){ CARD_T=performance.now(); ST.phase='c3_end'; const c=document.getElementById('card'); c.innerHTML='<div>第3章</div><div class="t">王殺しの 使者</div><div>完</div><div style="font-size:13px;margin-top:20px">── 第4章へ つづく ──</div>'; c.style.opacity=1; }
 
 function resize(){ const v=document.getElementById('view'); const w=v.clientWidth,h=v.clientHeight; R.setSize(w,h,false); C.aspect=w/h; C.updateProjectionMatrix(); batCam.aspect=w/h; batCam.updateProjectionMatrix(); }
