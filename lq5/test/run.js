@@ -213,6 +213,13 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('外の 世界の 戦闘の 背景：草原は 草原、山の そば・荒れ地は 岩場', await E(()=>{ if(BT) endBattle(); ST.phase='c2_road'; enterWorld([56.5,36.5]); const a=sceneLook(); enterWorld([41.5,30.5]); const b=sceneLook(); enterWorld([78.5,42.5]); const c=sceneLook(); enterWorld([20.5,30.5]); const d=sceneLook(); return a==='field' && b==='rock' && c==='rock' && d==='field'; }));
   T('ZFの 全体攻撃の 呪文（フリジス Lv7・フリジアス Lv17・フリジオン Lv29）', await E(()=>{ const L=LEARN.zf; return ['frigis','frigias','frigion'].every(id=>SKILLS[id].type==='atkAll' && L.some(([,k])=>k===id) && FXS_DEF[id]) && L.find(([,k])=>k==='frigis')[0]===7; }));
   T('エスケイル：坑道では ドルムの 町の 坑道の 入口の 前へ', await E(()=>{ if(BT) endBattle(); while(msgQ) closeMsg(); ST.phase='c3_mine'; enterDun('mine'); const to=escapeTo(); return to && to.town==='velna' && Math.abs(to.at[0]-12)<1 && to.at[1]<4; }));
+  T('トランジス（行った 町へ 飛ぶ）：Lv7で 覚え、町を 選んで 飛ぶ。王殺しの 後は ドルムだけ', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); if(MENU) closeMenu(); STATS.elt.lv=Math.max(STATS.elt.lv,7); STATS.elt.mp=STATS.elt.maxmp=60; ST.phase='c2_road'; ST.visited={rue:1,cap:1,velna:1,fort:1}; enterTown([11.5,15.5],'velna'); });
+    const a=await E(()=>{ const L=warpList(); const ok1=skillsOf('elt').some(s=>s.type==='warp') && L.length>=3 && L.some(w=>w[0]==='王都 アルディア'); ST.phase='c3_flee'; const L2=warpList(); ST.phase='c2_road'; return ok1 && L2.length===1 && L2[0][0]==='ドルム'; });
+    await E(()=>{ openSpells('elt'); const i=skillsOf('elt').findIndex(s=>s.type==='warp'); MENU.onPick(i); }); await W(100);
+    await E(()=>{ while(msgQ) pressA(); MENU.onPick(warpList().findIndex(w=>w[0]==='王都 アルディア')); }); await W(100); await E(()=>{ while(msgQ) pressA(); }); await W(900);
+    const b=await E(()=>cur.kind==='world' && Math.abs(hero.x-12.5)<.6 && Math.abs(hero.z-25.45)<.6);
+    const c=await E(()=>{ enterDun('mine'); openSpells('elt'); MENU.onPick(skillsOf('elt').findIndex(s=>s.type==='warp')); const ok=!!msgQ && /使えない/.test(msgEl.textContent); while(msgQ) closeMsg(); if(MENU) closeMenu(); return ok; });
+    return a && b && c; })());
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });

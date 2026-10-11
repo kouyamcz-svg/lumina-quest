@@ -1208,6 +1208,7 @@ const SKILLS={
   tsuyogiri:{name:'ブレイズエッジ', desc:'剣に 炎を まとわせて 敵1体を 斬る。', mp:3, type:'atk1', mul:1.6, battle:true},
   blaze2:{name:'ブレイズセイバー', desc:'剣に 強い 炎を まとわせて 敵1体を 斬る。', mp:7, type:'atk1', mul:2.2, battle:true},
   blaze3:{name:'ブレイズカリバー', desc:'剣を 燃えさかる 炎の 刃に 変えて 敵1体を 斬る。', mp:14, type:'atk1', mul:3.0, battle:true},
+  warp:{name:'トランジス', desc:'行った ことの ある 町へ 一瞬で 飛ぶ。外で 唱える。', mp:8, type:'warp', field:true},
   michishirube:{name:'エスケイル', desc:'来た 道の 光を たどり、ダンジョンの 入口へ 戻る。', mp:4, type:'escape', field:true},
   iyashi:{name:'キュアル', desc:'味方1人の 傷を いやす。', mp:3, type:'heal', amt:28, battle:true, field:true},
   volt:{name:'ヴォルト', desc:'敵1体に 雷を 落とす。', mp:8, type:'atk1', power:42, spell:true, battle:true},
@@ -1233,7 +1234,7 @@ const SKILLS={
   kabutowari:{name:'兜割り', desc:'敵を 斬りつけ、その 守りを 下げる。', mp:2, type:'atkdef', battle:true},             // ★通常の 攻撃＋相手の 守りを 下げる
   kaenkiri:{name:'火炎斬り', desc:'炎の 刃で 敵1体を 斬る。', mp:2, type:'atk1', mul:1.3, waza:true, battle:true},   // ★通常の 攻撃に 倍率（1.3倍）を かける 技（1.5倍・MP3は 強すぎる ため 下げた）
 };
-const LEARN={ elt:[[3,'michishirube'],[4,'tsuyogiri'],[6,'iyashi'],[12,'volt'],[14,'blaze2'],[24,'voltra'],[28,'blaze3']],
+const LEARN={ elt:[[3,'michishirube'],[4,'tsuyogiri'],[6,'iyashi'],[7,'warp'],[12,'volt'],[14,'blaze2'],[24,'voltra'],[28,'blaze3']],
   lidia:[[1,'kaifuku'],[1,'hono'],[4,'nemuri'],[10,'minnakaifuku'],[12,'flare2'],[26,'flare3']], zf:[[1,'raigeki'],[1,'hibiware'],[5,'shibire'],[7,'frigis'],[11,'thunder2'],[17,'frigias'],[25,'thunder3'],[29,'frigion']], dolgan:[[1,'kabutowari'],[3,'nusumu'],[8,'kaenkiri'],[20,'daimajin'],[28,'nirengeki']] };   // ★ダブルファングは 中盤の Lv28（指示）。大魔神斬りは Lv20
 const skillsOf=(k)=>(LEARN[k]||[]).filter(([lv])=>(STATS[k].lv||1)>=lv).map(([,id])=>id).concat(STATS[k].extra||[]).map(id=>Object.assign({id},SKILLS[id]));   // ★extra：物語で 授かる 呪文（ヴォルトリオン）
 const STNAME={sleep:'眠り', conf:'混乱', poison:'毒'};
@@ -1703,6 +1704,12 @@ function fitMenu(){ const vw=menuEl.parentElement.clientWidth; menuEl.style.font
 function menu(items,title,onPick,onBack){ MENU={items,title,sel:0,onPick,onBack}; menuEl.classList.remove('wide'); drawMenu(); }
 // ★呪文の 一覧と 解説（指示）。選んで いる 呪文の 説明を 下に 出す。戦闘の 外で 使える 呪文は ここで 唱えられる
 // ★エスケイルの 行き先：入った 側の 入口（前は 砦でしか 使えず、行き先も 砦の 西 だけ）
+// ★トランジス（ルーラの ような 呪文）：行った ことの ある 町へ。物語の 進みで 行けない 町は 出さない
+const WARPS=[['ルーエ','rue',[34.5,32.45]],['王都 アルディア','cap',[12.5,25.45]],['ドルム','velna',[48.5,26.45]],['帝都 ヴェルナ','vcap',[92.5,26.4]]];
+function warpList(){ const p=ST.phase; if(!/^(c1_|c2_|c3_)/.test(p) || p==='c1_castle') return [];   /* 序章の 間は 使えない */
+  visitedFromPhase(); const v=ST.visited||{};
+  if(/^c3_(seat|flee|mine|exit|end)$/.test(p)) return WARPS.filter(w=>w[1]==='velna'&&v.velna).map(w=>[w[0],w[2]]);   /* 王殺しの 後：帝都は 閉ざされ、国境の 西へは 戻れない */
+  return WARPS.filter(w=>v[w[1]]).map(w=>[w[0],w[2]]); }
 function escapeTo(){ if(cur.kind==='fort') return cur.fromEast?[41.6,25.5]:[37.5,24.5]; if(cur.kind==='dun'){ if(DUN_NOW==='mine') return {town:'velna',at:[12,3.4]}; return DUN_NOW==='pass'?(cur.fromEnd?[64.6,25.5]:[61.4,25.5]):[74.5,23.5]; } return null; }   /* ★坑道は ドルムの 町の 坑道の 入口の 前へ（前は 遺跡の 前に 出た） */
 function openSpells(ck){ const c=STATS[ck], sks=skillsOf(ck);
   menu(sks.map(k=>k.name+'　'+k.mp+(k.field?'':'（戦闘）')).concat(['戻る']),c.name+'の 呪文（MP '+c.mp+'）',(i)=>{ if(i>=sks.length){ openFieldMenu(); return; } const k=sks[i]; closeMenu();
@@ -1713,6 +1720,10 @@ function openSpells(ck){ const c=STATS[ck], sks=skillsOf(ck);
       if(PARTY.length===1) return cast(PARTY[0]);
       menu(PARTY.map(p=>STATS[p].name+'　HP '+STATS[p].hp+'/'+STATS[p].max).concat(['やめる']),'誰に？',(t)=>{ closeMenu(); if(t>=PARTY.length) return back(); const m=STATS[PARTY[t]]; if(m.hp<=0){ say([m.name+'は 倒れて いる。'],back); return; } if(m.hp>=m.max){ say([m.name+'の HPは 減って いない。'],back); return; } cast(PARTY[t]); },back); return; }
     if(k.type==='healAll'){ const al=PARTY.filter(p=>STATS[p].hp>0&&STATS[p].hp<STATS[p].max); if(!al.length){ say(['みんなの HPは 減って いない。'],back); return; } c.mp-=k.mp; al.forEach(p=>{ const m=STATS[p]; m.hp=Math.min(m.max,m.hp+k.amt); }); se('item'); say([c.name+'は '+k.name+'を 唱えた！','みんなの HPが 回復した！'],back); return; }
+    if(k.type==='warp'){ const list=warpList(); if(!(cur.kind==='world'||cur.kind==='town')){ say(['ここでは 使えない。','（外の 世界か 町の 中で 使う）'],back); return; }
+      if(!list.length){ say(['今は 飛べる 町が ない。'],back); return; }
+      menu(list.map(w=>w[0]).concat(['やめる']),'どこへ 飛ぶ？（MP '+k.mp+'）',(j)=>{ if(j>=list.length){ back(); return; } closeMenu(); c.mp-=k.mp; se('ok'); const w=list[j];
+        say([c.name+'は '+k.name+'を 唱えた！','体が 光に 包まれ、空へ 舞い上がった——'],()=>go(()=>{ enterWorld(w[1]); refreshFollowers(); })); },back); return; }
     if(k.type==='escape'){ const to=escapeTo(); if(!to){ say(['ここでは 使えない。','（砦や 山道、遺跡の 中で 使う）'],back); return; } c.mp-=k.mp; se('ok'); say(['来た 道の 光が ひとつずつ ともり、入口へ 導かれた——'],()=>go(()=>{ if(to.town){ enterTown(to.at,to.town); const [sx,sz]=safeSpot(hero.x,hero.z); hero.x=sx; hero.z=sz; hero.ang=0; resetTrail(); } else enterWorld(to); })); return; }
   },()=>openFieldMenu());
   MENU.notes=sks.map(k=>k.desc||''); menuEl.classList.add('wide'); drawMenu(); }
