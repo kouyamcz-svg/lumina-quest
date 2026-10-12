@@ -724,7 +724,7 @@ function pressB(){ if(mapOpen){ closeMap(); return; } if(BT){ if(winClose()) ret
 // ================= 動き =================
 const SPEED=3.2, DASH=1.8, RADT=0.38;   // DASH：町の 中で Bを 押して いる 間の 速さの 倍
 const at=(x,y)=>{ const r=cur.rows; return (y<0||y>=r.length||x<0||x>=r[0].length)?'#':r[y][x]; };
-function blockedAt(x,z){ const c=at(Math.floor(x),Math.floor(z)); if(cur.kind==='world' && c==='~' && seaPass(x,z)) return false;   /* ★船：乗って いれば 海を 渡れる。陸から は 船の ますだけ */ if(cur.solid.has(c)) return true;
+function blockedAt(x,z){ if(cur.kind==='world' && (x<0||z<0||x>=WORLD[0].length||z>=WORLD.length)) return true;   /* ★外の 世界の 端より 外へは 出られない（前は 地図の 外を「陸」と して 歩け、船から 降りて しまった） */ const c=at(Math.floor(x),Math.floor(z)); if(cur.kind==='world' && c==='~' && seaPass(x,z)) return false;   /* ★船：乗って いれば 海を 渡れる。陸から は 船の ますだけ */ if(cur.solid.has(c)) return true;
   if(cur.kind==='town' && ST.phase==='burn' && fires.some(f=>Math.hypot(f[0]-x,f[1]-z)<.45)) return true;
   if((CHESTS[chestKey()]||[]).some(c=>Math.abs(c.x-x)<.36&&Math.abs(c.z-z)<.3)) return true;
   if(cur.kind==='fort'){ if(!fortGateOpen() && x>11 && x<12 && z>5 && z<6) return true; }
