@@ -977,11 +977,11 @@ function drawWorld(fr,now){
     g.save(); g.translate(Math.round(sx),Math.round(sy-h+ts*.12)); if(flip){ g.scale(-1,1); } g.drawImage(cvs,-w/2,0,w,h); g.restore(); });
 }
 
-// ★船（外の 世界の 海の 上。仮の 絵：船体・帆柱・帆）。主人公だけ 甲板に 立つ
+// ★船（外の 世界の 海の 上。発注した 絵：ship_side・ship_up・ship_down）。主人公だけ 甲板に 立つ
 function drawBoat(g,sx,sy,ts,now,ang){ const b=Math.sin(now/400)*ts*.04; const north=Math.cos(ang)<-.7, south=Math.cos(ang)>.7&&!!WOBJ_IMG.ship_down, im=WOBJ_IMG[north?'ship_up':south?'ship_down':'ship_side']; if(!im) return;   /* ★下（南）へ 進む 絵 ship_down が 届いたら 使う（無い 間は 横向き） */   /* ★船（届いた 絵）：北へ 進む ときは 上から 見た 姿、ほかは 横向き（左へ 進むと 反転） */
   const k=ts*1.6/WOBJ_IMG.ship_side.width, w=im.width*k, h=im.height*k;   /* ★横向きと 上から の 絵は 同じ 縮みで（上からの 姿が 大きく 出た） */ g.save(); g.translate(Math.round(sx),Math.round(sy+b+ts*.28)); if(!north && !south && Math.sin(ang)<0) g.scale(-1,1); g.drawImage(im,-w/2,-h,w,h); g.restore(); }
 // ★外の 世界の 絵を 1ます 32ドットで 描く（草原・海・浜辺・街道・川・橋は ここで 描き、
-//   森・山・村・城は 仮の 絵。のちに 発注した 絵と 差し替える）
+//   森・山・村・城などは 発注した 絵 WOBJ_IMG を 置く）
 function bakeWorld32(){
   const TS=32, MW=WORLD[0].length, MH=WORLD.length;
   const mk=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
@@ -2579,7 +2579,7 @@ function worldArea(){ const x=hero.x, z=hero.z, c=at(Math.floor(x),Math.floor(z)
   if(/^c5_/.test(p)) return x>40 ? 'plain5' : 'west';
   if(/^c4_/.test(p)){ if(c==='d') return 'waste'; if(Math.hypot(x-96.5,z-19.5)<7) return 'manorWood'; if(x>81 && z<32) return 'capN'; if(x>63) return 'velnaE4'; if(x>40) return 'pursuit'; return 'west'; }
   if(x>63) return velnaArea(x,z); if(x>40) return (/^c3_(flee|mine|exit)$/.test(p)?'pursuit':/^c3_/.test(p)?'velnaE':'east'); return (p==='road'?'westNight':'west'); }
-// ---- 第4章の 魔物（絵は 仮）----
+// ---- 第4章の 魔物（絵は 2026-10-12 に 届いた ものを 入れた）----
 FOES.sumiyoroi={key:'sumiyoroi', offs:{wind:0.04,atk:0.163}, scale:1.15, name:'スミヨロイ', hp:210, exp:150, gold:40, atk:[30,40], wind:'は 焦げた 大剣を 振りかぶった！', verb:'焦げた 大剣', frames:{idle:RAB.sy_idle,wind:RAB.sy_wind,atk:RAB.sy_atk}};
 FOES.hainome={key:'hainome', offs:{wind:0.02,atk:-0.038}, scale:0.9, name:'ハイノメ', inflict:{type:'conf',rate:.2}, hp:170, exp:140, gold:36, atk:[28,36], wind:'の 灰の 中で 目が ぎょろりと 動いた！', verb:'灰の 牙', frames:{idle:RAB.hn_idle,wind:RAB.hn_wind,atk:RAB.hn_atk}};
 FOES.hikagerou={key:'hikagerou', offs:{wind:0.064}, scale:0.85, name:'ヒカゲロウ', float:true, inflict:{type:'sleep',rate:.2}, hp:150, exp:135, gold:34, atk:[26,34], wind:'の 炎が 黒く 揺れた！', verb:'黒い 炎', frames:{idle:RAB.hg_idle,wind:RAB.hg_wind,atk:RAB.hg_atk}};
