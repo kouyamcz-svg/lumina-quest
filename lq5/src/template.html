@@ -2668,7 +2668,7 @@ const WESTPORT_ROOMS=[
  {name:'教会', rows:["WWWWWWWWW","W...A...W","W.......W","WQQ...QQW","W.......W","WQQ...QQW","WWWWXWWWW"], npc:{x:4.5,y:2.3,spr:'priest',name:'港の 神父',talk:()=>openChurch()}},
 ];
 function westportNpcs(){ return [
-  {x:11.5,y:6.4,spr:'asoldier',name:'アルディアの 兵',lines:['兵「ヴェルナが 国境を 越えたと いう 報せだ。王都は 大騒ぎだ」','兵「王都は ここから 街道を 東へ。橋を 渡って 北だ」']},
+  {x:11.5,y:6.4,spr:'asoldier',name:'アルディアの 兵',lines:['兵「ヴェルナの 全軍が 国境へ 向かって いると いう 報せだ。王都は 大騒ぎだ」','兵「王都は ここから 街道を 東へ。橋を 渡って 北だ」']},
   {x:6.5,y:9.5,spr:'elder',name:'港の 老人',lines:['老人「ヴェルナの 港から 船が 来るなんて、何年ぶりかのう」']},
   {x:16.5,y:9.5,spr:'girl',name:'港の 娘',lines:['娘「使者の ハーヴェンさまが、傷だらけで 王都へ 戻られたそうよ」','娘「王さまは 使者の 言葉を 信じて、ずっと 待って おられるって」']},
 ]; }
@@ -2788,7 +2788,7 @@ function uminariFight(){ if(BT||CUT) return; CUT=1; hero.z=cur.rows.length-1.5; 
     say(['ウミナリは 大きな 波を 残して、沖へ 沈んで いった。','港の 海が、静かに なった。','ドルガン「……ガロの 所へ 戻ろう」']); })); }
 // ---- 西の 港町ウェルスに 着く：第4章の 終わり ----
 function westPortArrive(where){ const cap=where==='cap'; if(cap) enterTown([12,20.2],'cap'); else enterTown([11.5,TOWNS.westport.rows.length-1.8],'westport'); CUT=1;
-  setTimeout(()=>say([cap?'海を 渡り、王都 アルディアの 門の 前まで たどり着いた。……アルディアの 土だ。':'船は 川の 口の 港に 着いた。……アルディアの 土だ。','リディア「ここが、アルディア……」','エルト「……帰って きた」','ドルガン「のんびり してる 暇は ねえぞ。見ろ、兵の 数を」',(cap?'門番':'港の 兵')+'「ヴェルナが 国境を 越えた！ 全軍だ！ '+(cap?'城へ 急げ！」':'王都へ 急げ！」'),'ZF「……戦ガ 始マッタ」',(cap?'リディア「城へ。アルディア王に、先生の 手記を」':'リディア「王都へ。アルディア王に、先生の 手記を」')],()=>{ CUT=0; showEnd4(); }),600); }
+  setTimeout(()=>say([cap?'海を 渡り、王都 アルディアの 門の 前まで たどり着いた。……アルディアの 土だ。':'船は 川の 口の 港に 着いた。……アルディアの 土だ。','リディア「ここが、アルディア……」','エルト「……帰って きた」','ドルガン「のんびり してる 暇は ねえぞ。見ろ、兵の 数を」',(cap?'門番':'港の 兵')+'「ヴェルナの 全軍が 国境へ 向かって いる！ '+(cap?'城へ 急げ！」':'王都へ 急げ！」'),'ZF「……戦ガ 始マル」',(cap?'リディア「城へ。アルディア王に、先生の 手記を」':'リディア「王都へ。アルディア王に、先生の 手記を」')],()=>{ CUT=0; showEnd4(); }),600); }
 function showEnd4(ns){ CARD_T=performance.now(); ST.phase='c4_end'; const c=document.getElementById('card'); c.innerHTML='<div>第4章</div><div class="t">側近の 屋敷跡</div><div>完</div><div style="font-size:13px;margin-top:20px">── 第5章へ つづく ──</div>'; c.style.opacity=1; if(!ns) saveGame(); }
 CHESTS.dun_manor=[{x:16.5,z:9.5,gear:{name:'焦げ跡の 兜',kind:'helm',v:15,price:600},id:'mn1'},{x:1.5,z:11.5,gold:500,id:'mn2'},{x:1.5,z:1.5,herb:3,ether:2,kitsuke:2,id:'mn3'}];
 CHESTS.dun_manorB=[{x:1.5,z:6.5,gear:{name:'黒檀の 杖',kind:'weapon',v:17,price:700},id:'mb1'},{x:9.5,z:6.5,gear:{name:'書庫の 腕刃',kind:'weapon',v:22,price:800,who:['zf']},id:'mb2'}];
