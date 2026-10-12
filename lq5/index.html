@@ -976,8 +976,8 @@ function drawWorld(fr,now){
 }
 
 // ★船（外の 世界の 海の 上。仮の 絵：船体・帆柱・帆）。主人公だけ 甲板に 立つ
-function drawBoat(g,sx,sy,ts,now,ang){ const b=Math.sin(now/400)*ts*.04; const north=Math.cos(ang)<-.7, im=WOBJ_IMG[north?'ship_up':'ship_side']; if(!im) return;   /* ★船（届いた 絵）：北へ 進む ときは 上から 見た 姿、ほかは 横向き（左へ 進むと 反転） */
-  const k=ts*1.6/WOBJ_IMG.ship_side.width, w=im.width*k, h=im.height*k;   /* ★横向きと 上から の 絵は 同じ 縮みで（上からの 姿が 大きく 出た） */ g.save(); g.translate(Math.round(sx),Math.round(sy+b+ts*.28)); if(!north && Math.sin(ang)<0) g.scale(-1,1); g.drawImage(im,-w/2,-h,w,h); g.restore(); }
+function drawBoat(g,sx,sy,ts,now,ang){ const b=Math.sin(now/400)*ts*.04; const north=Math.cos(ang)<-.7, south=Math.cos(ang)>.7&&!!WOBJ_IMG.ship_down, im=WOBJ_IMG[north?'ship_up':south?'ship_down':'ship_side']; if(!im) return;   /* ★下（南）へ 進む 絵 ship_down が 届いたら 使う（無い 間は 横向き） */   /* ★船（届いた 絵）：北へ 進む ときは 上から 見た 姿、ほかは 横向き（左へ 進むと 反転） */
+  const k=ts*1.6/WOBJ_IMG.ship_side.width, w=im.width*k, h=im.height*k;   /* ★横向きと 上から の 絵は 同じ 縮みで（上からの 姿が 大きく 出た） */ g.save(); g.translate(Math.round(sx),Math.round(sy+b+ts*.28)); if(!north && !south && Math.sin(ang)<0) g.scale(-1,1); g.drawImage(im,-w/2,-h,w,h); g.restore(); }
 // ★外の 世界の 絵を 1ます 32ドットで 描く（草原・海・浜辺・街道・川・橋は ここで 描き、
 //   森・山・村・城は 仮の 絵。のちに 発注した 絵と 差し替える）
 function bakeWorld32(){
