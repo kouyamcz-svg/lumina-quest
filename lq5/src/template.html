@@ -2808,14 +2808,14 @@ CHESTS.dun_manorB=[{x:1.5,z:6.5,gear:{name:'黒檀の 杖',kind:'weapon',v:17,pr
 // ================= 第5章「戦場の 真実」 =================
 //  c5_king（王都の 城で 手記を 王へ）→ c5_fleet（西の 港町ウェルスで 船団の 将に 話す）→ c5_land（南の 海岸に 上陸。夜、北の 平原の 摂政の 陣へ。外れの 天幕で 騎士団長）
 //  → c5_battle（明け方。アルディアの 兵と 柵を 3つ 破る → 物見台で 正体を 暴く → ガルヴァ）→ c5_end
-//  ★魔物の 絵は 仮（いまある 絵の 色を 変えて いる）。プロンプトは docs/第5章_絵のプロンプト.md
-FOES.kagehei={key:'kagehei', name:'影の 兵', tint:0x6a5a90, hp:340, exp:220, gold:50, atk:[42,52], wind:'は 黒い 槍を 構えた！', verb:'影の 槍', frames:{idle:RAB.ts_idle,wind:RAB.ts_wind,atk:RAB.ts_atk}};   /* 仮：追っ手の 兵の 絵 */
-FOES.yarinoko={key:'yarinoko', name:'ヤリノコ', tint:0xb0c060, hp:230, exp:200, gold:46, atk:[36,46], wind:'の 葉が 槍の ように 逆立った！', verb:'葉の 槍', inflict:{type:'poison',rate:.22}, frames:{idle:RAB.tn_idle,wind:RAB.tn_wind,atk:RAB.tn_atk}};   /* 仮：ツタノゾキの 絵 */
-FOES.noroshidama={key:'noroshidama', name:'ノロシダマ', tint:0xe09050, float:true, hp:210, exp:195, gold:44, atk:[34,44], wind:'から 赤い 煙が 噴き上がった！', verb:'のろしの 煙', inflict:{type:'conf',rate:.22}, frames:{idle:RAB.ym_idle,wind:RAB.ym_wind,atk:RAB.ym_atk}};   /* 仮：ヨミアカリの 絵 */
-FOES.kageshin={key:'kageshin', name:'影の 親衛隊長', tint:0x7060a0, scale:1.3, hp:2600, exp:3800, gold:700, atk:[46,58], wind:'は 黒い 斧槍を 振りかぶった！', verb:'影の 斧槍', boss:true,
-  bigWind:'が 斧槍を 掲げた！ 影の 兵が いっせいに 槍を 向ける！', bigName:'影の 号令', frames:{idle:RAB.gn_idle,idle2:RAB.gn_idle2,wind:RAB.gn_wind,atk:RAB.gn_atk,big:RAB.gn_big}};   /* 仮：騎士団長の 絵 */
-FOES.garva={key:'garva', name:'影の 宰相 ガルヴァ', tint:0xb070d0, scale:1.65, hp:4200, exp:6000, gold:1200, atk:[48,60], wind:'の 角が 紫に 光った！', verb:'影の 爪', boss:true, bigInflict:{type:'conf',rate:.3},
-  bigWind:'の 体から 無数の 黒い 糸が 伸びた！', bigName:'心を 縛る 術', frames:{idle:RAB.km_idle,idle2:RAB.km_idle2,wind:RAB.km_wind,atk:RAB.km_atk,big:RAB.km_big}};   /* 仮：屋敷跡の 番人の 絵 */
+//  ★魔物の 絵は 2026-10-12 に 届いた 絵（art/foes/ の kagehei〜garva）
+FOES.kagehei={key:'kagehei', offs:{wind:0.116,atk:0.135}, scale:1.0, name:'影の 兵', hp:340, exp:220, gold:50, atk:[42,52], wind:'は 黒い 槍を 構えた！', verb:'影の 槍', frames:{idle:RAB.kh_idle,wind:RAB.kh_wind,atk:RAB.kh_atk}};
+FOES.yarinoko={key:'yarinoko', scale:0.95, name:'ヤリノコ', hp:230, exp:200, gold:46, atk:[36,46], wind:'の 葉が 槍の ように 逆立った！', verb:'葉の 槍', inflict:{type:'poison',rate:.22}, frames:{idle:RAB.yn_idle,wind:RAB.yn_wind,atk:RAB.yn_atk}};
+FOES.noroshidama={key:'noroshidama', offs:{wind:-0.024,atk:0.308}, scale:0.85, name:'ノロシダマ', float:true, hp:210, exp:195, gold:44, atk:[34,44], wind:'から 赤い 煙が 噴き上がった！', verb:'のろしの 煙', inflict:{type:'conf',rate:.22}, frames:{idle:RAB.nr_idle,wind:RAB.nr_wind,atk:RAB.nr_atk}};
+FOES.kageshin={key:'kageshin', offs:{idle:0.028,idle2:0.038,wind:0.021,atk:0.083}, scale:1.35, name:'影の 親衛隊長', hp:2600, exp:3800, gold:700, atk:[46,58], wind:'は 黒い 斧槍を 振りかぶった！', verb:'影の 斧槍', boss:true,
+  bigWind:'が 斧槍を 掲げた！ 影の 兵が いっせいに 槍を 向ける！', bigName:'影の 号令', frames:{idle:RAB.ks_idle,idle2:RAB.ks_idle2,wind:RAB.ks_wind,atk:RAB.ks_atk,big:RAB.ks_big}};
+FOES.garva={key:'garva', scale:1.7, name:'影の 宰相 ガルヴァ', hp:4200, exp:6000, gold:1200, atk:[48,60], wind:'の 角が 紫に 光った！', verb:'影の 爪', boss:true, bigInflict:{type:'conf',rate:.3},
+  bigWind:'の 体から 無数の 黒い 糸が 伸びた！', bigName:'心を 縛る 術', frames:{idle:RAB.gv_idle,idle2:RAB.gv_idle2,wind:RAB.gv_wind,atk:RAB.gv_atk,big:RAB.gv_big}};
 ENC.plain5=[['kagehei',3],['yarinoko',2],['noroshidama',2],['tsuite',1],['gincoro',1]]; ENC.camp=[['kagehei',3],['tsuite',2],['noroshidama',1]];
 SHOP.smith5=[{name:'王国の 宝剣',kind:'weapon',v:40,price:2200},{name:'王国の 大斧',kind:'weapon',v:42,price:2300,who:['dolgan']},{name:'白銀の よろい',kind:'armor',v:30,price:1900},{name:'白銀の 兜',kind:'helm',v:19,price:1100},{name:'聖樹の 杖',kind:'weapon',v:22,price:1300},{name:'白銀の ローブ',kind:'armor',v:18,price:1200},{name:'白銀の 腕刃',kind:'weapon',v:28,price:1700,who:['zf']},{name:'白銀の 装甲',kind:'armor',v:26,price:1800,who:['zf']}];
 // ---- 始まり：王都の 城 ----
