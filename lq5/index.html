@@ -1315,9 +1315,9 @@ function enemyTurn(){ const st=[]; alive().forEach(f=>st.push(...foeAct(f))); st
 const EXP_RATE=1.25;   // ★経験値を 少し 上げる（指示。前は 1倍）
 function winSteps(){ const won=BT.foes.filter(f=>!f.fled); if(!won.length) return [()=>{ bsay('魔物は 逃げて いった。'); return 1.2; }, ()=>{ endBattle(); return 99; }];   /* ★逃げた 魔物の 分は もらえない */
   return [
-  ()=>{ const ex=Math.round(won.reduce((a,f)=>a+(f.def.exp||0),0)*EXP_RATE), gd=won.reduce((a,f)=>a+(f.def.gold||0),0); BAG.gold+=gd; const ups=gainExp(ex); if(bgmEl && !bgmEl.paused) bgmEl.pause(); jingleUntil=performance.now()+(ups.length?4200:2000); setTimeout(()=>se('win'),80); if(ups.length) setTimeout(()=>se('lvup'),1650);   /* ★勝利の 曲の 後に ファンファーレ（前は 0.3秒 ずらして 重なり、戦闘の 曲に 埋もれて いた） */
+  ()=>{ const ex=Math.round(won.reduce((a,f)=>a+(f.def.exp||0),0)*EXP_RATE), gd=won.reduce((a,f)=>a+(f.def.gold||0),0); BAG.gold+=gd; const ups=gainExp(ex); if(bgmEl && !bgmEl.paused) bgmEl.pause(); jingleUntil=performance.now()+(ups.length?3000:1000); setTimeout(()=>se('win'),80); if(ups.length) setTimeout(()=>se('lvup'),760);   /* ★勝利の 曲の 後に ファンファーレ（前は 0.3秒 ずらして 重なり、戦闘の 曲に 埋もれて いた） */
  ST.kill=ST.kill||{}; won.forEach(f=>{ ST.kill[f.def.key]=(ST.kill[f.def.key]||0)+1; });   // ★眠りと 混乱は 戦闘が 終わると 治る（毒は 残る）
-        bsay((BT.foes.length>1?'魔物たちを やっつけた！ ':'')+'経験値 '+ex+'、'+gd+'ゴールドを 手に 入れた！'+(ups.length?'　'+ups.join('　'):'')); return ups.length?3.9:1.9; },
+        bsay((BT.foes.length>1?'魔物たちを やっつけた！ ':'')+'経験値 '+ex+'、'+gd+'ゴールドを 手に 入れた！'+(ups.length?'　'+ups.join('　'):'')); return ups.length?2.8:1.4; },
   ()=>{ endBattle(); return 99; } ]; }
 function killCheck(f){ if(f.hp<=0 && !f.dead){ BT.steps.unshift(()=>{ f.dead=true; f.ex=1; se('defeat'); drawFoeNames(); bsay(f.name+'を たおした！'); return 1.0; }); } }
 function hitFoe(m,f,mul,label,key){ return ()=>{ if(!alive().length) return 0; if(f.dead) f=alive()[0];
@@ -1962,9 +1962,8 @@ function melody(seq,beat,type,v,w,hold){ let t=w||0; seq.forEach(([n,len])=>{ if
 let jingleUntil=0;   // ★勝利・レベルアップの 曲の 間は 戦闘の 曲を 止める
 function jingle(kind){ const b=kind==='lvup'?.105:.115; let d=0;
   if(kind==='win'){   // 勝利の 曲（オリジナル）
-    d=melody([['E5',1],['G5',1],['C6',2],['B5',1],['G5',1],['A5',1],['B5',1],[['C6','E5'],5]],b,'square',.07);
-    melody([['C3',4],['G2',4],[['C3','G3'],5]],b,'triangle',.08);
-    melody([[0,2],['E4',2],[0,2],['D4',2],[['G4'],5]],b,'square',.035); }
+    d=melody([['G5',1],['C6',1],['E6',1],['C6',3]],.09,'square',.07);   /* ★短く シンプルに（指示）：4音 約0.55秒 */
+    melody([[0,3],['C4',3]],.09,'triangle',.07); }
   if(kind==='lvup'){   // レベルアップの ファンファーレ（オリジナル）
     d=melody([['C5',.67],['C5',.67],['C5',.66],['G5',3],['F5',1],['A5',1],['G5',1],['F5',1],[['C6','G5','E5'],7]],b,'square',.075);
     melody([['C3',2],['C3',3],['F2',2],['G2',2],[['C3','G3'],7]],b,'triangle',.085);

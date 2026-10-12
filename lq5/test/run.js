@@ -267,7 +267,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     for(let i=0;i<80;i++){ await W(100); if(await E(()=>!BT)) break; }
     const r=await E(()=>{ FOES.nousagi.exp=FOES.nousagi._exp; tone=window._origTone; const d1=jingle.length; return { n:window._tones.length, until:jingleUntil-performance.now() }; });
     const winD=await E(()=>{ const s=jingleUntil; const d=jingle('win'); jingleUntil=s; return d; }), lvD=await E(()=>{ const s=jingleUntil; const d=jingle('lvup'); jingleUntil=s; return d; });
-    return r.n>=20 && winD>1.2 && lvD>1.4 && winD+.08<1.65; })());
+    return r.n>=12 && winD>.4 && winD<.8 && lvD>1.4 && winD+.08<.76; })());
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
