@@ -80,7 +80,7 @@ const SPR=__SPR__;
 // ★絵の 向きが 左向きで 描かれて いる こま（反転の 向きを 逆に する）。ドルガンの 描き直しの 斜め後ろは 左上を 向いて いた（横顔の 絵との 似かたで 確かめた）
 const MIRROR={dolgan:{diagB:true}};
 // ★人ごとの 背の 高さ（1＝大人）
-const SIZE={child:.72, elder:.9, girl:.92, banpei:1.4};
+const SIZE={child:.72, elder:.9, girl:.92, banpei:1.4, martha:.86};
 // ================= 地図（ますの 並び。その 上を 自由に 動く）=================
 //  # 崖・外壁  H 家（ひとかたまりで 1けん）  D 家の 扉  t 木  F 噴水  w 井戸  = 石畳の 広場  g 村の 門
 const TOWN=[
@@ -961,7 +961,7 @@ function drawWorld(fr,now){
   // ★出た 直後は 4人が 同じ 場所に 重なり、歩き出すと 縦の 列に なる（resetTrail で みんな 先頭と 同じ 場所から）
   const sailing=at(Math.floor(hero.x),Math.floor(hero.z))==='~';
   if(sailing) drawBoat(g, ox+hero.x*ts, oy+hero.z*ts, ts, now);
-  const list=sailing?[[hero.p.k,hero.x,hero.z,hero.ang]]:[...followers.map(f=>[f.p.k,f.x,f.z,f.ang]).reverse(), [hero.p.k,hero.x,hero.z,hero.ang]];
+  const list=sailing?[]:[...followers.map(f=>[f.p.k,f.x,f.z,f.ang]).reverse(), [hero.p.k,hero.x,hero.z,hero.ang]];
   list.sort((a,b)=>a[2]-b[2]);
   list.forEach(([k,x,z,ang])=>{ let rel=Math.atan2(Math.sin(ang),Math.cos(ang)); const a=Math.abs(rel); let pose,flip=false;
     if(SPR[k].diagF){ const e=Math.PI/8; pose=a<e?'front':a<3*e?'diagF':a<5*e?'side':a<7*e?'diagB':'back'; flip=(pose!=='front'&&pose!=='back')&&rel<0; if(MIRROR[k]&&MIRROR[k][pose]) flip=!flip; }
@@ -972,8 +972,8 @@ function drawWorld(fr,now){
 }
 
 // ★船（外の 世界の 海の 上。仮の 絵：船体・帆柱・帆）。主人公だけ 甲板に 立つ
-function drawBoat(g,sx,sy,ts,now){ const b=Math.sin(now/400)*ts*.04; const u=ts/16; const R_=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round(sx+x*u),Math.round(sy+b+y*u),Math.ceil(w*u),Math.ceil(h*u));};
-  R_(-10,2,20,5,'#6a4a2a'); R_(-11,1,22,2,'#8a6a3a'); R_(-9,6,18,2,'#4a3018'); R_(-1,-14,2,16,'#5a3a20'); R_(0,-13,9,9,'#f0e8d8'); R_(0,-13,9,1,'#c8b8a0'); R_(-12,3,2,2,'#e8e0d0'); }
+function drawBoat(g,sx,sy,ts,now){ const b=Math.sin(now/400)*ts*.04; const north=Math.cos(hero.ang)<-.7, im=WOBJ_IMG[north?'ship_up':'ship_side']; if(!im) return;   /* ★船（届いた 絵）：北へ 進む ときは 上から 見た 姿、ほかは 横向き（左へ 進むと 反転） */
+  const k=ts*1.6/WOBJ_IMG.ship_side.width, w=im.width*k, h=im.height*k;   /* ★横向きと 上から の 絵は 同じ 縮みで（上からの 姿が 大きく 出た） */ g.save(); g.translate(Math.round(sx),Math.round(sy+b+ts*.28)); if(!north && Math.sin(hero.ang)<0) g.scale(-1,1); g.drawImage(im,-w/2,-h,w,h); g.restore(); }
 // ★外の 世界の 絵を 1ます 32ドットで 描く（草原・海・浜辺・街道・川・橋は ここで 描き、
 //   森・山・村・城は 仮の 絵。のちに 発注した 絵と 差し替える）
 function bakeWorld32(){
@@ -1034,10 +1034,10 @@ function bakeWorld32(){
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){ const c=WORLD[y][x], sx=x*TS, sy=y*TS;
     if(c===',') put(WOBJ_IMG[hsh(x,y,5)<.5?'tree1':'tree2'], sx+16, sy+31);
     if(c==='^') put(WOBJ_IMG[hsh(x,y,6)<.75?'mtn1':'mtn2'], sx+16, sy+31);
-    if(c==='V'||c==='W'||c==='h'||c==='P'||c==='T'||c==='U') put(WOBJ_IMG.village, sx+16, sy+31);   /* ★第4章の 町は 村の 絵を 使い回し（仮） */
-    if(c==='P'||c==='U'||c==='T'){ P(G2,sx+2,sy+26,28,4,'#6a4a2a'); P(G2,sx+4,sy+24,24,2,'#8a6a3a'); }   /* ★港：桟橋の 板（仮） */
+    if(c==='V'||c==='W'||c==='h') put(WOBJ_IMG.village, sx+16, sy+31);
+    if(c==='P'||c==='U'||c==='T') put(WOBJ_IMG.port, sx+16, sy+34);   /* ★港町（サルム・ウェルス・ミラ共通。2026-10-12 届いた 絵） */
     if(c==='N') put(WOBJ_IMG.cave, sx+16, sy+31);   /* ★坑道の 北の 出口（ほら穴の 絵） */
-    if(c==='A'){ P(G2,sx+3,sy+16,26,14,'#3a3230'); P(G2,sx+5,sy+10,4,20,'#2a2220'); P(G2,sx+14,sy+8,4,22,'#2a2220'); P(G2,sx+23,sy+12,4,18,'#2a2220'); P(G2,sx+2,sy+28,28,3,'#4a4440'); P(G2,sx+9,sy+20,4,4,'#1a1410'); }   /* ★焼け落ちた 屋敷（焦げた 柱） */
+    if(c==='A') put(WOBJ_IMG.manor, sx+16, sy+32);   /* ★側近の 屋敷跡（届いた 絵） */
     if((c==='J'||c==='j') && WORLD[y][x-1]!==c){ const im=WOBJ_IMG[c==='J'?'pass_open':'pass_closed']; if(im) put(im, sx+32, sy+16+Math.round(im.height*.41)); }   /* ★帝都の 検問（関所の 絵を 使い回し） */
     if(c==='S' && WORLD[y][x-1]!=='S' && WORLD[y-1][x]!=='S') put(WOBJ_IMG.fort, sx+32, sy+63);   // ★国境の 砦（2×2）
     if(c==='C' && WORLD[y][x-1]!=='C' && WORLD[y-1][x]!=='C') put(WOBJ_IMG.castle, sx+32, sy+63);
@@ -2514,7 +2514,7 @@ function worldArea(){ const x=hero.x, z=hero.z, c=at(Math.floor(x),Math.floor(z)
   if(/^c4_/.test(p)){ if(c==='d') return 'waste'; if(Math.hypot(x-96.5,z-19.5)<7) return 'manorWood'; if(x>81 && z<32) return 'capN'; if(x>63) return 'velnaE4'; if(x>40) return 'pursuit'; return 'west'; }
   if(x>63) return velnaArea(x,z); if(x>40) return (/^c3_(flee|mine|exit)$/.test(p)?'pursuit':/^c3_/.test(p)?'velnaE':'east'); return (p==='road'?'westNight':'west'); }
 // ---- 第4章の 魔物（絵は 仮）----
-FOES.sumiyoroi={key:'sumiyoroi', offs:{idle:-0.148,wind:0.073,atk:0.13}, scale:1.15, name:'スミヨロイ', hp:210, exp:150, gold:40, atk:[30,40], wind:'は 焦げた 大剣を 振りかぶった！', verb:'焦げた 大剣', frames:{idle:RAB.sy_idle,wind:RAB.sy_wind,atk:RAB.sy_atk}};
+FOES.sumiyoroi={key:'sumiyoroi', offs:{wind:0.04,atk:0.163}, scale:1.15, name:'スミヨロイ', hp:210, exp:150, gold:40, atk:[30,40], wind:'は 焦げた 大剣を 振りかぶった！', verb:'焦げた 大剣', frames:{idle:RAB.sy_idle,wind:RAB.sy_wind,atk:RAB.sy_atk}};
 FOES.hainome={key:'hainome', offs:{wind:0.02,atk:-0.038}, scale:0.9, name:'ハイノメ', inflict:{type:'conf',rate:.2}, hp:170, exp:140, gold:36, atk:[28,36], wind:'の 灰の 中で 目が ぎょろりと 動いた！', verb:'灰の 牙', frames:{idle:RAB.hn_idle,wind:RAB.hn_wind,atk:RAB.hn_atk}};
 FOES.hikagerou={key:'hikagerou', offs:{wind:0.064}, scale:0.85, name:'ヒカゲロウ', float:true, inflict:{type:'sleep',rate:.2}, hp:150, exp:135, gold:34, atk:[26,34], wind:'の 炎が 黒く 揺れた！', verb:'黒い 炎', frames:{idle:RAB.hg_idle,wind:RAB.hg_wind,atk:RAB.hg_atk}};
 FOES.sabitsuno={key:'sabitsuno', offs:{wind:0.026}, scale:0.95, name:'サビツノ', hp:200, exp:160, gold:44, atk:[32,42], wind:'は 錆びた 角を 低く 構えた！', verb:'錆びた 角', frames:{idle:RAB.sb_idle,wind:RAB.sb_wind,atk:RAB.sb_atk}};
@@ -2544,7 +2544,7 @@ const HAMLET=[
 "#tt..................tt#",
 "###########..###########"];
 const HAMLET_ROOMS=[
- {name:'マーサの 家', rows:["WWWWWWWWW","Ws..f...W","W.......W","W..cTc..W","W.......W","Wp..b..pW","WWWWXWWWW"], npc:{x:4.5,y:2.6,spr:'okami',name:'老婆 マーサ',talk:()=>marthaTalk()}},
+ {name:'マーサの 家', rows:["WWWWWWWWW","Ws..f...W","W.......W","W..cTc..W","W.......W","Wp..b..pW","WWWWXWWWW"], npc:{x:4.5,y:2.6,spr:'martha',name:'老婆 マーサ',talk:()=>marthaTalk()}},
  {name:'炭焼きの 家', rows:["WWWWWWWWW","Wf..s..sW","W.......W","W.T...T.W","W.......W","Ws......W","WWWWXWWWW"], npc:{x:2.5,y:2.5,spr:'smith',name:'炭焼きの 男',talk:()=>say(['炭焼き「炭と 薬草なら 分けて やれる。……兵に 見つかるなよ」'],()=>openShop('tools','炭焼きの 家（所持金 '+BAG.gold+'G）'))}},
  {name:'宿屋', rows:["WWWWWWWWW","Wb.bfb.sW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"], npc:{x:2.5,y:2.4,spr:'girl',name:'宿の 娘',talk:()=>say(['娘「小さな 宿だけど、ゆっくり して いってね」'],openInn)}},
 ];
@@ -2573,7 +2573,7 @@ const PORT_ROOMS=[
  {name:'道具屋', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.TTT...W","W.......W","Wp.....pW","WWWWXWWWW"], npc:{x:4.5,y:2.5,spr:'okami',name:'道具屋の 主人',talk:()=>say(['主人「船に 乗るなら 薬草と 気つけ草は 多めにね。海の 魔物は 眠らせて くるよ」'],()=>openShop('tools','道具屋（所持金 '+BAG.gold+'G）'))}},
  {name:'武器と 防具の 店', rows:["WWWWWWWWW","Wf..s..sW","W.......W","W.T...T.W","W.......W","Ws......W","WWWWXWWWW"], npc:{x:2.5,y:2.5,spr:'smith',name:'港の 鍛冶',talk:()=>{ EQUIP_TALK=1; drawEquipPanel(); say(['鍛冶「潮に 強い 鋼だ。帝都の 品より 軽くて 硬い」'],()=>{ EQUIP_TALK=0; openShop('smith4','武器と 防具の 店（所持金 '+BAG.gold+'G）'); }); }}},
  {name:'教会', rows:["WWWWWWWWW","W...A...W","W.......W","WQQ...QQW","W.......W","WQQ...QQW","WWWWXWWWW"], npc:{x:4.5,y:2.3,spr:'priest',name:'港の 神父',talk:()=>openChurch()}},
- {name:'ガロの 倉庫', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.T.....W","W.....s.W","Wp......W","WWWWXWWWW"], npc:{x:3.5,y:2.6,spr:'smith',name:'密輸商 ガロ',talk:()=>garoTalk()}},
+ {name:'ガロの 倉庫', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.T.....W","W.....s.W","Wp......W","WWWWXWWWW"], npc:{x:3.5,y:2.6,spr:'garo',name:'密輸商 ガロ',talk:()=>garoTalk()}},
 ];
 function portNpcs(){ const ph=ST.phase; return [
   {x:13.5,y:6.4,spr:'vsoldier',name:'港の 兵',lines:/^c4_(sea|end)$/.test(ph)?['兵「……船止めは 解けん。だが、港の 魔物を 退治して くれた 者を 捕まえる 気は ないさ」']:['兵「摂政さまの 命令で、港の 船は 全部 止めて ある」','兵「アルディアの 王殺しを 海から 逃がさぬ ためだとさ」']},
