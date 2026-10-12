@@ -961,7 +961,8 @@ function drawWorld(fr,now){
   // ★外の 世界の 絵（1ます 32ドット）
   if(!WORLD_IMG) WORLD_IMG=bakeWorld32();
   g.drawImage(WORLD_IMG, Math.round(ox), Math.round(oy), WORLD[0].length*ts, WORLD.length*ts);
-  if(ST.phase==='road'){ g.fillStyle='rgba(12,14,48,.5)'; g.fillRect(0,0,W_,H_); }
+  if(ST.phase==='road'||ST.phase==='c5_land'){ g.fillStyle='rgba(12,14,48,.5)'; g.fillRect(0,0,W_,H_); }   /* ★第5章の 上陸は 夜明け前（前は 昼の 明るさで、陣に 入ると 夜だった） */
+  if(ST.phase==='c5_land'){ const fx=ox+56.5*ts, fy=oy+40.5*ts, fl=1+Math.sin(now/180)*.06, gr=g.createRadialGradient(fx,fy,0,fx,fy,ts*2.2*fl); gr.addColorStop(0,'rgba(255,170,70,.5)'); gr.addColorStop(1,'rgba(255,140,40,0)'); g.fillStyle=gr; g.fillRect(fx-ts*3,fy-ts*3,ts*6,ts*6); }   /* ★摂政の 陣の かがり火（兵「陣の 火が 見えます」） */
   // 人（後ろの 者から 先に 描く）
   // ★出た 直後は 4人が 同じ 場所に 重なり、歩き出すと 縦の 列に なる（resetTrail で みんな 先頭と 同じ 場所から）
   shipFix(); const sailing=!!(ST.ship && ST.onShip);
@@ -1070,7 +1071,7 @@ const BG_LOOK={
   burn:{grp:'burn', bg:0x1e0c10, fog:[0x2a1210,10,40], hemi:[0xff9a70,0x2a1010,.5], sun:[0xff7040,.35], sky:false},
 };
 function sceneLook(){ if(cur.kind==='fort') return 'fort'; if(cur.kind==='dun'){ const lk=DUNS[DUN_NOW].look; return typeof lk==='function'?lk():lk; } if(cur.kind==='town' && ST.phase==='burn') return 'burn';
-  if(cur.kind==='world'){ if(ST.phase==='road') return 'night';   /* ★外の 世界は 立って いる 所の まわりで 決める（前は 国境より 東なら いつも 岩場で、草原でも 地面の 背景だった） */
+  if(cur.kind==='world'){ if(ST.phase==='road'||ST.phase==='c5_land') return 'night';   /* ★外の 世界は 立って いる 所の まわりで 決める（前は 国境より 東なら いつも 岩場で、草原でも 地面の 背景だった） */
     const hx=Math.floor(hero.x), hz=Math.floor(hero.z); let rock=0, n=0; for(let dz=-2;dz<=2;dz++) for(let dx=-2;dx<=2;dx++){ const c=WORLD[hz+dz]&&WORLD[hz+dz][hx+dx]; if(!c) continue; n++; if(c==='^'||c==='d'||c==='Q'||c==='G') rock++; }
     if(WORLD[hz]&&WORLD[hz][hx]==='~') return 'sea';   /* ★海の 上は 船の 甲板と 海 */
     if(WORLD[hz]&&WORLD[hz][hx]==='d') return 'rock'; return rock>=5 ? 'rock' : 'field'; } return 'field'; }
