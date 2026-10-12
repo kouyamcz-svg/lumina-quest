@@ -724,7 +724,7 @@ function pressB(){ if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='men
 // ================= 動き =================
 const SPEED=3.2, DASH=1.8, RADT=0.38;   // DASH：町の 中で Bを 押して いる 間の 速さの 倍
 const at=(x,y)=>{ const r=cur.rows; return (y<0||y>=r.length||x<0||x>=r[0].length)?'#':r[y][x]; };
-function blockedAt(x,z){ const c=at(Math.floor(x),Math.floor(z)); if(cur.kind==='world' && c==='~' && canSail()) return false;   /* ★船：海を 渡れる */ if(cur.solid.has(c)) return true;
+function blockedAt(x,z){ const c=at(Math.floor(x),Math.floor(z)); if(cur.kind==='world' && c==='~' && seaPass(x,z)) return false;   /* ★船：乗って いれば 海を 渡れる。陸から は 船の ますだけ */ if(cur.solid.has(c)) return true;
   if(cur.kind==='town' && ST.phase==='burn' && fires.some(f=>Math.hypot(f[0]-x,f[1]-z)<.45)) return true;
   if((CHESTS[chestKey()]||[]).some(c=>Math.abs(c.x-x)<.36&&Math.abs(c.z-z)<.3)) return true;
   if(cur.kind==='fort'){ if(!fortGateOpen() && x>11 && x<12 && z>5 && z<6) return true; }
@@ -760,6 +760,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
       if(cur.kind!=='world' && hero.x===ox && hero.z===oz){ if(Math.abs(vz)>.5){ const cx=Math.floor(hero.x)+.5, dx=cx-hero.x; if(Math.abs(dx)>.02 && freeCircle(cx,hero.z+vz*st*3)){ const m=Math.sign(dx)*Math.min(Math.abs(dx),st); if(freeCircle(hero.x+m,hero.z)) hero.x+=m; } }
         else if(Math.abs(vx)>.5){ const cz=Math.floor(hero.z)+.5, dz=cz-hero.z; if(Math.abs(dz)>.02 && freeCircle(hero.x+vx*st*3,cz)){ const m=Math.sign(dz)*Math.min(Math.abs(dz),st); if(freeCircle(hero.x,hero.z+m)) hero.z+=m; } } } }
     const mv=Math.hypot(hero.x-ox,hero.z-oz);
+    if(mv>.001 && cur.kind==='world') shipStep();
     if(mv>.001){ trail.unshift([hero.x,hero.z,hero.ang]); if(trail.length>400) trail.pop(); }
     if(mv>.001 && STATS.elt.status==='poison'){ ST.pz=(ST.pz||0)+mv; if(ST.pz>6){ ST.pz=0; if(STATS.elt.hp>1){ STATS.elt.hp--; flashEl.style.opacity=.35; setTimeout(()=>flashEl.style.opacity=0,120); } } }   // ★毒：歩くと 少しずつ 減る（1までで 止まる）
     if(cur.kind==='world' && mv>.001){ wWalk+=mv*(at(Math.floor(hero.x),Math.floor(hero.z))===','?1.5:1);
@@ -938,6 +939,7 @@ function drawCastle(sx,sy,s){ // 2×2 ますの 王都の 城
 function enterWorld(at){ if(G){ S.remove(G); disposeG(G); } G=null; PROPS=[]; applyWorldState();
   clearNpcs(); cur={kind:'world', rows:WORLD, solid:WSOLID, npcs:[], room:null};   /* ★先に 前の 場所の 人を 消す（前は 消し忘れて、王都の 門番が 砦の 壁に 残った） */
   hero.x=at[0]; hero.z=at[1]; hero.ang=0; resetTrail();
+  if(ST.ship){ shipFix(); const sea=WORLD[Math.floor(at[1])]&&WORLD[Math.floor(at[1])][Math.floor(at[0])]==='~'; ST.onShip=sea?1:0; if(sea) ST.shipPos=[Math.floor(at[0])+.5,Math.floor(at[1])+.5]; }   /* ★町から 出た（陸）なら 降りて いる。海の 上で 再開したら 乗って いる */
   [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=false; p.sh.visible=false; });
   cv.style.display='none'; c2.style.display='block'; resize2();
   document.getElementById('place').textContent= ST.phase==='road' ? '夜の 街道' : (at[0]>40 ? 'ヴェルナ帝国' : 'アルディア王国'); wWalk=0; }
@@ -960,8 +962,9 @@ function drawWorld(fr,now){
   if(ST.phase==='road'){ g.fillStyle='rgba(12,14,48,.5)'; g.fillRect(0,0,W_,H_); }
   // 人（後ろの 者から 先に 描く）
   // ★出た 直後は 4人が 同じ 場所に 重なり、歩き出すと 縦の 列に なる（resetTrail で みんな 先頭と 同じ 場所から）
-  const sailing=at(Math.floor(hero.x),Math.floor(hero.z))==='~';
-  if(sailing) drawBoat(g, ox+hero.x*ts, oy+hero.z*ts, ts, now);
+  shipFix(); const sailing=!!(ST.ship && ST.onShip);
+  if(sailing) drawBoat(g, ox+hero.x*ts, oy+hero.z*ts, ts, now, hero.ang);
+  else if(ST.ship && ST.shipPos) drawBoat(g, ox+ST.shipPos[0]*ts, oy+ST.shipPos[1]*ts, ts, now, ST.shipAng===undefined?Math.PI/2:ST.shipAng);   /* ★岸に 残った 船 */
   const list=sailing?[]:[...followers.map(f=>[f.p.k,f.x,f.z,f.ang]).reverse(), [hero.p.k,hero.x,hero.z,hero.ang]];
   list.sort((a,b)=>a[2]-b[2]);
   list.forEach(([k,x,z,ang])=>{ let rel=Math.atan2(Math.sin(ang),Math.cos(ang)); const a=Math.abs(rel); let pose,flip=false;
@@ -973,8 +976,8 @@ function drawWorld(fr,now){
 }
 
 // ★船（外の 世界の 海の 上。仮の 絵：船体・帆柱・帆）。主人公だけ 甲板に 立つ
-function drawBoat(g,sx,sy,ts,now){ const b=Math.sin(now/400)*ts*.04; const north=Math.cos(hero.ang)<-.7, im=WOBJ_IMG[north?'ship_up':'ship_side']; if(!im) return;   /* ★船（届いた 絵）：北へ 進む ときは 上から 見た 姿、ほかは 横向き（左へ 進むと 反転） */
-  const k=ts*1.6/WOBJ_IMG.ship_side.width, w=im.width*k, h=im.height*k;   /* ★横向きと 上から の 絵は 同じ 縮みで（上からの 姿が 大きく 出た） */ g.save(); g.translate(Math.round(sx),Math.round(sy+b+ts*.28)); if(!north && Math.sin(hero.ang)<0) g.scale(-1,1); g.drawImage(im,-w/2,-h,w,h); g.restore(); }
+function drawBoat(g,sx,sy,ts,now,ang){ const b=Math.sin(now/400)*ts*.04; const north=Math.cos(ang)<-.7, im=WOBJ_IMG[north?'ship_up':'ship_side']; if(!im) return;   /* ★船（届いた 絵）：北へ 進む ときは 上から 見た 姿、ほかは 横向き（左へ 進むと 反転） */
+  const k=ts*1.6/WOBJ_IMG.ship_side.width, w=im.width*k, h=im.height*k;   /* ★横向きと 上から の 絵は 同じ 縮みで（上からの 姿が 大きく 出た） */ g.save(); g.translate(Math.round(sx),Math.round(sy+b+ts*.28)); if(!north && Math.sin(ang)<0) g.scale(-1,1); g.drawImage(im,-w/2,-h,w,h); g.restore(); }
 // ★外の 世界の 絵を 1ます 32ドットで 描く（草原・海・浜辺・街道・川・橋は ここで 描き、
 //   森・山・村・城は 仮の 絵。のちに 発注した 絵と 差し替える）
 function bakeWorld32(){
@@ -1770,7 +1773,7 @@ function openSpells(ck){ const c=STATS[ck], sks=skillsOf(ck);
     if(k.type==='warp'){ const list=warpList(); if(!(cur.kind==='world'||cur.kind==='town')){ say(['ここでは 使えない。','（外の 世界か 町の 中で 使う）'],back); return; }
       if(!list.length){ say(['今は 飛べる 町が ない。'],back); return; }
       menu(list.map(w=>w[0]).concat(['やめる']),'どこへ 飛ぶ？（MP '+k.mp+'）',(j)=>{ if(j>=list.length){ back(); return; } closeMenu(); c.mp-=k.mp; se('ok'); const w=list[j];
-        say([c.name+'は '+k.name+'を 唱えた！','体が 光に 包まれ、空へ 舞い上がった——'],()=>go(()=>{ enterWorld(w[1]); refreshFollowers(); })); },back); return; }
+        say([c.name+'は '+k.name+'を 唱えた！','体が 光に 包まれ、空へ 舞い上がった——'],()=>go(()=>{ enterWorld(w[1]); if(ST.ship){ ST.onShip=0; const s=shipNear(w[1][0],w[1][1],4); if(s) ST.shipPos=s; }   /* ★飛んだ 先の 近くに 海が あれば 船も ついて くる（無ければ 元の 岸に 残る） */ refreshFollowers(); })); },back); return; }
     if(k.type==='escape'){ const to=escapeTo(); if(!to){ say(['ここでは 使えない。','（砦や 山道、遺跡の 中で 使う）'],back); return; } c.mp-=k.mp; se('ok'); say(['来た 道の 光が ひとつずつ ともり、入口へ 導かれた——'],()=>go(()=>{ if(to.town){ enterTown(to.at,to.town); const [sx,sz]=safeSpot(hero.x,hero.z); hero.x=sx; hero.z=sz; hero.ang=0; resetTrail(); } else enterWorld(to); })); return; }
   },()=>openFieldMenu());
   MENU.notes=sks.map(k=>k.desc||''); menuEl.classList.add('wide'); drawMenu(); }
@@ -2137,6 +2140,15 @@ function openTrade(){ const m=MARKET[TOWN_NOW]; BAG.goods=BAG.goods||{}; const k
       else if(j===1){ if(!(BAG.goods[k]>0)){ closeMenu(); say(['もって いない。'],openTrade); return; } BAG.goods[k]--; BAG.gold+=m[k][1]; se('buy'); openTrade(); } else openTrade(); },()=>openTrade()); },()=>closeMenu()); }
 // ---- 船（外の 世界で 海を 渡る。手に 入るのは 後の 章。ST.ship）----
 function canSail(){ return !!ST.ship; }
+// ★船は 岸に 残る（ドラクエと 同じ）：ST.shipPos＝船の いる 海の ます（中心）、ST.onShip＝乗って いるか。
+//   陸から 船の ますへ 進むと 乗る。乗って 陸へ 進むと 降りて、船は 最後の 海の ますに 残る
+const SHIP_HOME=[87.5,56.5];   // 港町サルムの 東の 入り江（町を 出て 東へ 2ます、南へ 1ます。真南は 桟橋で 町の 印を 通る ため）
+function shipFix(){ if(!ST.ship) return; if(!ST.shipPos) ST.shipPos=SHIP_HOME.slice(); if(ST.onShip===undefined) ST.onShip= cur.kind==='world' && at(Math.floor(hero.x),Math.floor(hero.z))==='~' ? 1 : 0; }
+function seaPass(x,z){ if(!ST.ship) return false; if(ST.onShip) return true; const s=ST.shipPos; return !!s && Math.hypot(x-s[0],z-s[1])<.95; }   /* ★陸に いる ときは 船の ますだけ 入れる */
+function shipStep(){ if(!ST.ship || cur.kind!=='world') return; shipFix(); const c=at(Math.floor(hero.x),Math.floor(hero.z));
+  if(ST.onShip){ if(c==='~'){ ST.shipPos=[Math.floor(hero.x)+.5,Math.floor(hero.z)+.5]; ST.shipAng=hero.ang; } else { ST.onShip=0; resetTrail(); } }   /* 陸へ 上がった：船は 最後の 海の ますに 残る */
+  else if(c==='~' && seaPass(hero.x,hero.z)){ ST.onShip=1; hero.x=ST.shipPos[0]; hero.z=ST.shipPos[1]; se('ok'); } }
+function shipNear(x,z,r){ let best=null,bd=1e9; for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){ const tx=Math.floor(x)+dx, tz=Math.floor(z)+dz; if(WORLD[tz]&&WORLD[tz][tx]==='~'){ const d=Math.hypot(dx,dz); if(d<bd){ bd=d; best=[tx+.5,tz+.5]; } } } return best; }
 // ---- 仕掛け：砦の 灯り（ふたつ ともすと 奥の 鉄格子が 開く）----
 ST.lamps=ST.lamps||{};
 function lampHint(){ if(cur.kind!=='fort'||msgQ||BT) return; const l=lampAt(hero.x,hero.z); if(!l) return; const k=l.join(','); if(ST.lamps[k]||(ST.lampSeen||{})[k]) return; ST.lampSeen=ST.lampSeen||{}; ST.lampSeen[k]=1; say(['古い 灯りの 台が ある。','火を ともせそうだ。（Aで 調べる）']); }
@@ -2749,7 +2761,7 @@ function garoTalk(){ const ph=ST.phase;
   if(ST.uminari) return say(['ガロ「おう、戻ったか。魔物は 片づけたんだな」'],()=>garoShip());
   CUT=1; say(['倉庫の 奥で、片目に 傷の ある 男が 酒を あおって いた。','男「……ドルガン？ お前、生きてたのか」','ドルガン「ガロ。相変わらず 顔が 悪いな」','ガロ「うるせえ。……で、その 連中は 何だ。王女さまに、からくりに……」','ドルガン「船を 貸せ。アルディアまで」',
     'ガロ「船止めの 最中に アルディア行きかよ。摂政の 首に 自分から 飛び込む ようなもんだ」','ドルガン「借りは 返す」','ガロ「……ふん。昔の 貸しで ちゃらにして やる。ただし 条件が ある」','ガロ「桟橋に 魔物が 居座ってる。ウミナリって やつだ。あれを どかせ。でなきゃ 船が 出せねえ」','ガロ「魔物は 町の 南、桟橋の 先だ」'],()=>{ ST.garoAsked=1; CUT=0; say(['＊ 港の 南の 桟橋に いる 魔物を 退治する ＊']); }); }
-function garoShip(){ CUT=1; say(['ガロ「約束だ。倉庫の 裏の 船を 持ってけ。古いが 速い」','ガロ「ドルガン。……生きて 帰れよ」','ドルガン「お前もな」','＊ 船を 手に 入れた！ 外の 世界で 海を 渡れる ＊','（船は 港の 南の 海に ある。町を 出て 南へ）'],()=>{ ST.ship=1; ST.phase='c4_sea'; CUT=0;
+function garoShip(){ CUT=1; say(['ガロ「約束だ。倉庫の 裏の 船を 持ってけ。古いが 速い」','ガロ「ドルガン。……生きて 帰れよ」','ドルガン「お前もな」','＊ 船を 手に 入れた！ 外の 世界で 海を 渡れる ＊','（船は 町を 出て 東の 入り江に つないで ある。降りた 船は その 岸に 残る）'],()=>{ ST.ship=1; ST.shipPos=SHIP_HOME.slice(); ST.shipAng=-Math.PI/2; ST.onShip=0; ST.phase='c4_sea'; CUT=0;
     say(['リディア「西へ。アルディアの 王に、この 手記を」','ZF「南ノ 島ニ 寄レバ、海ノ 向コウノ 話モ 聞ケル」']); }); }
 function uminariFight(){ if(BT||CUT) return; CUT=1; hero.z=cur.rows.length-1.5; say(['桟橋の 先。海面が 盛り上がり、巨大な 影が 現れた！','ウミナリが 低く 鳴くと、港じゅうの 海が ざわめいた……','ドルガン「でけえな……。船を 出す にゃ、こいつを どかすしか ねえ」'],()=>startBattle(FOES.uminari,()=>{ ST.uminari=1; CUT=0;
     say(['ウミナリは 大きな 波を 残して、沖へ 沈んで いった。','港の 海が、静かに なった。','ドルガン「……ガロの 所へ 戻ろう」']); })); }

@@ -58,7 +58,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   await E(()=>say(useAntidote(STATS.elt))); await flush(); T('どくけし草で 治る', await E(()=>!STATS.elt.status));
   T('作戦：いのちだいじに で 回復を 選ぶ', await E(()=>{ STATS.lidia={name:'リディア',lv:5,hp:5,max:30,mp:20,atk:6,defT:3}; PARTY.push('lidia'); startBattle([FOES.nousagi]); tactic='inochi'; const a=autoAct(BT.party[1]); endBattle(); PARTY.length=1; return a.kind==='skill'&&a.sk.type==='heal'; }));
   T('入れ替え（控え）', await E(()=>{ RESERVE.push('lidia'); const ok=openFieldMenu()===undefined && MENU.items.includes('入れ替え'); closeMenu(); RESERVE.length=0; return ok; }));
-  T('船：海を 渡れる', await E(()=>{ enterWorld([22.5,31.5]); const a=blockedAt(1.5,1.5); ST.ship=1; const bb=blockedAt(1.5,1.5); ST.ship=0; return a&&!bb; }));
+  T('船：海を 渡れる', await E(()=>{ enterWorld([22.5,31.5]); const a=blockedAt(1.5,1.5); ST.ship=1; ST.onShip=1; const bb=blockedAt(1.5,1.5); ST.ship=0; ST.onShip=0; return a&&!bb; }));
   T('戦闘の 速さ', await E(()=>{ SND.speed=2; const ok=SND.speed===2; SND.speed=1; return ok; }));
   T('章ごとの 台詞', await E(()=>{ enterTown([12,6],'cap'); const g=cur.npcs.find(x=>x.name==='城の 門番'); ST.phase='road'; const a=linesByPhase(g)[0]; ST.phase='c1_road'; const bb=linesByPhase(g)[0]; return a!==bb; }));
   T('2体まで（1人）', await E(()=>{ const sb=window.startBattle; let mx=0; window.startBattle=(d)=>{ mx=Math.max(mx,d.length); }; for(let i=0;i<500;i++) startEnc('west'); window.startBattle=sb; return mx===2; }));
@@ -218,8 +218,21 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('地下の 書庫：手記 → 隠し扉 → 亡骸で 番人と 戦い、勝つと 手記と 懐中時計。港へ', await (async()=>{ await E(()=>{ hero.x=9.5; hero.z=4.5; dunExits(0,0); }); await W(900); const a=await E(()=>DUN_NOW==='manorB' && blockedAt(5.5,4.5)); await E(()=>{ hero.x=4.5; hero.z=9.3; hero.ang=Math.PI; pressA(); }); await flush(); const b=await E(()=>ST.manorNote===1 && BAG.keys.includes('セルヴィスの 手記')); await E(()=>{ hero.x=5.5; hero.z=5.4; hero.ang=Math.PI; pressA(); }); await flush(); const c=await E(()=>ST.manorHidden===1 && !blockedAt(5.5,4.5)); await E(()=>{ hero.x=5.5; hero.z=3.4; hero.ang=Math.PI; pressA(); }); await flush(); const d=await waitMenu() && await E(()=>BT.foes[0].def.key==='kagenomori' && BT.look==='fort'); await winBattle(); await flush(); return a && b && c && d && await E(()=>ST.manorBody===1 && BAG.keys.includes('リディアの 懐中時計') && ST.phase==='c4_port' && /港/.test(goalText())); })());
   T('エスケイル：屋敷跡からは 屋敷跡の 前へ', await E(()=>{ const to=escapeTo(); return Array.isArray(to) && Math.abs(to[0]-96.5)<1 && Math.abs(to[1]-20.5)<1; }));
   T('港町サルム：ガロに 頼まれ、南の 桟橋で ウミナリ。倒して ガロに 話すと 船', await (async()=>{ await E(()=>{ enterTown([11.5,TOWNS.port.rows.length-1.8],'port'); }); const a=await E(()=>TOWN_NOW==='port' && TDOORS().length===5 && TROOMS().length===5 && cur.npcs.length===4); await E(()=>{ lastDoor=4; enterRoom(4); }); await talk('ガロ'); await flush(); const b=await E(()=>ST.garoAsked===1 && !ST.ship); await E(()=>{ enterTown([11.5,TOWNS.port.rows.length-1.5],'port'); uminariFight(); }); await flush(); const c=await waitMenu() && await E(()=>BT.foes[0].def.key==='uminari'); await winBattle(); await flush(); await E(()=>{ lastDoor=4; enterRoom(4); }); await talk('ガロ'); await flush(); return a && b && c && await E(()=>ST.ship===1 && ST.phase==='c4_sea' && canSail()); })());
-  T('船：海の ますを 歩ける。北の 島の 岩（x）は 上陸できない', await E(()=>{ enterWorld([84.5,55.45]); const sea=!blockedAt(83.5,57.5); const rock=blockedAt(56.5,4.5); return sea && rock && at(83,57)==='~'; }));
-  T('海の 上の 戦闘は 船の 甲板の 背景', await (async()=>{ await E(()=>{ enterWorld([84.5,55.45]); hero.x=83.5; hero.z=57.5; startBattle([FOES.shionaki]); }); await waitMenu(); const ok=await E(()=>BT.look==='sea' && BG.sea.visible && !BG.field.visible); await E(()=>endBattle()); return ok; })());
+  T('船は 岸に 残る：陸からは 船の ますだけ 入れ、乗ると 海を 進み、陸へ 上がると 船は 最後の 海の ますに 残る', await (async()=>{
+    const a=await E(()=>{ enterWorld([84.5,55.45]); return ST.onShip===0 && ST.shipPos[0]===87.5 && ST.shipPos[1]===56.5 && blockedAt(88.5,56.5) && !blockedAt(87.5,56.5) && blockedAt(56.5,4.5); });
+    // 東へ 歩いて 船に 乗る
+    await E(()=>{ hero.x=86.4; hero.z=56.5; dir[0]=1; dir[1]=0; }); await W(500); await E(()=>{ dir[0]=0; dir[1]=0; });
+    const b=await E(()=>ST.onShip===1 && at(Math.floor(hero.x),Math.floor(hero.z))==='~' && !blockedAt(88.5,58.5));
+    // 南 → 西へ 進む（海）→ 北へ 上がって 降りる
+    await E(()=>{ dir[0]=0; dir[1]=1; }); await W(700); await E(()=>{ dir[0]=-1; dir[1]=0; }); await W(900); await E(()=>{ dir[0]=0; dir[1]=0; });
+    const sx=await E(()=>ST.shipPos[0]);
+    await E(()=>{ dir[0]=0; dir[1]=-1; }); await W(900); await E(()=>{ dir[0]=0; dir[1]=0; });
+    const c=await E((sx)=>ST.onShip===0 && at(Math.floor(hero.x),Math.floor(hero.z))!=='~' && ST.shipPos[0]===sx && WORLD[Math.floor(ST.shipPos[1])][Math.floor(ST.shipPos[0])]==='~' && blockedAt(ST.shipPos[0]-2,ST.shipPos[1]),sx);
+    // セーブして 読み込んでも 船の 場所は 同じ
+    const d=await E(()=>{ const sp=ST.shipPos.slice(); saveGame(); enterWorld([20.5,30.5]); loadGame(); return ST.shipPos[0]===sp[0] && ST.shipPos[1]===sp[1] && ST.onShip===0; });
+    return a && b && c && d; })());
+  T('トランジス：海に 近い 町へ 飛ぶと 船も 近くの 海へ', await E(()=>{ const s=shipNear(26.5,61.45,4); return !!s && WORLD[Math.floor(s[1])][Math.floor(s[0])]==='~'; }));
+  T('海の 上の 戦闘は 船の 甲板の 背景', await (async()=>{ await E(()=>{ enterWorld([84.5,55.45]); hero.x=83.5; hero.z=57.5; ST.onShip=1; startBattle([FOES.shionaki]); }); await waitMenu(); const ok=await E(()=>BT.look==='sea' && BG.sea.visible && !BG.field.visible); await E(()=>endBattle()); return ok; })());
   T('海の 上の 遭遇は 海の 魔物、荒れ地は 荒れ地の 魔物', await E(()=>{ hero.x=83.5; hero.z=57.5; const a=worldArea()==='sea'; hero.x=84.5; hero.z=50.5; const b=worldArea()==='waste'; return a && b && ENC.sea.every(([k])=>FOES[k]) && ENC.waste.every(([k])=>FOES[k]); }));
   T('海沿いの 町ミラ：漁師が 魔王の 島の 噂を 話す', await (async()=>{ await E(()=>{ enterTown([11.5,TOWNS.seatown.rows.length-1.8],'seatown'); }); await talk('漁師'); await flush(); return await E(()=>TOWN_NOW==='seatown' && ST.miraHeard===1 && /ミラ/.test(document.getElementById('place').textContent)); })());
   T('トランジス：第4章は 行った ヴェルナ側の 町へ（帝都は なし）。船の 後は ドルムも なし', await E(()=>{ const L=warpList(); return L.some(w=>/ノルン/.test(w[0])) && L.some(w=>/サルム/.test(w[0])) && L.some(w=>/ミラ/.test(w[0])) && !L.some(w=>/帝都|王都|ルーエ|ドルム/.test(w[0])); }));
