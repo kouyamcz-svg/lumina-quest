@@ -231,6 +231,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     // セーブして 読み込んでも 船の 場所は 同じ
     const d=await E(()=>{ const sp=ST.shipPos.slice(); saveGame(); enterWorld([20.5,30.5]); loadGame(); return ST.shipPos[0]===sp[0] && ST.shipPos[1]===sp[1] && ST.onShip===0; });
     return a && b && c && d; })());
+  T('船は 4つの 向きで 絵が ある（上・下・横＋反転）', await E(()=>['ship_side','ship_up','ship_down'].every(k=>WOBJ_IMG[k] && WOBJ_IMG[k].width>0)));
   T('トランジス：海に 近い 町へ 飛ぶと 船も 近くの 海へ', await E(()=>{ const s=shipNear(26.5,61.45,4); return !!s && WORLD[Math.floor(s[1])][Math.floor(s[0])]==='~'; }));
   T('海の 上の 戦闘は 船の 甲板の 背景', await (async()=>{ await E(()=>{ enterWorld([84.5,55.45]); hero.x=83.5; hero.z=57.5; ST.onShip=1; startBattle([FOES.shionaki]); }); await waitMenu(); const ok=await E(()=>BT.look==='sea' && BG.sea.visible && !BG.field.visible); await E(()=>endBattle()); return ok; })());
   T('海の 上の 遭遇は 海の 魔物、荒れ地は 荒れ地の 魔物', await E(()=>{ hero.x=83.5; hero.z=57.5; const a=worldArea()==='sea'; hero.x=84.5; hero.z=50.5; const b=worldArea()==='waste'; return a && b && ENC.sea.every(([k])=>FOES[k]) && ENC.waste.every(([k])=>FOES[k]); }));
