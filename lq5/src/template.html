@@ -1469,7 +1469,7 @@ function battleTick(dt,now){
   BT.foes.forEach(f=>{
     f.x = -halfW + cell*(f.slot+.5);
     if(f.frame==='idle') f.idleAr=f.ar; const H0=1.75*(f.def.scale||1), fit=Math.min(1, cell*.95/(H0*(f.idleAr||f.ar))), H=H0*fit;   /* ★大きさは 待機の こまの 幅で 決める（攻撃の こまが 横に 長くても 小さく ならない） */
-    const off=(f.frame==='atk'&&f.def.atkOff)?H*f.ar*f.def.atkOff:0;   /* ★攻撃の こまが 右へ 伸びる 絵は、体の 位置が 動かない よう ずらす */
+    const off=f.def.offs?H*f.ar*(f.def.offs[f.frame]||0):(f.frame==='atk'&&f.def.atkOff)?H*f.ar*f.def.atkOff:0;   /* ★攻撃の こまが 右へ 伸びる 絵は、体の 位置が 動かない よう ずらす（offs：こまごとの ずれ。こまの 幅に 対する 割合） */
     f.hop=Math.max(0,f.hop-dt*3.2); f.lunge=Math.max(0,f.lunge-dt*2.6); f.shake=Math.max(0,f.shake-dt); f.hurt=Math.max(0,f.hurt-dt);
     const sx=f.shake>0?Math.sin(now/22)*.05:0;
     const lz=Math.sin(Math.min(1,f.lunge)*Math.PI)*1.6, sc=1+Math.sin(Math.min(1,f.lunge)*Math.PI)*.18+Math.sin(Math.min(1,f.hop)*Math.PI)*.05;
@@ -2506,7 +2506,7 @@ function showEnd3(ns){ CARD_T=performance.now(); ST.phase='c3_end'; const c=docu
 //  c4_road（坑道の 北の 出口 → 峠 → 帝都の 検問。変装して 隊長を 倒す）→ c4_hamlet（北の 集落ノルンで 元使用人の 老婆）
 //  → c4_manor（側近の 屋敷跡：1階の 燭台 → 地下の 書庫 → 手記 → 隠し部屋の 亡骸 → 番人）→ c4_port（荒れ地を 南へ。港町サルムで 密輸商ガロ → 港の 魔物）
 //  → c4_sea（船。海沿いの 町ミラに 寄れる）→ 西の 港町ウェルスに 着くと c4_end
-//  ★魔物の 絵は 仮（いまある 絵を 色を 変えて 使って いる）。絵が 届いたら 差し替える（docs/第4章_絵のプロンプト.md）
+//  ★魔物の 絵は 2026-10-12 に 届いた 絵（art/foes/ の sumiyoroi〜uminari）。検問の 隊長は 部隊長の 絵
 const WARPS4=[['北の 集落 ノルン','hamlet',[85.5,13.45]],['港町 サルム','port',[84.5,57.4]],['海沿いの 町 ミラ','seatown',[26.5,61.45]],['西の 港町 ウェルス','westport',[4.5,30.45]]];
 // ---- 外の 世界の 遭遇の 区分（第4章を 足した）----
 function worldArea(){ const x=hero.x, z=hero.z, c=at(Math.floor(x),Math.floor(z)), p=ST.phase;
@@ -2514,19 +2514,19 @@ function worldArea(){ const x=hero.x, z=hero.z, c=at(Math.floor(x),Math.floor(z)
   if(/^c4_/.test(p)){ if(c==='d') return 'waste'; if(Math.hypot(x-96.5,z-19.5)<7) return 'manorWood'; if(x>81 && z<32) return 'capN'; if(x>63) return 'velnaE4'; if(x>40) return 'pursuit'; return 'west'; }
   if(x>63) return velnaArea(x,z); if(x>40) return (/^c3_(flee|mine|exit)$/.test(p)?'pursuit':/^c3_/.test(p)?'velnaE':'east'); return (p==='road'?'westNight':'west'); }
 // ---- 第4章の 魔物（絵は 仮）----
-FOES.sumiyoroi={key:'sumiyoroi', name:'スミヨロイ', tint:0x6a6a8a, scale:1.1, hp:210, exp:150, gold:40, atk:[30,40], wind:'は 焦げた 大剣を 振りかぶった！', verb:'焦げた 大剣', frames:{idle:RAB.bp_idle,wind:RAB.bp_wind,atk:RAB.bp_atk}};   /* 仮：砦の 番兵の 絵 */
-FOES.hainome={key:'hainome', name:'ハイノメ', tint:0x9a9aa0, inflict:{type:'conf',rate:.2}, hp:170, exp:140, gold:36, atk:[28,36], wind:'の 灰の 中で 目が ぎょろりと 動いた！', verb:'灰の 牙', frames:{idle:RAB.kb_idle,wind:RAB.kb_wind,atk:RAB.kb_atk}};   /* 仮：カベノメの 絵 */
-FOES.hikagerou={key:'hikagerou', name:'ヒカゲロウ', tint:0x8080c0, float:true, inflict:{type:'sleep',rate:.2}, hp:150, exp:135, gold:34, atk:[26,34], wind:'の 炎が 黒く 揺れた！', verb:'黒い 炎', frames:{idle:RAB.ym_idle,wind:RAB.ym_wind,atk:RAB.ym_atk}};   /* 仮：ヨミアカリの 絵 */
-FOES.sabitsuno={key:'sabitsuno', name:'サビツノ', tint:0xc08a60, hp:200, exp:160, gold:44, atk:[32,42], wind:'は 錆びた 角を 低く 構えた！', verb:'錆びた 角', frames:{idle:RAB.tk_idle,wind:RAB.tk_wind,atk:RAB.tk_atk}};   /* 仮：テツクイムシの 絵 */
-FOES.sunabouzu={key:'sunabouzu', name:'スナボウズ', tint:0xe0c080, float:true, inflict:{type:'poison',rate:.25}, hp:180, exp:150, gold:40, atk:[28,38], wind:'は 砂を 巻き上げた！', verb:'砂の 息', frames:{idle:RAB.kj_idle,wind:RAB.kj_wind,atk:RAB.kj_atk}};   /* 仮：ケムリクジラの 絵 */
-FOES.shionaki={key:'shionaki', name:'シオナキ', tint:0x60a0e0, float:true, hp:190, exp:170, gold:46, atk:[32,42], wind:'は 潮を 吹き上げた！', verb:'潮の 刃', frames:{idle:RAB.ik_idle,wind:RAB.ik_wind,atk:RAB.ik_atk}};   /* 仮：イシクラゲの 絵 */
-FOES.awadama={key:'awadama', name:'アワダマ', tint:0xa0d0ff, float:true, inflict:{type:'sleep',rate:.25}, hp:160, exp:150, gold:40, atk:[28,36], wind:'から 泡が ふわりと 浮かんだ！', verb:'眠りの 泡', frames:{idle:RAB.nk_idle,wind:RAB.nk_wind,atk:RAB.nk_atk}};   /* 仮：ナキダケの 絵 */
+FOES.sumiyoroi={key:'sumiyoroi', offs:{idle:-0.148,wind:0.073,atk:0.13}, scale:1.15, name:'スミヨロイ', hp:210, exp:150, gold:40, atk:[30,40], wind:'は 焦げた 大剣を 振りかぶった！', verb:'焦げた 大剣', frames:{idle:RAB.sy_idle,wind:RAB.sy_wind,atk:RAB.sy_atk}};
+FOES.hainome={key:'hainome', offs:{wind:0.02,atk:-0.038}, scale:0.9, name:'ハイノメ', inflict:{type:'conf',rate:.2}, hp:170, exp:140, gold:36, atk:[28,36], wind:'の 灰の 中で 目が ぎょろりと 動いた！', verb:'灰の 牙', frames:{idle:RAB.hn_idle,wind:RAB.hn_wind,atk:RAB.hn_atk}};
+FOES.hikagerou={key:'hikagerou', offs:{wind:0.064}, scale:0.85, name:'ヒカゲロウ', float:true, inflict:{type:'sleep',rate:.2}, hp:150, exp:135, gold:34, atk:[26,34], wind:'の 炎が 黒く 揺れた！', verb:'黒い 炎', frames:{idle:RAB.hg_idle,wind:RAB.hg_wind,atk:RAB.hg_atk}};
+FOES.sabitsuno={key:'sabitsuno', offs:{wind:0.026}, scale:0.95, name:'サビツノ', hp:200, exp:160, gold:44, atk:[32,42], wind:'は 錆びた 角を 低く 構えた！', verb:'錆びた 角', frames:{idle:RAB.sb_idle,wind:RAB.sb_wind,atk:RAB.sb_atk}};
+FOES.sunabouzu={key:'sunabouzu', scale:1.05, name:'スナボウズ', float:true, inflict:{type:'poison',rate:.25}, hp:180, exp:150, gold:40, atk:[28,38], wind:'は 砂を 巻き上げた！', verb:'砂の 息', frames:{idle:RAB.sn_idle,wind:RAB.sn_wind,atk:RAB.sn_atk}};
+FOES.shionaki={key:'shionaki', offs:{idle:0.033,wind:-0.024,atk:0.229}, scale:0.9, name:'シオナキ', float:true, hp:190, exp:170, gold:46, atk:[32,42], wind:'は 潮を 吹き上げた！', verb:'潮の 刃', frames:{idle:RAB.sh_idle,wind:RAB.sh_wind,atk:RAB.sh_atk}};
+FOES.awadama={key:'awadama', offs:{atk:0.027}, scale:0.8, name:'アワダマ', float:true, inflict:{type:'sleep',rate:.25}, hp:160, exp:150, gold:40, atk:[28,36], wind:'から 泡が ふわりと 浮かんだ！', verb:'眠りの 泡', frames:{idle:RAB.aw_idle,wind:RAB.aw_wind,atk:RAB.aw_atk}};
 FOES.gatecap={key:'gatecap', name:'検問の 隊長', scale:1.25, hp:1300, exp:1800, gold:420, atk:[36,46], wind:'は 剣を 振りかぶった！', verb:'斬りつけ', boss:true,
   bigWind:'は 剣を 地に 突き立てた！ 足もとから 赤い 炎が 立ちのぼる！', bigName:'炎の 剣', frames:{idle:RAB.tc_idle,idle2:RAB.tc_idle2,wind:RAB.tc_wind,atk:RAB.tc_atk,big:RAB.tc_big}};   /* 部隊長の 絵（同じ 帝国の 隊長） */
-FOES.kagenomori={key:'kagenomori', name:'屋敷跡の 番人', tint:0x5a4a7a, scale:1.4, hp:2900, exp:4200, gold:600, atk:[44,56], wind:'の 影が 大きく ふくらんだ！', verb:'影の 爪', boss:true, bigInflict:{type:'sleep',rate:.3},
-  bigWind:'の 体から 黒い 霧が あふれ出した！', bigName:'影の 霧', frames:{idle:RAB.sk_idle,idle2:RAB.sk_idle2,wind:RAB.sk_wind,atk:RAB.sk_atk,big:RAB.sk_big}};   /* 仮：関所荒らしの 絵 */
-FOES.uminari={key:'uminari', name:'港の 魔物 ウミナリ', tint:0x4080c0, scale:1.35, hp:1800, exp:3000, gold:500, atk:[40,50], wind:'は 大きな 爪を 振り上げた！', verb:'爪の 一撃', boss:true,
-  bigWind:'が 海に 潜った！ 大きな 波が 盛り上がる！', bigName:'大波', frames:{idle:RAB.kn_idle,idle2:RAB.kn_idle2,wind:RAB.kn_wind,atk:RAB.kn_atk,big:RAB.kn_big}};   /* 仮：坑道の 主の 絵 */
+FOES.kagenomori={key:'kagenomori', offs:{atk:-0.04}, scale:1.5, name:'屋敷跡の 番人', hp:2900, exp:4200, gold:600, atk:[44,56], wind:'の 影が 大きく ふくらんだ！', verb:'影の 爪', boss:true, bigInflict:{type:'sleep',rate:.3},
+  bigWind:'の 体から 黒い 霧が あふれ出した！', bigName:'影の 霧', frames:{idle:RAB.km_idle,idle2:RAB.km_idle2,wind:RAB.km_wind,atk:RAB.km_atk,big:RAB.km_big}};
+FOES.uminari={key:'uminari', offs:{wind:-0.022}, scale:1.45, name:'港の 魔物 ウミナリ', hp:1800, exp:3000, gold:500, atk:[40,50], wind:'は 大きな 爪を 振り上げた！', verb:'爪の 一撃', boss:true,
+  bigWind:'が 海に 潜った！ 大きな 波が 盛り上がる！', bigName:'大波', frames:{idle:RAB.um_idle,idle2:RAB.um_idle2,wind:RAB.um_wind,atk:RAB.um_atk,big:RAB.um_big}};
 ENC.velnaE4=[['tsuite',3],['tetsukui',2],['yamabiko',2],['gincoro',1]]; ENC.capN=[['tsuite',2],['sabitsuno',2],['hikagerou',2]]; ENC.manorWood=[['hikagerou',3],['hainome',2],['sumiyoroi',1]];
 ENC.manor=[['sumiyoroi',3],['hainome',3],['hikagerou',2]]; ENC.manorB=[['sumiyoroi',2],['hainome',3]]; ENC.waste=[['sabitsuno',3],['sunabouzu',3],['gincoro',1]]; ENC.sea=[['shionaki',3],['awadama',2]];
 // ---- 第4章の 町（村の 形を 使い回し）----
