@@ -2566,10 +2566,10 @@ FOES.uminari={key:'uminari', offs:{wind:-0.022}, scale:1.45, name:'港の 魔物
   bigWind:'が 海に 潜った！ 大きな 波が 盛り上がる！', bigName:'大波', frames:{idle:RAB.um_idle,idle2:RAB.um_idle2,wind:RAB.um_wind,atk:RAB.um_atk,big:RAB.um_big}};
 ENC.velnaE4=[['tsuite',3],['tetsukui',2],['yamabiko',2],['gincoro',1]]; ENC.capN=[['tsuite',2],['sabitsuno',2],['hikagerou',2]]; ENC.manorWood=[['hikagerou',3],['hainome',2],['sumiyoroi',1]];
 ENC.manor=[['sumiyoroi',3],['hainome',3],['hikagerou',2]]; ENC.manorB=[['sumiyoroi',2],['hainome',3]]; ENC.waste=[['sabitsuno',3],['sunabouzu',3],['gincoro',1]]; ENC.sea=[['shionaki',3],['awadama',2],['ikarimodoki',2],['honebune',2],['uzuguchi',2]];
-// ★海の 上だけの 魔物（指示、2026-10-12）。絵は 仮（いまある 絵の 色を 変えて いる）。プロンプトは docs/第4章_絵のプロンプト.md の 18〜20
-FOES.ikarimodoki={key:'ikarimodoki', tint:0x8090a8, scale:1.05, hp:230, exp:185, gold:52, atk:[34,44], wind:'は 鎖を 鳴らして 体を 大きく 振りかぶった！', verb:'錨の 一撃', frames:{idle:RAB.zm_idle,wind:RAB.zm_wind,atk:RAB.zm_atk}};   /* 仮：ゼンマイヘイの 絵 */
-FOES.honebune={key:'honebune', tint:0xe8dcc0, float:true, hp:200, exp:175, gold:60, atk:[30,40], wind:'の 舳先の 灯りが 青く 燃えた！', verb:'体当たり', inflict:{type:'poison',rate:.2}, frames:{idle:RAB.tr_idle,wind:RAB.tr_wind,atk:RAB.tr_atk}};   /* 仮：ボロトロッコの 絵 */
-FOES.uzuguchi={key:'uzuguchi', tint:0x60c0c0, float:true, hp:180, exp:170, gold:48, atk:[30,38], wind:'の 渦が 速く 回りはじめた！', verb:'渦の 牙', inflict:{type:'conf',rate:.22}, frames:{idle:RAB.ya_idle,wind:RAB.ya_wind,atk:RAB.ya_atk}};   /* 仮：ヤマビコダマの 絵 */
+// ★海の 上だけの 魔物（指示、2026-10-12）。絵は 2026-10-12 に 届いた 絵（art/foes/ikarimodoki・honebune・uzuguchi_sheet3.png）
+FOES.ikarimodoki={key:'ikarimodoki', name:'イカリモドキ', offs:{wind:0.06,atk:0.039}, scale:1.05, hp:230, exp:185, gold:52, atk:[34,44], wind:'は 鎖を 鳴らして 体を 大きく 振りかぶった！', verb:'錨の 一撃', frames:{idle:RAB.ik2_idle,wind:RAB.ik2_wind,atk:RAB.ik2_atk}};
+FOES.honebune={key:'honebune', name:'ホネブネ', offs:{idle:-0.031,atk:-0.048}, scale:1.0, float:true, hp:200, exp:175, gold:60, atk:[30,40], wind:'の 舳先の 灯りが 青く 燃えた！', verb:'体当たり', inflict:{type:'poison',rate:.2}, frames:{idle:RAB.hb_idle,wind:RAB.hb_wind,atk:RAB.hb_atk}};
+FOES.uzuguchi={key:'uzuguchi', name:'ウズグチ', scale:0.95, float:true, hp:180, exp:170, gold:48, atk:[30,38], wind:'の 渦が 速く 回りはじめた！', verb:'渦の 牙', inflict:{type:'conf',rate:.22}, frames:{idle:RAB.uz_idle,wind:RAB.uz_wind,atk:RAB.uz_atk}};
 // ---- 第4章の 町（村の 形を 使い回し）----
 const HAMLET=[
 "########################",
