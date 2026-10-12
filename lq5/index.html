@@ -652,7 +652,7 @@ function bbGeo(){ const g=new THREE.PlaneGeometry(1,1); const p=g.attributes.pos
 function person(k){const mat=new THREE.MeshBasicMaterial({map:sprTex(k,'front'),transparent:true,alphaTest:.3});const m=new THREE.Mesh(bbGeo(),mat);S.add(m);
   const sh=new THREE.Mesh(new THREE.CircleGeometry(.28,12),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.25,depthWrite:false}));sh.rotation.x=-Math.PI/2;S.add(sh);return {m,sh,k,pose:'front',f:0};}
 function place(p,x,z,faceAng,step){
-  if(p.noAnim){ const img=p.m.material.map.image; const ar=img&&img.width?img.width/img.height:1; const hgt=1.9; p.m.scale.set(hgt*ar,hgt,1); p.m.position.set(x,hgt/2+.02,z); p.m.quaternion.copy(C.quaternion); p.sh.position.set(x,.02,z); return; }
+  if(p.noAnim){ const img=p.m.material.map.image; const ar=img&&img.width?img.width/img.height:1; const hgt=p.hgt||1.9; p.m.scale.set(hgt*ar,hgt,1); p.m.position.set(x,hgt/2+.02,z); p.m.quaternion.copy(C.quaternion); p.sh.position.set(x,.02,z); return; }
   const camAng=Math.atan2(C.position.x-x, C.position.z-z);
   let rel=faceAng-camAng; rel=Math.atan2(Math.sin(rel),Math.cos(rel)); const a=Math.abs(rel);
   let pose, flip=false;
@@ -664,7 +664,7 @@ function place(p,x,z,faceAng,step){
 // ================= 地図の 出入り =================
 let cur={kind:'town', rows:TOWN, solid:new Set(['#','H','t','F','w']), npcs:[], room:null};
 const hero={x:11.5,z:18.6,ang:Math.PI,p:null}; let followers=[], trail=[];
-function clearNpcs(){ cur.npcs.forEach(n=>{ S.remove(n.p.m); S.remove(n.p.sh); [n.p.m,n.p.sh].forEach(o=>{ o.geometry.dispose(); o.material.dispose(); }); }); cur.npcs=[]; }   /* ★人の 板も 捨てる（模様は 共有なので 残す） */
+function clearNpcs(){ cur.npcs.forEach(n=>{ if(n.p.fx){ S.remove(n.p.fx); n.p.fx.geometry.dispose(); n.p.fx.material.dispose(); } S.remove(n.p.m); S.remove(n.p.sh); [n.p.m,n.p.sh].forEach(o=>{ o.geometry.dispose(); o.material.dispose(); }); }); cur.npcs=[]; }   /* ★人の 板も 捨てる（模様は 共有なので 残す） */
 function setNpcs(list){ clearNpcs(); cur.npcs=list.map(n=>({...n,ang:0,p:person(n.spr)})); }
 function resetTrail(){ trail=[]; for(let i=0;i<200;i++) trail.push([hero.x,hero.z,hero.ang]); followers.forEach(f=>{f.x=hero.x;f.z=hero.z;f.ang=hero.ang;}); }   // ★みんな 先頭と 同じ 場所（重なる）
 function enterTown(at,which){ TOWN_NOW=which||'rue'; visit(TOWN_NOW); if(/^c4_/.test(ST.phase) && /^(velna|hamlet|port|seatown|westport)$/.test(TOWN_NOW)) ST.c4town=TOWN_NOW;
@@ -823,7 +823,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   const ch = cur.kind==='town' ? [12.1,7.1] : [8.3,5.1];   // ★町は 少し 引き（前は 10.5,6.2）。家・城・砦も 同じ 割合で 引き（前は 7.2,4.4。指示）
   C.position.lerp(new THREE.Vector3(hero.x, ch[0], hero.z+ch[1]),.18); C.lookAt(hero.x,0,hero.z-.4);
   const moving=!!(ix||iz); if(moving) walkT+=dt*((cur.kind==='town'&&(holdB||keys.x||keys.Shift))?DASH:1); /* ダッシュ中は 足も 速く */ const seq=[1,0,2,0], fr=moving?seq[Math.floor(walkT*8)%4]:0;
-  place(hero.p,hero.x,hero.z,hero.ang,fr); followers.forEach(f=>place(f.p,f.x,f.z,f.ang,fr)); cur.npcs.forEach(n=>place(n.p,n.x,n.y,n.ang,n.walking?[1,0,2,0][Math.floor(now/130)%4]:0));
+  place(hero.p,hero.x,hero.z,hero.ang,fr); followers.forEach(f=>place(f.p,f.x,f.z,f.ang,fr)); cur.npcs.forEach(n=>{ if(n.fight) fightStep(n,now); }); cur.npcs.forEach(n=>place(n.p,n.x,n.y,n.ang,n.walking?[1,0,2,0][Math.floor(now/130)%4]:0));
   // 噴水の 水しぶき・水面・暖炉の 火
   dolmSmoke.forEach(p=>{ p.userData.t=(p.userData.t+dt*.25)%1; const t=p.userData.t; p.position.set(p.userData.x+Math.sin(t*4+p.userData.ph)*.25+t*.6, p.userData.y+t*3.2, p.userData.z-t*.3); p.scale.setScalar(.4+t*1.4); p.material.opacity=.55*(1-t); });
   drops.forEach(d=>{ d.userData.t=(d.userData.t+dt*.7)%1; const t=d.userData.t, r=.15+t*.95, a=d.userData.a; d.position.set(fountainC[0]+Math.cos(a)*r, 1.62+t*.55-t*t*1.5, fountainC[1]+Math.sin(a)*r); });   /* ★しぶきは その 町の 噴水の 上（前は ルーエの 位置に 固定） */
@@ -2872,10 +2872,17 @@ function campNpcs(){ const L_=[], night=campNight();
     if(!ST.sq1) L_.push({x:CAMP_GAPS[0][0],y:CAMP_GAPS[0][1],spr:null,foe:'kagehei',name:'影の 兵の 隊',talk:()=>squadFight(1)});
     else if(!ST.sq2) L_.push({x:CAMP_GAPS[1][0],y:CAMP_GAPS[1][1],spr:null,foe:'kagehei',name:'影の 兵の 隊',talk:()=>squadFight(2)});
     else if(!ST.sq3) L_.push({x:CAMP_GAPS[2][0],y:CAMP_GAPS[2][1],spr:null,foe:'kageshin',name:'影の 親衛隊長',talk:()=>squadFight(3)});
+    { const k=[1,2,3].find(k=>!ST['sq'+k]); if(k){ const [y,xs]=CAMP_FRONT[k]; xs.forEach((bx,i)=>{ const ph=i*.37; L_.push({x:bx,y:y+.45,spr:'asoldier',name:'アルディアの 兵',fight:{bx,y,dir:1,ph},lines:[['兵「くっ……こいつら、斬っても 斬っても！」','兵「エルトどの、ここは 任せて 柵へ！」'][i%2]]}); L_.push({x:bx,y:y-.45,spr:null,foe:'kagehei',name:'影の 兵',fight:{bx,y,dir:-1,ph},lines:['影の 兵は アルディアの 兵と 斬り結んで いる。']}); }); } }
     [1,2,3].forEach(k=>{ if(ST['sq'+k]){ const [x,y]=CAMP_GAPS[k-1]; L_.push({x:x-1.4,y:y+1.0,spr:'asoldier',name:'アルディアの 兵',lines:['兵「この 柵は 押さえた！ エルトどの、先へ！」']}); L_.push({x:x+1.4,y:y+1.0,spr:'asoldier',name:'アルディアの 兵',lines:['兵「ヴェルナの 兵が……槍を 下ろして いる？」']}); } });
     if(ST.sq3 && !ST.garva) L_.push({x:12.5,y:4.4,spr:'servis',name:'摂政 セルヴィス',talk:()=>revealScene()});
     if(ST.sq3) L_.push({x:16.5,y:5.4,spr:'general',name:'騎士団長',lines:ST.garva?['騎士団長「……長い 悪夢だった」']:['騎士団長「わたしの 隊は 剣を 引いた。……殿下、今です」']}); }
-  setNpcs(L_.filter(n=>n.spr)); L_.filter(n=>!n.spr).forEach(n=>cur.npcs.push({...n,ang:0,p:foeStand(n.foe)})); }
+  setNpcs(L_.filter(n=>n.spr)); L_.filter(n=>!n.spr).forEach(n=>cur.npcs.push({...n,ang:0,p:foeStand(n.foe)}));
+  cur.npcs.forEach(n=>{ if(n.fight && n.fight.dir===1){ const fx=new THREE.Mesh(new THREE.PlaneGeometry(.5,.5),new THREE.MeshBasicMaterial({color:0xfff0a0,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending})); S.add(fx); n.p.fx=fx; } }); }
+// ★戦場の 斬り合い（見た目だけ。戦いには ならない）：次に 破る 柵の 手前で アルディアの 兵と 影の 兵が 交互に 打ち込み、当たると 火花
+const CAMP_FRONT={1:[19.7,[5.5,10.4,14.4,19.5]],2:[13.55,[5.5,10.4,14.4,19.5]],3:[7.5,[5.5,10.4,14.4,19.5]]};   /* ★内側の 2組は 柵の 切れ目へ 向かう 道から 見える 所（天幕に 重ならない 位置）。影の 兵が 北（柵の 側）、アルディアの 兵が 南で 柵へ 押す */
+function fightStep(n,now){ const f=n.fight, t=((now/1000)+f.ph)%1.4, lunge=(a)=>(t>=a&&t<a+.3)?Math.sin((t-a)/.3*Math.PI):0, mine=f.dir===1?lunge(0):lunge(.7), theirs=f.dir===1?lunge(.7):lunge(0);
+  n.x=f.bx; n.y=f.y+f.dir*(.45-mine*.28+theirs*.08); n.ang=f.dir===1?Math.PI:0; n.walking=mine>0; if(n.p.noAnim) n.p.hgt=1.45;   /* ★影の 兵は 人と 並ぶので 少し 小さく */
+  if(n.p.fx){ const k=Math.max(lunge(0),lunge(.7)), on=k>.85; n.p.fx.material.opacity=on?(k-.85)/.15:0; n.p.fx.position.set(f.bx+.05,1.0,f.y+(lunge(0)>lunge(.7)?-.12:.12)); n.p.fx.quaternion.copy(C.quaternion); n.p.fx.rotation.z=now/60; const sc=.6+k*.6; n.p.fx.scale.set(sc,sc,1); } }
 function campExamine(){ if(cur.kind!=='dun'||DUN_NOW!=='camp') return false; const R=DUNS.camp.rows, x=Math.floor(hero.x+Math.sin(hero.ang)*.8), z=Math.floor(hero.z+Math.cos(hero.ang)*.8), c=R[z]&&R[z][x];
   if(c==='T'){ say([campNight()?'天幕の 中から いびきが 聞こえる。':'天幕は からっぽだ。兵は みな 前へ 出て いる。']); return true; }
   if(c==='G'){ say(['青い 旗の 天幕。騎士団長の 天幕だ。']); return true; }
