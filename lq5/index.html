@@ -802,7 +802,8 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
       if((ix||iz) && !msgQ && at(Math.floor(hero.x+ix*.6),Math.floor(hero.z+iz*.6))==='Q'){ say(['峠の 関所だ。門は 固く 閉ざされて いる。']); hero.x-=ix*.25; hero.z-=iz*.25; }   /* ★閉じた 関所に ぶつかった とき */
       if(c==='Y' && (/^c3_(seat|flee|mine|exit|end)$/.test(ST.phase)||/^c4_/.test(ST.phase))){ hero.z+=.6; say(['帝都の 門は 固く 閉ざされて いる。','門の 前に ヴェルナの 兵が 並んで いる……。']); } else if(c==='Y'){ go(()=>{ if(ST.phase==='c2_road') ST.phase='c2_capital'; enterTown([12,20.2],'vcap'); }); }
       if(c==='R'){ if(/^c2_(ruins|back|end)$/.test(ST.phase)) go(()=>enterDun('ruins')); else { hero.z+=.6; say(['古い 遺跡の 入口だ。','……今は 入る 理由が ない。']); } }
-      if(c==='C') { if(/^(road|c1_|c2_|c3_|c4_)/.test(ST.phase)) go(()=>enterTown([12,20.2],'cap')); else { hero.z+=0.6; say(['王都 アルディア。今は 用が ない。']); } } }
+      if(c==='C' && ST.phase==='c4_sea'){ go(()=>westPortArrive('cap')); }   /* ★船で 西の 港町を 通らず 王都へ 来ても 第4章を 終える */
+      else if(c==='C') { if(/^(road|c1_|c2_|c3_|c4_)/.test(ST.phase)) go(()=>enterTown([12,20.2],'cap')); else { hero.z+=0.6; say(['王都 アルディア。今は 用が ない。']); } } }
     else if(cur.kind==='town' && TOWN_NOW==='rue' && /^(burn|after|road)$/.test(ST.phase) && !msgQ && TDOORS().some(([dx,dy])=>Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2) && iz<0){ say(['家の 中まで 火が 回って いる。入れない！']); hero.z+=.35; }   /* ★燃えて いる 家には 入れない */
     else if(cur.kind==='town'){ TDOORS().forEach(([dx,dy],i)=>{ if(!busyDoor && Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2 && iz<0){ busyDoor=1;   /* ★扉の すぐ 前だけ。busyDoor=1 が 説明の 中に 入って 効かず、毎こま 扉の 音が 鳴って 重なって いた */
         se('door'); swing(doorPiv[i],0,OPEN,.28,0,()=>goDoor(()=>{ lastDoor=i; enterRoom(i); swing(roomDoor,OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }); }
@@ -2753,8 +2754,8 @@ function garoShip(){ CUT=1; say(['ガロ「約束だ。倉庫の 裏の 船を �
 function uminariFight(){ if(BT||CUT) return; CUT=1; hero.z=cur.rows.length-1.5; say(['桟橋の 先。海面が 盛り上がり、巨大な 影が 現れた！','ウミナリが 低く 鳴くと、港じゅうの 海が ざわめいた……','ドルガン「でけえな……。船を 出す にゃ、こいつを どかすしか ねえ」'],()=>startBattle(FOES.uminari,()=>{ ST.uminari=1; CUT=0;
     say(['ウミナリは 大きな 波を 残して、沖へ 沈んで いった。','港の 海が、静かに なった。','ドルガン「……ガロの 所へ 戻ろう」']); })); }
 // ---- 西の 港町ウェルスに 着く：第4章の 終わり ----
-function westPortArrive(){ enterTown([11.5,TOWNS.westport.rows.length-1.8],'westport'); CUT=1;
-  setTimeout(()=>say(['船は 川の 口の 港に 着いた。……アルディアの 土だ。','リディア「ここが、アルディア……」','エルト「……帰って きた」','ドルガン「のんびり してる 暇は ねえぞ。見ろ、兵の 数を」','港の 兵「ヴェルナが 国境を 越えた！ 全軍だ！ 王都へ 急げ！」','ZF「……戦ガ 始マッタ」','リディア「王都へ。アルディア王に、先生の 手記を」'],()=>{ CUT=0; showEnd4(); }),600); }
+function westPortArrive(where){ const cap=where==='cap'; if(cap) enterTown([12,20.2],'cap'); else enterTown([11.5,TOWNS.westport.rows.length-1.8],'westport'); CUT=1;
+  setTimeout(()=>say([cap?'海を 渡り、王都 アルディアの 門の 前まで たどり着いた。……アルディアの 土だ。':'船は 川の 口の 港に 着いた。……アルディアの 土だ。','リディア「ここが、アルディア……」','エルト「……帰って きた」','ドルガン「のんびり してる 暇は ねえぞ。見ろ、兵の 数を」',(cap?'門番':'港の 兵')+'「ヴェルナが 国境を 越えた！ 全軍だ！ '+(cap?'城へ 急げ！」':'王都へ 急げ！」'),'ZF「……戦ガ 始マッタ」',(cap?'リディア「城へ。アルディア王に、先生の 手記を」':'リディア「王都へ。アルディア王に、先生の 手記を」')],()=>{ CUT=0; showEnd4(); }),600); }
 function showEnd4(ns){ CARD_T=performance.now(); ST.phase='c4_end'; const c=document.getElementById('card'); c.innerHTML='<div>第4章</div><div class="t">側近の 屋敷跡</div><div>完</div><div style="font-size:13px;margin-top:20px">── 第5章へ つづく ──</div>'; c.style.opacity=1; if(!ns) saveGame(); }
 CHESTS.dun_manor=[{x:16.5,z:9.5,gear:{name:'焦げ跡の 兜',kind:'helm',v:15,price:600},id:'mn1'},{x:1.5,z:11.5,gold:500,id:'mn2'},{x:1.5,z:1.5,herb:3,ether:2,kitsuke:2,id:'mn3'}];
 CHESTS.dun_manorB=[{x:1.5,z:6.5,gear:{name:'黒檀の 杖',kind:'weapon',v:17,price:700},id:'mb1'},{x:9.5,z:6.5,gear:{name:'書庫の 腕刃',kind:'weapon',v:22,price:800,who:['zf']},id:'mb2'}];
