@@ -24,7 +24,7 @@ const W=ms=>new Promise(r=>setTimeout(r,ms));
         syncAtk(); PARTY.forEach(k=>{ STATS[k].hp=STATS[k].max; STATS[k].mp=STATS[k].maxmp; });
         BAG.herbs=5; tactic='balance'; SND.speed=60; window._turns=0; window._min=1; window._ko=0; enterDun('mine'); startBattle(boss.split('+').map(k=>FOES[k])); },[L,boss]);
       let out='?';
-      for(let i=0;i<3000;i++){ await W(25); const st=await E(()=>{ if(BT){ const r=BT.party.reduce((a,m)=>a+m.hp,0)/BT.party.reduce((a,m)=>a+m.max,0); window._min=Math.min(window._min??1,r); window._ko=Math.max(window._ko||0,BT.party.filter(m=>m.hp<=0).length); } if(!BT) return 'end'; if(BT.party.every(m=>m.hp<=0)) return 'lose'; if(BT.phase==='menu'){ window._turns++; commit(autoAct(BT.party[BT.cur||0])); } return ''; }); if(st==='end'){ out='win'; break; } if(st==='lose'){ out='lose'; break; } }
+      for(let i=0;i<3000;i++){ await W(25); const st=await E(()=>{ if(BT){ const r=BT.party.reduce((a,m)=>a+m.hp,0)/BT.party.reduce((a,m)=>a+m.max,0); window._min=Math.min(window._min??1,r); window._ko=Math.max(window._ko||0,BT.party.filter(m=>m.hp<=0).length); } if(BT && BT.waitA){ pressA(); } if(!BT) return 'end'; if(BT.party.every(m=>m.hp<=0)) return 'lose'; if(BT.phase==='menu'){ window._turns++; commit(autoAct(BT.party[BT.cur||0])); } return ''; }); if(st==='end'){ out='win'; break; } if(st==='lose'){ out='lose'; break; } }
       const t=await E(()=>window._turns+'/'+Math.round(window._min*100)+'%/'+window._ko); const hp=await E(()=>PARTY.map(k=>STATS[k].hp+'/'+STATS[k].max).join(' '));
       res.push(out+':'+t); if(out==='lose') await E(()=>{ if(BT){ BT.steps=[]; endBattle(); } });
     }

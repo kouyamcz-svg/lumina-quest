@@ -712,7 +712,7 @@ function closeMsg(){ msgQ=null; msgEl.style.display='none'; const d=msgDone; msg
 let CARD_T=0;   // ★章の 札を 出した 時刻（しばらくは Aで 消えない）
 function pressA(){ if(/^(end|c1_end|c2_end|c3_end)$/.test(ST.phase) && performance.now()-CARD_T<3000) return;
   if(ST.phase==='end'){ startCh1(); return; } if(ST.phase==='c1_end'){ startCh2(); return; } if(ST.phase==='c2_end'){ startCh3(); return; } if(ST.phase==='c3_end'){ startCh4(); return; } if(ST.phase==='c4_end') return;
-  if(mapOpen){ se('cursor'); mapSt.zoom=mapSt.zoom?0:1; if(mapSt.zoom){ mapSt.cx=hero.x; mapSt.cz=hero.z; } drawMap(); return; } if(BT){ if(BT.phase==='menu'){ se('ok'); battleCmd(); } else if(BT.phase==='target') targetPick(); else if(BT.phase==='skill'){ se('ok'); skillPick(); } else if(BT.phase==='item'){ se('ok'); itemPick(); } else if(BT.phase==='ally'){ allyPick(); } return; }
+  if(mapOpen){ se('cursor'); mapSt.zoom=mapSt.zoom?0:1; if(mapSt.zoom){ mapSt.cx=hero.x; mapSt.cz=hero.z; } drawMap(); return; } if(BT){ if(winClose()) return; if(BT.phase==='menu'){ se('ok'); battleCmd(); } else if(BT.phase==='target') targetPick(); else if(BT.phase==='skill'){ se('ok'); skillPick(); } else if(BT.phase==='item'){ se('ok'); itemPick(); } else if(BT.phase==='ally'){ allyPick(); } return; }
   if(MENU){ se('ok'); MENU.onPick(MENU.sel); return; }
   if(msgQ){ if(msgQ.length) msgEl.textContent=msgQ.shift(); else closeMsg(); return; }
   const fx=Math.sin(hero.ang), fz=Math.cos(hero.ang); let best=null,bd=1e9;
@@ -720,7 +720,7 @@ function pressA(){ if(/^(end|c1_end|c2_end|c3_end)$/.test(ST.phase) && performan
   if(best){ se('cue'); best.ang=Math.atan2(hero.x-best.x,hero.z-best.y); const bl=linesByPhase(best); if(bl){ say(bl); return; } if(best.talk){ best.talk(best); return; } say([best.name+'：'].concat(best.lines)); return; }
   if(examine()) return;
   say(['……なにも ない。']); }
-function pressB(){ if(mapOpen){ closeMap(); return; } if(BT){ if(BT.phase==='menu' && (BT.cur||0)>0){ se('cancel'); cmdBack(); return; } if(BT.phase==='target'||BT.phase==='skill'||BT.phase==='item'||BT.phase==='ally'){ se('cancel'); BT.pendSkill=null; BT.phase='menu'; bsay('どうする？'); drawBattleUI(); } return; } if(MENU){ se('cancel'); MENU.onBack&&MENU.onBack(); return; } if(msgQ){ closeMsg(); } }
+function pressB(){ if(mapOpen){ closeMap(); return; } if(BT){ if(winClose()) return; if(BT.phase==='menu' && (BT.cur||0)>0){ se('cancel'); cmdBack(); return; } if(BT.phase==='target'||BT.phase==='skill'||BT.phase==='item'||BT.phase==='ally'){ se('cancel'); BT.pendSkill=null; BT.phase='menu'; bsay('どうする？'); drawBattleUI(); } return; } if(MENU){ se('cancel'); MENU.onBack&&MENU.onBack(); return; } if(msgQ){ closeMsg(); } }
 // ================= 動き =================
 const SPEED=3.2, DASH=1.8, RADT=0.38;   // DASH：町の 中で Bを 押して いる 間の 速さの 倍
 const at=(x,y)=>{ const r=cur.rows; return (y<0||y>=r.length||x<0||x>=r[0].length)?'#':r[y][x]; };
@@ -1313,12 +1313,15 @@ function foeAct(f){ let t=null, line='';
 function turnEnd(){ return ()=>{ const lines=[]; BT.party.forEach(m=>{ if(m.hp>0 && m.status==='poison'){ const d=Math.max(1,Math.floor(m.max/12)); m.hp=Math.max(1,m.hp-d); lines.push(m.name+'は 毒で '+d+'の ダメージ'); } }); drawBattleUI(); if(lines.length){ bsay(lines.join('　')); return .9; } return 0; }; }
 function enemyTurn(){ const st=[]; alive().forEach(f=>st.push(...foeAct(f))); st.push(()=>{ if(!alive().length){ BT.steps=winSteps(); return 0; } return 0; }); st.push(turnEnd()); st.push(backToMenu()); return st; }   /* ★魔物が みな 逃げたら 戦闘を 終える */
 const EXP_RATE=1.25;   // ★経験値を 少し 上げる（指示。前は 1倍）
-function winSteps(){ const won=BT.foes.filter(f=>!f.fled); if(!won.length) return [()=>{ bsay('魔物は 逃げて いった。'); return 1.2; }, ()=>{ endBattle(); return 99; }];   /* ★逃げた 魔物の 分は もらえない */
+// ★勝った 後の 文は、待ち時間の 後に Aか Bを 押すと 戦闘を 終える（指示。前は 自動で 閉じた）
+function winWait(){ return ()=>{ BT.waitA=1; bmsg.textContent=bmsg.textContent.replace(/\s*▼$/,'')+' ▼'; return 1e9; }; }
+function winClose(){ if(!BT||!BT.waitA) return false; BT.waitA=0; BT.steps=[]; se('ok'); endBattle(); return true; }
+function winSteps(){ const won=BT.foes.filter(f=>!f.fled); if(!won.length) return [()=>{ bsay('魔物は 逃げて いった。'); return 1.2; }, winWait()];   /* ★逃げた 魔物の 分は もらえない */
   return [
   ()=>{ const ex=Math.round(won.reduce((a,f)=>a+(f.def.exp||0),0)*EXP_RATE), gd=won.reduce((a,f)=>a+(f.def.gold||0),0); BAG.gold+=gd; const ups=gainExp(ex); if(bgmEl && !bgmEl.paused) bgmEl.pause(); jingleUntil=performance.now()+(ups.length?3000:1000); setTimeout(()=>se('win'),80); if(ups.length) setTimeout(()=>se('lvup'),760);   /* ★勝利の 曲の 後に ファンファーレ（前は 0.3秒 ずらして 重なり、戦闘の 曲に 埋もれて いた） */
  ST.kill=ST.kill||{}; won.forEach(f=>{ ST.kill[f.def.key]=(ST.kill[f.def.key]||0)+1; });   // ★眠りと 混乱は 戦闘が 終わると 治る（毒は 残る）
         bsay((BT.foes.length>1?'魔物たちを やっつけた！ ':'')+'経験値 '+ex+'、'+gd+'ゴールドを 手に 入れた！'+(ups.length?'　'+ups.join('　'):'')); return ups.length?2.8:1.4; },
-  ()=>{ endBattle(); return 99; } ]; }
+  winWait() ]; }
 function killCheck(f){ if(f.hp<=0 && !f.dead){ BT.steps.unshift(()=>{ f.dead=true; f.ex=1; se('defeat'); drawFoeNames(); bsay(f.name+'を たおした！'); return 1.0; }); } }
 function hitFoe(m,f,mul,label,key){ return ()=>{ if(!alive().length) return 0; if(f.dead) f=alive()[0];
   let d=m.atk+Math.floor(Math.random()*4); if(f.defDown) d=Math.round(d*1.3); d=Math.round(d*(mul||1));
