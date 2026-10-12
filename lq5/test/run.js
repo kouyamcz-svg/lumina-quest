@@ -243,6 +243,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     const b=await E(()=>cur.kind==='world' && Math.abs(hero.x-12.5)<.6 && Math.abs(hero.z-25.45)<.6);
     const c=await E(()=>{ enterDun('mine'); openSpells('elt'); MENU.onPick(skillsOf('elt').findIndex(s=>s.type==='warp')); const ok=!!msgQ && /使えない/.test(msgEl.textContent); while(msgQ) closeMsg(); if(MENU) closeMenu(); return ok; });
     return a && b && c; })());
+  T('どの 町の どの 家も、出口の 前（2ます）が ふさがって いない', await E(()=>{ const bad=[]; const all=[...Object.entries(TOWNS).map(([k,v])=>[k,v.rooms||(k==='vcap'?VCAP_ROOMS:ROOMS)]),['vcap',VCAP_ROOMS]]; all.forEach(([k,rs])=>(rs||[]).forEach(r=>{ const R=r.rows, x=R[R.length-1].indexOf('X'); if(x<0) return; [2,3].forEach(d=>{ if(!'.c'.includes(R[R.length-d][x])) bad.push(k+':'+r.name); }); })); return bad.length===0 || (console.log(bad.join(',')),false); }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
