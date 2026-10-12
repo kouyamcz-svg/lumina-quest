@@ -1922,7 +1922,7 @@ function openEquipOld(){ const e=EQUIP.elt;
 // ---- 地図（外の 世界の とき だけ）----
 // ★地図：前は 世界 全体を 画面の 幅に 縮めて いて、1ますが 3ドットほどで 見づらかった。
 //   主人公の まわりを 大きく 出し、十字で 動かせる。Aで 拡大 ⇔ 全体、Bで 閉じる。町や 城の 名前も 出す
-const MAP_NAMES=[[34.5,30.6,'ルーエ','rue'],[13,21.4,'王都 アルディア','cap'],[40,22.6,'国境の 砦','fort'],[48.5,24.2,'ドルム','velna'],[63,23.6,'峠の 山道','pass'],[93,21.4,'帝都 ヴェルナ','vcap'],[74.5,21.2,'森の 遺跡','ruins']];
+const MAP_NAMES=[[34.5,30.6,'ルーエ','rue'],[13,21.4,'王都 アルディア','cap'],[40,22.6,'国境の 砦','fort'],[48.5,24.2,'ドルム','velna'],[63,23.6,'峠の 山道','pass'],[93,21.4,'帝都 ヴェルナ','vcap'],[74.5,21.2,'森の 遺跡','ruins'],[48.5,20.6,'坑道の 北の 出口','mine'],[85.5,10.8,'ノルン','hamlet'],[96.5,17.8,'側近の 屋敷跡','manor'],[84.5,54.8,'港町 サルム','port'],[26.5,58.8,'ミラ','seatown'],[4.5,27.8,'ウェルス','westport'],[56.5,38.8,'摂政の 陣','camp']];   /* ★第4章・第5章の 町と 場所を 足した（前は 地図に 名前が 出なかった） */
 // ★行った 場所だけ 名前を 出す（指示）。前の セーブは 話の 進みから 行った はずの 場所を 補う
 function visit(k){ ST.visited=ST.visited||{}; ST.visited[k]=1; }
 function visitedFromPhase(){ const p=ST.phase; visit('rue'); if(/^c5_/.test(p)){ ['cap','westport','fort','velna','pass','vcap','ruins','hamlet','port'].forEach(visit); } if(/^(road|end|c1_|c2_|c3_|c4_)/.test(p)) visit('cap'); if(/^(c1_(fort|east|town|end)|c2_|c3_|c4_)/.test(p)) visit('fort'); if(/^(c1_(town|end)|c2_|c3_|c4_)/.test(p)) visit('velna'); if(/^(c2_(road|capital|inn|tower|ruins|back|end)|c3_|c4_)/.test(p)) visit('pass'); if(/^(c2_(capital|inn|tower|ruins|back|end)|c3_|c4_)/.test(p)) visit('vcap'); if(/^(c2_(back|end)|c3_|c4_)/.test(p)) visit('ruins'); if(/^c4_(manor|port|sea|end)/.test(p)) visit('hamlet'); if(/^c4_(sea|end)/.test(p)) visit('port'); }

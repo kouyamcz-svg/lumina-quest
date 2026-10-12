@@ -286,6 +286,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     const winD=await E(()=>{ const s=jingleUntil; const d=jingle('win'); jingleUntil=s; return d; }), lvD=await E(()=>{ const s=jingleUntil; const d=jingle('lvup'); jingleUntil=s; return d; });
     return r.n>=12 && winD>.4 && winD<.8 && lvD>1.4 && winD+.08<.76; })());
   T('勝った 後の 文は 待ち時間の 後も 閉じず、Aを 押すと 戦闘が 終わる', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); if(MENU) closeMenu(); startBattle([FOES.nousagi]); }); await waitMenu(); await E(()=>{ BT.foes.forEach(f=>f.hp=1); for(let k=0;k<12&&BT&&BT.phase!=='act';k++){ if(BT.phase==='menu') BT.sel=0; pressA(); } }); for(let i=0;i<60;i++){ await W(100); if(await E(()=>BT&&BT.waitA)) break; } await W(1500); const a=await E(()=>!!BT && BT.waitA===1 && /▼$/.test(bmsg.textContent)); await E(()=>pressA()); await W(200); const b=await E(()=>!BT); return a && b; })());
+  T('地図の 名前：外の 世界の 町・場所の 印に すべて 名前が ある', await E(()=>{ const need={V:'rue',C:'cap',S:'fort',W:'velna',G:'pass',Q:'pass',Y:'vcap',R:'ruins',N:'mine',h:'hamlet',A:'manor',P:'port',T:'seatown',U:'westport',B:'camp'}; return Object.values(need).every(k=>MAP_NAMES.some(m=>m[3]===k)); }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
