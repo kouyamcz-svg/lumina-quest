@@ -284,7 +284,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('祠：南東の 島の 高台は 山に 囲まれ、飛空艇で 降りて 入ると 雷神の 剣', await (async()=>{ const a=await E(()=>{ hero.x=58.5; hero.z=8.5; pressA(); hero.x=104.5; hero.z=60.5; pressA(); return ST.onAir===0 && blockedAt(103.5,61.5) && blockedAt(105.5,59.5) && blockedAt(107.5,62.5); });
     await E(()=>{ hero.x=105.5; hero.z=62.3; dir[1]=-1; }); await W(500); await E(()=>{ dir[1]=0; }); await W(500); const b=await E(()=>DUN_NOW==='shrine');
     await E(()=>{ hero.x=4.5; hero.z=4.4; hero.ang=Math.PI; examine(); }); await flush(); return a && b && await E(()=>BAG.gear.some(g=>g.name==='雷神の 剣') && canWear('elt',BAG.gear.find(g=>g.name==='雷神の 剣')) && !canWear('dolgan',BAG.gear.find(g=>g.name==='雷神の 剣'))); })());
-  T('魔王の 城：1階 → 2階（闇の 騎士）→ 玉座の 間', await (async()=>{ await E(()=>{ wEnc=1e9; enterDun('dcastle1'); }); await flush(); const a=await E(()=>DUN_NOW==='dcastle1' && freeCircle(hero.x,hero.z) && sceneLook()==='demon');
+  T('魔王の 城：1階 → 2階（闇の 騎士）→ 玉座の 間', await (async()=>{ await E(()=>{ wEnc=1e9; enterDun('dcastle1'); }); for(let i=0;i<20;i++){ await W(100); if(await E(()=>!!msgQ)) break; } await flush();   /* ★入った 直後の 台詞は 1こま 後に 出る（前は 先に flush して、台詞で 階段が 止まり 時々 失敗した） */ const a=await E(()=>DUN_NOW==='dcastle1' && freeCircle(hero.x,hero.z) && sceneLook()==='demon');
     await E(()=>{ wEnc=1e9; hero.x=10.5; hero.z=1.9; dir[1]=-1; }); await W(400); await E(()=>{ dir[1]=0; }); await W(600); await E(()=>{ wEnc=1e9; }); const b=await E(()=>DUN_NOW==='dcastle2' && freeCircle(hero.x,hero.z));
     await E(()=>{ wEnc=1e9; hero.x=10.5; hero.z=4.6; }); for(let i=0;i<20;i++){ await W(100); if(await E(()=>!!msgQ||!!BT)) break; } await flush(); const c=await waitMenu() && await E(()=>BT.foes[0].def.key==='yamikishi'); await winBattle(); await flush();
     await E(()=>{ hero.x=10.5; hero.z=1.9; dir[1]=-1; }); await W(400); await E(()=>{ dir[1]=0; }); await W(600); const d=await E(()=>DUN_NOW==='dcastle3' && ST.yamikishi===1); if(!(a&&b&&c&&d)) console.log('castle',a,b,c,d,await E(()=>DUN_NOW+' '+hero.x.toFixed(1)+','+hero.z.toFixed(1)+' '+sceneLook()+' '+CUT+' '+!!msgQ)); return a && b && c && d; })());
@@ -334,6 +334,10 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
       const comp=(blk)=>{ let st=null; for(let y=0;y<H&&!st;y++)for(let x=0;x<W;x++) if(open(x,y,blk)&&'SUD'.includes(R[y][x])){ st=[x,y]; break; } if(!st) return null; const seen=new Set([st+'']), q=[st]; while(q.length){ const [x,y]=q.shift(); for(const [a,c] of [[1,0],[-1,0],[0,1],[0,-1]]){ const nx=x+a, ny=y+c; if(open(nx,ny,blk)&&!seen.has(nx+','+ny)){ seen.add(nx+','+ny); q.push([nx,ny]); } } } return seen; };
       const all=comp([]); if(!all) continue; const w=comp(ch); const lost=[...all].filter(p=>!w.has(p)&&!ch.some(c=>c[0]+','+c[1]===p)); if(lost.length) bad.push(k); }
     return bad.length===0; }));
+  T('タイトル画面：題名が 出て、タップで 消えて 序章が 始まる（#title で 開いた とき）', await (async()=>{ const p2=await b.newPage(); await p2.setViewport({width:393,height:852}); const e2=[]; p2.on('pageerror',e=>e2.push(e.message));
+    await p2.goto(URL+'#title',{waitUntil:'load'}); await p2.evaluate(()=>localStorage.clear()); await p2.reload({waitUntil:'load'}); await W(1800);
+    const a=await p2.evaluate(()=>TITLE_ON===1 && /ルミナクエスト/.test(document.getElementById('title').textContent) && /ふたつの 王冠/.test(document.getElementById('title').textContent) && !msgQ && getComputedStyle(document.getElementById('title')).display!=='none');
+    await p2.mouse.click(200,400); await W(1500); const c=await p2.evaluate(()=>TITLE_ON===0 && !!msgQ && ST.phase==='morning'); await p2.close(); return a && c && !e2.length; })());
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
