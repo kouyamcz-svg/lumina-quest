@@ -1077,11 +1077,13 @@ const BG_LOOK={
   rock:{grp:'rock', bg:0xc8d4e0, fog:[0xd0d4d8,16,64], hemi:[0xe0e0e8,0x6a5a48,.75], sun:[0xfff0d8,.7], sky:true},
   fort:{grp:'fort', bg:0x0c0a10, fog:[0x0c0a10,8,26], hemi:[0x8a7a70,0x2a2018,.4], sun:[0xffd0a0,.18], sky:false},
   sea:{grp:'sea', bg:0xa8d0f0, fog:[0xb8d8f0,24,90], hemi:[0xd8ecff,0x3a6a9a,.8], sun:[0xfff4e0,.75], sky:false},   /* ★海の 上（船の 甲板） */
+  lava:{grp:'fort', bg:0x1a0806, fog:[0x2a0c06,8,30], hemi:[0xffa070,0x301008,.5], sun:[0xff6020,.35], sky:false},   /* ★終章：坑道の 奥（溶岩の 熱い 坑道） */
+  demonOut:{grp:'field', extra:'nightX', bg:0x1a0610, fog:[0x24080e,10,44], hemi:[0xb05068,0x200810,.45], sun:[0xff5060,.3], sky:false},   /* ★終章：魔王の 島の 外 */
   demon:{grp:'fort', bg:0x1a0610, fog:[0x1e0812,8,32], hemi:[0xc06080,0x200810,.48], sun:[0xff4060,.28], sky:false},   /* ★終章：魔王の 島と 城 */
   burn:{grp:'burn', bg:0x1e0c10, fog:[0x2a1210,10,40], hemi:[0xff9a70,0x2a1010,.5], sun:[0xff7040,.35], sky:false},
 };
 function sceneLook(){ if(cur.kind==='fort') return 'fort'; if(cur.kind==='dun'){ const lk=DUNS[DUN_NOW].look; return typeof lk==='function'?lk():lk; } if(cur.kind==='town' && ST.phase==='burn') return 'burn';
-  if(cur.kind==='world'){ if(ST.phase==='road'||ST.phase==='c5_land') return 'night'; { const c0=WORLD[Math.floor(hero.z)]&&WORLD[Math.floor(hero.z)][Math.floor(hero.x)]; if(c0==='k') return 'demon'; }   /* ★魔王の 島 */   /* ★外の 世界は 立って いる 所の まわりで 決める（前は 国境より 東なら いつも 岩場で、草原でも 地面の 背景だった） */
+  if(cur.kind==='world'){ if(ST.phase==='road'||ST.phase==='c5_land') return 'night'; { const c0=WORLD[Math.floor(hero.z)]&&WORLD[Math.floor(hero.z)][Math.floor(hero.x)]; if(c0==='k') return 'demonOut'; }   /* ★魔王の 島（外。城の 中の 'demon' は 壁と たいまつの 背景） */   /* ★外の 世界は 立って いる 所の まわりで 決める（前は 国境より 東なら いつも 岩場で、草原でも 地面の 背景だった） */
     const hx=Math.floor(hero.x), hz=Math.floor(hero.z); let rock=0, n=0; for(let dz=-2;dz<=2;dz++) for(let dx=-2;dx<=2;dx++){ const c=WORLD[hz+dz]&&WORLD[hz+dz][hx+dx]; if(!c) continue; n++; if(c==='^'||c==='d'||c==='Q'||c==='G') rock++; }
     if(WORLD[hz]&&WORLD[hz][hx]==='~') return 'sea';   /* ★海の 上は 船の 甲板と 海 */
     if(WORLD[hz]&&WORLD[hz][hx]==='d') return 'rock'; return rock>=5 ? 'rock' : 'field'; } return 'field'; }
@@ -3080,7 +3082,7 @@ DUNS.mineB={name:'坑道の 奥', rows:[
 "#LL...#.#.....#.#.....#",
 "#LL.###.#.###.#.#####.#",
 "#O....#...#.......#...#",
-"#######################"], enc:'mineB', bg:0x1a0a06, fog:[0x1a0a06,7,20], floor:0x5a4436, wall:0x4a3428, wallH:1.3, look:'rock', solid:['#','L','O'],
+"#######################"], enc:'mineB', bg:0x1a0a06, fog:[0x1a0a06,7,20], floor:0x5a4436, wall:0x4a3428, wallH:1.3, look:'lava', solid:['#','L','O'],   /* ★前は 'rock'（外の 岩場）で、戦闘の 背景が 砂地に なって いた */
   start:()=>[21.5,1.9,0], escape:{town:'velna',at:[12,3.4]}, decor:()=>c6Decor('mineB'),
   exits:(c,iz)=>{ if(c==='U' && iz<0){ ST._mineFromB=1; go(()=>enterDun('mine')); } }};
 // ---- 南東の 島の 祠 ----
