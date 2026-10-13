@@ -19,6 +19,8 @@
 #title .l1 .v{font-size:1.35em;margin-left:.08em}
 #title .l2{margin-top:10px;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-weight:700;font-size:min(5vw,24px);letter-spacing:.32em;color:#e8f0ff;text-shadow:0 0 8px #3a5aff,0 2px 0 #10183a}
 #title .line{width:min(62vw,300px);height:1px;margin:12px auto 0;background:linear-gradient(90deg,transparent,#e8c86a,transparent)}
+#title .logo{transition:filter 1.2s,transform 1.2s}
+#title.lit .logo{filter:brightness(1.18) drop-shadow(0 0 18px rgba(255,220,140,.55));transform:scale(1.03)}
 #title .tap{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 5vh);text-align:center;font-size:15px;letter-spacing:.3em;color:#fff;
   text-shadow:0 0 8px #000,0 0 3px #000;animation:ttap 1.9s ease-in-out infinite}
 @keyframes ttap{0%,100%{opacity:.3}50%{opacity:1}}
@@ -84,7 +86,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #bmark{position:absolute;display:none;color:#ffe060;font-size:20px;text-shadow:0 0 3px #000;pointer-events:none}
 #hint{display:none!important;position:absolute;left:10px;bottom:10px;font-size:12px;color:var(--dim);background:rgba(18,15,28,.7);padding:3px 8px;border-radius:4px}
 </style></head><body>
-<div id="title" style="background-image:url(__TITLE__)"><div class="logo"><div class="l1">ルミナクエスト<span class="v">Ⅴ</span></div><div class="line"></div><div class="l2">〜ふたつの 王冠〜</div></div><div class="tap">▶ タップして はじめる</div></div>
+<div id="title" style="background-image:url(__TITLE__)"><div class="logo"><div class="l1">ルミナクエスト<span class="v">Ⅴ</span></div><div class="line"></div><div class="l2">〜ふたつの 王冠〜</div></div><div class="tap">─ タップ ─</div></div>
 <div id="wrap">
  <div id="view"><canvas id="c"></canvas><canvas id="c2" style="display:none"></canvas><div id="place">国境の 村 ルーエ</div>
   <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="flash"></div><div id="bmark">▼</div><div id="fstat"></div><div id="mapview"></div><div id="fmenu"></div><div id="fequip"></div><div id="card"></div>
@@ -2060,10 +2062,12 @@ const CHESTS={town:[{x:20.5,z:17.5,gold:25,id:'c1'}], farm:[{x:2.5,z:12.5,herb:1
 // ================= 曲（Ⅳの 曲の ファイルを そのまま 使う。../lq4/ の mp3）=================
 //  村・家＝town、外の 世界・畑＝field、王都＝castle、燃える 村＝dungeon、戦闘＝battle_sky（Ⅳの 後半の 戦闘の 曲）、ボス＝boss
 // ★燃える 村：いただいた 曲（lq5/burned_village.mp3、約2分。Ⅳの 曲より 約4dB 小さい ので 音量を 上げて ある）
-const BGM_FILES={burn:'burned_village.mp3', town:'../lq4/town.mp3', field:'../lq4/field.mp3', castle:'../lq4/castle.mp3', dungeon:'../lq4/dungeon.mp3', battle:'../lq4/battle_sky.mp3', boss:'../lq4/boss.mp3'};
-const BGM_VOL={burn:.78, town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, boss:.5};
+// ★タイトル：いただいた オープニングの 曲（lq5/opening.mp3、約3分15秒。Ⅳの 曲より 約2dB 大きい ので 音量を 下げて ある）
+const BGM_FILES={title:'opening.mp3', burn:'burned_village.mp3', town:'../lq4/town.mp3', field:'../lq4/field.mp3', castle:'../lq4/castle.mp3', dungeon:'../lq4/dungeon.mp3', battle:'../lq4/battle_sky.mp3', boss:'../lq4/boss.mp3'};
+const BGM_VOL={title:.38, burn:.78, town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, boss:.5};
 let bgmEl=null, bgmNow='', bgmUnlocked=false;
 function bgmFor(){
+  if(typeof TITLE_ON!=='undefined' && TITLE_ON) return 'title';   /* ★タイトル画面 */
   // ★燃える 村（村が 焼かれてから 村を 出るまで）は、家の 中でも 曲を 変えない。部隊長戦（ボス）だけは ボスの 曲（指示）
   // ★村の 中（町・家）に いる ときだけ。前は 村を 出た 後も TOWN_NOW が rue の ままで、夜の 街道の 戦闘でも 燃える 村の 曲が 流れた
   if(TOWN_NOW==='rue' && /^(burn|after|road)$/.test(ST.phase) && (cur.kind==='town'||cur.kind==='room') && !(BT && BT.def.boss)) return 'burn';
@@ -3293,8 +3297,10 @@ loadImgs(()=>{ hero.p=person('elt'); followers=PARTY.slice(1).map(k=>({p:person(
   C.position.set(hero.x,10.5,hero.z+6.2); requestAnimationFrame(tick);
   TITLE_READY=1; if(TITLE_ON) return; beginGame(); });
 // ★タイトル画面：タップ（または A）で 消して ゲームを 始める。自動の 検査（navigator.webdriver）では 出さない（#title を 付けると 出す）
-let TITLE_ON=1, TITLE_READY=0;
-function hideTitle(){ if(!TITLE_ON) return; TITLE_ON=0; const t=document.getElementById('title'); t.classList.add('hide'); setTimeout(()=>{ t.style.display='none'; },850); try{ se('ok'); }catch(e){} if(TITLE_READY) setTimeout(beginGame,300); }
+let TITLE_ON=1, TITLE_READY=0, TITLE_T=0;
+function hideTitle(){ if(!TITLE_ON) return;
+  if(TITLE_ON===1){ TITLE_ON=2; bgmUnlocked=true; bgmUpdate(); const t=document.getElementById('title'); t.classList.add('lit'); const tp=t.querySelector('.tap'); tp.style.visibility='hidden'; setTimeout(()=>{ tp.textContent='▶ タップして はじめる'; tp.style.visibility=''; },1200); TITLE_T=performance.now(); return; }   /* ★1回めの タップで オープニングの 曲（iPhone は 触れるまで 音を 出せない） */
+  if(performance.now()-TITLE_T<1200) return; TITLE_ON=0; const t=document.getElementById('title'); t.classList.add('hide'); setTimeout(()=>{ t.style.display='none'; },850); try{ se('ok'); }catch(e){} if(TITLE_READY) setTimeout(beginGame,300); }
 document.getElementById('title').addEventListener('touchstart',e=>{ e.preventDefault(); hideTitle(); },{passive:false}); document.getElementById('title').addEventListener('mousedown',()=>hideTitle());
 if(navigator.webdriver && !/title/.test(location.hash)){ TITLE_ON=0; document.getElementById('title').style.display='none'; }
 function beginGame(){
