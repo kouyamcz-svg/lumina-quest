@@ -3117,7 +3117,7 @@ DUNS.dcastle1={name:'魔王の 城 1階', rows:[
 "#...#.........#.....#",
 "#...#.#######.#.....#",
 "#..P.............P..#",
-"##########S##########"], enc:'dcastle', bg:0x14060c, fog:[0x14060c,7,24], floor:0x4a3a44, wall:0x3a2a34, wallH:1.6, look:'demon', solid:['#','P'],
+"##########S##########"], enc:'dcastle', bg:0x1c0a14, fog:[0x1c0a14,12,34], floor:0xa8a0b0, wall:0x6a3a4a, wallH:1.15, look:'demon', solid:['#','P'],
   start:(fe)=>fe?[10.5,2.6,0]:null, escape:[57.5,7.5], decor:()=>c6Decor('dcastle1'),
   exits:(c,iz)=>{ if(c==='S' && iz>0) go(()=>enterWorld([57.5,7.5])); if(c==='X' && iz<0) go(()=>enterDun('dcastle2'));
     if(!ST.dcIn && !CUT && !msgQ){ ST.dcIn=1; say(['リディア「……空気が 重い」','ドルガン「壁が 脈打って やがる。……生きてる みてえだ」','ZF「上ノ 階カラ、強イ 魔力。……二ツ」']); } }};
@@ -3136,7 +3136,7 @@ DUNS.dcastle2={name:'魔王の 城 2階', rows:[
 "#.........#.........#",
 "#.#######...#######.#",
 "#.........D.........#",
-"#####################"], enc:'dcastle', bg:0x14060c, fog:[0x14060c,7,24], floor:0x4a3a44, wall:0x3a2a34, wallH:1.6, look:'demon',
+"#####################"], enc:'dcastle', bg:0x1c0a14, fog:[0x1c0a14,12,34], floor:0xa8a0b0, wall:0x6a3a4a, wallH:1.15, look:'demon',
   start:(fe)=>fe?[10.5,2.6,0]:[10.5,12.6,Math.PI], escape:[57.5,7.5], decor:()=>c6Decor('dcastle2'),
   npcs:()=>ST.yamikishi?[]:[{x:10.5,y:3.5,spr:null,foe:'yamikishi',name:'闇の 騎士',talk:()=>yamikishiFight()}],
   exits:(c,iz)=>{ if(c==='D' && iz>0) go(()=>enterDun('dcastle1',true)); if(c==='X' && iz<0 && ST.yamikishi) go(()=>enterDun('dcastle3'));
@@ -3152,7 +3152,7 @@ DUNS.dcastle3={name:'魔王の 城 玉座の 間', rows:[
 "###...........#",
 "###P.........P#",
 "###...........#",
-"#######D#######"], enc:'', bg:0x10040a, fog:[0x10040a,8,26], floor:0x3a2a34, wall:0x2a1a24, wallH:2.2, look:'demon', solid:['#','P','Q'],
+"#######D#######"], enc:'', bg:0x180812, fog:[0x180812,12,34], floor:0x9a8a9a, wall:0x5a2a3a, wallH:2.2, look:'demon', solid:['#','P','Q'],
   start:()=>[7.5,9.6,Math.PI], escape:[57.5,7.5], decor:()=>c6Decor('dcastle3'),
   npcs:()=>ST.finalWon?[]:[{x:7.5,y:3.2,spr:null,foe:'garva2',name:'ガルヴァ',talk:()=>finalBattle()}],
   exits:(c,iz)=>{ if(c==='D' && iz>0) go(()=>enterDun('dcastle2',true)); if(!ST.finalWon && hero.z<6.2 && !msgQ && !BT && !CUT && !fading) finalBattle(); }};
@@ -3205,7 +3205,7 @@ function c6Examine(){ if(cur.kind!=='dun' || !/^c6_/.test(ST.phase)) return fals
 // ---- 終章の 3Dの 小物：階段・記録の 台・黒鉄の 筋・溶岩・柱・石板・玉座 ----
 function c6Stairs(x,z,down){ add(box,L(null,0x14101a),x,.02,z,.95,.04,.95); [0,1,2].forEach(k=>add(box,L(null,0x3a3440),x,down?-.15-k*.18:.15+k*.2,z+(down?k*.22:-k*.22),.8,.08,.24)); const l=new THREE.PointLight(0x80a0ff,.7,4); l.position.set(x,.8,z); G.add(l); }
 function c6Decor(k){ const R=DUNS[k].rows;
-  if(k==='dcastle1'||k==='dcastle2'||k==='dcastle3'){ amb.intensity=.42; amb.color.setHex(0xd08098); }
+  if(k==='dcastle1'||k==='dcastle2'||k==='dcastle3'){ amb.intensity=.95; amb.color.setHex(0xffd8e4); sun.intensity=.45; sun.color.setHex(0xffc0d0); }   /* ★暗すぎて 歩きづらかった（実機で 報告）。前は amb .42・霧 7〜24 */
   if(k==='mineB'){ amb.intensity=.5; amb.color.setHex(0xffb080); }
   for(let y=0;y<R.length;y++)for(let x=0;x<R[0].length;x++){ const c=R[y][x], X=x+.5, Z=y+.5;
     if(c==='U'||c==='X') c6Stairs(X,Z,false); if(c==='D') c6Stairs(X,Z,true);
