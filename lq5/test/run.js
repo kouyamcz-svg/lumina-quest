@@ -328,6 +328,12 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     return r.n>=12 && winD>.4 && winD<.8 && lvD>1.4 && winD+.08<.76; })());
   T('勝った 後の 文は 待ち時間の 後も 閉じず、Aを 押すと 戦闘が 終わる', await (async()=>{ await flush(); await E(()=>{ if(BT) endBattle(); if(MENU) closeMenu(); startBattle([FOES.nousagi]); }); await waitMenu(); await E(()=>{ BT.foes.forEach(f=>f.hp=1); for(let k=0;k<12&&BT&&BT.phase!=='act';k++){ if(BT.phase==='menu') BT.sel=0; pressA(); } }); for(let i=0;i<60;i++){ await W(100); if(await E(()=>BT&&BT.waitA)) break; } await W(1500); const a=await E(()=>!!BT && BT.waitA===1 && /▼$/.test(bmsg.textContent)); await E(()=>pressA()); await W(200); const b=await E(()=>!BT); return a && b; })());
   T('地図の 名前：外の 世界の 町・場所の 印に すべて 名前が ある', await E(()=>{ const need={V:'rue',C:'cap',S:'fort',W:'velna',G:'pass',Q:'pass',Y:'vcap',R:'ruins',N:'mine',h:'hamlet',A:'manor',P:'port',T:'seatown',U:'westport',B:'camp',Z:'dcastle1',H:'shrine'}; return Object.values(need).every(k=>MAP_NAMES.some(m=>m[3]===k)); }));
+  T('宝箱が 通り道を ふさがない（すべての 3Dの 場所：宝箱が あっても 行ける ますが 減らない）', await E(()=>{ const bad=[];
+    for(const k of Object.keys(DUNS)){ const d=DUNS[k], R=d.rows, H=R.length, W=R[0].length, sol=new Set(d.solid||['#','M']); const ch=(CHESTS['dun_'+k]||[]).map(c=>[Math.floor(c.x),Math.floor(c.z)]);
+      const open=(x,y,blk)=>x>=0&&y>=0&&x<W&&y<H&&!sol.has(R[y][x])&&!blk.some(c=>c[0]===x&&c[1]===y);
+      const comp=(blk)=>{ let st=null; for(let y=0;y<H&&!st;y++)for(let x=0;x<W;x++) if(open(x,y,blk)&&'SUD'.includes(R[y][x])){ st=[x,y]; break; } if(!st) return null; const seen=new Set([st+'']), q=[st]; while(q.length){ const [x,y]=q.shift(); for(const [a,c] of [[1,0],[-1,0],[0,1],[0,-1]]){ const nx=x+a, ny=y+c; if(open(nx,ny,blk)&&!seen.has(nx+','+ny)){ seen.add(nx+','+ny); q.push([nx,ny]); } } } return seen; };
+      const all=comp([]); if(!all) continue; const w=comp(ch); const lost=[...all].filter(p=>!w.has(p)&&!ch.some(c=>c[0]+','+c[1]===p)); if(lost.length) bad.push(k); }
+    return bad.length===0; }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });

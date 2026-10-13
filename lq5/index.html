@@ -3218,12 +3218,12 @@ function c6Decor(k){ const R=DUNS[k].rows;
   }
   if(k==='shrine'){ const l=new THREE.PointLight(0xb0c8ff,1.0,9); l.position.set(4.5,2.2,4); G.add(l); }
   if(k==='dcastle3'){ const l=new THREE.PointLight(0xff3050,1.2,12); l.position.set(7.5,2.5,2.5); G.add(l); } }
-// ---- 宝箱 ----
-CHESTS.dun_ruinsB=[{x:17.5,z:1.5,gold:1500,id:'r6a'},{x:1.5,z:9.5,herb:5,ether:3,id:'r6b'},{x:13.5,z:3.5,gear:{name:'古代の 腕刃',kind:'weapon',v:40,price:3000,who:['zf']},id:'r6c'}];
-CHESTS.dun_mineB=[{x:1.5,z:1.5,gold:2000,id:'m6a'},{x:21.5,z:15.5,gear:{name:'溶岩の 杖',kind:'weapon',v:32,price:2600},id:'m6b'},{x:9.5,z:9.5,herb:5,ether:3,kitsuke:2,id:'m6c'}];
+// ---- 宝箱（行き止まりに 置く。通り道に 置くと 奥へ 行けなく なった）----
+CHESTS.dun_ruinsB=[{x:17.5,z:13.5,gold:1500,id:'r6a'},{x:1.5,z:8.5,herb:5,ether:3,id:'r6b'},{x:13.5,z:6.5,gear:{name:'古代の 腕刃',kind:'weapon',v:40,price:3000,who:['zf']},id:'r6c'}];
+CHESTS.dun_mineB=[{x:9.5,z:7.5,gold:2000,id:'m6a'},{x:19.5,z:15.5,gear:{name:'溶岩の 杖',kind:'weapon',v:32,price:2600},id:'m6b'},{x:7.5,z:13.5,herb:5,ether:3,kitsuke:2,id:'m6c'}];
 CHESTS.dun_shrine=[{x:4.5,z:3.5,gear:{name:'雷神の 剣',kind:'weapon',v:64,price:9000,who:['elt']},id:'s6a'}];
 CHESTS.dun_dcastle1=[{x:1.5,z:7.5,herb:6,ether:4,id:'d6a'},{x:19.5,z:7.5,gear:{name:'闇払いの 鎧',kind:'armor',v:42,price:5000},id:'d6b'}];
-CHESTS.dun_dcastle2=[{x:1.5,z:1.5,ether:5,kitsuke:3,id:'d6c'},{x:19.5,z:1.5,gear:{name:'闇払いの 兜',kind:'helm',v:28,price:3200},id:'d6d'}];
+CHESTS.dun_dcastle2=[{x:11.5,z:10.5,ether:5,kitsuke:3,id:'d6c'},{x:9.5,z:2.5,gear:{name:'闇払いの 兜',kind:'helm',v:28,price:3200},id:'d6d'}];
 // ---- 飛空艇（外の 世界）：Aで 乗り降り ----
 function landOK(x,z){ const c=WORLD[Math.floor(z)]&&WORLD[Math.floor(z)][Math.floor(x)]; return c==='.'||c===','||c==='d'||c==='k'; }
 function airNear(x,z){ for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1]]){ const tx=Math.floor(x)+a+.5, tz=Math.floor(z)+b+.5; if(landOK(tx,tz)) return [tx,tz]; } return [Math.floor(x)+.5,Math.floor(z)+.5]; }
