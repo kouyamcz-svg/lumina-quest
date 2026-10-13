@@ -1267,7 +1267,7 @@ function wipeOut(){ CUT=0;   /* ★場面の 途中の 戦い（ボス）で 全
     say([inV?'……気が つくと、帝都の 教会の 前に いた。':inD?'……気が つくと、ドルムの 町に いた。':inCh1?'……気が つくと、王都の 教会の 前に いた。':'……気が つくと、村の 広場に 倒れて いた。','所持金が 半分に なった。']); }); }
 // ================= 呪文・状態異常・会心・作戦（Ⅳの 仕組みを 写した もの）=================
 //  ★名前は 横文字の 呪文名（指示）。メニューと 戦闘の 欄も「技」ではなく「呪文」
-//  type：atk1（1体）・atkAll（全体）・heal（味方1人）・healAll・escape（ダンジョンから 出る）・sleep（眠らせる）・conf（混乱）・defdown（守備を 下げる）・atkdown・double（2回 攻撃）・steal（盗む）
+//  type：atk1（1体）・atkAll（全体）・heal（味方1人）・healAll・revive（倒れた 味方1人を 生き返らせる）・escape（ダンジョンから 出る）・sleep（眠らせる）・conf（混乱）・defdown（守備を 下げる）・atkdown・double（2回 攻撃）・steal（盗む）
 const SKILLS={
   // ★攻撃の 呪文は すべて 3段階（指示）
   tsuyogiri:{name:'ブレイズエッジ', desc:'剣に 炎を まとわせて 敵1体を 斬る。', mp:3, type:'atk1', mul:1.6, battle:true},
@@ -1285,6 +1285,9 @@ const SKILLS={
   nemuri:{name:'スリーピア', desc:'敵 全体を 眠りに さそう。ボスには 効かない。', mp:4, type:'sleep', rate:.6, battle:true},
   kaifuku:{name:'キュアラ', desc:'味方1人の 傷を 大きく いやす。', mp:4, type:'heal', amt:40, battle:true, field:true},
   minnakaifuku:{name:'キュアルス', desc:'味方 全員の 傷を いやす。', mp:10, type:'healAll', amt:30, battle:true, field:true},
+  cure3:{name:'キュアリオン', desc:'味方1人の 傷を とても 大きく いやす。', mp:9, type:'heal', amt:120, battle:true, field:true},   // ★上位の 回復（指示 2026-10-13）
+  healall2:{name:'キュアルスラ', desc:'味方 全員の 傷を 大きく いやす。', mp:20, type:'healAll', amt:80, battle:true, field:true},
+  revive:{name:'リヴァイル', desc:'倒れた 味方1人を、HPを 半分に して 生き返らせる。', mp:16, type:'revive', battle:true, field:true},   // ★生き返りの 呪文（指示 2026-10-13）
   raigeki:{name:'サンダリス', desc:'敵1体に 紫の 雷を 撃つ。', mp:5, type:'atk1', power:30, spell:true, battle:true},
   thunder2:{name:'サンダリアス', desc:'敵1体に 強い 紫の 雷を 撃つ。', mp:11, type:'atk1', power:62, spell:true, battle:true},
   thunder3:{name:'サンダリオン', desc:'敵1体に 紫の 大雷を 撃つ。', mp:22, type:'atk1', power:120, spell:true, battle:true},
@@ -1300,7 +1303,7 @@ const SKILLS={
   kaenkiri:{name:'火炎斬り', desc:'炎の 刃で 敵1体を 斬る。', mp:2, type:'atk1', mul:1.3, waza:true, battle:true},   // ★通常の 攻撃に 倍率（1.3倍）を かける 技（1.5倍・MP3は 強すぎる ため 下げた）
 };
 const LEARN={ elt:[[3,'michishirube'],[4,'tsuyogiri'],[6,'iyashi'],[7,'warp'],[12,'volt'],[14,'blaze2'],[24,'voltra'],[28,'blaze3']],
-  lidia:[[1,'kaifuku'],[1,'hono'],[4,'nemuri'],[10,'minnakaifuku'],[12,'flare2'],[26,'flare3']], zf:[[1,'raigeki'],[1,'hibiware'],[5,'shibire'],[7,'frigis'],[11,'thunder2'],[17,'frigias'],[25,'thunder3'],[29,'frigion']], dolgan:[[1,'kabutowari'],[3,'nusumu'],[8,'kaenkiri'],[20,'daimajin'],[28,'nirengeki']] };   // ★ダブルファングは 中盤の Lv28（指示）。大魔神斬りは Lv20
+  lidia:[[1,'kaifuku'],[1,'hono'],[4,'nemuri'],[10,'minnakaifuku'],[12,'flare2'],[20,'cure3'],[22,'revive'],[26,'flare3'],[30,'healall2']], zf:[[1,'raigeki'],[1,'hibiware'],[5,'shibire'],[7,'frigis'],[11,'thunder2'],[17,'frigias'],[25,'thunder3'],[29,'frigion']], dolgan:[[1,'kabutowari'],[3,'nusumu'],[8,'kaenkiri'],[20,'daimajin'],[28,'nirengeki']] };   // ★ダブルファングは 中盤の Lv28（指示）。大魔神斬りは Lv20
 const skillsOf=(k)=>(LEARN[k]||[]).filter(([lv])=>(STATS[k].lv||1)>=lv).map(([,id])=>id).concat(STATS[k].extra||[]).map(id=>Object.assign({id},SKILLS[id]));   // ★extra：物語で 授かる 呪文（ヴォルトリオン）
 const STNAME={sleep:'眠り', conf:'混乱', poison:'毒'};
 function inflictOn(t,kind,who){ if(!kind || t.status) return ''; t.status=kind; t.stTurns=kind==='sleep'?2+Math.floor(Math.random()*2):3; return t.name+(kind==='sleep'?'は 眠って しまった！':kind==='conf'?'は 混乱した！':'は 毒に おかされた！'); }
@@ -1365,6 +1368,8 @@ function actOf(m,act){ return ()=>{ if(m.hp<=0 || !alive().length) return 0;
     const d=Math.round(sk.power*(.9+Math.random()*.2)+(STATS[PARTY[BT.party.indexOf(m)]]?.lv||1)*1.5); f.hp=Math.max(0,f.hp-d); f.hurt=.4; BT.flash=.6; se('hit'); fxAt({foe:f},sk.id); bsay(m.name+'は '+sk.name+'を 唱えた！ '+f.name+'に '+d+'の ダメージ！'); killCheck(f); drawBattleUI(); return .9; }
   if(sk.type==='atkAll'){ const parts=[]; al.forEach(f=>{ const d=f.def.hard?0:Math.round(sk.power*(.85+Math.random()*.3)); f.hp=Math.max(0,f.hp-d); f.hurt=.4; fxAt({foe:f},sk.id); parts.push(f.name+'に '+d); killCheck(f); }); BT.flash=.8; BT.quake=.3; se('hit'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+parts.join('、')+'の ダメージ！'); drawBattleUI(); return 1.1; }
   if(sk.type==='heal'){ const t=(a.ally&&a.ally.hp>0)?a.ally:BT.party.filter(x=>x.hp>0).sort((p,q)=>p.hp/p.max-q.hp/q.max)[0];   /* ★選んだ 相手が 先に 倒れたら、いちばん 弱って いる 者へ */ const h=Math.min(sk.amt,t.max-t.hp); t.hp+=h; se('item'); fxAt({idx:BT.party.indexOf(t)},'heal'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+t.name+'の HPが '+h+' 回復した！'); drawBattleUI(); return .9; }
+  if(sk.type==='revive'){ const t=(a.ally&&a.ally.hp<=0)?a.ally:BT.party.find(x=>x.hp<=0); if(!t){ bsay(m.name+'は '+sk.name+'を 唱えた！ しかし 倒れて いる 者は いない。'); return .9; }
+    t.hp=Math.ceil(t.max/2); t.status=null; t.stTurns=0; t.guard=false; se('lvup'); fxAt({idx:BT.party.indexOf(t)},'heal'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+t.name+'が 生き返った！'); drawBattleUI(); return 1.0; }
   if(sk.type==='healAll'){ BT.party.filter(x=>x.hp>0).forEach(t=>{ t.hp=Math.min(t.max,t.hp+sk.amt); fxAt({idx:BT.party.indexOf(t)},'heal'); }); se('item'); bsay(m.name+'は '+sk.name+'を 唱えた！ みんなの HPが 回復した！'); drawBattleUI(); return .9; }
   if(sk.type==='sleep'){ const got=al.filter(f=>!f.def.boss && Math.random()<sk.rate); al.forEach(f=>fxAt({foe:f},'sleep')); got.forEach(f=>{ f.status='sleep'; f.stTurns=2; }); bsay(m.name+'は '+sk.name+'を 唱えた！ '+(got.length?got.map(f=>f.name).join('と ')+'は 眠った！':'しかし 効かなかった！')); return 1.0; }
   if(sk.type==='defdown'){ const f=a.target||al[0]; f.defDown=true; fxAt({foe:f},'down'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+f.name+'の 守りが 下がった！'); return .9; }
@@ -1377,7 +1382,9 @@ function actOf(m,act){ return ()=>{ if(m.hp<=0 || !alive().length) return 0;
   return 0; }; }
 // ★作戦（仲間の 自動の 動き）
 function autoAct(m){ const k=PARTY[BT.party.indexOf(m)], sks=skillsOf(k).filter(s=>s.battle && m.mp>=s.mp), low=BT.party.filter(x=>x.hp>0).sort((p,q)=>p.hp/p.max-q.hp/q.max)[0];
-  const heal=sks.find(s=>s.type==='heal'||s.type==='healAll'), atk=sks.filter(s=>/^(atk1|atkAll|double|atkdef)$/.test(s.type)).sort((p,q)=>(q.power||q.mul*10||8)-(p.power||p.mul*10||8))[0];
+  const rv=sks.find(s=>s.type==='revive'); if(rv && BT.party.some(x=>x.hp<=0) && tactic!=='jumon' && tactic!=='gungan') return {kind:'skill',sk:rv,ally:BT.party.find(x=>x.hp<=0)};   /* ★倒れた 者を 先に 起こす */
+  const lows=BT.party.filter(x=>x.hp>0 && x.hp<x.max*.5).length, hAll=sks.filter(s=>s.type==='healAll').sort((p,q)=>q.amt-p.amt)[0], h1=sks.filter(s=>s.type==='heal').sort((p,q)=>q.amt-p.amt)[0];
+  const heal=(lows>=2&&hAll)||h1||hAll, atk=sks.filter(s=>/^(atk1|atkAll|double|atkdef)$/.test(s.type)).sort((p,q)=>(q.power||q.mul*10||8)-(p.power||p.mul*10||8))[0];
   if(tactic==='jumon') return {kind:'atk'};
   if(tactic==='inochi'){ if(heal && low.hp<low.max*.6) return {kind:'skill',sk:heal}; return {kind:'atk'}; }
   if(tactic==='gungan'){ if(atk) return {kind:'skill',sk:atk}; return {kind:'atk'}; }
@@ -1397,10 +1404,11 @@ function battleCmd(){ const c=CMDS[BT.sel];
   if(c==='にげる' && BT.foes.some(f=>f.def.boss)){ queue([()=>{ bsay('逃げられない！'); return .8; }, ...enemyTurn()],0); return; }
   if(c==='にげる') queue([()=>{ bsay('エルトたちは 逃げだした！'); se('flee'); return .7; }, ()=>{ if(Math.random()<.75){ endBattle(); return 99; } bsay('しかし まわりこまれて しまった！'); BT.steps.push(...enemyTurn()); return .7; }],0); }
 function itemPick(){ BT.pendSkill=null; BT.pendItem=BT.items[BT.isel]; if(BT.party.length<=1){ BT.asel=0; return allyPick(); } BT.phase='ally'; BT.asel=0; bsay('誰に 使う？'); drawBattleUI(); }
-function allyPick(){ const it=BT.pendItem, t=BT.party[BT.asel]; if(t.hp<=0){ bsay(t.name+'は 倒れて いる。'); return; } se('ok'); if(BT.pendSkill){ const sk=BT.pendSkill; BT.pendSkill=null; commit({kind:'skill',sk,ally:t}); return; } commit({kind:'item',it,t}); }
+function allyPick(){ const it=BT.pendItem, t=BT.party[BT.asel]; if(BT.pendSkill && BT.pendSkill.type==='revive'){ if(t.hp>0){ bsay(t.name+'は 倒れて いない。'); return; } } else if(t.hp<=0){ bsay(t.name+'は 倒れて いる。'); return; } se('ok'); if(BT.pendSkill){ const sk=BT.pendSkill; BT.pendSkill=null; commit({kind:'skill',sk,ally:t}); return; } commit({kind:'item',it,t}); }
 function skillPick(){ const sk=BT.sks[BT.ssel]; if(curM().mp<sk.mp){ bsay('MPが 足りない。'); return; }
   if((sk.type==='atk1'||sk.type==='defdown'||sk.type==='atkdown'||sk.type==='double'||sk.type==='steal'||sk.type==='gamble'||sk.type==='atkdef') && alive().length>1){ BT.phase='target'; BT.pend={kind:'skill',sk}; BT.tsel=BT.foes.indexOf(alive()[0]); bsay('どの 魔物に？'); drawBattleUI(); return; }
   if(sk.type==='escape'){ bsay('ここでは 使えない。'); return; }
+  if(sk.type==='revive'){ const dead=BT.party.filter(x=>x.hp<=0); if(!dead.length){ bsay('倒れて いる 者は いない。'); return; } BT.pendSkill=sk; BT.phase='ally'; BT.asel=BT.party.indexOf(dead[0]); bsay('誰を 生き返らせる？'); drawBattleUI(); return; }
   if(sk.type==='heal' && BT.party.length>1){ BT.pendSkill=sk; BT.phase='ally'; BT.asel=BT.party.indexOf(curM()); if(BT.asel<0) BT.asel=0; bsay('誰に 唱える？'); drawBattleUI(); return; }   /* ★回復の 呪文は 相手を 選ぶ */
   commit({kind:'skill',sk,target:alive()[0]}); }
 function targetPick(){ const f=BT.foes[BT.tsel]; se('ok'); commit(Object.assign({},BT.pend||{kind:'atk'},{target:f})); }
@@ -1792,6 +1800,8 @@ function openSpells(ck){ const c=STATS[ck], sks=skillsOf(ck);
       const cast=(tk)=>{ const m=STATS[tk]; c.mp-=k.mp; const h=Math.min(k.amt,m.max-m.hp); m.hp+=h; se('item'); say([c.name+'は '+k.name+'を 唱えた！',m.name+'の HPが '+h+' 回復した！'],back); };
       if(PARTY.length===1) return cast(PARTY[0]);
       menu(PARTY.map(p=>STATS[p].name+'　HP '+STATS[p].hp+'/'+STATS[p].max).concat(['やめる']),'誰に？',(t)=>{ closeMenu(); if(t>=PARTY.length) return back(); const m=STATS[PARTY[t]]; if(m.hp<=0){ say([m.name+'は 倒れて いる。'],back); return; } if(m.hp>=m.max){ say([m.name+'の HPは 減って いない。'],back); return; } cast(PARTY[t]); },back); return; }
+    if(k.type==='revive'){ const dead=PARTY.filter(p=>STATS[p].hp<=0); if(!dead.length){ say(['倒れて いる 者は いない。'],back); return; }
+      menu(dead.map(p=>STATS[p].name).concat(['やめる']),'誰を 生き返らせる？',(t)=>{ closeMenu(); if(t>=dead.length) return back(); const m=STATS[dead[t]]; c.mp-=k.mp; m.hp=Math.ceil(m.max/2); m.status=null; se('lvup'); say([c.name+'は '+k.name+'を 唱えた！',m.name+'が 生き返った！'],back); },back); return; }
     if(k.type==='healAll'){ const al=PARTY.filter(p=>STATS[p].hp>0&&STATS[p].hp<STATS[p].max); if(!al.length){ say(['みんなの HPは 減って いない。'],back); return; } c.mp-=k.mp; al.forEach(p=>{ const m=STATS[p]; m.hp=Math.min(m.max,m.hp+k.amt); }); se('item'); say([c.name+'は '+k.name+'を 唱えた！','みんなの HPが 回復した！'],back); return; }
     if(k.type==='warp'){ const list=warpList(); if(!(cur.kind==='world'||cur.kind==='town')){ say(['ここでは 使えない。','（外の 世界か 町の 中で 使う）'],back); return; }
       if(!list.length){ say(['今は 飛べる 町が ない。'],back); return; }
@@ -2832,7 +2842,7 @@ FOES.yarinoko={key:'yarinoko', scale:0.95, name:'ヤリノコ', hp:230, exp:200,
 FOES.noroshidama={key:'noroshidama', offs:{wind:-0.024,atk:0.308}, scale:0.85, name:'ノロシダマ', float:true, hp:210, exp:195, gold:44, atk:[34,44], wind:'から 赤い 煙が 噴き上がった！', verb:'のろしの 煙', inflict:{type:'conf',rate:.22}, frames:{idle:RAB.nr_idle,wind:RAB.nr_wind,atk:RAB.nr_atk}};
 FOES.kageshin={key:'kageshin', offs:{idle:0.028,idle2:0.038,wind:0.021,atk:0.083}, scale:1.35, name:'影の 親衛隊長', hp:2600, exp:3800, gold:700, atk:[46,58], wind:'は 黒い 斧槍を 振りかぶった！', verb:'影の 斧槍', boss:true,
   bigWind:'が 斧槍を 掲げた！ 影の 兵が いっせいに 槍を 向ける！', bigName:'影の 号令', frames:{idle:RAB.ks_idle,idle2:RAB.ks_idle2,wind:RAB.ks_wind,atk:RAB.ks_atk,big:RAB.ks_big}};
-FOES.garva={key:'garva', scale:1.7, name:'影の 宰相 ガルヴァ', hp:4200, exp:6000, gold:1200, atk:[48,60], wind:'の 角が 紫に 光った！', verb:'影の 爪', boss:true, bigInflict:{type:'conf',rate:.3},
+FOES.garva={key:'garva', scale:1.7, name:'影の 宰相 ガルヴァ', hp:4800, exp:6000, gold:1200, atk:[50,62], wind:'の 角が 紫に 光った！', verb:'影の 爪', boss:true, bigInflict:{type:'conf',rate:.3},
   bigWind:'の 体から 無数の 黒い 糸が 伸びた！', bigName:'心を 縛る 術', frames:{idle:RAB.gv_idle,idle2:RAB.gv_idle2,wind:RAB.gv_wind,atk:RAB.gv_atk,big:RAB.gv_big}};
 ENC.plain5=[['kagehei',3],['yarinoko',2],['noroshidama',2],['tsuite',1],['gincoro',1]]; ENC.camp=[['kagehei',3],['tsuite',2],['noroshidama',1]];
 SHOP.smith5=[{name:'王国の 宝剣',kind:'weapon',v:40,price:2200},{name:'王国の 大斧',kind:'weapon',v:42,price:2300,who:['dolgan']},{name:'白銀の よろい',kind:'armor',v:30,price:1900},{name:'白銀の 兜',kind:'helm',v:19,price:1100},{name:'聖樹の 杖',kind:'weapon',v:22,price:1300},{name:'白銀の ローブ',kind:'armor',v:18,price:1200},{name:'白銀の 腕刃',kind:'weapon',v:28,price:1700,who:['zf']},{name:'白銀の 装甲',kind:'armor',v:26,price:1800,who:['zf']}];
@@ -2978,11 +2988,11 @@ FOES.kodaiban=tintOf('zfboss',{key:'kodaiban', name:'古代の 番人', tint:0xe
   bigWind:'の 背の 砲が 開いた！', bigName:'古代の 光線'});
 FOES.yamikishi=tintOf('kageshin',{key:'yamikishi', name:'闇の 騎士', tint:0xff7090, scale:1.45, boss:true, hp:6000, exp:15000, gold:1500, atk:[66,80], wind:'は 赤い 大剣を 振りかぶった！', verb:'闇の 大剣',
   bigWind:'が 大剣を 天に 掲げた！ 赤い 稲妻が 走る！', bigName:'闇の 雷刃'});
-FOES.garva2=tintOf('garva',{key:'garva2', name:'ガルヴァ（魔王の 力）', tint:0xff6a6a, scale:1.85, boss:true, hp:5000, exp:0, gold:0, atk:[68,80], wind:'の 角が 赤く 光った！', verb:'魔の 爪', bigInflict:{type:'conf',rate:.3},
+FOES.garva2=tintOf('garva',{key:'garva2', name:'ガルヴァ（魔王の 力）', tint:0xff6a6a, scale:1.85, boss:true, hp:5100, exp:0, gold:0, atk:[68,80], wind:'の 角が 赤く 光った！', verb:'魔の 爪', bigInflict:{type:'conf',rate:.3},
   bigWind:'の 体から 赤黒い 糸が 噴き出した！', bigName:'魔王の 縛り'});
-FOES.zeldios1=tintOf('garva',{key:'zeldios1', name:'魔王 ゼルディオス', tint:0x7a6aff, scale:2.05, boss:true, hp:5500, exp:0, gold:0, atk:[70,84], wind:'が 黒い 翼を 広げた！', verb:'魔王の 爪',
+FOES.zeldios1=tintOf('garva',{key:'zeldios1', name:'魔王 ゼルディオス', tint:0x7a6aff, scale:2.05, boss:true, hp:5600, exp:0, gold:0, atk:[70,84], wind:'が 黒い 翼を 広げた！', verb:'魔王の 爪',
   bigWind:'の 頭上に 黒い 太陽が 生まれた！', bigName:'黒い 太陽'});
-FOES.zeldios2=tintOf('kageshin',{key:'zeldios2', name:'魔王 ゼルディオス（真の 姿）', tint:0x50ffb0, scale:2.2, boss:true, hp:6000, exp:0, gold:0, atk:[74,88], wind:'の 口に 光が 集まった！', verb:'魔王の 牙', bigInflict:{type:'sleep',rate:.25},
+FOES.zeldios2=tintOf('kageshin',{key:'zeldios2', name:'魔王 ゼルディオス（真の 姿）', tint:0x50ffb0, scale:2.2, boss:true, hp:6100, exp:0, gold:0, atk:[74,88], wind:'の 口に 光が 集まった！', verb:'魔王の 牙', bigInflict:{type:'sleep',rate:.25},
   bigWind:'が 大陸ごと 呑みこむ 闇を 吐いた！', bigName:'終わりの 闇'});
 ENC.east6=[['tetsukui',2],['yamabiko',2],['sabitsuno',2],['hikagerou',2],['gincoro',1]]; ENC.plain6=[['yarinoko',3],['noroshidama',3],['sabitsuno',2],['gincoro',1]]; ENC.sea6=[['yarinoko',2],['noroshidama',2],['sabitsuno',2],['sunabouzu',2],['gincoro',1]];   /* 南東の 島の 陸（海の 魔物は 海だけ） */
 ENC.ruinsB=[['kodaihei',3],['hikarigumo',3],['ishigami',2],['gincoro',1]]; ENC.mineB=[['kurogane',3],['yoroimushi',3],['magumadama',3],['kincoro',1]];
