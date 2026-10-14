@@ -181,14 +181,14 @@ const CAP_ROOMS=[
  {name:'民家', rows:["WWWWWWWWW","W.s...b.W","W.......W","W...T...W","W.......W","Wp.....pW","WWWWXWWWW"],
   npc:{x:6.5,y:2.5,spr:'elder',name:'王都の 老人',talk:()=>questTalk('doku',['老人「若い ころ、ヴェルナの 麦で 飢えを しのいだ ことが ある」','老人「……すまんが、どくけし草を ひとつ 分けて もらえんか」'])}},
 ];
-function capNpcs(){ const night=ST.phase==='road'; return [
+function capNpcs(){ const night=ST.phase==='road'; const L_=[
   {x:10.4,y:4.7,spr:'asoldier',name:'城の 門番',byPhase:{road:['門番「こんな 夜中に……国境の 村の 者か！ ただごとでは ないな。王に お取り次ぎ する、早く 中へ」'], c1_road:['門番「使者どのの 護衛か。国境の 砦は 東だ」'], '*':['門番「ここは アルディア城。王の おわす 城だ」']}},
   {x:13.6,y:4.7,spr:'asoldier',name:'城の 門番',lines:['門番「城の 中では 静かに な」']},
   {x:9.2,y:12.6,spr:'girl',name:'王都の 娘',lines:['娘「噴水の 水は、北の 山から 引いて いるの」']},
   {x:16.5,y:9.6,spr:'smith',name:'王都の 男',talk:()=>questTalk('wara',['男「王都の 西の 野原に、わらの 化け物が 出るらしい」','男「3体 退治して くれたら 礼を するよ」'])},
   {x:16.5,y:15.6,spr:'okami',name:'交易商',talk:()=>say(['交易商「町ごとに 品の 値段は 違うよ。安く 買って 高く 売りな」'],openTrade)},
   {x:6.5,y:13.6,spr:'child',name:'王都の 子',lines:['子「教会の 神父さまは、ぼうけんの きろくを つけて くれるよ」']},
-]; }
+]; return night ? L_.filter(n=>n.name==='城の 門番') : L_; }   /* ★序章の 夜中：町の 人は 寝静まり、門番だけ（指示） */
 // ★教会：お祈り（ぼうけんの きろく）
 function openChurch(){ say(['神父「神の 家へ ようこそ。何を 望まれますか」'],()=>menu(['お祈りを する（きろく）','生き返らせる','毒の 治療','やめる'],'教会',(k)=>{ closeMenu();
   if(k===1){ const down=PARTY.filter(p=>STATS[p].hp<=0); if(!down.length){ say(['神父「生き返らせる 必要の ある 方は おりません」']); return; } const p=down[0], cost=(STATS[p].lv||1)*10;
@@ -836,6 +836,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
       if(c==='R'){ if(/^(c2_(ruins|back|end)|c6_)/.test(ST.phase)) go(()=>enterDun('ruins')); else { hero.z+=.6; say(['古い 遺跡の 入口だ。','……今は 入る 理由が ない。']); } }
       if(c==='C' && ST.phase==='c4_sea'){ go(()=>westPortArrive('cap')); }   /* ★船で 西の 港町を 通らず 王都へ 来ても 第4章を 終える */
       else if(c==='C') { if(/^(road|c1_|c2_|c3_|c4_|c5_|c6_)/.test(ST.phase)) go(()=>enterTown([12,20.2],'cap')); else { hero.z+=0.6; say(['王都 アルディア。今は 用が ない。']); } } }
+    else if(cur.kind==='town' && TOWN_NOW==='cap' && ST.phase==='road' && !msgQ && TDOORS().some(([dx,dy])=>Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2) && iz<0){ say(['扉は 固く 閉ざされて いる。','……町は 寝静まって いる。']); hero.z+=.35; }   /* ★序章の 夜中：家も 店も 閉まって いる */
     else if(cur.kind==='town' && TOWN_NOW==='rue' && /^(burn|after|road)$/.test(ST.phase) && !msgQ && TDOORS().some(([dx,dy])=>Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2) && iz<0){ say(['家の 中まで 火が 回って いる。入れない！']); hero.z+=.35; }   /* ★燃えて いる 家には 入れない */
     else if(cur.kind==='town'){ TDOORS().forEach(([dx,dy],i)=>{ if(!busyDoor && Math.abs(hero.x-(dx+.5))<.32 && hero.z<dy+.62 && hero.z>dy+.2 && iz<0){ busyDoor=1;   /* ★扉の すぐ 前だけ。busyDoor=1 が 説明の 中に 入って 効かず、毎こま 扉の 音が 鳴って 重なって いた */
         se('door'); swing(doorPiv[i],0,OPEN,.28,0,()=>goDoor(()=>{ lastDoor=i; enterRoom(i); swing(roomDoor,OPEN,0,.3,.15,()=>{busyDoor=0;}); })); } }); }
@@ -2070,6 +2071,7 @@ const BGM_FILES={title:'opening.mp3', burn:'burned_village.mp3', town:'../lq4/to
 const BGM_VOL={title:.38, burn:.78, town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, boss:.5};
 let bgmEl=null, bgmNow='', bgmUnlocked=false;
 function bgmFor(){
+  if(TOWN_NOW==='cap' && ST.phase==='road' && (cur.kind==='town'||cur.kind==='room') && !BT) return '';   /* ★序章の 夜中の 王都は 曲なし（指示） */
   if(typeof TITLE_ON!=='undefined' && TITLE_ON) return 'title';   /* ★タイトル画面 */
   // ★燃える 村（村が 焼かれてから 村を 出るまで）は、家の 中でも 曲を 変えない。部隊長戦（ボス）だけは ボスの 曲（指示）
   // ★村の 中（町・家）に いる ときだけ。前は 村を 出た 後も TOWN_NOW が rue の ままで、夜の 街道の 戦闘でも 燃える 村の 曲が 流れた
@@ -2079,7 +2081,8 @@ function bgmFor(){
   if(cur.kind==='town' && TOWN_NOW==='rue' && (ST.phase==='burn'||ST.phase==='after')) return 'burn'; return 'town'; }
 function bgmUpdate(){ if(performance.now()<jingleUntil){ if(bgmEl && !bgmEl.paused) bgmEl.pause(); return; }   /* ★勝利・レベルアップの 曲の 間は 止める */
   if(SND.bgm<=0 || !bgmUnlocked || (typeof bgmHidden==='function' && bgmHidden())){ if(bgmEl && !bgmEl.paused) bgmEl.pause(); return; }
-  const want=bgmFor(); if(want===bgmNow && bgmEl && !bgmEl.paused){ bgmEl.volume=Math.min(1,(BGM_VOL[want]||.5)*SND.bgm/.6); return; }   // ★大きさは 毎回 合わせる
+  const want=bgmFor(); if(!want){ if(bgmEl && !bgmEl.paused) bgmEl.pause(); bgmNow=''; return; }   /* ★曲なしの 場所 */
+  if(want===bgmNow && bgmEl && !bgmEl.paused){ bgmEl.volume=Math.min(1,(BGM_VOL[want]||.5)*SND.bgm/.6); return; }   // ★大きさは 毎回 合わせる
   try{ if(!bgmEl){ bgmEl=new Audio(); bgmEl.loop=true; }
     if(want!==bgmNow){ bgmEl.src=BGM_FILES[want]; bgmNow=want; }
     bgmEl.volume=Math.min(1,(BGM_VOL[want]||.5)*SND.bgm/.6); const p=bgmEl.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
