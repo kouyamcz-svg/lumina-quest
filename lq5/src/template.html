@@ -695,7 +695,7 @@ function enterTown(at,which){ TOWN_NOW=which||'rue'; visit(TOWN_NOW); if(/^c4_/.
   // ★外の 世界から 直接 入る ときも 3Dの 画面に 戻す（前は ドルムに 入っても 2Dの 地図の まま だった）
   if(hero.p){ [hero.p,...followers.map(f=>f.p)].forEach(p=>{ p.m.visible=true; p.sh.visible=true; }); } cv.style.display='block'; c2.style.display='none'; newG(); drops=[]; dolmSmoke=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildTown(); if(TOWN_NOW==='rue' && RUE_BURNT()) burnTown();   /* ★ガイルとの 別れの 後（road）や 第1章でも 焼けた 村の まま（前は road で 昼の 村に 戻った） */
   cur={kind:'town', rows:TL().rows, solid:new Set(TL().mine?['#','H','t','w','K','M','O','B','C','L','u','x']:TL().imperial?['#','H','K','Y','S','T','L','B']:['#','H','t','F','w','K']), npcs:cur.npcs, room:null};
-  setNpcs(TL().npcs?TL().npcs():TOWN_NOW==='velna'?velnaNpcs():TOWN_NOW==='cap'?capNpcs():TOWN_NOW==='vcap'?vcapNpcs():townNpcs()); chestMesh(TOWN_NOW==='rue'?'town':'none'); if(at){ hero.x=at[0]; hero.z=at[1]; hero.ang=0; } resetTrail();
+  setNpcs(TL().npcs?TL().npcs():TOWN_NOW==='velna'?velnaNpcs():TOWN_NOW==='cap'?capNpcs():TOWN_NOW==='vcap'?vcapNpcs():townNpcs()); placeQuestGivers(); chestMesh(TOWN_NOW==='rue'?'town':'none'); if(at){ hero.x=at[0]; hero.z=at[1]; hero.ang=0; } resetTrail();
   document.getElementById('place').textContent= TL().label ? TL().label : TOWN_NOW==='vcap' ? '帝都 ヴェルナ' : TOWN_NOW==='cap' ? '王都 アルディア' : TOWN_NOW==='velna' ? 'ヴェルナの 鉱山の 町 ドルム' : /^(burn|after|road)/.test(ST.phase) ? '燃える 村 ルーエ' : /^(end|c1_|c2_|c3_)/.test(ST.phase) ? '焼け跡の 村 ルーエ' : '国境の 村 ルーエ'; }
 function enterRoom(i){ const r=TROOMS()[i]; newG(); drops=[]; fireLight=null; doorPiv=[]; roomDoor=null; anims=[]; buildRoom(r);
   cur={kind:'room', rows:r.rows, solid:new Set(['W','s','b','T','f','p','A','Q']), npcs:cur.npcs, room:i};
@@ -1361,13 +1361,14 @@ function foeAct(f){ let t=null, line='';
 // ★ターンの 終わり：毒の ダメージ、混乱・眠りの 残り
 function turnEnd(){ return ()=>{ const lines=[]; BT.party.forEach(m=>{ if(m.hp>0 && m.status==='poison'){ const d=Math.max(1,Math.floor(m.max/12)); m.hp=Math.max(1,m.hp-d); lines.push(m.name+'は 毒で '+d+'の ダメージ'); } }); drawBattleUI(); if(lines.length){ bsay(lines.join('　')); return .9; } return 0; }; }
 function enemyTurn(){ const st=[]; alive().forEach(f=>st.push(...foeAct(f))); st.push(()=>{ if(!alive().length){ BT.steps=winSteps(); return 0; } return 0; }); st.push(turnEnd()); st.push(backToMenu()); return st; }   /* ★魔物が みな 逃げたら 戦闘を 終える */
+const GOLD_RATE=2;   // ★戦闘で もらえる ゴールドを 2倍に（指示：少ない）
 const EXP_RATE=1.25;   // ★経験値を 少し 上げる（指示。前は 1倍）
 // ★勝った 後の 文は、待ち時間の 後に Aか Bを 押すと 戦闘を 終える（指示。前は 自動で 閉じた）
 function winWait(){ return ()=>{ BT.waitA=1; bmsg.textContent=bmsg.textContent.replace(/\s*▼$/,'')+' ▼'; return 1e9; }; }
 function winClose(){ if(!BT||!BT.waitA) return false; BT.waitA=0; BT.steps=[]; se('ok'); endBattle(); return true; }
 function winSteps(){ const won=BT.foes.filter(f=>!f.fled); if(!won.length) return [()=>{ bsay('魔物は 逃げて いった。'); return 1.2; }, winWait()];   /* ★逃げた 魔物の 分は もらえない */
   return [
-  ()=>{ const ex=Math.round(won.reduce((a,f)=>a+(f.def.exp||0),0)*EXP_RATE), gd=won.reduce((a,f)=>a+(f.def.gold||0),0); BAG.gold+=gd; const ups=gainExp(ex); if(bgmEl && !bgmEl.paused) bgmEl.pause(); jingleUntil=performance.now()+(ups.length?3000:1000); setTimeout(()=>se('win'),80); if(ups.length) setTimeout(()=>se('lvup'),760);   /* ★勝利の 曲の 後に ファンファーレ（前は 0.3秒 ずらして 重なり、戦闘の 曲に 埋もれて いた） */
+  ()=>{ const ex=Math.round(won.reduce((a,f)=>a+(f.def.exp||0),0)*EXP_RATE), gd=Math.round(won.reduce((a,f)=>a+(f.def.gold||0),0)*GOLD_RATE); BAG.gold+=gd; const ups=gainExp(ex); if(bgmEl && !bgmEl.paused) bgmEl.pause(); jingleUntil=performance.now()+(ups.length?3000:1000); setTimeout(()=>se('win'),80); if(ups.length) setTimeout(()=>se('lvup'),760);   /* ★勝利の 曲の 後に ファンファーレ（前は 0.3秒 ずらして 重なり、戦闘の 曲に 埋もれて いた） */
  ST.kill=ST.kill||{}; won.forEach(f=>{ ST.kill[f.def.key]=(ST.kill[f.def.key]||0)+1; });   // ★眠りと 混乱は 戦闘が 終わると 治る（毒は 残る）
         bsay((BT.foes.length>1?'魔物たちを やっつけた！ ':'')+'経験値 '+ex+'、'+gd+'ゴールドを 手に 入れた！'+(ups.length?'　'+ups.join('　'):'')); return ups.length?2.8:1.4; },
   winWait() ]; }
@@ -2200,7 +2201,32 @@ function openSwap(){ if(!RESERVE.length){ closeMenu(); say(['控えの 仲間が
 const QUESTS={
   wara:{name:'畑の ワラドクロ退治', from:'王都の 男', need:3, foe:'waradokuro', reward:{gold:60}, text:'ワラドクロを 3体 倒す', ask:'わらの 化け物、3体 退治して くれたかい？ 頼んだよ'},
   doku:{name:'老人の 毒消し', from:'王都の 老人', item:'antidote', reward:{gold:80}, text:'どくけし草を 1つ 届ける', ask:'どくけし草は まだ かのう。……頼んだぞ'},
+  // ★第2章〜終章の 頼みごと（指示：少ない。2026-10-15）。頼む 人は QGIVERS で 町に 置く
+  tetsu:{name:'坑道の 柱を 守れ', from:'ドルムの 鉱夫の 妻', need:4, foe:'tetsukui', reward:{gold:240}, text:'テツクイムシを 4体 倒す', ask:'テツクイムシ、4匹 やっつけて くれた？'},
+  yama:{name:'まねっこ退治', from:'帝都の 楽士', need:3, foe:'yamabiko', reward:{gold:260}, text:'ヤマビコダマを 3体 倒す', ask:'ヤマビコダマは まだ わしの 歌を まねて おる……'},
+  kofu:{name:'坑道の 影', from:'ドルムの 年寄りの 鉱夫', need:4, foe:'kagekofu', reward:{gold:600}, text:'カゲコウフを 4体 倒す', ask:'坑道の 奥の 影の 鉱夫……まだ うろついて おるか'},
+  hikage:{name:'森の 黒い 火', from:'ノルンの 木こり', need:4, foe:'hikagerou', reward:{gold:900}, text:'ヒカゲロウを 4体 倒す', ask:'黒い 火の 魔物、まだ 森に いるだろうか'},
+  sabi:{name:'荒れ地の 角', from:'サルムの 商人', need:4, foe:'sabitsuno', reward:{gold:1000}, text:'サビツノを 4体 倒す', ask:'サビツノの せいで 荷車が 出せないんだ'},
+  shio:{name:'潮の 刃', from:'ミラの 漁師の 妻', need:3, foe:'shionaki', reward:{gold:1100}, text:'シオナキを 3体 倒す', ask:'夫が 安心して 海へ 出られる ように……お願い'},
+  yari:{name:'畑の 槍草', from:'ウェルスの 農夫', need:4, foe:'yarinoko', reward:{gold:1500}, text:'ヤリノコを 4体 倒す', ask:'ヤリノコの 根が 畑まで 伸びて くるんじゃ'},
+  noro:{name:'のろしの 煙', from:'王都の 見張り', need:4, foe:'noroshidama', reward:{gold:1600}, text:'ノロシダマを 4体 倒す', ask:'あの 赤い 煙を 見ると、のろしと 見間違えて しまう'},
+  kuro:{name:'黒鉄の はさみ', from:'ドルムの 鍛冶屋の 弟子', need:5, foe:'kurogane', reward:{gold:3000}, text:'クロガネガニを 5体 倒す（坑道の 奥）', ask:'坑道の 奥の クロガネガニ、5匹 頼みます！'},
+  mazoku:{name:'魔王の 兵', from:'帝都の 騎士', need:5, foe:'mazokuhei', reward:{gold:4000}, text:'魔王の 兵を 5体 倒す（北の 島）', ask:'魔王の 兵どもを 5体……騎士の 名に かけて 頼む'},
 };
+// ★頼む 人（町・出る 章・位置）。町に 入ると 置く。受けた 後も 報告できる よう、その 町に 入れる 章では ずっと いる
+const QGIVERS=[
+  {id:'tetsu', town:'velna', ph:/^(c2_|c3_|c4_|c6_)/, x:8.5, y:6.5, spr:'girl', name:'鉱夫の 妻', lines:['鉱夫の 妻「峠の テツクイムシが、坑道の 鉄の 柱まで かじるのよ」','鉱夫の 妻「4匹 退治して くれたら、お礼を するわ」']},
+  {id:'yama', town:'vcap', ph:/^(c2_|c6_)/, x:4.5, y:16.5, spr:'elder', name:'帝都の 楽士', lines:['楽士「峠の ヤマビコダマが、わしの 歌を まねして 笑うんじゃ」','楽士「3体 黙らせて くれんか」']},
+  {id:'kofu', town:'velna', ph:/^(c3_(flee|mine|exit|end)|c4_|c6_)/, x:21.5, y:12.5, spr:'smith', name:'年寄りの 鉱夫', lines:['年寄りの 鉱夫「坑道の 奥に、影の 鉱夫が 出る ように なった」','年寄りの 鉱夫「4体 追い払って くれたら、ためた 金を やろう」']},
+  {id:'hikage', town:'hamlet', ph:/^(c4_|c5_|c6_)/, x:19.5, y:5.5, spr:'smith', name:'ノルンの 木こり', lines:['木こり「森に 黒い 火の 魔物が 出て、木を 切りに 行けん」','木こり「4体 消して くれたら、礼は はずむ」']},
+  {id:'sabi', town:'port', ph:/^(c4_|c5_|c6_)/, x:20.5, y:5.5, spr:'okami', name:'サルムの 商人', lines:['商人「荒れ地の サビツノが、荷車を 角で ひっくり返すんだ」','商人「4体 退治して くれたら 儲けを 分けるよ」']},
+  {id:'shio', town:'seatown', ph:/^(c4_|c5_|c6_)/, x:19.5, y:8.5, spr:'girl', name:'漁師の 妻', lines:['漁師の 妻「沖の シオナキが 船の 網を 切って しまうの」','漁師の 妻「3体 倒して くれたら、お礼を 用意するわ」']},
+  {id:'yari', town:'westport', ph:/^(c5_|c6_)/, x:19.5, y:5.5, spr:'elder', name:'ウェルスの 農夫', lines:['農夫「戦の 後から、畑に ヤリノコが 生えて きての」','農夫「4本 抜いて……いや、4体 倒して くれんか」']},
+  {id:'noro', town:'cap', ph:/^(c5_|c6_)/, x:5.5, y:11.5, spr:'asoldier', name:'王都の 見張り', lines:['見張り「ノロシダマの 赤い 煙を、敵の のろしと 見間違えて 困って いる」','見張り「4体 倒して くれ。礼は 出す」']},
+  {id:'kuro', town:'velna', ph:/^c6_/, x:3.5, y:12.5, spr:'smith', name:'鍛冶屋の 弟子', lines:['弟子「坑道の 奥の クロガネガニの はさみは、いい 鉄に なるんです」','弟子「5体 倒して くれたら、お代を 払います！」']},
+  {id:'mazoku', town:'vcap', ph:/^c6_/, x:19.5, y:16.5, spr:'vsoldier', name:'帝都の 騎士', lines:['騎士「北の 島の 魔王の 兵が、海を 渡って くるかも しれん」','騎士「5体 討って くれ。帝都の 騎士の 礼を する」']},
+];
+function placeQuestGivers(){ if(cur.kind!=='town') return; QGIVERS.filter(g=>g.town===TOWN_NOW && g.ph.test(ST.phase)).forEach(g=>{ if(cur.npcs.some(n=>n.qid===g.id)) return; cur.npcs.push({x:g.x,y:g.y,spr:g.spr,name:g.name,qid:g.id,ang:0,p:person(g.spr),talk:()=>questTalk(g.id,g.lines)}); }); }
 ST.q=ST.q||{};   // 受けた 頼みごと：{id:'受けた'|'済み'}
 function questTalk(id,lines){ const q=QUESTS[id], st=ST.q[id], sp=lines[0].split('「')[0];   /* ★話す 人の 名前は 最初の 台詞と 同じに */
   if(st==='済み') return say([sp+'「あの 時は 助かったよ」']);
