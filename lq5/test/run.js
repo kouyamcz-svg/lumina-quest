@@ -28,7 +28,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   await talk('部隊長'); await flush(); T('部隊長戦の 背景は 燃える村', await waitMenu() && await E(()=>BT.look==='burn'));
   await winBattle(); await flush(); T('部隊長の 後', await E(()=>ST.phase==='after'));
   await talk('ガイル'); await flush(); T('ガイルの 剣', await E(()=>ST.phase==='road'&&EQUIP.elt.weapon.name==='ガイルの 剣'));
-  await E(()=>enterTown([12,20.2],'cap')); T('夜に 王都の 城下町', await E(()=>TOWN_NOW==='cap'));
+  await E(()=>enterTown([12,20.2],'cap')); T('夜に 王都の 城下町（暗い）', await E(()=>TOWN_NOW==='cap' && amb.intensity<.5 && S.background.getHex()===0x0a1028));
   await E(()=>enterCastle()); await talk('アルディア王'); await flush(); await W(300); T('序章 完', await E(()=>ST.phase==='end'));
   // ---- 第1章 ----
   await E(()=>pressA()); await W(200); T('章の 札は しばらく Aで 消えない・「Ａで 第○章へ」の 文字は ない', await E(()=>ST.phase==='end' && !/Ａで/.test(document.getElementById('card').textContent)));

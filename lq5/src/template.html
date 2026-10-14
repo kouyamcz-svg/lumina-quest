@@ -548,6 +548,7 @@ function buildTown(){
   const imp=!!TL().imperial;
   if(imp){ S.background=new THREE.Color(0x9a948e); S.fog=new THREE.Fog(0x9a948e,15,36); amb.intensity=.66; amb.color.setHex(0xf0e4dc); sun.intensity=.5; sun.color.setHex(0xffe0d0); }   /* ★鉄の 煙で くすんだ 空 */
   else { S.background=new THREE.Color(0x9fd0f0); S.fog=new THREE.Fog(0x9fd0f0,16,38); amb.intensity=.72; sun.intensity=.6; amb.color.setHex(0xffffff); sun.color.setHex(0xffffff); }
+  if(TOWN_NOW==='cap' && ST.phase==='road'){ S.background=new THREE.Color(0x0a1028); S.fog=new THREE.Fog(0x0a1028,10,32); amb.intensity=.36; amb.color.setHex(0x7a8ad0); sun.intensity=.12; sun.color.setHex(0x8aa0e0); }   /* ★序章の 夜（村から 走って 来た 夜中。前は 昼の 明るさ だった。実機で 報告） */
   const mG=imp?L(T.found,0x9a968e):L(T.grass), mS=imp?L(T.stone,0xc0b8ac):L(T.stone), mC=L(T.cliff);
   const TR=TL().rows, isCap=!!TL().castle;
   if(imp){ const gt=T.found.clone(); gt.needsUpdate=true; gt.repeat.set(80,80); const gp=new THREE.Mesh(new THREE.PlaneGeometry(80,80),L(gt,0x8a8680)); gp.rotation.x=-Math.PI/2; gp.position.set(12,-1.01,12); G.add(gp); }
