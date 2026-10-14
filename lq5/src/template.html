@@ -827,6 +827,7 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
       else if(c==='P'){ go(()=>enterTown([11.5,TOWNS.port.rows.length-1.8],'port')); }
       else if(c==='T'){ go(()=>enterTown([11.5,TOWNS.seatown.rows.length-1.8],'seatown')); }
       else if(c==='U'){ if(/^c4_sea$/.test(ST.phase)) go(()=>westPortArrive()); else go(()=>enterTown([11.5,TOWNS.westport.rows.length-1.8],'westport')); }
+      if(c==='J') visit('vgate');   /* ★帝都の 西の 山並みの 関所（第4章の 検問と 同じ 場所） */
       if(c==='Z'){ go(()=>enterDun('dcastle1')); }   /* ★終章：魔王の 城 */
       if(c==='H'){ go(()=>enterDun('shrine')); }   /* ★終章：南東の 島の 祠 */
       if(c==='A'){ if(/^c4_(manor|port|sea|end)$/.test(ST.phase)) go(()=>enterDun('manor')); else { hero.z+=.6; say(['焼け落ちた 屋敷の 跡だ。','……何の 屋敷だったのか、まだ わからない。']); } }
@@ -1777,6 +1778,7 @@ function enterCastle(which){ CASTLE_NOW=which||'ardia'; [hero.p,...followers.map
     {x:10.2,y:19.4,spr:'asoldier',name:'城の 門番',lines:['門番「ここは アルディア城。北の 奥が 謁見の 間だ」']},
   ].map(n=>({...n,ang:0,p:person(n.spr)})));
   hero.x=12.5; hero.z=CASTLE.length-1.6; hero.ang=Math.PI; resetTrail();
+  if(/^c6_/.test(ST.phase) && !/^c6_end/.test(ST.phase)){ removeNpc(cur.npcs.find(n=>n.name==='アルディア王')); const m=cur.npcs.find(n=>n.name==='大臣'); if(m) m.byPhase={'*':['大臣「陛下は 帝都 ヴェルナへ 出向かれて おる。二つの 国の 話し合いじゃ」','大臣「留守は この わしが 預かって おる。……エルトどの、陛下を 頼みますぞ」']}; const g=cur.npcs.find(n=>n.name==='近衛兵'); if(g) g.lines=['近衛兵「陛下の 留守を 守って いる。玉座は 空だ」']; }   /* ★終章：王は 帝都に いる（前は 王都の 玉座にも いて 2か所に いた） */
   if(/^c5_/.test(ST.phase)) cur.npcs.push({x:10.6,y:3.6,spr:'haven',name:'使者 ハーヴェン',ang:0,p:person('haven'),lines:ST.phase==='c5_king'?['ハーヴェン「エルトどの！ ……よくぞ ご無事で」']:['ハーヴェン「肩の 傷は もう 平気です。……王女殿下を、頼みましたぞ」']});   /* ★第5章：城に ハーヴェン */
   document.getElementById('place').textContent='王都 アルディア城'; resize(); }
 function showEnd(ns){ CARD_T=performance.now(); ST.phase='end'; const c=document.getElementById('card'); c.innerHTML='<div>序章</div><div class="t">燃える国境</div><div>完</div>'; c.style.opacity=1; if(!ns) saveGame(); }   /* ★章の 終わりで 自動セーブ */
@@ -1973,7 +1975,7 @@ function openEquipOld(){ const e=EQUIP.elt;
 // ---- 地図（外の 世界の とき だけ）----
 // ★地図：前は 世界 全体を 画面の 幅に 縮めて いて、1ますが 3ドットほどで 見づらかった。
 //   主人公の まわりを 大きく 出し、十字で 動かせる。Aで 拡大 ⇔ 全体、Bで 閉じる。町や 城の 名前も 出す
-const MAP_NAMES=[[58,3.6,'魔王の 城','dcastle1'],[105.5,59.6,'空の 祠','shrine'],[34.5,30.6,'ルーエ','rue'],[13,21.4,'王都 アルディア','cap'],[40,22.6,'国境の 砦','fort'],[48.5,24.2,'ドルム','velna'],[63,23.6,'峠の 山道','pass'],[93,21.4,'帝都 ヴェルナ','vcap'],[74.5,21.2,'森の 遺跡','ruins'],[48.5,20.6,'坑道の 北の 出口','mine'],[85.5,10.8,'ノルン','hamlet'],[96.5,17.8,'側近の 屋敷跡','manor'],[84.5,54.8,'港町 サルム','port'],[26.5,58.8,'ミラ','seatown'],[4.5,27.8,'ウェルス','westport'],[56.5,38.8,'摂政の 陣','camp']];   /* ★第4章・第5章の 町と 場所を 足した（前は 地図に 名前が 出なかった） */
+const MAP_NAMES=[[80.5,23.6,'帝都の 関所','vgate'],[58,3.6,'魔王の 城','dcastle1'],[105.5,59.6,'空の 祠','shrine'],[34.5,30.6,'ルーエ','rue'],[13,21.4,'王都 アルディア','cap'],[40,22.6,'国境の 砦','fort'],[48.5,24.2,'ドルム','velna'],[63,23.6,'峠の 山道','pass'],[93,21.4,'帝都 ヴェルナ','vcap'],[74.5,21.2,'森の 遺跡','ruins'],[48.5,20.6,'坑道の 北の 出口','mine'],[85.5,10.8,'ノルン','hamlet'],[96.5,17.8,'側近の 屋敷跡','manor'],[84.5,54.8,'港町 サルム','port'],[26.5,58.8,'ミラ','seatown'],[4.5,27.8,'ウェルス','westport'],[56.5,38.8,'摂政の 陣','camp']];   /* ★第4章・第5章の 町と 場所を 足した（前は 地図に 名前が 出なかった） */
 // ★行った 場所だけ 名前を 出す（指示）。前の セーブは 話の 進みから 行った はずの 場所を 補う
 function visit(k){ ST.visited=ST.visited||{}; ST.visited[k]=1; }
 function visitedFromPhase(){ const p=ST.phase; visit('rue'); if(/^c[56]_/.test(p)){ ['cap','westport','fort','velna','pass','vcap','ruins','hamlet','port'].forEach(visit); } if(/^(road|end|c1_|c2_|c3_|c4_)/.test(p)) visit('cap'); if(/^(c1_(fort|east|town|end)|c2_|c3_|c4_)/.test(p)) visit('fort'); if(/^(c1_(town|end)|c2_|c3_|c4_)/.test(p)) visit('velna'); if(/^(c2_(road|capital|inn|tower|ruins|back|end)|c3_|c4_)/.test(p)) visit('pass'); if(/^(c2_(capital|inn|tower|ruins|back|end)|c3_|c4_)/.test(p)) visit('vcap'); if(/^(c2_(back|end)|c3_|c4_)/.test(p)) visit('ruins'); if(/^c4_(manor|port|sea|end)/.test(p)) visit('hamlet'); if(/^c4_(sea|end)/.test(p)) visit('port'); }
@@ -2432,7 +2434,7 @@ function vcapNpcs(){ if(/^c6_/.test(ST.phase)) return c6VcapNpcs(); return [
   {x:16.5,y:9.6,spr:'smith',name:'鉱山の 男',lines:['男「王さまが 変わったのは、数年前からだ。今は 側近の セルヴィスさまの 言う ことしか 聞かない」','男「セルヴィスさまは 王女さまの 教育係も して いた お方なんだが……大きな 声じゃ 言えないがな」']},
   {x:6.5,y:13.6,spr:'child',name:'帝都の 子',lines:['子「王女さまは やさしいんだ。でも 最近 お城から 出て こない」']},
   {x:7.5,y:8.3,spr:'smith',name:'工房の 職人',lines:['職人「この 工房で 鉄を 溶かして、毎日 剣と 鎧を 作って いる」','職人「……昔は 鋤や 鍋を 作って いたんだがな」']},
-  {x:18.5,y:6.2,spr:'vsoldier',name:'訓練中の 兵',lines:['兵「はっ！ はっ！ ……休めと 言われるまで 振り続けろ、だとよ」','兵「戦が 近いって 噂だ。相手は アルディアだと」']},
+  {x:18.5,y:6.2,spr:'vsoldier',name:'訓練中の 兵',lines:['兵「はっ！ はっ！ ……休めと 言われるまで 振り続けろ、だとよ」','兵「戦が 近いって 噂だ。相手は アルディアだと」','兵「西の 森へ 行くなら、帝都の 西の 山並みは 越えられん。街道の 関所を 抜けな」']},   /* ★帝都の 西の 山並みの 説明（前は 理由の ない 山だった） */
   {x:12.5,y:9.6,spr:'elder',name:'像を 見上げる 老人',lines:['老人「鋼の 騎兵の 像か。数年前に 急に 建てられた」','老人「前は ここに 麦の 女神の 像が あったんじゃよ」']},
   {x:16.5,y:15.6,spr:'okami',name:'交易商',talk:()=>say(['交易商「帝都は 麦が 高い。アルディアの 麦なら 高く 買うよ」'],openTrade)},
 ]; }
@@ -2637,9 +2639,9 @@ const WARPS4=[['北の 集落 ノルン','hamlet',[85.5,13.45]],['港町 サル�
 // ---- 外の 世界の 遭遇の 区分（第4章を 足した）----
 function worldArea(){ const x=hero.x, z=hero.z, c=at(Math.floor(x),Math.floor(z)), p=ST.phase;
   if(c==='~') return 'sea';
-  if(/^c6_/.test(p)){ if(c==='k') return 'isle6'; if(c==='d') return 'waste'; if(x>96 && z>56) return 'sea6'; if(x>63) return 'east6'; if(x>40) return z>32?'plain6':'east6'; return 'west'; }   /* ★終章：影の 兵と 追っ手は もう 出ない */
-  if(/^c5_/.test(p)) return x>40 ? 'plain5' : 'west';
-  if(/^c4_/.test(p)){ if(c==='d') return 'waste'; if(Math.hypot(x-96.5,z-19.5)<7) return 'manorWood'; if(x>81 && z<32) return 'capN'; if(x>63) return 'velnaE4'; if(x>40) return 'pursuit'; return 'west'; }
+  if(/^c6_/.test(p)){ if(c==='k') return 'isle6'; if(c==='d') return 'waste'; if(x>96 && z>56) return 'sea6'; if(x>63) return 'east6'; if(x>40) return z>32?'plain6':'east6'; return 'west6'; }   /* ★終章：影の 兵と 追っ手は もう 出ない */
+  if(/^c5_/.test(p)) return x>40 ? 'plain5' : 'west5';   /* ★第5章・終章の アルディア側は 強い 魔物（前は 第1章の 野ウサギ HP16 の まま） */
+  if(/^c4_/.test(p)){ if(c==='d') return 'waste'; if(Math.hypot(x-96.5,z-19.5)<7) return 'manorWood'; if(x>81 && z<32) return 'capN'; if(x>63) return 'velnaE4'; if(x>40) return 'pursuit'; return 'west4'; }
   if(x>63) return velnaArea(x,z); if(x>40) return (/^c3_(flee|mine|exit)$/.test(p)?'pursuit':/^c3_/.test(p)?'velnaE':'east'); return (p==='road'?'westNight':'west'); }
 // ---- 第4章の 魔物（絵は 2026-10-12 に 届いた ものを 入れた）----
 FOES.sumiyoroi={key:'sumiyoroi', offs:{wind:0.04,atk:0.163}, scale:1.15, name:'スミヨロイ', hp:210, exp:150, gold:40, atk:[30,40], wind:'は 焦げた 大剣を 振りかぶった！', verb:'焦げた 大剣', frames:{idle:RAB.sy_idle,wind:RAB.sy_wind,atk:RAB.sy_atk}};
@@ -2878,6 +2880,8 @@ FOES.kageshin={key:'kageshin', offs:{idle:0.028,idle2:0.038,wind:0.021,atk:0.083
   bigWind:'が 斧槍を 掲げた！ 影の 兵が いっせいに 槍を 向ける！', bigName:'影の 号令', frames:{idle:RAB.ks_idle,idle2:RAB.ks_idle2,wind:RAB.ks_wind,atk:RAB.ks_atk,big:RAB.ks_big}};
 FOES.garva={key:'garva', scale:1.7, name:'影の 宰相 ガルヴァ', hp:4800, exp:6000, gold:1200, atk:[50,62], wind:'の 角が 紫に 光った！', verb:'影の 爪', boss:true, bigInflict:{type:'conf',rate:.3},
   bigWind:'の 体から 無数の 黒い 糸が 伸びた！', bigName:'心を 縛る 術', frames:{idle:RAB.gv_idle,idle2:RAB.gv_idle2,wind:RAB.gv_wind,atk:RAB.gv_atk,big:RAB.gv_big}};
+ENC.west4=[['sabitsuno',2],['sunabouzu',2],['hikagerou',2],['hainome',1],['gincoro',1]];   /* ★第4章の 海の 向こう（ミラの 島・アルディアの 西）。前は 第1章の 魔物 */
+ENC.west5=[['yarinoko',3],['sabitsuno',2],['hikagerou',2],['sunabouzu',2],['gincoro',1]];   /* ★第5章の アルディア側（影の 兵は 出ない） */
 ENC.plain5=[['kagehei',3],['yarinoko',2],['noroshidama',2],['tsuite',1],['gincoro',1]]; ENC.camp=[['kagehei',3],['tsuite',2],['noroshidama',1]];
 SHOP.smith5=[{name:'王国の 宝剣',kind:'weapon',v:40,price:2200},{name:'王国の 大斧',kind:'weapon',v:42,price:2300,who:['dolgan']},{name:'白銀の よろい',kind:'armor',v:30,price:1900},{name:'白銀の 兜',kind:'helm',v:19,price:1100},{name:'聖樹の 杖',kind:'weapon',v:22,price:1300},{name:'白銀の ローブ',kind:'armor',v:18,price:1200},{name:'白銀の 腕刃',kind:'weapon',v:28,price:1700,who:['zf']},{name:'白銀の 装甲',kind:'armor',v:26,price:1800,who:['zf']}];
 // ---- 始まり：王都の 城 ----
@@ -3026,8 +3030,9 @@ FOES.garva2=tintOf('garva',{key:'garva2', name:'ガルヴァ（魔王の 力）'
   bigWind:'の 体から 赤黒い 糸が 噴き出した！', bigName:'魔王の 縛り'});
 FOES.zeldios1=Object.assign({frames:{idle:RAB.zd_idle,idle2:RAB.zd_idle2,wind:RAB.zd_wind,atk:RAB.zd_atk,big:RAB.zd_big}, offs:{wind:0.004,atk:0.029,big:0.004}},{key:'zeldios1', name:'魔王 ゼルディオス', scale:1.8, boss:true, hp:5600, exp:0, gold:0, atk:[70,84], wind:'が 黒い 翼を 広げた！', verb:'魔王の 爪',
   bigWind:'の 頭上に 黒い 太陽が 生まれた！', bigName:'黒い 太陽'});
-FOES.zeldios2=Object.assign({frames:{idle:RAB.zx_idle,idle2:RAB.zx_idle2,wind:RAB.zx_wind,atk:RAB.zx_atk,big:RAB.zx_big}, offs:{idle:-0.03,idle2:-0.03,wind:-0.024,atk:0.069,big:0.107}},{key:'zeldios2', name:'魔王 ゼルディオス（真の 姿）', scale:1.85, boss:true, hp:6100, exp:0, gold:0, atk:[74,88], wind:'の 口に 光が 集まった！', verb:'魔王の 牙', bigInflict:{type:'sleep',rate:.25},
+FOES.zeldios2=Object.assign({frames:{idle:RAB.zx_idle,idle2:RAB.zx_idle2,wind:RAB.zx_wind,atk:RAB.zx_atk,big:RAB.zx_big}, offs:{idle:-0.03,idle2:-0.03,wind:-0.024,atk:0.069,big:0.107}},{key:'zeldios2', name:'魔王 ゼルディオス（真の 姿）', scale:1.85, boss:true, hp:6800, exp:0, gold:0, atk:[78,92], wind:'の 口に 光が 集まった！', verb:'魔王の 牙', bigInflict:{type:'sleep',rate:.25},
   bigWind:'が 大陸ごと 呑みこむ 闇を 吐いた！', bigName:'終わりの 闇'});
+ENC.west6=[['yarinoko',3],['noroshidama',2],['sabitsuno',2],['hikagerou',2],['sunabouzu',2],['gincoro',1]];   /* ★終章の アルディア側 */
 ENC.east6=[['tetsukui',2],['yamabiko',2],['sabitsuno',2],['hikagerou',2],['gincoro',1]]; ENC.plain6=[['yarinoko',3],['noroshidama',3],['sabitsuno',2],['gincoro',1]]; ENC.sea6=[['yarinoko',2],['noroshidama',2],['sabitsuno',2],['sunabouzu',2],['gincoro',1]];   /* 南東の 島の 陸（海の 魔物は 海だけ） */
 ENC.ruinsB=[['kodaihei',3],['hikarigumo',3],['ishigami',2],['gincoro',1]]; ENC.mineB=[['kurogane',3],['yoroimushi',3],['magumadama',3],['kincoro',1]];
 ENC.dcastle=[['mazokuhei',3],['yamibotaru',3],['yamiguchi',3],['kincoro',1]]; ENC.isle6=[['mazokuhei',2],['yamibotaru',2],['yamiguchi',2],['gincoro',1]];
