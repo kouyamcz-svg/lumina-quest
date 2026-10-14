@@ -3301,10 +3301,14 @@ loadImgs(()=>{ hero.p=person('elt'); followers=PARTY.slice(1).map(k=>({p:person(
 // ★タイトル画面：タップ（または A）で 消して ゲームを 始める。自動の 検査（navigator.webdriver）では 出さない（#title を 付けると 出す）
 let TITLE_ON=1, TITLE_READY=0, TITLE_T=0;
 function hideTitle(){ if(!TITLE_ON) return;
-  if(TITLE_ON===1){ TITLE_ON=2; bgmUnlocked=true; bgmUpdate(); const t=document.getElementById('title'); t.classList.add('lit'); const tp=t.querySelector('.tap'); tp.style.visibility='hidden'; setTimeout(()=>{ tp.textContent='▶ タップして はじめる'; tp.style.visibility=''; },1200); TITLE_T=performance.now(); return; }   /* ★1回めの タップで オープニングの 曲（iPhone は 触れるまで 音を 出せない） */
+  if(TITLE_ON===1){ bgmUnlocked=true; bgmUpdate(); titleLit(1200); return; }   /* ★1回めの タップで オープニングの 曲（iPhone は 触れるまで 音を 出せない） */
   if(performance.now()-TITLE_T<1200) return; TITLE_ON=0; const t=document.getElementById('title'); t.classList.add('hide'); setTimeout(()=>{ t.style.display='none'; },850); try{ se('ok'); }catch(e){} if(TITLE_READY) setTimeout(beginGame,300); }
 document.getElementById('title').addEventListener('touchend',e=>{ e.preventDefault(); hideTitle(); },{passive:false}); document.getElementById('title').addEventListener('click',()=>hideTitle());   /* ★指を 離した 時に（touchstart では iPhone が 曲を 鳴らさない） */
 if(navigator.webdriver && !/title/.test(location.hash)){ TITLE_ON=0; document.getElementById('title').style.display='none'; }
+function titleLit(wait){ if(TITLE_ON!==1) return; TITLE_ON=2; const t=document.getElementById('title'); t.classList.add('lit'); const tp=t.querySelector('.tap'); tp.style.visibility='hidden'; setTimeout(()=>{ tp.textContent='▶ タップして はじめる'; tp.style.visibility=''; },wait); TITLE_T=performance.now()-(1200-wait); }
+// ★開いたら すぐ 曲を 流す（指示）。ブラウザが 許せば その まま 流れ、1回の タップで ゲームへ。iPhone の Safari は 画面に 触れるまで 音を 出させないので、その 時は 1回めの タップで 曲が 始まる
+function titleAutoplay(){ if(!TITLE_ON) return; try{ if(!bgmEl){ bgmEl=new Audio(); bgmEl.loop=true; } bgmEl.src=BGM_FILES.title; bgmNow='title'; bgmEl.volume=Math.min(1,BGM_VOL.title*SND.bgm/.6); bgmUnlocked=true; const p=bgmEl.play(); if(p&&p.then) p.then(()=>{ titleLit(0); }).catch(()=>{ bgmUnlocked=false; }); }catch(e){} }   /* ★先に 許可の 印を 立てる（前は 読み込みの 間に 0.5秒ごとの 見回りが 止めて しまった） */
+if(TITLE_ON) titleAutoplay();
 function beginGame(){
   if(hasSave()){ setTimeout(()=>{ menu(['つづきから','はじめから'],'ぼうけんの きろく',(k)=>{ closeMenu(); if(k===0 && loadGame()) say(['きろくの つづきから はじめる。']); else say(['── 国境の 村 ルーエ ──','見張り櫓の 当番を 終えた 朝。','エルトは、師匠 ガイルに 呼ばれて いた。','＊ 村の 北の 入口に いる ガイルに 話しかけよう ＊']); }); MENU.lock=1; },300); return; }
   setTimeout(()=>say(['── 国境の 村 ルーエ ──','見張り櫓の 当番を 終えた 朝。','エルトは、師匠 ガイルに 呼ばれて いた。','＊ 村の 北の 入口に いる ガイルに 話しかけよう ＊']),300); }

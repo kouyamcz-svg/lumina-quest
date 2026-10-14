@@ -336,8 +336,9 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     return bad.length===0; }));
   T('タイトル画面：題名が 出て、1回めの タップで オープニングの 曲、2回めで 消えて 序章が 始まる（#title で 開いた とき）', await (async()=>{ const p2=await b.newPage(); await p2.setViewport({width:393,height:852}); const e2=[]; p2.on('pageerror',e=>e2.push(e.message));
     await p2.goto(URL+'#title',{waitUntil:'load'}); await p2.evaluate(()=>localStorage.clear()); await p2.reload({waitUntil:'load'}); await W(1800);
-    const a=await p2.evaluate(()=>TITLE_ON===1 && /ルミナクエスト/.test(document.getElementById('title').textContent) && /ふたつの 王冠/.test(document.getElementById('title').textContent) && !msgQ && getComputedStyle(document.getElementById('title')).display!=='none');
-    await p2.mouse.click(200,400); await W(400); const a2=await p2.evaluate(()=>TITLE_ON===2 && bgmFor()==='title' && BGM_FILES.title==='opening.mp3' && getComputedStyle(document.getElementById('title')).display!=='none'); await W(1300); await p2.mouse.click(200,400); await W(1500); const c=a2 && await p2.evaluate(()=>TITLE_ON===0 && !!msgQ && ST.phase==='morning' && bgmFor()!=='title'); await p2.close(); return a && c && !e2.length; })());
+    const a=await p2.evaluate(()=>TITLE_ON>=1 && /ルミナクエスト/.test(document.getElementById('title').textContent) && /ふたつの 王冠/.test(document.getElementById('title').textContent) && !msgQ && getComputedStyle(document.getElementById('title')).display!=='none');
+    if(await p2.evaluate(()=>TITLE_ON===1)){ await p2.mouse.click(200,400); await W(400); }   /* ★開いて すぐ 曲が 流れた（自動再生が 許された）ときは 1回で ゲームへ */
+    const a2=await p2.evaluate(()=>TITLE_ON===2 && bgmFor()==='title' && BGM_FILES.title==='opening.mp3' && getComputedStyle(document.getElementById('title')).display!=='none'); await W(1300); await p2.mouse.click(200,400); await W(1500); const c=a2 && await p2.evaluate(()=>TITLE_ON===0 && !!msgQ && ST.phase==='morning' && bgmFor()!=='title'); await p2.close(); return a && c && !e2.length; })());
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
