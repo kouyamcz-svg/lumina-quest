@@ -820,10 +820,12 @@ function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
       if(c==='G'){ go(()=>enterDun('pass',hero.x>63)); }
       if(c==='B'){ if(/^c5_(land|camp|battle)$/.test(ST.phase)) go(()=>enterCamp()); else { hero.z+=.6; say(['摂政の 陣だ。']); } }
       if(c==='N'){ if(ST.mineOpen) go(()=>enterDun('mine',true)); else { hero.z+=.6; say(['古い 坑道の 出口だ。崩れた 岩で ふさがって いる。']); } }   /* ★坑道の 北の 出口 */
-      if(c==='h'){ go(()=>enterTown([11.5,TOWNS.hamlet.rows.length-1.8],'hamlet')); }
-      if(c==='P'){ go(()=>enterTown([11.5,TOWNS.port.rows.length-1.8],'port')); }
-      if(c==='T'){ go(()=>enterTown([11.5,TOWNS.seatown.rows.length-1.8],'seatown')); }
-      if(c==='U'){ if(/^c4_sea$/.test(ST.phase)) go(()=>westPortArrive()); else go(()=>enterTown([11.5,TOWNS.westport.rows.length-1.8],'westport')); }
+      const C4UP=/^c[456]_/.test(ST.phase);   /* ★第4章で 作った 町（ノルン・サルム・ミラ・ウェルス）は 第4章から（前は 第1章でも ウェルスに 入れた。町の 人は 第4章の 話を する） */
+      if(!C4UP && /^[hPTU]$/.test(c)){ hero.x-=(ix||0)*.6; hero.z-=(iz||0)*.6; if(!ix&&!iz) hero.z+=.6;   /* ★来た 向きへ 押し戻す */ say([({h:'北の 小さな 集落だ。',P:'港町だ。',T:'海沿いの 町だ。',U:'西の 港町 ウェルスだ。'})[c],'……今は 用が ない。']); }
+      else if(c==='h'){ go(()=>enterTown([11.5,TOWNS.hamlet.rows.length-1.8],'hamlet')); }
+      else if(c==='P'){ go(()=>enterTown([11.5,TOWNS.port.rows.length-1.8],'port')); }
+      else if(c==='T'){ go(()=>enterTown([11.5,TOWNS.seatown.rows.length-1.8],'seatown')); }
+      else if(c==='U'){ if(/^c4_sea$/.test(ST.phase)) go(()=>westPortArrive()); else go(()=>enterTown([11.5,TOWNS.westport.rows.length-1.8],'westport')); }
       if(c==='Z'){ go(()=>enterDun('dcastle1')); }   /* ★終章：魔王の 城 */
       if(c==='H'){ go(()=>enterDun('shrine')); }   /* ★終章：南東の 島の 祠 */
       if(c==='A'){ if(/^c4_(manor|port|sea|end)$/.test(ST.phase)) go(()=>enterDun('manor')); else { hero.z+=.6; say(['焼け落ちた 屋敷の 跡だ。','……何の 屋敷だったのか、まだ わからない。']); } }
