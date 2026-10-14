@@ -344,7 +344,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   T('頼みごと：第2章〜終章に 10件。頼む 人は 町の 歩ける 所に 立ち、ほかの 人と 重ならない。受けて 倒して 報告すると お礼', await E(()=>{ const ph0=ST.phase; const bad=[]; const samp={velna:['c2_road','c3_mine','c6_sky'],vcap:['c2_capital','c6_sky'],hamlet:['c4_manor'],port:['c4_port'],seatown:['c4_sea'],westport:['c5_fleet','c6_sky'],cap:['c5_king','c6_sky']};
     for(const [tw,phs] of Object.entries(samp)) for(const ph of phs){ ST.phase=ph; enterTown(null,tw); const gs=QGIVERS.filter(g=>g.town===tw&&g.ph.test(ph)); gs.forEach(g=>{ const n=cur.npcs.find(x=>x.qid===g.id); if(!n){ bad.push('なし '+g.id+' '+ph); return; } const c=cur.rows[Math.floor(g.y)][Math.floor(g.x)]; if(!'.='.includes(c)) bad.push('床 '+g.id+' '+c); cur.npcs.forEach(o=>{ if(o!==n && Math.hypot(o.x-n.x,o.y-n.y)<1.0) bad.push('重なり '+g.id+' '+o.name); }); }); }
     ST.phase='c6_sky'; enterTown(null,'vcap'); const g=cur.npcs.find(n=>n.qid==='mazoku'); delete ST.q.mazoku; g.talk(); while(msgQ) closeMsg(); const acc=ST.q.mazoku==='受けた'; ST.kill.mazokuhei=(ST.kill.mazokuhei||0)+5; const gold=BAG.gold; g.talk(); while(msgQ) closeMsg(); const ok=ST.q.mazoku==='済み' && BAG.gold===gold+4000;
-    ST.phase=ph0; if(bad.length) console.log(bad.join(' / ')); return bad.length===0 && acc && ok && Object.keys(QUESTS).length>=12 && GOLD_RATE===2; }));
+    ST.phase=ph0; if(bad.length) console.log(bad.join(' / ')); return bad.length===0 && acc && ok && Object.keys(QUESTS).length>=12 && GOLD_RATE===1.25; }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });

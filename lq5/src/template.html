@@ -1361,7 +1361,7 @@ function foeAct(f){ let t=null, line='';
 // ★ターンの 終わり：毒の ダメージ、混乱・眠りの 残り
 function turnEnd(){ return ()=>{ const lines=[]; BT.party.forEach(m=>{ if(m.hp>0 && m.status==='poison'){ const d=Math.max(1,Math.floor(m.max/12)); m.hp=Math.max(1,m.hp-d); lines.push(m.name+'は 毒で '+d+'の ダメージ'); } }); drawBattleUI(); if(lines.length){ bsay(lines.join('　')); return .9; } return 0; }; }
 function enemyTurn(){ const st=[]; alive().forEach(f=>st.push(...foeAct(f))); st.push(()=>{ if(!alive().length){ BT.steps=winSteps(); return 0; } return 0; }); st.push(turnEnd()); st.push(backToMenu()); return st; }   /* ★魔物が みな 逃げたら 戦闘を 終える */
-const GOLD_RATE=2;   // ★戦闘で もらえる ゴールドを 2倍に（指示：少ない）
+const GOLD_RATE=1.25;   // ★戦闘で もらえる ゴールドを 1.25倍に（指示。2倍から 直した）
 const EXP_RATE=1.25;   // ★経験値を 少し 上げる（指示。前は 1倍）
 // ★勝った 後の 文は、待ち時間の 後に Aか Bを 押すと 戦闘を 終える（指示。前は 自動で 閉じた）
 function winWait(){ return ()=>{ BT.waitA=1; bmsg.textContent=bmsg.textContent.replace(/\s*▼$/,'')+' ▼'; return 1e9; }; }
