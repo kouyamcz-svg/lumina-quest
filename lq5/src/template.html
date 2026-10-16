@@ -89,7 +89,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 <div id="title" style="background-image:url(__TITLE__)"><div class="logo"><div class="l1">ルミナクエスト<span class="v">Ⅴ</span></div><div class="line"></div><div class="l2">〜ふたつの 王冠〜</div></div><div class="tap">─ タップ ─</div></div>
 <div id="wrap">
  <div id="view"><canvas id="c"></canvas><canvas id="c2" style="display:none"></canvas><div id="place">国境の 村 ルーエ</div>
-  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="flash"></div><div id="bmark">▼</div><div id="fstat"></div><div id="mapview"></div><div id="fmenu"></div><div id="fequip"></div><div id="card"></div>
+  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="startbg" style="position:absolute;inset:0;background:#000;display:none;z-index:50"></div><div id="flash"></div><div id="bmark">▼</div><div id="fstat"></div><div id="mapview"></div><div id="fmenu"></div><div id="fequip"></div><div id="card"></div>
   <div id="bt"><div id="bparty"></div><div id="bmenu"></div><div id="bfoes"></div><div id="bmsg"></div></div></div>
  <div id="pad">
   <div id="dpad"><div class="k u">▲</div><div class="k l">◀</div><div class="k r">▶</div><div class="k d">▼</div></div>
@@ -2074,6 +2074,7 @@ const BGM_FILES={title:'opening.mp3', burn:'burned_village.mp3', town:'../lq4/to
 const BGM_VOL={title:.38, burn:.78, town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, boss:.5};
 let bgmEl=null, bgmNow='', bgmUnlocked=false;
 function bgmFor(){
+  if(typeof CHOOSING!=='undefined' && CHOOSING) return '';   /* ★つづきから／はじめからの 画面は 音なし */
   if(TOWN_NOW==='cap' && ST.phase==='road' && (cur.kind==='town'||cur.kind==='room') && !BT) return '';   /* ★序章の 夜中の 王都は 曲なし（指示） */
   if(typeof TITLE_ON!=='undefined' && TITLE_ON) return 'title';   /* ★タイトル画面 */
   // ★燃える 村（村が 焼かれてから 村を 出るまで）は、家の 中でも 曲を 変えない。部隊長戦（ボス）だけは ボスの 曲（指示）
@@ -3336,7 +3337,7 @@ loadImgs(()=>{ hero.p=person('elt'); followers=PARTY.slice(1).map(k=>({p:person(
   C.position.set(hero.x,10.5,hero.z+6.2); requestAnimationFrame(tick);
   TITLE_READY=1; if(TITLE_ON) return; beginGame(); });
 // ★タイトル画面：タップ（または A）で 消して ゲームを 始める。自動の 検査（navigator.webdriver）では 出さない（#title を 付けると 出す）
-let TITLE_ON=1, TITLE_READY=0, TITLE_T=0;
+let TITLE_ON=1, TITLE_READY=0, TITLE_T=0, CHOOSING=0;
 function hideTitle(){ if(!TITLE_ON) return;
   if(TITLE_ON===1){ bgmUnlocked=true; bgmUpdate(); titleLit(1200); return; }   /* ★1回めの タップで オープニングの 曲（iPhone は 触れるまで 音を 出せない） */
   if(performance.now()-TITLE_T<1200) return; TITLE_ON=0; const t=document.getElementById('title'); t.classList.add('hide'); setTimeout(()=>{ t.style.display='none'; },850); try{ se('ok'); }catch(e){} if(TITLE_READY) setTimeout(beginGame,300); }
@@ -3347,6 +3348,7 @@ function titleLit(wait){ if(TITLE_ON!==1) return; TITLE_ON=2; const t=document.g
 function titleAutoplay(){ if(!TITLE_ON) return; try{ if(!bgmEl){ bgmEl=new Audio(); bgmEl.loop=true; } bgmEl.src=BGM_FILES.title; bgmNow='title'; bgmEl.volume=Math.min(1,BGM_VOL.title*SND.bgm/.6); bgmUnlocked=true; const p=bgmEl.play(); if(p&&p.then) p.then(()=>{ titleLit(0); }).catch(()=>{ bgmUnlocked=false; }); }catch(e){} }   /* ★先に 許可の 印を 立てる（前は 読み込みの 間に 0.5秒ごとの 見回りが 止めて しまった） */
 if(TITLE_ON) titleAutoplay();
 function beginGame(){
-  if(hasSave()){ setTimeout(()=>{ menu(['つづきから','はじめから'],'ぼうけんの きろく',(k)=>{ closeMenu(); if(k===0 && loadGame()) say(['きろくの つづきから はじめる。']); else say(['── 国境の 村 ルーエ ──','見張り櫓の 当番を 終えた 朝。','エルトは、師匠 ガイルに 呼ばれて いた。','＊ 村の 北の 入口に いる ガイルに 話しかけよう ＊']); }); MENU.lock=1; },300); return; }
+  if(hasSave()){ CHOOSING=1; const bk=document.getElementById('startbg'); bk.style.display='block'; menuEl.style.zIndex=60; bgmUpdate();   /* ★「つづきから／はじめから」は 音なしの 真っ黒な 画面で（指示） */
+    setTimeout(()=>{ menu(['つづきから','はじめから'],'ぼうけんの きろく',(k)=>{ closeMenu(); CHOOSING=0; bk.style.display='none'; menuEl.style.zIndex=''; bgmUpdate(); if(k===0 && loadGame()) say(['きろくの つづきから はじめる。']); else say(['── 国境の 村 ルーエ ──','見張り櫓の 当番を 終えた 朝。','エルトは、師匠 ガイルに 呼ばれて いた。','＊ 村の 北の 入口に いる ガイルに 話しかけよう ＊']); }); MENU.lock=1; },300); return; }
   setTimeout(()=>say(['── 国境の 村 ルーエ ──','見張り櫓の 当番を 終えた 朝。','エルトは、師匠 ガイルに 呼ばれて いた。','＊ 村の 北の 入口に いる ガイルに 話しかけよう ＊']),300); }
 </script></body></html>
