@@ -2075,7 +2075,7 @@ const BGM_FILES={title:'opening.mp3', burn:'burned_village.mp3', town:'../lq4/to
 const BGM_VOL={title:.38, burn:.78, town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, boss:.5};
 let bgmEl=null, bgmNow='', bgmUnlocked=false;
 function bgmFor(){
-  if(typeof INN_NIGHT!=='undefined' && INN_NIGHT) return '';   /* ★帝都の 宿の 真夜中（侍女が 来る 場面）は 曲なし */
+  if((typeof INN_NIGHT!=='undefined' && INN_NIGHT) || (cur.kind==='tower' && ST.phase==='c2_tower' && !BT)) return '';   /* ★真夜中の 塔（王女に 会う まで）も 曲なし */   /* ★帝都の 宿の 真夜中（侍女が 来る 場面）は 曲なし */
   if(typeof CHOOSING!=='undefined' && CHOOSING) return '';   /* ★つづきから／はじめからの 画面は 音なし */
   if(TOWN_NOW==='cap' && ST.phase==='road' && (cur.kind==='town'||cur.kind==='room') && !BT) return '';   /* ★序章の 夜中の 王都は 曲なし（指示） */
   if(typeof TITLE_ON!=='undefined' && TITLE_ON) return 'title';   /* ★タイトル画面 */
