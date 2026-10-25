@@ -1903,7 +1903,7 @@ const SHOP={ smith:[{name:'銅の 剣',kind:'weapon',v:6,price:60},{name:'鉄の
 // ★町ごとの 品ぞろえ（前は どの 町も 同じで、今の 装備より 弱い 品も あった）。旅の 順に 強く なる
 SHOP.smith_rue=[{name:'銅の 剣',kind:'weapon',v:9,price:70},{name:'革の よろい',kind:'armor',v:7,price:70},{name:'革の 帽子',kind:'helm',v:2,price:30}];
 SHOP.smith_cap=[{name:'鉄の 剣',kind:'weapon',v:15,price:260},{name:'くさりかたびら',kind:'armor',v:11,price:220},{name:'鉄の 兜',kind:'helm',v:5,price:130},{name:'革の 帽子',kind:'helm',v:2,price:30}];
-SHOP.smith3=[{name:'ドルム鋼の 剣',kind:'weapon',v:28,price:880},{name:'ドルム鋼の 大斧',kind:'weapon',v:30,price:920,who:['dolgan']},{name:'ドルム鋼の よろい',kind:'armor',v:22,price:760},{name:'ドルム鋼の 兜',kind:'helm',v:14,price:520},{name:'月長石の 杖',kind:'weapon',v:14,price:560},{name:'坑夫織りの ローブ',kind:'armor',v:12,price:520},{name:'ドルム鋼の 腕刃',kind:'weapon',v:20,price:700,who:['zf']},{name:'鉱石の 装甲',kind:'armor',v:18,price:720,who:['zf']}];   /* ★第3章の ドルムの 隠し品（帝都の 店より 少し 強い。4人 それぞれに） */
+SHOP.smith3=[{name:'ドルム鋼の 剣',kind:'weapon',v:28,price:880},{name:'ドルム鋼の 大斧',kind:'weapon',v:30,price:920,who:['dolgan']},{name:'ドルム鋼の よろい',kind:'armor',v:22,price:760},{name:'ドルム鋼の 兜',kind:'helm',v:14,price:520},{name:'月長石の 杖',kind:'weapon',v:14,price:560},{name:'坑夫織りの ローブ',kind:'armor',v:12,price:520},{name:'ドルム鋼の 腕刃',kind:'weapon',v:20,price:700,who:['zf']},{name:'鉱石の 装甲',kind:'armor',v:18,price:720,who:['zf']},{name:'月長石の 冠',kind:'helm',v:8,price:480,who:['lidia']}];   /* ★第3章の ドルムの 隠し品（帝都の 店より 少し 強い。4人 それぞれに） */
 SHOP.smith_velna=[{name:'鋼の 剣',kind:'weapon',v:19,price:430},{name:'鉄の よろい',kind:'armor',v:15,price:400},{name:'鋼の 兜',kind:'helm',v:8,price:260},{name:'鉱夫の 帽子',kind:'helm',v:4,price:90}];
 // ★買った 装備を その場で 付ける（指示）。付けられる 仲間と、付けた ときの 数字の 変わり方を 出す
 function askWear(g,back){ const slot=g.kind, lab=slot==='weapon'?'攻撃':'守り', who=PARTY.filter(k=>canWear(k,g));
@@ -1951,7 +1951,7 @@ function openInn(){ const price=10; menu(['泊まる（'+price+'G）','やめる
   setTimeout(()=>say(['ぐっすり 眠った。','HPと MPが すっかり 回復した！']),500); },()=>closeMenu()); }
 // ---- 装備の 付け替え（ふくろから）----
 // ★装備の 種類が 抜けて いた 品（最初の 装備・ガイルの 剣）を 直す。外すと 付け直せなかった
-function gearKind(g){ if(!g||g.kind) return g; g.kind=/兜|帽子/.test(g.name)?'helm':/胸当て|よろい|鎧|ローブ|かたびら|装甲|服/.test(g.name)?'armor':'weapon'; return g; }
+function gearKind(g){ if(!g||g.kind) return g; g.kind=/兜|帽子|頭巾|冠/.test(g.name)?'helm':/胸当て|よろい|鎧|ローブ|かたびら|装甲|服/.test(g.name)?'armor':'weapon'; return g; }
 function fixGear(){ (BAG.gear||[]).forEach(gearKind); Object.values(EQUIP).forEach(e=>{ if(e) ['weapon','armor','helm'].forEach(k=>gearKind(e[k])); }); }
 // ★誰が 付けられるか：剣と 斧と 重い 鎧と 兜は エルト・ドルガン、杖と ローブは リディア、帽子は 誰でも。ZFは 付け替えられない
 const ZF_GEAR=/腕刃|腕の 刃|装甲|からくり/;
@@ -2455,7 +2455,7 @@ const VCAP_ROOMS=[
  {name:'民家', rows:CAP_ROOMS[4].rows, npc:{x:2.5,y:4.4,spr:'child',name:'帝都の 子',lines:['子「お城の からくり、夜に なると 目が 光るんだ」']}},
  {name:'民家', rows:CAP_ROOMS[5].rows, npc:{x:6.5,y:2.5,spr:'elder',name:'帝都の 老人',lines:['老人「王さまは 昔、よく 町を 歩かれて おった」','老人「この 数年、お姿を 見た 者は おらん」']}},
 ];
-SHOP.smith2=[{name:'帝国の 剣',kind:'weapon',v:24,price:700},{name:'鋼の よろい',kind:'armor',v:19,price:560},{name:'帝国の 兜',kind:'helm',v:11,price:380},{name:'魔導士の 杖',kind:'weapon',v:10,price:320},{name:'精霊の ローブ',kind:'armor',v:9,price:340},{name:'鋼の 腕刃',kind:'weapon',v:15,price:480,who:['zf']},{name:'強化装甲',kind:'armor',v:14,price:500,who:['zf']},{name:'からくりの 目当て',kind:'helm',v:6,price:260,who:['zf']}];   /* ★杖と ローブは リディア用 */
+SHOP.smith2=[{name:'帝国の 剣',kind:'weapon',v:24,price:700},{name:'鋼の よろい',kind:'armor',v:19,price:560},{name:'帝国の 兜',kind:'helm',v:11,price:380},{name:'魔導士の 杖',kind:'weapon',v:10,price:320},{name:'精霊の ローブ',kind:'armor',v:9,price:340},{name:'鋼の 腕刃',kind:'weapon',v:15,price:480,who:['zf']},{name:'強化装甲',kind:'armor',v:14,price:500,who:['zf']},{name:'からくりの 目当て',kind:'helm',v:6,price:260,who:['zf']},{name:'魔導士の 頭巾',kind:'helm',v:6,price:300,who:['lidia']}];   /* ★杖と ローブは リディア用 */
 function vcapNpcs(){ if(/^c6_/.test(ST.phase)) return c6VcapNpcs(); return [
   {x:10.4,y:4.7,spr:'vsoldier',name:'城の 門番',byPhase:{c2_capital:['門番「アルディアの 使者か。……話は 聞いて いる。城へ 入れ」'],'*':['門番「ここは 帝都 ヴェルナの 城だ」']}},
   {x:13.6,y:4.7,spr:'vsoldier',name:'城の 門番',lines:['門番「……近ごろ 城の 中は 静かすぎる」']},
@@ -2730,7 +2730,7 @@ const PORT=[
 "#......................#",
 "#tt....t.........t...tt#",
 "###########..###########"];
-SHOP.smith4=[{name:'潮風の 曲刀',kind:'weapon',v:34,price:1500},{name:'船乗りの 大斧',kind:'weapon',v:36,price:1600,who:['dolgan']},{name:'潮風の よろい',kind:'armor',v:26,price:1300},{name:'水夫の 兜',kind:'helm',v:16,price:760},{name:'珊瑚の 杖',kind:'weapon',v:18,price:820},{name:'海色の ローブ',kind:'armor',v:15,price:780},{name:'船の 腕刃',kind:'weapon',v:24,price:1100,who:['zf']},{name:'錨の 装甲',kind:'armor',v:22,price:1150,who:['zf']}];
+SHOP.smith4=[{name:'潮風の 曲刀',kind:'weapon',v:34,price:1500},{name:'船乗りの 大斧',kind:'weapon',v:36,price:1600,who:['dolgan']},{name:'潮風の よろい',kind:'armor',v:26,price:1300},{name:'水夫の 兜',kind:'helm',v:16,price:760},{name:'珊瑚の 杖',kind:'weapon',v:18,price:820},{name:'海色の ローブ',kind:'armor',v:15,price:780},{name:'船の 腕刃',kind:'weapon',v:24,price:1100,who:['zf']},{name:'錨の 装甲',kind:'armor',v:22,price:1150,who:['zf']},{name:'珊瑚の 冠',kind:'helm',v:10,price:700,who:['lidia']}];
 const PORT_ROOMS=[
  {name:'宿屋', rows:["WWWWWWWWW","Wb.bfb.sW","W.......W","W..cTc..W","W.......W","Wp.....pW","WWWWXWWWW"], npc:{x:2.5,y:2.4,spr:'girl',name:'宿の 娘',talk:()=>say(['娘「船乗りの 宿へ ようこそ。……今は 船が 出ないから、がらがらよ」'],openInn)}},
  {name:'道具屋', rows:["WWWWWWWWW","Ws.s.s.sW","W.......W","W.TTT...W","W.......W","Wp.....pW","WWWWXWWWW"], npc:{x:4.5,y:2.5,spr:'okami',name:'道具屋の 主人',talk:()=>say(['主人「船に 乗るなら 薬草と 気つけ草は 多めにね。海の 魔物は 眠らせて くるよ」'],()=>openShop('tools','道具屋（所持金 '+BAG.gold+'G）'))}},
@@ -2912,7 +2912,7 @@ FOES.garva={key:'garva', scale:1.7, name:'影の 宰相 ガルヴァ', hp:4800, 
 ENC.west4=[['sabitsuno',2],['sunabouzu',2],['hikagerou',2],['hainome',1],['gincoro',1]];   /* ★第4章の 海の 向こう（ミラの 島・アルディアの 西）。前は 第1章の 魔物 */
 ENC.west5=[['yarinoko',3],['sabitsuno',2],['hikagerou',2],['sunabouzu',2],['gincoro',1]];   /* ★第5章の アルディア側（影の 兵は 出ない） */
 ENC.plain5=[['kagehei',3],['yarinoko',2],['noroshidama',2],['tsuite',1],['gincoro',1]]; ENC.camp=[['kagehei',3],['tsuite',2],['noroshidama',1]];
-SHOP.smith5=[{name:'王国の 宝剣',kind:'weapon',v:40,price:2200},{name:'王国の 大斧',kind:'weapon',v:42,price:2300,who:['dolgan']},{name:'白銀の よろい',kind:'armor',v:30,price:1900},{name:'白銀の 兜',kind:'helm',v:19,price:1100},{name:'聖樹の 杖',kind:'weapon',v:22,price:1300},{name:'白銀の ローブ',kind:'armor',v:18,price:1200},{name:'白銀の 腕刃',kind:'weapon',v:28,price:1700,who:['zf']},{name:'白銀の 装甲',kind:'armor',v:26,price:1800,who:['zf']}];
+SHOP.smith5=[{name:'王国の 宝剣',kind:'weapon',v:40,price:2200},{name:'王国の 大斧',kind:'weapon',v:42,price:2300,who:['dolgan']},{name:'白銀の よろい',kind:'armor',v:30,price:1900},{name:'白銀の 兜',kind:'helm',v:19,price:1100},{name:'聖樹の 杖',kind:'weapon',v:22,price:1300},{name:'白銀の ローブ',kind:'armor',v:18,price:1200},{name:'白銀の 腕刃',kind:'weapon',v:28,price:1700,who:['zf']},{name:'白銀の 装甲',kind:'armor',v:26,price:1800,who:['zf']},{name:'聖樹の 冠',kind:'helm',v:12,price:1000,who:['lidia']}];
 // ---- 始まり：王都の 城 ----
 function startCh5(){ const c=document.getElementById('card'); c.style.opacity=0; ST.phase='c5_king'; refreshFollowers(); enterCastle(); hero.x=12.5; hero.z=4.6; hero.ang=Math.PI; resetTrail();
   CUT=1; setTimeout(()=>say(['── 第5章　戦場の 真実 ──','王都 アルディアの 城。謁見の 間に、王と 使者 ハーヴェンの 姿が あった。'],()=>kingCh5()),500); }
@@ -3065,7 +3065,7 @@ ENC.west6=[['yarinoko',3],['noroshidama',2],['sabitsuno',2],['hikagerou',2],['su
 ENC.east6=[['tetsukui',2],['yamabiko',2],['sabitsuno',2],['hikagerou',2],['gincoro',1]]; ENC.plain6=[['yarinoko',3],['noroshidama',3],['sabitsuno',2],['gincoro',1]]; ENC.sea6=[['yarinoko',2],['noroshidama',2],['sabitsuno',2],['sunabouzu',2],['gincoro',1]];   /* 南東の 島の 陸（海の 魔物は 海だけ） */
 ENC.ruinsB=[['kodaihei',3],['hikarigumo',3],['ishigami',2],['gincoro',1]]; ENC.mineB=[['kurogane',3],['yoroimushi',3],['magumadama',3],['kincoro',1]];
 ENC.dcastle=[['mazokuhei',3],['yamibotaru',3],['yamiguchi',3],['kincoro',1]]; ENC.isle6=[['mazokuhei',2],['yamibotaru',2],['yamiguchi',2],['gincoro',1]];
-SHOP.smith6=[{name:'星鉄の 剣',kind:'weapon',v:50,price:3400},{name:'星鉄の 大斧',kind:'weapon',v:53,price:3600,who:['dolgan']},{name:'星鉄の よろい',kind:'armor',v:38,price:3000},{name:'星鉄の 兜',kind:'helm',v:25,price:1900},{name:'星樹の 杖',kind:'weapon',v:30,price:2200},{name:'星糸の ローブ',kind:'armor',v:24,price:2000},{name:'星鉄の 腕刃',kind:'weapon',v:37,price:2800,who:['zf']},{name:'星鉄の 装甲',kind:'armor',v:34,price:2800,who:['zf']}];
+SHOP.smith6=[{name:'星鉄の 剣',kind:'weapon',v:50,price:3400},{name:'星鉄の 大斧',kind:'weapon',v:53,price:3600,who:['dolgan']},{name:'星鉄の よろい',kind:'armor',v:38,price:3000},{name:'星鉄の 兜',kind:'helm',v:25,price:1900},{name:'星樹の 杖',kind:'weapon',v:30,price:2200},{name:'星糸の ローブ',kind:'armor',v:24,price:2000},{name:'星鉄の 腕刃',kind:'weapon',v:37,price:2800,who:['zf']},{name:'星鉄の 装甲',kind:'armor',v:34,price:2800,who:['zf']},{name:'星糸の 頭巾',kind:'helm',v:15,price:1700,who:['lidia']}];
 // ---- 始まり：帝都の 城の 話し合い ----
 function startCh6(){ const c=document.getElementById('card'); c.style.opacity=0; ST.phase='c6_council'; refreshFollowers(); enterCastle('velna'); hero.x=12.5; hero.z=6.6; hero.ang=Math.PI; resetTrail();
   CUT=1; setTimeout(()=>say(['── 終章　ふたつの 王冠 ──','帝都 ヴェルナの 城。謁見の 間に、二つの 国の 者たちが 集まって いた。'],()=>councilScene()),500); }
