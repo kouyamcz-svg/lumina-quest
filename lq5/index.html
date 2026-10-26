@@ -1106,6 +1106,7 @@ const BG_LOOK={
   sea:{grp:'sea', bg:0xa8d0f0, fog:[0xb8d8f0,24,90], hemi:[0xd8ecff,0x3a6a9a,.8], sun:[0xfff4e0,.75], sky:false},   /* ★海の 上（船の 甲板） */
   lava:{grp:'fort', bg:0x1a0806, fog:[0x2a0c06,8,30], hemi:[0xffa070,0x301008,.5], sun:[0xff6020,.35], sky:false},   /* ★終章：坑道の 奥（溶岩の 熱い 坑道） */
   demonOut:{grp:'field', extra:'nightX', bg:0x1a0610, fog:[0x24080e,10,44], hemi:[0xb05068,0x200810,.45], sun:[0xff5060,.3], sky:false},   /* ★終章：魔王の 島の 外 */
+  demonRage:{grp:'fort', bg:0x320408, fog:[0x3a0610,6,26], hemi:[0xff6060,0x300808,.58], sun:[0xff2a2a,.45], sky:false},   /* ★ラスボスの 後半：赤く 染まる */
   demon:{grp:'fort', bg:0x1a0610, fog:[0x1e0812,8,32], hemi:[0xc06080,0x200810,.48], sun:[0xff4060,.28], sky:false},   /* ★終章：魔王の 島と 城 */
   burn:{grp:'burn', bg:0x1e0c10, fog:[0x2a1210,10,40], hemi:[0xff9a70,0x2a1010,.5], sun:[0xff7040,.35], sky:false},
 };
@@ -1277,7 +1278,8 @@ function startBattle(defs,onWin){ PARTY.forEach(k=>{ if(STATS[k]) STATS[k].guard
   BT={look, foes, def:defs[0], onWin, party:PARTY.map(k=>STATS[k]), phase:'intro', sel:0, tsel:0, steps:[], st:0, guard:false, hitIdx:-1, quake:0, flash:0};
   cv.style.display='block'; c2.style.display='none'; btEl.style.display='block'; document.getElementById('place').style.display='none'; document.getElementById('hint').style.display='none'; resize();
   const names=[...new Set(defs.map(d=>d.name))]; bsay(defs.length>1 ? names.join('と ')+'が あらわれた！' : defs[0].name+'が あらわれた！'); drawBattleUI(); se('encounter');
-  queue([()=>{ beginCmds(); return 0; }],1.0); }
+  const intro=(defs.length===1&&defs[0].intro||[]).map(l=>()=>{ bsay(l); BT.foes[0].shake=.6; return 1.9; });   /* ★ボスの 最初の ことば（終章の ラスボス戦） */
+  queue(intro.concat([()=>{ beginCmds(); return 0; }]),1.0); }
 function queue(fns,delay){ BT.steps=fns.slice(); BT.st=delay||0; }
 function backToMenu(){ return ()=>{ BT.guard=false; BT.party.forEach(m=>m.guard=false);
   // ★全滅：前は 体力を 戻すだけで 選ぶ欄に 戻らず、操作 できなく なった。Ⅳと 同じく 町へ 戻され、所持金が 半分に なる
@@ -1343,11 +1345,14 @@ function foeAct(f){ let t=null, line='';
          if(f.def.flee && f.status!=='sleep' && Math.random()<f.def.flee){ f.fled=true; f.dead=true; f.ex=1; t=null; se('flee'); drawFoeNames(); bsay(f.name+'は 逃げ出した！'); return .9; }   /* ★経験値の 多い 魔物は すぐ 逃げる */
          if(f.status==='sleep'){ if(--f.stTurns<=0 || Math.random()<.3){ f.status=null; bsay(f.name+'は 目を 覚ました！'); return .7; } bsay(f.name+'は 眠って いる。'); return .7; }
          const al=BT.party.filter(m=>m.hp>0); t=al[Math.floor(Math.random()*al.length)];
-         f.kind = (f.def.frames.big && f.def.bigName && Math.random()<.25) ? 'big' : (Math.random()<1/16 ? 'crit' : 'normal');
+         if(f.charged && f.ready){ f.kind='big'; f.charged=0; f.ready=0; } else { f.kind = (!f.charged && f.def.frames.big && f.def.bigName && Math.random()<(f.bigRate||.25)) ? 'big' : (Math.random()<1/16 ? 'crit' : 'normal');
+           if(f.kind==='big' && f.def.charge){ f.charged=1; f.ready=0; t=null; bsay(f.name+f.def.chargeWind); setFoeFrame(f,'wind'); f.shake=1.6; BT.flash=.5; BT.quake=.4; return 1.4; } }   /* ★ためる 大技：1回 ためて、次に 放つ（その 間に 身を 守れる） */
          if(f.kind==='big'){ bsay(f.name+f.def.bigWind); setFoeFrame(f,'big'); f.shake=.9; return .9; }
          bsay(f.name+f.def.wind); setFoeFrame(f,'wind'); f.shake=.55; return .65; },
    ()=>{ if(f.dead||!t||f.status==='sleep') return 0; let d=f.def.atk[0]+Math.floor(Math.random()*(f.def.atk[1]-f.def.atk[0]+1)); let head='';
-         if(f.atkDown) d=Math.ceil(d*.7);
+         if(f.atkDown) d=Math.ceil(d*.7); if(f.pow) d=Math.round(d*f.pow);
+         if(f.kind==='big' && f.def.bigAll){ f.lunge=1; BT.flash=1.4; BT.quake=1; se('ehit'); const parts=[], infs=[]; BT.party.filter(m=>m.hp>0).forEach(m=>{ let dd=Math.round((f.def.atk[0]+Math.floor(Math.random()*(f.def.atk[1]-f.def.atk[0]+1)))*(f.pow||1)*(f.atkDown?.7:1)*f.def.bigAll); dd=Math.max(1,dd-Math.floor((m.defT||0)/4)); if(m.guard) dd=Math.ceil(dd/2); m.hp=Math.max(0,m.hp-dd); fxAt({idx:BT.party.indexOf(m)},'e_big'); parts.push(m.name+'に '+dd+(m.hp<=0?'（倒れた）':'')); });
+           bsay(f.name+'の '+f.def.bigName+'！ '+parts.join('、')+'の ダメージ！'+(infs.length?'　'+infs.join(' '):'')); drawBattleUI(); return 1.1; }   /* ★全体への 大技（bigAll：1人 あたりの 倍率） */
          if(f.kind==='big'){ d=Math.round(d*1.6); f.lunge=1; BT.flash=1; BT.quake=.5; head=f.name+'の '+f.def.bigName+'！ '; }
          else if(f.kind==='crit'){ t.popCrit=1; d=Math.round(d*2); f.lunge=1; BT.flash=1; BT.quake=.45; setFoeFrame(f,'atk'); head='つうこんの いちげき！ '; }
          else { setFoeFrame(f,'atk'); f.hop=1; BT.flash=.45; BT.quake=.15; head=f.name+'の '+f.def.verb+'！ '; }
@@ -1360,7 +1365,7 @@ function foeAct(f){ let t=null, line='';
    ()=>{ if(!f.dead) setFoeFrame(f,'idle'); BT.hitIdx=-1; drawBattleUI(); return t?.45:0; } ]; }
 // ★ターンの 終わり：毒の ダメージ、混乱・眠りの 残り
 function turnEnd(){ return ()=>{ const lines=[]; BT.party.forEach(m=>{ if(m.hp>0 && m.status==='poison'){ const d=Math.max(1,Math.floor(m.max/12)); m.hp=Math.max(1,m.hp-d); lines.push(m.name+'は 毒で '+d+'の ダメージ'); } }); drawBattleUI(); if(lines.length){ bsay(lines.join('　')); return .9; } return 0; }; }
-function enemyTurn(){ const st=[]; alive().forEach(f=>st.push(...foeAct(f))); st.push(()=>{ if(!alive().length){ BT.steps=winSteps(); return 0; } return 0; }); st.push(turnEnd()); st.push(backToMenu()); return st; }   /* ★魔物が みな 逃げたら 戦闘を 終える */
+function enemyTurn(){ const st=[]; alive().forEach(f=>{ if(f.charged) f.ready=1; for(let i=0;i<(f.acts||1);i++) st.push(...foeAct(f)); });   /* ★ためた 大技は 次の ターンに 放つ（2回 動く ときも 同じ ターンには 放たない） */   /* ★acts：1ターンに 何回 動くか（ラスボスの 後半） */ st.push(()=>{ if(!alive().length){ BT.steps=winSteps(); return 0; } return 0; }); st.push(turnEnd()); st.push(backToMenu()); return st; }   /* ★魔物が みな 逃げたら 戦闘を 終える */
 const GOLD_RATE=1.25;   // ★戦闘で もらえる ゴールドを 1.25倍に（指示。2倍から 直した）
 const EXP_RATE=1.25;   // ★経験値を 少し 上げる（指示。前は 1倍）
 // ★勝った 後の 文は、待ち時間の 後に Aか Bを 押すと 戦闘を 終える（指示。前は 自動で 閉じた）
@@ -1372,7 +1377,12 @@ function winSteps(){ const won=BT.foes.filter(f=>!f.fled); if(!won.length) retur
  ST.kill=ST.kill||{}; won.forEach(f=>{ ST.kill[f.def.key]=(ST.kill[f.def.key]||0)+1; });   // ★眠りと 混乱は 戦闘が 終わると 治る（毒は 残る）
         bsay((BT.foes.length>1?'魔物たちを やっつけた！ ':'')+'経験値 '+ex+'、'+gd+'ゴールドを 手に 入れた！'+(ups.length?'　'+ups.join('　'):'')); return ups.length?2.8:1.4; },
   winWait() ]; }
-function killCheck(f){ if(f.hp<=0 && !f.dead){ BT.steps.unshift(()=>{ f.dead=true; f.ex=1; se('defeat'); drawFoeNames(); bsay(f.name+'を たおした！'); return 1.0; }); } }
+function killCheck(f){ if(f.hp<=0 && !f.dead){ BT.steps.unshift(()=>{ f.dead=true; f.ex=1; se('defeat'); drawFoeNames(); if(f.def.lastWords){ BT.flash=1.6; BT.quake=1.6; bsay(f.def.lastWords); return 2.4; } bsay(f.name+'を たおした！'); return 1.0; }); } else if(f.hp>0) phaseCheck(f); }
+// ★ボスの 形態の 変化（HPが 減ると ことば・光・揺れ・背景・色が 変わり、強く なる）。phases:[{at:HPの 割合, lines, acts:1ターンの 行動数, pow:攻撃の 倍率, bigRate:大技の 割合, tint, look}]
+function phaseCheck(f){ const P=f.def.phases; if(!P) return; const st=[]; while((f.ph||0)<P.length && f.hp<=f.max*P[f.ph||0].at){ const p=P[f.ph||0]; f.ph=(f.ph||0)+1;
+    p.lines.forEach((l,i)=>st.push(()=>{ if(f.dead) return 0; if(i===0){ BT.flash=1.5; BT.quake=1.3; f.shake=1.5; se('encounter'); setFoeFrame(f,'big'); if(p.tint) f.mesh.material.color.setHex(p.tint); if(p.look) applyLook(p.look); if(p.acts) f.acts=p.acts; if(p.pow) f.pow=p.pow; if(p.bigRate) f.bigRate=p.bigRate; } bsay(l); return 1.9; }));
+    st.push(()=>{ if(!f.dead) setFoeFrame(f,'idle'); return 0; }); }
+  if(st.length) BT.steps.unshift(...st); }
 function hitFoe(m,f,mul,label,key){ return ()=>{ if(!alive().length) return 0; if(f.dead) f=alive()[0];
   let d=m.atk+Math.floor(Math.random()*4); if(f.defDown) d=Math.round(d*1.3); d=Math.round(d*(mul||1));
   const crit=Math.random()<1/32; if(crit){ d=Math.round((m.atk+3)*2*(mul||1)); BT.flash=.8; f.popCrit=1; }   // ★味方の 会心の 一撃（1/32、2倍）
@@ -1413,6 +1423,7 @@ function actOf(m,act){ return ()=>{ if(m.hp<=0 || !alive().length) return 0;
 // ★作戦（仲間の 自動の 動き）
 function autoAct(m){ const k=PARTY[BT.party.indexOf(m)], sks=skillsOf(k).filter(s=>s.battle && m.mp>=s.mp), low=BT.party.filter(x=>x.hp>0).sort((p,q)=>p.hp/p.max-q.hp/q.max)[0];
   const rv=sks.find(s=>s.type==='revive'); if(rv && BT.party.some(x=>x.hp<=0) && tactic!=='jumon' && tactic!=='gungan') return {kind:'skill',sk:rv,ally:BT.party.find(x=>x.hp<=0)};   /* ★倒れた 者を 先に 起こす */
+  if(tactic!=='gungan' && m.hp<m.max*.6 && alive().some(f=>f.charged)) return {kind:'guard'};   /* ★魔王が 力を ためて いる ときは 弱った 者は 身を 守る */
   const lows=BT.party.filter(x=>x.hp>0 && x.hp<x.max*.5).length, hAll=sks.filter(s=>s.type==='healAll').sort((p,q)=>q.amt-p.amt)[0], h1=sks.filter(s=>s.type==='heal').sort((p,q)=>q.amt-p.amt)[0];
   const heal=(lows>=2&&hAll)||h1||hAll, atk=sks.filter(s=>/^(atk1|atkAll|double|atkdef)$/.test(s.type)).sort((p,q)=>(q.rank||q.power||q.mul*10||8)-(p.rank||p.power||p.mul*10||8))[0];
   if(tactic==='jumon') return {kind:'atk'};
@@ -3056,11 +3067,19 @@ FOES.kodaiban=tintOf('zfboss',{key:'kodaiban', name:'古代の 番人', tint:0xe
 FOES.yamikishi=tintOf('kageshin',{key:'yamikishi', name:'闇の 騎士', tint:0xff7090, scale:1.45, boss:true, hp:6000, exp:15000, gold:1500, atk:[66,80], wind:'は 赤い 大剣を 振りかぶった！', verb:'闇の 大剣',
   bigWind:'が 大剣を 天に 掲げた！ 赤い 稲妻が 走る！', bigName:'闇の 雷刃'});
 FOES.garva2=tintOf('garva',{key:'garva2', name:'ガルヴァ（魔王の 力）', tint:0xff6a6a, scale:1.85, boss:true, hp:5100, exp:0, gold:0, atk:[68,80], wind:'の 角が 赤く 光った！', verb:'魔の 爪', bigInflict:{type:'conf',rate:.3},
-  bigWind:'の 体から 赤黒い 糸が 噴き出した！', bigName:'魔王の 縛り'});
+  bigWind:'の 体から 赤黒い 糸が 噴き出した！', bigName:'魔王の 縛り',
+  intro:['ガルヴァ「魔王様の 力を いただいた 今、王冠など もう 恐れぬ！」'],
+  phases:[{at:.4, lines:['ガルヴァの 体から 魔王の 力が あふれ出した！','ガルヴァ「まだだ……まだ 倒れぬ！」'], pow:1.15, tint:0xff3a3a}]});
 FOES.zeldios1=Object.assign({frames:{idle:RAB.zd_idle,idle2:RAB.zd_idle2,wind:RAB.zd_wind,atk:RAB.zd_atk,big:RAB.zd_big}, offs:{wind:0.004,atk:0.029,big:0.004}},{key:'zeldios1', name:'魔王 ゼルディオス', scale:1.8, boss:true, hp:6600, exp:0, gold:0, atk:[76,90], wind:'が 黒い 翼を 広げた！', verb:'魔王の 爪',
-  bigWind:'の 頭上に 黒い 太陽が 生まれた！', bigName:'黒い 太陽'});
-FOES.zeldios2=Object.assign({frames:{idle:RAB.zx_idle,idle2:RAB.zx_idle2,wind:RAB.zx_wind,atk:RAB.zx_atk,big:RAB.zx_big}, offs:{idle:-0.03,idle2:-0.03,wind:-0.024,atk:0.069,big:0.107}},{key:'zeldios2', name:'魔王 ゼルディオス（真の 姿）', scale:1.85, boss:true, hp:8200, exp:0, gold:0, atk:[86,100], wind:'の 口に 光が 集まった！', verb:'魔王の 牙', bigInflict:{type:'sleep',rate:.25},
-  bigWind:'が 大陸ごと 呑みこむ 闇を 吐いた！', bigName:'終わりの 闇'});
+  bigWind:'の 頭上に 黒い 太陽が 生まれた！', bigName:'黒い 太陽', bigAll:.8,   /* ★黒い 太陽は 全員に */
+  intro:['ゼルディオス「……二つの 王冠。千年 待った ぞ」','ゼルディオス「その 光ごと、闇に 沈めて やろう」'],
+  phases:[{at:.5, lines:['ゼルディオスの 翼が 黒い 炎を まとった！','ゼルディオス「……面白い。少しは 本気を 出そう」'], pow:1.1, bigRate:.35, tint:0xff9a9a, look:'demonRage'}]});
+FOES.zeldios2=Object.assign({frames:{idle:RAB.zx_idle,idle2:RAB.zx_idle2,wind:RAB.zx_wind,atk:RAB.zx_atk,big:RAB.zx_big}, offs:{idle:-0.03,idle2:-0.03,wind:-0.024,atk:0.069,big:0.107}},{key:'zeldios2', name:'魔王 ゼルディオス（真の 姿）', scale:1.85, boss:true, hp:7000, exp:0, gold:0, atk:[86,100], wind:'の 口に 光が 集まった！', verb:'魔王の 牙', bigInflict:{type:'sleep',rate:.25},
+  bigWind:'が 大陸ごと 呑みこむ 闇を 吐いた！', bigName:'終わりの 闇', bigAll:1.2, charge:true, chargeWind:'は 大陸ごと 呑みこむ 闇を ためて いる……！',   /* ★終わりの 闇：1回 ためて 全員に */
+  intro:['ゼルディオスの 体が 裂け、真の 姿が 現れた！','ゼルディオス「この 姿を 見た 人間は、お前たちが 初めてだ」'],
+  phases:[{at:.5, lines:['真の 姿が 天を 仰いで 吠えた！','大地が 割れる！ 魔王の 動きが 速く なった！'], acts:2, pow:.6, tint:0xffa8a8, look:'demonRage'},
+          {at:.25, lines:['ゼルディオス「……ありえぬ。人間 ごときに……！」','魔王の 体が 崩れ始めた。最後の 力を ふりしぼって いる！'], bigRate:.4, pow:.75, tint:0xff7070}],
+  lastWords:'ゼルディオスの 体が 光の 粒に なって 崩れて いく……！'});
 ENC.west6=[['yarinoko',3],['noroshidama',2],['sabitsuno',2],['hikagerou',2],['sunabouzu',2],['gincoro',1]];   /* ★終章の アルディア側 */
 ENC.east6=[['tetsukui',2],['yamabiko',2],['sabitsuno',2],['hikagerou',2],['gincoro',1]]; ENC.plain6=[['yarinoko',3],['noroshidama',3],['sabitsuno',2],['gincoro',1]]; ENC.sea6=[['yarinoko',2],['noroshidama',2],['sabitsuno',2],['sunabouzu',2],['gincoro',1]];   /* 南東の 島の 陸（海の 魔物は 海だけ） */
 ENC.ruinsB=[['kodaihei',3],['hikarigumo',3],['ishigami',2],['gincoro',1]]; ENC.mineB=[['kurogane',3],['yoroimushi',3],['magumadama',3],['kincoro',1]];
