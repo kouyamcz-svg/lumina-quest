@@ -349,7 +349,7 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     const a=await p2.evaluate(()=>!!MENU && /つづきから/.test(menuEl.textContent) && CHOOSING===1 && bgmFor()==='' && getComputedStyle(document.getElementById('startbg')).display==='block' && +getComputedStyle(menuEl).zIndex>50);
     await p2.evaluate(()=>{ MENU.sel=1; pressA(); }); await W(400); const c=await p2.evaluate(()=>CHOOSING===0 && getComputedStyle(document.getElementById('startbg')).display==='none' && bgmFor()!==''); await p2.close(); return a && c; })());
   T('リディアの 頭の 装備：第2章〜終章の 店に 1つずつ（リディアだけ）、だんだん 強い', await E(()=>{ const v=['smith2','smith3','smith4','smith5','smith6'].map(s=>SHOP[s].filter(g=>g.kind==='helm'&&canWear('lidia',g)&&!canWear('elt',g)&&!canWear('dolgan',g)&&!canWear('zf',g))); return v.every(x=>x.length===1) && v.every((x,i)=>i===0||x[0].v>v[i-1][0].v) && gearKind({name:'星糸の 頭巾'}).kind==='helm' && gearKind({name:'珊瑚の 冠'}).kind==='helm'; }));
-  T('ヴォルトリオン：攻撃力×3.5を 敵 全体に・固い 敵にも 効く・ブレイズカリバー（1体）より 強い', await E(()=>{ const sk=SKILLS.voltrion; return sk.mul===3.5 && sk.pierce===1 && sk.type==='atkAll' && sk.mul>SKILLS.blaze3.mul && /固い/.test(sk.desc); }));
+  T('ヴォルトリオン：攻撃力×4.0を 敵 全体に・固い 敵にも 効く・ブレイズカリバー（1体）より 強い', await E(()=>{ const sk=SKILLS.voltrion; return sk.mul===4 && sk.pierce===1 && sk.type==='atkAll' && sk.mul>SKILLS.blaze3.mul && /固い/.test(sk.desc); }));
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
