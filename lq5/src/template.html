@@ -1307,7 +1307,7 @@ const SKILLS={
   iyashi:{name:'キュアル', desc:'味方1人の 傷を いやす。', mp:3, type:'heal', amt:28, battle:true, field:true},
   volt:{name:'ヴォルト', desc:'敵1体に 雷を 落とす。', mp:8, type:'atk1', power:42, spell:true, battle:true},
   voltra:{name:'ヴォルトラ', desc:'敵 全体に いくつもの 雷を 落とす。', mp:18, type:'atkAll', power:46, spell:true, battle:true},
-  voltrion:{name:'ヴォルトリオン', desc:'天の 雷を すべて 呼び、敵 全体を 撃つ 奥義。', mp:36, type:'atkAll', power:110, spell:true, battle:true},   // ★奥義（終章で 授かる。LEARN には 入れず、物語で 足す）
+  voltrion:{name:'ヴォルトリオン', desc:'天の 雷を すべて 呼び、敵 全体を 撃つ 奥義。どんな 固い 敵も 貫く。', mp:36, type:'atkAll', mul:3.5, pierce:1, rank:200, spell:true, battle:true},   // ★奥義（終章で 授かる。LEARN には 入れず、物語で 足す）。★最終奥義らしく（指示、2026-10-26）：攻撃力×3.5を 敵 全体に（前は 固定 110 で ふつうの 攻撃より 弱かった）。固い 敵にも 効く
   hono:{name:'フレアス', desc:'炎を 巻き起こし、敵 全体を 焼く。', mp:5, type:'atkAll', power:18, spell:true, battle:true},
   flare2:{name:'フレアストーム', desc:'炎の 嵐で 敵 全体を 焼く。', mp:12, type:'atkAll', power:40, spell:true, battle:true},
   flare3:{name:'フレアノヴァ', desc:'炎を 爆ぜさせ、敵 全体を 焼きつくす。', mp:24, type:'atkAll', power:78, spell:true, battle:true},
@@ -1396,7 +1396,7 @@ function actOf(m,act){ return ()=>{ if(m.hp<=0 || !alive().length) return 0;
     if(sk.mul){ if(sk.waza){ BT.steps.unshift(hitFoe(m,f,sk.mul,sk.name,sk.id)); return 0; } bsay(m.name+'は '+sk.name+'を 唱えた！ 剣が 炎を まとう！'); BT.steps.unshift(hitFoe(m,f,sk.mul,sk.name,sk.id)); return .6; }
     if(f.def.hard){ fxAt({foe:f},'miss'); bsay(m.name+'は '+sk.name+'を 唱えた！ しかし '+f.name+'には 効かない！'); return .9; }
     const d=Math.round(sk.power*(.9+Math.random()*.2)+(STATS[PARTY[BT.party.indexOf(m)]]?.lv||1)*1.5); f.hp=Math.max(0,f.hp-d); f.hurt=.4; BT.flash=.6; se('hit'); fxAt({foe:f},sk.id); bsay(m.name+'は '+sk.name+'を 唱えた！ '+f.name+'に '+d+'の ダメージ！'); killCheck(f); drawBattleUI(); return .9; }
-  if(sk.type==='atkAll'){ const parts=[]; al.forEach(f=>{ const d=f.def.hard?0:Math.round(sk.power*(.85+Math.random()*.3)); f.hp=Math.max(0,f.hp-d); f.hurt=.4; fxAt({foe:f},sk.id); parts.push(f.name+'に '+d); killCheck(f); }); BT.flash=.8; BT.quake=.3; se('hit'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+parts.join('、')+'の ダメージ！'); drawBattleUI(); return 1.1; }
+  if(sk.type==='atkAll'){ const parts=[]; al.forEach(f=>{ const d=(f.def.hard&&!sk.pierce)?0:sk.mul?Math.round(m.atk*sk.mul*(.92+Math.random()*.16)):Math.round(sk.power*(.85+Math.random()*.3)); f.hp=Math.max(0,f.hp-d); f.hurt=.4; fxAt({foe:f},sk.id); parts.push(f.name+'に '+d); killCheck(f); }); const big=sk.id==='voltrion'; BT.flash=big?1.4:.8; BT.quake=big?1:.3; se('hit'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+(big?'天が 裂け、無数の 雷が 降りそそぐ！ ':'')+parts.join('、')+'の ダメージ！'); drawBattleUI(); return big?1.6:1.1; }   /* ★奥義は 光と 揺れを 大きく */
   if(sk.type==='heal'){ const t=(a.ally&&a.ally.hp>0)?a.ally:BT.party.filter(x=>x.hp>0).sort((p,q)=>p.hp/p.max-q.hp/q.max)[0];   /* ★選んだ 相手が 先に 倒れたら、いちばん 弱って いる 者へ */ const h=Math.min(sk.amt,t.max-t.hp); t.hp+=h; se('item'); fxAt({idx:BT.party.indexOf(t)},'heal'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+t.name+'の HPが '+h+' 回復した！'); drawBattleUI(); return .9; }
   if(sk.type==='revive'){ const t=(a.ally&&a.ally.hp<=0)?a.ally:BT.party.find(x=>x.hp<=0); if(!t){ bsay(m.name+'は '+sk.name+'を 唱えた！ しかし 倒れて いる 者は いない。'); return .9; }
     t.hp=Math.ceil(t.max/2); t.status=null; t.stTurns=0; t.guard=false; se('lvup'); fxAt({idx:BT.party.indexOf(t)},'heal'); bsay(m.name+'は '+sk.name+'を 唱えた！ '+t.name+'が 生き返った！'); drawBattleUI(); return 1.0; }
@@ -1414,7 +1414,7 @@ function actOf(m,act){ return ()=>{ if(m.hp<=0 || !alive().length) return 0;
 function autoAct(m){ const k=PARTY[BT.party.indexOf(m)], sks=skillsOf(k).filter(s=>s.battle && m.mp>=s.mp), low=BT.party.filter(x=>x.hp>0).sort((p,q)=>p.hp/p.max-q.hp/q.max)[0];
   const rv=sks.find(s=>s.type==='revive'); if(rv && BT.party.some(x=>x.hp<=0) && tactic!=='jumon' && tactic!=='gungan') return {kind:'skill',sk:rv,ally:BT.party.find(x=>x.hp<=0)};   /* ★倒れた 者を 先に 起こす */
   const lows=BT.party.filter(x=>x.hp>0 && x.hp<x.max*.5).length, hAll=sks.filter(s=>s.type==='healAll').sort((p,q)=>q.amt-p.amt)[0], h1=sks.filter(s=>s.type==='heal').sort((p,q)=>q.amt-p.amt)[0];
-  const heal=(lows>=2&&hAll)||h1||hAll, atk=sks.filter(s=>/^(atk1|atkAll|double|atkdef)$/.test(s.type)).sort((p,q)=>(q.power||q.mul*10||8)-(p.power||p.mul*10||8))[0];
+  const heal=(lows>=2&&hAll)||h1||hAll, atk=sks.filter(s=>/^(atk1|atkAll|double|atkdef)$/.test(s.type)).sort((p,q)=>(q.rank||q.power||q.mul*10||8)-(p.rank||p.power||p.mul*10||8))[0];
   if(tactic==='jumon') return {kind:'atk'};
   if(tactic==='inochi'){ if(heal && low.hp<low.max*.6) return {kind:'skill',sk:heal}; return {kind:'atk'}; }
   if(tactic==='gungan'){ if(atk) return {kind:'skill',sk:atk}; return {kind:'atk'}; }
