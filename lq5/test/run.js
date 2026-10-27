@@ -9,10 +9,11 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
   const b=await pu.launch({executablePath:await chromium.executablePath(), args:chromium.args, headless:true});
   const pg=await b.newPage(); await pg.setViewport({width:393,height:852});
   const errs=[]; pg.on('pageerror',e=>errs.push(e.message));
-  await pg.goto(URL,{waitUntil:'load'}); await pg.evaluate(()=>localStorage.clear()); await pg.reload({waitUntil:'load'}); await W(1500);
+  await pg.goto(URL,{waitUntil:'load'}); await pg.evaluate(()=>localStorage.clear()); await pg.reload({waitUntil:'load'}); await W(1500); await pg.evaluate(()=>{ window.FX_FAST=1; });   /* ★演出の 待ちを 飛ばす */
   const E=(f,a)=>pg.evaluate(f,a);
   const flush=async()=>{ for(let i=0;i<60;i++){ if(!(await E(()=>!!msgQ))) break; await E(()=>pressA()); await W(30);} };
   const talk=async(re)=>{ await E((re)=>{ const x=cur.npcs.find(n=>new RegExp(re).test(n.name)); if(!x) return; const bl=linesByPhase(x); if(bl) say(bl); else if(x.talk) x.talk(x); else say(x.lines); },re); await W(60); };
+  const until=async(cond,ms=40000)=>{ const t0=Date.now(); while(Date.now()-t0<ms){ if(await E(cond)) return true; await E(()=>{ if(msgQ && !MSGWAIT) pressA(); }); await W(80); } return false; };
   const waitMenu=async()=>{ for(let i=0;i<80;i++){ await W(100); if(await E(()=>BT&&BT.phase==='menu')) return true; } return false; };
   const winBattle=async()=>{ if(!(await waitMenu())){ console.log("winBattle: no menu, phase="+(await E(()=>ST.phase+" "+(BT?BT.phase:"noBT")))); } await E(()=>{ if(!BT) return; BT.foes.forEach(f=>f.hp=1); for(let k=0;k<12 && BT && BT.phase!=='act';k++){ if(BT.phase==='menu') BT.sel=0; pressA(); } }); for(let i=0;i<120;i++){ await W(100); if(await E(()=>{ if(BT&&BT.waitA) pressA(); return !BT; })) break; } await W(200); };
   const pick=async(l)=>{ await E((l)=>{ const i=MENU.items.findIndex(t=>t.indexOf(l)>=0); MENU.sel=i; pressA(); },l); await W(60); };
@@ -275,7 +276,13 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     if(!a2) return false;   /* ★戦闘の 背景が 砂地（外の 岩場）に なって いた */ await E(()=>{ hero.x=1.5; hero.z=14.4; examine(); }); await flush(); const b=await E(()=>ST.phase==='c6_oath');
     await E(()=>{ hero.x=21.5; hero.z=1.9; dir[1]=-1; }); await W(400); await E(()=>{ dir[1]=0; }); await W(600); const c=await E(()=>DUN_NOW==='mine' && Math.abs(hero.x-21.5)<.3 && Math.abs(hero.z-2.7)<.3);
     await E(()=>{ dir[1]=1; }); await W(500); await E(()=>{ dir[1]=0; }); const d=await E(()=>DUN_NOW==='mine'); return a && b && c && d; })());
-  T('誓い：帝都の 城で 王に 話すと ヴォルトリオンと 飛空艇', await (async()=>{ await E(()=>enterCastle('velna')); await talk('アルディア王'); await flush(); return await E(()=>ST.phase==='c6_sky' && ST.air===1 && skillsOf('elt').some(k=>k.id==='voltrion') && ST.airPos[0]===95.5); })());
+  T('誓い：帝都の 城で 王に 話すと ヴォルトリオンと 飛空艇', await (async()=>{ await E(()=>enterCastle('velna')); await talk('アルディア王'); const ok0=await until(()=>ST.phase==='c6_sky' && ST.air===1); if(!ok0) console.log('oath',await E(()=>ST.phase+' '+cur.kind+' '+CUT+' '+(msgQ?msgEl.textContent:'-'))); return ok0 && await E(()=>skillsOf('elt').some(k=>k.id==='voltrion') && ST.airPos[0]===95.5); })());
+  T('決戦前夜：誓いの 後は 帝都の 宿の 夜。3人と 話すと 窓辺に 集まり、朝に なって 帝都の 町へ（HP・MPも 戻る）', await (async()=>{ const a=await until(()=>cur.kind==='room' && TOWN_NOW==='vcap' && !msgQ && CUT===0 && cur.npcs.length===3);
+    const b=await E(()=>['lidia','zf','dolgan'].every(k=>cur.npcs.some(n=>n.spr===k)) && followers.every(f=>!f.p.m.visible));
+    for(const k of ['lidia','zf']){ await E((k)=>eveTalk(k),k); await until(()=>!msgQ); }
+    const c=await E(()=>!ST.eveDone && CUT===0); await E(()=>{ STATS.elt.hp=1; eveTalk('dolgan'); });
+    const d=await until(()=>cur.kind==='town' && ST.eveDone===1 && CUT===0 && !msgQ);
+    return a && b && c && d && await E(()=>STATS.elt.hp===STATS.elt.max && followers.length===3 && followers.every(f=>f.p.m.visible) && ST.phase==='c6_sky'); })());
   T('飛空艇：そばで Aで 乗り、海も 山も 越え、海では 降りられず、北の 島の 地面に 降りる', await (async()=>{
     const a=await E(()=>{ enterWorld([95.5,25.6]); wEnc=1e9; pressA(); return ST.onAir===1 && !blockedAt(95.5,3.5) && !blockedAt(52.5,6.5); });
     const b=await E(()=>{ hero.x=70.5; hero.z=5.5; pressA(); const r=ST.onAir===1 && !!msgQ; closeMsg(); return r; });
@@ -290,8 +297,23 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     await E(()=>{ hero.x=10.5; hero.z=1.9; dir[1]=-1; }); await W(400); await E(()=>{ dir[1]=0; }); await W(600); const d=await E(()=>DUN_NOW==='dcastle3' && ST.yamikishi===1); if(!(a&&b&&c&&d)) console.log('castle',a,b,c,d,await E(()=>DUN_NOW+' '+hero.x.toFixed(1)+','+hero.z.toFixed(1)+' '+sceneLook()+' '+CUT+' '+!!msgQ)); return a && b && c && d; })());
   T('玉座の 間：ガルヴァ → 魔王 → 真の 姿 の 連戦。戦いの 間は 王冠の 光で 全員 回復。3戦とも 専用の 曲（千年待った魔王）', await (async()=>{ await E(()=>{ CHOOSING=0; hero.x=7.5; hero.z=6.0; }); await W(300); await flush(); const k=[];
     for(const key of ['garva2','zeldios1','zeldios2']){ const ok=await waitMenu() && await E((key)=>BT.foes[0].def.key===key && BT.foes[0].def.boss && bgmFor()==='lastboss' && BGM_FILES.lastboss==='lastboss.mp3',key); k.push(ok); await winBattle(); if(key==='garva2') await E(()=>{ STATS.elt.hp=Math.max(1,STATS.elt.max-50); window._hp=STATS.elt.hp; }); await flush(); if(key==='garva2') k.push(await waitMenu() && await E(()=>STATS.elt.hp===STATS.elt.max && window._hp<STATS.elt.max)); }
-    await W(1200); await flush(); await W(400); await flush();
-    return k.every(x=>x) && await E(()=>{ const d=JSON.parse(localStorage.getItem('lq5save')||'{}'); return ST.phase==='c6_end' && ST.finalWon===1 && LASTBOSS===0 && bgmFor()!=='lastboss' && /ふたつの 王冠/.test(document.getElementById('card').textContent) && d.ST && d.ST.phase==='c6_end'; }); })());
+    const e1=await until(()=>ST.phase==='c6_escape' && !msgQ && CUT===0 && cur.kind==='dun');
+    return k.every(x=>x) && e1 && await E(()=>ST.finalWon===1 && LASTBOSS===0 && bgmFor()==='escape'); })());
+  T('脱出：揺れの 中で 魔物は 出ず、エスケイルも 使えない。2階 → 1階 → 南の 門で 城が 崩れ、戴冠式へ', await (async()=>{
+    const a=await E(()=>{ const off=fxOffset(); return escaping() && (off[0]!==0||off[1]!==0) && FX.tintA>0; });
+    await E(()=>{ wWalk=0; wEnc=0.0001; hero.x=7.5; hero.z=8.6; dir[1]=1; }); await W(700); await E(()=>{ dir[1]=0; }); await W(500); const b=await E(()=>!BT && DUN_NOW==='dcastle2');
+    await E(()=>{ while(msgQ) closeMsg(); enterDun('dcastle1',true); }); await W(900); await E(()=>{ while(msgQ) closeMsg(); hero.x=10.5; hero.z=15.4; dir[1]=1; }); await W(700); await E(()=>{ dir[1]=0; });   /* ★入って 0.5秒 後の 仲間の 声を 先に 閉じる */
+    const d=await until(()=>cur.kind==='world' && ST.zFallen===1);
+    const e=await E(()=>{ applyWorldState(); return WORLD[5][57]!=='Z' && WORLD[6][58]!=='Z'; });
+    const f=await until(()=>cur.kind==='castle' && ST.phase==='c6_epi');
+    if(!(a&&b&&d&&e&&f)) console.log('escape',a,b,d,e,f,await E(()=>ST.phase+' '+cur.kind+' '+DUN_NOW+' '+hero.x.toFixed(1)+','+hero.z.toFixed(1)+' CUT'+CUT+' BT'+!!BT+' '+(msgQ?msgEl.textContent:'-')));
+    return a && b && d && e && f; })());
+  T('ふり返り：ドルム → ノルン → サルム → 建て直した ルーエ（師匠 ガイル）→ スタッフロール → 終わりの 札（セーブ）', await (async()=>{
+    const seen={}; const t0=Date.now(); while(Date.now()-t0<60000){ const st=await E(()=>({t:cur.kind==='town'?TOWN_NOW:'', g:cur.npcs.some(n=>n.spr==='gail'), burnt:RUE_BURNT(), cr:CREDITS, ph:ST.phase})); if(st.t) seen[st.t]=seen[st.t]||st; if(st.cr) break; await E(()=>{ if(msgQ && !MSGWAIT) pressA(); }); await W(80); }
+    const a=['velna','hamlet','port','rue'].every(t=>seen[t]) && seen.rue.g && !seen.rue.burnt;
+    const b=await E(()=>CREDITS===1 && bgmFor()==='title' && /津野巧也/.test(document.getElementById('credits').textContent));
+    await E(()=>{ ST.creditsT=0; pressA(); }); await W(1900);
+    return a && b && await E(()=>{ const d=JSON.parse(localStorage.getItem('lq5save')||'{}'); return ST.phase==='c6_end' && CREDITS===0 && /ふたつの 王冠/.test(document.getElementById('card').textContent) && d.ST && d.ST.phase==='c6_end' && d.ST.zFallen===1; }); })());
   T('終章で 全滅すると 帝都の 教会へ。動ける（CUT が 残らない）・飛空艇は 帝都の 東へ', await (async()=>{ await E(()=>{ document.getElementById('card').style.opacity=0; ST.phase='c6_sky'; ST.airPos=[58.5,8.5]; CUT=1; wipeOut(); }); await W(900); await flush(); const ok=await E(()=>TOWN_NOW==='vcap' && CUT===0 && ST.airPos[0]===95.5); await E(()=>{ ST.phase='c6_end'; }); return ok; })());
   T('終章の 魔物と ボス：名前・絵・強さの 順', await E(()=>['kodaihei','hikarigumo','ishigami','kurogane','yoroimushi','magumadama','kincoro','mazokuhei','yamibotaru','yamiguchi','kodaiban','yamikishi','garva2','zeldios1','zeldios2'].every(k=>FOES[k]&&FOES[k].name&&FOES[k].frames.idle) && ['ruinsB','mineB','dcastle','isle6','east6','plain6','sea6'].every(k=>ENC[k]&&ENC[k].every(e=>FOES[e[0]])) && SHOP.smith6.length===9));
   T('生き返りと 上位回復：リディアが Lv20 キュアリオン・Lv22 リヴァイル・Lv30 キュアルスラ。戦闘で 倒れた 者を 選んで 生き返らせる（HP半分）', await (async()=>{
@@ -363,6 +385,9 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     const a=await p2.evaluate(()=>{ while(msgQ) closeMsg(); if(MENU) closeMenu(); CHOOSING=0; showEnd6(true); pressA(); return !window._goingTitle && /タイトルへ/.test(document.getElementById('card').textContent); });
     await p2.evaluate(()=>{ CARD_T=performance.now()-4000; pressA(); }); await W(200); const c=await p2.evaluate(()=>window._goingTitle===1 && getComputedStyle(document.getElementById('startbg')).display==='block');
     await W(1500); const d=await p2.evaluate(()=>!window._goingTitle); await p2.close(); return a && c && d; })());
+  T('会話の 演出：文の 間の 関数は その 行で 動き、数を 返すと 待つ（その 間 Aは きかない）', await (async()=>{ await E(()=>{ window.FX_FAST=0; window._d=[]; ST.phase='c6_sky'; document.getElementById('card').style.opacity=0; while(msgQ) closeMsg(); say(['一',()=>{ _d.push(1); },()=>{ _d.push(2); return 400; },'二'],()=>{ _d.push('end'); }); });
+    const a=await E(()=>msgEl.textContent==='一' && _d.length===0); await E(()=>pressA()); const b=await E(()=>MSGWAIT===1 && _d.join()==='1,2' && msgEl.style.display==='none'); await E(()=>pressA()); const c=await E(()=>MSGWAIT===1);
+    await W(550); const d=await E(()=>msgEl.textContent==='二' && MSGWAIT===0); await E(()=>pressA()); const e=await E(()=>_d.join()==='1,2,end' && !msgQ); await E(()=>{ window.FX_FAST=1; }); return a && b && c && d && e; })());
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
