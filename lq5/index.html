@@ -735,7 +735,7 @@ function say(lines,done){msgQ=lines.slice();msgDone=done||null;msgEl.style.displ
 function closeMsg(){ msgQ=null; msgEl.style.display='none'; const d=msgDone; msgDone=null; d&&d(); }
 let CARD_T=0;   // ★章の 札を 出した 時刻（しばらくは Aで 消えない）
 function pressA(){ if(TITLE_ON){ hideTitle(); return; } if(/^(end|c1_end|c2_end|c3_end|c4_end|c5_end|c6_end)$/.test(ST.phase) && performance.now()-CARD_T<3000) return;
-  if(ST.phase==='end'){ startCh1(); return; } if(ST.phase==='c1_end'){ startCh2(); return; } if(ST.phase==='c2_end'){ startCh3(); return; } if(ST.phase==='c3_end'){ startCh4(); return; } if(ST.phase==='c4_end'){ startCh5(); return; } if(ST.phase==='c5_end'){ startCh6(); return; } if(ST.phase==='c6_end') return;
+  if(ST.phase==='end'){ startCh1(); return; } if(ST.phase==='c1_end'){ startCh2(); return; } if(ST.phase==='c2_end'){ startCh3(); return; } if(ST.phase==='c3_end'){ startCh4(); return; } if(ST.phase==='c4_end'){ startCh5(); return; } if(ST.phase==='c5_end'){ startCh6(); return; } if(ST.phase==='c6_end'){ goTitle(); return; }   /* ★物語を クリアした 後は Aで タイトル画面へ（指示、2026-10-27） */
   if(mapOpen){ se('cursor'); mapSt.zoom=mapSt.zoom?0:1; if(mapSt.zoom){ mapSt.cx=hero.x; mapSt.cz=hero.z; } drawMap(); return; } if(BT){ if(winClose()) return; if(BT.phase==='menu'){ se('ok'); battleCmd(); } else if(BT.phase==='target') targetPick(); else if(BT.phase==='skill'){ se('ok'); skillPick(); } else if(BT.phase==='item'){ se('ok'); itemPick(); } else if(BT.phase==='ally'){ allyPick(); } return; }
   if(MENU){ se('ok'); MENU.onPick(MENU.sel); return; }
   if(msgQ){ if(msgQ.length) msgEl.textContent=msgQ.shift(); else closeMsg(); return; }
@@ -3266,7 +3266,7 @@ function endingScene(){ CUT=1; LASTBOSS=0;
     say(['──　数日後。帝都 ヴェルナの 城　──','アルディア王「エルト。前へ」','アルディア王「国境の 村の 兵士見習いが、二つの 国を 救った」','アルディア王「アルディア王の 名に おいて、そなたを 騎士に 任ずる」','王の 剣が、エルトの 肩に そっと 置かれた。','＊ エルトは アルディアの 騎士に なった ＊',
       'そして──','騎士団長「ヴェルナの 新しき 女王、リディア殿下に！」','リディアの 頭に、鉄の 王冠が 載せられた。','城の 外から、二つの 国の 民の 歓声が 響いた。','ドルガン「……似合ってるぜ、女王さま」','ZF「記録スル。今日ハ、良イ 日ダ」',
       'リディア「エルト」','リディア「アルディアへ 帰っても、忘れないで」','リディア「いつでも、この 国の 門は 開いて いる」'],()=>{ CUT=0; showEnd6(); }); })); }
-function showEnd6(ns){ CARD_T=performance.now(); ST.phase='c6_end'; const c=document.getElementById('card'); c.innerHTML='<div>終章</div><div class="t">ふたつの 王冠</div><div>完</div><div style="font-size:13px;margin-top:20px">ルミナクエストⅤ　〜ふたつの 王冠〜</div><div style="font-size:13px;margin-top:6px">── おわり ──</div>'; c.style.opacity=1; if(!ns) saveGame(); }
+function showEnd6(ns){ CARD_T=performance.now(); ST.phase='c6_end'; const c=document.getElementById('card'); c.innerHTML='<div>終章</div><div class="t">ふたつの 王冠</div><div>完</div><div style="font-size:13px;margin-top:20px">ルミナクエストⅤ　〜ふたつの 王冠〜</div><div style="font-size:13px;margin-top:6px">── おわり ──</div><div style="font-size:12px;margin-top:26px;opacity:.75">A で タイトルへ</div>'; c.style.opacity=1; if(!ns) saveGame(); }
 // ---- 誓い：二つの 王冠 → ヴォルトリオン・飛空艇 ----
 function oathScene(){ CUT=1;
   say(['アルディア王「来たか、エルト。……窓の 外を 見よ」','帝都の 東の 草原に、大きな 船が 浮かんで いた。','職人頭「浮遊石は 船の 心臓、黒鉄は 骨。アルディアの 帆と ヴェルナの 鉄で 組みました」','アルディア王「出立の 前に、皆に 見届けて ほしい ことが ある」',
@@ -3362,6 +3362,7 @@ loadImgs(()=>{ hero.p=person('elt'); followers=PARTY.slice(1).map(k=>({p:person(
   TITLE_READY=1; if(TITLE_ON) return; beginGame(); });
 // ★タイトル画面：タップ（または A）で 消して ゲームを 始める。自動の 検査（navigator.webdriver）では 出さない（#title を 付けると 出す）
 let TITLE_ON=1, TITLE_READY=0, TITLE_T=0, CHOOSING=0;
+function goTitle(){ if(window._goingTitle) return; window._goingTitle=1; se('ok'); try{ if(bgmEl) bgmEl.pause(); }catch(e){} const bk=document.getElementById('startbg'); bk.style.display='block'; bk.style.zIndex=99; setTimeout(()=>location.reload(),700); }   /* ★クリア後：真っ黒に して 開き直す → タイトル画面 */
 function hideTitle(){ if(!TITLE_ON) return;
   if(TITLE_ON===1){ bgmUnlocked=true; bgmUpdate(); titleLit(1200); return; }   /* ★1回めの タップで オープニングの 曲（iPhone は 触れるまで 音を 出せない） */
   if(performance.now()-TITLE_T<1200) return; TITLE_ON=0; const t=document.getElementById('title'); t.classList.add('hide'); setTimeout(()=>{ t.style.display='none'; },850); try{ se('ok'); }catch(e){} if(TITLE_READY) setTimeout(beginGame,300); }

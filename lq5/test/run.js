@@ -359,6 +359,10 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     const d=await E(()=>{ const f=BT.foes[0]; f.charged=0; f.acts=2; const R=Math.random; Math.random=()=>0.01; BT.party.forEach(m=>{ m.hp=m.max; }); const st=enemyTurn(); st[0](); const ch=f.charged===1; st[1](); st[2](); st[3](); const second=f.charged===1; Math.random=R; return ch && second; });   /* 2回 動く ときも ためた ターンには 放たない */
     await E(()=>{ if(BT) endBattle(); }); return a && b && c && d; })());
   T('ラスボス戦の 変化：ゼルディオスの 黒い 太陽は 全員・ガルヴァと ゼルディオスにも 形態の 変化と 最初の ことば', await E(()=>FOES.zeldios1.bigAll>0 && FOES.zeldios1.phases.length===1 && FOES.zeldios1.intro.length===2 && FOES.garva2.phases.length===1 && FOES.garva2.intro.length===1 && FOES.zeldios2.phases.length===2 && !!FOES.zeldios2.lastWords && FOES.zeldios2.charge===true && !!BG_LOOK.demonRage));
+  T('クリア後：終わりの 札で Aを 押すと タイトル画面へ（3秒は 押しても 何も しない）', await (async()=>{ const p2=await b.newPage(); await p2.setViewport({width:393,height:852}); await p2.goto(URL,{waitUntil:'load'}); await W(1500);
+    const a=await p2.evaluate(()=>{ while(msgQ) closeMsg(); if(MENU) closeMenu(); CHOOSING=0; showEnd6(true); pressA(); return !window._goingTitle && /タイトルへ/.test(document.getElementById('card').textContent); });
+    await p2.evaluate(()=>{ CARD_T=performance.now()-4000; pressA(); }); await W(200); const c=await p2.evaluate(()=>window._goingTitle===1 && getComputedStyle(document.getElementById('startbg')).display==='block');
+    await W(1500); const d=await p2.evaluate(()=>!window._goingTitle); await p2.close(); return a && c && d; })());
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
