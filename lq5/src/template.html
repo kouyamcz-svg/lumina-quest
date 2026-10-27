@@ -49,6 +49,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #mapview canvas{image-rendering:pixelated;border:2px solid var(--line)}
 #fade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .2s;pointer-events:none}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.sbtn{font:inherit;font-size:14px;padding:10px 14px;border-radius:8px;border:1px solid #8a86a8;background:#2a2840;color:#f4efe0}
 #bt{position:absolute;inset:0;display:none;pointer-events:none}
 #bparty{position:absolute;left:6px;right:6px;top:6px;display:flex;gap:4px}
 #bparty .pm{flex:1;border:2px solid var(--line);background:rgba(10,8,18,.88);border-radius:5px;padding:4px 6px;font-size:12px;line-height:1.5}
@@ -86,10 +87,10 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #bmark{position:absolute;display:none;color:#ffe060;font-size:20px;text-shadow:0 0 3px #000;pointer-events:none}
 #hint{display:none!important;position:absolute;left:10px;bottom:10px;font-size:12px;color:var(--dim);background:rgba(18,15,28,.7);padding:3px 8px;border-radius:4px}
 </style></head><body>
-<div id="title" style="background-image:url(__TITLE__)"><div class="logo"><div class="l1">ルミナクエスト<span class="v">Ⅴ</span></div><div class="line"></div><div class="l2">〜ふたつの 王冠〜</div></div><div class="tap">─ タップ ─</div></div>
+<div id="title"><div class="logo"><div class="l1">ルミナクエスト<span class="v">Ⅴ</span></div><div class="line"></div><div class="l2">〜ふたつの 王冠〜</div></div><div class="tap">─ タップ ─</div></div>
 <div id="wrap">
  <div id="view"><canvas id="c"></canvas><canvas id="c2" style="display:none"></canvas><div id="place">国境の 村 ルーエ</div>
-  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="startbg" style="position:absolute;inset:0;background:#000;display:none;z-index:50"></div><div id="flash"></div><div id="fxtint" style="position:absolute;inset:0;pointer-events:none;opacity:0;background:#c00000;mix-blend-mode:multiply"></div><div id="fxflash" style="position:absolute;inset:0;pointer-events:none;opacity:0;background:#fff"></div><div id="credits" style="position:absolute;inset:0;background:#000;color:#f4efe0;display:none;overflow:hidden;z-index:80;text-align:center;letter-spacing:.15em"><div id="credin" style="position:absolute;left:0;right:0;top:100%;font-size:15px;line-height:2.1"></div></div><div id="bmark">▼</div><div id="fstat"></div><div id="mapview"></div><div id="fmenu"></div><div id="fequip"></div><div id="card"></div>
+  <div id="hint">十字で歩く・A 話す／調べる・B 戻る／押しながら歩く＝ダッシュ・MENU メニュー</div><div id="msg"></div><div id="fade"></div><div id="startbg" style="position:absolute;inset:0;background:#000;display:none;z-index:50"></div><div id="flash"></div><div id="fxtint" style="position:absolute;inset:0;pointer-events:none;opacity:0;background:#c00000;mix-blend-mode:multiply"></div><div id="fxflash" style="position:absolute;inset:0;pointer-events:none;opacity:0;background:#fff"></div><div id="errbox" style="position:absolute;inset:0;z-index:400;background:rgba(0,0,0,.86);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;color:#f4efe0;font-size:14px;text-align:center"><div style="font-size:17px">エラーが 起きました</div><div>この 画面を スクリーンショットで 送って ください</div><pre id="errtxt" style="white-space:pre-wrap;word-break:break-all;font-size:11px;background:#1a1a28;padding:10px;border-radius:6px;max-width:100%;max-height:40%;overflow:auto;text-align:left"></pre><div style="display:flex;gap:10px"><button class="sbtn" onclick="errClose()">このまま 続ける</button><button class="sbtn" onclick="errReload()">最後の きろくから</button></div></div><div id="savebox" style="position:absolute;inset:0;z-index:350;background:rgba(0,0,0,.9);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px;color:#f4efe0;font-size:14px;text-align:center"><div id="sbtitle" style="font-size:16px"></div><div id="sbnote" style="font-size:12px;opacity:.85"></div><textarea id="sbtext" style="width:100%;height:34%;font-size:11px;background:#14141e;color:#e8e4d8;border:1px solid #556;border-radius:6px;padding:8px" spellcheck="false"></textarea><input type="file" id="sbfile" accept=".txt,text/plain" style="display:none"><div id="sbbtns" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div></div><div id="credits" style="position:absolute;inset:0;background:#000;color:#f4efe0;display:none;overflow:hidden;z-index:80;text-align:center;letter-spacing:.15em"><div id="credin" style="position:absolute;left:0;right:0;top:100%;font-size:15px;line-height:2.1"></div></div><div id="bmark">▼</div><div id="fstat"></div><div id="mapview"></div><div id="fmenu"></div><div id="fequip"></div><div id="card"></div>
   <div id="bt"><div id="bparty"></div><div id="bmenu"></div><div id="bfoes"></div><div id="bmsg"></div></div></div>
  <div id="pad">
   <div id="dpad"><div class="k u">▲</div><div class="k l">◀</div><div class="k r">▶</div><div class="k d">▼</div></div>
@@ -97,8 +98,10 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
  </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="assets.js?v=__ASSETS_V__"></script>
 <script>
-const SPR=__SPR__;
+document.getElementById('title').style.backgroundImage='url('+window.LQ5_TITLE+')';   /* ★絵は assets.js（build.py） */
+const SPR=window.LQ5_SPR;
 // ★絵の 向きが 左向きで 描かれて いる こま（反転の 向きを 逆に する）。ドルガンの 描き直しの 斜め後ろは 左上を 向いて いた（横顔の 絵との 似かたで 確かめた）
 const MIRROR={dolgan:{diagB:true}};
 // ★人ごとの 背の 高さ（1＝大人）
@@ -792,7 +795,18 @@ function blockedCount(x,z){ const RAD = cur.kind==='world' ? 0.3 : RADT; let n=b
 function safeSpot(x,z){ if(freeCircle(x,z)) return [x,z]; for(let r=.05;r<1.2;r+=.05) for(const [a,b] of [[0,-1],[0,1],[-1,0],[1,0],[-.7,-.7],[.7,-.7],[-.7,.7],[.7,.7]]) if(freeCircle(x+a*r,z+b*r)) return [x+a*r,z+b*r]; return [x,z]; }
 function freeCircle(x,z){ const RAD = cur.kind==='world' ? 0.3 : RADT; for(const [ox,oz] of [[RAD,0],[-RAD,0],[0,RAD],[0,-RAD],[RAD*.7,RAD*.7],[-RAD*.7,RAD*.7],[RAD*.7,-RAD*.7],[-RAD*.7,-RAD*.7]]) if(blockedAt(x+ox,z+oz)) return false; return true; }
 let walkT=0, last=performance.now(), lastDoor=-1, busyDoor=0, busyStuck=0;
-function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
+// ★1回の エラーで 止まらない（指示、2026-10-27）：毎フレームの 処理で エラーが 起きても 次の フレームを 続け、画面に 知らせる
+function tick(now){ try{ tickBody(now); }catch(e){ reportErr(e,'tick'); last=now; requestAnimationFrame(tick); } }
+const ERRS=[]; window.LQ5_ERRS=ERRS;
+function reportErr(e,where){ const msg=(e&&e.message)||String(e), st=((e&&e.stack)||'').split('\n').slice(0,3).join(' / ');
+  const key=where+'|'+msg; if(ERRS.some(x=>x.key===key)) return; ERRS.push({key,msg,st,where,phase:ST.phase,at:(cur&&cur.kind)+' '+(TOWN_NOW||'')+' '+(DUN_NOW||''),t:new Date().toLocaleString()}); try{ console.error('LQ5', where, e); }catch(_){}
+  const b=document.getElementById('errbox'); if(!b) return; const x=ERRS[ERRS.length-1];
+  document.getElementById('errtxt').textContent='場所：'+x.phase+'・'+x.at+'\n'+x.where+'：'+x.msg+'\n'+x.st+'\n'+x.t; b.style.display='flex'; }
+window.addEventListener('error',ev=>reportErr(ev.error||ev.message,'error'));
+window.addEventListener('unhandledrejection',ev=>reportErr(ev.reason,'promise'));
+function errClose(){ document.getElementById('errbox').style.display='none'; if(msgQ===null && !BT){ CUT=0; } }
+function errReload(){ location.reload(); }
+function tickBody(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   if(BT){ let iy=dir[1], ix=dir[0]; if(keys.ArrowUp)iy=-1; if(keys.ArrowDown)iy=1; if(keys.ArrowLeft)ix=-1; if(keys.ArrowRight)ix=1; battleInput(iy,ix); battleTick(dt,now); requestAnimationFrame(tick); return; }
   let ix=dir[0], iz=dir[1]; if(keys.ArrowLeft)ix=-1; if(keys.ArrowRight)ix=1; if(keys.ArrowUp)iz=-1; if(keys.ArrowDown)iz=1;
   if(mapOpen){ mapInput(ix,iz,dt); ix=0; iz=0; }   /* ★地図を 開いて いる 間は 主人公は 動かず、地図が 動く */
@@ -987,7 +1001,7 @@ const WT={
 };
 let wPhase=0;
 let WORLD_IMG=null;   // ★1ます 32ドットの 絵（bakeWorld32 で 作る）
-const WOBJ=__WOBJ__; const WOBJ_IMG={};   // ★外の 世界に 置く 物（森・山・村・ほら穴・城・砦）
+const WOBJ=window.LQ5_WOBJ; const WOBJ_IMG={};   // ★外の 世界に 置く 物（森・山・村・ほら穴・城・砦）
 const sea2=tile16(g=>{P(g,0,0,16,16,'#2c5aa8');for(let i=0;i<6;i++)P(g,(i*5+3)%16,(i*7+2)%16,3,1,'#6a9ae0');});
 function drawCastle(sx,sy,s){ // 2×2 ますの 王都の 城
   const u=s/16; const R_=(x,y,w,h,c)=>{g2.fillStyle=c;g2.fillRect(sx+x*u,sy+y*u,w*u,h*u);};
@@ -1120,7 +1134,7 @@ function bakeWorld32(){
 }
 
 // ================= 戦闘（仕組みは Ⅳ と 同じ。背景は 3D、敵は 3こまの 絵で 動く）=================
-const RAB=__RAB__;
+const RAB=window.LQ5_RAB;
 const batScene=new THREE.Scene(), batCam=new THREE.PerspectiveCamera(50,1,.1,200);
 let BT=null, batBuilt=false, enemyTex={};
 const BG={}, BGL={};
@@ -1891,7 +1905,7 @@ function closeMenu(){ MENU=null; drawMenu(); }
 function goalText(){ return ({ c2_dolm:'ドルムの 広場で 帝国の 迎えの 騎士に 話す', c2_pass:'ドルムの 東の 峠の 山道を 抜ける（出口に 魔物が いる）', c2_road:'街道を 東へ。帝都 ヴェルナの 城へ', c2_capital:'帝都の 城の 北の 謁見の 間で ヴェルナ王に 会う', c2_inn:'帝都の 城下町の 宿屋で 休む', c2_tower:'塔の 王女に 話す', c2_ruins:'リディアと 西の 森の 遺跡へ。奥を 調べる', c2_back:'帝都の 城の ヴェルナ王に 会う', c2_end:'（第2章 完）', c3_order:'謁見の 間の 話を 聞く', c3_road:'ハーヴェンと 国境の 砦へ（峠と ドルムを 越えて 西）', c3_seat:'和平の 席', c3_flee:'追っ手を 逃れて ドルムの 町へ。町の 長に 話す', c3_mine:'ドルムの 北の 坑道へ。奥に 隠れて いる 傭兵を 探す', c3_exit:'坑道の 北の 出口へ（崩れた 岩は ドルガンが 割れる）', c3_end:'（第3章 完）', c4_road:'東の 峠を 越え、帝都へ 向かう 街道の 検問へ', c4_hamlet:'検問の 先、帝都の 北の 集落ノルンで 屋敷の ことを 聞く', c4_manor:'帝都の 北東の 森に ある 側近の 屋敷跡を 調べる（地下に 書庫が ある）', c4_port:'荒れ地を 南へ。港町サルムで ドルガンの 昔の 仲間に 会う', c5_king:'謁見の 間で アルディア王に 話す', c5_fleet:'西の 港町ウェルスで 船団の 将に 話す', c5_land:'夜の うちに 北の 平原の 摂政の 陣へ。陣の 西の 外れ、青い 旗の 天幕の 騎士団長に 会う', c5_battle:'アルディアの 兵と 北へ。3つの 柵を 破り、物見台の 摂政の もとへ', c5_end:'（第5章 完）', c6_council:'帝都の 城の 謁見の 間で 話し合いに 加わる', c6_ruins:'西の 森の 遺跡の 奥へ。ZFが 封じられた 扉を 開ける', c6_mine:'ドルムの 坑道の 奥へ。北東の 行き止まりの 下り階段から 黒鉄を 取りに 行く', c6_oath:'帝都の 城の 謁見の 間へ。飛空艇の 仕上がりを 見届ける', c6_sky:'飛空艇で 北の 海の 魔王の 島へ（Aで 乗り降り）', c6_escape:'崩れる 魔王の 城から 外へ 逃げる', c6_epi:'それぞれの その後', c6_post:'クリア後。飛空艇で 自由に 旅が できる', c6_end:'（終章 完）', c4_sea:'船で 西へ。アルディアの 西の 港町ウェルスへ（南の 海沿いの 町ミラにも 寄れる）', c4_end:'（第4章 完）',morning:'村の 北の 入口に いる ガイルに 話す', field:'北の 畑を 見回り、外れの 古い 倉を 調べる', raid:'南の 出口から 村へ 戻る',
   burn:'逃げ遅れた 村の 人を 助ける（'+Object.keys(ST.rescued).length+'／3）。そして 広場の 部隊長', after:'広場の ガイルの もとへ', road:'夜の 街道を 西へ。王都 アルディアの 王に 会う', end:'（序章 完）', c1_castle:'王の 話を 聞く', c1_road:'使者を 連れて、街道を 東の 国境の 砦へ', c1_fort:'砦の 灯りを ふたつ ともして 鉄格子を 上げ、奥の 番兵を 倒す', c1_east:'砦を 抜け、東の ヴェルナの 鉱山の 町 ドルムへ', c1_town:'ドルムの 人たちと 話し、町の 長に 会う', c1_end:'（第1章 完）'})[ST.phase]; }
 function openFieldMenu(){ if(msgQ||BT||fading||CUT||/^(end|c1_end|c2_end|c3_end|c4_end|c5_end|c6_end)$/.test(ST.phase)) return;   /* ★章の 終わりの 札の 間は 開かない */
-  const items=['強さ','呪文','道具','装備','地図','作戦'].concat(RESERVE.length?['入れ替え']:[]).concat(['クエスト','頼まれごと','音','セーブ','とじる']);
+  const items=['強さ','呪文','道具','装備','地図','作戦'].concat(RESERVE.length?['入れ替え']:[]).concat(['クエスト','頼まれごと','音','セーブ','きろくを 移す','とじる']);
   menu(items,'メニュー',(sel)=>{ const pick=items[sel];
     if(pick==='強さ'){ const show=(k)=>{ const m=STATS[k]; closeMenu(); say([m.name+'　Lv'+m.lv,'HP '+m.hp+' / '+m.max+'　　MP '+m.mp+' / '+(m.maxmp||m.mp),'攻撃力 '+m.atk+'　守備力 '+m.defT+'　素早さ '+m.agi+(m.status?'　状態：'+STNAME[m.status]:''),'次の レベルまで あと '+(expNeed(m.lv)-m.exp)+(k==='elt'?'　所持金 '+BAG.gold+'G':'')],openFieldMenu); };   /* ★仲間の 強さも 見られる */
       if(PARTY.length<=1) show('elt'); else menu(PARTY.map(k=>STATS[k].name).concat(['戻る']),'誰の 強さ？',(i)=>{ if(i>=PARTY.length){ openFieldMenu(); return; } show(PARTY[i]); },()=>openFieldMenu()); }
@@ -1905,6 +1919,7 @@ function openFieldMenu(){ if(msgQ||BT||fading||CUT||/^(end|c1_end|c2_end|c3_end|
     else if(pick==='クエスト'){ closeMenu(); say(['【目的】','　'+goalText()],openFieldMenu); }
     else if(pick==='頼まれごと'){ closeMenu(); say(requestList(),openFieldMenu); }   /* ★頼まれごとの 一覧（指示） */
     else if(pick==='入れ替え'){ openSwap(); }
+    else if(pick==='きろくを 移す'){ saveIO(openFieldMenu); }
     else if(pick==='セーブ'){ chooseSaveSlot(ok=>{ if(ok===null) openFieldMenu(); else say([ok?'ぼうけんの きろくを つけた。（きろく'+(SAVE_SLOT+1)+'）':'きろくに しっぱいした…'],openFieldMenu); }); }
     else closeMenu(); }, ()=>closeMenu()); }
 function itemTo(fn){ if(PARTY.length<=1) return say(fn(STATS.elt),openItems); menu(PARTY.map(k=>{ const m=STATS[k]; return m.name+'　HP '+m.hp+'/'+m.max+(m.status?'　'+STNAME[m.status]:''); }).concat(['やめる']),'誰に 使う？',(i)=>{ closeMenu(); if(i>=PARTY.length) return openItems(); say(fn(STATS[PARTY[i]]),openItems); },()=>openItems()); }   /* ★道具を 仲間にも 使える */
@@ -3503,15 +3518,39 @@ function titleLit(wait){ if(TITLE_ON!==1) return; TITLE_ON=2; const t=document.g
 // ★開いたら すぐ 曲を 流す（指示）。ブラウザが 許せば その まま 流れ、1回の タップで ゲームへ。iPhone の Safari は 画面に 触れるまで 音を 出させないので、その 時は 1回めの タップで 曲が 始まる
 function titleAutoplay(){ if(!TITLE_ON) return; try{ if(!bgmEl){ bgmEl=new Audio(); bgmEl.loop=true; } bgmEl.src=BGM_FILES.title; bgmNow='title'; bgmEl.volume=Math.min(1,BGM_VOL.title*SND.bgm/.6); bgmUnlocked=true; const p=bgmEl.play(); if(p&&p.then) p.then(()=>{ titleLit(0); }).catch(()=>{ bgmUnlocked=false; }); }catch(e){} }   /* ★先に 許可の 印を 立てる（前は 読み込みの 間に 0.5秒ごとの 見回りが 止めて しまった） */
 if(TITLE_ON) titleAutoplay();
+// ★きろくの 書き出し・読み込み（指示、2026-10-27）：iPhoneの Safariは ホーム画面に 入れて いない サイトの 保存を、7日 使わないと 消す。
+//   きろくを 文字（LQ5S1:…）や ファイルに して 残し、あとで 戻せる。タイトルの 「ぼうけんの きろく」と メニューの 「きろくを 移す」から
+function sum8(t){ let h=2166136261>>>0; for(let i=0;i<t.length;i++){ h^=t.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return ('0000000'+h.toString(16)).slice(-8); }
+function encodeSave(json){ const b=btoa(unescape(encodeURIComponent(json))); return 'LQ5S1:'+b+':'+sum8(b); }
+function decodeSave(text){ const m=String(text||'').replace(/\s+/g,'').match(/^LQ5S1:([A-Za-z0-9+/=]+):([0-9a-f]{8})$/); if(!m) return {err:'きろくの 文字では ありません'}; if(sum8(m[1])!==m[2]) return {err:'文字が 欠けて いるか、まちがって います'};
+  try{ const js=decodeURIComponent(escape(atob(m[1]))); const d=JSON.parse(js); if(!d||!d.ST||!d.STATS) return {err:'中身が こわれて います'}; return {json:js,d}; }catch(e){ return {err:'中身が こわれて います'}; } }
+let SB_PREV_CUT=0;
+function sbOpen(title,note,text,btns,ro){ SB_PREV_CUT=CUT; CUT=1; const b=document.getElementById('savebox'); document.getElementById('sbtitle').textContent=title; document.getElementById('sbnote').textContent=note; const ta=document.getElementById('sbtext'); ta.value=text||''; ta.readOnly=!!ro;
+  const bb=document.getElementById('sbbtns'); bb.innerHTML=''; btns.forEach(([lab,fn])=>{ const e=document.createElement('button'); e.className='sbtn'; e.textContent=lab; e.onclick=fn; bb.appendChild(e); }); b.style.display='flex'; }
+function sbClose(){ document.getElementById('savebox').style.display='none'; CUT=SB_PREV_CUT; }
+function saveIO(back){ menu(['きろくを 書き出す','きろくを 読み込む','もどる'],'きろくを 移す',(k)=>{
+    if(k===0){ menu(SLOT_KEYS.map((_,i)=>slotLabel(i)).concat(['もどる']),'どの きろくを 書き出す？',(i)=>{ if(i>=SLOT_KEYS.length) return saveIO(back); const raw=localStorage.getItem(SLOT_KEYS[i]); if(!raw) return; closeMenu(); const code=encodeSave(raw);
+        sbOpen(slotLabel(i)+' を 書き出し','この 文字を メモ帳などに 残すか、ファイルに 保存して ください。読み込むと この きろくに 戻せます。',code,[
+          ['コピー',()=>{ const ta=document.getElementById('sbtext'); const done=()=>{ document.getElementById('sbnote').textContent='コピー しました。'; }; try{ navigator.clipboard.writeText(code).then(done,()=>{ ta.select(); document.execCommand('copy'); done(); }); }catch(e){ ta.select(); try{ document.execCommand('copy'); done(); }catch(_){} } }],
+          ['ファイルに 保存',()=>{ try{ const d=new Date(), nm='lq5_kiroku'+(i+1)+'_'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.txt'; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([code],{type:'text/plain'})); a.download=nm; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000); document.getElementById('sbnote').textContent=nm+' を 保存しました。'; }catch(e){ document.getElementById('sbnote').textContent='保存 できませんでした。コピーを 使って ください。'; } }],
+          ['閉じる',()=>{ sbClose(); saveIO(back); }]],true); },()=>saveIO(back)); return; }
+    if(k===1){ menu(SLOT_KEYS.map((_,i)=>slotLabel(i)).concat(['もどる']),'どの きろくに 読み込む？',(i)=>{ if(i>=SLOT_KEYS.length) return saveIO(back); closeMenu();
+        sbOpen('きろく'+(i+1)+' に 読み込む',(slotData(i)?'いまの '+slotLabel(i)+' は 消えます。':'')+'書き出した 文字を 貼り付けるか、ファイルを 選んで ください。','',[
+          ['ファイルから',()=>{ const f=document.getElementById('sbfile'); f.value=''; f.onchange=()=>{ const fl=f.files&&f.files[0]; if(!fl) return; const r=new FileReader(); r.onload=()=>{ document.getElementById('sbtext').value=String(r.result||''); }; r.readAsText(fl); }; f.click(); }],
+          ['読み込む',()=>{ const r=decodeSave(document.getElementById('sbtext').value); if(r.err){ document.getElementById('sbnote').textContent='読み込めません：'+r.err; return; } try{ localStorage.setItem(SLOT_KEYS[i],r.json); }catch(e){ document.getElementById('sbnote').textContent='書き込めませんでした。'; return; } sbClose(); say(['きろく'+(i+1)+' に 読み込みました。',slotLabel(i)],()=>{ if(CHOOSING){ saveIO(back); return; } menu(['この きろくから 続ける','あとで'],'いま 読み込んだ きろくから 続ける？',(j)=>{ closeMenu(); if(j===0 && loadGame(i)){ if(ST.postNew){ delete ST.postNew; say(POST_LINES); } else say(['きろくの つづきから はじめる。（きろく'+(i+1)+'）']); } else back&&back(); },()=>{ closeMenu(); back&&back(); }); }); }],
+          ['やめる',()=>{ sbClose(); saveIO(back); }]],false); },()=>saveIO(back)); return; }
+    closeMenu(); back&&back(); },()=>{ closeMenu(); back&&back(); }); }
 const OPENING_LINES=['── 国境の 村 ルーエ ──','見張り櫓の 当番を 終えた 朝。','エルトは、師匠 ガイルに 呼ばれて いた。','＊ 村の 北の 入口に いる ガイルに 話しかけよう ＊'];
 function beginGame(){
   if(hasSave()){ CHOOSING=1; const bk=document.getElementById('startbg'); bk.style.display='block'; menuEl.style.zIndex=60; bgmUpdate();   /* ★「つづきから／はじめから」は 音なしの 真っ黒な 画面で（指示） */
     const done=()=>{ closeMenu(); CHOOSING=0; bk.style.display='none'; menuEl.style.zIndex=''; bgmUpdate(); };
-    const top=()=>{ menu(['つづきから','はじめから'],'ぼうけんの きろく',(k)=>{
+    const top=()=>{ menu(['つづきから','はじめから','きろくを 移す'],'ぼうけんの きろく',(k)=>{
+        if(k===2){ saveIO(()=>{ if(hasSave()) top(); else { done(); say(OPENING_LINES); } }); MENU.lock=1; return; }
         if(k===0){ menu(SLOT_KEYS.map((_,i)=>slotLabel(i)).concat(['もどる']),'どの きろくから？',(i)=>{ if(i>=SLOT_KEYS.length){ top(); return; } if(!slotData(i)) return; done(); if(loadGame(i)){ if(ST.postNew){ delete ST.postNew; say(POST_LINES); } else say(['きろくの つづきから はじめる。（きろく'+(i+1)+'）']); } else say(OPENING_LINES); },()=>top()); MENU.lock=1; return; }
         const empty=SLOT_KEYS.findIndex((_,i)=>!slotData(i));
         if(empty>=0){ SAVE_SLOT=empty; done(); say(OPENING_LINES); return; }
         menu(SLOT_KEYS.map((_,i)=>slotLabel(i)).concat(['もどる']),'新しい ぼうけんを どの きろくに？（次の セーブで 上書き）',(i)=>{ if(i>=SLOT_KEYS.length){ top(); return; } SAVE_SLOT=i; done(); say(OPENING_LINES); },()=>top()); MENU.lock=1; }); MENU.lock=1; };
     setTimeout(top,300); return; }
   setTimeout(()=>say(OPENING_LINES),300); }
+// ★きろくが 1つも ない ときは そのまま 序章へ。消えた きろくは メニューの 「きろくを 移す」→ 読み込む → 「この きろくから 続ける」で 戻せる
 </script></body></html>
