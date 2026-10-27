@@ -3068,7 +3068,8 @@ FOES.kodaiban=tintOf('zfboss',{key:'kodaiban', name:'古代の 番人', tint:0xe
   bigWind:'の 背の 砲が 開いた！', bigName:'古代の 光線'});
 FOES.yamikishi=tintOf('kageshin',{key:'yamikishi', name:'闇の 騎士', tint:0xff7090, scale:1.45, boss:true, hp:6000, exp:15000, gold:1500, atk:[66,80], wind:'は 赤い 大剣を 振りかぶった！', verb:'闇の 大剣',
   bigWind:'が 大剣を 天に 掲げた！ 赤い 稲妻が 走る！', bigName:'闇の 雷刃'});
-FOES.garva2=tintOf('garva',{key:'garva2', name:'ガルヴァ（魔王の 力）', tint:0xff6a6a, scale:1.85, boss:true, hp:5100, exp:0, gold:0, atk:[68,80], wind:'の 角が 赤く 光った！', verb:'魔の 爪', bigInflict:{type:'conf',rate:.3},
+FOES.garva2=tintOf('garva',{key:'garva2', name:'ガルヴァ（魔王の 力）', tint:0xff6a6a, scale:1.85, boss:true, hp:5100, exp:15000, gold:1500,   /* ★経験値と お金（指示、2026-10-27。前は 0）。闇の 騎士と 同じ */
+   atk:[68,80], wind:'の 角が 赤く 光った！', verb:'魔の 爪', bigInflict:{type:'conf',rate:.3},
   bigWind:'の 体から 赤黒い 糸が 噴き出した！', bigName:'魔王の 縛り',
   intro:['ガルヴァ「魔王様の 力を いただいた 今、王冠など もう 恐れぬ！」'],
   phases:[{at:.4, lines:['ガルヴァの 体から 魔王の 力が あふれ出した！','ガルヴァ「まだだ……まだ 倒れぬ！」'], pow:1.15, tint:0xff3a3a}]});
