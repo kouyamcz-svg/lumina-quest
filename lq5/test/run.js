@@ -386,8 +386,8 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     await p2.evaluate(()=>{ CARD_T=performance.now()-4000; pressA(); }); await W(200); const c=await p2.evaluate(()=>window._goingTitle===1 && getComputedStyle(document.getElementById('startbg')).display==='block');
     await W(1500); const d=await p2.evaluate(()=>!window._goingTitle); await p2.close(); return a && c && d; })());
   T('会話の 演出：文の 間の 関数は その 行で 動き、数を 返すと 待つ（その 間 Aは きかない）', await (async()=>{ await E(()=>{ window.FX_FAST=0; window._d=[]; ST.phase='c6_sky'; document.getElementById('card').style.opacity=0; while(msgQ) closeMsg(); say(['一',()=>{ _d.push(1); },()=>{ _d.push(2); return 400; },'二'],()=>{ _d.push('end'); }); });
-    const a=await E(()=>msgEl.textContent==='一' && _d.length===0); await E(()=>pressA()); const b=await E(()=>MSGWAIT===1 && _d.join()==='1,2' && msgEl.style.display==='none'); await E(()=>pressA()); const c=await E(()=>MSGWAIT===1);
-    await W(550); const d=await E(()=>msgEl.textContent==='二' && MSGWAIT===0); await E(()=>pressA()); const e=await E(()=>_d.join()==='1,2,end' && !msgQ); await E(()=>{ window.FX_FAST=1; }); return a && b && c && d && e; })());
+    const a=await E(()=>msgLine==='一' && _d.length===0); await W(200); await E(()=>pressA()); const b=await E(()=>MSGWAIT===1 && _d.join()==='1,2' && msgEl.style.display==='none'); await E(()=>pressA()); const c=await E(()=>MSGWAIT===1);
+    await W(550); const d=await E(()=>msgLine==='二' && MSGWAIT===0); await W(200); await E(()=>pressA()); const e=await E(()=>_d.join()==='1,2,end' && !msgQ); await E(()=>{ window.FX_FAST=1; }); return a && b && c && d && e; })());
   T('セーブは 3か所：別の きろくに 書ける（上書きは 確かめる）。はじめからは 空いた きろくへ。満杯なら 選ぶ', await (async()=>{ const p2=await b.newPage(); await p2.setViewport({width:393,height:852}); await p2.goto(URL,{waitUntil:'load'}); await W(1500);
     const a=await p2.evaluate(()=>{ localStorage.clear(); while(msgQ) closeMsg(); CHOOSING=0; if(MENU) closeMenu(); SAVE_SLOT=0; ST.phase='c2_road'; saveGame(); let r=null; chooseSaveSlot(ok=>{ r=ok; }); MENU.sel=1; pressA(); return r===true && SAVE_SLOT===1 && !!localStorage.getItem('lq5save2') && /第2章/.test(slotLabel(1)) && /なし/.test(slotLabel(2)); });
     const b2=await p2.evaluate(()=>{ let r='x'; SAVE_SLOT=1; chooseSaveSlot(ok=>{ r=ok; }); MENU.sel=0; pressA(); const asked=!!MENU && /上書き/.test(MENU.items.join()); MENU.sel=1; pressA(); if(MENU){ MENU.sel=3; pressA(); } return asked && r===null && SAVE_SLOT===1; });
@@ -400,10 +400,15 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     await p2.evaluate(()=>{ localStorage.clear(); while(msgQ) closeMsg(); CHOOSING=0; if(MENU) closeMenu(); ['lidia','zf','dolgan'].forEach(k=>{ if(!PARTY.includes(k)) joinParty(k,38); }); ST.finalWon=1; ST.zFallen=1; SAVE_SLOT=2; showEnd6(); });
     await p2.reload({waitUntil:'load'}); await W(1800);
     const a=await p2.evaluate(()=>{ if(!MENU) return false; MENU.sel=0; pressA(); const list=!!MENU && /クリア/.test(MENU.items[2]); MENU.sel=2; pressA(); return list; }); await W(500);
-    const b2=await p2.evaluate(()=>ST.phase==='c6_post' && cur.kind==='town' && TOWN_NOW==='vcap' && ST.air===1 && PARTY.length===4 && document.getElementById('card').style.opacity==='0' && /クリア後/.test(msgQ?msgEl.textContent:'') && SAVE_SLOT===2);
+    const b2=await p2.evaluate(()=>ST.phase==='c6_post' && cur.kind==='town' && TOWN_NOW==='vcap' && ST.air===1 && PARTY.length===4 && document.getElementById('card').style.opacity==='0' && /クリア後/.test(msgQ?msgLine:'') && SAVE_SLOT===2);
     const c=await p2.evaluate(()=>{ while(msgQ) closeMsg(); applyWorldState(); const z=WORLD[5][57]!=='Z'; enterTown(null,'rue'); return z && !RUE_BURNT() && cur.npcs.some(n=>n.spr==='gail') && goalText()!=='' && c6at('c6_sky'); });
     const d=await p2.evaluate(()=>{ pressA(); return ST.phase==='c6_post'; });
     await p2.close(); return a && b2 && c && d; })());
+  T('文字が 1字ずつ 流れて 鳴る。流れて いる 間の Aは 全部 出すだけ、次の Aで 送る（カチッと 鳴る）', await (async()=>{ await E(()=>{ window.FX_FAST=0; ST.phase='c6_sky'; while(msgQ) closeMsg(); window._se=[]; window._seO=se; se=k=>{ _se.push(k); }; say(['あいうえお かきくけこ さしすせそ たちつてと','二行め']); });
+    await W(120); const a=await E(()=>!!TYPE && msgEl.textContent.length>0 && msgEl.textContent.length<msgLine.length && _se.includes('type'));
+    await E(()=>pressA()); const b=await E(()=>!TYPE && msgEl.textContent===msgLine && msgLine.startsWith('あいう') && _se.includes('click'));
+    await E(()=>pressA()); await W(400); const c=await E(()=>msgLine==='二行め' && msgEl.textContent==='二行め');
+    await E(()=>{ pressA(); se=_seO; window.FX_FAST=1; }); return a && b && c && await E(()=>!msgQ); })());
   T('ブラウザの エラー なし', errs.length===0, errs.join(' / '));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });

@@ -734,7 +734,15 @@ let msgDone=null;
 function say(lines,done){msgQ=lines.slice();msgDone=done||null;msgEl.style.display='block';msgNext();}
 // ★会話の 中の 演出（指示、2026-10-27）：lines に 関数を 混ぜると、その 行で 実行する。数を 返すと その ミリ秒 待つ（文の 枠を 隠し、Aは きかない）
 let MSGWAIT=0;
-function msgNext(){ while(msgQ && msgQ.length){ const l=msgQ.shift(); if(typeof l==='function'){ let w=0; try{ w=l()||0; }catch(e){} if(window.FX_FAST) w=0; if(w>0){ MSGWAIT=1; msgEl.style.display='none'; const q=msgQ; setTimeout(()=>{ MSGWAIT=0; if(msgQ===q) msgNext(); },w); return; } continue; } msgEl.style.display='block'; msgEl.textContent=l; return; }
+// ★文字が 1字ずつ 流れ、ピッと 鳴る（指示、2026-10-27）。msgLine＝いまの 行の 全文
+let TYPE=null, msgLine='';
+const TYPE_CPS=38;   // 1秒に 出る 字数
+function typeStart(l){ msgLine=l; if(window.FX_FAST){ TYPE=null; msgEl.textContent=l; return; } TYPE={full:l,n:0,t0:performance.now(),beep:0}; msgEl.textContent=''; requestAnimationFrame(typeStep); }
+function typeStep(){ if(!TYPE) return; const n=Math.min(TYPE.full.length,Math.floor((performance.now()-TYPE.t0)/1000*TYPE_CPS*(SND.speed||1))+1);
+  if(n>TYPE.n){ const add=TYPE.full.slice(TYPE.n,n); TYPE.n=n; msgEl.textContent=TYPE.full.slice(0,n); if(/[^\s　・…、。「」]/.test(add) && performance.now()-TYPE.beep>55){ TYPE.beep=performance.now(); se('type'); } }
+  if(TYPE.n>=TYPE.full.length){ TYPE=null; return; } requestAnimationFrame(typeStep); }
+function typeFinish(){ if(!TYPE) return; msgEl.textContent=TYPE.full; TYPE=null; }
+function msgNext(){ while(msgQ && msgQ.length){ const l=msgQ.shift(); if(typeof l==='function'){ let w=0; try{ w=l()||0; }catch(e){} if(window.FX_FAST) w=0; if(w>0){ MSGWAIT=1; msgEl.style.display='none'; const q=msgQ; setTimeout(()=>{ MSGWAIT=0; if(msgQ===q) msgNext(); },w); return; } continue; } msgEl.style.display='block'; typeStart(l); return; }
   if(msgQ) closeMsg(); }
 // ★場面の 演出の 道具（指示、2026-10-27）：揺れ・光・色・効果音・待つ・主人公を 歩かせる
 const FX={q:0,amp:0,flash:0,tintA:0,tintPulse:0,rumble:0};
@@ -750,13 +758,13 @@ function sceneFxTick(dt,now){ FX.q=Math.max(0,FX.q-dt); if(FX.q<=0) FX.amp=0; FX
 const Q=(sec,amp)=>()=>{ fxQuake(sec,amp); }, FL=(col,a)=>()=>{ fxFlash(col,a); }, SE_=(k)=>()=>{ se(k); }, WAIT=(ms)=>()=>ms, DO=(fn,ms)=>()=>{ fn(); return ms||0; };
 function walkHero(pts,dur,done){ HERO_WALK=true; const o={x:hero.x,y:hero.z}; walkNpc(o,[[hero.x,hero.z]].concat(pts),dur,()=>{ HERO_WALK=false; hero.x=o.x; hero.z=o.y; done&&done(); }); const sync=()=>{ hero.x=o.x; hero.z=o.y; if(o.walking){ hero.ang=o.ang; requestAnimationFrame(sync); } }; requestAnimationFrame(sync); }
 function hideFollowers(){ followers.forEach(f=>{ f.p.m.visible=false; f.p.sh.visible=false; f.hold=true; }); }
-function closeMsg(){ msgQ=null; MSGWAIT=0; msgEl.style.display='none'; const d=msgDone; msgDone=null; d&&d(); }
+function closeMsg(){ msgQ=null; MSGWAIT=0; TYPE=null; msgEl.style.display='none'; const d=msgDone; msgDone=null; d&&d(); }
 let CARD_T=0;   // ★章の 札を 出した 時刻（しばらくは Aで 消えない）
 function pressA(){ if(TITLE_ON){ hideTitle(); return; } if(typeof CREDITS!=='undefined' && CREDITS){ if(CREDITS===1 && performance.now()-ST.creditsT>4000) staffRollEnd(); return; }   /* ★スタッフロールは 4秒 後から Aで 飛ばせる */ if(/^(end|c1_end|c2_end|c3_end|c4_end|c5_end|c6_end)$/.test(ST.phase) && performance.now()-CARD_T<3000) return;
   if(ST.phase==='end'){ startCh1(); return; } if(ST.phase==='c1_end'){ startCh2(); return; } if(ST.phase==='c2_end'){ startCh3(); return; } if(ST.phase==='c3_end'){ startCh4(); return; } if(ST.phase==='c4_end'){ startCh5(); return; } if(ST.phase==='c5_end'){ startCh6(); return; } if(ST.phase==='c6_end'){ goTitle(); return; }   /* ★物語を クリアした 後は Aで タイトル画面へ（指示、2026-10-27） */
   if(mapOpen){ se('cursor'); mapSt.zoom=mapSt.zoom?0:1; if(mapSt.zoom){ mapSt.cx=hero.x; mapSt.cz=hero.z; } drawMap(); return; } if(BT){ if(winClose()) return; if(BT.phase==='menu'){ se('ok'); battleCmd(); } else if(BT.phase==='target') targetPick(); else if(BT.phase==='skill'){ se('ok'); skillPick(); } else if(BT.phase==='item'){ se('ok'); itemPick(); } else if(BT.phase==='ally'){ allyPick(); } return; }
   if(MENU){ se('ok'); MENU.onPick(MENU.sel); return; }
-  if(msgQ){ if(MSGWAIT) return; if(msgQ.length) msgNext(); else closeMsg(); return; }
+  if(msgQ){ if(MSGWAIT) return; if(TYPE){ typeFinish(); se('click'); return; } se('click'); if(msgQ.length) msgNext(); else closeMsg(); return; }   /* ★流れて いる 途中は 全部 出す。送る ときは カチッと 鳴る */
   if(cur.kind==='world' && ST.air && airA()) return;   /* ★飛空艇：Aで 乗り降り */
   const fx=Math.sin(hero.ang), fz=Math.cos(hero.ang); let best=null,bd=1e9;
   cur.npcs.forEach(n=>{const dx=n.x-hero.x,dz=n.y-hero.z;const d=Math.hypot(dx,dz);const dot=(dx*fx+dz*fz)/(d||1);if((d<1.5||(n.foe&&d<2.1)||(cur.kind==='room'&&d<2.2&&dot>0.8))&&dot>0.4&&d<bd){bd=d;best=n;}   /* ★部屋では カウンター越しに 話せる */});
@@ -2090,6 +2098,7 @@ const SE={
   hit(){ noise(.10,.10,0,300,2600); tone(160,.13,'square',.08,0,60); }, ehit(){ noise(.12,.11,.16,180,1600); tone(110,.20,'triangle',.09,.17,45); },
   defeat(){ tone(300,.22,'square',.06,0,90); noise(.22,.05,.02,300,2200); }, flee(){ tone(880,.10,'square',.05,0,300); tone(660,.14,'square',.045,.08,220); },
   win(){ jingle('win'); },
+  type(){ tone(1560,.018,'square',.022); }, click(){ tone(1200,.025,'square',.04); tone(1800,.03,'square',.03,.02); },
   rumble(){ noise(1.1,.14,0,25,260); tone(48,1.0,'sawtooth',.045,0,36); }, thunder(){ noise(1.4,.2,0,60,5000); tone(110,.5,'sawtooth',.05,0,50); noise(.6,.12,.25,200,2500); }, crash(){ noise(.5,.16,0,80,1800); tone(70,.35,'square',.04,0,40); }, chime(){ arp([1047,1319,1568,2093],.07,.4,'triangle',.05); tone(2637,.6,'sine',.03,.3); },
   lvup(){ jingle('lvup'); },
   lose(){ [392,349,294,247,196].forEach((f,i)=>tone(f,.34,'triangle',.06,i*.20)); noise(.5,.03,.9,120,900); },
