@@ -423,6 +423,10 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
       return {shown,bad,ok}; });
     await p2.close(); return r.shown && r.bad && r.ok; })());
   T('絵は assets.js に 分けた（index.html は 小さく、絵と タイトルの 背景は 読める）', await E(()=>!!window.LQ5_RAB && !!window.LQ5_SPR && /^url\("?data:image/.test(document.getElementById('title').style.backgroundImage) && document.documentElement.outerHTML.length<1200000));
+  T('宿屋で 眠ると 暗い まま 子守歌（約4秒、曲は 止まる）→ 明るく なって 回復の 文', await (async()=>{ await E(()=>{ window.FX_FAST=0; if(BT) endBattle(); while(msgQ) closeMsg(); if(MENU) closeMenu(); ST.phase='c6_post'; CUT=0; enterTown([11.5,15.5],'velna'); STATS.elt.hp=1; BAG.gold=100; openInn(); MENU.sel=0; pressA(); });
+    await W(700); const a=await E(()=>fadeEl.style.opacity==='1' && jingleUntil-performance.now()>2500 && STATS.elt.hp===STATS.elt.max && !msgQ);
+    for(let i=0;i<60;i++){ await W(100); if(await E(()=>!!msgQ)) break; } const b=await E(()=>fadeEl.style.opacity==='0' && /ぐっすり/.test(msgLine) && CUT===0);
+    await E(()=>{ while(msgQ) closeMsg(); window.FX_FAST=1; }); return a && b; })());
   T('ブラウザの エラー なし', errs.length===0 && (await E(()=>LQ5_ERRS.length))===0, errs.join(' / ')+' '+(await E(()=>LQ5_ERRS.map(x=>x.where+':'+x.msg).join(' / '))));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });

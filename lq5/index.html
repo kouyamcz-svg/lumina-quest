@@ -2016,9 +2016,12 @@ function innNight(){ // 暗転の 最中に 夜の 部屋へ（宿の 娘は い
 // ---- 宿屋 ----
 function openInn(){ const price=10; menu(['泊まる（'+price+'G）','やめる'],'宿屋（所持金 '+BAG.gold+'G）',(k)=>{ closeMenu();
   if(k!==0){ say(['娘「また どうぞ」']); return; } if(BAG.gold<price){ say(['娘「お金が 足りないみたい……」']); return; }
-  BAG.gold-=price; go(()=>{ PARTY.forEach(k=>{ const m=STATS[k]; m.hp=m.max; m.mp=m.maxmp; m.status=null; }); });
-  if(ST.phase==='c2_inn' && TOWN_NOW==='vcap'){ setTimeout(innNight,260); return; }
-  setTimeout(()=>say(['ぐっすり 眠った。','HPと MPが すっかり 回復した！']),500); },()=>closeMenu()); }
+  BAG.gold-=price;
+  if(ST.phase==='c2_inn' && TOWN_NOW==='vcap'){ go(()=>{ PARTY.forEach(k=>{ const m=STATS[k]; m.hp=m.max; m.mp=m.maxmp; m.status=null; }); }); setTimeout(innNight,260); return; }   /* ★真夜中の 場面は 曲なしの まま */
+  innSleep(()=>say(['ぐっすり 眠った。','HPと MPが すっかり 回復した！'])); },()=>closeMenu()); }
+// ★眠る：画面を 暗く した まま 子守歌を 流し、終わったら 明るく する（指示、2026-10-27）
+function innSleep(after,keepDark){ const pc=CUT; fading=1; CUT=1; fadeEl.style.opacity=1; setTimeout(()=>{ PARTY.forEach(k=>{ const m=STATS[k]; m.hp=m.max; m.mp=m.maxmp||m.mp; m.status=null; }); const d=window.FX_FAST?0:jingle('inn');
+    setTimeout(()=>{ if(keepDark){ fading=0; CUT=pc; after&&after(); return; } fadeEl.style.opacity=0; setTimeout(()=>{ fading=0; CUT=pc; bgmUpdate(); after&&after(); },260); },d*1000+400); },300); }   /* keepDark：暗い まま 次の 場面へ（決戦前夜の 朝） */
 // ---- 装備の 付け替え（ふくろから）----
 // ★装備の 種類が 抜けて いた 品（最初の 装備・ガイルの 剣）を 直す。外すと 付け直せなかった
 function gearKind(g){ if(!g||g.kind) return g; g.kind=/兜|帽子|頭巾|冠/.test(g.name)?'helm':/胸当て|よろい|鎧|ローブ|かたびら|装甲|服/.test(g.name)?'armor':'weapon'; return g; }
@@ -2103,6 +2106,10 @@ function jingle(kind){ const b=kind==='lvup'?.105:.115; let d=0;
     d=melody([['C5',.67],['C5',.67],['C5',.66],['G5',3],['F5',1],['A5',1],['G5',1],['F5',1],[['C6','G5','E5'],7]],b,'square',.075);
     melody([['C3',2],['C3',3],['F2',2],['G2',2],[['C3','G3'],7]],b,'triangle',.085);
     melody([[0,2],['E4',3],['A4',2],['B4',2],[['E5'],7]],b,'square',.035); }
+  if(kind==='inn'){   // ★宿屋で 眠る ときの 子守歌（オリジナル、指示 2026-10-27）。約4秒
+    const ib=.26; d=melody([['F5',1],['A5',1],['C6',2],['A#5',1],['A5',1],['G5',2],['A5',1],['F5',1],['G5',1],['E5',1],['F5',4]],ib,'triangle',.085,0,.98);
+    melody([['A4',2],['C5',2],['D5',2],['C5',2],['C5',2],['A#4',2],['A4',4]],ib,'square',.022,0,.95);
+    melody([['F3',4],['A#2',2],['C3',2],['F3',2],['C3',2],['F2',4]],ib,'triangle',.08,0,.95); }
   jingleUntil=Math.max(jingleUntil,performance.now()+d*1000+250); if(typeof bgmEl!=='undefined' && bgmEl && !bgmEl.paused) bgmEl.pause(); return d; }
 const SE={
   cursor(){ tone(880,.05,'square',.05); }, ok(){ tone(880,.05,'square',.06); tone(1319,.09,'square',.055,.045); }, cancel(){ tone(660,.06,'square',.05); tone(440,.09,'square',.045,.05); },
@@ -3440,7 +3447,8 @@ function eveFinale(){ CUT=1; const N=k=>cur.npcs.find(n=>n.spr===k), L=N('lidia'
   say(['リディアが 窓を 開けた。夜の 風が 入って くる。'],()=>{ walkNpc(Z,[[Z.x,Z.y],[3.5,2.4]],600); walkNpc(D,[[D.x,D.y],[6.7,3.4],[7.2,2.8]],800); setTimeout(()=>walkHero([[6.2,4.4],[6.2,3.2],[4.6,2.5]],1500,()=>{ [L,Z,D].forEach(n=>n.ang=Math.PI); hero.ang=Math.PI;
     say(['リディア「見て。北の 空」','ZF「星ガ 一ツ、赤ク 光ッテ イル。……魔王ノ 島ノ 方角ダ」','ドルガン「明日 あれを 消しに 行くんだな」','エルト「……みんな。必ず、生きて 帰ろう」','リディア「ええ」','ZF「了解」','ドルガン「おう」',WAIT(400),'……','夜が 更けて いく。'],
       ()=>eveEnd()); }),450); }); }
-function eveEnd(){ goDoor(()=>{ PARTY.forEach(k=>{ const m=STATS[k]; m.hp=m.max; m.mp=m.maxmp||m.mp; m.status=null; }); ST.eveDone=1; enterTown([18.5,19.95],'vcap'); hero.ang=0; resetTrail(); refreshFollowers();
+function eveEnd(){ innSleep(()=>eveMorning(),true); }
+function eveMorning(){ goDoor(()=>{ PARTY.forEach(k=>{ const m=STATS[k]; m.hp=m.max; m.mp=m.maxmp||m.mp; m.status=null; }); ST.eveDone=1; enterTown([18.5,19.95],'vcap'); hero.ang=0; resetTrail(); refreshFollowers();
     say(['朝が 来た。','HPと MPが すっかり 回復した！','リディア「行きましょう、エルト」','＊ 飛空艇は 帝都の 東の 草原に ある。そばで Aを 押すと 乗り、空の 上で Aを 押すと 降りる ＊','＊ 北の 海の 魔王の 島へ ＊'],()=>{ CUT=0; }); }); }
 
 // ---- 崩れる 城から 脱出 ----
