@@ -1285,7 +1285,7 @@ function backToMenu(){ return ()=>{ BT.guard=false; BT.party.forEach(m=>m.guard=
   // ★全滅：前は 体力を 戻すだけで 選ぶ欄に 戻らず、操作 できなく なった。Ⅳと 同じく 町へ 戻され、所持金が 半分に なる
   if(BT.party.every(m=>m.hp<=0)){ bsay('エルトたちは 全滅した……'); se('lose'); BT.steps.push(()=>{ wipeOut(); return 99; }); return 2.0; }
   beginCmds(); return 0; }; }
-function wipeOut(){ CUT=0;   /* ★場面の 途中の 戦い（ボス）で 全滅しても 動けるように（前は CUT が 残って 動けなく なった） */ PARTY.forEach(k=>{ STATS[k].status=null; }); clearPops(); BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display='';
+function wipeOut(){ CUT=0; LASTBOSS=0;   /* ★場面の 途中の 戦い（ボス）で 全滅しても 動けるように（前は CUT が 残って 動けなく なった） */ PARTY.forEach(k=>{ STATS[k].status=null; }); clearPops(); BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display='';
   BAG.gold=Math.floor(BAG.gold/2); PARTY.forEach(k=>{ STATS[k].hp=STATS[k].max; STATS[k].mp=STATS[k].maxmp||STATS[k].mp; });
   if(ST.phase==='c3_seat'){ CUT=0; ST.phase='c3_flee'; }   /* ★砦の 追っ手に 敗れても、ドルムへ 運ばれて 続く */
   const inCh1=/^c1_/.test(ST.phase) && ST.phase!=='c1_castle', inV=/^(c2_(capital|inn|tower|ruins|back)|c3_order)$/.test(ST.phase), inD=/^(c2_(dolm|pass|road)|c3_(road|flee|mine|exit))$/.test(ST.phase);
@@ -2082,8 +2082,9 @@ const CHESTS={town:[{x:20.5,z:17.5,gold:25,id:'c1'}], farm:[{x:2.5,z:12.5,herb:1
 //  村・家＝town、外の 世界・畑＝field、王都＝castle、燃える 村＝dungeon、戦闘＝battle_sky（Ⅳの 後半の 戦闘の 曲）、ボス＝boss
 // ★燃える 村：いただいた 曲（lq5/burned_village.mp3、約2分。Ⅳの 曲より 約4dB 小さい ので 音量を 上げて ある）
 // ★タイトル：いただいた オープニングの 曲（lq5/opening.mp3、約3分15秒。Ⅳの 曲より 約2dB 大きい ので 音量を 下げて ある）
-const BGM_FILES={title:'opening.mp3', burn:'burned_village.mp3', town:'../lq4/town.mp3', field:'../lq4/field.mp3', castle:'../lq4/castle.mp3', dungeon:'../lq4/dungeon.mp3', battle:'../lq4/battle_sky.mp3', boss:'../lq4/boss.mp3'};
-const BGM_VOL={title:.38, burn:.78, town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, boss:.5};
+const BGM_FILES={title:'opening.mp3', burn:'burned_village.mp3', town:'../lq4/town.mp3', field:'../lq4/field.mp3', castle:'../lq4/castle.mp3', dungeon:'../lq4/dungeon.mp3', battle:'../lq4/battle_sky.mp3', boss:'../lq4/boss.mp3', lastboss:'lastboss.mp3'};   /* ★lastboss：ラスボスの 3連戦（千年待った魔王、2026-10-27。画面の 録画から 音を 取り出した もの） */
+const BGM_VOL={title:.38, burn:.78, town:.5, field:.5, castle:.5, dungeon:.35, battle:.5, boss:.5, lastboss:.5};
+let LASTBOSS=0;   /* ★ラスボスの 3連戦の 間（戦いの 合間の 会話も）は 専用の 曲 */
 let bgmEl=null, bgmNow='', bgmUnlocked=false;
 function bgmFor(){
   if((typeof INN_NIGHT!=='undefined' && INN_NIGHT) || (cur.kind==='tower' && ST.phase==='c2_tower' && !BT)) return '';   /* ★真夜中の 塔（王女に 会う まで）も 曲なし */   /* ★帝都の 宿の 真夜中（侍女が 来る 場面）は 曲なし */
@@ -2093,6 +2094,7 @@ function bgmFor(){
   // ★燃える 村（村が 焼かれてから 村を 出るまで）は、家の 中でも 曲を 変えない。部隊長戦（ボス）だけは ボスの 曲（指示）
   // ★村の 中（町・家）に いる ときだけ。前は 村を 出た 後も TOWN_NOW が rue の ままで、夜の 街道の 戦闘でも 燃える 村の 曲が 流れた
   if(TOWN_NOW==='rue' && /^(burn|after|road)$/.test(ST.phase) && (cur.kind==='town'||cur.kind==='room') && !(BT && BT.def.boss)) return 'burn';
+  if(LASTBOSS && (BT || CUT)) return 'lastboss';
   if(BT) return BT.def.boss?'boss':'battle';
   if(cur.kind==='world') return 'field'; if(cur.kind==='farm') return 'field'; if(cur.kind==='castle'||cur.kind==='tower') return 'castle'; if(cur.kind==='fort'||cur.kind==='dun') return 'dungeon';   /* ★ダンジョンは ダンジョンの 曲（前は 砦で 町の 曲が 流れた） */
   if(cur.kind==='town' && TOWN_NOW==='rue' && (ST.phase==='burn'||ST.phase==='after')) return 'burn'; return 'town'; }
@@ -3247,15 +3249,15 @@ function yamikishiFight(){ if(ST.yamikishi||BT||CUT) return; CUT=1; hero.ang=Mat
 // ---- 玉座の 間：ガルヴァ（魔王の 力）→ 魔王 第1形態 → 第2形態（休みなしの 連戦）----
 function finalBattle(){ if(ST.finalWon||BT||CUT) return; CUT=1; hero.ang=Math.PI;
   say(['玉座の 前に、ガルヴァが 立って いた。','ガルヴァ「来たか。……二つの 国の 小僧ども」','ガルヴァ「魔王さまは お目覚めだ。その 力を、我に 分け与えて くださった」','ガルヴァの 体が 赤黒く 膨れ上がった！'],
-    ()=>startBattle([FOES.garva2],()=>{ removeNpc(cur.npcs.find(n=>n.foe==='garva2'));
+    ()=>{ LASTBOSS=1; startBattle([FOES.garva2],()=>{ removeNpc(cur.npcs.find(n=>n.foe==='garva2'));
       say(['ガルヴァ「……ば、かな……魔王さま……！」','ガルヴァは 黒い 霧に なって 消えた。','玉座の 上の 闇が、ゆっくりと 人の 形に なって いく。','魔王 ゼルディオス「……ガルヴァめ。人間 ごときに」','魔王 ゼルディオス「我が 眠る 間に、二つの 国が 争い 疲れる はずで あった」','魔王 ゼルディオス「よかろう。この 手で、まとめて 闇に 沈めて くれる」','エルトの 胸の 奥で、二つの 王冠の 光が ともった。','光が 皆を 包み、傷が 癒えて いく……！'],
         ()=>{ crownHeal(); startBattle([FOES.zeldios1],()=>{
           say(['魔王 ゼルディオス「……おのれ……！」','魔王の 体が 裂け、中から 巨大な 影が 這い出した！','魔王 ゼルディオス「我は 終わりの 闇。……大陸ごと、呑みこんで くれよう！」','リディア「エルト！ 王冠の 光が……まだ 消えて いない！」','光が ふたたび 皆を 包んだ。'],
-            ()=>{ crownHeal(); startBattle([FOES.zeldios2],()=>{ ST.finalWon=1; endingScene(); }); }); }); }); })); }
+            ()=>{ crownHeal(); startBattle([FOES.zeldios2],()=>{ ST.finalWon=1; endingScene(); }); }); }); }); }); }); }
 // ★連戦の 間：二つの 王冠の 光で 全員の HPと MPが 戻り、倒れた 者も 起き上がる（この 国の 戦いには 生き返りの 呪文が ない ため、休みなしでは 1人 倒れると 立て直せない）
 function crownHeal(){ PARTY.forEach(k=>{ const m=STATS[k]; m.hp=m.max; m.mp=m.maxmp||m.mp; m.status=null; }); se('item'); }
 // ---- 終わり：脱出 → 帝都の 城で 騎士の 任命と 戴冠式 ----
-function endingScene(){ CUT=1;
+function endingScene(){ CUT=1; LASTBOSS=0;
   say(['魔王 ゼルディオス「……二つの……王冠……か……」','魔王の 影は 光に 焼かれ、消えて いった。','城が 大きく 揺れ始めた！','ZF「崩レル。急ゲ、飛空艇ヘ！」'],()=>go(()=>{
     ST.air=1; ST.onAir=0; ST.airPos=AIR_HOME.slice(); enterCastle('velna'); hero.x=12.5; hero.z=6.4; hero.ang=Math.PI; resetTrail();
     followers.forEach(f=>{ f.p.m.visible=false; f.p.sh.visible=false; });
