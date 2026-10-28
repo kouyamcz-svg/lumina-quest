@@ -1051,7 +1051,7 @@ function drawWorld(fr,now){
     const cvs=sprTex(k,pose,fr).image; const h=ts*1.15, w=h*cvs.width/cvs.height; const sx=ox+x*ts, sy=oy+z*ts;
     g.fillStyle='rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(sx,sy,ts*.28,ts*.1,0,0,Math.PI*2); g.fill();
     g.save(); g.translate(Math.round(sx),Math.round(sy-h+ts*.12)); if(flip){ g.scale(-1,1); } g.drawImage(cvs,-w/2,0,w,h); g.restore(); });
-  drawGoal(g,ox,oy,ts,W_,H_,now);
+  /* ★目的地の 印は 地図（メニューの 地図）だけに 出す（指示、2026-10-28）。外の 世界には 出さない */
 }
 // ★目的地の 印（指示、2026-10-28）：いまの 進みで 行く 場所の 上に 黄色の 印が はねる。画面の 外なら 端に 向きの 矢印
 const GOAL_TILE={road:'C', c1_road:'S', c1_fort:'S', c1_east:'W', c1_town:'W', c2_dolm:'W', c2_pass:'G', c2_road:'Y', c2_capital:'Y', c2_inn:'Y', c2_tower:'Y', c2_ruins:'R', c2_back:'Y', c3_order:'Y', c3_road:'S', c3_seat:'S', c3_flee:'W', c3_mine:'W',
