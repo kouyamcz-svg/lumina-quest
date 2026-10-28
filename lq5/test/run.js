@@ -427,6 +427,16 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     await W(700); const a=await E(()=>fadeEl.style.opacity==='1' && jingleUntil-performance.now()>2500 && STATS.elt.hp===STATS.elt.max && !msgQ);
     for(let i=0;i<60;i++){ await W(100); if(await E(()=>!!msgQ)) break; } const b=await E(()=>fadeEl.style.opacity==='0' && /ぐっすり/.test(msgLine) && CUT===0);
     await E(()=>{ while(msgQ) closeMsg(); window.FX_FAST=1; }); return a && b; })());
+  T('強く なった 後の 弱い 場所：出会いは 4割に 減り、逃げれば 必ず 逃げられる（強い 場所は そのまま）', await (async()=>{ const r=await E(()=>{ if(BT) endBattle(); while(msgQ) closeMsg(); const lv=STATS.elt.lv; STATS.elt.lv=38; const a=areaWeak('farm') && areaWeak('west') && !areaWeak('dcastle') && !areaWeak('mineB');
+      const R=Math.random; let n=0; for(let i=0;i<200;i++){ Math.random=()=>i/200; encOrSkip('farm'); if(BT){ n++; endBattle(); } } Math.random=R;
+      STATS.elt.lv=lv; return {a,n}; });
+    await E(()=>{ STATS.elt.lv=38; encOrSkip('farm'); if(!BT) startEnc('farm'); }); await waitMenu(); await E(()=>{ const R=Math.random; Math.random=()=>.99; window._R=R; BT.sel=CMDS0.indexOf('にげる'); });
+    const ok=await E(()=>BT.area==='farm'); await E(()=>{ battleCmd(); }); await W(1800); const fled=await E(()=>!BT); await E(()=>{ Math.random=_R; });
+    return r.a && r.n>=70 && r.n<=90 && ok && fled; })());
+  T('戦闘に 入る 瞬間の 演出（光と 黒い 帯、約0.6秒で 消える）と、最後の 1体を 倒した 一瞬の 止まり・光・音', await (async()=>{ await E(()=>{ window.FX_FAST=0; if(BT) endBattle(); while(msgQ) closeMsg(); startBattle([FOES.nousagi]); });
+    const a=await E(()=>document.getElementById('encfx').style.display==='block'); await W(900); const b=await E(()=>document.getElementById('encfx').style.display==='none');
+    await waitMenu(); const c=await E(()=>{ window._se=[]; window._seO=se; se=k=>{ _se.push(k); }; const f=BT.foes[0]; f.hp=0; killCheck(f); const st=BT.steps.shift(); st(); const r=BT.freeze>0 && BT.flash>1 && _se.includes('finish'); se=_seO; window.FX_FAST=1; endBattle(); return r; });
+    return a && b && c; })());
   T('ブラウザの エラー なし', errs.length===0 && (await E(()=>LQ5_ERRS.length))===0, errs.join(' / ')+' '+(await E(()=>LQ5_ERRS.map(x=>x.where+':'+x.msg).join(' / '))));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
