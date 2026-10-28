@@ -446,6 +446,11 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     const r=at('c2_ruins'), j=at('c4_road'); ST.zFallen=0; const z=at('c6_sky'); const n=at('morning'), e=at('c6_end'); ST.phase=ph; ST.zFallen=zf; applyWorldState(); GOAL_C={k:'',p:null};
     return r && Math.abs(r[0]-74.5)<3 && j && Math.abs(j[0]-80.5)<3 && z && Math.abs(z[0]-58)<2 && z[1]<8 && !n && !e; }));
   T('目的地の 印は 地図だけ（外の 世界の 画面では drawGoal を 呼ばない）', await E(()=>{ ST.phase='c2_ruins'; enterWorld([60.5,30.5]); let n=0; const o=drawGoal; drawGoal=function(){ n++; }; drawWorld(0,performance.now()); drawGoal=o; return n===0 && !!goalPos(); }));
+  T('戦闘に 入る 瞬間：外の 画面で 光って 帯が 閉じる 間（約0.9秒）は まだ 戦闘に ならず 動けない。閉じきって から 戦闘、黒が 晴れて 消える', await (async()=>{ await E(()=>{ window.FX_FAST=0; if(BT) endBattle(); while(msgQ) closeMsg(); if(MENU) closeMenu(); CUT=0; ST.phase='c6_post'; enterWorld([60.5,30.5]); window._se=[]; window._seO=se; se=k=>{ _se.push(k); }; startEnc('west'); });
+    await W(400); const a=await E(()=>!BT && ENCWAIT===1 && CUT===1 && document.getElementById('encfx').style.display==='block' && cur.kind==='world');
+    await W(800); const b=await E(()=>!!BT && ENCWAIT===0 && _se.filter(k=>k==='encounter').length===1);
+    await W(900); const c=await E(()=>document.getElementById('encfx').style.display==='none');
+    await E(()=>{ se=_seO; window.FX_FAST=1; if(BT) endBattle(); CUT=0; }); return a && b && c; })());
   T('ブラウザの エラー なし', errs.length===0 && (await E(()=>LQ5_ERRS.length))===0, errs.join(' / ')+' '+(await E(()=>LQ5_ERRS.map(x=>x.where+':'+x.msg).join(' / '))));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });
