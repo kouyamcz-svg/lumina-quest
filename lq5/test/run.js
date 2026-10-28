@@ -437,6 +437,14 @@ let n=0, ng=0; const T=(name,ok,d)=>{ n++; if(!ok){ ng++; console.log('NG',name,
     const a=await E(()=>document.getElementById('encfx').style.display==='block'); await W(900); const b=await E(()=>document.getElementById('encfx').style.display==='none');
     await waitMenu(); const c=await E(()=>{ window._se=[]; window._seO=se; se=k=>{ _se.push(k); }; const f=BT.foes[0]; f.hp=0; killCheck(f); const st=BT.steps.shift(); st(); const r=BT.freeze>0 && BT.flash>1 && _se.includes('finish'); se=_seO; window.FX_FAST=1; endBattle(); return r; });
     return a && b && c; })());
+  T('画面を 直接 タップ：メニューの 項目・戦闘の コマンド・会話の 枠', await (async()=>{ const r=await E(()=>{ if(BT) endBattle(); while(msgQ) closeMsg(); if(MENU) closeMenu(); ST.phase='c6_post'; CUT=0; let got=-1; menu(['あ','い','う'],'test',(k)=>{ got=k; closeMenu(); }); menuEl.querySelector('[data-i="2"]').click(); const a=got===2;
+      say(['一','二']); msgEl.click(); const b=msgLine==='二'; msgEl.click(); const c=!msgQ; return a&&b&&c; });
+    await E(()=>{ startBattle([FOES.nousagi]); }); await waitMenu(); const d=await E(()=>{ const i=CMDS.indexOf('ぼうぎょ'); bmenu.querySelector('[data-i="'+i+'"]').click(); return BT.phase!=='menu' || BT.cur>0 || BT.acts.length>0; }); await E(()=>{ if(BT) endBattle(); });
+    return r && d; })());
+  T('十字を 押し続けると カーソルが 続けて 動く（最初 0.38秒、あとは 0.08秒ごと）', await E(()=>{ const N=performance.now; let t=1000; performance.now=()=>t; const a=dirStep(1,0); const b=!dirStep(1,1); t+=400; const c=dirStep(1,1); const d=!dirStep(1,1); t+=90; const e=dirStep(1,1); const f=!dirStep(0,1); performance.now=N; return a&&b&&c&&d&&e&&f; }));
+  T('目的地の 印：進みごとの 行き先（例 第2章の 遺跡・第4章の 検問・終章の 魔王の 城）。村や 城の 中の 進みでは 出さない', await E(()=>{ const ph=ST.phase, zf=ST.zFallen; const at=p=>{ ST.phase=p; applyWorldState(); return goalPos(); };
+    const r=at('c2_ruins'), j=at('c4_road'); ST.zFallen=0; const z=at('c6_sky'); const n=at('morning'), e=at('c6_end'); ST.phase=ph; ST.zFallen=zf; applyWorldState(); GOAL_C={k:'',p:null};
+    return r && Math.abs(r[0]-74.5)<3 && j && Math.abs(j[0]-80.5)<3 && z && Math.abs(z[0]-58)<2 && z[1]<8 && !n && !e; }));
   T('ブラウザの エラー なし', errs.length===0 && (await E(()=>LQ5_ERRS.length))===0, errs.join(' / ')+' '+(await E(()=>LQ5_ERRS.map(x=>x.where+':'+x.msg).join(' / '))));
   console.log('--- lq5 test: '+(n-ng)+'/'+n+' 通過 ---'); await b.close(); process.exit(ng?1:0);
 })().catch(e=>{ console.log('NG 実行',e.message); process.exit(1); });

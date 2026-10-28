@@ -67,6 +67,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #bfoes .mt{font-size:12px;color:var(--dim);border-bottom:1px solid #4a4070;margin-bottom:2px}
 #bfoes .zz{font-size:11px;color:#c8a8ff;margin-left:4px}
 #bmenu .mt{font-size:12px;color:var(--dim);border-bottom:1px solid #4a4070;margin-bottom:2px}
+#bmenu,#bmsg{pointer-events:auto}
 #bmsg{position:absolute;left:6px;right:6px;bottom:6px;min-height:3.2em;border:2px solid var(--line);background:rgba(10,8,18,.92);border-radius:6px;padding:10px 12px;font-size:15px;line-height:1.6}
 #card{position:absolute;inset:0;background:#000;color:#f4efe0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:18px;opacity:0;transition:opacity 1.5s;pointer-events:none;letter-spacing:.2em}
 #card .t{font-size:30px}
@@ -1050,7 +1051,19 @@ function drawWorld(fr,now){
     const cvs=sprTex(k,pose,fr).image; const h=ts*1.15, w=h*cvs.width/cvs.height; const sx=ox+x*ts, sy=oy+z*ts;
     g.fillStyle='rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(sx,sy,ts*.28,ts*.1,0,0,Math.PI*2); g.fill();
     g.save(); g.translate(Math.round(sx),Math.round(sy-h+ts*.12)); if(flip){ g.scale(-1,1); } g.drawImage(cvs,-w/2,0,w,h); g.restore(); });
+  drawGoal(g,ox,oy,ts,W_,H_,now);
 }
+// ★目的地の 印（指示、2026-10-28）：いまの 進みで 行く 場所の 上に 黄色の 印が はねる。画面の 外なら 端に 向きの 矢印
+const GOAL_TILE={road:'C', c1_road:'S', c1_fort:'S', c1_east:'W', c1_town:'W', c2_dolm:'W', c2_pass:'G', c2_road:'Y', c2_capital:'Y', c2_inn:'Y', c2_tower:'Y', c2_ruins:'R', c2_back:'Y', c3_order:'Y', c3_road:'S', c3_seat:'S', c3_flee:'W', c3_mine:'W',
+  c4_road:'J', c4_hamlet:'h', c4_manor:'A', c4_port:'P', c4_sea:'U', c5_king:'C', c5_fleet:'U', c5_land:'B', c5_battle:'B', c6_council:'Y', c6_ruins:'R', c6_mine:'W', c6_oath:'Y', c6_sky:'Z'};
+let GOAL_C={k:'',p:null};
+function goalPos(){ const ch=GOAL_TILE[ST.phase]; if(!ch) return null; const key=ch+'|'+ST.phase+'|'+(ST.zFallen?1:0); if(GOAL_C.k===key) return GOAL_C.p; let sx=0,sz=0,n=0;
+  for(let y=0;y<WORLD.length;y++){ const r=WORLD[y]; for(let x=0;x<r.length;x++) if(r[x]===ch){ sx+=x+.5; sz+=y+.5; n++; } }
+  GOAL_C={k:key,p:n?[sx/n,sz/n]:null}; return GOAL_C.p; }
+function drawGoal(g,ox,oy,ts,W_,H_,now){ const gp=goalPos(); if(!gp) return; let x=ox+gp[0]*ts, y=oy+gp[1]*ts-ts*.9; const bob=Math.sin(now/220)*ts*.12, m=ts*.55;
+  if(x>m && x<W_-m && y>m && y<H_-m){ const r=ts*.22; y+=bob; g.fillStyle='rgba(255,220,80,.25)'; g.beginPath(); g.arc(x,y,r*2.1,0,Math.PI*2); g.fill(); g.fillStyle='#ffd23a'; g.strokeStyle='#5a3a00'; g.lineWidth=Math.max(2,ts*.05); g.beginPath(); g.moveTo(x,y+r*1.6); g.lineTo(x+r,y); g.lineTo(x,y-r*1.2); g.lineTo(x-r,y); g.closePath(); g.fill(); g.stroke(); return; }
+  const cx=W_/2, cy=H_/2, a=Math.atan2(y-cy,x-cx), t=Math.min((W_/2-m)/Math.abs(Math.cos(a)||1e-6),(H_/2-m)/Math.abs(Math.sin(a)||1e-6)), ex=cx+Math.cos(a)*t, ey=cy+Math.sin(a)*t, r=ts*.26*(1+Math.sin(now/220)*.08);
+  g.save(); g.translate(ex,ey); g.rotate(a); g.fillStyle='rgba(255,210,58,.92)'; g.strokeStyle='#5a3a00'; g.lineWidth=Math.max(2,ts*.05); g.beginPath(); g.moveTo(r*1.3,0); g.lineTo(-r*.8,r*.85); g.lineTo(-r*.4,0); g.lineTo(-r*.8,-r*.85); g.closePath(); g.fill(); g.stroke(); g.restore(); }
 
 // ★船（外の 世界の 海の 上。発注した 絵：ship_side・ship_up・ship_down）。主人公だけ 甲板に 立つ
 function drawBoat(g,sx,sy,ts,now,ang){ const b=Math.sin(now/400)*ts*.04; const c=Math.cos(ang), ne=c<-.38&&c>=-.92&&!!WOBJ_IMG.ship_ne, se=c>.38&&c<=.92&&!!WOBJ_IMG.ship_se, north=!ne&&c<-.7, south=!se&&c>.7&&!!WOBJ_IMG.ship_down, im=WOBJ_IMG[ne?'ship_ne':se?'ship_se':north?'ship_up':south?'ship_down':'ship_side']; if(!im) return;   /* ★斜め（右上・右下へ 進む 絵 ship_ne・ship_se）が 届いたら 使う。左へは 反転 */   /* ★下（南）へ 進む 絵 ship_down が 届いたら 使う（無い 間は 横向き） */   /* ★船（届いた 絵）：北へ 進む ときは 上から 見た 姿、ほかは 横向き（左へ 進むと 反転） */
@@ -1292,11 +1305,11 @@ function skDesc(){ const k=BT.sks[BT.ssel]; bsay(k.desc||'どの 呪文を 唱�
 function drawBattleUI(){ bparty.innerHTML=partyHtml(); bmenu.classList.toggle('wide', BT.phase==='ally'); drawFoeNames(); bmenu.style.display = (BT.phase==='menu'||BT.phase==='target'||BT.phase==='skill'||BT.phase==='item'||BT.phase==='ally') ? 'block':'none';
   // ★ねらう 魔物は 名前の 一覧から 選ぶ（前は 魔物の 頭の 上に ▼ を 出して いた）
   bmark.style.display = BT.phase==='target' ? 'block':'none';   // ★▼は 一覧で 選んで いる 魔物の 頭の 上（一覧と 連動）
-  if(BT.phase==='target'){ const al=alive(); bmenu.innerHTML='<div class="mt">ねらう 魔物</div>'+al.map(f=>{ const on=BT.foes.indexOf(f)===BT.tsel; return `<div class="${on?'on':''}">${on?'▶':'　'}${f.name}</div>`; }).join(''); }
-  else if(BT.phase==='item'){ bmenu.innerHTML='<div class="mt">道具</div>'+BT.items.map((it,i)=>`<div class="${i===BT.isel?'on':''}">${i===BT.isel?'▶':'　'}${it.name}　${it.n}</div>`).join(''); }
-  else if(BT.phase==='ally'){ bmenu.innerHTML='<div class="mt">'+(BT.pendSkill?BT.pendSkill.name:BT.pendItem.name)+'を 誰に？</div>'+BT.party.map((m,i)=>`<div class="${i===BT.asel?'on':''}">${i===BT.asel?'▶':'　'}${m.name}　HP ${m.hp}/${m.max}</div>`).join(''); }
-  else if(BT.phase==='skill'){ bmenu.innerHTML='<div class="mt">'+(BT.party.length>1?curM().name+'の ':'')+'呪文（MP '+curM().mp+'）</div>'+BT.sks.map((k,i)=>`<div class="${i===BT.ssel?'on':''}">${i===BT.ssel?'▶':'　'}${k.name}　${k.mp}</div>`).join(''); }
-  else bmenu.innerHTML=CMDS.map((c,i)=>`<div class="${i===BT.sel?'on':''}">${i===BT.sel?'▶':'　'}${c}</div>`).join(''); }
+  if(BT.phase==='target'){ const al=alive(); bmenu.innerHTML='<div class="mt">ねらう 魔物</div>'+al.map((f,i)=>{ const on=BT.foes.indexOf(f)===BT.tsel; return `<div data-i="${i}" class="${on?'on':''}">${on?'▶':'　'}${f.name}</div>`; }).join(''); }
+  else if(BT.phase==='item'){ bmenu.innerHTML='<div class="mt">道具</div>'+BT.items.map((it,i)=>`<div data-i="${i}" class="${i===BT.isel?'on':''}">${i===BT.isel?'▶':'　'}${it.name}　${it.n}</div>`).join(''); }
+  else if(BT.phase==='ally'){ bmenu.innerHTML='<div class="mt">'+(BT.pendSkill?BT.pendSkill.name:BT.pendItem.name)+'を 誰に？</div>'+BT.party.map((m,i)=>`<div data-i="${i}" class="${i===BT.asel?'on':''}">${i===BT.asel?'▶':'　'}${m.name}　HP ${m.hp}/${m.max}</div>`).join(''); }
+  else if(BT.phase==='skill'){ bmenu.innerHTML='<div class="mt">'+(BT.party.length>1?curM().name+'の ':'')+'呪文（MP '+curM().mp+'）</div>'+BT.sks.map((k,i)=>`<div data-i="${i}" class="${i===BT.ssel?'on':''}">${i===BT.ssel?'▶':'　'}${k.name}　${k.mp}</div>`).join(''); }
+  else bmenu.innerHTML=CMDS.map((c,i)=>`<div data-i="${i}" class="${i===BT.sel?'on':''}">${i===BT.sel?'▶':'　'}${c}</div>`).join(''); }
 function bsay(t){ bmsg.textContent=t; }
 // ★相手の 魔物の 名前（指示：戦闘中に 名前が わからない）。コマンドを 選ぶ 間、右に 生きて いる 魔物の 名前を 出す
 function drawFoeNames(){ const el=document.getElementById('bfoes'); const show=BT && BT.phase!=='target' && BT.phase!=='ally' && alive().length>0; el.style.display=show?'block':'none'; if(!show) return;
@@ -1514,12 +1527,15 @@ function endBattle(){ const win=BT&&BT.foes.every(f=>f.dead), cb=BT&&BT.onWin; P
   if(BT) BT.party.forEach(m=>{ m.status=null; m.stTurns=0; }); /* ★状態異常は 戦闘が 終わると すべて 治る（毒も。指示） */ clearPops(); BT=null; btEl.style.display='none'; bmark.style.display='none'; document.getElementById('place').style.display=''; document.getElementById('hint').style.display=''; if(cur.kind==='world'){ cv.style.display='none'; c2.style.display='block'; resize2(); } else { cv.style.display='block'; c2.style.display='none'; resize(); }
   if(win && cb) cb(); }
 let lastDirY=0, lastDirX=0;
+// ★十字を 押し続けると カーソルが 続けて 動く（指示、2026-10-28）：最初は 0.38秒 待ち、そのあと 0.08秒ごと
+let RPT_T=0;
+function dirStep(iy,last){ if(!iy) return false; const now=performance.now(); if(iy!==last){ RPT_T=now+380; return true; } if(now>=RPT_T){ RPT_T=now+80; return true; } return false; }
 function battleInput(iy,ix){ if(!BT) return;
-  if(BT.phase==='menu'){ if(iy!==0 && iy!==lastDirY){ se('cursor'); BT.sel=(BT.sel+(iy>0?1:-1)+CMDS.length)%CMDS.length; drawBattleUI(); } }
-  if(BT.phase==='item' && iy!==0 && iy!==lastDirY){ se('cursor'); BT.isel=(BT.isel+(iy>0?1:-1)+BT.items.length)%BT.items.length; drawBattleUI(); }
-  if(BT.phase==='ally' && iy!==0 && iy!==lastDirY){ se('cursor'); BT.asel=(BT.asel+(iy>0?1:-1)+BT.party.length)%BT.party.length; drawBattleUI(); }
-  if(BT.phase==='skill' && iy!==0 && iy!==lastDirY){ se('cursor'); BT.ssel=(BT.ssel+(iy>0?1:-1)+BT.sks.length)%BT.sks.length; skDesc(); drawBattleUI(); }
-  if(BT.phase==='target' && iy!==0 && iy!==lastDirY){ const al=alive(); let k=al.indexOf(BT.foes[BT.tsel]); k=(k+(iy>0?1:-1)+al.length)%al.length; BT.tsel=BT.foes.indexOf(al[k]); se('cursor'); drawBattleUI(); }
+  if(BT.phase==='menu'){ if(dirStep(iy,lastDirY)){ se('cursor'); BT.sel=(BT.sel+(iy>0?1:-1)+CMDS.length)%CMDS.length; drawBattleUI(); } }
+  if(BT.phase==='item' && dirStep(iy,lastDirY)){ se('cursor'); BT.isel=(BT.isel+(iy>0?1:-1)+BT.items.length)%BT.items.length; drawBattleUI(); }
+  if(BT.phase==='ally' && dirStep(iy,lastDirY)){ se('cursor'); BT.asel=(BT.asel+(iy>0?1:-1)+BT.party.length)%BT.party.length; drawBattleUI(); }
+  if(BT.phase==='skill' && dirStep(iy,lastDirY)){ se('cursor'); BT.ssel=(BT.ssel+(iy>0?1:-1)+BT.sks.length)%BT.sks.length; skDesc(); drawBattleUI(); }
+  if(BT.phase==='target' && dirStep(iy,lastDirY)){ const al=alive(); let k=al.indexOf(BT.foes[BT.tsel]); k=(k+(iy>0?1:-1)+al.length)%al.length; BT.tsel=BT.foes.indexOf(al[k]); se('cursor'); drawBattleUI(); }
   lastDirY=iy; lastDirX=ix; }
 const EZ=-2.0;   // ★魔物の 立つ 位置（奥へ。0 → -1.1 → -2.0。指示で 少しずつ 下げた）
 const _v=new THREE.Vector3();
@@ -1873,7 +1889,7 @@ function drawEquipPanel(){ const el=document.getElementById('fequip'); if(EQUIP_
 function drawStat(){ drawEquipPanel(); if(!MENU || BT || MENU.notes || MENU.wideOnly){ /* ★呪文の 解説の 間は 横幅を 使う ため 隠す */ fstatEl.style.display='none'; return; } fstatEl.style.display='block';
   fstatEl.innerHTML=PARTY.map(k=>{ const m=STATS[k]; return `<div class="pm${m.hp<=0?' down':''}"><b>${m.name}</b>　Lv ${m.lv||1}${m.status?'<span class="st">'+STNAME[m.status]+'</span>':''}<br>HP ${m.hp}／${m.max}<br>MP ${m.mp}／${m.maxmp||m.mp}</div>`; }).join('')+`<div class="g">${BAG.gold} G</div>`; }
 function drawMenu(){ drawStat(); if(!MENU){ menuEl.style.display='none'; return; } menuEl.style.display='block';
-  menuEl.innerHTML='<div class="mt">'+MENU.title+'</div>'+MENU.items.map((t,i)=>`<div class="${i===MENU.sel?'on':''}">${i===MENU.sel?'▶':'　'}${t}</div>`).join('')+(MENU.notes&&MENU.notes[MENU.sel]?'<div class="mdesc">'+MENU.notes[MENU.sel]+'</div>':'');
+  menuEl.innerHTML='<div class="mt">'+MENU.title+'</div>'+MENU.items.map((t,i)=>`<div data-i="${i}" class="${i===MENU.sel?'on':''}">${i===MENU.sel?'▶':'　'}${t}</div>`).join('')+(MENU.notes&&MENU.notes[MENU.sel]?'<div class="mdesc">'+MENU.notes[MENU.sel]+'</div>':'');
   fitMenu(); }
 // ★メニューの 字が 2段に ならない ように（指示）：横に 収まらない ときは 右の 仲間の 欄を 隠して 横幅を 使い、それでも 収まらなければ 字を 少し 小さく する
 function fitMenu(){ const vw=menuEl.parentElement.clientWidth; menuEl.style.fontSize=''; menuEl.style.whiteSpace=''; menuEl.style.lineHeight=''; if(MENU.notes) return;
@@ -1949,7 +1965,15 @@ function useEther(m){ if(m.hp<=0) return [m.name+'は 倒れて いる。']; con
 function useKitsuke(m){ if(m.hp<=0) return [m.name+'は 倒れて いる。']; if(m.status!=='sleep'&&m.status!=='conf') return [m.name+'は 眠っても 混乱しても いない。']; BAG.kitsuke--; const was=m.status; m.status=null; m.stTurns=0; se('item'); return [m.name+'は 気つけ草を 使った。',was==='sleep'?'目が 覚めた！':'正気に 戻った！']; }
 function useAntidote(m){ if(m.hp<=0) return [m.name+'は 倒れて いる。']; if(m.status!=='poison') return [m.name+'は 毒に かかって いない。']; BAG.antidote--; m.status=null; se('item'); return [m.name+'は どくけし草を 使った。','毒が 消えた！']; }
 function useHerb(m){ if(m.hp<=0) return [m.name+'は 倒れて いる。薬草では 起こせない。']; if(m.hp>=m.max) return [m.name+'の HPは 減って いない。']; BAG.herbs--; const h=Math.min(30,m.max-m.hp); m.hp+=h; se('item'); return [m.name+'は 薬草を 使った。','HPが '+h+' 回復した！']; }
-function menuInput(iy){ if(!MENU) return; if(iy!==0 && iy!==menuLastY){ se('cursor'); MENU.sel=(MENU.sel+(iy>0?1:-1)+MENU.items.length)%MENU.items.length; drawMenu(); } menuLastY=iy; }
+// ★画面を 直接 タップ（指示、2026-10-28）：メニューの 項目・戦闘の コマンドや 一覧・会話の 枠。項目は 1回の タップで 選んで 決める（説明が 出る 一覧は 1回めで 選び、2回めで 決める）
+function tapIdx(e){ const d=e.target&&e.target.closest?e.target.closest('[data-i]'):null; return d?+d.dataset.i:-1; }
+menuEl.addEventListener('click',e=>{ if(!MENU||BT) return; const i=tapIdx(e); if(i<0||i>=MENU.items.length) return; e.stopPropagation(); if(MENU.notes && MENU.sel!==i){ MENU.sel=i; se('cursor'); drawMenu(); return; } MENU.sel=i; pressA(); });
+bmenu.addEventListener('click',e=>{ if(!BT) return; const i=tapIdx(e); if(i<0) return; e.stopPropagation();
+  if(BT.phase==='menu'){ if(i>=CMDS.length) return; BT.sel=i; } else if(BT.phase==='target'){ const al=alive(); if(!al[i]) return; BT.tsel=BT.foes.indexOf(al[i]); } else if(BT.phase==='item'){ if(i>=BT.items.length) return; BT.isel=i; } else if(BT.phase==='ally'){ if(i>=BT.party.length) return; BT.asel=i; } else if(BT.phase==='skill'){ if(i>=BT.sks.length) return; if(BT.ssel!==i){ BT.ssel=i; se('cursor'); skDesc(); drawBattleUI(); return; } } else return;
+  drawBattleUI(); pressA(); });
+msgEl.addEventListener('click',e=>{ if(msgQ){ e.stopPropagation(); pressA(); } });
+bmsg.addEventListener('click',e=>{ if(BT && BT.waitA){ e.stopPropagation(); pressA(); } });
+function menuInput(iy){ if(!MENU) return; if(dirStep(iy,menuLastY)){ se('cursor'); MENU.sel=(MENU.sel+(iy>0?1:-1)+MENU.items.length)%MENU.items.length; drawMenu(); } menuLastY=iy; }
 let menuLastY=0;
 // ---- セーブ（この 端末の ブラウザに 残す）----
 // ★セーブは 3か所（指示、2026-10-27）。きろく1 は 前からの 'lq5save'。SAVE_SLOT＝いま 使って いる きろく（章の 終わりの 自動セーブも ここ）
@@ -2087,7 +2111,8 @@ function drawMap(){ if(!mapSt) return; const c=mapSt.c, g=c.getContext('2d'), im
   g.font='bold '+Math.round(Math.max(12*(c.width/ (c.clientWidth||c.width)), fs))+'px sans-serif'; g.textAlign='center'; g.textBaseline='bottom'; g.lineWidth=Math.max(3,fs*.25); g.strokeStyle='rgba(10,8,18,.9)'; g.fillStyle='#fff6d8';
   visitedFromPhase(); MAP_NAMES.filter(m=>ST.visited[m[3]]).forEach(([x,z,n],i)=>{ let [px,py]=P(x,z); if(px<-50||py<-20||px>c.width+50||py>c.height+20) return; if(!mapSt.zoom){ n=n.replace(/^(王都|帝都) /,''); g.textBaseline=i%2?'top':'bottom'; py=i%2?py+2.2*sc:py; }   /* ★全体の ときは 名前を 短く、上下に 互い違い */
     g.strokeText(n,px,py); g.fillText(n,px,py); });
-  const [hx,hz]=P(hero.x,hero.z), rr=Math.max(6,sc*(mapSt.zoom?.35:1.2)); g.fillStyle='#ff3030'; g.strokeStyle='#fff'; g.lineWidth=Math.max(2,rr*.35); g.beginPath(); g.arc(hx,hz,rr,0,Math.PI*2); g.fill(); g.stroke(); }
+  const [hx,hz]=P(hero.x,hero.z), rr=Math.max(6,sc*(mapSt.zoom?.35:1.2)); g.fillStyle='#ff3030'; g.strokeStyle='#fff'; g.lineWidth=Math.max(2,rr*.35); g.beginPath(); g.arc(hx,hz,rr,0,Math.PI*2); g.fill(); g.stroke();
+  { const gp=goalPos(); if(gp){ const [gx,gz]=P(gp[0],gp[1]), r2=Math.max(7,sc*(mapSt.zoom?.45:1.6)); g.fillStyle='#ffd23a'; g.strokeStyle='#5a3a00'; g.lineWidth=Math.max(2,r2*.3); g.beginPath(); g.moveTo(gx,gz-r2*1.9); g.lineTo(gx+r2,gz-r2*.5); g.lineTo(gx,gz+r2*.2); g.lineTo(gx-r2,gz-r2*.5); g.closePath(); g.fill(); g.stroke(); } } }   /* ★目的地の 印（黄色の ひし形） */
 function mapInput(ix,iz,dt){ if(!mapSt||!mapSt.zoom||(!ix&&!iz)) return; mapSt.cx+=ix*dt*14; mapSt.cz+=iz*dt*14; drawMap(); }
 let mapOpen=false;
 function closeMap(){ document.getElementById('mapview').style.display='none'; mapOpen=false; mapSt=null; openFieldMenu(); }
